@@ -1,0 +1,280 @@
+---
+title: Why are trace input and output empty?
+description: Trace-level input and output are deprecated in Langfuse v4. Store input and output on observations instead.
+tags: [observability, observability-get-started]
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# Why are trace input and output empty?
+
+Trace-level input and output are deprecated as part of [Langfuse v4](/docs/v4). In the observations-first data model, a trace ID groups related observations; the trace is no longer a separate record with its own input and output.
+
+For new instrumentation, write:
+
+- The overall request and response to the root or workflow observation.
+- Step-specific input and output to the observation representing that operation.
+
+In most applications, the root observation already carries the same input and output that was previously written to the trace.
+
+<Callout type="info">
+An empty trace input or output does not necessarily indicate missing data. Check the observations in the trace. If the relevant observation contains the expected input and output, the data was ingested correctly.
+</Callout>
+
+## Use observation input and output
+
+Observation input and output support the same core workflows without relying on the deprecated trace fields:
+
+| Workflow               | Recommended approach                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Browse and search data | Filter or search observations directly. For the overall request and response, use the root observation.                               |
+| Run evaluations        | Create an observation-level evaluator that targets the observation containing the required input, output, and context.                |
+| Record a summary       | Store the summary on a root or dedicated workflow observation instead of writing separate input and output values to the trace level. |
+
+If you still use trace-level LLM-as-a-Judge evaluators, follow the [evaluator upgrade guide](/faq/all/llm-as-a-judge-migration).
+
+### Set input and output on the root observation
+
+Use a root observation to represent the overall application or agent invocation:
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="my-pipeline",
+) as root_span:
+    user_input = "What's the weather like?"
+    result = process_request(user_input)
+
+    root_span.update(
+        input={"query": user_input},
+        output={"response": result},
+    )
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { startActiveObservation } from "@langfuse/tracing";
+
+await startActiveObservation("my-pipeline", async (rootSpan) => {
+  const userInput = "What's the weather like?";
+  const result = await processRequest(userInput);
+
+  rootSpan.update({
+    input: { query: userInput },
+    output: { response: result },
+  });
+});
+```
+
+</Tab>
+</Tabs>
+
+## If observation input or output is missing
+
+### Flush short-lived applications
+
+Langfuse [sends data in the background](/docs/observability/data-model#background-processing). Scripts, serverless functions, and notebooks can exit before all observations are exported.
+
+Call `flush()` or `forceFlush()` before the application exits:
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Your code here...
+
+langfuse.flush()
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const langfuseSpanProcessor = new LangfuseSpanProcessor();
+const sdk = new NodeSDK({
+  spanProcessors: [langfuseSpanProcessor],
+});
+
+sdk.start();
+
+async function main() {
+  // Your code here...
+}
+
+main().finally(() => langfuseSpanProcessor.forceFlush());
+```
+
+</Tab>
+</Tabs>
+
+### Check decorator input/output capture
+
+The Python [`@observe()` decorator](/docs/observability/sdk/instrumentation#observe-wrapper) captures function arguments and return values by default. If `LANGFUSE_OBSERVE_DECORATOR_IO_CAPTURE_ENABLED=false`, enable capture globally or for the relevant function:
+
+```python
+from langfuse import observe
+
+@observe(capture_input=True, capture_output=True)
+def my_function(data):
+    return process(data)
+```
+
+### Ensure the relevant observation is exported
+
+If `shouldExportSpan` filters out your root observation, its input and output are not sent to Langfuse. Keep the root observation, or store the required values on another exported observation and target that observation in downstream workflows.
+
+See the [span filtering documentation](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope) for details.
+
+### Map OpenTelemetry input and output
+
+OpenTelemetry integrations use different attribute names. Langfuse maps these span attributes to observation input and output, in priority order:
+
+| Observation field | OpenTelemetry attributes                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| `input`           | `langfuse.observation.input`, `gen_ai.prompt`, `input.value`, `mlflow.spanInputs`        |
+| `output`          | `langfuse.observation.output`, `gen_ai.completion`, `output.value`, `mlflow.spanOutputs` |
+
+See the [OpenTelemetry property mapping](/integrations/native/opentelemetry#property-mapping) for the complete reference.
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from opentelemetry import trace
+import json
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    span.set_attribute(
+        "langfuse.observation.input",
+        json.dumps(input_data),
+    )
+    span.set_attribute(
+        "langfuse.observation.output",
+        json.dumps(output_data),
+    )
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import { trace } from "@opentelemetry/api";
+
+const tracer = trace.getTracer("my-service");
+
+tracer.startActiveSpan("my-operation", (span) => {
+  span.setAttribute(
+    "langfuse.observation.input",
+    JSON.stringify(inputData),
+  );
+  span.setAttribute(
+    "langfuse.observation.output",
+    JSON.stringify(outputData),
+  );
+
+  span.end();
+});
+```
+
+</Tab>
+</Tabs>
+
+<Details>
+<Summary>**Which attributes does my OpenTelemetry provider use?**</Summary>
+
+1. Enable debug logging in your OpenTelemetry exporter to inspect the raw span attributes.
+2. Open the observation in Langfuse and check its metadata.
+3. Review the provider's semantic conventions.
+
+Common conventions include:
+
+- **OpenLLMetry:** `gen_ai.prompt` and `gen_ai.completion`
+- **OpenInference:** `input.value` and `output.value`
+- **MLflow:** `mlflow.spanInputs` and `mlflow.spanOutputs`
+
+If your provider uses different names, map them to the Langfuse observation attributes shown above.
+
+</Details>
+
+## Temporary compatibility for legacy evaluators
+
+<Callout type="warning">
+The trace I/O methods are deprecated in Python SDK v4 and JS/TS SDK v5, and removed in Python SDK v5 and JS/TS SDK v6. Use them only while an existing trace-level evaluator still reads trace input or output. Do not add them to new instrumentation.
+</Callout>
+
+After upgrading your SDK or ingestion path, trace input and output are no longer written automatically. Until you have [upgraded the evaluator](/faq/all/llm-as-a-judge-migration), you can continue supplying the legacy fields explicitly.
+
+On **Python SDK v5 and JS/TS SDK v6**, trace input and output come from the root observation, so set `input` and `output` on the root observation (see [Update trace](/docs/observability/sdk/instrumentation#trace-inputoutput-behavior)). On **Python SDK v4 and JS/TS SDK v5**, use the deprecated trace I/O methods:
+
+<Tabs items={["Python", "JS/TS"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+user_input = "What's the weather like?"
+
+with langfuse.start_as_current_observation(
+    as_type="span",
+    name="my-pipeline",
+) as root_span:
+    result = process_request(user_input)
+
+    root_span.set_trace_io(
+        input={"query": user_input},
+        output={"response": result},
+    )
+```
+
+</Tab>
+<Tab>
+
+```typescript
+import {
+  setActiveTraceIO,
+  startActiveObservation,
+} from "@langfuse/tracing";
+
+await startActiveObservation("my-pipeline", async () => {
+  const userInput = "What's the weather like?";
+  const result = await processRequest(userInput);
+
+  setActiveTraceIO({
+    input: { query: userInput },
+    output: { response: result },
+  });
+});
+```
+
+</Tab>
+</Tabs>
+
+Once the observation-level evaluator is validated, remove these calls.
+
+## Still having issues?
+
+1. Update to the latest Langfuse SDK version.
+2. Open the trace and verify that the expected observation was exported.
+3. Check that the observation itself has input and output.
+4. For short-lived applications, confirm that the client flushes before exit.
+
+If the observation data is still missing, open a [GitHub discussion](https://github.com/orgs/langfuse/discussions) with your SDK version, instrumentation snippet, and a screenshot of the observation tree.

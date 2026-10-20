@@ -1,0 +1,205 @@
+---
+title: How do I upgrade trace-level evaluators to observation-level evaluators?
+seoTitle: "Upgrade to Observation-Level Evaluators"
+description: Step-by-step guide for upgrading deprecated trace-level LLM-as-a-Judge evaluators to observation-level evaluators as part of Langfuse v4.
+tags: [evaluation]
+---
+
+import { Steps, Step } from "@/components/docs";
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
+# Upgrade trace-level evaluators
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+Trace-level evaluators use Langfuse's old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). Existing evaluators continue to run while you upgrade.
+
+Observation-level evaluators run in real time and scale with larger traces and higher evaluation volume. Any future multi-span support will also use the observations-first data model, so upgrading is the foundation for future evaluation capabilities.
+
+<Callout type="warning">
+  On Langfuse Cloud, trace-level evaluators stop producing
+  results at the v4 cutover on <V4CutoverDate />. Upgrade before this date to
+  avoid a gap in evaluation coverage.
+</Callout>
+
+<Callout type="info">
+  The stable [Evaluation Rules
+  API](https://api.reference.langfuse.com/#tag/evaluationrules) returns legacy
+  `trace` and `dataset` rules so you can inspect and migrate them. These legacy
+  rules can be deactivated or deleted through the API, but their other settings
+  cannot be changed.
+</Callout>
+
+<Callout type="info">
+  **Setting up a new evaluator?** Start with an observation-level evaluator in
+  the [LLM-as-a-Judge setup
+  guide](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step).
+  This page is only for upgrading existing trace-level evaluators.
+</Callout>
+
+## Upgrade your evaluator
+
+<Steps>
+
+<Step>
+
+### Before you start
+
+- **Langfuse Cloud:** First, upgrade your SDK or ingestion path, then upgrade your evaluators.
+- **Self-hosted:** Keep existing evaluators active while you upgrade your SDK or instrumentation and Langfuse using `legacy` or `dual` mode. Migrate the evaluators as a final step before switching to `events_only`.
+
+Observation-level evaluators run in real time with:
+
+- **Python SDK:** v4.7.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4))
+- **JS/TS SDK:** v5.4.0+ ([upgrade guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5))
+- **Direct OpenTelemetry ingestion:** `x-langfuse-ingestion-version: 4` ([setup guide](/integrations/native/opentelemetry))
+
+In the [v4 data model](/docs/v4), a trace is the logical group of observations that share a trace ID, rather than a separate record. Input and output belong to observations. In most cases, an existing root or workflow observation already carries the same input and output that was previously written to the trace. The evaluator upgrade targets that observation. If no single observation contains all required values, the coding assistant helps update your instrumentation.
+
+<Callout type="warning">
+  **Keep existing trace-level evaluators running during the transition.** After
+  the SDK upgrade, trace input and output are no longer written automatically.
+  If your existing trace-level evaluators read trace input or output, keep
+  supplying these values with the deprecated trace I/O methods
+  (`set_current_trace_io()` or `span.set_trace_io()` in Python,
+  `setActiveTraceIO()` or `span.setTraceIO()` in JS/TS) until the new
+  observation-level evaluators are validated, then remove the calls. Python
+  SDK v5 and JS/TS SDK v6 remove these methods and take trace input and output
+  from the root observation instead. See [Why
+  are the input and output of a trace
+  empty?](/faq/all/empty-trace-input-and-output) for details.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Upgrade in Langfuse
+
+Click on the **Evaluation** navigation item. The upgrade screen shows the recommended path for your project:
+
+- **In-app upgrade (Langfuse Cloud):** Recommended when only minimal configuration changes need to be reviewed and accepted. [Halo](/docs/halo), the Langfuse assistant, guides you through these changes in the app.
+- **Coding assistant:** Recommended when the upgrade requires broader configuration or instrumentation changes, and for self-hosted deployments where Halo is unavailable. The UI provides the skill and project context to use in your coding editor.
+
+In both paths, the agentic flow makes the upgrade conversational: you can inspect the proposed changes, ask questions, and refine them before creating the new evaluators. You do not need to translate or recreate configurations manually.
+
+</Step>
+
+<Step>
+
+### Review, create, and validate
+
+The recommended agent guides you through reviewing the proposed changes, creating the observation-level evaluators, and validating the result against your project data. You can ask questions and refine the target observation, filters, variable mappings, and expected score behavior until the upgrade looks correct.
+
+When ready, create the observation-level evaluators. You can keep the existing trace-level evaluators active temporarily to compare results, or deactivate them immediately. Confirm that the new evaluators receive the expected input, output, and context and produce the intended number of scores.
+
+If you need to revert, deactivate the new evaluators and reactivate the existing trace-level evaluators. Historical evaluation results remain accessible.
+
+The agent explains the relevant changes during the upgrade. The following sections summarize what may differ if you want to understand the underlying behavior.
+
+**How configurations may change**
+
+Depending on the existing evaluator, the proposed configuration may target the same observation as before, replace trace fields with values from one observation, or require an instrumentation change so all required values are available together. The [common configuration scenarios](#common-configuration-scenarios) below explains the cases in detail.
+
+When remapping a trace-level evaluator, the default observation filter is `isRootObservation = true`. This targets logical roots, including observations explicitly marked as application roots by the SDK. Review this filter alongside any name or type filters before creating the upgraded evaluator.
+
+**How resulting scores may differ**
+
+Score placement and cardinality may change:
+
+- A trace-level evaluator produces one score per matching trace.
+- An observation-level evaluator produces one score per matching observation.
+- If three observations in one trace match the filters, the upgraded evaluator produces three scores. To keep one score per trace, narrow the filters to one observation using its name, type, or the **Is Root Observation** filter.
+
+<Frame fullWidth>
+  ![Before and after the upgrade: the evaluator score moves from the trace to
+  the matched observation](/images/docs/evaluator-score-output-example.png)
+</Frame>
+
+</Step>
+
+</Steps>
+
+## Common Configuration Scenarios [#common-configuration-scenarios]
+
+The recommended assistant guides you through every change. You do not need to classify or update configurations manually. Expand this section only if you want to understand how an existing configuration may be translated.
+
+<details>
+<summary>View technical configuration cases and a before/after example</summary>
+
+Existing evaluator configurations typically fall into these cases:
+
+| Current variable mapping                                       | Typical configuration change                                                                                                                                                           |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`Observation` for every variable, all from one observation** | Target the same [observation](/docs/observability/data-model#observations-traces-and-sessions) and translate the filters and variable mappings.                                        |
+| **`Trace` for every variable**                                 | Select the observation holding the equivalent input, output, and metadata. For end-to-end evaluations, this is often a root observation.                                               |
+| **A mix of `Trace` and one `Observation`**                     | Target that observation and make the trace fields available there via [`propagate_attributes()`](/docs/observability/sdk/instrumentation#add-attributes) or an instrumentation update. |
+| **More than one `Observation`, with or without `Trace`**       | Write the required values to a root or dedicated evaluation observation, then target it directly. Any future multi-span support will also use the observations-first model.            |
+| **`Dataset` target**                                           | Create an `Experiment` successor with the same evaluator configuration. Translate `datasetId` to `experimentDatasetId` and map dataset-item fields to the experiment-item context.     |
+
+Dataset-target evaluators are the simplest v3-to-v4 compatibility migration. A
+dataset run's root observation is the same [observation](/docs/observability/data-model#observations-traces-and-sessions) that carries the run's input and
+output, so mapping `trace.input` to `observation.input` and `trace.output` to
+`observation.output` is safe. No evaluator-specific instrumentation change is
+needed for this case. Map dataset-item expected output and metadata to the
+experiment-item context. Once the project uses v4 experiment context, deactivate
+the legacy dataset-target evaluator to avoid duplicate scores.
+
+### Before and after example
+
+This example upgrades a trace-level evaluator that reads trace input and output to target the [observation](/docs/observability/data-model#observations-traces-and-sessions) containing the same values.
+
+**Before: trace-level evaluator**
+
+```text
+Target: Trace
+Filters:
+  environment not in ["sdk-experiment"]
+  name = "user-workflow"
+Variable mapping:
+  query = trace.input.key
+  generation = trace.output
+```
+
+**After: observation-level evaluator**
+
+```text
+Target: Observation
+Filters:
+  environment not in ["sdk-experiment"]
+  traceName = "user-workflow"
+  type = "SPAN"
+  isRootObservation = true
+Variable mapping:
+  query = observation.input.key
+  generation = observation.output
+```
+
+The default `isRootObservation = true` filter keeps this example focused on the logical root instead of evaluating every matching observation in the trace.
+
+</details>
+
+## Upgrade checklist
+
+1. Upgrade the SDK or OpenTelemetry ingestion path.
+2. Open the evaluator upgrade screen by clicking on the **Evaluation** navigation item.
+3. Follow the recommended Halo or coding assistant path.
+4. Review the newly created observation-level evaluators. Confirm the expected number and placement of scores.
+5. Decide whether to keep the trace-level evaluator active for comparison.
+6. Validate the evaluator results and deactivate the trace-level evaluator when ready.
+
+## Getting help
+
+- **Troubleshooting**: [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing)
+- **Documentation**: [LLM-as-a-Judge step-by-step set up guide](/docs/evaluation/evaluation-methods/llm-as-a-judge)
+- **Questions on Langfuse v4**: Ask in the dedicated [GitHub Discussion](https://github.com/orgs/langfuse/discussions/12518)
+- **GitHub**: Report issues at [github.com/langfuse/langfuse](https://github.com/langfuse/langfuse)
+- **Support**: Contact support@langfuse.com for enterprise customers

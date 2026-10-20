@@ -1,0 +1,48 @@
+---
+title: How to update traces, observations, and scores?
+description: "Langfuse treats traces and observations as immutable. What that means in practice, and how to correct or enrich data after it has been ingested."
+tags: [observability]
+---
+
+# How to update traces, observations, and scores?
+
+Langfuse treats [traces and observations](/docs/observability/data-model) as **immutable**. Once ingested, they are final and cannot be reliably updated.
+
+If you want to enrich traces or observations after they were ingested with evaluations or annotations, use [scores](/docs/evaluation/evaluation-methods/custom-scores). Scores can be added to traces, observations, sessions, and dataset runs at any time.
+
+## Traces and observations are immutable [#traces-and-observations]
+
+<Callout type="warning">
+Do not attempt to update a trace or observation after ingestion by re-sending an event with the same `id`.
+
+In Langfuse v4, ingested data is **not deduplicated on the read path**, and the underlying storage does **not** guarantee consistency (not even eventual consistency) across records that share an `id`. Re-inserting therefore creates **duplicate records** rather than replacing the original. Duplicates inflate metrics (for example, `sum(totalCost)` in the Metrics API counts every version) and cause inconsistent results in dashboards, filtering, and exports.
+
+</Callout>
+
+This immutability applies to data that has already been ingested. Building up a trace over the course of a request — for example, updating a span with its output before the trace is flushed by the SDK — is normal, supported usage. The constraint only concerns re-ingesting data that Langfuse has already persisted.
+
+If you need to correct or re-process data, the recommended approach is to add the corrected information as [scores](/docs/evaluation/evaluation-methods/custom-scores) rather than mutating the original record.
+
+## Enriching data after ingestion [#enriching-data]
+
+There are two supported ways to add information to existing traces and observations without re-ingesting them:
+
+**Via scores**
+
+Use [scores](/docs/evaluation/evaluation-methods/custom-scores) to attach evaluations, annotations, or other metadata to traces, observations, sessions, and dataset runs at any time. This is the recommended way to enrich data after it has been ingested.
+
+**Via the Langfuse UI**
+
+UI-based updates — bookmarks and [publishing](/docs/observability/features/url) — can be applied to traces and scores at any time. [Tags](/docs/observability/features/tags) are set at creation and follow the immutable data model, so they can't be edited in the UI afterward.
+
+## Updating scores [#updating-scores]
+
+Unlike traces and observations, scores can be overwritten. A score is identified by three fields: its `id`, its `name`, and its `timestamp` at date granularity (`toDate(timestamp)`). A re-ingested score overwrites the existing one only when **all three match**. If any of them differs, you get a **separate** score, not an update.
+
+This is easy to trip over: sending a score with the same `id` but a different `name` — or a `timestamp` that falls on a different calendar date — creates a duplicate record instead of overwriting the original. To reliably overwrite a score, always send the same `id` (a stable idempotency key such as `trace_id-score_name`), `name`, and `timestamp`, and include the full score payload rather than only the changed fields.
+
+<Callout type="warning">
+**Deprecated:** For up to 30 days after a score is created, Langfuse may merge a re-ingested score that shares the same `id` into the existing record, backfilling any fields you leave unset. This partial-update behavior is deprecated and will be removed in a future version — do not rely on it. Always send the complete score with a matching `id`, `name`, and `timestamp`.
+</Callout>
+
+See [Scores via SDK/API](/docs/evaluation/evaluation-methods/scores-via-sdk#preventing-duplicate-scores) for details.

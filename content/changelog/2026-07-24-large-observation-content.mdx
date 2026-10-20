@@ -1,0 +1,22 @@
+---
+date: 2026-07-24
+title: Keep large observation content inspectable
+description: Inspect large observation inputs, outputs, and metadata in the Langfuse UI.
+author: Hassieb
+canonical: /docs/observability/features/multi-modality
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Langfuse now keeps very large observation inputs, outputs, and metadata intact and available for inspection in the UI. When large content reaches the ingestion pipeline, Langfuse processes it server-side and links it from the observation.
+
+This helps when an application inadvertently logs a large base64-encoded image, audio file, or document, or when a model response contains a large embedded payload.
+
+<Callout type="warning" title="Handle media in the client or SDK">
+  Server-side processing is a fallback. We strongly recommend handling media in
+  the client or Langfuse SDK for the best performance.
+</Callout>
+
+Learn more in the [multi-modality and attachments documentation](/docs/observability/features/multi-modality).

@@ -1,0 +1,68 @@
+---
+date: 2026-06-16
+title: Mask exported spans in Python
+description: Run media detection and configured masking on every span accepted by the Python SDK span processor, including third-party OpenTelemetry spans.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { BookOpen, ShieldCheck } from "lucide-react";
+
+<ChangelogHeader />
+
+The Langfuse Python SDK now runs media detection for every span accepted by the Langfuse span processor, and can apply configured export-stage masking to those same spans. This includes spans created by Langfuse SDK APIs and spans emitted by third-party OpenTelemetry instrumentations.
+
+Use this to keep redaction and media handling consistent across your full trace export path. For example, you can redact prompt or completion attributes from OpenAI instrumentation spans, replace inline base64 media payloads with Langfuse media references, or apply the same masking rule to custom OpenTelemetry spans and Langfuse SDK observations.
+
+Previously, Python SDK masking happened when Langfuse SDK attributes were created via APIs such as `start_observation()`, `update()`, and `set_trace_io()`. That legacy `mask` hook does not see final raw OpenTelemetry span attributes from other instrumentations. The new `mask_otel_spans` hook runs at export stage, after export filtering and after Langfuse media detection, so it can patch the attributes that the Langfuse exporter is about to send.
+
+```python
+from typing import Optional
+
+from langfuse import Langfuse
+from langfuse.types import (
+    MaskOtelSpansParams,
+    MaskOtelSpansResult,
+    OtelSpanPatch,
+)
+
+
+def mask_otel_spans(
+    *, params: MaskOtelSpansParams
+) -> Optional[MaskOtelSpansResult]:
+    patches = {}
+
+    for identifier, span in params.spans.items():
+        if span.instrumentation_scope_name == "openai":
+            patches[identifier] = OtelSpanPatch(
+                delete_attributes=(
+                    "gen_ai.prompt.0.content",
+                    "gen_ai.completion.0.content",
+                ),
+                set_attributes={"masking.applied": True},
+            )
+
+    return MaskOtelSpansResult(span_patches=patches)
+
+
+langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
+```
+
+The hook receives one OpenTelemetry export batch at a time, not necessarily a complete trace. It is synchronous and usually runs on the OpenTelemetry batch span processor worker thread, so it should not block the main application thread. Keep it fast: slow network calls or expensive masking logic can back up the export queue.
+
+## Get started
+
+<Cards num={2}>
+  <Card
+    title="Masking documentation"
+    href="/docs/observability/features/masking"
+    icon={<ShieldCheck />}
+    arrow
+  />
+  <Card
+    title="Python SDK overview"
+    href="/docs/observability/sdk/overview"
+    icon={<BookOpen />}
+    arrow
+  />
+</Cards>

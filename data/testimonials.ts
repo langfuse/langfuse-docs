@@ -3,7 +3,7 @@ export interface Testimonial {
   name: string;
   handle: string;
   avatar: string;
-  platform: "xcom" | "producthunt";
+  platform: "xcom" | "producthunt" | "linkedin";
   content: string;
   postURL?: string;
 }
@@ -15,8 +15,10 @@ export const testimonials: Testimonial[] = [
     handle: "Founder at Producta",
     avatar: "/images/walloflove/manuhortet.avif",
     platform: "producthunt",
-    content: "Complete and simple, sweet product. We also love it is open source!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=219995",
+    content:
+      "Complete and simple, sweet product. We also love it is open source!",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?founderReview=219995",
   },
   {
     id: "2",
@@ -24,8 +26,10 @@ export const testimonials: Testimonial[] = [
     handle: "Co-founder of Cognee",
     avatar: "/images/walloflove/boris.avif",
     platform: "producthunt",
-    content: "Langfuse is our choice when observability and tracing are the key. Our clients love their tool and we do too!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=301582",
+    content:
+      "Langfuse is our choice when observability and tracing are the key. Our clients love their tool and we do too!",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?founderReview=301582",
   },
   {
     id: "3",
@@ -34,10 +38,22 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/walloflove/davewilson.avif",
     platform: "producthunt",
     content: "Brilliant product, this team is smashing it!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=762527",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=762527",
   },
   {
     id: "4",
+    name: "Jorge Torres",
+    handle: "CEO @ MindsDB",
+    avatar: "/images/walloflove/jorgetorres.jpeg",
+    platform: "linkedin",
+    content:
+      "One of my fav products! Long Live Langfuse, we use it everywhere in MindsDB",
+    postURL:
+      "https://www.linkedin.com/posts/torresjorge_day-4-of-launch-week-brings-major-upgrades-activity-7392403428108521472-6eIQ?utm_source=share&utm_medium=member_desktop&rcm=ACoAACSW1FMBTZYGJkOLhe4YZmjH3MXAurzFFsk",
+  },
+  {
+    id: "5",
     name: "Viktor Sarstrom",
     handle: "@viktorsarstrom",
     avatar: "/images/walloflove/vicstor.jpg",
@@ -46,57 +62,67 @@ export const testimonials: Testimonial[] = [
     postURL: "https://x.com/viktorsarstrom/status/1941093292319670527",
   },
   {
-    id: "5",
+    id: "6",
     name: "Othmane Zoheir",
     handle: "@othmanezoheir",
     avatar: "/images/walloflove/othmane.jpg",
     platform: "xcom",
-    content: "I've been using @langfuse from day 1 for my LLM package \"tinyllm\" and all my LLM apps. It just works and the team is fast and very helpful. Probably the best open-source tool/experience I've ever had.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=964209",
+    content:
+      "I've been using @langfuse from day 1 for my LLM package \"tinyllm\" and all my LLM apps. It just works and the team is fast and very helpful. Probably the best open-source tool/experience I've ever had.",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=964209",
   },
   {
-    id: "6",
+    id: "7",
     name: "Nadeesha Cabral",
     handle: "SVP of Engineering",
     avatar: "/images/walloflove/nadeesha.png",
     platform: "producthunt",
-    content: "Langfuse is the easiest way to add observability to your AI stack. We use Langfuse ourselves, and have a native integration for our customers to push their spans to Langfuse as well.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=209822",
+    content:
+      "Langfuse is the easiest way to add observability to your AI stack. We use Langfuse ourselves, and have a native integration for our customers to push their spans to Langfuse as well.",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?founderReview=209822",
   },
   {
-    id: "7",
+    id: "8",
     name: "Roman Geugelin",
     handle: "@RGeugelin",
     avatar: "/images/walloflove/RomanGeugelin.avif",
     platform: "producthunt",
-    content: "Best LLM engineering platform out there by far. The speed with which they ship and how close they are to the community is mindblowing.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1274265",
+    content:
+      "Best LLM engineering platform out there by far. The speed with which they ship and how close they are to the community is mindblowing.",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=1274265",
   },
   {
-    id: "8",
+    id: "9",
     name: "Jackson Golden",
     handle: "AI Engineer",
     avatar: "/images/walloflove/jackson.avif",
     platform: "producthunt",
-    content: "Easy to use -- it \"just works\". Great open-source experience as well.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1105948",
+    content:
+      'Easy to use -- it "just works". Great open-source experience as well.',
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=1105948",
   },
   {
-    id: "9",
+    id: "10",
     name: "Feliks Ghazaryan",
     handle: "Founder at Symvol",
     avatar: "/images/walloflove/FeliksGhazaryan.avif",
     platform: "producthunt",
     content: "Best for LLM monitoring.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=290737",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?founderReview=290737",
   },
   {
-    id: "10",
+    id: "11",
     name: "Grant Sloane",
     handle: "@rolling__sloane",
     avatar: "/images/walloflove/grantsloane.jpeg",
     platform: "xcom",
-    content: "We have been using @langfuse to debug some of our prompts within our product and its a total game changer at pin pointing the issues and allowing you to quickly upgrade your prompts and back test them. Amazing product!",
+    content:
+      "We have been using @langfuse to debug some of our prompts within our product and its a total game changer at pin pointing the issues and allowing you to quickly upgrade your prompts and back test them. Amazing product!",
     postURL: "https://x.com/rolling__sloane/status/1944774759406821396",
   },
   {
@@ -114,8 +140,10 @@ export const testimonials: Testimonial[] = [
     handle: "@dmitriy_tkalich",
     avatar: "/images/walloflove/dmitriy.jpg",
     platform: "xcom",
-    content: "Solid observability features combined with TS SDK made @langfuse a go-to solution for bootstrapping new AI products. Previously used LangSmith and Helicone, where @langfuse stands out - pricing plan that favors early-stage products and offers more value for the price.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1133521",
+    content:
+      "Solid observability features combined with TS SDK made @langfuse a go-to solution for bootstrapping new AI products. Previously used LangSmith and Helicone, where @langfuse stands out - pricing plan that favors early-stage products and offers more value for the price.",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=1133521",
   },
   {
     id: "14",
@@ -124,7 +152,8 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/walloflove/MaxPrilutskiy.jpg",
     platform: "producthunt",
     content: "Extremely reliable LLM Engineering Platform.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=262381",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?founderReview=262381",
   },
   {
     id: "15",
@@ -132,8 +161,10 @@ export const testimonials: Testimonial[] = [
     handle: "Founder at Cortea AI",
     avatar: "/images/walloflove/PhilippHoevelmann.jpeg",
     platform: "producthunt",
-    content: "Langfuse has been indispensable for us in leveraging LLMs. Its detailed tracing provides unrivaled clarity, streamlining our debug times and offering insights into both LLM and non-LLM actions. [...] It's the must-have tool for anyone in the LLM space.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=661724",
+    content:
+      "Langfuse has been indispensable for us in leveraging LLMs. Its detailed tracing provides unrivaled clarity, streamlining our debug times and offering insights into both LLM and non-LLM actions. [...] It's the must-have tool for anyone in the LLM space.",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=661724",
   },
   {
     id: "16",
@@ -141,8 +172,10 @@ export const testimonials: Testimonial[] = [
     handle: "Co-founder and Chief Art Fidgeter",
     avatar: "/images/walloflove/fengjiaopeng.avif",
     platform: "producthunt",
-    content: "Easy to integrate and very intuitive to use!! Highly recommend for anyone developing chatGPT products. Amazing founding team who are super detail-oriented and understands LLM products deeply, and cool to see the evolution of the open source project every week!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=661641",
+    content:
+      "Easy to integrate and very intuitive to use!! Highly recommend for anyone developing chatGPT products. Amazing founding team who are super detail-oriented and understands LLM products deeply, and cool to see the evolution of the open source project every week!",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=661641",
   },
   {
     id: "17",
@@ -151,7 +184,8 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/walloflove/FenilSuchak.avif",
     platform: "producthunt",
     content: "LLM observability platform that just works!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?founderReview=135177",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?founderReview=135177",
   },
   {
     id: "18",
@@ -159,8 +193,10 @@ export const testimonials: Testimonial[] = [
     handle: "",
     avatar: "/images/walloflove/FelixGuo.avif",
     platform: "producthunt",
-    content: "Its flexible architecture allows seamless integration with any model or framework, and the open API empowers teams to create custom workflows tailored to their needs.",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1264274",
+    content:
+      "Its flexible architecture allows seamless integration with any model or framework, and the open API empowers teams to create custom workflows tailored to their needs.",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=1264274",
   },
   {
     id: "19",
@@ -169,6 +205,7 @@ export const testimonials: Testimonial[] = [
     avatar: "/images/walloflove/maurice.avif",
     platform: "producthunt",
     content: "These guys keep building really cool stuff!",
-    postURL: "https://www.producthunt.com/products/langfuse/reviews?review=1242981",
+    postURL:
+      "https://www.producthunt.com/products/langfuse/reviews?review=1242981",
   },
-]; 
+];

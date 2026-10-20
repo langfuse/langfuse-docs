@@ -1,4 +1,7 @@
 import { Button } from "@/components/ui/button";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
 import Link from "next/link";
 
 const discounts = [
@@ -19,40 +22,56 @@ const discounts = [
     },
   },
   {
+    name: "Non-profits",
+    description: "USD 199 in credits / month",
+    cta: {
+      text: "Learn more and apply",
+      href: "/non-profit",
+    },
+  },
+  {
     name: "Open-source projects",
     description: "USD 300 in credits / month, first year",
   },
 ];
 
 export const PricingDiscounts = () => (
-  <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-8 mt-8" id="discounts">
-    <div className="mx-auto max-w-4xl">
-      <h2 className="text-2xl font-bold leading-10 tracking-tight text-primary">
+  <div className="pt-8 mx-auto mt-8" id="discounts">
+    <div>
+      <Heading as="h2" size="normal" className="text-left mb-4">
         Discounts
-      </h2>
-      <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      </Heading>
+      <div className="grid grid-cols-1 mt-3 sm:grid-cols-2 lg:grid-cols-4">
         {discounts.map((discount) => (
-          <div
+          <CornerBox
             key={discount.name}
-            className="rounded-lg border border-gray-200 p-4 shadow-sm"
+            hoverStripes
+            className="p-4 -mt-px -ml-px flex flex-col gap-2"
           >
-            <dt className="text-base font-semibold leading-7 text-primary">
+            <Text as="dt" className="text-left font-medium text-text-secondary">
               {discount.name}
-            </dt>
-            <dd className="mt-2 text-sm leading-7 text-primary/60">
+            </Text>
+            <Text as="dd" size="s" className="text-left">
               {discount.description}
-            </dd>
+            </Text>
             {discount.cta && (
-              <Button size="sm" variant="secondary" asChild className="mt-2">
-                <Link href={discount.cta.href} target="_blank">
+              <div className="mt-auto pt-2 self-start">
+                <Button
+                  size="small"
+                  variant="secondary"
+                  href={discount.cta.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group-hover:border-line-structure hover:border-line-cta"
+                >
                   {discount.cta.text}
-                </Link>
-              </Button>
+                </Button>
+              </div>
             )}
-          </div>
+          </CornerBox>
         ))}
       </div>
-      <p className="mt-6 leading-8 text-primary/60">
+      <Text size="s" className="mt-6 max-w-4xl text-left">
         Reach out to{" "}
         <Link href="mailto:support@langfuse.com" className="underline">
           support@langfuse.com
@@ -60,7 +79,7 @@ export const PricingDiscounts = () => (
         to apply for a discount. We want all startups, educational users,
         non-profits and open source projects to build with Langfuse and are
         happy to work with you to make that happen.
-      </p>
+      </Text>
     </div>
   </div>
 );

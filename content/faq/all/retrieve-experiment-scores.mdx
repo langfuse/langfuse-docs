@@ -1,0 +1,39 @@
+---
+title: How to retrieve experiment scores via UI or API/SDK?
+description: Learn how to export and retrieve experiment scores through the Langfuse UI or programmatically via API/SDK.
+tags: [evaluation, export-data]
+---
+
+# How to Retrieve Experiment Scores?
+
+<Callout type="info">
+**Terminology Note**: "Experiment" and "dataset run" are used interchangeably throughout Langfuse. We are moving toward deprecating the term "dataset run" in favor of "experiment", but both terms currently refer to the same concept.
+</Callout>
+
+Langfuse supports two types of experiment scores:
+
+1. **Experiment-level scores**: Overall metrics for the entire experiment run (e.g., precision, recall, F1-scores). These scores are immutable and represent aggregate performance. [Learn more about run-level scores](/changelog/2025-05-07-run-level-scores).
+2. **Experiment-item-level scores**: Scores for individual items within an experiment (e.g., per-generated-output evaluations).
+
+## Via API/SDK
+
+Use the [Experiments API](/docs/api-and-data-platform/features/public-api#experiments)
+to retrieve both score levels. Use the [API reference](https://api.reference.langfuse.com/#tag/experiments)
+for endpoint parameters, filters, pagination, and response fields.
+
+For full trace and observation details, use the [Observations API v2](/docs/api-and-data-platform/features/public-api#v2).
+For score-centric queries across experiments, traces, or observations, use the
+[Scores API v3](/docs/api-and-data-platform/features/public-api#v3).
+
+### Recommended: Use Experiment Runner SDK
+
+When running a new experiment, the [Experiment Runner SDK](/docs/evaluation/experiments/experiments-via-sdk)
+returns scores and results directly. Use the Experiments API when you need to
+retrieve results from a previous run.
+
+## Related Resources
+
+- [Scores Data Model](/docs/evaluation/scores/data-model#scores)
+- [Run-Level Scores Changelog](/changelog/2025-05-07-run-level-scores)
+- [Experiment Runner SDK](/docs/evaluation/experiments/experiments-via-sdk)
+- [Experiments API](/docs/api-and-data-platform/features/public-api#experiments)

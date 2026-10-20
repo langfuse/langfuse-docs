@@ -1,177 +1,281 @@
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
 import type { StaticImageData } from "next/image";
-import circlebackLight from "../home/img/circleback_light.png";
-import circlebackDark from "../home/img/circleback_dark.png";
-import samsaraLight from "../home/img/samsara_light.png";
-import samsaraDark from "../home/img/samsara_dark.png";
-import khanacademyLight from "../home/img/khanacademy_light.png";
-import khanacademyDark from "../home/img/khanacademy_dark.png";
-import twilioLight from "../home/img/twilio_light.svg";
-import twilioDark from "../home/img/twilio_dark.svg";
-import sumupLight from "../home/img/sumup_light.svg";
-import sumupDark from "../home/img/sumup_dark.svg";
-import telusLight from "../home/img/telus_light.png";
-import telusDark from "../home/img/telus_dark.png";
-import magicPatternsLight from "../home/img/magicpatterns_light.png";
-import magicPatternsDark from "../home/img/magicpatterns_dark.png";
-import merckLight from "../home/img/merck-dark.png";
-import merckDark from "../home/img/merck-light.png";
+import { motion, useReducedMotion } from "framer-motion";
+import canvaLogo from "../home/img/canva.svg";
+import circlebackLogo from "../home/img/circleback.svg";
+import ciscoLogo from "../home/img/cisco.svg";
+import expediaGroupLogo from "../home/img/expedia.svg";
+import freeeLogo from "../home/img/freee.svg";
+import huggingfaceLogo from "../home/img/huggingface.svg";
+import intuitLogo from "../home/img/intuit.svg";
+import khanacademyLogo from "../home/img/khan.svg";
+import magicPatternsLogo from "../home/img/magic.svg";
+import merckLogo from "../home/img/merck.svg";
+import pigmentLogo from "../home/img/pigment.svg";
+import rampLogo from "../home/img/ramp.svg";
+import rocketMoneyLogo from "../home/img/rocket-money.svg";
+import samsaraLogo from "../home/img/samsara.svg";
+import sumupLogo from "../home/img/sumup.svg";
+import tradeRepublicLogo from "../home/img/trade-republic.svg";
+import { cn } from "@/lib/utils";
+import { LinkBox } from "@/components/ui/link-box";
+import { wordmarkDisplaySize } from "@/components/shared/wordmark";
+
+const MARQUEE_DURATION_SEC = 40;
+const LOGO_DISPLAY_HEIGHT = 56;
 
 type CompanyLogo = {
   name: string;
-  lightImage: StaticImageData | string;
-  darkImage: StaticImageData | string;
+  logo: StaticImageData;
   customerStoryPath?: string;
+  hidden?: boolean;
 };
 
 const companies: CompanyLogo[] = [
   {
-    name: "Samsara",
-    lightImage: samsaraLight,
-    darkImage: samsaraDark,
+    name: "Ramp",
+    logo: rampLogo,
+    customerStoryPath: "/users/ramp",
   },
   {
-    name: "Twilio",
-    lightImage: twilioLight,
-    darkImage: twilioDark,
+    name: "Trade Republic",
+    logo: tradeRepublicLogo,
+    customerStoryPath: "/users/trade-republic",
+    hidden: true,
   },
   {
-    name: "SumUp",
-    lightImage: sumupLight,
-    darkImage: sumupDark,
-
-    customerStoryPath: "/customers/sumup",
+    name: "Canva",
+    logo: canvaLogo,
+    customerStoryPath: "/users/canva",
+  },
+  {
+    name: "Expedia Group",
+    logo: expediaGroupLogo,
+  },
+  {
+    name: "Pigment",
+    logo: pigmentLogo,
   },
   {
     name: "Khan Academy",
-    lightImage: khanacademyLight,
-    darkImage: khanacademyDark,
-
-    customerStoryPath: "/customers/khan-academy",
+    logo: khanacademyLogo,
+    customerStoryPath: "/users/khan-academy",
   },
   {
-    name: "Magic Patterns",
-    lightImage: magicPatternsLight,
-    darkImage: magicPatternsDark,
-
-    customerStoryPath: "/customers/magic-patterns-ai-design-tools",
-  },
-  // {
-  //   name: "Springer Nature",
-  //   lightImage: springernatureLight,
-  //   darkImage: springernatureDark,
-  //   href: "https://www.springernature.com",
-  // },
-  {
-    name: "Merck",
-    lightImage: merckLight,
-    darkImage: merckDark,
-
-    customerStoryPath: "/customers/merckgroup",
+    name: "Hugging Face",
+    logo: huggingfaceLogo,
+    customerStoryPath: "/users/hugging-face",
   },
   {
-    name: "Telus",
-    lightImage: telusLight,
-    darkImage: telusDark,
+    name: "Intuit",
+    logo: intuitLogo,
+  },
+  {
+    name: "SumUp",
+    logo: sumupLogo,
+    customerStoryPath: "/users/sumup",
   },
   {
     name: "Circleback",
-    lightImage: circlebackLight,
-    darkImage: circlebackDark,
+    logo: circlebackLogo,
+    hidden: true,
+  },
+  {
+    name: "Merck",
+    logo: merckLogo,
+    customerStoryPath: "/users/merckgroup",
+  },
+  {
+    name: "Samsara",
+    logo: samsaraLogo,
+  },
+  {
+    name: "freee",
+    logo: freeeLogo,
+    hidden: true,
+  },
+  {
+    name: "Magic Patterns",
+    logo: magicPatternsLogo,
+    customerStoryPath: "/users/magic-patterns-ai-design-tools",
+    hidden: true,
+  },
+  {
+    name: "Cisco",
+    logo: ciscoLogo,
+  },
+  {
+    name: "Rocket Money",
+    logo: rocketMoneyLogo,
   },
 ];
 
-// Reusable component for company logos with light/dark theme support
 const LogoImage = ({
-  lightImage,
-  darkImage,
+  logo,
   name,
+  hoverable = true,
 }: {
-  lightImage: StaticImageData | string;
-  darkImage: StaticImageData | string;
+  logo: StaticImageData;
   name: string;
-}) => (
-  <>
-    <Image
-      src={lightImage}
-      alt={`${name} logo`}
-      className="object-contain max-h-8 max-w-full hidden dark:block"
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
-    />
-    <Image
-      src={darkImage}
-      alt={`${name} logo`}
-      className="object-contain max-h-8 max-w-full dark:hidden"
-      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-      priority={false}
-    />
-  </>
-);
-
-// Customer story badge component
-const CustomerStoryBadge = () => (
-  <div className="absolute top-0 right-0 md:top-2 md:right-2 z-10 pointer-events-none">
-    <div className="inline-flex items-center justify-center text-blue-500 md:bg-blue-500 md:text-white text-xs rounded-full md:w-6 md:h-6 group-hover:w-auto group-hover:h-auto group-hover:px-3 group-hover:py-1 px-2 py-1 md:px-0 md:py-0 transition-all duration-200">
-      <span className="md:hidden whitespace-nowrap">Read Story</span>
-      <span className="hidden md:group-hover:inline">Read Customer Story</span>
-      <span className="hidden md:block group-hover:hidden w-2 h-2 bg-white rounded-full"></span>
-    </div>
-  </div>
-);
-
-interface EnterpriseLogoGridProps {
-  className?: string;
-}
-
-export const EnterpriseLogoGrid = ({
-  className = "",
-}: EnterpriseLogoGridProps) => {
-  // Shared CSS classes for grid cells
-  const baseCellClasses =
-    "relative overflow-hidden h-16 md:h-14 transition-all duration-200 py-4 px-4 md:py-8 md:px-14 border border-gray-200 dark:border-gray-800 bg-card -mr-px -mb-px flex items-center justify-center";
-  const clickableCellClasses = `${baseCellClasses} group hover:opacity-80 cursor-pointer`;
+  hoverable?: boolean;
+}) => {
+  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
 
   return (
-    <div
-      className={`grid grid-cols-2 md:grid-cols-4 auto-rows-fr ${className}`}
-      role="grid"
-      aria-label="Enterprise customers using Langfuse"
-    >
-      {companies.map((company) => {
-        const cellContent = (
-          <>
-            <LogoImage
-              lightImage={company.lightImage}
-              darkImage={company.darkImage}
-              name={company.name}
-            />
-            {company.customerStoryPath && <CustomerStoryBadge />}
-          </>
-        );
+    <Image
+      src={logo}
+      alt={`${name} logo`}
+      width={logo.width}
+      height={logo.height}
+      unoptimized
+      className={cn(
+        "h-auto w-auto max-w-full",
+        hoverable
+          ? "hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] group-hover:filter-[grayscale(1)_brightness(0)_contrast(1.15)] transition-[filter] duration-200"
+          : "",
+      )}
+      style={{ height, width }}
+    />
+  );
+};
 
-        return company.customerStoryPath ? (
-          <Link
-            key={company.name}
-            href={company.customerStoryPath}
-            className={clickableCellClasses}
-            aria-label={`Read ${company.name} customer story`}
-            role="gridcell"
-          >
-            {cellContent}
-          </Link>
-        ) : (
+const visibleCompanies = companies.filter((c) => !c.hidden);
+
+function LogoMarqueeItems({
+  companies: items,
+  duplicate = false,
+}: {
+  companies: CompanyLogo[];
+  duplicate?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-8 pr-8">
+      {items.map((company) => {
+        const hasStory = Boolean(company.customerStoryPath);
+        return (
           <div
             key={company.name}
-            className={baseCellClasses}
-            role="gridcell"
-            aria-label={`${company.name} uses Langfuse`}
+            className="shrink-0 flex items-center justify-center !p-0"
+            aria-hidden={duplicate || undefined}
+            aria-label={
+              hasStory
+                ? `Read ${company.name} user story`
+                : `${company.name} uses Langfuse`
+            }
           >
-            {cellContent}
+            <LogoImage
+              hoverable={false}
+              logo={company.logo}
+              name={company.name}
+            />
           </div>
         );
       })}
     </div>
+  );
+}
+
+interface EnterpriseLogoGridProps {
+  className?: string;
+  small?: boolean;
+  /** When set, only these company names are shown, in this order. */
+  names?: readonly string[];
+}
+
+export const EnterpriseLogoGrid = ({
+  className = "",
+  small = false,
+  names,
+}: EnterpriseLogoGridProps) => {
+  const shouldReduceMotion = useReducedMotion();
+  const selectedCompanies = names
+    ? names
+        .map((name) => companies.find((company) => company.name === name))
+        .filter((company): company is CompanyLogo => Boolean(company))
+    : visibleCompanies;
+
+  return (
+    <>
+      {/* Mobile: scrolling marquee or static scroll fallback */}
+      {shouldReduceMotion ? (
+        <div
+          className={cn(
+            "sm:hidden overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            className,
+          )}
+          aria-label="Enterprise customers using Langfuse"
+        >
+          <div className="flex items-center w-max py-2">
+            <LogoMarqueeItems companies={selectedCompanies} />
+          </div>
+        </div>
+      ) : (
+        <div
+          className={cn(
+            "sm:hidden overflow-hidden w-full mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]",
+            className,
+          )}
+          aria-label="Enterprise customers using Langfuse"
+        >
+          <motion.div
+            className="flex items-center w-max py-2"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{
+              duration: MARQUEE_DURATION_SEC,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          >
+            <LogoMarqueeItems companies={selectedCompanies} />
+            <LogoMarqueeItems companies={selectedCompanies} duplicate />
+          </motion.div>
+        </div>
+      )}
+
+      {/* Desktop: grid layout */}
+      <div
+        className={cn(
+          "hidden sm:grid sm:grid-cols-6 px-2 py-2",
+          small && "sm:grid-cols-3",
+          selectedCompanies.length <= 4 && "sm:grid-cols-4",
+          className,
+        )}
+        role="grid"
+        aria-label="Enterprise customers using Langfuse"
+      >
+        {selectedCompanies.map((company) => {
+          const hasStory = Boolean(company.customerStoryPath);
+
+          return (
+            <LinkBox
+              key={company.name}
+              href={company.customerStoryPath}
+              className="-mr-px -mb-px relative flex h-14 items-center justify-center !p-0"
+              aria-label={
+                hasStory
+                  ? `Read ${company.name} user story`
+                  : `${company.name} uses Langfuse`
+              }
+              role="gridcell"
+            >
+              {hasStory && (
+                <div className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
+                  <div
+                    className={cn(
+                      "tooltip-label z-50 inline-flex h-[12px] items-center justify-center gap-[3px] overflow-hidden rounded-none border-0 bg-primary/10 px-1 py-0.5 font-mono text-[10px] leading-none text-primary-foreground shadow-none outline-hidden group-hover:bg-primary transition",
+                    )}
+                  >
+                    Read story
+                  </div>
+                </div>
+              )}
+              <LogoImage logo={company.logo} name={company.name} />
+            </LinkBox>
+          );
+        })}
+      </div>
+    </>
   );
 };

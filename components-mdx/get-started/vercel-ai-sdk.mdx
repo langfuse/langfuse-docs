@@ -1,0 +1,51 @@
+**Install packages**
+
+Install AI SDK 7, OpenTelemetry, and the Langfuse integration packages.
+
+```bash
+npm install ai @ai-sdk/openai @langfuse/vercel-ai-sdk @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
+```
+
+**Add credentials**
+
+Set your Langfuse credentials as environment variables so the SDK knows which project to write to.
+
+import EnvJS from "@/components-mdx/env-js.mdx";
+
+<EnvJS />
+
+**Initialize OpenTelemetry with Langfuse**
+
+Set up the OpenTelemetry SDK with the Langfuse span processor and register the Langfuse Vercel AI SDK telemetry integration once at application startup.
+
+```typescript
+import { registerTelemetry } from "ai";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());
+```
+
+**Run AI SDK calls**
+
+After telemetry is registered, AI SDK 7 emits telemetry by default. Use `telemetry` to set a function name, include selected runtime context keys, or opt out of telemetry for a specific call.
+
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+
+const { text } = await generateText({
+  model: openai("gpt-5.1"),
+  prompt: "What is the weather like today?",
+  telemetry: {
+    functionId: "weather-chat",
+  },
+});
+```

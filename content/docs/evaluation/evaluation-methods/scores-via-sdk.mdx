@@ -1,0 +1,1000 @@
+---
+title: Scores via API/SDK
+description: Ingest custom scores via the Langfuse SDKs or API.
+sidebarTitle: Scores via API/SDK
+---
+
+# Scores via API/SDK
+
+You can use the Langfuse SDKs or API to add [scores](/docs/evaluation/scores/overview) to traces, observations, sessions and dataset runs. This is an evaluation method that allows you to set up custom evaluation workflows and extend the scoring capabilities of Langfuse. See the [data model](/docs/evaluation/scores/data-model#scores) for full details on the score object.
+
+If you want Langfuse to run deterministic Python or TypeScript logic for you, use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators). Use this page when your application, pipeline, or CI job computes scores and sends them to Langfuse via API or SDK.
+
+## Ingesting Scores via API/SDKs
+
+Scores can be attached at different levels of granularity: to individual traces, to specific observations within a trace, or to full sessions.
+
+See the [API reference](/docs/api) for full details on the POST and GET endpoints for scores and score configs.
+
+Upgrading from Python SDK v4 or JS/TS SDK v5? `api.scores.create` now takes a list of scores, and score reads moved to `api.scores.get_many` / `api.scores.getMany`. See the [Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5#scores-api) and [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6#scores-api) migration guides.
+
+### Trace or Observation-level Scores
+
+You can add scores via the Langfuse SDKs or API. Scores can take one of four data types: **Numeric**, **Categorical**, **Boolean**, or **Text**. See [Score Types](/docs/evaluation/scores/overview#score-types) for details.
+
+If a score is ingested manually using a `trace_id` to link the score to a trace, it is not necessary to wait until the trace has been created. The score will show up in the scores table and will be linked to the trace once the trace with the same `trace_id` is created.
+
+Here are examples by `Score` data types.
+
+For trace and observation scores, `trace_id`/`traceId` is required and `observation_id`/`observationId` is optional. If you attach a score to an observation, always provide both the observation ID and the corresponding trace ID.
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+<Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
+<Tab>
+Numeric score values must be provided as float.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="correctness",
+    value=0.9,
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="NUMERIC", # optional, inferred if not provided
+    comment="Factually correct", # optional
+)
+
+# Method 2: Score current observation (within context)
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    # Score the current observation
+    span.score(
+        name="correctness",
+        value=0.9,
+        data_type="NUMERIC",
+        comment="Factually correct"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value=0.95,
+        data_type="NUMERIC"
+    )
+
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    # Score the current observation
+    langfuse.score_current_span(
+        name="correctness",
+        value=0.9,
+        data_type="NUMERIC",
+        comment="Factually correct"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value=0.95,
+        data_type="NUMERIC"
+    )
+```
+
+</Tab>
+<Tab>
+Categorical score values must be provided as strings.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="accuracy",
+    value="partially correct",
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="CATEGORICAL", # optional, inferred if not provided
+    comment="Some factual errors", # optional
+)
+
+# Method 2: Score current observation (within context)
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    # Score the current observation
+    span.score(
+        name="accuracy",
+        value="partially correct",
+        data_type="CATEGORICAL",
+        comment="Some factual errors"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value="partially correct",
+        data_type="CATEGORICAL"
+    )
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    # Score the current observation
+    langfuse.score_current_span(
+        name="accuracy",
+        value="partially correct",
+        data_type="CATEGORICAL",
+        comment="Some factual errors"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value="partially correct",
+        data_type="CATEGORICAL"
+    )
+```
+
+</Tab>
+<Tab>
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="helpfulness",
+    value=0, # 0 or 1
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="BOOLEAN", # required, numeric values without data type would be inferred as NUMERIC
+    comment="Incorrect answer", # optional
+)
+
+# Method 2: Score current observation (within context)
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    # Score the current observation
+    span.score(
+        name="helpfulness",
+        value=1, # 0 or 1
+        data_type="BOOLEAN",
+        comment="Very helpful response"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_quality",
+        value=1, # 0 or 1
+        data_type="BOOLEAN"
+    )
+# Method 3: Score via the current context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    # Score the current observation
+    langfuse.score_current_span(
+        name="helpfulness",
+        value=1, # 0 or 1
+        data_type="BOOLEAN",
+        comment="Very helpful response"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_quality",
+        value=1, # 0 or 1
+        data_type="BOOLEAN"
+    )
+```
+
+</Tab>
+<Tab>
+Text score values must be provided as strings between 1 and 500 characters.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    name="reviewer_notes",
+    value="The response was helpful but could be more concise.",
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    data_type="TEXT", # optional, inferred if not provided
+    comment="Reviewed by QA team", # optional
+)
+
+# Method 2: Score current observation (within context)
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    # Score the current observation
+    span.score(
+        name="reviewer_notes",
+        value="The response was helpful but could be more concise.",
+        data_type="TEXT",
+        comment="Reviewed by QA team"
+    )
+
+    # Score the trace
+    span.score_trace(
+        name="overall_notes",
+        value="Good quality overall, minor formatting issues.",
+        data_type="TEXT"
+    )
+
+# Method 3: Score via the current context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation"):
+    # Score the current observation
+    langfuse.score_current_span(
+        name="reviewer_notes",
+        value="The response was helpful but could be more concise.",
+        data_type="TEXT",
+        comment="Reviewed by QA team"
+    )
+
+    # Score the trace
+    langfuse.score_current_trace(
+        name="overall_notes",
+        value="Good quality overall, minor formatting issues.",
+        data_type="TEXT"
+    )
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
+
+<Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
+<Tab>
+Numeric score values must be provided as float.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "correctness",
+  value: 0.9,
+  dataType: "NUMERIC", // optional, inferred if not provided
+  comment: "Factually correct", // optional
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+Categorical score values must be provided as strings.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "accuracy",
+  value: "partially correct",
+  dataType: "CATEGORICAL", // optional, inferred if not provided
+  comment: "Factually correct", // optional
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean. See [API reference](/docs/api) for more details on POST/GET scores endpoints.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "helpfulness",
+  value: 0, // 0 or 1
+  dataType: "BOOLEAN", // required, numeric values without data type would be inferred as NUMERIC
+  comment: "Incorrect answer", // optional
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+Text score values must be provided as strings between 1 and 500 characters.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "reviewer_notes",
+  value: "The response was helpful but could be more concise.",
+  dataType: "TEXT", // optional, inferred if not provided
+  comment: "Reviewed by QA team", // optional
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
+
+You can also create scores directly via the [REST API](https://api.reference.langfuse.com/#tag/scores/POST/api/public/scores). Authenticate using HTTP Basic Auth with your Langfuse Public Key as username and Secret Key as password.
+
+<Tabs items={["Numeric", "Categorical", "Boolean", "Text"]}>
+<Tab>
+Numeric score values must be provided as float.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "correctness",
+      "value": 0.9,
+      "dataType": "NUMERIC",
+      "comment": "Factually correct"
+    }
+  ]'
+```
+
+</Tab>
+<Tab>
+Categorical score values must be provided as strings.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "accuracy",
+      "value": "partially correct",
+      "dataType": "CATEGORICAL",
+      "comment": "Some factual errors"
+    }
+  ]'
+```
+
+</Tab>
+<Tab>
+Boolean scores must be provided as a float, where `1` is true and `0` is false. When read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores), the value is returned as a boolean.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "helpfulness",
+      "value": 0,
+      "dataType": "BOOLEAN",
+      "comment": "Incorrect answer"
+    }
+  ]'
+```
+
+</Tab>
+<Tab>
+Text score values must be provided as strings between 1 and 500 characters.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "reviewer_notes",
+      "value": "The response was helpful but could be more concise.",
+      "dataType": "TEXT",
+      "comment": "Reviewed by QA team"
+    }
+  ]'
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+</LangTabs>
+
+### Browser score ingestion [#browser-score-ingestion]
+
+Use `@langfuse/browser` when the score is created in frontend code, for example thumbs up/down user feedback, star ratings, or client-side quality signals. Use a dedicated key with the [Scores ingestion permissions](/docs/administration/rbac#api-key-permissions) so it can only submit scores. The browser SDK sends each score immediately to `POST /api/public/scores` (JS/TS SDK v5 and earlier use the ingestion API).
+
+For backend services, scripts, CI jobs, and evaluation pipelines, use `@langfuse/client` as shown in the JS/TS SDK examples above.
+
+```bash
+npm install @langfuse/browser
+```
+
+```ts
+import { LangfuseBrowserClient } from "@langfuse/browser";
+
+const langfuse = new LangfuseBrowserClient({
+  publicKey: process.env.NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY!,
+  baseUrl: process.env.NEXT_PUBLIC_LANGFUSE_BASE_URL, // optional, defaults to https://cloud.langfuse.com
+});
+
+await langfuse.score({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  id: `user-feedback-${message.traceId}`, // optional, use as an idempotency key
+  name: "user-feedback",
+  value: 1, // 1 for positive, 0 for negative
+  dataType: "BOOLEAN",
+  comment: "Helpful answer", // optional
+});
+```
+
+`score()` returns `{ id }` after the request succeeds. No `flush()` call is required.
+
+### Session-level Scores
+
+To score an entire session (without attaching the score to a trace or observation), provide only `session_id` (Python SDK) or `sessionId` (JS/TS SDK and API).
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+langfuse.create_score(
+    name="session_quality",
+    value=0.85,
+    session_id="session_id_here",
+    data_type="NUMERIC",
+    comment="Overall conversation quality"
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  name: "session_quality",
+  value: 0.85,
+  sessionId: "session_id_here",
+  dataType: "NUMERIC",
+  comment: "Overall conversation quality",
+});
+
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "sessionId": "session_id_here",
+      "name": "session_quality",
+      "value": 0.85,
+      "dataType": "NUMERIC",
+      "comment": "Overall conversation quality"
+    }
+  ]'
+```
+
+</Tab>
+</LangTabs>
+
+## Advanced
+
+### Preventing Duplicate Scores [#preventing-duplicate-scores]
+
+By default, Langfuse allows for multiple scores of the same `name` on the same trace. This is useful if you'd like to track the evolution of a score over time or if e.g. you've received multiple user feedback scores on the same trace.
+
+In some cases, you want to prevent this behavior or overwrite an existing score. A score is identified by three fields — its `id`, its `name`, and its date (`toDate(timestamp)`) — and a new score only replaces an existing one when all three match. To achieve this, create an **idempotency key** and pass it as the `id` (JS/TS) / `score_id` (Python) when creating the score (for example `trace_id-score_name`), and keep the `name` and `timestamp` unchanged across calls. If any of the three differs — for example the same `id` with a different `name` — you get an additional score rather than a replacement.
+
+<Callout type="warning">
+Do not send partial score updates (only the changed fields) and rely on Langfuse to merge them into the existing record. This merge only happens for a limited window after creation, is deprecated, and will be removed. Always send the complete score.
+</Callout>
+
+See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#updating-scores) for more details on Langfuse's immutable data model.
+
+### Enforcing a Score Config
+
+Score configs are helpful when you want to standardize your scores for future analysis.
+
+To enforce a score config, you can provide a `configId` when creating a score to reference a `ScoreConfig` that was previously created. `Score Configs` can be defined in the Langfuse UI or via our API. [See our guide on how to create and manage score configs](/faq/all/manage-score-configs).
+
+Whenever you provide a `ScoreConfig`, the score data will be validated against the config. The following rules apply:
+
+- **Score Name**: Must equal the config's name
+- **Score Data Type**: When provided, must match the config's data type
+- **Score Value when Type is `NUMERIC`**: Value must be within the min and max values defined in the config (if provided, min and max are optional and otherwise are assumed as -∞ and +∞ respectively)
+- **Score Value when Type is `CATEGORICAL`**: Value must map to one of the categories defined in the config
+- **Score Value when Type is `BOOLEAN`**: Value must equal `0` or `1`
+- **Score Value when Type is `TEXT`**: Value must be a non-empty string of at most 500 characters
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "API"]}>
+
+<Tab>
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    session_id="session_id_here", # optional, ID of the session the score relates to
+    name="accuracy",
+    value=0.9,
+    comment="Factually correct", # optional
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
+    config_id="78545-6565-3453654-43543", # optional, to ensure that the score follows a specific min/max value range
+    data_type="NUMERIC" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    span.score(
+        name="accuracy",
+        value=0.9,
+        comment="Factually correct",
+        config_id="78545-6565-3453654-43543",
+        data_type="NUMERIC"
+    )
+```
+
+</Tab>
+<Tab>
+Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="correctness",
+    value="correct",
+    comment="Factually correct", # optional
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
+    config_id="12345-6565-3453654-43543", # optional, to ensure that the score maps to a specific category defined in a score config
+    data_type="CATEGORICAL" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    span.score(
+        name="correctness",
+        value="correct",
+        comment="Factually correct",
+        config_id="12345-6565-3453654-43543",
+        data_type="CATEGORICAL"
+    )
+```
+
+</Tab>
+<Tab>
+When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="helpfulness",
+    value=1,
+    comment="Factually correct", # optional
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
+    config_id="93547-6565-3453654-43543", # optional, can be used to infer the score data type and validate the score value
+    data_type="BOOLEAN" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    span.score(
+        name="helpfulness",
+        value=1,
+        comment="Factually correct",
+        config_id="93547-6565-3453654-43543",
+        data_type="BOOLEAN"
+    )
+```
+
+</Tab>
+<Tab>
+When ingesting text scores, provide the value as a string (1–500 characters). If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```python
+from langfuse import get_client
+langfuse = get_client()
+
+# Method 1: Score via low-level method
+langfuse.create_score(
+    trace_id="trace_id_here",
+    observation_id="observation_id_here", # optional
+    name="reviewer_notes",
+    value="The response was helpful but could be more concise.",
+    comment="Reviewed by QA team", # optional
+    score_id="unique_id", # optional, can be used as an idempotency key to update the score subsequently
+    config_id="24680-6565-3453654-43543", # optional
+    data_type="TEXT" # optional, possibly inferred
+)
+
+# Method 2: Score within context
+with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
+    span.score(
+        name="reviewer_notes",
+        value="The response was helpful but could be more concise.",
+        comment="Reviewed by QA team",
+        config_id="24680-6565-3453654-43543",
+        data_type="TEXT"
+    )
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range, which might be defined by a minimum and/or maximum value.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "accuracy",
+  value: 0.9,
+  comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  configId: "78545-6565-3453654-43543", // optional, to ensure that the score follows a specific min/max value range
+  dataType: "NUMERIC", // optional, possibly inferred
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+Categorical scores are used to evaluate data that falls into specific categories. When ingesting categorical scores, you can provide the value as a string. If you provide a configId, the score value will be validated against the config's categories.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "correctness",
+  value: "correct",
+  comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  configId: "12345-6565-3453654-43543", // optional, to ensure that a score maps to a specific category defined in a score config
+  dataType: "CATEGORICAL", // optional, possibly inferred
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "helpfulness",
+  value: 1,
+  comment: "Factually correct", // optional
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  configId: "93547-6565-3453654-43543", // optional, can be used to infer the score data type and validate the score value
+  dataType: "BOOLEAN", // optional, possibly inferred
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+<Tab>
+When ingesting text scores, provide the value as a string (1–500 characters). If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+langfuse.score.create({
+  traceId: message.traceId,
+  observationId: message.generationId, // optional
+  name: "reviewer_notes",
+  value: "The response was helpful but could be more concise.",
+  comment: "Reviewed by QA team", // optional
+  id: "unique_id", // optional, can be used as an idempotency key to update the score subsequently
+  configId: "24680-6565-3453654-43543", // optional
+  dataType: "TEXT", // optional, possibly inferred
+});
+
+// Flush the scores in short-lived environments
+await langfuse.flush();
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+<Tab>
+
+You can also enforce score configs via the [REST API](https://api.reference.langfuse.com/#tag/scores/POST/api/public/scores) by providing a `configId`.
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
+<Tab>
+When ingesting numeric scores, you can provide the value as a float. If you provide a configId, the score value will be validated against the config's numeric range.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "accuracy",
+      "value": 0.9,
+      "dataType": "NUMERIC",
+      "configId": "78545-6565-3453654-43543",
+      "comment": "Factually correct"
+    }
+  ]'
+```
+
+</Tab>
+<Tab>
+Categorical scores are used to evaluate data that falls into specific categories. If you provide a configId, the score value will be validated against the config's categories.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "correctness",
+      "value": "correct",
+      "dataType": "CATEGORICAL",
+      "configId": "12345-6565-3453654-43543",
+      "comment": "Factually correct"
+    }
+  ]'
+```
+
+</Tab>
+<Tab>
+When ingesting boolean scores, you can provide the value as a float. If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "helpfulness",
+      "value": 1,
+      "dataType": "BOOLEAN",
+      "configId": "93547-6565-3453654-43543",
+      "comment": "Factually correct"
+    }
+  ]'
+```
+
+</Tab>
+<Tab>
+When ingesting text scores, provide the value as a string (1–500 characters). If you provide a configId, the score's name and config's name must match as well as their data types.
+
+```bash
+curl -X POST https://cloud.langfuse.com/api/public/scores \
+  -u "pk-lf-...":"sk-lf-..." \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "id": "unique_id",
+      "traceId": "trace_id_here",
+      "observationId": "observation_id_here",
+      "name": "reviewer_notes",
+      "value": "The response was helpful but could be more concise.",
+      "dataType": "TEXT",
+      "configId": "24680-6565-3453654-43543",
+      "comment": "Reviewed by QA team"
+    }
+  ]'
+```
+
+</Tab>
+</Tabs>
+
+</Tab>
+
+See [API reference](/docs/api) for more details on POST/GET score configs endpoints.
+
+</LangTabs>
+
+### Inferred Score Properties
+
+Certain score properties might be inferred based on your input:
+
+- **If you don't provide a score data type** it will always be inferred. See tables below for details.
+- **For boolean and categorical scores**, we will provide the score value in both numerical and string format where possible. The score value format that is not provided as input, i.e. the translated value is referred to as the inferred value in the tables below.
+- **On read via the [v3 scores API](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores)**, boolean scores are returned as a single boolean `value`.
+- **For categorical scores**, the string representation is always provided and a numerical mapping of the category will be produced only if a `ScoreConfig` was provided.
+
+Detailed Examples:
+
+<Tabs items={["Numeric Scores", "Categorical Scores", "Boolean Scores", "Text Scores"]}>
+<Tab>
+For example, let's assume you'd like to ingest a numeric score to measure **accuracy**. We have included a table of possible score ingestion scenarios below.
+
+| Value   | Data Type | Config Id | Description                                                 | Inferred Data Type | Valid                            |
+| ------- | --------- | --------- | ----------------------------------------------------------- | ------------------ | -------------------------------- |
+| `0.9`   | `Null`    | `Null`    | Data type is inferred                                       | `NUMERIC`          | Yes                              |
+| `0.9`   | `NUMERIC` | `Null`    | No properties inferred                                      |                    | Yes                              |
+| `depth` | `NUMERIC` | `Null`    | Error: data type of value does not match provided data type |                    | No                               |
+| `0.9`   | `NUMERIC` | `78545`   | No properties inferred                                      |                    | Conditional on config validation |
+| `0.9`   | `Null`    | `78545`   | Data type inferred                                          | `NUMERIC`          | Conditional on config validation |
+| `depth` | `NUMERIC` | `78545`   | Error: data type of value does not match provided data type |                    | No                               |
+
+</Tab>
+<Tab>
+For example, let's assume you'd like to ingest a categorical score to measure **correctness**. We have included a table of possible score ingestion scenarios below.
+
+| Value     | Data Type     | Config Id | Description                                                 | Inferred Data Type | Inferred Value representation       | Valid                            |
+| --------- | ------------- | --------- | ----------------------------------------------------------- | ------------------ | ----------------------------------- | -------------------------------- |
+| `correct` | `Null`        | `Null`    | Data type is inferred                                       | `CATEGORICAL`      |                                     | Yes                              |
+| `correct` | `CATEGORICAL` | `Null`    | No properties inferred                                      |                    |                                     | Yes                              |
+| `1`       | `CATEGORICAL` | `Null`    | Error: data type of value does not match provided data type |                    |                                     | No                               |
+| `correct` | `CATEGORICAL` | `12345`   | Numeric value inferred                                      |                    | `4` numeric config category mapping | Conditional on config validation |
+| `correct` | `NULL`        | `12345`   | Data type inferred                                          | `CATEGORICAL`      |                                     | Conditional on config validation |
+| `1`       | `CATEGORICAL` | `12345`   | Error: data type of value does not match provided data type |                    |                                     | No                               |
+
+</Tab>
+<Tab>
+For example, let's assume you'd like to ingest a boolean score to measure **helpfulness**. We have included a table of possible score ingestion scenarios below.
+
+| Value   | Data Type | Config Id | Description                                                 | Inferred Data Type | Inferred Value representation | Valid                            |
+| ------- | --------- | --------- | ----------------------------------------------------------- | ------------------ | ----------------------------- | -------------------------------- |
+| `1`     | `BOOLEAN` | `Null`    | Value's string equivalent inferred                          |                    | `True`                        | Yes                              |
+| `true`  | `BOOLEAN` | `Null`    | Error: data type of value does not match provided data type |                    |                               | No                               |
+| `3`     | `BOOLEAN` | `Null`    | Error: boolean data type expects `0` or `1` as input value  |                    |                               | No                               |
+| `0.9`   | `Null`    | `93547`   | Data type and value's string equivalent inferred            | `BOOLEAN`          | `True`                        | Conditional on config validation |
+| `depth` | `BOOLEAN` | `93547`   | Error: data type of value does not match provided data type |                    |                               | No                               |
+
+</Tab>
+<Tab>
+For example, let's assume you'd like to ingest a text score to capture **reviewer notes**. Text scores must be non-empty strings of at most 500 characters.
+
+| Value             | Data Type | Config Id | Description                                                 | Inferred Data Type | Valid                            |
+| ----------------- | --------- | --------- | ----------------------------------------------------------- | ------------------ | -------------------------------- |
+| `"Good response"` | `Null`    | `Null`    | Data type is inferred                                       | `TEXT`             | Yes                              |
+| `"Good response"` | `TEXT`    | `Null`    | No properties inferred                                      |                    | Yes                              |
+| `0.9`             | `TEXT`    | `Null`    | Error: data type of value does not match provided data type |                    | No                               |
+| `"Good response"` | `TEXT`    | `24680`   | No properties inferred                                      |                    | Conditional on config validation |
+| `"Good response"` | `Null`    | `24680`   | Data type inferred                                          | `TEXT`             | Conditional on config validation |
+| `""`              | `TEXT`    | `Null`    | Error: text scores must be non-empty                        |                    | No                               |
+
+</Tab>
+</Tabs>
+
+## Update Existing Scores via API/SDKs [#update]
+
+When creating a score, you can provide an optional `id` (JS/TS) / `score_id` (Python) parameter. A re-ingested score overwrites an existing one only when its `id`, `name`, and `timestamp` (at date granularity, `toDate(timestamp)`) all match — a matching `id` alone is not sufficient, and any difference creates a duplicate instead of an update.
+
+To overwrite a score without fetching existing scores first, set a stable `id` as an idempotency key when initially creating the score, and keep the `name` and `timestamp` unchanged on subsequent calls. See [Preventing Duplicate Scores](#preventing-duplicate-scores) for details.
+
+## Related guides
+
+<ManualGuideList
+  guides={[
+    {
+      href: "/guides/user-feedback-loop",
+      topic: "Collecting user feedback",
+      lede: "Capture explicit and implicit user feedback as scores on your traces, including in-app ratings sent via our Browser SDK.",
+    },
+    {
+      href: "/guides/cookbook/example_external_evaluation_pipelines",
+      topic: "Custom evaluation data pipeline",
+      lede: "Continuously monitor quality by fetching traces, running custom evaluations, and ingesting scores back into Langfuse.",
+    },
+    {
+      href: "/guides/cookbook/example_structured_output_extraction",
+      topic: "Per-field scores for structured extraction",
+      lede: "Emit one boolean score per output field to evaluate document extraction and catch regressions that pooled accuracy hides.",
+    },
+    {
+      href: "/guides/cookbook/security-and-guardrails",
+      topic: "Guardrails and security checks",
+      lede: "Check whether output contains a certain keyword, matches a required structure or format, or exceeds a length limit.",
+    },
+    {
+      href: "/guides/human-in-the-loop-scoring",
+      topic: "Custom internal workflow tooling",
+      lede: "Build internal tooling for human-in-the-loop workflows, ingesting scores back into Langfuse following your custom schema.",
+    },
+    {
+      href: "/guides/cookbook/example_evaluating_multi_turn_conversations",
+      topic: "Session-level quality tracking",
+      lede: "Score full conversations, such as support chats or agent threads, by attaching scores via sessionId in the SDK or API.",
+    },
+  ]}
+/>

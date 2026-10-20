@@ -1,29 +1,67 @@
-import { useRouter } from "next/router";
-import { useState, useEffect, useRef } from "react";
-import { useConfig } from "nextra-theme-docs";
+"use client";
+
+import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef, type ReactNode } from "react";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import { Button } from "./ui/button";
+import { Link } from "./ui/link";
 import {
   Copy as CopyIcon,
-  Check as CheckIcon,
   LifeBuoy,
   ThumbsDown,
   ThumbsUp,
+  ChevronDown,
+  ExternalLink,
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
-import { Background } from "./Background";
 import { NotebookBanner } from "./NotebookBanner";
 import { COOKBOOK_ROUTE_MAPPING } from "@/lib/cookbook_route_mapping";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
+import { Image } from "./ui/image";
 import { Dialog, DialogContent } from "./ui/dialog";
-import { CustomerStoryCTA } from "./customers/CustomerStoryCTA";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import IconChatGPT from "./icons/chatgpt";
+import IconClaude from "./icons/claude";
+import IconMCP from "./icons/mcp";
+import { HoverCorners } from "./ui/corner-box";
 
+/** Paths where the page already shows feedback (DocBodyChrome); skip duplicate here. */
 const pathsWithoutFooterWidgets = [
   "/imprint",
   "/blog",
-  "/customers",
+  "/users",
+  "/support",
+  "/about",
+  "/brand",
   "/careers",
+  "/press",
+  "/partners",
+  "/watch-demo",
+  "/enterprise",
+  "/chat-agents",
+  "/coding-agents",
+  "/workflow-automation",
+  "/financial-services",
+  "/events",
+  "/changelog",
+  "/resources",
+  "/compare",
+  "/cn",
+  "/community",
+  "/cookie-policy",
+  "/find-us",
+  "/japan",
+  "/kr",
+  "/oss-friends",
+  "/privacy",
+  "/research",
+  "/terms",
+  "/wrapped",
 ];
 const pathsWithCopyAsMarkdownButton = [
   "/docs",
@@ -33,12 +71,21 @@ const pathsWithCopyAsMarkdownButton = [
   "/integrations",
   "/handbook",
   "/security",
+  "/library",
+  "/enterprise",
+  "/chat-agents",
+  "/coding-agents",
+  "/workflow-automation",
+  "/financial-services",
+  "/resources",
+  "/compare",
+  "/academy",
 ];
-const isCustomerStory = (pathname: string) =>
-  pathname.startsWith("/customers/");
+const isCustomerStory = (pathname: string) => pathname.startsWith("/users/");
 
-const CopyMarkdownButton = () => {
-  const router = useRouter();
+export const CopyMarkdownButton = () => {
+  const pathname = usePathname();
+  const capture = usePostHogClientCapture();
   const [copyState, setCopyState] = useState<
     "idle" | "loading" | "copied" | "error"
   >("idle");
@@ -54,6 +101,20 @@ const CopyMarkdownButton = () => {
     };
   }, []);
 
+  const getMarkdownUrl = () => {
+    let basePath = pathname ?? "";
+    if (basePath.startsWith("/")) basePath = basePath.substring(1);
+    if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
+    if (!basePath) basePath = "index"; // Handle root index page
+    return `/${basePath}.md`;
+  };
+
+  const getMarkdownFullUrl = () => {
+    if (typeof window === "undefined") return "";
+    const mdPath = getMarkdownUrl();
+    return `${window.location.origin}${mdPath}`;
+  };
+
   const handleCopy = async () => {
     // Clear any existing timeout before starting a new operation
     if (timeoutIdRef.current) {
@@ -64,12 +125,9 @@ const CopyMarkdownButton = () => {
     setCopyState("loading");
     setErrorMessage("");
 
-    let basePath = router.pathname;
-    if (basePath.startsWith("/")) basePath = basePath.substring(1);
-    if (basePath.endsWith("/")) basePath = basePath.slice(0, -1);
-    if (!basePath) basePath = "index"; // Handle root index page
+    capture("copy_page", { type: "copy" });
 
-    const mdUrl = `/${basePath}.md`;
+    const mdUrl = getMarkdownUrl();
 
     try {
       const response = await fetch(mdUrl, {
@@ -114,104 +172,243 @@ const CopyMarkdownButton = () => {
     }
   };
 
-  let buttonText = "Copy as Markdown";
-  let ButtonIcon = CopyIcon;
+  const getChatGPTUrl = () => {
+    const mdUrl = getMarkdownFullUrl();
+    const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
+    return `https://chatgpt.com/?hints=search&q=${encodeURIComponent(prompt)}`;
+  };
+
+  const getClaudeUrl = () => {
+    const mdUrl = getMarkdownFullUrl();
+    const prompt = `Read from ${mdUrl} so I can ask questions about it.`;
+    return `https://claude.ai/new?q=${encodeURIComponent(prompt)}`;
+  };
+
+  const handleChatGPTClick = () => {
+    capture("copy_page", { type: "chatgpt" });
+  };
+
+  const handleClaudeClick = () => {
+    capture("copy_page", { type: "claude" });
+  };
+
+  const isDisabled = copyState === "loading" || copyState === "copied";
+  const isError = copyState === "error";
+
+  // Self-guard: only render on pages that should have the copy button.
+  // All hooks are above so this conditional return is safe.
+  const shouldShow = pathsWithCopyAsMarkdownButton.some((prefix) =>
+    (pathname ?? "").startsWith(prefix),
+  );
+  if (!shouldShow) return null;
+
+  let buttonText = "Copy page";
   if (copyState === "loading") {
     buttonText = "Copying...";
   } else if (copyState === "copied") {
     buttonText = "Copied!";
-    ButtonIcon = CheckIcon;
   } else if (copyState === "error") {
     buttonText = errorMessage;
   }
 
-  const isDisabled = copyState === "loading" || copyState === "copied";
-
   return (
-    <button
-      type="button"
-      disabled={isDisabled || copyState === "error"}
-      onClick={!isDisabled ? handleCopy : undefined}
-      className={cn(
-        "inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground",
-        isDisabled || copyState === "error"
-          ? "opacity-50 cursor-not-allowed"
-          : "cursor-pointer hover:bg-secondary/80",
-        copyState === "error"
-          ? "text-destructive-foreground bg-destructive hover:bg-destructive/80"
-          : ""
-      )}
-    >
-      {buttonText}
-      <ButtonIcon className="h-3 w-3 ml-1.5" />
-    </button>
+    <div className="group relative inline-flex items-center p-1 button-wrapper">
+      <HoverCorners />
+      <div
+        className={cn(
+          "inline-flex h-[26px] items-stretch overflow-hidden rounded-[1px] border border-line-structure dark:border-line-cta bg-surface-bg text-text-secondary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+          isDisabled || isError ? "opacity-70" : "",
+          isError ? "border-destructive/50" : "",
+        )}
+      >
+        <button
+          type="button"
+          disabled={isDisabled || isError}
+          onClick={handleCopy}
+          className={cn(
+            "inline-flex items-center px-[8px] py-0.75 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] transition-colors min-w-[80px] max-w-[160px] overflow-hidden",
+            isDisabled || isError
+              ? "cursor-not-allowed"
+              : "cursor-pointer hover:bg-surface-1/80",
+          )}
+        >
+          <span className="truncate">{buttonText}</span>
+        </button>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Open copy options"
+              disabled={isError}
+              className={cn(
+                "inline-flex w-[24px] items-center justify-center border-l border-line-structure transition-colors",
+                isError
+                  ? "cursor-not-allowed"
+                  : "cursor-pointer hover:bg-surface-1/80",
+              )}
+            >
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-[220px]">
+            <DropdownMenuItem
+              onClick={handleCopy}
+              disabled={isDisabled}
+              className="cursor-pointer"
+            >
+              <CopyIcon className="w-3.5 h-3.5 shrink-0" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="font-medium text-text-primary">Copy page</span>
+                <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                  Copy page as Markdown for LLMs
+                </span>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={getChatGPTUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleChatGPTClick}
+                className="cursor-pointer no-underline"
+              >
+                <IconChatGPT className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
+                    Open in ChatGPT
+                    <ExternalLink
+                      className="h-[1em] w-[1em] shrink-0"
+                      strokeWidth={1.7}
+                    />
+                  </span>
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                    Ask questions about this page
+                  </span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={getClaudeUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={handleClaudeClick}
+                className="cursor-pointer no-underline"
+              >
+                <IconClaude className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
+                    Open in Claude
+                    <ExternalLink
+                      className="h-[1em] w-[1em] shrink-0"
+                      strokeWidth={1.7}
+                    />
+                  </span>
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                    Ask questions about this page
+                  </span>
+                </div>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                href="/docs/docs-mcp"
+                onClick={() => {
+                  capture("copy_page", { type: "mcp" });
+                }}
+                target="_blank"
+                className="cursor-pointer no-underline"
+              >
+                <IconMCP className="w-3.5 h-3.5 shrink-0" />
+                <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                  <span className="flex gap-1 items-center font-medium text-text-primary">
+                    Install Docs MCP server
+                    <ExternalLink
+                      className="h-[1em] w-[1em] shrink-0"
+                      strokeWidth={1.7}
+                    />
+                  </span>
+                  <span className="text-[11px] text-text-tertiary leading-[1.3]">
+                    Add to Cursor, Claude Code, VS Code, etc
+                  </span>
+                </div>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
   );
 };
 
-export const MainContentWrapper = (props) => {
-  const router = useRouter();
-  const { frontMatter } = useConfig();
+export const MainContentWrapper = ({
+  children,
+  showCopyButton,
+}: {
+  children?: ReactNode;
+  /** Override the path-based copy button. Post pages render it in the header. */
+  showCopyButton?: boolean;
+}) => {
+  const pathname = usePathname();
   const cookbook = COOKBOOK_ROUTE_MAPPING.find(
-    (cookbook) => cookbook.path === router.pathname
+    (cookbook) => cookbook.path === pathname,
   );
 
-  const versionLabel = frontMatter.label;
-
-  const shouldShowCopyButton = pathsWithCopyAsMarkdownButton.some((prefix) =>
-    router.pathname.startsWith(prefix)
-  );
+  const shouldShowCopyButton =
+    showCopyButton ??
+    pathsWithCopyAsMarkdownButton.some((prefix) =>
+      (pathname ?? "").startsWith(prefix),
+    );
 
   return (
     <>
-      {(versionLabel || shouldShowCopyButton) && (
-        <div className="flex items-center gap-2 flex-wrap mt-5">
-          {versionLabel && (
-            <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-              {versionLabel}
-            </span>
-          )}
-          {shouldShowCopyButton && <CopyMarkdownButton key={router.pathname} />}
+      {shouldShowCopyButton && (
+        <div className="flex flex-wrap gap-2 items-center mt-5">
+          <CopyMarkdownButton key={pathname} />
         </div>
       )}
 
       {cookbook ? (
-        <NotebookBanner src={cookbook.ipynbPath} className="mb-4 mt-4" />
+        <NotebookBanner src={cookbook.ipynbPath} className="mt-4 mb-4" />
       ) : null}
 
-      {props.children}
-      {isCustomerStory(router.pathname) && <CustomerStoryCTA />}
+      {children}
       {!pathsWithoutFooterWidgets.some(
-        (path) =>
-          router.pathname === path || router.pathname.startsWith(path + "/")
+        (path) => pathname === path || (pathname ?? "").startsWith(path + "/"),
       ) ? (
         <div
-          className="flex flex-wrap items-center justify-between gap-6 pt-8 border-t dark:border-neutral-800"
+          className="flex flex-col gap-2 px-4 py-4 md:px-6 xl:px-8"
           id="docs-feedback"
         >
-          <DocsFeedback key={router.pathname} />
-          <DocsSupport />
+          <span className="text-sm font-medium">Was this page helpful?</span>
+          <div className="flex items-center justify-between gap-2">
+            <DocsFeedback key={pathname} showLabel={false} />
+            <DocsSupport />
+          </div>
         </div>
       ) : null}
-      <Background />
     </>
   );
 };
 
 export const DocsSupport = () => {
   return (
-    <div className="flex items-center gap-3">
-      <Button variant="outline" size="sm" asChild>
-        <a href="/support">
-          <span>Support</span>
-          <LifeBuoy className="h-4 w-4 ml-2" />
-        </a>
+    <div className="flex gap-3 items-center">
+      <Button
+        variant="secondary"
+        size="small"
+        href="/support"
+        icon={<LifeBuoy className="w-3.25 h-3.25" />}
+      >
+        Support
       </Button>
     </div>
   );
 };
 
-export const DocsFeedback = () => {
-  const router = useRouter();
+export const DocsFeedback = ({ showLabel = true }: { showLabel?: boolean }) => {
+  const pathname = usePathname();
+  const capture = usePostHogClientCapture();
   const [selected, setSelected] = useState<
     "positive" | "negative" | "submitted" | null
   >(null);
@@ -229,10 +426,15 @@ export const DocsFeedback = () => {
     setFeedbackComment("");
     setSubmitting(true);
 
+    capture("docs_feedback", {
+      rating: newSelection,
+      page: pathname ?? "",
+    });
+
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
-        page: router.pathname,
+        page: pathname ?? "",
         feedback: newSelection,
       }),
     })
@@ -249,10 +451,15 @@ export const DocsFeedback = () => {
   const handleFeedbackCommentSubmit = () => {
     setCommentSubmitting(true);
 
+    capture("docs_feedback_comment", {
+      rating: selected,
+      page: pathname ?? "",
+    });
+
     fetch("/api/feedback", {
       method: "POST",
       body: JSON.stringify({
-        page: router.pathname,
+        page: pathname ?? "",
         feedback: selected,
         comment: feedbackComment,
       }),
@@ -270,26 +477,28 @@ export const DocsFeedback = () => {
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-medium">Was this page helpful?</span>
+    <div className="flex gap-2 items-center">
+      {showLabel && (
+        <span className="text-sm font-medium">Was this page helpful?</span>
+      )}
       <div className="flex gap-2">
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           onClick={() => handleFeedbackSelection("positive")}
           disabled={submitting}
+          icon={<ThumbsUp className="w-3.25 h-3.25" />}
         >
-          <ThumbsUp className="h-4 w-4 text-green-600" />
-          <span className="sr-only">Yes</span>
+          Good
         </Button>
         <Button
-          variant="outline"
-          size="sm"
+          variant="secondary"
+          size="small"
           onClick={() => handleFeedbackSelection("negative")}
           disabled={submitting}
+          icon={<ThumbsDown className="w-3.25 h-3.25" />}
         >
-          <ThumbsDown className="h-4 w-4 text-red-600" />
-          <span className="sr-only">No</span>
+          Bad
         </Button>
       </div>
 
@@ -307,8 +516,8 @@ export const DocsFeedback = () => {
         <DialogContent className="max-w-lg">
           {selected === "submitted" ? (
             // Thank you view
-            <div className="flex flex-col gap-4 text-center items-center py-4">
-              <ThumbsUp className="h-12 w-12 text-green-500" />
+            <div className="flex flex-col gap-4 items-center py-4 text-center">
+              <ThumbsUp className="w-12 h-12 text-green-500" />
               <h4 className="text-lg font-semibold">
                 Thank you for your feedback!
               </h4>
@@ -331,9 +540,9 @@ export const DocsFeedback = () => {
             // Positive feedback follow-up
             <div className="flex flex-col gap-6">
               <div className="flex gap-4 items-start">
-                <ThumbsUp className="h-8 w-8 text-green-500 mt-1" />
+                <ThumbsUp className="mt-1 w-8 h-8 text-green-500" />
                 <div>
-                  <h4 className="text-lg font-semibold mb-2">
+                  <h4 className="mb-2 text-lg font-semibold">
                     What was most helpful?
                   </h4>
                   <p className="text-sm text-muted-foreground">

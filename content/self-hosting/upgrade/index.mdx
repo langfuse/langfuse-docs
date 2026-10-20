@@ -1,0 +1,74 @@
+---
+title: How to upgrade a self-hosted Langfuse deployment
+description: Use this guide to keep your Langfuse deployment up to date. Updates between minor/patch versions can be applied automatically. For major versions, please refer to the migration guides.
+label: "Version: v4"
+sidebarTitle: "How to Upgrade"
+---
+
+# Upgrading a Self-Hosted Langfuse Deployment
+
+Langfuse evolves quickly ([changelog](/changelog)) and keeping your deployment up to date is key to benefit from security, performance, and feature updates.
+
+The Langfuse versioning and upgrade process is optimized for minimal complexity and disruption. If you ever experience any issues, please create an [issue on GitHub](/issues) or contact the maintainers ([support](/support)).
+
+## How to upgrade
+
+<Callout type="info">
+
+It is recommended to be familiar with our [versioning](/self-hosting/upgrade/versioning) policy before upgrading existing deployments.
+
+</Callout>
+
+### Minor/Patch Versions
+
+Updates within a major version are designed to be non-disruptive and are automatically applied. On start of the application, all migrations are automatically applied to the databases.
+
+You can automatically use the latest version of a major release by using `langfuse/langfuse:4` and `langfuse/langfuse-worker:4` as the image tags in your deployment.
+
+To update deployments, follow the update section in our deployment guides:
+
+- [Local](/self-hosting/deployment/docker-compose#how-to-upgrade)
+- [VM](/self-hosting/deployment/docker-compose#how-to-upgrade)
+- [Docker](/self-hosting/deployment/docker-compose#how-to-upgrade)
+- [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm#how-to-upgrade)
+
+### Major Versions
+
+If you upgrade between major versions, please follow our migration guides:
+
+- [v3.x.x to v4.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4)
+- [v2.x.x to v3.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v2-to-v3)
+- [v1.x.x to v2.x.x](/self-hosting/upgrade/upgrade-guides/upgrade-v1-to-v2)
+
+<Callout type="info">
+
+The [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm) is versioned independently of the Langfuse server and has its own major versions. If you run the chart with bundled data stores, [upgrade the chart from v1 to v2](/self-hosting/deployment/kubernetes-helm#chart-v1-to-v2) before you upgrade Langfuse to v4: the v1 chart cannot bring its bundled ClickHouse to a v4-compatible version.
+
+</Callout>
+
+### SDK compatibility
+
+Python SDK v5 and JS/TS SDK v6 require Langfuse v4.59.0 or later. Upgrade your deployment before you upgrade the SDKs, then follow the [Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5) and [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6) migration guides. See the [feature availability matrix](/self-hosting/upgrade/versioning#sdk-server) for which SDK versions work with which server versions.
+
+## Release Notes
+
+import SelfHostUpdateSignup from "@/components-mdx/self-host-update-signup.mdx";
+
+<SelfHostUpdateSignup />
+
+You can also watch the [GitHub releases](https://github.com/langfuse/langfuse/releases) for information about the changes in each version.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/github-subscribe-releases.mp4"
+  aspectRatio={923 / 516}
+  gifStyle
+  className="max-w-md block"
+/>
+
+<span>_Watch the repository on GitHub to get notified about new releases_</span>
+
+## Support
+
+If you experience any issues, please create an [issue on GitHub](/issues) or consider other [support options](/support) as part of our Enterprise offering.
+
+Alternatively, you may consider using [Langfuse Cloud](/docs/deployment/cloud), which is a fully managed version of Langfuse. Learn more about its [security and privacy](/security).

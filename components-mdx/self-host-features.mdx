@@ -3,6 +3,7 @@ import {
   Shield,
   Network,
   Users,
+  Bot,
   Brush,
   Workflow,
   UserCog,
@@ -10,11 +11,11 @@ import {
   Mail,
   ServerCog,
   Activity,
+  Code,
   Eye,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
-
-import { Cards } from "nextra/components";
 
 <Cards num={3}>
   <Cards.Card
@@ -36,6 +37,18 @@ import { Cards } from "nextra/components";
     arrow
   />
   <Cards.Card
+    icon={<Code size="24" />}
+    title="Code evaluators"
+    href="/self-hosting/configuration/code-evaluators"
+    arrow
+  />
+  <Cards.Card
+    icon={<Bot size="24" />}
+    title="Halo"
+    href="/self-hosting/configuration/halo"
+    arrow
+  />
+  <Cards.Card
     icon={<Route size="24" />}
     title="Custom Base Path"
     href="/self-hosting/configuration/custom-base-path"
@@ -54,6 +67,12 @@ import { Cards } from "nextra/components";
     arrow
   />
   <Cards.Card
+    icon={<ShieldCheck size="24" />}
+    title="Data Masking"
+    href="/self-hosting/security/data-masking"
+    arrow
+  />
+  <Cards.Card
     icon={<Network size="24" />}
     title="Networking"
     href="/self-hosting/security/networking"
@@ -67,8 +86,8 @@ import { Cards } from "nextra/components";
   />
   <Cards.Card
     icon={<ServerCog size="24" />}
-    title="Organization Management API (EE)"
-    href="/self-hosting/administration/organization-management-api"
+    title="Instance Management API (EE)"
+    href="/self-hosting/administration/instance-management-api"
     arrow
   />
   <Cards.Card

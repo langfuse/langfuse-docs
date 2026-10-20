@@ -1,17 +1,12 @@
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import {
-  convertToModelMessages,
-  streamText,
-  UIMessage,
-  experimental_createMCPClient as createMCPClient,
-  MCPTransport,
-  stepCountIs,
-} from "ai";
+import { streamText, UIMessage, stepCountIs } from "ai";
+import { createMCPClient } from "@ai-sdk/mcp";
 import {
   observe,
+  propagateAttributes,
   startActiveObservation,
   updateActiveObservation,
-  updateActiveTrace,
+  setActiveTraceIO,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { LangfuseClient } from "@langfuse/client";
@@ -39,95 +34,125 @@ export const handler = async (req: Request) => {
   }: { messages: UIMessage[]; chatId: string; userId: string } =
     await req.json();
 
-  // Set session id and user id on active trace
   const inputText = messages[messages.length - 1].parts.find(
     (part) => part.type === "text",
   )?.text;
 
-  updateActiveObservation({ input: inputText }, { asType: "generation" });
-
-  updateActiveTrace({
-    name: "QA-Chatbot",
-    sessionId: chatId,
-    userId,
-    input: inputText,
-  });
-
-  // Get prompt from Langfuse
-  const prompt = await tracedGetPrompt("langfuse-docs-assistant-text");
-
-  // Initialize MCP client using Streamable HTTP transport (works with our MCP server)
-  const mcpClient = await startActiveObservation(
-    "create-mcp-client",
+  return propagateAttributes(
+    {
+      traceName: "QA-Chatbot",
+      tags: ["qa-chatbot"],
+      sessionId: chatId,
+      userId,
+    },
     async () => {
-      const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
+      updateActiveObservation({ input: inputText }, { asType: "agent" });
+      setActiveTraceIO({ input: inputText });
 
-      return createMCPClient({
-        transport: new StreamableHTTPClientTransport(mcpUrl, {
-          sessionId: `qa-chatbot-${crypto.randomUUID()}`,
-        }) as MCPTransport,
+      const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
+        type: "chat",
+      });
+
+      const reasoningSummary = prompt.config.reasoningSummary as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const textVerbosity = prompt.config.textVerbosity as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+      const reasoningEffort = prompt.config.reasoningEffort as
+        | "low"
+        | "medium"
+        | "high"
+        | undefined;
+
+      const chatHistory = messages.map((msg) => ({
+        role: msg.role,
+        content: msg.parts
+          .filter((part) => part.type === "text")
+          .map((part) => part.text)
+          .join(""),
+      }));
+
+      const compiledPrompt = prompt.compile({}, { chat_history: chatHistory });
+      const systemPrompt = compiledPrompt
+        .filter((message) => message.role === "system")
+        .map((message) => message.content)
+        .join("\n\n");
+      const modelMessages = compiledPrompt.filter(
+        (message) => message.role !== "system",
+      );
+
+      const mcpClient = await startActiveObservation(
+        "create-mcp-client",
+        async () => {
+          const mcpUrl = new URL("https://langfuse.com/api/mcp", req.url);
+
+          return createMCPClient({
+            transport: new StreamableHTTPClientTransport(mcpUrl, {
+              sessionId: `qa-chatbot-${crypto.randomUUID()}`,
+            }),
+          });
+        },
+      );
+
+      const tools = await mcpClient.tools();
+
+      const result = streamText({
+        model: openai(String(prompt.config.model)),
+        providerOptions: {
+          openai: {
+            reasoningSummary,
+            textVerbosity,
+            reasoningEffort,
+          } satisfies OpenAIResponsesProviderOptions,
+        },
+        instructions: systemPrompt || undefined,
+        messages: modelMessages,
+        tools: tools as Parameters<typeof streamText>[0]["tools"],
+        stopWhen: stepCountIs(10),
+        runtimeContext: {
+          langfusePrompt: prompt,
+        },
+        telemetry: {
+          functionId: "qa-chatbot",
+          includeRuntimeContext: {
+            langfusePrompt: true,
+          },
+        },
+        onFinish: async (result) => {
+          await mcpClient.close();
+
+          const latestText = Array.isArray((result as any).content)
+            ? [...((result as any).content as Array<any>)]
+                .reverse()
+                .find((part: any) => part?.type === "text")?.text
+            : (result as any).content;
+
+          updateActiveObservation({ output: latestText }, { asType: "agent" });
+          setActiveTraceIO({ output: latestText });
+          trace.getActiveSpan()?.end();
+        },
+      });
+
+      after(async () => await flush());
+
+      return result.toUIMessageStreamResponse({
+        generateMessageId: () => getActiveTraceId(),
+        sendSources: true,
+        sendReasoning: true,
       });
     },
   );
-
-  // Discover all tools exposed by the MCP server
-  const tools = await mcpClient.tools();
-
-
-  const reasoningSummary = prompt.config
-    .reasoningSummary as 'low' | 'medium' | 'high' | undefined;
-  const textVerbosity = prompt.config
-    .textVerbosity as 'low' | 'medium' | 'high' | undefined;
-  const reasoningEffort = prompt.config
-    .reasoningEffort as 'low' | 'medium' | 'high' | undefined;
-
-  const result = streamText({
-    model: openai(String(prompt.config.model)),
-    providerOptions: {
-      openai: {
-        reasoningSummary,
-        textVerbosity,
-        reasoningEffort,
-      } satisfies OpenAIResponsesProviderOptions,
-    },
-    system: prompt.prompt,
-    messages: convertToModelMessages(messages),
-    tools,
-    stopWhen: stepCountIs(10),
-    experimental_telemetry: {
-      isEnabled: true,
-      metadata: { langfusePrompt: prompt.toJSON() },
-    },
-    onFinish: async (result) => {
-      await mcpClient.close();
-
-      const latestText = Array.isArray((result as any).content)
-        ? [...((result as any).content as Array<any>)]
-            .reverse()
-            .find((part: any) => part?.type === "text")?.text
-        : (result as any).content;
-
-      updateActiveObservation({ output: latestText }, { asType: "generation" });
-      updateActiveTrace({
-        output: latestText,
-      });
-      trace.getActiveSpan().end();
-    },
-  });
-
-  // Schedule flush after request is finished
-  after(async () => await flush());
-
-  return result.toUIMessageStreamResponse({
-    generateMessageId: () => getActiveTraceId(),
-    sendSources: true,
-    sendReasoning: true,
-  });
 };
 
 export const POST = observe(handler, {
   name: "handle-chatbot-message",
   endOnExit: false, // end after stream has finished
+  asType: "agent",
 });
 
 export const maxDuration = 30;

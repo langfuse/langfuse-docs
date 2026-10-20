@@ -1,88 +1,68 @@
-import { getPagesUnderRoute } from "nextra/context";
-import { type Page } from "nextra";
-import { Cards } from "nextra/components";
-import { MessageCircleQuestion } from "lucide-react";
-import Link from "next/link";
+import { faqSource } from "@/lib/source";
+import { DetailsLink } from "@/components/Details";
+import { FaqDetails } from "./FaqDetails";
+import { getFaqTags, isFaqArticle } from "@/lib/faq-tags";
 
-export const getFaqPages = () => {
-  return getPagesUnderRoute("/faq/all") as Array<Page & { frontMatter: any }>;
-};
+type FaqPage = ReturnType<typeof faqSource.getPages>[number];
+
+export const getFaqPages = () => faqSource.getPages();
 
 export const getFilteredFaqPages = (
-  faqPages: Array<Page & { frontMatter: any }>,
+  faqPages: FaqPage[],
   tags: string[],
-  limit: number | undefined = undefined
+  limit: number | undefined = undefined,
 ) => {
   return faqPages
-    .filter((page) => page.route !== "/faq/all")
+    .filter(isFaqArticle)
     .filter((page) => {
-      const faqTags = page.frontMatter?.tags || [];
+      const faqTags = getFaqTags(page);
       return faqTags.some((tag) => tags.includes(tag));
     })
-    .sort((a, b) =>
-      (a.frontMatter?.title || "").localeCompare(b.frontMatter?.title || "")
-    )
+    .sort((a, b) => (a.data.title ?? "").localeCompare(b.data.title ?? ""))
     .slice(0, limit);
 };
 
 export const FaqPreview = ({
   tags,
-  renderAsCards = false,
 }: {
   tags: string[];
-  renderAsCards?: boolean;
+  /** @deprecated All FAQ previews render as boxed rows. */
+  renderAsRows?: boolean;
 }) => {
   const faqPages = getFaqPages();
   const filteredFaqPages = getFilteredFaqPages(faqPages, tags);
-
-  return <FaqList pages={filteredFaqPages} renderAsCards={renderAsCards} />;
+  return <FaqList pages={filteredFaqPages} />;
 };
 
-export const FaqList = ({
+export const FaqList = ({ pages }: { pages: FaqPage[] }) => (
+  <FaqDetails>
+    <FaqLinks pages={pages} newTab anchors />
+  </FaqDetails>
+);
+
+const faqAnchorId = (url: string) => url.replace("/faq/all/", "");
+
+export const FaqLinks = ({
   pages,
-  renderAsCards = false,
+  newTab = false,
+  anchors = false,
 }: {
-  pages: Array<Page & { frontMatter: any }>;
-  renderAsCards?: boolean;
-}) => {
-  if (renderAsCards) {
-    return (
-      <Cards num={1}>
-        {pages.map((page) => (
-          <Cards.Card
-            href={page.route}
-            key={page.route}
-            title={page.meta?.title || page.frontMatter?.title || page.name}
-            icon={<MessageCircleQuestion />}
-            arrow
-          >
-            {""}
-          </Cards.Card>
-        ))}
-      </Cards>
-    );
-  }
-  return (
-    <>
-      <ul className="list-disc list pl-6 mt-5">
-        {pages.map((page) => (
-          <li
-            className="my-2"
-            id={page.route.replace("/faq/all/", "")}
-            key={page.route.replace("/faq/all/", "")}
-          >
-            <Link
-              key={page.route}
-              href={page.route}
-              className="_text-primary-600 _underline _decoration-from-font [text-underline-position:from-font]"
-            >
-              <span className="">
-                {page.meta?.title || page.frontMatter?.title || page.name}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-};
+  pages: FaqPage[];
+  /** Embedded doc previews open answers in a new tab; FAQ index listings stay in-tab. */
+  newTab?: boolean;
+  /** Restore `/faq/tag/<tag>#<slug>` anchors. Off on the index, where a page can appear under several tags. */
+  anchors?: boolean;
+}) => (
+  <>
+    {pages.map((page) => (
+      <DetailsLink
+        href={page.url}
+        id={anchors ? faqAnchorId(page.url) : undefined}
+        newTab={newTab}
+        key={page.url}
+      >
+        {page.data.title}
+      </DetailsLink>
+    ))}
+  </>
+);

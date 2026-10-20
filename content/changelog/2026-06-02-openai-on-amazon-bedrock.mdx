@@ -1,0 +1,32 @@
+---
+date: 2026-06-02
+title: Use OpenAI models on Amazon Bedrock
+description: Connect Bedrock-hosted OpenAI models to Langfuse LLM Connections with OpenAI Responses API support.
+author: tobiaswochinger
+canonical: /docs/administration/llm-connection
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Langfuse LLM Connections now support OpenAI-compatible Responses API endpoints. You can use OpenAI models hosted on Amazon Bedrock, including `openai.gpt-5.5` and `openai.gpt-5.4`, in the Langfuse Playground, LLM-as-a-Judge evaluators, and prompt experiments.
+
+Create an OpenAI LLM Connection, enable **Use Responses API**, add your Bedrock API key, configure the Bedrock Mantle endpoint for your AWS Region, and add the Bedrock model IDs you want to use.
+
+## Setup [#setup]
+
+In **Project Settings** > **LLM Connections**, add a new connection with:
+
+- **Provider**: OpenAI
+- **API Key**: your Amazon Bedrock API key
+- **Base URL**: `https://bedrock-mantle.<aws-region>.api.aws/openai/v1`
+- **Custom model names**: `openai.gpt-5.5`, `openai.gpt-5.4`, or another OpenAI model ID available in your Bedrock account
+- **Use Responses API**: enabled
+
+## Learn more [#learn-more]
+
+- [LLM Connections](/docs/administration/llm-connection)
+- [Amazon Bedrock API keys](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html)
+- [Inference using Responses API on Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html)
+- [OpenAI GPT-5.5 and GPT-5.4 models on Amazon Bedrock](https://aws.amazon.com/blogs/aws/get-started-with-openai-gpt-5-5-gpt-5-4-models-and-codex-on-amazon-bedrock/)

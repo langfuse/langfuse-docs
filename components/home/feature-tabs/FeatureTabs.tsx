@@ -4,15 +4,53 @@ import {
   useMemo,
   useEffect,
   useRef,
-  useState,
   useCallback,
   useReducer,
+  useState,
 } from "react";
-import { useRouter } from "next/router";
-import { TabButton } from "./TabButton";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Play, X } from "lucide-react";
 import { TabContent } from "./TabContent";
 import type { AutoAdvanceConfig, FeatureTabData } from "./types";
-import { Card, CardContent } from "@/components/ui/card";
+import { CornerBox } from "@/components/ui/corner-box";
+import { Button } from "@/components/ui/button";
+import { WalkthroughVideoIframe } from "@/components/watchOrBookDemo/WalkthroughVideoIframe";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
+import { cn } from "@/lib/utils";
+import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
+
+/** Soft ease-out (Emil Kowalski–style: calm deceleration, no snappy linear segments). */
+const CONTENT_EASE = [0.22, 1, 0.36, 1] as const;
+
+/** Quick ease-in for exit so the incoming panel reads sooner. */
+const CONTENT_EXIT_EASE = [0.4, 0, 1, 1] as const;
+
+const tabImageVariants = (reduceMotion: boolean) =>
+  reduceMotion
+    ? {
+        initial: { opacity: 0 },
+        animate: {
+          opacity: 1,
+          transition: { duration: 0.12, ease: "easeOut" as const },
+        },
+        exit: {
+          opacity: 0,
+          transition: { duration: 0.12, ease: "easeOut" as const },
+        },
+      }
+    : {
+        initial: { opacity: 0 },
+        animate: {
+          opacity: 1,
+          transition: { duration: 0.26, ease: CONTENT_EASE },
+        },
+        exit: {
+          opacity: 0,
+          transition: { duration: 0.14, ease: CONTENT_EXIT_EASE },
+        },
+      };
 
 export interface FeatureTabsProps {
   features: FeatureTabData[];
@@ -20,61 +58,46 @@ export interface FeatureTabsProps {
   autoAdvance?: AutoAdvanceConfig;
 }
 
-// State management with useReducer
 type TabState = {
-  previewTab: string | null;
   focusedIndex: number;
   isAutoAdvancePaused: boolean;
-  autoAdvanceProgress: number;
   isInViewport: boolean;
-  isAutoTransitioning: boolean;
-  isHovered: boolean;
 };
 
 type TabAction =
-  | { type: "SET_PREVIEW_TAB"; payload: string | null }
   | { type: "SET_FOCUSED_INDEX"; payload: number }
   | { type: "PAUSE_AUTO_ADVANCE" }
   | { type: "RESUME_AUTO_ADVANCE" }
-  | { type: "SET_AUTO_ADVANCE_PROGRESS"; payload: number }
-  | { type: "SET_IN_VIEWPORT"; payload: boolean }
-  | { type: "SET_AUTO_TRANSITIONING"; payload: boolean }
-  | { type: "SET_HOVERED"; payload: boolean }
-  | { type: "RESET_PROGRESS" };
+  | { type: "SET_IN_VIEWPORT"; payload: boolean };
+
+function assertNever(action: never): never {
+  throw new Error(`Unexpected tab action: ${String(action)}`);
+}
 
 const tabStateReducer = (state: TabState, action: TabAction): TabState => {
   switch (action.type) {
-    case "SET_PREVIEW_TAB":
-      return { ...state, previewTab: action.payload };
     case "SET_FOCUSED_INDEX":
       return { ...state, focusedIndex: action.payload };
     case "PAUSE_AUTO_ADVANCE":
-      return { ...state, isAutoAdvancePaused: true, autoAdvanceProgress: 0 };
+      return { ...state, isAutoAdvancePaused: true };
     case "RESUME_AUTO_ADVANCE":
       return { ...state, isAutoAdvancePaused: false };
-    case "SET_AUTO_ADVANCE_PROGRESS":
-      return { ...state, autoAdvanceProgress: action.payload };
     case "SET_IN_VIEWPORT":
       return { ...state, isInViewport: action.payload };
-    case "SET_AUTO_TRANSITIONING":
-      return { ...state, isAutoTransitioning: action.payload };
-    case "SET_HOVERED":
-      return { ...state, isHovered: action.payload };
-    case "RESET_PROGRESS":
-      return { ...state, autoAdvanceProgress: 0 };
     default:
-      return state;
+      return assertNever(action);
   }
 };
 
 const initialTabState: TabState = {
-  previewTab: null,
   focusedIndex: 0,
   isAutoAdvancePaused: false,
-  autoAdvanceProgress: 0,
   isInViewport: false,
-  isAutoTransitioning: false,
-  isHovered: false,
+};
+
+const DEFAULT_AUTO_ADVANCE: AutoAdvanceConfig = {
+  enabled: true,
+  intervalMs: 5000,
 };
 
 export const FeatureTabs = ({
@@ -82,29 +105,36 @@ export const FeatureTabs = ({
   defaultTab = "observability",
   autoAdvance,
 }: FeatureTabsProps) => {
-  // Default auto-advance configuration
-  const defaultAutoAdvance = autoAdvance || {
-    enabled: true,
-    intervalMs: 10000,
-  };
+  const defaultAutoAdvance = autoAdvance ?? DEFAULT_AUTO_ADVANCE;
 
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState(defaultTab);
+  const [isWatchingDemo, setIsWatchingDemo] = useState(false);
   const [state, dispatch] = useReducer(tabStateReducer, initialTabState);
+  const pathname = usePathname() ?? "/";
+  const capture = usePostHogClientCapture();
 
-  // Memoize activeTab computation to prevent unnecessary re-renders
-  const activeTab = useMemo(() => {
-    const tab = router.query.tab as string;
-    if (tab && features.some((f) => f.id === tab)) {
-      return tab;
-    }
-    return defaultTab;
-  }, [router.query.tab, features, defaultTab]);
-
-  const tabListRef = useRef<HTMLDivElement>(null);
   const tabListScrollRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const autoAdvanceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReducedMotion();
+  const isMd = useMinWidth(MD_MIN_WIDTH_QUERY);
+  const [observeRoot, setObserveRoot] = useState<HTMLDivElement | null>(null);
+  const isMountedRef = useRef(true);
+
+  const isAutoAdvancePausedRef = useRef(state.isAutoAdvancePaused);
+  const pausedBeforeWatchingRef = useRef(false);
+
+  useEffect(() => {
+    isAutoAdvancePausedRef.current = state.isAutoAdvancePaused;
+  }, [state.isAutoAdvancePaused]);
+
+  const setContainerNode = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    setObserveRoot(node);
+  }, []);
 
   // Update focused index when active tab changes
   useEffect(() => {
@@ -114,13 +144,12 @@ export const FeatureTabs = ({
     }
   }, [activeTab, features]);
 
-  // Viewport detection for auto-advance - Fixed intersection observer setup
+  // Viewport detection for auto-advance (re-attach if root node changes)
   useEffect(() => {
-    if (!containerRef.current) {
+    if (!observeRoot) {
       return;
     }
 
-    const element = containerRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
         dispatch({ type: "SET_IN_VIEWPORT", payload: entry.isIntersecting });
@@ -129,35 +158,122 @@ export const FeatureTabs = ({
         root: null,
         rootMargin: "50px",
         threshold: [0, 0.1, 0.25, 0.5],
-      }
+      },
     );
 
-    observer.observe(element);
+    observer.observe(observeRoot);
 
     return () => {
       observer.disconnect();
     };
+  }, [observeRoot]);
+
+  const clearAutoAdvanceTimer = useCallback(() => {
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
   }, []);
 
-  // Handle tab change and update URL query param
-  const handleTabChange = (tabId: string) => {
-    if (activeTab === tabId) return; // Prevent unnecessary transitions
+  const clearAllTimers = useCallback(() => {
+    clearAutoAdvanceTimer();
+  }, [clearAutoAdvanceTimer]);
 
-    // Pause auto-advance on manual interaction
-    dispatch({ type: "PAUSE_AUTO_ADVANCE" });
+  const advanceToNextTab = useCallback(() => {
+    if (!defaultAutoAdvance.enabled || isAutoAdvancePausedRef.current) {
+      return;
+    }
+
+    const currentIndex = features.findIndex((f) => f.id === activeTab);
+    const nextIndex = (currentIndex + 1) % features.length;
+
+    setActiveTab(features[nextIndex].id);
+  }, [features, activeTab, defaultAutoAdvance.enabled]);
+
+  const startAutoAdvance = useCallback(() => {
+    if (!defaultAutoAdvance.enabled || isAutoAdvancePausedRef.current) {
+      return;
+    }
+
     clearAutoAdvanceTimer();
 
-    // Update URL query param
-    const query = { ...router.query };
-    query.tab = tabId;
+    autoAdvanceTimerRef.current = setTimeout(() => {
+      if (!isAutoAdvancePausedRef.current) {
+        advanceToNextTab();
+      }
+    }, defaultAutoAdvance.intervalMs);
+  }, [
+    defaultAutoAdvance.enabled,
+    defaultAutoAdvance.intervalMs,
+    advanceToNextTab,
+    clearAutoAdvanceTimer,
+  ]);
 
-    router.replace({ pathname: router.pathname, query }, undefined, {
-      shallow: true,
+  const handleTabChange = useCallback(
+    (tabId: string) => {
+      if (activeTab === tabId && !isWatchingDemo) return;
+
+      dispatch({ type: "PAUSE_AUTO_ADVANCE" });
+      clearAllTimers();
+      setIsWatchingDemo(false);
+      setActiveTab(tabId);
+    },
+    [activeTab, clearAllTimers, isWatchingDemo],
+  );
+
+  const closeWatchDemo = useCallback(() => {
+    setIsWatchingDemo(false);
+    if (!pausedBeforeWatchingRef.current) {
+      dispatch({ type: "RESUME_AUTO_ADVANCE" });
+    }
+  }, []);
+
+  const handleWatchDemoToggle = useCallback(() => {
+    if (isWatchingDemo) {
+      closeWatchDemo();
+      return;
+    }
+
+    pausedBeforeWatchingRef.current = isAutoAdvancePausedRef.current;
+    dispatch({ type: "PAUSE_AUTO_ADVANCE" });
+    clearAllTimers();
+    setIsWatchingDemo(true);
+    capture("home:watch_demo_clicked", {
+      source: "home_feature_tabs",
+      path: pathname,
     });
-  };
+  }, [capture, clearAllTimers, closeWatchDemo, isWatchingDemo, pathname]);
+
+  useEffect(() => {
+    if (!isWatchingDemo) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      const root = containerRef.current;
+      const target = event.target;
+      if (root && target instanceof Node && !root.contains(target)) {
+        return;
+      }
+
+      event.preventDefault();
+      closeWatchDemo();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [closeWatchDemo, isWatchingDemo]);
 
   // Keyboard navigation
   const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (features.length === 0) {
+      return;
+    }
+
     const { key } = event;
     let newIndex = state.focusedIndex;
 
@@ -183,16 +299,19 @@ export const FeatureTabs = ({
       case "Enter":
       case " ":
         event.preventDefault();
-        handleTabChange(features[state.focusedIndex].id);
+        handleTabChange(features[state.focusedIndex]!.id);
         return;
       case "Escape":
-        // Accessibility: Allow users to pause auto-advance
         event.preventDefault();
+        if (isWatchingDemo) {
+          closeWatchDemo();
+          return;
+        }
         if (state.isAutoAdvancePaused) {
           dispatch({ type: "RESUME_AUTO_ADVANCE" });
         } else {
           dispatch({ type: "PAUSE_AUTO_ADVANCE" });
-          clearAutoAdvanceTimer();
+          clearAllTimers();
         }
         return;
       default:
@@ -201,6 +320,7 @@ export const FeatureTabs = ({
 
     dispatch({ type: "SET_FOCUSED_INDEX", payload: newIndex });
     tabRefs.current[newIndex]?.focus();
+    handleTabChange(features[newIndex]!.id);
   };
 
   // Scroll active tab into view (for mobile)
@@ -217,13 +337,11 @@ export const FeatureTabs = ({
           activeTabRect.left < tabListRect.left ||
           activeTabRect.right > tabListRect.right
         ) {
-          // Calculate the scroll position needed
           const scrollLeft =
             activeTabButton.offsetLeft -
             tabList.clientWidth / 2 +
             activeTabButton.clientWidth / 2;
 
-          // Smooth scroll the container only (not the viewport)
           tabList.scrollTo({
             left: scrollLeft,
             behavior: "smooth",
@@ -233,101 +351,13 @@ export const FeatureTabs = ({
     }
   }, [state.focusedIndex]);
 
-  // Simplified timer management
-  const clearAutoAdvanceTimer = useCallback(() => {
-    if (autoAdvanceTimerRef.current) {
-      clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-  }, []);
-
-  // Simplified auto-advance functionality
-  const advanceToNextTab = useCallback(() => {
-    if (!defaultAutoAdvance?.enabled || state.isAutoAdvancePaused) {
-      return;
-    }
-
-    const currentIndex = features.findIndex((f) => f.id === activeTab);
-    const nextIndex = (currentIndex + 1) % features.length;
-    const nextTab = features[nextIndex];
-
-    dispatch({ type: "SET_AUTO_TRANSITIONING", payload: true });
-
-    // Small delay to allow fade out
-    setTimeout(() => {
-      dispatch({ type: "RESET_PROGRESS" });
-
-      // Update URL query param
-      const query = { ...router.query };
-      query.tab = nextTab.id;
-
-      router.replace({ pathname: router.pathname, query }, undefined, {
-        shallow: true,
-      });
-
-      // Allow fade in
-      setTimeout(() => {
-        dispatch({ type: "SET_AUTO_TRANSITIONING", payload: false });
-      }, 50);
-    }, 100);
-  }, [
-    features,
-    activeTab,
-    defaultAutoAdvance?.enabled,
-    state.isAutoAdvancePaused,
-    router,
-  ]);
-
-  // Simplified auto-advance with single timer and optimized progress updates
-  const startAutoAdvance = useCallback(() => {
-    if (
-      !defaultAutoAdvance?.enabled ||
-      state.isAutoAdvancePaused ||
-      state.isHovered
-    ) {
-      return;
-    }
-
-    clearAutoAdvanceTimer();
-    dispatch({ type: "RESET_PROGRESS" });
-
-    const startTime = Date.now();
-    const intervalMs = defaultAutoAdvance.intervalMs;
-
-    // Use a single timer with less frequent updates (every 100ms instead of 50ms)
-    const updateProgress = () => {
-      if (state.isHovered || state.isAutoAdvancePaused) {
-        return;
-      }
-
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min((elapsed / intervalMs) * 100, 100);
-      dispatch({ type: "SET_AUTO_ADVANCE_PROGRESS", payload: progress });
-
-      if (elapsed >= intervalMs) {
-        advanceToNextTab();
-      } else {
-        autoAdvanceTimerRef.current = setTimeout(updateProgress, 100);
-      }
-    };
-
-    autoAdvanceTimerRef.current = setTimeout(updateProgress, 100);
-  }, [
-    defaultAutoAdvance?.enabled,
-    defaultAutoAdvance?.intervalMs,
-    advanceToNextTab,
-    state.isAutoAdvancePaused,
-    state.isHovered,
-    clearAutoAdvanceTimer,
-  ]);
-
   // Simplified auto-advance effect with better cleanup
   useEffect(() => {
     if (
-      defaultAutoAdvance?.enabled &&
+      defaultAutoAdvance.enabled &&
       !state.isAutoAdvancePaused &&
-      state.isInViewport &&
-      !state.isHovered
+      !isWatchingDemo &&
+      state.isInViewport
     ) {
       startAutoAdvance();
     } else {
@@ -337,107 +367,233 @@ export const FeatureTabs = ({
     return clearAutoAdvanceTimer;
   }, [
     activeTab,
-    defaultAutoAdvance?.enabled,
+    defaultAutoAdvance.enabled,
     startAutoAdvance,
     state.isAutoAdvancePaused,
     state.isInViewport,
-    state.isHovered,
+    isWatchingDemo,
     clearAutoAdvanceTimer,
   ]);
 
-  const activeFeature = useMemo(() => {
-    const displayedTab = state.previewTab || activeTab;
-    return features.find((f) => f.id === displayedTab) || features[0];
-  }, [activeTab, state.previewTab, features]);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      clearAllTimers();
+    };
+  }, [clearAllTimers]);
+
+  const activeFeature = features.find((f) => f.id === activeTab) ?? features[0];
+
+  const activeIndex = features.findIndex((f) => f.id === activeTab);
+  const n = features.length;
+  const preloadNeighborIndices = useMemo(() => {
+    if (n < 2 || activeIndex < 0) {
+      return new Set<number>();
+    }
+    const prev = (activeIndex - 1 + n) % n;
+    const next = (activeIndex + 1) % n;
+    return new Set([prev, next]);
+  }, [n, activeIndex]);
 
   return (
-    <Card
-      ref={containerRef}
-      className="p-0 mt-0 bg-card border-radius-none overflow-hidden"
+    <div
+      ref={setContainerNode}
+      className="overflow-hidden p-0 mt-0 bg-card border-radius-none"
     >
-      <CardContent className="space-y-8 p-0 border-radius-none overflow-hidden">
-        <div className="w-full">
-          {/* Accessibility: Auto-advance status announcement */}
-          <div className="sr-only" aria-live="polite" aria-atomic="true">
-            {defaultAutoAdvance?.enabled && (
-              <span>
-                Auto-advance is{" "}
-                {state.isAutoAdvancePaused ? "paused" : "active"}. Press Escape
-                to {state.isAutoAdvancePaused ? "resume" : "pause"}{" "}
-                auto-advance.
-              </span>
-            )}
-          </div>
+      {/* Accessibility: announce pause/resume only, not every auto-advance */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {defaultAutoAdvance.enabled && (
+          <span>
+            Auto-advance is {state.isAutoAdvancePaused ? "paused" : "active"}.
+            Press Escape to {state.isAutoAdvancePaused ? "resume" : "pause"}{" "}
+            auto-advance.
+          </span>
+        )}
+      </div>
 
-          {/* Tab List */}
+      {/* Preload neighbor tab images on md+ only — on mobile this competed with LCP. */}
+      {isMd ? (
+        <CornerBox
+          aria-hidden="true"
+          className="overflow-hidden absolute pointer-events-none"
+          style={{ width: 1, height: 1, opacity: 0.01 }}
+        >
+          {features.map((feature, index) => {
+            if (!preloadNeighborIndices.has(index)) {
+              return null;
+            }
+            const isNext = index === (activeIndex + 1 + n) % n;
+            return (
+              <div
+                key={`preload-${feature.id}`}
+                className="relative"
+                style={{ width: 806, height: 410 }}
+              >
+                <Image
+                  src={feature.image.light}
+                  alt=""
+                  fill
+                  quality={100}
+                  sizes="806px"
+                  loading={isNext ? "eager" : "lazy"}
+                />
+              </div>
+            );
+          })}
+        </CornerBox>
+      ) : null}
+
+      {/* Clickable product-area names, then animated subtitle */}
+      <CornerBox className="px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
           <div
-            ref={tabListRef}
+            ref={tabListScrollRef}
             role="tablist"
-            aria-label="Feature navigation. Use arrow keys to navigate, Enter or Space to select, Escape to toggle auto-advance."
-            className="p-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
+            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:flex-none md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
             onKeyDown={handleKeyDown}
           >
-            <div
-              ref={tabListScrollRef}
-              className="flex flex-row flex-nowrap overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-0 px-4 -mx-4 sm:mx-0 sm:px-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {features.map((feature, index) => (
-                <TabButton
+            {features.map((feature, index) => {
+              const isActive = activeTab === feature.id && !isWatchingDemo;
+
+              return (
+                <span
                   key={feature.id}
-                  ref={(el) => (tabRefs.current[index] = el)}
-                  feature={feature}
-                  isActive={activeTab === feature.id}
-                  onClick={() => handleTabChange(feature.id)}
-                  onMouseEnter={() => {
-                    dispatch({ type: "SET_PREVIEW_TAB", payload: feature.id });
-                    dispatch({ type: "SET_HOVERED", payload: true });
-                  }}
-                  onMouseLeave={() => {
-                    dispatch({ type: "SET_PREVIEW_TAB", payload: null });
-                    dispatch({ type: "SET_HOVERED", payload: false });
-                  }}
-                  tabIndex={state.focusedIndex === index ? 0 : -1}
-                  className="snap-center"
-                />
-              ))}
-            </div>
+                  className="inline-flex items-center shrink-0"
+                >
+                  <button
+                    ref={(el) => {
+                      tabRefs.current[index] = el;
+                    }}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls="tabpanel-product-area"
+                    id={`tab-${feature.id}`}
+                    tabIndex={state.focusedIndex === index ? 0 : -1}
+                    onClick={() => handleTabChange(feature.id)}
+                    className={cn(
+                      "cursor-pointer whitespace-nowrap rounded-sm py-0.5 transition-colors duration-150",
+                      "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
+                      isActive
+                        ? "font-medium text-primary"
+                        : "font-normal text-text-tertiary hover:text-primary",
+                    )}
+                  >
+                    {feature.name}
+                  </button>
+                  {index < features.length - 1 && (
+                    <span aria-hidden className="px-2 text-text-tertiary">
+                      ·
+                    </span>
+                  )}
+                </span>
+              );
+            })}
           </div>
-
-          {/* Auto-advance progress indicator - always maintains height */}
-          {defaultAutoAdvance?.enabled && (
-            <div
-              className="w-full h-0.5 overflow-hidden border-b-0.5 border-solid border-border"
-              role="progressbar"
-              aria-label="Auto-advance progress"
-              aria-valuenow={state.autoAdvanceProgress}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-hidden={state.isAutoAdvancePaused || !state.isInViewport}
-            >
-              {!state.isAutoAdvancePaused && state.isInViewport ? (
-                <div
-                  className="h-full bg-primary/15 transition-all duration-100 ease-in-out rounded-lg"
-                  style={{ width: `${state.autoAdvanceProgress}%` }}
-                />
+          <Button
+            id="watch-demo-toggle"
+            type="button"
+            variant="secondary"
+            size="small"
+            icon={
+              isWatchingDemo ? (
+                <X size={12} strokeWidth={2} />
               ) : (
-                <div className="h-full bg-transparent" />
-              )}
-            </div>
-          )}
-
-          <div className="relative overflow-hidden">
-            <div
-              className={`${
-                state.isAutoTransitioning
-                  ? "transition-opacity duration-100 ease-in-out opacity-30"
-                  : "transition-opacity duration-200 ease-in-out opacity-100"
-              }`}
-            >
-              <TabContent feature={activeFeature} isActive={true} />
-            </div>
-          </div>
+                <Play size={12} strokeWidth={2} />
+              )
+            }
+            className="w-auto"
+            wrapperClassName="shrink-0 -mr-1 ml-auto"
+            aria-label={isWatchingDemo ? "Close demo" : "Watch demo"}
+            aria-pressed={isWatchingDemo}
+            aria-controls="tabpanel-product-area"
+            onClick={handleWatchDemoToggle}
+          >
+            {isWatchingDemo ? "Close demo" : "Watch demo"}
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+
+        <div className="relative mt-3 min-h-[1.125rem] overflow-hidden">
+          <AnimatePresence mode="wait" initial={false}>
+            {isWatchingDemo ? (
+              <motion.p
+                key="watch-demo"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12, ease: "easeOut" }}
+                className="text-xs leading-relaxed font-normal text-text-tertiary"
+              >
+                End-to-end walkthrough of the Langfuse platform.
+              </motion.p>
+            ) : (
+              activeFeature && (
+                <motion.p
+                  key={activeFeature.id}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.12, ease: "easeOut" }}
+                  className="text-xs leading-relaxed font-normal text-text-tertiary"
+                >
+                  {activeFeature.subtitle}
+                </motion.p>
+              )
+            )}
+          </AnimatePresence>
+        </div>
+      </CornerBox>
+
+      <CornerBox
+        className="p-4 -mt-px"
+        withStripes
+        role="tabpanel"
+        id="tabpanel-product-area"
+        aria-label={
+          isWatchingDemo ? "Langfuse platform walkthrough" : undefined
+        }
+        aria-labelledby={
+          isWatchingDemo
+            ? undefined
+            : activeFeature
+              ? `tab-${activeFeature.id}`
+              : undefined
+        }
+      >
+        <div
+          className={cn(
+            "relative w-full overflow-hidden custom-card-shadow",
+            isWatchingDemo ? "aspect-video" : "aspect-[2205/1291]",
+          )}
+        >
+          <AnimatePresence mode="sync" initial={false}>
+            {isWatchingDemo ? (
+              <motion.div
+                key="watch-demo"
+                variants={tabImageVariants(Boolean(reduceMotion))}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="w-full"
+              >
+                <WalkthroughVideoIframe className="w-full" />
+              </motion.div>
+            ) : activeFeature ? (
+              <motion.div
+                key={activeFeature.id}
+                variants={tabImageVariants(Boolean(reduceMotion))}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <TabContent feature={activeFeature} />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
+      </CornerBox>
+    </div>
   );
 };

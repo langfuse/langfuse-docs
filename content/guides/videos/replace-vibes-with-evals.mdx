@@ -1,0 +1,91 @@
+---
+title: "Replace Vibes With Evals: Build an Evaluation Pipeline"
+description: "Stop shipping AI features on gut feel. Use Langfuse to trace production, run error analysis, capture failures into a dataset, score them with evaluators, and measure every change with experiments before it ships."
+ogImage: /images/videos/replace-vibes-with-evals.jpg
+---
+
+# Replace Vibes With Evals: Build an Evaluation Pipeline
+
+Most teams test an AI feature by typing in a few questions, deciding the answers look fine, and clicking deploy. Shipping on vibes works right up until it doesn't — a language model can be confidently wrong, and eyeballing ten answers tells you nothing about the thousands of conversations happening in production.
+
+This walkthrough replaces vibes with something you can measure. Using a customer-support assistant for a fictional product called **Nimbus Cloud**, it builds a real evaluation pipeline around a live app: trace production, find the failures that matter, capture them into a dataset, score them automatically, and measure every change before it ships.
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/4ZT7GWEjFVk"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## Start from production traces [#start-from-traces]
+
+The walkthrough assumes [tracing](/docs/observability/get-started) is already set up, so every request shows up as a trace with the full story: what got retrieved from the docs, the prompt that was sent, the response, token counts, and latency — the whole pipeline in one view.
+
+[Monitoring](/docs/metrics/overview) does two jobs on top of that raw data: it tracks aggregate trends like cost, latency, and quality scores over time, and it surfaces the individual traces worth investigating right now.
+
+Here's the shift that takes you from reactive to systematic: **your production traffic is the best test set you'll ever have.** It's full of messy, real-world questions you never would have thought to write yourself.
+
+## Error analysis: name what went wrong [#error-analysis]
+
+Take one real failure. A user asked which regions Nimbus Cloud supports, and the agent confidently listed a region — `eu-west-3` — that doesn't exist. It even picked up a thumbs-down.
+
+That thumbs-down is **explicit [user feedback](/docs/observability/features/user-feedback)** — the clearest signal you get. There's also implicit feedback, like a user rephrasing a question or abandoning the chat. Both land in Langfuse as [scores](/docs/evaluation/evaluation-methods/scores-via-ui).
+
+Reading through traces like this and naming what went wrong is **error analysis**. For each failure, the real decision is whether it's a one-time prompt fix or a recurring pattern worth testing for. A hallucinated region is a pattern you never want to ship again — so capture it.
+
+## Capture failures into a dataset [#build-dataset]
+
+A [dataset](/docs/evaluation/experiments/datasets) is a collection of test cases you run your app against every time you make a change. Create one from the sidebar, then, whenever you find a trace where the app got something wrong, open it and add it to the dataset.
+
+Langfuse pulls in the original input automatically. You fill in the **expected output** — the answer you actually wanted, in this case the four real regions and nothing invented. That's a **reference answer**: a gold-standard response the judge can compare against later.
+
+Do this a few times and the dataset becomes a living benchmark of the exact cases your application needs to get right — one that mirrors real production traffic. That's how a failure stops being an incident and becomes a permanent regression test.
+
+## Score automatically with evaluators [#evaluators]
+
+Grading thousands of answers by hand doesn't scale, so you need automated judges. There are three ways to evaluate, and you'll use all of them:
+
+- **Reading outputs yourself** — where you always start, to build intuition for what "good" means.
+- **[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)** — deterministic checks like valid JSON or a length limit.
+- **[LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)** — for anything that needs understanding language, like whether an answer is actually correct.
+
+To set up an LLM judge, pick the dimension to measure (here, a managed evaluator for **correctness**) and the model that does the judging. Langfuse gives you the scoring rubric as an editable prompt. Then decide what it runs on: point it at **live observations** so production answers get scored automatically as they happen — sampling, say, 10% of traffic to keep costs sane — or run it against a controlled dataset in an experiment.
+
+Either way, the key step is **variable mapping**: you tell the judge which field is the question, which is the answer your app produced, and which is the correct answer to compare against. Because it compares against a known correct answer, this is a **reference-based** evaluator. If a value is buried in a nested JSON payload, point at it with a JSONPath expression; a live preview shows the fully filled-in prompt so you know the mapping is right.
+
+One caveat: an LLM judge isn't perfect. Calibrate it against a few human-labeled examples so you trust it's measuring what you think, and prefer simple pass/fail scores over a vague one-to-five scale.
+
+## Measure every change with an experiment [#experiments]
+
+To grade against the corrected answers in your dataset, run the evaluator as an [experiment](/docs/evaluation/experiments/data-model). Every experiment has the same anatomy: a **baseline** (your current production setup), the **dataset**, one **variable** you're changing, and the **outputs** you compare.
+
+Change just the prompt and keep everything else fixed. From the dataset, run the experiment: pick the new prompt, choose the dataset, attach the correctness evaluator, and map the variables. Langfuse runs the new version across every dataset item and scores each answer.
+
+Then compare both runs side by side. Read a few traces manually first — that's how you learn what "better" actually means for your app — and let the scores make it concrete.
+
+In the video, the new prompt lifts average correctness from around **0.65 to 0.90**. But one row regresses: the "What is the default query timeout?" question now answers 60 seconds instead of the correct 30. On vibes, that regression ships straight to users. With an experiment, you catch it before it does.
+
+## The full loop [#the-full-loop]
+
+That's the whole cycle:
+
+1. **Trace** what happens in production.
+2. Use **error analysis** to find the failures that matter.
+3. **Capture** them into a dataset.
+4. **Score** them automatically with evaluators.
+5. Run **experiments** so every change is measured before it ships.
+
+Production then feeds the cycle all over again, and your agent gets measurably better with real usage instead of drifting on guesswork. All of it is open source, and trace data is stored in ClickHouse under the hood, so it scales to billions of traces. You can also wire experiments into [CI/CD](/docs/evaluation/experiments/experiments-ci-cd) to catch regressions on every pull request.
+
+To go deeper on any single step:
+
+- [Evaluation overview](/docs/evaluation/overview) — all evaluation methods in Langfuse
+- [Datasets and experiments](/docs/evaluation/experiments/datasets)
+- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)
+- [Experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) — run evals alongside your pull requests
+- [Metrics and monitoring](/docs/metrics/overview) — track cost, latency, and quality over time
+- [Langfuse Academy](/academy) — a deeper course on evaluation

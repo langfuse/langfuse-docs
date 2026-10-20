@@ -1,0 +1,315 @@
+---
+title: Masking
+description: Configure masking to redact sensitive information from Langfuse SDK data and OpenTelemetry span attributes before they are sent to Langfuse.
+sidebarTitle: Masking
+---
+
+# Masking sensitive LLM data
+
+Masking gives you control over the [tracing](/docs/tracing/overview) data sent to Langfuse. Use masking functions to redact sensitive information before trace data leaves your application, for example to:
+
+1. Redact sensitive information from trace or observation inputs, outputs, and metadata.
+2. Transform OpenTelemetry span attributes before export.
+3. Implement fine-grained data filtering for compliance or privacy requirements.
+
+Learn more about Langfuse's data security and privacy measures concerning the stored data in our [security and compliance overview](/security).
+
+## Configure masking
+
+<LangTabs items={["Python SDK", "JS/TS SDK", "LangChain (JS/TS)"]}>
+<Tab title="Python SDK">
+
+The Python SDK supports two masking hooks. For new Python SDK setups, prefer `mask_otel_spans`.
+
+| Method            | Status      | When it runs                                                                                                                  | What it covers                                                                                                              |
+| ----------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `mask_otel_spans` | Recommended | At export stage, after Langfuse decides which OpenTelemetry spans this client should export and after Langfuse media handling | Raw OpenTelemetry span attributes from Langfuse SDK spans and third-party instrumentations exported by this Langfuse client |
+| `mask`            | Legacy      | Synchronously when Langfuse SDK attributes are created                                                                        | Data set through Langfuse SDK APIs such as `start_observation()` and `update()`                                             |
+
+Use `mask_otel_spans` to patch OpenTelemetry span attributes before the Langfuse client exports them. The hook receives read-only snapshots of one OpenTelemetry export batch and returns sparse patches for the spans that should change.
+
+```python
+from typing import Optional
+
+from langfuse import Langfuse
+from langfuse.types import (
+    MaskOtelSpansParams,
+    MaskOtelSpansResult,
+    OtelSpanPatch,
+)
+
+
+def mask_otel_spans(
+    *, params: MaskOtelSpansParams
+) -> Optional[MaskOtelSpansResult]:
+    patches = {}
+
+    for identifier, span in params.spans.items():
+        if span.instrumentation_scope_name == "openai":
+            patches[identifier] = OtelSpanPatch(
+                delete_attributes=(
+                    "gen_ai.prompt.0.content",
+                    "gen_ai.completion.0.content",
+                ),
+                set_attributes={"masking.applied": True},
+            )
+
+    return MaskOtelSpansResult(span_patches=patches)
+
+
+langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
+```
+
+### `mask_otel_spans` behavior
+
+`mask_otel_spans` follows the public Python SDK type contract:
+
+- It receives one OpenTelemetry export batch as `params.spans`. A batch is not guaranteed to contain a complete trace, request, or Langfuse observation tree.
+- Each key is an `OtelSpanIdentifier(trace_id, span_id)`. Reuse the identifier objects from `params.spans` when returning patches.
+- Each value is an `OtelSpanData` snapshot after `should_export_span` filtering and export-stage media handling. Its `attributes` and `resource_attributes` mappings are read-only.
+- Return `None` to leave the whole batch unchanged.
+- Return `MaskOtelSpansResult(span_patches=...)` to delete or replace attributes on selected spans.
+- Patches are sparse. Omit spans that do not need changes.
+- `OtelSpanPatch` deletes `delete_attributes` first and then applies `set_attributes`, so `set_attributes` wins when the same key appears in both.
+- `set_attributes` values must be valid OpenTelemetry attribute values: strings, booleans, integers, floats, or homogeneous sequences of those scalar types.
+- In Python SDK v5, metadata attributes (`langfuse.observation.metadata.<key>` and `langfuse.trace.metadata.<key>`) hold JSON-encoded values, for example `'"prod"'` for the string `prod`. Decode them with `json.loads()` and set replacements JSON-encoded, for example `json.dumps("REDACTED")`.
+- The hook can only change span attributes. It cannot change the span name, IDs, parent relationship, resource attributes, events, links, or instrumentation scope.
+- The hook affects only spans exported by this Langfuse client. If the same OpenTelemetry spans are sent to another exporter, that exporter receives its own unmodified copy.
+
+<Callout type="info">
+
+`mask_otel_spans` only affects spans that pass through the Langfuse Python SDK span processor and are exported by this Langfuse client. If you also send telemetry to another observability backend through a separate OpenTelemetry span processor or exporter, that backend receives its own unmodified copy of the spans. Configure masking separately for any non-Langfuse exporter.
+
+</Callout>
+
+<Callout type="warning">
+
+`mask_otel_spans` is synchronous. It usually runs on the OpenTelemetry batch span processor worker thread, so it should not block the main caller thread of your application. During `flush()` and shutdown it may run on the caller thread.
+
+Keep the function deterministic and fast. Network calls are possible, but slow masking backs up the OpenTelemetry export queue and delays span export. Avoid long-running work, unbounded retries, request-local state, the current active span, and async I/O inside the masking function.
+
+</Callout>
+
+If `mask_otel_spans` raises an exception or returns an invalid `MaskOtelSpansResult`, Langfuse drops the whole export batch. If an individual `OtelSpanPatch` is invalid, Langfuse drops only that span from the Langfuse export. Invalid returned attribute values delete only the affected attribute.
+
+### Legacy `mask` behavior
+
+The `mask` parameter is the legacy Python SDK masking hook. It runs synchronously when Langfuse SDK attributes are created and applies only to data set through Langfuse SDK APIs such as `start_observation()` and `update()`. It does not inspect final raw OpenTelemetry span attributes from third-party instrumentations.
+
+Use `mask` only when you specifically need to transform data at Langfuse SDK attribute creation time.
+
+```python
+from typing import Any
+
+from langfuse import Langfuse
+
+
+def masking_function(*, data: Any, **kwargs: Any) -> Any:
+    if isinstance(data, str) and data.startswith("SECRET_"):
+        return "REDACTED"
+
+    if isinstance(data, dict):
+        return {key: masking_function(data=value) for key, value in data.items()}
+
+    if isinstance(data, list):
+        return [masking_function(data=item) for item in data]
+
+    return data
+
+
+langfuse = Langfuse(mask=masking_function)
+```
+
+For new Python SDK masking setups, prefer `mask_otel_spans`.
+
+### Examples
+
+#### Redact credit card numbers with `mask_otel_spans`
+
+This example scans exported OpenTelemetry string attributes for credit card-like patterns and replaces matches before the span is exported to Langfuse.
+
+```python
+import re
+from typing import Optional
+
+from langfuse import Langfuse, observe
+from langfuse.types import (
+    MaskOtelSpansParams,
+    MaskOtelSpansResult,
+    OtelSpanPatch,
+)
+
+credit_card_pattern = re.compile(r"\b(?:\d[ -]*?){13,19}\b")
+
+
+def mask_otel_spans(
+    *, params: MaskOtelSpansParams
+) -> Optional[MaskOtelSpansResult]:
+    patches = {}
+
+    for identifier, span in params.spans.items():
+        replacements = {}
+
+        for key, value in span.attributes.items():
+            if isinstance(value, str):
+                masked_value = credit_card_pattern.sub(
+                    "[REDACTED CREDIT CARD]", value
+                )
+
+                if masked_value != value:
+                    replacements[key] = masked_value
+
+        if replacements:
+            patches[identifier] = OtelSpanPatch(set_attributes=replacements)
+
+    return MaskOtelSpansResult(span_patches=patches)
+
+
+langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
+
+
+@observe()
+def process_payment():
+    return "Customer paid with card number 4111 1111 1111 1111."
+
+
+result = process_payment()
+
+print(result)
+# Output: Customer paid with card number 4111 1111 1111 1111.
+
+# Flush spans in short-lived applications.
+langfuse.flush()
+```
+
+The function result printed in your application is unchanged. The exported span attributes sent to Langfuse contain the redacted value.
+
+#### Redact email addresses and phone numbers
+
+```python
+import re
+from typing import Optional
+
+from langfuse import Langfuse
+from langfuse.types import (
+    MaskOtelSpansParams,
+    MaskOtelSpansResult,
+    OtelSpanPatch,
+)
+
+email_pattern = re.compile(r"\b[\w.-]+?@[\w.-]+?\.\w+?\b")
+phone_pattern = re.compile(r"\b\d{3}[-. ]?\d{3}[-. ]?\d{4}\b")
+
+
+def mask_otel_spans(
+    *, params: MaskOtelSpansParams
+) -> Optional[MaskOtelSpansResult]:
+    patches = {}
+
+    for identifier, span in params.spans.items():
+        replacements = {}
+
+        for key, value in span.attributes.items():
+            if isinstance(value, str):
+                masked_value = email_pattern.sub("[REDACTED EMAIL]", value)
+                masked_value = phone_pattern.sub("[REDACTED PHONE]", masked_value)
+
+                if masked_value != value:
+                    replacements[key] = masked_value
+
+        if replacements:
+            patches[identifier] = OtelSpanPatch(set_attributes=replacements)
+
+    return MaskOtelSpansResult(span_patches=patches)
+
+
+langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
+```
+
+</Tab>
+<Tab title="JS/TS SDK">
+
+To prevent sensitive data from being sent to Langfuse, you can provide a `mask` function to the `LangfuseSpanProcessor`. This function will be applied to the `input`, `output`, and `metadata` of every observation.
+
+The function receives an object `{ data }`, where `data` is the stringified JSON of the attribute's value. It should return the masked data.
+
+```ts filename="instrumentation.ts" /mask:/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    const maskedData = data.replace(
+      /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g,
+      "***MASKED_CREDIT_CARD***",
+    );
+
+    return maskedData;
+  },
+});
+
+const sdk = new NodeSDK({
+  spanProcessors: [spanProcessor],
+});
+
+sdk.start();
+```
+
+See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
+
+</Tab>
+<Tab title="LangChain (JS/TS)">
+
+Masking is configured on the `LangfuseSpanProcessor` — spans created by the LangChain [CallbackHandler](/integrations/frameworks/langchain) flow through it automatically, so no LangChain-specific masking setup is needed:
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { CallbackHandler } from "@langfuse/langchain";
+
+const spanProcessor = new LangfuseSpanProcessor({
+  mask: ({ data }) => {
+    if (typeof data === "string" && data.startsWith("SECRET_")) {
+      return "REDACTED";
+    }
+
+    return data;
+  },
+});
+
+const sdk = new NodeSDK({ spanProcessors: [spanProcessor] });
+sdk.start();
+
+const handler = new CallbackHandler();
+```
+
+</Tab>
+</LangTabs>
+
+## Masking with OpenTelemetry
+
+In a pure OpenTelemetry tracing setup, mask sensitive span attributes before they reach Langfuse. You can apply masking in two places:
+
+- **In the application:** Avoid recording sensitive attributes where possible. Otherwise, use a language-specific or custom span processor or export layer to transform them before OTLP export. Choose this approach when sensitive data must not leave the application.
+- **In an OpenTelemetry Collector:** Route traces through an optional Collector and use the attributes, redaction, or transform processors to mask attributes centrally. The filter processor drops entire spans, so use it only when you intentionally want to remove spans. This approach is useful for applying a consistent policy across multiple services.
+
+```mermaid
+flowchart LR
+  App["Application (OpenTelemetry SDK)"] -->|"OTLP traces"| Collector["OpenTelemetry Collector<br/>(masking processors)"]
+  Collector -->|"OTLP/HTTP"| Langfuse["Langfuse"]
+```
+
+Collector-side masking happens after telemetry leaves the application. Deploy the Collector within the appropriate trust boundary and secure the connection between the application and Collector.
+
+See OpenTelemetry's guide to [handling sensitive data](https://opentelemetry.io/docs/security/handling-sensitive-data/) for common Collector processor patterns, and the [Langfuse OpenTelemetry integration guide](/integrations/native/opentelemetry) for export setup.
+
+## Related resources
+
+- [Data Retention](/docs/administration/data-retention) - Automatically delete traces, observations, scores, and media assets after a configured retention period.
+- [Data Deletion](/docs/administration/data-deletion) - Manually delete individual or batches of traces.
+
+## GitHub discussions
+
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+<GhDiscussionsPreview labels={["feat-data-masking"]} />

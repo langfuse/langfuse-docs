@@ -1,0 +1,129 @@
+---
+title: Roadmap
+description: Explore the current product focus areas for Langfuse.
+---
+
+# Langfuse roadmap
+
+Langfuse is [open source](/open-source), and we want to be transparent about where the project is going. This page summarizes the product areas we are currently investing in.
+
+<Callout type="info">
+  This roadmap is directional, not a commitment to ship individual features or
+  dates. Priorities may evolve as we learn from users and the community.
+</Callout>
+
+Each quarter, we host a Langfuse town hall to demo new features and discuss what's next. Watch the latest recording below or [subscribe to our event calendar](https://langfuse.com/events) for updates on the next one.
+
+<iframe
+  width="100%"
+  className="aspect-video rounded mt-5 max-w-md"
+  src="https://www.youtube-nocookie.com/embed/h2PvNRhDTcU?rel=0"
+  title="Langfuse Town Hall: V4 Data Model Upgrade, Faster Queries, New UI and Roadmap"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## 🚧 In progress and coming next [#roadmap]
+
+### New capabilities
+
+- **Langfuse Gateway**
+  - Provide a thin, bring-your-own-key gateway with virtual keys and access controls across Langfuse Cloud and self-hosted deployments.
+  - Connect requests directly to Langfuse tracing and cost tracking, with clear visibility into model usage and spend.
+- **Proactive issue detection**
+  - Develop Topics to identify recurring user intents, behaviors, and failure patterns across traces at scale.
+  - Surface clusters, outliers, and representative examples so teams can find issues without reviewing every trace.
+- **Agent transcripts**
+  - Extend a shared transcript representation across traces and sessions to make long-running agent interactions easier to read.
+  - Use transcripts as a foundation for Topics and other improvement workflows.
+- **In-app agent improvements**
+  - Help users complete workflows such as LLM-as-a-judge calibration with more capable sandbox tools.
+- **Multi-span, session, and trajectory evaluations**
+  - Evaluate complete agent interactions using the observations-first data model.
+- **Skill management**
+  - Manage and version agent skills, then trace how agents use them.
+- **Security and authentication improvements**
+  - Add granular permissions to API keys, including gateway-specific access.
+  - Support user-owned and service-account API keys.
+  - Add organization-level API keys that can write across multiple projects.
+  - Add OAuth authentication to the MCP server so it can respect user-level permissions.
+- **Organization-level dashboards**
+  - Provide an aggregated view of cost, quality, and other metrics across an organization's projects.
+- **Usage visibility and cost controls**
+  - Break down Langfuse usage by project, environment, and span name for organization admins.
+  - Control ingestion with filters, sampling, and usage limits.
+- **Custom trace viewers**
+  - Build and adapt trace viewers with coding agents.
+
+### Self-hosting improvements
+
+- Batch more S3 ingestion events to reduce cost.
+- Move ingestion work to Rust in stages to reduce latency and cost.
+- Extend [Hardening for Government](/self-hosting/configuration/hardening#hardening-for-government) with FIPS-compatible deployment support and hardened images.
+
+## ✅ Recently released [#releases]
+
+import { changelogSource } from "@/lib/source";
+import { Link } from "@/components/ui/link";
+
+export const ChangelogList = () => (
+  <ul className="list-disc list pl-6">
+    {changelogSource
+      .getPages()
+      .sort(
+        (a, b) =>
+          new Date(String(b.data.date || 0)).getTime() -
+          new Date(String(a.data.date || 0)).getTime(),
+      )
+      .slice(0, 10)
+      .map((page) => (
+        <li
+          className="my-2"
+          id={page.url.replace("/changelog/", "")}
+          key={page.url.replace("/changelog/", "")}
+        >
+          <Link href={page.url} variant="underline">
+            <span>{page.data.title}</span>
+          </Link>
+          <span className="text-primary/60 ml-2 hidden sm:inline">
+            {page.data.date
+              ? `(${new Date(String(page.data.date)).toLocaleDateString(
+                  "en-US",
+                  {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "UTC",
+                  },
+                )})`
+              : null}
+          </span>
+        </li>
+      ))}
+  </ul>
+);
+
+The 10 most recent [changelog](/changelog) updates:
+
+<ChangelogList />
+
+import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
+
+<Callout type="info">
+
+Subscribe to receive occasional email updates about new features.
+
+<ProductUpdateSignup source="roadmap" className="my-3 max-w-sm" />
+
+</Callout>
+
+## Shape the roadmap [#feedback]
+
+Your feedback helps us decide what to prioritize:
+
+- Suggest a [feature or improvement](/ideas), or vote on ideas from other users.
+- Report a [bug](/new-issue).
+- Discuss your use case with the community on [Discord](/discord).
+- Join a [community hour](/events) to talk with the Langfuse team.
