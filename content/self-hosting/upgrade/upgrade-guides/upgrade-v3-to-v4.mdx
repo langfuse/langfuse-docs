@@ -242,7 +242,7 @@ WHERE finished_at IS NULL
   AND (args->>'envGate') IS NULL;
 ```
 
-On the latest v3 release, the five `20260701_v4_step_*` rows stay pending by design: they are gated by `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` and only run after the upgrade, so they do not block it.
+On the latest v3 release, the five `20260701_v4_step_*` rows stay pending by design: steps 1–4 are gated by `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` (on by default in v4) and step 5 by `LANGFUSE_BACKGROUND_MIGRATION_V4_DROP_PID_TID_SORTING_TABLES` (off by default). Neither runs on v3 unless you set the flag, so they don't block the upgrade.
 
 **Take a database backup.**
 Snapshot or back up both PostgreSQL and ClickHouse immediately before the server upgrade. There is no automatic downgrade path back to v3 once the v4 schema migrations have been applied — going back requires a [manual schema rewind](#rollback-without-restore) or restoring this backup (see [rollback and safety](#rollback)).
