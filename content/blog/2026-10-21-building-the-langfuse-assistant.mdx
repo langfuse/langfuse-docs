@@ -68,6 +68,10 @@ When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#d
 
 Some of those fixes can be very straightforward. Agents kept asking to sort metrics by `totalCost_sum` when the tool expected `sum_totalCost`, so we [made the MCP adapter accept both](https://github.com/langfuse/langfuse/pull/15623). When dashboard creation failed validation, the error told the agent which field was wrong but not what it could use instead. We [added the allowed values and guidance on looking up the schema](https://github.com/langfuse/langfuse/pull/15630), so it had enough information to correct the call.
 
+When Halo became expensive to run, we used Langfuse to drill into its costs and found that prompt caching wasn't working as expected. Fixing it brought costs down enough to make running Halo with more capable models viable again. You can use the same approach to [find what's driving your own agent's costs and test ways to reduce them](/academy/experiments/cost-optimization).
+
+Reviewing Halo traces made the challenges of debugging multi-turn agents more tangible. That helped clarify the direction and priorities for UI improvements such as the [redesigned session view](/changelog/2026-10-13-redesigned-session-view).
+
 People have been trying to break or exploit Halo since we announced it, and those attempts still turn up regularly. Security shaped the design of both the agent and the sandbox from the start. These attempts reinforce why we keep strict boundaries around what the agent can access and what sandbox scripts can do. Some of those boundaries limit functionality, but they help keep the system secure and protect user data.
 
 ## The agent does not run in a sandbox
