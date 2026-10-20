@@ -20,7 +20,7 @@ You need a Langfuse account and project to use the Slack integration. Slack noti
 - [**Prompt notifications**](/docs/prompt-management/features/webhooks-slack-integrations): Get notified when prompt versions are created, updated, or deleted. Use this to review production prompt changes, coordinate releases, and audit prompt lifecycle events.
 - [**Alerts**](/docs/observability/features/alerts): Send threshold breach and recovery notifications for your Langfuse alerts to Slack. Use this to surface latency, cost, score, or quality changes before they affect users.
 
-## Get started
+## Get started [#get-started]
 
 <Steps>
 
@@ -75,7 +75,90 @@ Choose what Langfuse should send to Slack:
 
 </Steps>
 
-## FAQ
+## Self-hosted setup [#self-hosted-setup]
+
+Self-hosted Langfuse needs its own Slack app. The Langfuse Slack app serves Langfuse Cloud: its redirect URLs point at Langfuse Cloud hosts and its credentials are configured there, so a self-hosted deployment creates its own app. Set up the app once per deployment, then connect each project as described in [Get started](#get-started).
+
+<Steps>
+
+### Create a Slack app from the manifest
+
+Open [api.slack.com/apps](https://api.slack.com/apps), click **Create New App**, choose **From an app manifest**, and select your workspace. Paste the contents of [`app_manifest.json`](https://github.com/langfuse/langfuse/blob/main/web/src/features/slack/app_manifest.json) from the Langfuse repository, and change these fields before you create the app:
+
+- `oauth_config.redirect_urls`: replace the list with `https://<your-langfuse-host>/api/public/slack/oauth`. If you use a [custom base path](/self-hosting/configuration/custom-base-path), include it: `https://<your-langfuse-host>/<base-path>/api/public/slack/oauth`.
+- `display_information.name` and `features.bot_user.display_name`: use a name that identifies your deployment, for example `Langfuse (self-hosted)` or `Langfuse - <Company>`. Slack lists apps by name in app approval requests and app directories, so a second app named `Langfuse` is hard to tell apart from the Langfuse Cloud app.
+
+```json
+{
+  "display_information": {
+    "name": "Langfuse (self-hosted)"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Langfuse (self-hosted)"
+    }
+  },
+  "oauth_config": {
+    "redirect_urls": ["https://langfuse.example.com/api/public/slack/oauth"]
+  }
+}
+```
+
+Only the changed fields are shown. Keep the rest of the manifest as is: it already includes the four bot scopes listed in the [FAQ](#faq).
+
+### Configure environment variables on web and worker
+
+Set these variables on both `langfuse-web` and `langfuse-worker`, then restart both containers:
+
+- `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET`: from the app's **Basic Information** page in Slack.
+- `SLACK_STATE_SECRET`: any random string.
+
+```bash
+SLACK_CLIENT_ID=<client-id>
+SLACK_CLIENT_SECRET=<client-secret>
+# Generate with: openssl rand -base64 32 | tr -d "=+/" | cut -c1-32
+SLACK_STATE_SECRET=<random-string>
+```
+
+The web container runs the install flow, the channel selector, and the test message. The worker sends prompt notifications and alerts. With the variables on web only, connecting Slack and sending a test message succeed, but every notification fails. See [Environment variables](/self-hosting/configuration#slack) for the full reference.
+
+### Check NEXTAUTH_URL
+
+Langfuse builds the OAuth redirect URL from `NEXTAUTH_URL`, as `NEXTAUTH_URL` + `/api/public/slack/oauth`. Slack [requires HTTPS](https://docs.slack.dev/authentication/installing-with-oauth) for redirect URLs, so `NEXTAUTH_URL` must be the HTTPS URL that users open Langfuse on, and the resulting URL must match the redirect URL registered on your Slack app.
+
+The host does not need to be reachable from the internet. Slack redirects the user's browser to this URL and does not call it, so an internal hostname works as long as users' browsers can reach it.
+
+### Allow outbound HTTPS to Slack
+
+Both containers call the Slack API: the web container exchanges the OAuth code for a bot token and lists channels, and the worker posts notifications. Allow outbound HTTPS from `langfuse-web` and `langfuse-worker` to `slack.com`.
+
+### Connect your projects
+
+Follow [Get started](#get-started) in each project that should send notifications to Slack.
+
+</Steps>
+
+### Workspaces that require app approval
+
+If your Slack workspace [requires app approval](https://slack.com/help/articles/222386767-Manage-app-approval-for-your-workspace), a Workspace Owner or app manager must approve your app before the install completes. Until then, Slack stops the flow at "You've submitted a request for this app". On Enterprise plans, an [organization-level app policy](https://slack.com/help/articles/360038559694-Set-organization-level-policies-for-apps) turns on app approval for every workspace in the organization. Workspaces without app approval install the app immediately.
+
+To validate the rest of the setup while approval is pending, you can create a second app from the same manifest in a Slack workspace you administer and use its credentials temporarily.
+
+### Troubleshooting [#self-hosted-troubleshooting]
+
+**Connect Slack returns `{"message":"Internal server error"}`**
+
+The `SLACK_*` variables are missing on the web container, which logs `Install path handler failed`. Set the variables and restart `langfuse-web`.
+
+**Connecting Slack and the test message work, but no notifications arrive**
+
+The `SLACK_*` variables are missing on the worker, which logs `You must provide a valid clientId and clientSecret`. Set the variables and restart `langfuse-worker`. Then check the automation that sends the notification and re-enable it if needed: Langfuse can deactivate an automation after failed deliveries.
+
+**Slack shows `bad_redirect_uri`**
+
+The redirect URL Langfuse sends (`NEXTAUTH_URL` + `/api/public/slack/oauth`) does not match a redirect URL registered on your Slack app. Register the exact URL, including scheme, host, port, and base path.
+
+## FAQ [#faq]
 
 <FaqDetails>
 

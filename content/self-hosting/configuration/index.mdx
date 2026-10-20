@@ -139,6 +139,17 @@ Halo is available from `>=v4.28.0`. It stays hidden until `LANGFUSE_IN_APP_AGENT
 
 </div>
 
+## Slack integration [#slack]
+
+These variables are optional and only needed for the [Slack integration](/integrations/other/slack#self-hosted-setup). Configure them on both the web and worker containers: the web container runs the Slack OAuth flow and the channel selector, and the worker sends Slack notifications for prompt changes and alerts.
+
+| Variable              | Required / Default | Description                                                                                                                                                              |
+| --------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SLACK_CLIENT_ID`     | Required to enable | Client ID of your own Slack app, from the app's **Basic Information** page.                                                                                              |
+| `SLACK_CLIENT_SECRET` | Required to enable | Client secret of your own Slack app, from the app's **Basic Information** page.                                                                                          |
+| `SLACK_STATE_SECRET`  | Required to enable | Any random string. Used to [sign and verify the OAuth state](https://docs.slack.dev/tools/node-slack-sdk/oauth/#initialize-the-installer) during the Slack install flow. |
+| `SLACK_PAGE_SIZE`     | `1000`             | Number of channels requested per Slack API page when Langfuse lists channels. Maximum `1000`. The high default keeps the number of Slack API calls low.                  |
+
 ## Additional Features
 
 There are additional features that can be enabled and configured via environment variables.
