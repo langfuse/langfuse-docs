@@ -11,6 +11,7 @@ import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
 import { AssistantAccessDiagram } from "@/components/blog/AssistantAccessDiagram";
 import { SilentToolCallsDiagram } from "@/components/blog/SilentToolCallsDiagram";
 import { BackgroundRunDiagram } from "@/components/blog/BackgroundRunDiagram";
+import { AssistantArchitectureDiagram } from "@/components/blog/AssistantArchitectureDiagram";
 
 <BlogHeader
   title="How we built Langfuse Halo"
@@ -41,34 +42,9 @@ In June, we launched the first beta version of Halo: a [Mastra](https://mastra.a
 
 Here's the high-level architecture that we ended up with:
 
-```mermaid
-flowchart LR
-  B[Browser]
-
-  subgraph runs[Run management]
-    W[Langfuse web]
-    Q[(Redis queue)]
-    P[(Postgres<br/>Run state + event log)]
-    K[Langfuse worker<br/>Mastra agent loop]
-    W -->|Save run| P
-    W -->|Enqueue run ID| Q
-    Q -->|Pick up run| K
-    K -->|Save progress and results| P
-    P -.->|Poll new events| W
-  end
-
-  subgraph tools[Model and tools]
-    M[Claude on Bedrock]
-    MCP[Langfuse MCP server<br/>Project-scoped data access]
-    S[Optional Lambda MicroVM<br/>Files + scripts, no egress by default]
-  end
-
-  B -->|Start run or approve action| W
-  W -.->|Stream saved events over SSE| B
-  K <-->|Model calls| M
-  K -->|Temporary project key + approved tools| MCP
-  K -->|read, write, edit, bash| S
-```
+<div className="my-8">
+  <AssistantArchitectureDiagram />
+</div>
 
 Users can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when you return. MCP tools let Halo work with the user's project data. The optional sandbox lets Halo process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than you have, and actions that change data still need approval.
 
