@@ -122,9 +122,14 @@ SLACK_STATE_SECRET=<random-string>
 
 The web container runs the install flow, the channel selector, and the test message. The worker sends prompt notifications and alerts. With the variables on web only, connecting Slack and sending a test message succeed, but every notification fails. See [Environment variables](/self-hosting/configuration#slack) for the full reference.
 
-### Check NEXTAUTH_URL
+### Check NEXTAUTH_URL [#check-nextauth-url]
 
-Langfuse builds the OAuth redirect URL from `NEXTAUTH_URL`, as `NEXTAUTH_URL` + `/api/public/slack/oauth`. Slack [requires HTTPS](https://docs.slack.dev/authentication/installing-with-oauth) for redirect URLs, so `NEXTAUTH_URL` must be the HTTPS URL that users open Langfuse on, and the resulting URL must match the redirect URL registered on your Slack app.
+Langfuse builds the OAuth redirect URL from `NEXTAUTH_URL`: it keeps the origin and any base path, drops a trailing `/api/auth`, and appends `/api/public/slack/oauth`. Keep the `NEXTAUTH_URL` you already use for sign-in. Slack does not need a separate value.
+
+- Without a base path, `NEXTAUTH_URL=https://langfuse.example.com` gives the redirect URL `https://langfuse.example.com/api/public/slack/oauth`.
+- With a [custom base path](/self-hosting/configuration/custom-base-path), `NEXTAUTH_URL=https://example.com/langfuse/api/auth` gives the redirect URL `https://example.com/langfuse/api/public/slack/oauth`.
+
+Slack [requires HTTPS](https://docs.slack.dev/authentication/installing-with-oauth) for redirect URLs, so `NEXTAUTH_URL` must use `https://`, and the resulting URL must match a redirect URL registered on your Slack app.
 
 The host does not need to be reachable from the internet. Slack redirects the user's browser to this URL and does not call it, so an internal hostname works as long as users' browsers can reach it.
 
@@ -156,7 +161,7 @@ The `SLACK_*` variables are missing on the worker, which logs `You must provide 
 
 **Slack shows `bad_redirect_uri`**
 
-The redirect URL Langfuse sends (`NEXTAUTH_URL` + `/api/public/slack/oauth`) does not match a redirect URL registered on your Slack app. Register the exact URL, including scheme, host, port, and base path.
+The redirect URL Langfuse sends does not match a redirect URL registered on your Slack app. Work out the URL from `NEXTAUTH_URL` as described in [Check NEXTAUTH_URL](#check-nextauth-url) and register it exactly, including scheme, host, port, and base path.
 
 ## FAQ [#faq]
 
