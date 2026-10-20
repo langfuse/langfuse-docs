@@ -459,6 +459,14 @@ Halo turns and Ask AI completions then appear as traces in that project, tagged 
   project can read that data.
 </Callout>
 
+### Conversation retention [#conversation-retention]
+
+Halo conversations follow the project's [data retention policy](/docs/administration/data-retention#halo-conversations). Automatic conversation retention requires an Enterprise license and a configured project retention period.
+
+The worker's conversation retention cleaner is enabled by default and runs independently of Halo enablement and ingestion retention. Setting `LANGFUSE_IN_APP_AGENT_ENABLED=false` or `QUEUE_CONSUMER_DATA_RETENTION_QUEUE_IS_ENABLED=false` does not pause it. To pause conversation retention, set `LANGFUSE_IN_APP_AGENT_RETENTION_CLEANER_ENABLED=false` on every worker.
+
+Conversations with unfinished runs are excluded until those runs finish or are reconciled. Keep `LANGFUSE_IN_APP_AGENT_INTEGRITY_RUNNER_ENABLED` unset or `true` on at least one worker, including after disabling Halo. This runner reconciles stale runs without executing agent work. Cleanup also waits until run-specific MCP API keys have been revoked before deleting conversations and their runs and events.
+
 ### Full configuration reference
 
 See [Halo environment variables](/self-hosting/configuration#langfuse-assistant) for defaults, limits, and optional settings.
