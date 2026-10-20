@@ -1,7 +1,7 @@
 ---
 title: "How we built Langfuse Halo"
 date: 2026/10/21
-description: "How we built Langfuse Halo on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
+description: "How we built Langfuse Halo, our powerful in-product agent, on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
 tag: engineering
 author: Ben
 ---
@@ -15,12 +15,12 @@ import { AssistantArchitectureDiagram } from "@/components/blog/AssistantArchite
 
 <BlogHeader
   title="How we built Langfuse Halo"
-  description="How we built Langfuse Halo on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
+  description="How we built Langfuse Halo, our powerful in-product agent, on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
   authors={["lotteverheyden", "benbachem"]}
   date="October 21, 2026"
 />
 
-In June, we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/langfuse-assistant). You can ask it to interpret your traces, build a dashboard or dataset, or help set up evals without leaving the Langfuse UI.
+In June, we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/halo). You can ask it to interpret your traces, build a dashboard or dataset, or help set up evals without leaving the Langfuse UI.
 
 It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-product agent of our own. Users have been using our [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli), extensively with their own agents, now we wanted to bring those capabilities into Langfuse itself.
 
@@ -50,7 +50,7 @@ Users can ask Halo to investigate something, close the tab, and come back to its
 
 ## Reusing the MCP server and skill
 
-We didn't build a separate data-access layer for Halo. It uses our public MCP servers, the same ones you can connect to, for all customer-data access. Beyond MCP, Halo gets sandbox tools similar to those in coding agents, plus UI-specific tools such as proposing navigation to another page. We also give Halo the user's name, time zone, browser languages, and current URL through the system prompt. By relying on MCP and tools, we can control which tools Halo gets to call without having to secure arbitrary network requests.
+Halo accesses project data through our public MCP server. In addition, Halo gets sandbox tools similar to those in coding agents, plus UI-specific tools such as proposing navigation to another page. We also give Halo the user's name, time zone, browser languages, and current URL through the system prompt. By relying on MCP and tools, we can control which tools Halo gets to call without having to secure arbitrary network requests.
 
 For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions in the in-app agent's code rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, we don't expose the corresponding tool to the agent at all.
 
