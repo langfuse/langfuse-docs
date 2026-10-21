@@ -28,10 +28,12 @@ The Langfuse SDKs are the recommended way to create [custom observations and tra
   [OpenTelemetry](/integrations/native/opentelemetry), either directly or with an
   [auto-instrumentation
   library](/integrations/native/opentelemetry#instrumentation-libraries). On
-  Langfuse Cloud, `POST /api/public/ingestion` stops accepting everything except
-  scores on November 16, 2026. See the [migration
-  guide](/integrations/native/opentelemetry/migration-to-v4) to move a custom
-  integration to v4.
+  Langfuse Cloud, organizations created on or after October 22, 2026 can send
+  only scores to `POST /api/public/ingestion`. Organizations created earlier
+  keep legacy trace writes until November 16, 2026. New organizations use
+  Python SDK v4 or later, JS/TS SDK v5 or later, or OpenTelemetry. See the
+  [migration
+  guide](/integrations/native/opentelemetry/migration-to-v4#new-organizations).
 </Callout>
 
 **Key benefits**

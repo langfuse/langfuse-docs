@@ -21,6 +21,8 @@ For existing projects, complete the applicable steps below.
 
 Move off legacy ingestion before the v4 cutover on <V4CutoverDate /> (Langfuse Cloud; self-hosted deployments control their own timeline, see [step 3](#rollout)). Deprecated SDKs can delay data by up to 15 minutes.
 
+Langfuse Cloud organizations created on or after October 22, 2026 cannot write traces through legacy ingestion. Use Python SDK v4 or later, JS/TS SDK v5 or later, or the OpenTelemetry endpoint from the start. `POST /api/public/ingestion` accepts only `score-create` events for those organizations: other event types in the batch are rejected with status `400`, and the response stays `207`. `POST /api/public/traces`, `POST /api/public/events`, and `POST` and `PATCH` `/api/public/spans` and `/api/public/generations` return `404`. Organizations created earlier keep legacy trace writes until <V4CutoverDate />. Legacy reads are not affected by October 22, 2026. Error text is in [Migrate custom ingestion to Langfuse v4](/integrations/native/opentelemetry/migration-to-v4#new-organizations).
+
 | Your setup                                                  | Do this                                                                                                  |
 | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | Python SDK below 4.7.0                                      | [Upgrade the Python SDK](/docs/observability/sdk/upgrade-path) to 4.7.0 or later.                        |

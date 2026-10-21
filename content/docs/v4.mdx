@@ -57,6 +57,7 @@ Langfuse Cloud becomes v4-only on <V4CutoverDate />. Complete every action detec
 - Organizations created on or after April 14, 2026, 14:00 UTC run v4 by default and do not see a toggle.
 - Organizations created before that date can switch the **Langfuse v4 preview** toggle (bottom-left in the UI) on and off until Langfuse Cloud becomes v4-only on <V4CutoverDate />.
 - Cloud projects created on or after May 20, 2026 are locked to the "enriched observations" export source; new legacy export integrations cannot be created since June 22, 2026.
+- Organizations created on or after October 22, 2026 cannot write traces through legacy ingestion. `POST /api/public/ingestion` accepts only `score-create` events, and the legacy trace, span, generation, and event write endpoints return `404`. Organizations created earlier keep those writes until <V4CutoverDate />. Legacy reads are not affected by October 22, 2026. See [Migrate custom ingestion to Langfuse v4](/integrations/native/opentelemetry/migration-to-v4#new-organizations).
 
 Please note that you must migrate your projects to v4 before the cutover on <V4CutoverDate />.
 

@@ -4,9 +4,30 @@ sidebarTitle: Migrate ingestion to v4
 description: Move custom Langfuse tracing from the legacy ingestion API or an existing OpenTelemetry pipeline to the observations-first v4 format.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Migrate custom ingestion to Langfuse v4
 
 Use this guide if you send tracing data to Langfuse through a custom integration. It covers both migrations from the legacy `/api/public/ingestion` endpoint and updates to existing OpenTelemetry (OTEL) pipelines.
+
+## New Langfuse Cloud organizations [#new-organizations]
+
+Langfuse Cloud organizations created on or after October 22, 2026 cannot write traces or observations through legacy ingestion. Send traces with [Python SDK v4 or later](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS SDK v5 or later](/docs/observability/sdk/upgrade-path/js-v4-to-v5), or `POST /api/public/otel/v1/traces`. Organizations created before October 22, 2026 keep legacy trace writes until <V4CutoverDate />.
+
+`POST /api/public/ingestion` accepts only `score-create` events for these organizations. Every other event type in the batch is rejected on its own with status `400` and message `Event type not accepted`. The HTTP response stays `207`, and `score-create` events in the same batch are still accepted with status `201`. The `error` field is:
+
+```text
+Event type "<event type>" is not accepted. This ingestion API no longer accepts trace or observation writes for this organization. Upgrade to the latest Langfuse SDKs, which send traces via OpenTelemetry, or send traces directly to POST /api/public/otel/v1/traces. Scores can still be sent via POST /api/public/scores. Docs: https://langfuse.com/docs/observability/sdk/upgrade-path https://langfuse.com/integrations/native/opentelemetry/migration-to-v4.md
+```
+
+These legacy single-object writes return `404`. The JSON `message` is the same text, starting at `This ingestion API no longer accepts trace or observation writes for this organization.`:
+
+- `POST /api/public/traces`
+- `POST /api/public/events`
+- `POST /api/public/spans` and `PATCH /api/public/spans`
+- `POST /api/public/generations` and `PATCH /api/public/generations`
+
+Legacy reads are not affected by October 22, 2026. Scores can still be sent as `score-create` events or to `POST /api/public/scores`. This organization date applies to Langfuse Cloud. Self-hosted deployments follow the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#api-changes).
 
 <Callout type="info">
   **Using Python or JavaScript/TypeScript?** Use the [Langfuse SDK](/docs/observability/sdk/overview) instead of building directly on the OTEL API. The SDK handles Langfuse attributes, propagation, media, filtering, and export for you. Follow the [Python v3 → v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 → v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5) migration guide. For other languages, use the [native OpenTelemetry API for your language](https://opentelemetry.io/docs/languages/) and export spans to Langfuse.

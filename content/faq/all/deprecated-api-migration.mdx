@@ -52,7 +52,9 @@ The SDK method tables below name the Python v4 and JS/TS v5 callers. Their repla
 
 All paths are relative to `/api/public`.
 
-`score-create` events sent to `POST /ingestion` by older SDKs (Python v4, JS/TS v5) are not deprecated. They remain supported after the v4 cutover. Python SDK v5 and JS/TS SDK v6 write scores through `POST /scores`.
+`score-create` events sent to `POST /ingestion` by older SDKs (Python v4, JS/TS v5) are not deprecated. They remain supported after the v4 cutover, including for Langfuse Cloud organizations created on or after October 22, 2026. Python SDK v5 and JS/TS SDK v6 write scores through `POST /scores`.
+
+On Langfuse Cloud, organizations created on or after October 22, 2026 can send only `score-create` events to `POST /ingestion`. See [Ingestion](#ingestion).
 
 If you access the public API from shell scripts or coding agents, the [Langfuse CLI](/docs/api-and-data-platform/features/cli) provides commands for all supported endpoints.
 Use at least `@langfuse/cli` version `v1.1.0` to benefit from the new endpoints.
@@ -482,7 +484,7 @@ curl \
 
 ## Ingestion [#ingestion]
 
-**Deprecated for trace and observation ingestion:** trace and observation event types sent to `POST /ingestion`, and the older synchronous endpoints `POST /traces`, `POST /spans`, `PATCH /spans`, `POST /generations`, `PATCH /generations`, `POST /events`. Langfuse Cloud serves these trace-ingestion paths until <V4CutoverDate />; migrate to v4 before this date.
+**Deprecated for trace and observation ingestion:** trace and observation event types sent to `POST /ingestion`, and the older synchronous endpoints `POST /traces`, `POST /spans`, `PATCH /spans`, `POST /generations`, `PATCH /generations`, `POST /events`. On Langfuse Cloud, organizations created before October 22, 2026 can use these trace writes until <V4CutoverDate />. Organizations created on or after October 22, 2026 cannot. For those organizations, `POST /ingestion` accepts only `score-create` events: every other event type in the batch is rejected with status `400`, and the response stays `207`. `POST /traces`, `POST /events`, `POST` and `PATCH` `/spans`, and `POST` and `PATCH` `/generations` return `404` with `This ingestion API no longer accepts trace or observation writes for this organization.` Legacy reads are not affected by October 22, 2026. New organizations send traces with Python SDK v4 or later, JS/TS SDK v5 or later, or `POST /otel/v1/traces`. Exact error text is in [Migrate custom ingestion to Langfuse v4](/integrations/native/opentelemetry/migration-to-v4#new-organizations).
 
 **Replacement:** the OpenTelemetry endpoint [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) (OTLP/HTTP), or an upgraded SDK ([Python v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5)). Set the `x-langfuse-ingestion-version: 4` header on your OTEL span exporter and propagate trace attributes to all observations; see the [OpenTelemetry integration guide](/integrations/native/opentelemetry).
 
@@ -495,11 +497,11 @@ curl \
 
 Python SDK v5 and JS/TS SDK v6 remove `api.ingestion`. Use the SDK's OpenTelemetry tracing for traces and observations, and `api.scores.create` for scores.
 
-Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Python SDK v5 and JS/TS SDK v6 send score writes to `POST /scores`. Older SDKs (Python v4, JS/TS v5) batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />, so upgrading is not required for score compatibility.
+Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Python SDK v5 and JS/TS SDK v6 send score writes to `POST /scores`. Older SDKs (Python v4, JS/TS v5) batch score writes as `score-create` events through `POST /ingestion`. Langfuse continues to accept that event type for organizations created on or after October 22, 2026, and after <V4CutoverDate />, so upgrading is not required for score compatibility.
 
 ## Deprecated endpoints [#endpoints]
 
-These endpoints are deprecated and receive security patches only, no other fixes or new functionality. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
+These endpoints are deprecated and receive security patches only, no other fixes or new functionality. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date. Trace and observation writes are the exception for new organizations: organizations created on or after October 22, 2026 are already limited to `score-create` on `POST /ingestion`, as described in [Ingestion](#ingestion). Legacy reads keep the date above for every organization.
 All paths are relative to `/api/public`.
 
 | Deprecated endpoint(s)                                                              | Replacement                                                                                                                                                                                                                              | Replacement reference                                                                             |
