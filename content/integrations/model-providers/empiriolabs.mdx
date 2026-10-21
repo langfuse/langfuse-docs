@@ -73,6 +73,14 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+If you are running a short-lived application, flush Langfuse before it exits so every trace is sent:
+
+```python
+from langfuse import get_client
+
+get_client().flush()
+```
+
 ## Step 5: View Traces in Langfuse
 
 After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the trace. Each EmpirioLabs AI call is recorded with:
