@@ -1,7 +1,7 @@
 ---
 date: 2026-10-14
 title: Python SDK v5 and JS/TS SDK v6
-description: New SDK majors built for Langfuse v4, with experiment links, typed metadata filters, and compressed span export. A small upgrade for most users.
+description: New SDK majors built for Langfuse v4, with experiment links, nested metadata filters, and compressed span export. A small upgrade for most users.
 author: Hassieb
 ---
 
@@ -13,7 +13,7 @@ import { Book } from "lucide-react";
 Python SDK v5 and JS/TS SDK v6 are built for Langfuse v4. They mostly remove APIs that were already deprecated, so the SDKs expose only the current, fastest APIs, and coding agents working with them default to those. For most users, upgrading is a version bump: tracing, scoring, prompts, and the integrations work as before.
 
 - Open experiment results straight from your code: `experimentUrl` / `experiment_url` links to the comparison view.
-- Filter on typed metadata: numbers and booleans keep their type, and nested objects become filterable dotted paths such as `a.b`.
+- Filter on nested metadata: objects become filterable dotted paths such as `a.b`. Metadata values are still stored as strings, so numeric and boolean comparisons aren't supported yet.
 - Send large traces with less bandwidth: span batches are gzip-compressed and processed in real time on Langfuse v4.
 - Create scores in batches with `api.scores.create`, and read them from the same namespace with `api.scores.get_many` / `api.scores.getMany`. These replace `api.scores_v3` / `api.scoresV3`, a breaking change covered in the migration guides.
 - Work with a leaner API client: it includes only the current Public API, so deprecated endpoints such as `api.legacy.*` and `api.ingestion` are gone.

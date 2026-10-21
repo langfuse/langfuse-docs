@@ -1,0 +1,210 @@
+---
+title: Langfuse vs. LiteLLM Lens
+shortTitle: LiteLLM Lens
+seoTitle: "LiteLLM Lens Alternative: Langfuse vs. LiteLLM Lens"
+description: Langfuse is the open-source alternative to LiteLLM Lens. October 2026 comparison of release status, Cloud and self-hosting, ClickHouse retention, pricing, and the improvement loop.
+tags: [comparison]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
+
+# Langfuse vs. LiteLLM Lens
+
+This guide outlines the key differences between **[Langfuse](/)** and **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in October 2026.
+
+## TL;DR
+
+- **A shipped product with an open-source core, on Cloud or self-hosted.** Langfuse's core tracing, evaluation, prompt management, and APIs are [MIT-licensed](#open-source-and-deployment) with versioned releases on Cloud and self-hosted; additional Enterprise features require a license, and Enterprise SSO is in the free distribution. Lens launched on October 1, 2026 as early access; it is MIT-licensed, self-run only, and its releases page says to build from source until a release is published.
+- **3 years of history, with the platform on top of ClickHouse.** Both products store traces in ClickHouse. Langfuse is [part of ClickHouse](#storage), keeps 3 years on Pro, and puts APIs, dashboards, SQL when self-hosting, and scheduled exports on Pro with the Teams add-on, Enterprise, and self-hosted on that table. Lens defaults to 14 days of retention, configurable by the operator, on a single ClickHouse server you operate.
+- **Published pricing.** Langfuse Cloud publishes [Core at $29, Pro at $199 with unlimited users, and Enterprise at $2,499](#pricing); self-hosting is free. Lens has no license fee and no hosted plan; the cost is the service, its ClickHouse, and the analysis-model spend each investigation caps.
+- **The loop runs in one project, prompts included.** Langfuse [judges and code evaluators](#improvement-loop) score incoming observations, prompt experiments run in the UI and applications through the SDK, annotation queues are on every plan, and prompt labels carry model and tool config. Lens investigates a sample of stored traces with an analysis model and gates pull requests through a GitHub Action; prompt management and annotation queues are not documented.
+- **Keep LiteLLM, switch the quality record the same day.** [Add the Langfuse SDK or OpenTelemetry exporter](#switching-from-lens) next to the proxy integration; exported Lens datasets import via SDK, API, or CSV. Most teams see first traces in Langfuse the same day.
+
+**Choose Langfuse** if the system of record has to include review, experiments, and prompt versions: an open-source core on Cloud or self-hosted including air-gapped, a published price with 3 years of history on Pro, and observations in ClickHouse you can query and export, with the LiteLLM gateway kept for routing, keys, and budgets. Proven at 21 of the Fortune 50.
+
+**Choose Lens** if you are already running LiteLLM, want its investigator over agent traces on infrastructure you operate, and can build and pin it from source. You accept early-access status with no published release, a 14-day default retention on one ClickHouse server, no hosted option, and a loop without prompt management or annotation queues.
+
+---
+
+## Open source and deployment [#open-source-and-deployment]
+
+Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed and available on Cloud or self-hosted; additional Enterprise features require a license. [Self-hosting](/self-hosting) runs the UI, login, and data in your environment on every tier, including [air-gapped operation](/self-hosting/security/networking), and Enterprise SSO and organization-level RBAC ship in the [free distribution](/pricing-self-host). Langfuse Cloud is covered by [SOC 2 Type II and ISO 27001 audits, is GDPR compliant](/security), and signs a BAA from the Pro plan in the [HIPAA region](/security/hipaa). Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise).
+
+Lens [launched on October 1, 2026](https://docs.litellm.ai/blog/litellm-lens-launch) and its overview is labeled early access. The [repository](https://github.com/BerriAI/lens) is MIT-licensed outside an `enterprise/` directory. Lens runs as its own service with ClickHouse, standalone behind an admin token or inside the LiteLLM sidebar using LiteLLM's identity, and its [releases page](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) states that, as of October 9, 2026, there is no published GitHub release and the quickstart builds from source.
+
+|                       | Langfuse                                                                                                                                                                            | LiteLLM Lens                                           |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| License               | **[MIT](https://github.com/langfuse/langfuse)** core: tracing, evaluation, prompts, APIs; Enterprise features licensed separately                                                   | MIT, except an `enterprise/` directory                 |
+| GitHub stars          | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | Repository published October 2026                      |
+| Release status        | Versioned Cloud and [self-hosted releases](/self-hosting/upgrade)                                                                                                                   | Early access; no published release as of October 9     |
+| Hosted option         | **Langfuse Cloud**, US, EU, Japan, and HIPAA regions                                                                                                                                | None; self-run only                                    |
+| Self-hosting          | **[Every tier, including free](/pricing-self-host)**; Docker Compose, Helm, Terraform                                                                                               | Docker Compose or Helm, built from source              |
+| Sign-in               | **Enterprise SSO in free OSS**; Cloud via the [Teams add-on](/pricing)                                                                                                              | Admin token standalone; LiteLLM identity when embedded |
+| Air-gapped operation  | Supported                                                                                                                                                                           | Not described                                          |
+| Published Cloud price | **[$29 / $199 / $2,499](/pricing)**                                                                                                                                                 | No hosted plan                                         |
+
+---
+
+## Storage and retention [#storage]
+
+<CompareClickhouseDatastore />
+
+Both products store traces in ClickHouse. Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse) and runs it as the primary store for the whole application on Cloud and self-hosted, on a managed cluster, [ClickHouse Cloud](/self-hosting/deployment/infrastructure/clickhouse), or your own. Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([details](/blog/2026-03-10-simplify-langfuse-for-scale)). High-volume reads go through the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api#v2) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Pro with the Teams add-on, Enterprise, and self-hosted) land JSONL or Parquet in your own bucket, [dashboards](/docs/metrics/features/custom-dashboards) and [Pulse](/docs/observability/features/pulse) read the same table, and self-hosters query ClickHouse in SQL.
+
+Lens stores traces and its own state in a ClickHouse database you operate. Its [configuration reference](https://docs.litellm.ai/docs/proxy/lens/deployment/configuration) sets trace retention with `AGENT_TRACING_RETENTION_DAYS`, default 14 days, and its [storage page](https://docs.litellm.ai/docs/proxy/lens/deployment/storage) supports one ClickHouse server shared by the Lens replicas, with multi-server load balancing and automatic failover listed as unsupported.
+
+|                  | Langfuse                                                                                                                                                                                                            | LiteLLM Lens                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Data store       | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/open-source-10), Apache 2.0; same engine on Cloud and self-hosted                                                                                 | ClickHouse, operated by you                         |
+| Topology         | Managed on Cloud; cluster or ClickHouse Cloud when self-hosting                                                                                                                                                     | One ClickHouse server; failover unsupported         |
+| Retention        | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                                                                                                                                                         | 14 days by default, configurable                    |
+| Getting data out | SQL on ClickHouse when self-hosting; Observations and Metrics APIs; [scheduled export](/docs/api-and-data-platform/features/export-to-blob-storage) to your bucket (Pro with Teams add-on, Enterprise, self-hosted) | Tracing API, SQL on your ClickHouse, dataset export |
+| Analytics on top | Dashboards, Pulse, alerts, full-text search                                                                                                                                                                         | Investigation findings linked to steps              |
+
+---
+
+## Pricing [#pricing]
+
+Langfuse Cloud publishes its prices: Core at $29, Pro at $199 with 3 years of history and unlimited users, Enterprise at $2,499, plus graduated [unit pricing](/pricing) where a unit is one trace, observation, or score. Judge inference runs on your own model connection, and scheduled bucket exports and Cloud SSO are the Teams add-on. Self-hosted Langfuse OSS has no license fee; you run the infrastructure.
+
+Lens has no license fee and no hosted plan. You run the service and its ClickHouse, and every [investigation](https://docs.litellm.ai/docs/proxy/lens/investigations) carries its own monthly spending limit in USD for the analysis model, with provider charges on top; routing that analysis through a LiteLLM key applies that key's budgets as well.
+
+See [Langfuse pricing](/pricing) or [talk to us](/talk-to-us) about Enterprise volumes.
+
+---
+
+## The improvement loop [#improvement-loop]
+
+Langfuse runs the loop in one project. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score incoming observations and [backfill history](/docs/evaluation/core-concepts#batch-evaluation), [alerts](/docs/observability/features/alerts) fire on those metrics, and [Halo](/docs/halo) investigates traces and creates datasets, prompts, and dashboards on request; it is on every Cloud plan and in public beta for self-hosted. A failure becomes a [dataset](/docs/evaluation/experiments/datasets) item, a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui) in the UI or a full-application experiment through the [SDK](/docs/evaluation/experiments/experiments-via-sdk) that you [compare to a baseline](/docs/evaluation/experiments/compare-experiments), a row in an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), and a [prompt label](/docs/prompt-management/features/prompt-version-control) that carries [model and tool config](/docs/prompt-management/features/config) your application reads at runtime, with a [CI gate](/docs/evaluation/experiments/experiments-ci-cd) on the result.
+
+Lens investigations take a time window, a sample percentage, and a description of what the agent should do, send the selected traces to an analysis model, and group findings with quotes linked to the original step, on demand or on a schedule. Signals flag traces that match yes/no questions through a separate evaluation provider, saved runs become datasets, and the repository documents [PR evals](https://github.com/BerriAI/lens/blob/main/docs/github-evals.md) that run the agent in a GitHub Action and fail the check on a regression. Prompt management and annotation queues are not documented.
+
+|                                 | Langfuse                                                                                                    | LiteLLM Lens                                    |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Finding a failure in production | Judges and code evaluators on each observation; Pulse; alerts                                               | Scheduled investigations over a sample; Signals |
+| Who runs the experiment         | Prompts and models in the UI; applications through the SDK, compared in Langfuse                            | SDK adapter and GitHub Action                   |
+| Human review                    | Annotation queues on every plan                                                                             | Feedback on findings                            |
+| Prompt release                  | [Python and JS/TS](/docs/prompt-management/get-started), labels with model and tool config your app applies | Not documented                                  |
+| CI                              | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd) on experiment results                       | GitHub Action PR eval                           |
+| Non-engineers                   | Queues, the prompt UI, and Halo                                                                             | The investigation UI                            |
+
+---
+
+## Using Langfuse and LiteLLM together [#coexistence]
+
+LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. A [Langfuse Gateway](/docs/roadmap#roadmap) is on the public roadmap; until it ships, routing stays with LiteLLM or another gateway.
+
+If you trial Lens beside Langfuse, decide which store holds datasets and human labels before both accumulate a partial copy; running two investigators over the same traffic doubles analysis-model spend.
+
+---
+
+## Which should you choose [#which-should-you-choose]
+
+Choose **Langfuse** if you want **a shipped, independent platform for the LLM application**: an open-source core on Cloud or self-hosted including air-gapped with SSO and organization RBAC in the free distribution, prompt experiments in the UI and application experiments through the SDK, annotation queues, prompt labels, and CI gates in one project, 3 years of observations in ClickHouse you can query and export, and a published price.
+
+Choose **Lens** if you are **already running LiteLLM**, want its investigator over agent traces on infrastructure you operate, and can build and pin it from source.
+
+Keep **LiteLLM** for the gateway either way. See [Using Langfuse and LiteLLM together](#coexistence).
+
+---
+
+## Why teams move away from Lens [#why-teams-move-away]
+
+The same reasons recur when teams evaluate both.
+
+- **The artifact you deploy matters.** Lens's releases page says to build from source until a release is published, and a gateway upgrade does not carry a Lens service deployed beside it. Langfuse Cloud and the [self-hosted release](/self-hosting/upgrade) are the shipped product, with the [same open-source core](#open-source-and-deployment) on both.
+- **Retention default and topology.** Lens defaults to 14-day retention, configurable by the operator. Its documented topology supports one ClickHouse server shared by Lens replicas; multi-server load balancing and automatic failover are unsupported. Langfuse Pro keeps **3 years** on a [managed or clustered ClickHouse](#storage), with APIs, dashboards, and scheduled exports on Pro with the Teams add-on, Enterprise, and self-hosted on the same table.
+- **Prompts and review are missing from the loop.** Lens investigates, flags, and gates pull requests; it documents no prompt management or annotation queue. Langfuse runs [judges, experiments, queues, prompt labels, and CI](#improvement-loop) in one project.
+- **No hosted option and no published price.** Lens is self-run only, with analysis-model spend capped per investigation on a ClickHouse you operate. Langfuse Cloud publishes [Core, Pro, and Enterprise](#pricing) with unlimited users, and self-hosting is free.
+
+---
+
+## Why teams choose Langfuse [#customers]
+
+A pattern repeats across production adopters: start where governance requires, often self-hosted, then grow into the platform.
+
+- **[Canva](/users/canva)** runs a multi-agent support system for a product with **250 million** monthly active users. LLM-as-a-judge evaluators score the systems across **15–20** metrics, and domain experts build evaluators without an engineering handoff. They self-hosted first, then moved to Cloud.
+- **[SumUp](/users/sumup)** rolled AI support to **35+** markets and deflected almost **50%** of conversations, cutting external BPO cost by **30%**. They started self-hosted for the proof of concept, then moved to Langfuse Cloud.
+- **[Merck](/users/merckgroup)** runs about **80** of 300+ GenAI use cases on Langfuse, with **200+** people building on it. They self-host for data sovereignty and provision projects via API.
+
+---
+
+## Switching from Lens [#switching-from-lens]
+
+Leave the gateway in place and move the quality record. Most teams see first traces in Langfuse the **same day**.
+
+- **Instrumentation:** add the [Langfuse SDK](/docs/observability/sdk/overview) or point the OpenTelemetry exporter at the [OTLP endpoint](/integrations/native/opentelemetry), plus the [LiteLLM integration](/integrations/gateways/litellm) for proxy spans.
+- **Datasets:** import exported Lens datasets through the [Langfuse SDK, API, or CSV uploader](/docs/evaluation/experiments/datasets); expected responses become ground truth. Create judges in [evaluators](/docs/evaluation/overview) and prompts in [prompt management](/docs/prompt-management/get-started).
+- **History:** stays in the Lens ClickHouse database for its retention window. New traces accumulate in Langfuse from the cutover.
+
+[Talk to us](/talk-to-us) if you want help planning the switch.
+
+---
+
+## Start free: Cloud or self-host [#get-started]
+
+[Langfuse Cloud](https://cloud.langfuse.com) Hobby includes 50k units/month, no credit card. Or [self-host](/self-hosting) the MIT stack. The [example project](/docs/demo) is populated before you instrument anything.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+---
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="does-langfuse-replace-litellm">
+<Summary>Does Langfuse replace LiteLLM?</Summary>
+
+No. LiteLLM remains the gateway for routing, keys, and budgets. Langfuse traces that traffic through the [LiteLLM integration](/integrations/gateways/litellm) and is the AI engineering platform on top: experiments, annotation queues, prompt labels, and 3 years of history on Pro. Lens is the piece to compare when the question is trace investigation. See [Using Langfuse and LiteLLM together](#coexistence).
+
+</Details>
+
+<Details id="is-litellm-lens-open-source">
+<Summary>Is LiteLLM Lens open source?</Summary>
+
+Yes. The Lens repository is MIT-licensed outside an `enterprise/` directory. As of its releases page, dated October 9, 2026, there is no published GitHub release, and the quickstart builds from source. Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed with versioned Cloud and self-hosted releases; additional Enterprise features require a license. See [Open source and deployment](#open-source-and-deployment).
+
+</Details>
+
+<Details id="can-lens-run-without-the-gateway">
+<Summary>Can LiteLLM Lens run without the gateway?</Summary>
+
+Yes. Its setup guide says standalone Lens stores data in ClickHouse and does not require a LiteLLM gateway or PostgreSQL. You still send traces yourself; connecting Lens does not instrument the agent. See [Open source and deployment](#open-source-and-deployment).
+
+</Details>
+
+<Details id="how-much-does-lens-cost">
+<Summary>How much does LiteLLM Lens cost?</Summary>
+
+There is no license fee and no hosted plan. You operate the service and its ClickHouse, and each investigation has a monthly USD cap for the analysis model. Langfuse Cloud publishes plan and unit prices, and self-hosting is free. See [Pricing](#pricing).
+
+</Details>
+
+<Details id="do-both-products-use-clickhouse">
+<Summary>Do Langfuse and Lens both use ClickHouse?</Summary>
+
+Yes. Lens stores traces in a ClickHouse database you operate, with 14 days of retention by default, configurable. Langfuse stores observations in ClickHouse on Cloud and self-hosted, keeps 3 years on Pro, and is part of ClickHouse. See [Storage and retention](#storage).
+
+</Details>
+
+<Details id="how-do-i-move-from-lens-to-langfuse">
+<Summary>How do I move from Lens to Langfuse?</Summary>
+
+Keep LiteLLM for routing. Point traces at Langfuse, import exported datasets, and create judges and prompts. Lens history stays in its ClickHouse store. See [Switching from Lens](#switching-from-lens).
+
+</Details>
+
+</FaqDetails>
+
+<Callout type="info">
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/litellm-lens.mdx) with up-to-date information.
+</Callout>
+
+<SignupCTA className="my-6" />
