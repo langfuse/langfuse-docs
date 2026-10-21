@@ -1,0 +1,33 @@
+---
+date: 2026-10-19
+title: Experiments show which metric moved, and why
+description: Chart every score across experiment runs, read summary statistics against your baseline, and compare candidates item by item filtered by score thresholds.
+author: Marlies
+ogVideo: https://static.langfuse.com/docs-videos/experiments-metrics.mp4
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, FileCode } from "lucide-react";
+
+<ChangelogHeader />
+
+The Experiments page now shows the trade-off between quality, cost, and latency across your runs:
+
+- **Charts:** Plot relevant metrics across runs side-by-side. Visualize and compare the trade-off between different metrics. Customize the layout to your needs.
+- **Summary statistics:** Comparing a candidate run against your baseline? View summary statistics for each score across runs. Assess what improved, what regressed, and trade-off movements.
+
+Found a regression? Compare the candidate run against your baseline item by item:
+
+- **Score thresholds:** Filter to items under a threshold within a run or across all, so you land on the regressions immediately.
+- **Layout:** Choose which metrics to show as columns and set the row height, so long outputs are readable in the table.
+- **Annotate, correct, comment:** Step through items with keyboard shortcuts and add a human score, a corrected output, or a comment without leaving the context of your experiment comparison.
+
+## Get started
+
+Open **Experiments** and add a chart for each metric you care about. To go item by item, select two or more runs and compare them. New to experiments? Start with the [Academy guide](/academy/experiments) or see how to [optimize agent cost](/academy/experiments/cost-optimization) with experiments.
+
+<Cards num={3}>
+  <Card title="Compare experiments" href="/docs/evaluation/experiments/compare-experiments" icon={<Book />} arrow />
+  <Card title="Add scores to experiments" href="/docs/evaluation/evaluation-methods/scores-via-ui#add-scores-to-experiments" icon={<Book />} arrow />
+  <Card title="Scores via SDK" href="/docs/evaluation/evaluation-methods/scores-via-sdk" icon={<FileCode />} arrow />
+</Cards>

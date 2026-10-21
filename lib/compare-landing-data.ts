@@ -124,8 +124,17 @@ export const compareLanding = {
   comparisonResources: [
     {
       title: "More comparisons",
-      linkLabel: "Langfuse vs. Galileo",
-      link: "/compare/galileo",
+      links: [
+        { linkLabel: "Langfuse vs. Galileo", link: "/compare/galileo" },
+        { linkLabel: "Langfuse vs. Raindrop", link: "/compare/raindrop" },
+        { linkLabel: "Langfuse vs. Logfire", link: "/compare/logfire" },
+        { linkLabel: "Langfuse vs. Sentry", link: "/compare/sentry" },
+        { linkLabel: "Langfuse vs. MLflow", link: "/compare/mlflow" },
+        {
+          linkLabel: "Langfuse vs. LiteLLM Lens",
+          link: "/compare/litellm-lens",
+        },
+      ],
     },
     {
       title: "What would help you decide?",

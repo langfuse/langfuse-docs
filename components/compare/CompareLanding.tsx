@@ -252,20 +252,32 @@ export function CompareLanding() {
             <VendorCard key={vendor.name} vendor={vendor} />
           ))}
         </div>
-        <div className="mt-12 grid gap-6 @min-[600px]/compare:grid-cols-[1fr_auto] @min-[600px]/compare:gap-8">
-          {content.comparisonResources.map((resource) => (
-            <div key={resource.title}>
-              <h3 className="text-[16px] font-medium leading-[1.5] text-text-primary">
-                {resource.title}
-              </h3>
-              <Link
-                href={resource.link}
-                className="mt-3 inline-block text-[14px] text-text-secondary underline decoration-line-cta underline-offset-4 hover:text-text-primary"
-              >
-                {resource.linkLabel} <Arrow />
-              </Link>
-            </div>
-          ))}
+        <div className="mt-12 grid gap-6 @min-[600px]/compare:grid-cols-[1fr_auto] @min-[600px]/compare:items-start @min-[600px]/compare:gap-8">
+          {content.comparisonResources.map((resource) => {
+            const links =
+              "links" in resource && resource.links
+                ? resource.links
+                : [{ linkLabel: resource.linkLabel, link: resource.link }];
+            return (
+              <div key={resource.title}>
+                <h3 className="text-[16px] font-medium leading-[1.5] text-text-primary">
+                  {resource.title}
+                </h3>
+                <ul className="mt-3 flex flex-col gap-2">
+                  {links.map((item) => (
+                    <li key={item.link}>
+                      <Link
+                        href={item.link}
+                        className="inline-block text-[14px] text-text-secondary underline decoration-line-cta underline-offset-4 hover:text-text-primary"
+                      >
+                        {item.linkLabel} <Arrow />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       </section>
 
