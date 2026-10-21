@@ -65,6 +65,8 @@ If necessary, ingest a new example only after confirming that no suitable existi
 3. Keep the full Langfuse product boundary visible. Collapse the left navigation to its icon rail when this matches the old image: it preserves product context, creates more room for trace content, and avoids exposing the expanded account name or email. Do not remove the navigation or top product header merely to increase zoom unless the existing image intentionally focuses on a self-contained panel.
 4. Use 125% browser zoom by default. Increase it only when the important text remains too small and the full product frame, controls, labels, and relevant content still fit without clipping.
 5. Size the trace tree and detail pane so both have enough room:
+   - default to a 30% trace tree / 70% observation detail split;
+   - deviate from 30/70 only when the page's purpose or complete tree labels require it, and record the reason in the review notes;
    - tree labels must be complete;
    - the selected row must be visibly highlighted;
    - the detail pane must show the relevant tabs and payload;
