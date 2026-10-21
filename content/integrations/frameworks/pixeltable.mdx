@@ -129,6 +129,8 @@ export OTEL_METRICS=false
 export OTEL_SPAN_LEVEL=debug
 ```
 
+`pxt service run` reads these variables in its own process. `pxt service update` starts the service from the Pixeltable daemon, which reads the environment once, so run `pxt daemon restart` after the exports.
+
 The app file must not call `pxt_otel.init()`. If the database entry in `pixeltable.toml` sets `db_exporter_otlp_endpoint`, that value wins over `OTEL_EXPORTER_OTLP_ENDPOINT`.
 
 <Callout type="warning">
@@ -185,8 +187,6 @@ import openai
 import pixeltable as pxt
 from langfuse import observe, propagate_attributes
 
-client = openai.AsyncOpenAI()
-
 
 @pxt.udf
 @observe(name="word_count")
@@ -200,16 +200,18 @@ async def headline(text: str, row_id: int) -> str:
     # Attach this row id to the @observe span and to the LLM call inside it.
     # Propagated metadata values must be 200 characters or fewer.
     with propagate_attributes(metadata={"row_id": str(row_id)}):
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            max_tokens=20,
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"Write a 5-word headline for: {text}",
-                }
-            ],
-        )
+        # A client per call: a notebook or served app runs each query on a new event loop.
+        async with openai.AsyncOpenAI() as client:
+            response = await client.chat.completions.create(
+                model="gpt-4o-mini",
+                max_tokens=20,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Write a 5-word headline for: {text}",
+                    }
+                ],
+            )
     return response.choices[0].message.content
 ```
 
