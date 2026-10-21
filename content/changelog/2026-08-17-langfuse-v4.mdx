@@ -210,7 +210,7 @@ Langfuse Cloud deprecates v3 endpoints and features on <V4CutoverDate />. Please
 
 <VersionTimeline deployments={["cloud"]} />
 
-New projects already use v4 and need no migration.
+New projects already use v4 and need no migration. Organizations created on or after October 22, 2026 cannot write traces through legacy ingestion. Use Python SDK v4 or later, JS/TS SDK v5 or later, or the [OpenTelemetry endpoint](/integrations/native/opentelemetry/migration-to-v4#new-organizations) from the start. Organizations created earlier keep legacy trace writes until the date above. Legacy reads are not affected by October 22, 2026.
 
 For existing projects, organization owners can open the **Migration Assistant** sidebar and the [**Migration status page**](https://cloud.langfuse.com/v4-migration) to see if any actions are required:
 
