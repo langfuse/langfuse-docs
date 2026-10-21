@@ -1,0 +1,99 @@
+---
+title: Publish and Version
+seoTitle: Publish, version, and label agent skills
+description: Create skill versions in the UI, CLI, or API and promote them with labels.
+noindex: true
+---
+
+# Publish and version skills
+
+Publish a skill through the UI, CLI, or API. Each version contains the complete set of files for that revision.
+
+## Publish a version [#publish-a-version]
+
+<Tabs items={["UI", "CLI", "API"]}>
+<Tab>
+
+To update an existing skill:
+
+1. Open **[Skills](https://cloud.langfuse.com/project/~/skills)** and select the version to start from.
+2. Click **New version** to create an editable draft.
+3. Edit `SKILL.md` or its supporting files, then click **Save**.
+4. Review the file changes, add an optional version note, and confirm with **Create version**.
+
+Saved versions are read-only. Keep the same frontmatter `name` to add a version to the existing skill. Changing it to an unused name creates a separate skill starting at version 1.
+
+To import an existing skill, choose **Import** from the Skills list and select local files, a folder, or a ZIP containing `SKILL.md`. Review the detected skill before importing.
+
+![A skill with its file tree, saved versions, labels, and observations.](/images/changelog/2026-10-19-skill-management-editor.jpg)
+
+</Tab>
+<Tab>
+
+[Configure project credentials](/docs/skill-management/get-started#before-you-start) and install the CLI beta, then push the skill folder:
+
+```bash
+langfuse skills push ./refund-policy --label staging
+```
+
+The folder must contain `SKILL.md`. If its files match the latest saved version, the CLI reuses that version. Otherwise, it creates a version. It then assigns `staging`.
+
+</Tab>
+<Tab>
+
+Send every file the new version should contain to `POST /api/public/unstable/skills`. Omitting a file removes it from the new version; earlier versions stay unchanged. Langfuse reads the name and description from the frontmatter in `SKILL.md`:
+
+```bash
+curl --request POST "$LANGFUSE_BASE_URL/api/public/unstable/skills" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "files": [{
+      "path": "SKILL.md",
+      "content": "---\nname: refund-policy\ndescription: Review refund requests.\n---\nCheck the refund policy before responding."
+    }],
+    "commitMessage": "Add refund workflow"
+  }'
+```
+
+Use the version number in the response to [assign a label](#labels). Publishing assigns `latest`; assign `staging` or `production` separately. To reuse file content already stored in the project, provide its `sha256Hash` instead of `content`. See the [Skills API reference](https://api.reference.langfuse.com/#tag/unstableskills).
+
+</Tab>
+</Tabs>
+
+## Promote or roll back a version [#labels]
+
+Assign `production` to the version your agents should fetch. To roll back, assign it to an earlier version. Requests for an exact version stay on that version.
+
+In the UI, select a version and edit its labels. For the API, replace `2` below with the version you want to promote:
+
+```bash
+curl --request PATCH \
+  "$LANGFUSE_BASE_URL/api/public/unstable/skills/refund-policy/versions/2" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"labels":["production"]}'
+```
+
+The request replaces this version's user-managed labels. Include every label it should retain. Assigning a label moves it from any other version of the same skill. Langfuse manages `latest` automatically.
+
+For example, if `production` points to version 1 while you publish version 2, production requests continue to return version 1. Move `production` to version 2 when it is ready; move it back to version 1 to roll back.
+
+Run `langfuse skills update` to update CLI installations after moving a label. API clients receive the change on their next manifest request. If your application caches manifests, refresh its cache.
+
+## Organize skills with tags [#tags]
+
+Tags apply to the skill across all versions. Set them through the API:
+
+```bash
+curl --request PATCH "$LANGFUSE_BASE_URL/api/public/unstable/skills/refund-policy" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"tags":["support","billing"]}'
+```
+
+This replaces the skill's tag list. Include every tag you want to retain. You can then [install all skills with a tag](/docs/skill-management/load-skills#cli-install).
+
+## Validate before publishing [#validation]
+
+Keep the same frontmatter name when updating a skill. Include a root `SKILL.md` and check the [file and path limits](/docs/skill-management/limits-and-troubleshooting#limits).

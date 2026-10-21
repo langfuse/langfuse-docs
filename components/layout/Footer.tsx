@@ -36,7 +36,10 @@ const menuItems: {
     heading: "Product",
     items: [
       { name: "Observability", href: "/docs/observability/overview" },
-      { name: "Prompt Management", href: "/docs/prompt-management/overview" },
+      {
+        name: "Prompt & Skill Management",
+        href: "/docs/prompt-and-skill-management/overview",
+      },
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
       { name: "Langfuse for Agents", href: "/agents" },
