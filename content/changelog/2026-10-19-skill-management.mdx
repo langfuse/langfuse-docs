@@ -113,39 +113,7 @@ Record which skills were available to the agent and which files it loaded, inclu
 
 These examples assume [Langfuse tracing is configured](/docs/observability/sdk/overview). `runAgent` is your existing instrumented agent runner, exported from `./agent`.
 
-<Tabs items={["Installed skills (SDK)", "Fetched skills (SDK)", "OpenTelemetry"]}>
-
-<Tab>
-
-For CLI-installed skills, add `skills: { dir: ".agents/skills" }` to your existing `LangfuseSpanProcessor`, matching your install directory. Enable discovery for the traced run:
-
-```typescript
-import { propagateAttributes } from "@langfuse/tracing";
-import { runAgent } from "./agent";
-
-await propagateAttributes({ includeDiscoveredSkills: true }, () => runAgent());
-```
-
-Discovery runs once in the background. Only spans started after it finishes include the discovered skills. Your agent still loads the installed files itself.
-
-</Tab>
-
-<Tab>
-
-Reuse the `skill` returned by the API example above to attach its name and resolved version to the traced run:
-
-```typescript
-import { propagateAttributes } from "@langfuse/tracing";
-import { runAgent } from "./agent";
-
-await propagateAttributes({ availableSkills: [skill] }, () =>
-  runAgent(skill.files),
-);
-```
-
-The available skills propagate to child spans created inside this callback.
-
-</Tab>
+<Tabs items={["OpenTelemetry", "⚠️ Installed skills (SDK)", "⚠️ Fetched skills (SDK)"]} defaultIndex={0}>
 
 <Tab>
 
@@ -163,6 +131,51 @@ span?.setAttributes({
 ```
 
 Use the actual version your agent loaded. The raw attribute takes a JSON string with `skillName` and `skillVersion`; this records availability on the current generation span and does not propagate to child spans.
+
+</Tab>
+
+<Tab>
+
+<Callout type="warning">
+
+**SDK unreleased — release pending.** Skill discovery and `attachDiscoveredSkills` require matching unreleased SDK and backend builds. Use the OpenTelemetry example with the currently published SDK.
+
+</Callout>
+
+For CLI-installed skills in Node.js, import `LangfuseSpanProcessor` from `@langfuse/otel/node` in your tracing setup and add `skills: { dir: ".agents/skills" }`, matching your install directory. Attach the discovered skill list to spans created during the run:
+
+```typescript
+import { propagateAttributes } from "@langfuse/tracing";
+import { runAgent } from "./agent";
+
+await propagateAttributes({ attachDiscoveredSkills: true }, () => runAgent());
+```
+
+Discovery runs once in the background. Only spans started after it finishes include the discovered skills. To finish discovery before a run, use `await discoverSkills({ dir: ".agents/skills" })` from `@langfuse/otel/node` and pass the result as the processor's `skills.availableSkills` instead of `skills.dir`. Use `attachDiscoveredSkills` for a callback, or `skills.attachByDefault: true` to attach the configured list by default. These settings report availability for tracing; your agent still loads the files itself.
+
+</Tab>
+
+<Tab>
+
+<Callout type="warning">
+
+**SDK unreleased — release pending.** The `availableSkills` propagation API requires matching unreleased SDK and backend builds. Use the OpenTelemetry example with the currently published SDK.
+
+</Callout>
+
+Reuse the `skill` returned by the API example above to attach its name and resolved version to the traced run:
+
+```typescript
+import { propagateAttributes } from "@langfuse/tracing";
+import { runAgent } from "./agent";
+
+await propagateAttributes(
+  { availableSkills: [{ name: skill.name, version: skill.version }] },
+  () => runAgent(skill.files),
+);
+```
+
+The skill list attaches to the active observation and new child spans created inside this callback. An explicit `availableSkills` list takes precedence over discovered skills. It stays within this process.
 
 </Tab>
 
