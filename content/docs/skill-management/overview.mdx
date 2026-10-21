@@ -1,0 +1,36 @@
+---
+title: Overview
+seoTitle: Agent Skill Management
+description: Manage agent instructions and supporting files as versioned skills in Langfuse.
+noindex: true
+---
+
+# Skill Management
+
+<Callout type="info">
+
+Skill Management is in beta. Open your **account menu → Feature Preview** and turn on **Skill Management**. If the toggle is disabled, enable **V4 Preview** first.
+
+</Callout>
+
+Skill Management stores the instructions and supporting files your agents use for specific tasks. A skill contains a `SKILL.md` file and optional reference documents or scripts. Langfuse versions these files together, so your team can update an agent's instructions without changing its application code.
+
+For example, you can share a refund workflow across support agents, test a revised policy in staging, and use traces to check which policy file an agent read.
+
+![A Skills list containing four support skills, with descriptions and version labels.](/images/changelog/2026-10-19-skill-management-list.jpg)
+
+## Publish and version skills [#manage-skills]
+
+Create skills in the UI, push a local folder with the CLI, or publish through the API. Use labels such as `staging` and `production` to select a version for each environment. Moving a label to an earlier version rolls back future requests for that label. See [publishing and versioning](/docs/skill-management/manage-skills).
+
+## Load skills into your agent [#load-skills]
+
+Install skill folders on disk with the CLI, or fetch files through the API for an agent that works in memory. Your agent framework controls when to load instructions and run scripts. See [loading skills](/docs/skill-management/load-skills).
+
+## Trace skill usage [#trace-skills]
+
+Attach the skill list your agent received to its model and tool observations. In the trace, inspect available versions on a generation and loaded files on a successful skill-loading tool. See [skill tracing](/docs/skill-management/tracing).
+
+## Get started [#get-started]
+
+[Create and load your first skill](/docs/skill-management/get-started), read about [file structure and versioning](/docs/skill-management/concepts), or check [beta limits](/docs/skill-management/limits-and-troubleshooting).

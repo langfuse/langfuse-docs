@@ -1,0 +1,81 @@
+---
+title: Limits and Troubleshooting
+seoTitle: Skill Management beta limits and troubleshooting
+description: Current file limits, naming rules, and common setup issues for Skill Management.
+noindex: true
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# Limits and troubleshooting
+
+These limits apply to the Skill Management beta. Your agent framework may impose additional requirements.
+
+## Current limits [#limits]
+
+| Resource                       | Limit or requirement                                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Files per version              | Up to 200, including the root `SKILL.md`                                                                                               |
+| Total file content per version | Up to 1,000,000 UTF-8 bytes                                                                                                            |
+| File paths                     | Relative POSIX paths, up to 512 characters; no duplicates, absolute paths, backslashes, or `.` / `..` segments                         |
+| File types                     | Supported text extensions, including `.md`, `.txt`, `.json`, `.yaml`, `.py`, and `.sh`; binary and extensionless files are unsupported |
+| Skill name                     | 1–64 characters: lowercase letters, digits, and single hyphens; no leading, trailing, or consecutive hyphens                           |
+| Description                    | 1–1024 characters                                                                                                                      |
+| Tags                           | Up to 50 per skill, 1–100 characters each                                                                                              |
+| Local ZIP import               | Up to 3 MB per ZIP before extraction; imported skill files must fit the limits above                                                   |
+| Content fetch                  | 1–50 content hashes per request                                                                                                        |
+
+The [Agent Skills format](https://agentskills.io/specification) allows additional file types, including binary assets. Langfuse currently accepts supported text files only.
+
+<Details>
+<Summary>All supported file extensions</Summary>
+
+Extensions are matched without regard to case:
+
+```text
+.md .markdown .mdx .txt .rst .adoc .json .jsonc .jsonl .ndjson
+.yaml .yml .toml .xml .csv .tsv .ini .cfg .conf .properties
+.log .html .htm .css .scss .sass .less .js .jsx .mjs
+.cjs .ts .tsx .py .pyi .sh .bash .zsh .fish .ps1
+.rb .go .rs .java .c .h .cc .cpp .hpp .cs
+.swift .kt .kts .lua .r .pl .php .sql .graphql .gql
+.tex
+```
+
+</Details>
+
+## I cannot open Skills [#beta-access]
+
+Open your **account menu → Feature Preview** and enable **Skill Management**. If its toggle is disabled, enable **V4 Preview** first. For API requests, check that your keys belong to the project containing the skill.
+
+## A production skill cannot be found [#missing-label]
+
+API publishing assigns `latest`. To fetch by `production`, [assign that label to a version](/docs/skill-management/manage-skills#labels), or publish with `langfuse skills push ./refund-policy --label production`. You can also request another label or an exact version.
+
+## An upload is rejected [#upload-rejected]
+
+Include a root `SKILL.md` with valid YAML frontmatter containing `name` and `description`. Check the [file and path limits](#limits). Submit every file the version should contain.
+
+## Files are installed but the agent does not use them [#agent-loading]
+
+Configure your agent to read the installation path printed by the CLI. Check that its framework supports skills, and use the frontmatter description to state when the skill should be loaded.
+
+## My installed skill did not update [#updates]
+
+Run `langfuse skills update` to fetch the versions currently assigned to saved labels. Exact version pins stay fixed. Moving a label leaves installed files unchanged until you update them.
+
+## File content fetch fails [#content-fetch]
+
+Use hashes from a manifest in the same project. URL-encode them in REST requests and send at most 50 per request. Match results by hash rather than array position.
+
+## Skills are missing from a trace [#missing-trace-skills]
+
+Check that your SDK and Langfuse deployment both support skill tracing, then verify:
+
+- The available skill list is attached to the generation or tool observation before it ends.
+- For automatic attachment, discovery finishes before spans start and reads the correct installation directory.
+- The API manifest contains the expected version, or your CLI and SDK preview builds use compatible lockfile formats.
+- Your instrumentation records model and tool calls inside the callback that attaches available skills.
+- File-loading tools have recognized names, matching inputs, and successful, non-null outputs.
+
+See [skill tracing](/docs/skill-management/tracing) for setup and the **Preview → Skills** view.

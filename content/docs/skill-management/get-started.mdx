@@ -1,0 +1,145 @@
+---
+title: Get Started
+seoTitle: Get started with Skill Management
+description: Create your first versioned agent skill and load it with the Langfuse CLI or API.
+noindex: true
+---
+
+# Get started with Skill Management
+
+Create a `refund-policy` skill, assign the `production` label, and load its instructions into your agent's workspace or application. For file structure and versioning, see [Concepts](/docs/skill-management/concepts).
+
+## Before you start [#before-you-start]
+
+Enable **Skill Management** in your **account menu → Feature Preview**, then open **[Skills](https://cloud.langfuse.com/project/~/skills)** in your project. This requires **V4 Preview** to be enabled.
+
+Create a project API key pair under **Project settings → API Keys**. Export your keys and the URL of your Langfuse region or self-hosted deployment:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+```
+
+Use Node.js 20 or later for the CLI beta, or Node.js 22 or later for the JavaScript SDK. The examples use CLI `1.3.0-beta.2` and `@langfuse/client` `6.0.1`.
+
+## Create a skill [#create-a-skill]
+
+Create the skill in the UI or publish a local folder with the CLI. Use this `SKILL.md` for either method:
+
+```markdown filename="SKILL.md"
+---
+name: refund-policy
+description: Review refund requests and explain eligibility. Use when a customer asks for a refund.
+---
+
+# Handle a refund request
+
+Ask for the order number, purchase date, and whether the item was used.
+For this example, an unused item is eligible for a refund within 30 days
+of purchase. Explain the outcome using those rules. Ask for missing
+information before deciding eligibility.
+```
+
+The rules above are sample content. Replace them with your own policy before using the skill with customers.
+
+<Tabs items={["UI", "CLI"]}>
+<Tab>
+
+1. Open **Skills → New skill** and add the `SKILL.md` file above.
+2. Click **Save**, then confirm with **Create skill**.
+3. Assign the `production` label to the saved version.
+
+![The skill editor showing files, version history, and labels.](/images/changelog/2026-10-19-skill-management-editor.jpg)
+
+</Tab>
+<Tab>
+
+Install the CLI beta:
+
+```bash
+npm install -g @langfuse/cli@beta
+mkdir -p refund-policy
+```
+
+Save the example above as `refund-policy/SKILL.md`. Publish the folder and assign `production`:
+
+```bash
+langfuse skills push ./refund-policy --label production
+```
+
+The command prints the saved version. See [publishing and versioning](/docs/skill-management/manage-skills) for API publishing and label management.
+
+</Tab>
+</Tabs>
+
+## Load your skill [#load-your-skill]
+
+<Tabs items={["CLI install", "API fetch"]}>
+<Tab>
+
+Install the CLI beta, then fetch the version labeled `production`:
+
+```bash
+npm install -g @langfuse/cli@beta
+langfuse skills install refund-policy --label production
+```
+
+With the default installation directory, the files are written to `.agents/skills/refund-policy/`. Check the instructions:
+
+```bash
+cat .agents/skills/refund-policy/SKILL.md
+```
+
+You should see the same frontmatter and policy you saved. Configure your agent to discover this directory. See [loading skills](/docs/skill-management/load-skills#cli-install) for version pins and updates.
+
+After assigning `production` to a new version, update the installed files:
+
+```bash
+langfuse skills update
+```
+
+</Tab>
+<Tab>
+
+Install the JavaScript client:
+
+```bash
+npm install @langfuse/client@6.0.1
+```
+
+Fetch the skill's file list, find `SKILL.md`, and use its hash to fetch the instructions:
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+const skill = await langfuse.api.unstable.skills.get("refund-policy", {
+  label: "production",
+});
+const file = skill.files.find((file) => file.path === "SKILL.md");
+if (!file) throw new Error("Skill has no SKILL.md");
+
+const { data } = await langfuse.api.unstable.skills.getFileContents({
+  sha256Hashes: file.sha256Hash,
+});
+const instructions = data.find((item) => item.sha256Hash === file.sha256Hash);
+if (!instructions) throw new Error("Skill instructions were not returned");
+console.log(instructions.content);
+```
+
+Running this code prints the `SKILL.md` content you saved. Pass `instructions.content` to your agent's skill loader, and fetch supporting files from the same manifest as needed. For an agent integration, see [Use skills in memory](/docs/skill-management/load-skills#in-memory).
+
+</Tab>
+</Tabs>
+
+## Inspect a run [#inspect-a-run]
+
+[Configure skill tracing](/docs/skill-management/tracing) to record available skill versions on model calls and loaded files on tool calls.
+
+## Next steps [#next-steps]
+
+- Understand [frontmatter, file structure, versions, and labels](/docs/skill-management/concepts).
+- [Publish and promote revisions](/docs/skill-management/manage-skills).
+- Choose [filesystem or API loading](/docs/skill-management/load-skills) for your runtime.
+- Check [beta limits and troubleshooting](/docs/skill-management/limits-and-troubleshooting).

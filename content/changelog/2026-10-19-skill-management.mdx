@@ -1,7 +1,7 @@
 ---
 date: 2026-10-19
 title: Manage, version, and trace agent skills
-description: Manage versioned agent skills in beta, load them from the CLI or API, and trace their use.
+description: Version agent instructions and files, deploy them with labels, and inspect skill usage in traces.
 badge: Beta
 noindex: true
 ---
@@ -12,172 +12,34 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 {/* Confirm author and beta SDK package versions before publication. Remove noindex when ready. */}
 
-Skill Management is now in beta. Keep `SKILL.md`, reference documents, and scripts together in a versioned skill, from editing instructions to understanding how agents use them.
+Skill Management is in beta. Store agent instructions and supporting files together, deploy versions with labels, and see which skills your agents load in traces.
 
-Share a consistent set of skills across your agents, test revised instructions with a staging label, or inspect which supporting files an agent loaded during a run.
+Share a refund workflow across support agents, test revised instructions in staging, or check which policy file an agent read before answering a customer.
 
 ![Four customer-support skills with descriptions, latest and production versions, and tags in the Skills beta list.](/images/changelog/2026-10-19-skill-management-list.jpg)
 
-## Edit and version skills
+## Version the whole skill
 
-Create and update skills in the UI, publish a local skill folder with the CLI, or manage versions through the API.
+A skill contains `SKILL.md` instructions and optional reference files and scripts. Its name and description tell an agent when to load it. See [how skills are structured](/docs/skill-management/concepts).
 
-Use labels such as `production` and `staging` to choose which version your agents receive. Saved versions remain immutable, so you can move a label back to an earlier version when needed.
+Edit skills in the UI, push a local folder with the CLI, or publish through the API. Each saved version contains all of the skill's files.
 
-<Tabs items={["UI", "API", "CLI"]}>
-
-<Tab>
+Assign `staging` or `production` to the version your agents should fetch. To roll back, move the label to an earlier version. Saved versions stay unchanged.
 
 ![The refund-policy skill with version history, labels, supporting files, and the Files, Metrics, and Observations tabs.](/images/changelog/2026-10-19-skill-management-editor.jpg)
 
-</Tab>
+## Install or fetch skills
 
-<Tab>
+Install skill folders with the CLI, or fetch files through the API for an agent that works in memory. Follow a label for updates or pin an exact version. The [getting started guide](/docs/skill-management/get-started) covers both.
 
-Publish a skill or a new version with a POST request. Include every file for that version; the skill's name and description come from the frontmatter in `SKILL.md`:
+## See available skills and loaded files
 
-```bash
-curl --request POST "$LANGFUSE_BASE_URL/api/public/unstable/skills" \
-  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
-  --header "Content-Type: application/json" \
-  --data '{
-    "files": [{
-      "path": "SKILL.md",
-      "content": "---\nname: refund-policy\ndescription: Handle refund requests.\n---\nCheck the refund policy before responding."
-    }]
-  }'
-```
-
-The POST assigns the `latest` label. See the [API reference](https://api.reference.langfuse.com/#tag/unstableskills) for request fields and label management.
-
-</Tab>
-
-<Tab>
-
-With the CLI beta installed, push a local skill folder containing `SKILL.md` and its supporting files:
-
-```bash
-langfuse skills push ./refund-policy --label production
-```
-
-The CLI creates a version when files change and assigns the `production` label.
-
-</Tab>
-
-</Tabs>
-
-## Load skills in your agent
-
-Choose how your agent loads skills. Configure your project credentials with `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` (your Langfuse deployment URL).
-
-<Tabs items={["CLI install", "API fetch"]}>
-
-<Tab>
-
-Install skills into your agent's workspace with the CLI beta (Node.js 20+). Your agent can then read the installed instructions and supporting files from disk:
-
-```bash
-npm install -g @langfuse/cli@beta
-langfuse skills install refund-policy --label production
-langfuse skills update
-```
-
-</Tab>
-
-<Tab>
-
-Fetch a skill and all its file contents in one API request, then pass the files to your in-memory agent runner:
-
-```typescript
-import { LangfuseClient } from "@langfuse/client";
-import { runAgent } from "./agent";
-
-const langfuse = new LangfuseClient();
-const skill = await langfuse.api.unstable.skills.get("refund-policy", {
-  label: "production",
-  includeContent: true,
-});
-
-await runAgent(skill.files);
-```
-
-`runAgent` is your existing agent runner. `skill.files` contains each file's path and text content. The response resolves an immutable version, so moving the label does not change this run's files. You can also request an exact `version` instead of a label.
-
-</Tab>
-
-</Tabs>
-
-## Trace skill usage
-
-Record which skills were available to the agent and which files it loaded, including resolved versions and resource paths.
-
-These examples assume [Langfuse tracing is configured](/docs/observability/sdk/overview). `runAgent` is your existing instrumented agent runner, exported from `./agent`.
-
-<Tabs items={["Installed skills (SDK)", "Fetched skills (SDK)", "OpenTelemetry"]}>
-
-<Tab>
-
-For CLI-installed skills, add `skills: { dir: ".agents/skills" }` to your existing `LangfuseSpanProcessor`, matching your install directory. Enable discovery for the traced run:
-
-```typescript
-import { propagateAttributes } from "@langfuse/tracing";
-import { runAgent } from "./agent";
-
-await propagateAttributes({ includeDiscoveredSkills: true }, () => runAgent());
-```
-
-Discovery runs once in the background. Only spans started after it finishes include the discovered skills. Your agent still loads the installed files itself.
-
-</Tab>
-
-<Tab>
-
-Reuse the `skill` returned by the API example above to attach its name and resolved version to the traced run:
-
-```typescript
-import { propagateAttributes } from "@langfuse/tracing";
-import { runAgent } from "./agent";
-
-await propagateAttributes({ availableSkills: [skill] }, () =>
-  runAgent(skill.files),
-);
-```
-
-The available skills propagate to child spans created inside this callback.
-
-</Tab>
-
-<Tab>
-
-For raw OpenTelemetry instrumentation, set these attributes on your active model-call span before it ends:
-
-```typescript
-import { trace } from "@opentelemetry/api";
-
-const span = trace.getActiveSpan();
-span?.setAttributes({
-  "langfuse.observation.skills_available": JSON.stringify([
-    { skillName: "refund-policy", skillVersion: 2 },
-  ]),
-});
-```
-
-Use the actual version your agent loaded. The raw attribute takes a JSON string with `skillName` and `skillVersion`; this records availability on the current generation span and does not propagate to child spans.
-
-</Tab>
-
-</Tabs>
-
-Successful instrumented skill tools record the files actually loaded. Installing or fetching files alone does not record agent use.
-
-Select a generation in the trace tree and open **Preview → Skills** to see the skills available to that model call, with links to their resolved versions:
+With [skill tracing configured](/docs/skill-management/tracing), generations show the reported skill list, with links to each version.
 
 ![A generation showing four available skills and their version links in the trace's Preview view.](/images/changelog/2026-10-19-skill-management-generation.jpg)
 
-For a successful `loadSkill` tool call, the same section shows the loaded skill and version. Expand its file list to inspect the resource it loaded, such as `SKILL.md`:
+Traced skill-loading tool calls show which files the agent read. Open **Preview → Skills** on a successful call to see the skill version and file paths.
 
 ![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-10-19-skill-management-tool-load.jpg)
 
-Use custom dashboards to count how often skills were available and how often agents loaded their resources, with breakdowns by skill and file.
-
-To get started, open **[Skills](https://cloud.langfuse.com/project/~/skills)** in your project.
+See the [Skill Management docs](/docs/skill-management/overview) or [create your first skill](/docs/skill-management/get-started).
