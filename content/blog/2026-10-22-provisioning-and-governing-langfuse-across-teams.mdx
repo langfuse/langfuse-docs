@@ -16,13 +16,15 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["borismichel", "doneylidejesus"]}
 />
 
-Related guide: [Operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service).
+<Callout type="info">
+  Already running a shared Langfuse service? See [Operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service) for SDK upgrades, service health, application-team support and cost allocation.
+</Callout>
 
 As more teams adopt Langfuse, platform teams need a consistent way to onboard applications, control access, and keep ownership clear. Teams may need different permissions for experimentation and production, and each integration needs to meet the organization's data-handling requirements. Managing those decisions case by case becomes difficult as adoption grows.
 
 You'll learn how to choose organization and project boundaries, provision users and credentials, and verify that integrations produce safe, useful telemetry. The recommendations also cover the steps from a team's first trace to evaluation workflows, and the ownership and offboarding practices that keep access current as teams change.
 
-The guidance applies to platform teams managing Langfuse across multiple application teams. The examples follow two teams: Support, which is building a customer support assistant, and Search, which is building an internal knowledge search application.
+The guidance applies to platform teams managing Langfuse across multiple application teams. The hypothetical examples follow two teams: Support, which is building a customer support assistant, and Search, which is building an internal knowledge search application.
 
 ## Define the platform service
 
@@ -40,6 +42,14 @@ In this example, the platform team provides the Langfuse endpoint, organization 
 Capture a primary owner and backup, deployment region, environments, data classification, expected usage, and allocation identifier in the onboarding request. Keep these details linked to the project, using your existing catalog, configuration repository, or team workspace. Identify production-access approvers and exception reviewers. Add a review date for experimental projects so ownership and access remain current.
 
 Cloud and self-hosting change infrastructure responsibilities, but both need a defined service model. With Cloud, the internal platform team still manages how application teams gain access and use the service. For self-hosting, assign responsibility for operating the deployment as well. Reliability, upgrades, support, and cost allocation are covered in the companion article on [operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service).
+
+## Learn from shared platform deployments
+
+[Merck's published story on serving 80+ AI project teams](/users/merckgroup) is a concrete example of central provisioning. Teams describe their application and request access through an internal use-case portal. After approval, automated pipelines provision the tools and resources they need, including Langfuse access through its APIs. For the onboarding workflow in this guide, the useful pattern is a request that carries the application's context through approval and provisioning.
+
+[Khan Academy's story](/users/khan-academy) illustrates adoption across product and infrastructure teams. Internal interfaces link to Langfuse traces, support teams use them to investigate incidents, and engineers share traces when debugging. The lesson for a shared service is to make useful traces part of the tools and workflows teams already use.
+
+These published examples show different ways to organise a shared service. The hypothetical Support and Search design below illustrates the access decisions you still need to make for your own teams.
 
 ## Design project and access boundaries
 
@@ -79,6 +89,8 @@ Figure 2. A recommended onboarding lifecycle. Failed acceptance checks return to
 
 Provide a version-controlled SDK or OpenTelemetry reference integration that the application team can adapt. It should select the right endpoint and project, set consistent environment and release values, and capture useful request context. In [Langfuse's data model](/docs/observability/data-model), observations are the individual steps grouped by a trace ID. Use [stable observation names](/docs/observability/best-practices) and meaningful input and output on the root observation. Include the routing configuration for application spans and shared components in the reference integration; a shared trace ID doesn't grant cross-project visibility.
 
+Build the starter from the [tracing quickstart](/docs/observability/get-started), then add your endpoint, project selection and data-handling conventions. Link the [Academy introduction to tracing](/academy/tracing) for colleagues who need to understand the trace they are inspecting. The quickstart gets data flowing; the acceptance checks below establish whether the integration meets your team's requirements.
+
 Data handling belongs in this integration step. Decide which inputs, outputs, metadata, and identifiers may leave the application. Mask or omit prohibited fields before export, and test the actual instrumentation used by the team. Masking coverage depends on the SDK version, integration, and export path. Follow the [current guidance](/docs/observability/features/masking) for that combination, including third-party instrumentation. A configured callback is not evidence that every field and export path has been checked.
 
 Test successful and failing requests with synthetic sensitive values, then inspect the exported telemetry to verify that masking or omission worked as intended. Check separate logs and exporters too. Sampling and retention need their own policies; neither replaces controls that prevent prohibited data from being collected.
@@ -100,6 +112,8 @@ If the access test fails, onboarding stays open. The same applies when a trace l
 ## From tracing to evaluation
 
 Build role-specific tasks into onboarding. A developer investigates a failed request, an evaluator reviews examples, and a product owner inspects application behavior. Use the reference integration and a small example dataset to make each workflow reproducible.
+
+Use [Evaluate with Datasets](/docs/evaluation/get-started/offline) for a first runnable experiment. Include the link in the onboarding handoff alongside the team's example dataset and the name of the person responsible for reviewing its results.
 
 For Support, an initial workflow could turn a sanitized failure example into a regression test, evaluate a candidate prompt, and review the result before release. The application team defines a correct answer and decides whether the change is acceptable. For [new v4 request evaluations](/faq/all/llm-as-a-judge-migration), target an explicit observation, usually the root for the end-to-end result, and put the required context there. A trace ID groups the steps; it doesn't identify which step you're scoring. Check the resulting score's target and count. The platform team can provide a tested evaluation example that application teams adapt to their own criteria.
 

@@ -16,7 +16,9 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["borismichel", "doneylidejesus"]}
 />
 
-Related guide: [Provisioning and governing Langfuse across teams](/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams).
+<Callout type="info">
+  Setting up access for a new team? See [Provisioning and governing Langfuse across teams](/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams) for project boundaries, identity integration and onboarding checks.
+</Callout>
 
 Once several application teams rely on Langfuse, platform teams need to keep integrations working as SDKs, applications, and responsibilities change. A missing trace could be caused by an application release, an expired credential, or a service failure. Clear ownership and tested workflows help teams resolve these issues and handle routine work independently.
 
@@ -68,6 +70,8 @@ What happens to the application when Langfuse is unavailable? Test it, especiall
 
 An engineer investigating an incomplete trace and a product owner reviewing an answer need different help. Provide task-specific examples they can run and adapt. A general product tour rarely covers the diagnostic steps an engineer needs or the evaluation criteria a domain reviewer must apply.
 
+[Canva's published support-agent story](/users/canva) shows what this can look like across roles. Engineers investigate traces, QA reviewers score examples, and domain experts contribute evaluation criteria. A marketing manager in Japan created a tone-of-voice evaluator without engineering help. Give each role a concrete task and the context needed to complete it.
+
 Take a hypothetical support assistant that gives incorrect answers about refunds. Its application owner selects approved, sanitized examples for a regression dataset. A domain reviewer defines the expected behavior and checks the evaluation rubric. The team tests a candidate prompt against that dataset, inspects individual failures, and decides whether to release it. After release, it compares quality, latency, and model cost, with a route back to the previous version.
 
 The platform team supplies a reusable experiment example, consistent metadata, and a release-integration example in the team’s existing tooling. It helps when an evaluator cannot run or a prompt cannot be fetched. The application team owns the dataset’s relevance and the decision to accept the result. Platform support keeps the workflow usable; application owners remain accountable for quality.
@@ -75,6 +79,21 @@ The platform team supplies a reusable experiment example, consistent metadata, a
 Use Langfuse’s prompt versions, labels, datasets, and experiments within a workflow your team understands. [Compose approval steps and any gradual traffic rollout](/resources/engineering/prompt-cicd) in your release tooling or application. Confirm the controls available in your deployment before relying on them; versioned prompts alone do not create an approval process.
 
 Turn recurring support issues into runnable examples and runbook updates. Use focused office hours for teams working through a migration or new workflow. Assess adoption by whether teams can complete an evaluation or diagnose a trace independently, alongside account and activity metrics.
+
+### Give teams a short working playbook
+
+Maintain an internal guide that connects the team's tasks to the relevant [Langfuse Academy](/academy) concepts and product quickstarts. Add the local decisions those resources cannot supply: the approved project and endpoint, permitted data, the reference integration, support contacts and who reviews a release. Link to the maintained setup instructions so the playbook can focus on how your teams work.
+
+| Team task                     | Starting resource                                                                 | What the team should be able to show                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Instrument a useful request   | [Tracing quickstart](/docs/observability/get-started)                             | A trace in the intended project, with useful context and the agreed sensitive fields removed or masked.   |
+| Decide what quality means     | [Academy: choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) | A short set of criteria tied to observed failures and application requirements, with a named reviewer.    |
+| Test a proposed change        | [Evaluate with Datasets](/docs/evaluation/get-started/offline)                    | A comparison against a baseline on an approved dataset, with failures reviewed before a release decision. |
+| Monitor quality after release | [Evaluate Production Traffic](/docs/evaluation/get-started/online)                | Scores on the intended observations, with someone responsible for investigating failures.                 |
+
+For the hypothetical Support team, the [Academy customer-support chatbot example](/academy/examples/customer-support-chatbot) connects offline testing, internal use and customer-facing rollout. Use it to discuss the team's own acceptance criteria and review responsibilities. For Search, use approved questions and source material to review retrieval failures and unsupported answers before comparing candidate changes. These are suggested exercises for the two illustrative teams, not claims about the customer deployments above.
+
+Keep the playbook owned and tested. When an integration or evaluation workflow changes, have an application team follow the relevant exercise and update any instructions that no longer work.
 
 ## Maintain access and credentials
 
