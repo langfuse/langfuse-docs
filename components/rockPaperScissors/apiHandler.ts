@@ -399,11 +399,6 @@ const handler = async (req: Request) => {
                 value: timedOut ? 1 : 0,
                 dataType: "BOOLEAN",
               },
-              {
-                name: "response_time_ms",
-                value: responseTimeMs,
-                dataType: "NUMERIC",
-              },
             ];
             if (predictionCorrect !== null) {
               scores.push({
