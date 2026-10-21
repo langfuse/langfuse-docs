@@ -39,10 +39,10 @@ Pixeltable's spans record which operation, row, column, and UDF ran. An LLM inst
 ## Install dependencies
 
 ```bash
-pip install 'pixeltable[otel]' langfuse openinference-instrumentation-openai
+pip install 'pixeltable[otel]' openai langfuse openinference-instrumentation-openai
 ```
 
-The `otel` extra installs Pixeltable's OpenTelemetry bridge (`opentelemetry-instrumentation-pixeltable`) together with the OpenTelemetry SDK and OTLP exporter. `openinference-instrumentation-openai` adds generation spans for OpenAI calls. Other OpenInference instrumentors that attach to the global tracer provider work the same way.
+The `otel` extra installs Pixeltable's OpenTelemetry bridge (`opentelemetry-instrumentation-pixeltable`) together with the OpenTelemetry SDK and OTLP exporter. `openai` is the client that `chat_completions()` calls; neither Pixeltable nor the instrumentor installs it. `openinference-instrumentation-openai` adds generation spans for OpenAI calls. Other OpenInference instrumentors that attach to the global tracer provider work the same way.
 
 ## Configure credentials
 
@@ -85,7 +85,7 @@ pxt_otel.init(
     endpoint=f"{base_url}/api/public/otel",  # the exporter appends /v1/traces
     headers=f"Authorization=Basic {token},x-langfuse-ingestion-version=4",
     service_name="pixeltable-app",
-    span_level="debug",  # per-row and per-UDF spans; "info" is operation-level only
+    span_level="debug",  # adds row, UDF, and file spans; "info" keeps operation, catalog, store, and SQL spans
     metrics=False,  # Langfuse ingests traces
 )
 OpenAIInstrumentor().instrument()
@@ -93,7 +93,7 @@ OpenAIInstrumentor().instrument()
 import pixeltable as pxt
 from pixeltable.functions import openai
 
-t = pxt.create_table("articles", {"id": pxt.Int, "body": pxt.String})
+t = pxt.create_table("articles", {"id": pxt.Int, "body": pxt.String}, if_exists="replace")
 t.add_computed_column(
     summary=openai.chat_completions(
         messages=[{"role": "user", "content": "Summarize in one sentence: " + t.body}],
@@ -120,6 +120,17 @@ trace.get_tracer_provider().force_flush()  # short-lived scripts: send spans bef
 
 You can set `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_EXPORTER_OTLP_HEADERS` instead of passing `endpoint` and `headers`. Pixeltable also reads the endpoint from the `[otel]` section of `~/.pixeltable/config.toml`. Keep the authorization header in the environment, because it contains your secret key. Details are in Pixeltable's [observability guide](https://docs.pixeltable.com/platform/observability).
 
+To trace a served app, run `pxt service run` or `pxt service update` with `--otel`. It calls `pxt_otel.init()` before it loads the app file, so configure the export in the environment:
+
+```bash
+export OTEL_EXPORTER_OTLP_ENDPOINT="$LANGFUSE_BASE_URL/api/public/otel"
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic $(printf '%s' "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" | base64 | tr -d '\n'),x-langfuse-ingestion-version=4"
+export OTEL_METRICS=false
+export OTEL_SPAN_LEVEL=debug
+```
+
+The app file must not call `pxt_otel.init()`. If the database entry in `pixeltable.toml` sets `db_exporter_otlp_endpoint`, that value wins over `OTEL_EXPORTER_OTLP_ENDPOINT`.
+
 <Callout type="warning">
   Instrument each model provider once. The Anthropic Python SDK emits its own
   OpenTelemetry spans for `messages.create`, and Langfuse records those as
@@ -138,7 +149,7 @@ Create the Langfuse client first and pass `should_export_span`. From SDK v4 onwa
 Attach Pixeltable with `PixeltableInstrumentor().instrument()`. That uses the global provider the Langfuse client already installed. `pxt_otel.init()` builds its own provider, so use it only in the [OpenTelemetry export](#otel-export) approach above.
 
 ```python
-from langfuse import Langfuse
+from langfuse import Langfuse, propagate_attributes
 from langfuse.span_filter import is_default_export_span
 
 
@@ -205,13 +216,15 @@ async def headline(text: str, row_id: int) -> str:
 On the `articles` table from the example above:
 
 ```python
+import pixeltable as pxt
 from my_udfs import headline, word_count
 
+t = pxt.get_table("articles")
 t.add_computed_column(words=word_count(t.body))
 t.add_computed_column(title=headline(t.body, t.id))
 ```
 
-The `@observe` span nests under the Pixeltable UDF span, and LLM calls made inside it nest under the `@observe` span. This works for synchronous and asynchronous UDFs. Pass a column into the UDF, as `t.id` does above, when you want a row id on the trace. Pixeltable's own spans do not include row ids or cell values. Metadata rules are in [Metadata](/docs/observability/features/metadata).
+The `@observe` span nests under the Pixeltable UDF span, and LLM calls made inside it nest under the `@observe` span. This works for synchronous and asynchronous UDFs. Pixeltable's own spans do not include row ids or cell values. To attach an id, pass the column into a UDF and call `propagate_attributes()` inside it, as `headline()` does. Metadata rules are in [Metadata](/docs/observability/features/metadata).
 
 ### Group a batch into one trace [#one-trace-per-batch]
 
@@ -233,7 +246,7 @@ with langfuse.start_as_current_observation(name="ingest-docs", as_type="span"):
     with propagate_attributes(
         trace_name="ingest-docs",
         tags=["pixeltable"],
-        metadata={"table": "docs"},
+        metadata={"table": "articles"},
     ):
         t.insert(rows)
 
@@ -244,22 +257,21 @@ langfuse.flush()
 
 Open [Traces](https://cloud.langfuse.com/project/~/traces) and filter by the trace name (`ingest-docs`), the `pixeltable` tag, or metadata (`table`).
 
-<Frame className="my-10" fullWidth>
-  ![Langfuse trace of a Pixeltable insert named ingest-docs. The graph nests
-  pixeltable.insert, row and UDF spans, and an OpenAI generation. Trace tags
-  are ingest-docs and pixeltable, and metadata records the table
-  name.](/images/integrations/pixeltable_trace.png)
+<Frame className="my-10">
+  ![Langfuse trace graph of a Pixeltable insert named ingest-docs:
+  pixeltable.insert with row and UDF spans, @observe spans, and an OpenAI
+  generation.](/images/integrations/pixeltable_trace.png)
 </Frame>
 
 ## LLM generations only [#generations-only]
 
 To record the model calls and skip Pixeltable spans, import `langfuse.openai` before Pixeltable runs. The wrapper patches the `openai` module, including the `AsyncOpenAI` client that `pixeltable.functions.openai` uses, so each computed-column call becomes an OpenAI generation with tokens and cost.
 
-You can also create a Langfuse client and call `OpenAIInstrumentor().instrument()` on its own. Each insert then produces one trace per LLM call, unless you wrap the insert in `start_as_current_observation` as shown above.
+You can also create a Langfuse client and call `OpenAIInstrumentor().instrument()` on its own. Each insert then produces one trace per LLM call. To group a batch under one trace, use the [Langfuse SDK](#langfuse-sdk) approach. Without the Pixeltable bridge, a notebook or any caller with a running event loop runs the query on a worker thread that does not carry the Langfuse context.
 
 ## Notes [#notes]
 
-- With the bridge on, every Pixeltable call is traced, including `create_dir`, `create_table`, `drop_dir`, and `collect`. `span_level="info"` keeps operation-level spans only. Generations then attach to the operation span, because the per-row and per-UDF spans are omitted.
+- With the bridge on, every Pixeltable call is traced, including `create_dir`, `create_table`, `drop_dir`, and `collect`. `span_level="info"` drops the per-row, per-UDF, and per-file spans. On an insert, the generation then nests under `pixeltable.store.insert_rows`.
 - Computed-column results are stored. `collect()` produces a Pixeltable span and does not call the model again. LLM calls run on `insert`, on `update`, and when `add_computed_column` backfills existing rows.
 - Flush before a short-lived script exits: `trace.get_tracer_provider().force_flush()` for OpenTelemetry export, or `langfuse.flush()` for the SDK.
 - Turn tracing on before the first Pixeltable operation.
