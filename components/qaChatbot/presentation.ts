@@ -1,11 +1,15 @@
-import type { UIMessage } from "ai";
+import type { ChatStatus, UIMessage } from "ai";
 
 type Part = UIMessage["parts"][number];
+
+export function isMessageSettled(status: ChatStatus, isLastMessage: boolean) {
+  return !isLastMessage || (status !== "submitted" && status !== "streaming");
+}
 
 /** Keep tool-call narration inside reasoning without changing the API history. */
 export function getPresentationParts(
   parts: Part[],
-  isComplete: boolean,
+  isSettled: boolean,
 ): Part[] {
   const displayParts = parts.map((part) => ({ ...part }));
   const lastStepIndex = parts.findLastIndex(
@@ -24,10 +28,10 @@ export function getPresentationParts(
     } else if (
       part.type === "text" &&
       part.text.trim() &&
-      (!isComplete || index < lastStepIndex)
+      (!isSettled || index < lastStepIndex)
     ) {
       // A finished text segment can still be followed by a tool call. Keep
-      // unclassified text collapsed until the whole response has finished.
+      // unclassified text collapsed until the response finishes or is interrupted.
       if (reasoningIndex === undefined) {
         reasoningIndex = index;
         displayParts[index] = {

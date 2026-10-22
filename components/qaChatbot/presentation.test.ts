@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { UIMessage } from "ai";
-import { getPresentationParts } from "./presentation.ts";
+import { getPresentationParts, isMessageSettled } from "./presentation.ts";
 
 type Parts = UIMessage["parts"];
 const text = (value: string): Parts[number] => ({
@@ -122,4 +122,38 @@ test("pending narration preserves streaming state and stable tool positions", ()
   assert.equal("state" in result[0] && result[0].state, "streaming");
   assert.deepEqual(result[2], parts[2]);
   assert.deepEqual(answerText(result), []);
+});
+
+test("stopped and failed replies reveal partial answers even without text-end", () => {
+  const parts: Parts = [
+    reasoning("Search the docs."),
+    text("I’ll search the documentation."),
+    tool("searchDocs"),
+    { type: "step-start" },
+    { type: "text", text: "Langfuse helps you", state: "streaming" },
+  ];
+
+  for (const status of ["ready", "error"] as const) {
+    const result = getPresentationParts(parts, isMessageSettled(status, true));
+    assert.deepEqual(answerText(result), ["Langfuse helps you"]);
+    assert.equal(result[0].type, "reasoning");
+    assert.equal("text" in result[1] && result[1].text, "");
+  }
+
+  for (const status of ["submitted", "streaming"] as const) {
+    assert.deepEqual(
+      answerText(getPresentationParts(parts, isMessageSettled(status, true))),
+      [],
+    );
+  }
+});
+
+test("starting another turn keeps earlier partial answers visible", () => {
+  const parts: Parts = [text("A partial answer.")];
+  assert.deepEqual(
+    answerText(
+      getPresentationParts(parts, isMessageSettled("streaming", false)),
+    ),
+    ["A partial answer."],
+  );
 });

@@ -4,7 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { FormEvent, HTMLAttributes } from "react";
 import { useChat } from "@ai-sdk/react";
 import { getPersistedNanoId } from "./utils/persistedNanoId";
-import { getPresentationParts } from "./presentation";
+import { getPresentationParts, isMessageSettled } from "./presentation";
 
 import {
   Conversation,
@@ -124,13 +124,12 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               ...message,
               parts: getPresentationParts(
                 message.parts,
-                completedMessageIds.has(message.id) &&
-                  (index < messages.length - 1 || status === "ready"),
+                isMessageSettled(status, index === messages.length - 1),
               ),
             }
           : message,
       ),
-    [messages, completedMessageIds, status],
+    [messages, status],
   );
 
   // Check if user has submitted any messages
@@ -215,7 +214,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               </div>
             </div>
           )}
-          <ConversationContent className="space-y-2">
+          <ConversationContent className="space-y-2 pt-0">
             {presentedMessages.map((message, messageIndex) => (
               <div key={message.id}>
                 {message.role === "assistant" && (
@@ -254,6 +253,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                   key={message.id}
                   className={cn(
                     message.role === "assistant" && "[&>div]:max-w-full",
+                    message.role === "user" && "pt-1",
                     startsWithThinking(message) && "pt-1",
                     message.role === "user" &&
                       startsWithThinking(presentedMessages[messageIndex + 1]) &&
@@ -320,7 +320,6 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               isLastMessage &&
                               isNotFirstMessage &&
                               isLastTextPart &&
-                              isMessageComplete &&
                               isChatIdle && (
                                 <Actions className="mt-2">
                                   <Action
@@ -377,7 +376,13 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                                   ? "mb-0"
                                   : undefined,
                             )}
-                            isStreaming={part.state === "streaming"}
+                            isStreaming={
+                              part.state === "streaming" &&
+                              !isMessageSettled(
+                                status,
+                                messageIndex === messages.length - 1,
+                              )
+                            }
                           >
                             <ReasoningTrigger className="gap-1.5 text-xs font-normal leading-5 [&_p]:m-0 [&_svg]:size-3.5" />
                             <ReasoningContent>{part.text}</ReasoningContent>
@@ -418,6 +423,22 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
                       return null;
                     })}
+                    {message.role === "assistant" &&
+                      messageIndex === messages.length - 1 &&
+                      isMessageSettled(status, true) &&
+                      !message.parts.some(
+                        (part) => part.type === "text" && part.text.trim(),
+                      ) && (
+                        <Actions className="mt-2">
+                          <Action
+                            onClick={handleRegenerate}
+                            label="Retry"
+                            tooltip="Retry"
+                          >
+                            <RefreshCcwIcon className="size-3" />
+                          </Action>
+                        </Actions>
+                      )}
                   </MessageContent>
                 </Message>
               </div>
