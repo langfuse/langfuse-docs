@@ -48,28 +48,20 @@ export function UseCaseGrid({
 } = {}) {
   return (
     <div className="mt-8 grid gap-2 md:grid-cols-2">
-      {useCases.map((useCase, index) => {
+      {useCases.map((useCase) => {
         const Icon = useCaseIcons[useCase.icon];
         const inner = (
           <>
             <div className="flex items-start justify-between gap-3">
-              <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                {String(index + 1).padStart(2, "0")} · {useCase.area}
-                {"proof" in useCase && useCase.proof ? (
-                  <span className="ml-2 text-text-secondary">
-                    {useCase.proof}
-                  </span>
-                ) : null}
-              </p>
+              <h3 className="text-[20px] leading-[1.15] text-text-primary">
+                {useCase.title}
+              </h3>
               <Icon
                 className="h-5 w-5 shrink-0 text-text-secondary"
                 strokeWidth={1.75}
                 aria-hidden
               />
             </div>
-            <h3 className="mt-2 text-[20px] leading-[1.15] text-text-primary">
-              {useCase.title}
-            </h3>
             <p className="mt-3 text-[13px] leading-[1.45] text-text-secondary">
               {useCase.description}
             </p>

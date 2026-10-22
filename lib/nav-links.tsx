@@ -61,7 +61,7 @@ export const useCaseLinks: NavPanelLink[] = [
 
 export const industryLinks: NavPanelLink[] = [
   {
-    name: "Financial Services Industry",
+    name: "Financial Services",
     href: "/financial-services",
     icon: Landmark,
   },
