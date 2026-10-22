@@ -25,16 +25,16 @@ export const healthcareReasons = [
     body: "Run Langfuse in your VPC or in an air-gapped environment.",
   },
   {
-    title: "Clinician or domain expert review before release",
-    body: "Send traces and dataset items to annotation queues for clinicians or domain experts.",
+    title: "Clinician or domain expert review in platform",
+    body: "Send traces and dataset items to annotation queues for clinicians or domain experts to review, correct, and pinpoint failure modes.",
   },
   {
     title: "Quality gates and evidence for audits",
-    body: "Evaluate changes on datasets, and keep traces and scores for review.",
+    body: "Evaluate changes with datasets and experiments before going live, and keep traces and scores for review.",
   },
   {
     title: "One platform for every AI team",
-    body: "Share traces, prompts, and evaluations across the teams that build agents.",
+    body: "Orchestrate one platform for tracing, evals, and cost tracking across teams. Govern centrally across the org.",
   },
 ] as const;
 
