@@ -8,7 +8,7 @@ ogImage: /images/videos/evals-for-high-stakes-ai-agents.jpg
 
 Some AI agents can afford a few mistakes. A customer-facing agent at a bank cannot. A wrong answer can carry financial, legal, and reputational risk, and the system can look perfectly healthy while it happens. In the opening example, a support agent tells a user their refund has been issued. Every status is green and there are no latency issues, but the refund tool was never called. Nobody finds out until the customer comes back weeks later.
 
-In this workshop from AI Engineer, Annabell Schäfer and Doneyli De Jesus from Langfuse walk through the full AI engineering loop using a banking assistant built for the kind of financial institutions they work with. It is for teams in financial services, healthcare, and other regulated industries who have a working prototype and now need to answer the question leadership always asks: how do we know this agent is safe to put in front of customers?
+In this workshop from AI Engineer, Annabell Schäfer and Doneyli De Jesus walk through the full AI engineering loop using a banking assistant for financial institutions. It is for teams in financial services, healthcare, and other regulated industries who have a working prototype and now need to answer the question leadership always asks: how do we know this agent is safe to put in front of customers?
 
 <iframe
   width="100%"
@@ -34,7 +34,7 @@ In this workshop from AI Engineer, Annabell Schäfer and Doneyli De Jesus from L
 
 ## The AI engineering loop [#ai-engineering-loop]
 
-Annabell starts with the [AI engineering loop](/academy/ai-engineering-loop), the set of practices that teams who reliably ship and improve agents tend to follow:
+The workshop starts with the [AI engineering loop](/academy/ai-engineering-loop), the set of practices that teams who reliably ship and improve agents tend to follow:
 
 - **Tracing** records every step your agent takes in a log you can inspect as a human, and that your coding agent can work with at scale.
 - **Monitoring** makes sense of traces at scale: cost and latency, but also quality signals like whether compliance guardrails held, or how many users are frustrated.
@@ -48,15 +48,15 @@ You close this loop continuously, learning from production and feeding it back i
 
 The right entry point depends on the stakes. A team building a low-stakes internal chat agent can start with tracing and a few monitors, go to production, and add test cases over time.
 
-Customer-facing agents in regulated industries need more up front. Tracing is always the foundation: what steps the agent took, what inputs and outputs it saw, and which tools it called. On top of that, these teams need a ground truth dataset, and Annabell describes three ways she has seen teams build one:
+Customer-facing agents in regulated industries need more up front. Tracing is always the foundation: what steps the agent took, what inputs and outputs it saw, and which tools it called. On top of that, these teams need a ground truth dataset. There are three ways to build one:
 
 - **Expert curation.** Work with domain experts in your company to build the dataset directly.
 - **Shadow runs.** Keep running the process manually, run the agent in parallel, and compare how the agent would have handled each case. This measures accuracy and builds your ground truth at the same time.
-- **Human in the loop first.** Run a fully human-reviewed system, then over time slice the work into parts you are confident to automate and parts where a human always stays involved. This is what Annabell did in her previous role building agents for medical device compliance.
+- **Human in the loop first.** Run a fully human-reviewed system, then over time slice the work into parts you are confident to automate and parts where a human always stays involved. Agents for medical device compliance are one place this path has been used.
 
 ## Demo: a banking assistant with tracing and PII masking [#banking-assistant]
 
-Doneyli's demo is a typical banking assistant ([banking assistant demo repo](https://github.com/doneyli/clickhouse-llm-observability/tree/main/demos/bank-assistant)), with a few features that matter for financial services:
+The demo is a typical banking assistant ([banking assistant demo repo](https://github.com/doneyli/clickhouse-llm-observability/tree/main/demos/bank-assistant)), with a few features that matter for financial services:
 
 - **Persona impersonation.** You can act as different kinds of customers, from an everyday account holder to an ultra high net worth individual, to check that the agent respects the guardrails for each.
 - **PII masking.** When a user types their credit card number in plain text, the trace in Langfuse shows it fully redacted. A [masking function](/docs/observability/features/masking) removes anything defined as PII before it is persisted. Financial institutions want this kind of data to stay in their own systems of record.
@@ -70,7 +70,7 @@ The demo also handles voice. A recorded contact center call goes through speech 
 
 Customers will always find ways to use your system that you did not design for, and you cannot anticipate every outcome of an LLM-powered system. That is why the evaluation work is anchored in [datasets](/docs/evaluation/experiments/datasets).
 
-A dataset is a set of inputs and expected outputs. Doneyli's framing for anyone from software development: these are your test cases, and you would not ship software without QA. A few practical points from the demo:
+A dataset is a set of inputs and expected outputs. If you come from software development, treat them as your test cases. You would not ship software without QA. A few practical points from the demo:
 
 - **The expected output does not have to be the exact answer.** It can describe the intent or behavior you expect.
 - **Use several datasets for different areas of quality.** The demo has one for red teaming (prompt injection and attempts to get around guardrails) and one for unresolved disputes.
@@ -80,9 +80,9 @@ Everything shown in the UI can also be done through the [CLI](/docs/api-and-data
 
 ## Expert review and failure modes [#expert-review]
 
-Before you can measure quality, you need to know what goes wrong. Looking at traces to see whether the agent took the right steps, called the right tools, and produced the output you want is [error analysis](/academy/monitoring/error-analysis). Annabell spent days doing exactly this in her previous job.
+Before you can measure quality, you need to know what goes wrong. Looking at traces to see whether the agent took the right steps, called the right tools, and produced the output you want is [error analysis](/academy/monitoring/error-analysis). That reading can take days.
 
-You cannot read thousands of production traces by hand, so Doneyli recommends this process:
+You cannot read thousands of production traces by hand, so use this process:
 
 1. **Sample.** Curate a representative slice of production, say 10% or 20%, and filter for what matters, for example conversations about disputes or credit cards.
 2. **Send it to an expert.** Put the sample into an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for a domain expert, such as your risk expert.
@@ -95,7 +95,7 @@ Those failure modes become your quality dimensions, the scores you measure every
 
 With your failure modes defined, decide how to grade each one. You can build a library of evaluators that score traces automatically as they come in, and you can also send [scores from your application](/docs/evaluation/evaluation-methods/scores-via-sdk) in real time.
 
-The key lesson from working with these customers: **use a balanced mix of LLM-as-a-judge and deterministic evaluators**, depending on the failure mode.
+The key lesson: **use a balanced mix of LLM-as-a-judge and deterministic evaluators**, depending on the failure mode.
 
 - **LLM-as-a-judge** handles judgment calls, but if you rely on it entirely there is a nonzero chance some grades are wrong. That is the nature of LLMs.
 - **Code evaluators** are plain functions. The demo uses a simple regex for an exact match. For the same input they return the same output every time.
@@ -110,23 +110,23 @@ The demo wires this into CI so no human has to remember to run it:
 
 1. **Version your prompts.** The system prompt lives in [Langfuse prompt management](/docs/prompt-management/overview) with its full version history. Some customers keep a copy in GitHub or GitLab too.
 2. **Trigger on change.** An automation fires on any prompt change and launches a CI job in GitHub. See the [GitHub integration](/docs/prompt-management/features/github-integration) and [webhooks](/docs/prompt-management/features/webhooks-slack-integrations).
-3. **Promote a version.** In the demo, Doneyli promotes version 4 to the `production` label. This works from the UI, the API, or the CLI.
+3. **Promote a version.** In the demo, version 4 is promoted to the `production` label. This works from the UI, the API, or the CLI.
 4. **Run the eval gate.** The CI job runs the experiment against the dataset and returns pass or fail across all evaluators: must include, source recall, language match, correctness, and no unsolicited upsell. Each score can have a **minimum threshold**, and the change only passes if it clears every bar.
 
-Doneyli leaves the final merge to a human, though you could have the pipeline open a PR for review automatically. Either way, you have a paper trail showing why a new configuration went to production. Learn more in [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
+The demo leaves the final merge to a human, though you could have the pipeline open a PR for review automatically. Either way, you have a paper trail showing why a new configuration went to production. Learn more in [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
 
 ## Dashboards for stakeholders [#dashboards]
 
-Business stakeholders want to see that the agent delivers value. Doneyli builds a [custom dashboard](/docs/metrics/features/custom-dashboards) from the data the agent already produces:
+Business stakeholders want to see that the agent delivers value. The demo builds a [custom dashboard](/docs/metrics/features/custom-dashboards) from the data the agent already produces:
 
-- **Directional business value.** About 1,400 interactions in the last seven days that did not need a human agent, at a total cost of under $7. Doneyli is clear the logic will differ by organization, but it shows a direction.
+- **Directional business value.** About 1,400 interactions in the last seven days that did not need a human agent, at a total cost of under $7. The logic will differ by organization, but it shows a direction.
 - **Failure modes over time.** Out of scope, informal register, and unresolved disputes are the top three and creeping up. Instead of searching hundreds of thousands of traces, filter tracing for unresolved disputes, save the filter as a view, and do a targeted investigation on dozens of traces.
 - **User feedback.** Thumbs up and thumbs down captured as scores. Most are positive, so focus on the 18% that are not.
 - **Security mix.** Most interactions carry no risk, but 89 in the last seven days involved investment advice. Filter by the categorical security risk score to see exactly those cases.
 
 ## Working with your coding agent [#coding-agent]
 
-Annabell's warning: some teams hook their coding agent up to their traces and say "Please fix my agent. Make no mistakes." That mostly produces slop.
+Some teams hook their coding agent up to their traces and say "Please fix my agent. Make no mistakes." That mostly produces slop.
 
 Picture two axes, time invested and system quality. Letting the agent fix everything on its own costs you no time and gives you a low-quality system. Doing everything by hand is no longer necessary either. The sweet spot:
 
