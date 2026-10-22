@@ -32,6 +32,21 @@ export const COUNTER: Record<Move, Move> = {
 export const isMove = (value: unknown): value is Move =>
   typeof value === "string" && (MOVES as readonly string[]).includes(value);
 
+/** Reads a completed play_move tool payload. Returns null if `move` is missing. */
+export const parsePlayMove = (
+  input: unknown,
+): { move: Move; predictedUserMove: Move | null } | null => {
+  if (input == null || typeof input !== "object") return null;
+  const parsed = input as { move?: unknown; predicted_user_move?: unknown };
+  if (!isMove(parsed.move)) return null;
+  return {
+    move: parsed.move,
+    predictedUserMove: isMove(parsed.predicted_user_move)
+      ? parsed.predicted_user_move
+      : null,
+  };
+};
+
 export const isOpponentId = (value: unknown): value is OpponentId =>
   typeof value === "string" &&
   (OPPONENT_IDS as readonly string[]).includes(value);

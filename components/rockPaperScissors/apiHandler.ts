@@ -22,6 +22,7 @@ import {
   fallbackMove,
   isMove,
   isOpponentId,
+  parsePlayMove,
   resolveRound,
   sanitizeHistory,
   tally,
@@ -84,7 +85,6 @@ const playMoveInputSchema = z.object({
     .enum(MOVES)
     .describe("The move you predict the human plays this round"),
 });
-type PlayMoveInput = z.infer<typeof playMoveInputSchema>;
 
 const playMoveTool = tool({
   description:
@@ -251,19 +251,12 @@ const handler = async (req: Request) => {
         try {
           try {
             const applyPlayMove = (input: unknown) => {
-              if (
-                modelMove !== null ||
-                input == null ||
-                typeof input !== "object"
-              ) {
-                return false;
-              }
-              const parsed = input as Partial<PlayMoveInput>;
-              if (isMove(parsed.move)) modelMove = parsed.move;
-              if (isMove(parsed.predicted_user_move)) {
-                predictedUserMove = parsed.predicted_user_move;
-              }
-              return modelMove !== null;
+              if (modelMove !== null) return false;
+              const parsed = parsePlayMove(input);
+              if (!parsed) return false;
+              modelMove = parsed.move;
+              predictedUserMove = parsed.predictedUserMove;
+              return true;
             };
 
             const result = streamText({
