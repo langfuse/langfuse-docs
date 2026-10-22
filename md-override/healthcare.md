@@ -9,9 +9,9 @@ Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-re
 
 [Get started](/cloud)
 
-- **HIPAA-ready cloud region with a self-serve BAA:** Sign the BAA, then send PHI only to the dedicated US region.
+- **HIPAA-ready cloud region with a self-serve BAA:** Sign the ClickHouse BAA, then send PHI only to the dedicated US region.
 - **Self-host so patient data never leaves your network:** Run Langfuse in your VPC or in an air-gapped environment.
-- **Clinician review before release:** Send traces and dataset items to annotation queues for clinicians.
+- **Clinician or domain expert review before release:** Send traces and dataset items to annotation queues for clinicians or domain experts.
 - **Quality gates and evidence for audits:** Test changes on datasets, and keep traces and scores for review.
 - **One platform for every AI team:** Share traces, prompts, and evaluations across the teams that build agents.
 
@@ -43,7 +43,7 @@ Customer story · Health. [Read story](/users/evolve)
 
 ## Run Langfuse where patient data is allowed to live
 
-1. **[HIPAA-ready cloud region](/security/hipaa).** A separate US region for healthcare and life sciences workloads. Sign the BAA before you send PHI.
+1. **[HIPAA-ready cloud region](/security/hipaa).** A separate US region for healthcare and life sciences workloads. Sign the ClickHouse BAA before you send PHI.
 2. **[Self-host or air-gap](/self-hosting).** Run Langfuse in your own network, including a deployment with no internet access. Patient data stays there.
 3. **[Masking](/docs/observability/features/masking).** Remove or replace PHI in inputs, outputs, and metadata before it is stored.
 4. **[Access controls](/docs/administration/rbac).** SSO and role-based access scoped to organizations and projects.
@@ -78,15 +78,16 @@ No internet access. No vendor access.
 
 ## Prove it works before patients are impacted by your agents
 
-Test agents on datasets before release. Have clinicians review the results, and check that your AI judges agree with those labels.
+Evaluate agents or datasets before release. Have clinicians and domain experts review the results and check that your AI judges agree with those labels.
 
-### Evaluate before release
+### Evaluate before release and in production
 
-Offline tests, clinician review, and judge calibration.
+Offline evals, clinician or domain expert review, judge calibration, and production checks.
 
-- **[Offline tests with release gates](/docs/evaluation/experiments/experiments-ci-cd):** Run a dataset experiment on each change. Fail the release when a score drops below your threshold.
-- **[Clinician review](/docs/evaluation/evaluation-methods/annotation-queues):** Annotation queues are an in-app review flow. Clinicians label traces and can save a corrected output before a release.
-- **[Calibrate AI judges](/docs/evaluation/scores/score-analytics):** Score Analytics compares AI judge scores with clinician labels. Agreement metrics include Cohen's Kappa, F1, Pearson, and Spearman.
+- **[Offline evals with release gates](/docs/evaluation/experiments/experiments-ci-cd):** Run a dataset experiment on each change. Fail the release when a score drops below your threshold.
+- **[Clinician or domain expert review](/docs/evaluation/evaluation-methods/annotation-queues):** Annotation queues are an in-app review flow. Clinicians or domain experts label traces and can save a corrected output before a release.
+- **[Calibrate AI judges](/docs/evaluation/scores/score-analytics):** Score Analytics compares AI judge scores with clinician or domain expert labels. Agreement metrics include Cohen's Kappa, F1, Pearson, and Spearman.
+- **Compliance and quality checks on production traces:** Run compliance and quality checks with automated evaluators on production traces. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), [Decision model evaluators](/docs/evaluation/evaluation-methods/decision-models).
 
 ### Govern AI systems
 
@@ -101,7 +102,7 @@ Control prompts, protect data, and manage access.
 
 ### Patient support and intake
 
-Trace agents that answer patient questions and collect intake details. Score answers, and review the cases a clinician flags.
+Trace agents that answer patient questions and collect intake details. Score answers, and review the cases a clinician or domain expert flags.
 
 ### Appointment booking
 
@@ -115,7 +116,7 @@ Merck Group · Generative Medical Insights
 
 ### Clinical documentation
 
-Trace agents that draft clinical notes from visits and conversations. Review samples with clinicians before release.
+Trace agents that draft clinical notes from visits and conversations. Review samples with clinicians or domain experts before release.
 
 ### Payer and claims workflows
 
@@ -146,7 +147,7 @@ Start with datasets and release gates. Then read how Merck Group and Evolve use 
 
 ### How do I get a BAA with Langfuse?
 
-Create a fresh Langfuse Cloud account in the HIPAA-ready region. The region runs in Oregon (AWS us-west-2) at [hipaa.cloud.langfuse.com](https://hipaa.cloud.langfuse.com). Subscribe to the [Pro plan or higher](/pricing). [Complete and sign the BAA via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139) before you process PHI. Send HIPAA-regulated data only to that region. It is separate from the EU, US, and Japan regions. In a self-hosted deployment, Langfuse does not receive or process your data, so no BAA with Langfuse is involved. You implement the HIPAA safeguards in your own environment. [HIPAA docs](/security/hipaa).
+Create a fresh Langfuse Cloud account in the HIPAA-ready region. The region runs in Oregon (AWS us-west-2) at [hipaa.cloud.langfuse.com](https://hipaa.cloud.langfuse.com). Subscribe to the [Pro plan or higher](/pricing). [Complete and sign the ClickHouse Business Associate Agreement via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139) before you process PHI. That form is the ClickHouse BAA for Langfuse HIPAA Cloud. It asks for your Langfuse organization ID. [Where to find the organization ID](https://clickhouse.com/legal/how-to-find-langfuseorgid). Send HIPAA-regulated data only to that region. It is separate from the EU, US, and Japan regions. In a self-hosted deployment, Langfuse does not receive or process your data, so no BAA with Langfuse is involved. You implement the HIPAA safeguards in your own environment. [HIPAA docs](/security/hipaa).
 
 ### How do I keep PHI out of traces?
 

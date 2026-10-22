@@ -18,15 +18,15 @@ import type { FAQItem } from "@/components/shared/FAQAccordion";
 export const healthcareReasons = [
   {
     title: "HIPAA-ready cloud region with a self-serve BAA",
-    body: "Sign the BAA, then send PHI only to the dedicated US region.",
+    body: "Sign the ClickHouse BAA, then send PHI only to the dedicated US region.",
   },
   {
     title: "Self-host so patient data never leaves your network",
     body: "Run Langfuse in your VPC or in an air-gapped environment.",
   },
   {
-    title: "Clinician review before release",
-    body: "Send traces and dataset items to annotation queues for clinicians.",
+    title: "Clinician or domain expert review before release",
+    body: "Send traces and dataset items to annotation queues for clinicians or domain experts.",
   },
   {
     title: "Quality gates and evidence for audits",
@@ -75,7 +75,7 @@ export const healthcareStoryCards = [
 export const healthcareTrustPoints = [
   {
     title: "HIPAA-ready cloud region",
-    body: "A separate US region for healthcare and life sciences workloads. Sign the BAA before you send PHI.",
+    body: "A separate US region for healthcare and life sciences workloads. Sign the ClickHouse BAA before you send PHI.",
     href: "/security/hipaa",
   },
   {
@@ -146,23 +146,39 @@ export const healthcareDeploymentModes = [
 
 export const healthcareEvalColumns = [
   {
-    title: "Evaluate before release",
-    summary: "Offline tests, clinician review, and judge calibration.",
+    title: "Evaluate before release and in production",
+    summary:
+      "Offline evals, clinician or domain expert review, judge calibration, and production checks.",
     items: [
       {
-        title: "Offline tests with release gates",
+        title: "Offline evals with release gates",
         body: "Run a dataset experiment on each change. Fail the release when a score drops below your threshold.",
         href: "/docs/evaluation/experiments/experiments-ci-cd",
       },
       {
-        title: "Clinician review",
-        body: "Annotation queues are an in-app review flow. Clinicians label traces and can save a corrected output before a release.",
+        title: "Clinician or domain expert review",
+        body: "Annotation queues are an in-app review flow. Clinicians or domain experts label traces and can save a corrected output before a release.",
         href: "/docs/evaluation/evaluation-methods/annotation-queues",
       },
       {
         title: "Calibrate AI judges",
-        body: "Score Analytics compares AI judge scores with clinician labels. Agreement metrics include Cohen's Kappa, F1, Pearson, and Spearman.",
+        body: "Score Analytics compares AI judge scores with clinician or domain expert labels. Agreement metrics include Cohen's Kappa, F1, Pearson, and Spearman.",
         href: "/docs/evaluation/scores/score-analytics",
+      },
+      {
+        title: "Compliance and quality checks on production traces",
+        body: "Run compliance and quality checks with automated evaluators on production traces.",
+        href: "/docs/evaluation/evaluation-methods/code-evaluators",
+        links: [
+          {
+            href: "/docs/evaluation/evaluation-methods/code-evaluators",
+            label: "Code evaluators",
+          },
+          {
+            href: "/docs/evaluation/evaluation-methods/decision-models",
+            label: "Decision model evaluators",
+          },
+        ],
       },
     ],
   },
@@ -217,7 +233,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Patient support and intake",
     icon: "messages-square",
     description:
-      "Trace agents that answer patient questions and collect intake details. Score answers, and review the cases a clinician flags.",
+      "Trace agents that answer patient questions and collect intake details. Score answers, and review the cases a clinician or domain expert flags.",
   },
   {
     area: "Access",
@@ -242,7 +258,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Clinical documentation",
     icon: "clipboard-pen",
     description:
-      "Trace agents that draft clinical notes from visits and conversations. Review samples with clinicians before release.",
+      "Trace agents that draft clinical notes from visits and conversations. Review samples with clinicians or domain experts before release.",
   },
   {
     area: "Payers",
@@ -277,7 +293,7 @@ export const healthcareFaqs: FAQItem[] = [
   {
     question: "How do I get a BAA with Langfuse?",
     answer:
-      "Create a fresh Langfuse Cloud account in the HIPAA-ready region. The region runs in Oregon (AWS us-west-2) at [hipaa.cloud.langfuse.com](https://hipaa.cloud.langfuse.com). Subscribe to the [Pro plan or higher](/pricing). [Complete and sign the BAA via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139) before you process PHI. Send HIPAA-regulated data only to that region. It is separate from the EU, US, and Japan regions. In a self-hosted deployment, Langfuse does not receive or process your data, so no BAA with Langfuse is involved. You implement the HIPAA safeguards in your own environment. [HIPAA docs](/security/hipaa).",
+      "Create a fresh Langfuse Cloud account in the HIPAA-ready region. The region runs in Oregon (AWS us-west-2) at [hipaa.cloud.langfuse.com](https://hipaa.cloud.langfuse.com). Subscribe to the [Pro plan or higher](/pricing). [Complete and sign the ClickHouse Business Associate Agreement via Ironclad](https://ironcladapp.com/public-launch/6aa89377853bdf7f289e7139) before you process PHI. That form is the ClickHouse BAA for Langfuse HIPAA Cloud. It asks for your Langfuse organization ID. [Where to find the organization ID](https://clickhouse.com/legal/how-to-find-langfuseorgid). Send HIPAA-regulated data only to that region. It is separate from the EU, US, and Japan regions. In a self-hosted deployment, Langfuse does not receive or process your data, so no BAA with Langfuse is involved. You implement the HIPAA safeguards in your own environment. [HIPAA docs](/security/hipaa).",
   },
   {
     question: "How do I keep PHI out of traces?",

@@ -1,10 +1,17 @@
 import { Plus } from "lucide-react";
 import { financialServicesEvalColumns } from "./content";
 
+type EvalLink = { href: string; label: string };
+
 type EvalColumn = {
   title: string;
   summary: string;
-  items: readonly { title: string; body: string; href: string }[];
+  items: readonly {
+    title: string;
+    body: string;
+    href: string;
+    links?: readonly EvalLink[];
+  }[];
 };
 
 export function EvalCapabilityGrid({
@@ -42,12 +49,24 @@ export function EvalCapabilityGrid({
                   <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
                     {item.body}
                   </p>
-                  <a
-                    href={item.href}
-                    className="inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
-                  >
-                    {"Docs →"}
-                  </a>
+                  {item.links && item.links.length > 0 ? (
+                    item.links.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        className="mr-4 inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+                      >
+                        {link.label}
+                      </a>
+                    ))
+                  ) : (
+                    <a
+                      href={item.href}
+                      className="inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+                    >
+                      {"Docs →"}
+                    </a>
+                  )}
                 </div>
               </details>
             ))}
