@@ -1,6 +1,6 @@
 ---
 title: How Teams in Regulated Industries Get AI Agents into Production
-description: How financial services and healthcare teams trace an agent offline, prove the base case with a domain expert, add monitors, and go live with human sign-off in place.
+description: A four-stage path from an offline prototype to a live agent, for teams in financial services and healthcare that need evidence, compliance checks, and human sign-off before launch.
 date: 2026/10/22
 tag: guide
 author: Annabell
@@ -10,103 +10,115 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="How Teams in Regulated Industries Get AI Agents into Production"
-  description="How financial services and healthcare teams trace an agent offline, prove the base case with a domain expert, add monitors, and go live with human sign-off in place."
+  description="A four-stage path from an offline prototype to a live agent, for teams in financial services and healthcare that need evidence, compliance checks, and human sign-off before launch."
   date="October 22, 2026"
   authors={["annabellschafer"]}
 />
 
-A regulated team cannot go live and fix the agent later. Data handling, redaction, compliance checks, and a named sign-off have to be ready at launch.
+In banking, insurance, and healthcare, you cannot ship an agent and fix it later. Before the first customer talks to it, you need to know where the data goes, what gets redacted, which rules the agent must follow, and who signs off on the release.
 
-Karthic Rao, CTO of Perpetual, said it at AI Engineer NYC in October 2026: "in a highly regulated industry, a policy violation isn't a bug report." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/karthic-rao-reliable-smart-workflows.md))
+Karthic Rao, CTO of the wealth management firm Perpetual, said it plainly at AI Engineer NYC in October 2026: "in a highly regulated industry, a policy violation isn't a bug report." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/karthic-rao-reliable-smart-workflows.md))
 
-FINRA's 2026 Annual Regulatory Oversight Report flags "AI agents acting autonomously without human validation", asks firms "where to have 'human in the loop' agent oversight protocols or practices", and asks "how to track agent actions and decisions". ([FINRA](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai)) Article 14 of the EU AI Act says a high-risk system must be one that "can be effectively overseen by natural persons", including the ability "to intervene in the operation" and attention to "automation bias". ([Article 14](https://artificialintelligenceact.eu/article/14/))
+Regulators expect the same. FINRA's 2026 oversight report asks firms "where to have 'human in the loop' agent oversight protocols or practices" and "how to track agent actions and decisions" ([FINRA](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai)). Article 14 of the EU AI Act requires that high-risk systems "can be effectively overseen by natural persons" ([Article 14](https://artificialintelligenceact.eu/article/14/)).
 
-Financial services is the main example below. Healthcare follows the same sequence, with a HIPAA business associate agreement in front of any patient data and with clinicians as the domain experts.
+This post walks through how regulated teams get from a prototype to a live agent in four stages. Financial services is the main example. Healthcare follows the same path, with clinicians as the domain experts and a HIPAA business associate agreement before any patient data is processed.
 
-Banks already expect that evidence. A model risk process at one of the five largest banks "already required evidence before anything reached production: test results, review sign-offs, documentation." ([Building deployment gates for LLMs and AI agents in financial services](/blog/2026-07-15-llm-certification-financial-services))
+## The AI engineering loop still applies [#the-loop]
 
-## Run the same loop, starting offline [#the-loop]
+The [AI engineering loop](/academy/ai-engineering-loop) has five steps: trace, monitor, build datasets, experiment, and evaluate. Regulated teams run the same loop, and they usually enter it before launch.
 
-The [AI engineering loop](/academy/ai-engineering-loop) is the work: trace, monitor, build datasets, experiment, evaluate. "Everything else in the loop runs on traces: evaluations score your real production traces, and datasets are built from them."
+They start offline. They trace the prototype, test it on a dataset, and go live once the base case works the way their domain experts expect. The Academy describes this entry point: "you want to gain confidence in the quality before shipping to production. Your customers might even require this because they are in regulated environments with high quality bars."
 
-In a regulated setting you start that loop before launch. Trace the offline application, and go live once the base case works the way the domain expert expects. In production you run the same loop on live traffic.
-
-The Academy states the reason: "you want to gain confidence in the quality before shipping to production. Your customers might even require this because they are in regulated environments with high quality bars." Anthropic's eval guide says production monitoring "Lacks ground truth for grading". ([Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents))
+Banks already work this way for other models. In our work with one of the five largest banks, the model risk process "already required evidence before anything reached production: test results, review sign-offs, documentation." ([Building deployment gates for LLMs and AI agents in financial services](/blog/2026-07-15-llm-certification-financial-services))
 
 ```mermaid
 flowchart LR
-    A["1. Trace offline runs"] --> B["2. Dataset and shadow runs"]
-    B --> C["3. Monitors before launch"]
-    C --> D["4. Go live and keep the loop"]
+    A["1. Trace the offline app"] --> B["2. Verify on a starting dataset"]
+    B --> C["3. Add monitors"]
+    C --> D["4. Go live and run the loop"]
 ```
 
-## Stage 1: Trace the offline application [#trace-offline]
+## Stage 1: Add tracing to the offline application [#trace-offline]
 
-Add [tracing](/docs/observability/get-started) while the agent is offline. Every prompt, retrieval step, tool call, and output needs a record a reviewer can open later.
+Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Every later stage depends on it. Datasets are built from traces, evaluators score traces, and reviewers need traces as evidence.
 
-The published [DKB story](/users/dkb) opens that operating model with four words: "It starts with tracing." David Hinrichs, a senior machine learning scientist at DKB, said there "would have been no way to send an unknown company all the data from our customers". Walid Mehanna at Merck Group makes the same demand from life sciences: "Generative AI will only earn enterprise trust when we can see what's happening under the hood." ([Merck Group story](/users/merckgroup))
+Instrument the prototype the same way you will instrument production, recording the prompt version, model, tool calls, and retrieved context on every run. Then offline tests, shadow runs, and production traces can be compared directly.
 
-Rao's rule for that record: "every judgment is typed and logged and the provisional ones are confirmed or rejected by a person." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/karthic-rao-reliable-smart-workflows.md)) Michele Grant, on an M&A finance reporting agent, keeps a decision log of "the raw data ingested, the tool calls executed, the prompt and the model versions" and the "human sign-off". ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-michele-grant-trust.md))
+This is also how DKB, one of Germany's largest direct banks, runs its assistant. [The DKB story](/users/dkb) puts it in four words: "It starts with tracing." For DKB, where the traces live mattered as much as what they contain. David Hinrichs, a senior machine learning scientist at DKB, explains why the bank self-hosts Langfuse: "There would have been no way to send an unknown company all the data from our customers," he says. Walid Mehanna at [Merck Group](/users/merckgroup) makes the same point for life sciences: "Generative AI will only earn enterprise trust when we can see what's happening under the hood."
 
-## Stage 2: Prove the base case with a domain expert [#starting-dataset]
+A trace is the decision log reviewers ask for. Michele Grant, who spoke about trust in finance agents at AI Engineer NYC, wants each decision to record "the raw data ingested, the tool calls executed, the prompt and the model versions" along with the human sign-off ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-michele-grant-trust.md)). Evan Kormos, who builds policy workflows at Coinbase, checks each step of an agent with a short question: "Can we trace it?" ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md))
 
-Build a starting [dataset](/docs/evaluation/experiments/datasets) with the domain expert. Use historical cases the firm already decided, and shadow runs where the agent works beside the current process and a person compares the two.
+## Stage 2: Verify with a starting dataset [#starting-dataset]
 
-Qualified Health says: "Each deployment follows a staged approach that includes retrospective back-testing on historical data, automated evaluations, structured physician review, and controlled rollouts prior to broader use with partners." ([Qualified Health](https://claude.com/customers/qualified-health)) Justin Norden, MD, a co-founder, draws the clinical line: "There are no fully automated clinical decisions being made," and "Every output is reviewed by clinicians, with direct validation against source data."
+Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together with your domain expert. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician. The dataset should show that the agent handles the common cases correctly before anyone relies on it.
 
-Abridge does the historical pass on clinical notes. "Every system we build first undergoes "offline" pre-deployment evaluations." They add: "By back-testing on de-identified encounters we are able to evaluate our systems in realistic settings that publicly available and external data rarely reflect." ([Abridge](https://tech.abridge.com/blog/ai-evaluation-at-abridge))
+You rarely need to invent these cases. Two sources work well in regulated settings.
 
-Shadow mode is the second source. Grant names her first stage: "Stage one is shadow mode." The "agent runs right alongside them and the team compares the two." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-michele-grant-trust.md)) The Coalition for Health AI uses the clinical name, silent evaluation: "A silent evaluation involves generating AI system output using production data, but not displaying that output to personnel who would take action as part of the system workflow." ([CHAI Responsible AI Guide, PDF](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf)) She also sets the bar for going further: "Every single metric requires a pre-deployment baseline."
+**Historical data.** Run the agent on cases your team already decided, such as resolved tickets or reviewed claims, and compare. Qualified Health describes this as the first step of every clinical rollout: "Each deployment follows a staged approach that includes retrospective back-testing on historical data, automated evaluations, structured physician review, and controlled rollouts prior to broader use with partners." ([Qualified Health](https://claude.com/customers/qualified-health))
 
-Write the no-gos into that dataset: cases the agent must refuse, or hand to a person, with the behavior you expect. Rao's rule for outbound mail: "Nothing leaves the firm until a person approves that exact email." Run those cases as an [experiment](/docs/evaluation/experiments/experiments-via-sdk). The deployment gates post is the pattern: "documented testing before deployment, complete logs, documented human review, and monitoring that continues after release."
+**Shadow runs.** Let the agent work on live cases next to the current process, without acting on anything, and compare its output with what the team did. Grant puts this first in her rollout plan: "Stage one is shadow mode." Healthcare calls it silent evaluation. The Coalition for Health AI defines it this way: "A silent evaluation involves generating AI system output using production data, but not displaying that output to personnel who would take action as part of the system workflow." ([CHAI Responsible AI Guide, PDF](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf))
 
-One expert label still needs a check. Tejas Kumar, in a workshop at AI Engineer World's Fair 2026, said that on a human support team "all the humans on that team will also agree about 80% of the time." He treats the miss as a writing problem: "When we don't agree, it's just usually because there's a knowledge gap." ([talk](https://www.youtube.com/watch?v=NdrSPm6NCdk), [transcript](https://ai.engineer/talks/NdrSPm6NCdk-evals-in-ai-deep-dive)) The 80% figure is his experience with a retail returns desk.
+### Check the labels, too [#check-the-labels]
 
-Anthropic states the test in one line: "A good task is one where two domain experts would independently reach the same pass/fail verdict." When two experts split, the task is still ambiguous, and the metric will be noisy. Abridge applies that check to judges: "These LLM judges are themselves first validated offline on clinician annotations to ensure that the results they give are consistent with clinician adjudications."
+One expert's label is a starting point. Experts disagree more often than you might expect, and each disagreement points to a rule nobody wrote down. Tejas Kumar from IBM said in a workshop at AI Engineer World's Fair 2026: "When we don't agree, it's just usually because there's a knowledge gap." ([talk](https://www.youtube.com/watch?v=NdrSPm6NCdk)) Anthropic's guide to agent evals gives a simple test: "A good task is one where two domain experts would independently reach the same pass/fail verdict." ([Anthropic](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents))
 
-[Writing good evaluators](/academy/evaluate/writing-evaluators) and [Evaluation](/academy/evaluate) cover that labeling, and they treat the human labels as ground truth for a later judge. When a reviewer promotes a failure into the dataset, "The reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth."
+In practice, ask a second expert to label a sample of the dataset. Where the two disagree, talk it through, write the missing rule into your guidelines, and update the label. [Generating ground truth](/academy/datasets/generating-ground-truth#making-labels-trustworthy) in the Langfuse Academy covers this in more detail. [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) give experts a place to do the labeling without touching code.
 
-## Stage 3: Add monitors before launch [#monitors-before-launch]
+### Define the no-gos and test the guardrails [#guardrails]
 
-Turn compliance monitors on before the first live user. Score policy violations, missing sources, and refusals on the traces you already have. For a chat agent, also score user signals: explicit feedback, a request for a person, and a user who has to ask again. Start from [user feedback](/docs/observability/features/user-feedback) and [capturing signals](/academy/monitoring/capturing-signals), and read both on offline and shadow traffic before launch.
+Before launch, agree with compliance on what the agent must never do. For a bank, that might be giving investment advice, quoting a rate that is not on the price list, or sending a message without approval. Rao's team at Perpetual has a hard rule for one such case: "Nothing leaves the firm until a person approves that exact email."
 
-DKB treats screening as a condition of running the agent. "If I disabled the screening tomorrow," David Hinrichs says, "we would have to stop all our agent activity." A second Langfuse instance keeps employee conversations, and conversations with customers under 18, out of that screening. Specialists then work [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) "by service area (for example, brokerage or credit)" and rank cases "by severity".
+Then build a guardrail for each no-go and test it like any other component. Add dataset cases that should trigger it and normal cases that should pass. A guardrail that fires too often gets ignored.
 
-Set the agent to hand off early. A line you can give it is plain: "I can't help with that, I'll connect you to a person." Extra handoffs are the safer default while you are still learning the traffic.
+Run the full dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) each time you change a prompt, model, or tool. Record the results as your baseline. Grant is strict about this: "Every single metric requires a pre-deployment baseline." The deployment gates post sums up what reviewers expect at this point: "documented testing before deployment, complete logs, documented human review, and monitoring that continues after release."
 
-The AWS Well-Architected Agentic AI Lens names the triggers: "Agent-to-human escalation happens when confidence drops below a threshold, the stakes are high, or the retry budget has been exhausted." ([AGENTOPS01-BP02](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops01-bp02.html)) Evan Kormos, on policy workflows at Coinbase, asks the matching question of each step: "Can we fall back to a human?"
+## Stage 3: Add compliance and user-signal monitors [#monitors]
 
-## Stage 4: Go live and keep the loop running [#go-live]
+Set up monitors before launch, and turn them on during the shadow runs so you know what normal looks like.
 
-Go live when the dataset passes, the shadow comparison is stable, and the monitors are already scoring. Then run the same loop on production traces.
+**Compliance monitors come first.** They check every trace against your no-gos. An [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator can flag a response that sounds like investment advice. A code check can flag a missing disclaimer. DKB screens every answer its assistant gives this way and sends flagged conversations to experts in annotation queues sorted "by service area (for example, brokerage or credit)." "If I disabled the screening tomorrow," says David Hinrichs, "we would have to stop all our agent activity."
 
-Kormos described three steps at Coinbase. "So day one, we start supervised." "When measured confidence reaches a policy threshold," "we can move towards sampling." "And what that means is humans are looking at a slice of the output". After the next threshold, "once we clear the confidence threshold, humans handle more of the exceptions of the process, but still act as participants in refining the data sets and ensuring the quality outputs." Traces then cover "what the humans aren't seeing". ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md))
+Compliance also decides what may be screened at all. DKB is not allowed to auto-review conversations of its own employees or of customers under 18, so it runs a separate Langfuse instance that keeps those conversations out of automated screening.
 
-Grant's later stages match that shape. "Stage two is the supervised draft." "Stage 3 is the exception and sample". Then "stage 4, where it's exceptions only." She adds the warning for that last step: "once humans only look at exceptions, your biggest vulnerability is what the agent failed to flag." "A falling override rate does not automatically mean the agent is getting smarter." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-michele-grant-trust.md)) Keep an independent sample of any slice the agent now finishes alone.
+**User-signal monitors** matter for chat agents. Track [explicit feedback](/docs/observability/features/user-feedback), and score conversations for signs of trouble, such as a user asking for a person, repeating a question, or correcting the agent. The Academy page on [capturing signals](/academy/monitoring/capturing-signals) lists the common ones.
 
-Widen what the agent may finish by classifying the request. John Feminella, at Two Sigma, described blanket approval: "you succumb to review fatigue where you just see yes, yes, yes, yes, yes." "A better approach is to let these independent, conservative classifiers make decisions about routine calls, and then send a person only the requests that are most important". "If you're saying yes, 99.99999% of the time, then that's probably just a rule that the agent should follow, not a request you need to ask the human for permission for." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/john-feminella-agent-safety.md))
+At launch, let the agent escalate a little too often. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time. A wrong answer in a regulated setting can cost much more. The AWS Well-Architected Agentic AI Lens lists when to hand off: "Agent-to-human escalation happens when confidence drops below a threshold, the stakes are high, or the retry budget has been exhausted." ([AWS](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops01-bp02.html))
 
-A password reset that already passes the dataset is that kind of routine call. The Academy's [customer support chatbot](/academy/examples/customer-support-chatbot) puts the gate on the category: "you could also automate only the request categories that cleared the phase 2 gate, while the rest keeps going through the support team for a little longer."
+## Stage 4: Go live and run the loop [#go-live]
 
-Klarna is the cautionary example. After an AI-first push in customer service, CEO Sebastian Siemiatkowski told Bloomberg, "As cost unfortunately seems to have been a too predominant evaluation factor when organizing this, what you end up having is lower quality," and, "I just think it's so critical that you are clear to your customer that there will be always a human if you want". The chatbot still handles two-thirds of inquiries. ([CX Dive](https://www.customerexperiencedive.com/news/klarna-reinvests-human-talent-customer-service-AI-chatbot/747586/))
+Once the dataset passes, the shadow runs match what your experts expect, and the monitors are in place, go live. From here you run the normal loop: trace production, watch the monitors, and turn interesting traces into new dataset items.
 
-Healthcare sets review depth by risk. Joint Commission and CHAI guidance says: "Tools that inform or drive clinical decisions should be checked more often; tools that simply help with administrative or documentation tasks can be checked periodically." ([guidance, PDF](https://assets.ctfassets.net/7s4afyr9pmov/5RX4XUbRg0l1JG0gwXGkTM/bea3c1949d6d8cdd8ec2ae2f82f737ad/JC-CHAI_RUAIH_Guidance.pdf))
+### Keep humans on a subset [#humans-on-a-subset]
 
-Re-run the dataset when the system changes. Grant's regression triggers are "any updates to our prompt, base model, or source API that require full revalidation before running in production again." The deployment gates post names the same pressure: "By the time a manual approval lands, the system it tested has often already changed."
+People stay in the process after launch. What they review shrinks step by step as the evidence grows. At Coinbase, Kormos said, "So day one, we start supervised." Reviewers check every output at first. Once measured confidence passes a threshold set by policy, they move to checking a sample. Later they mainly handle exceptions, while still helping to improve the datasets. He also warned that "the loop is really only as trustworthy as the check." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md))
+
+Healthcare teams keep this even tighter. Justin Norden, co-founder of Qualified Health, said: "There are no fully automated clinical decisions being made." The Joint Commission and CHAI suggest matching review frequency to risk: "Tools that inform or drive clinical decisions should be checked more often; tools that simply help with administrative or documentation tasks can be checked periodically." ([guidance, PDF](https://assets.ctfassets.net/7s4afyr9pmov/5RX4XUbRg0l1JG0gwXGkTM/bea3c1949d6d8cdd8ec2ae2f82f737ad/JC-CHAI_RUAIH_Guidance.pdf))
+
+### Automate the slices that work [#automate-slices]
+
+Asking a person to approve everything does not scale, and it wears reviewers down. John Feminella from Two Sigma described the result: "you succumb to review fatigue where you just see yes, yes, yes, yes, yes." His advice is to automate what is clearly routine: "If you're saying yes, 99.99999% of the time, then that's probably just a rule that the agent should follow." ([transcript](https://ai.engineer/reading/nyc-2026/transcripts/john-feminella-agent-safety.md))
+
+In practice, classify incoming requests. Let the agent handle categories that score well in your dataset and in production, such as a password reset, and send the rest to a person. The Academy's [customer support chatbot example](/academy/examples/customer-support-chatbot) suggests the same: "you could also automate only the request categories that cleared the phase 2 gate, while the rest keeps going through the support team for a little longer."
+
+Automated slices still need a sample review. Grant names the risk: "once humans only look at exceptions, your biggest vulnerability is what the agent failed to flag." Keep reviewing a small random share of each automated category, so you notice when quality drifts.
+
+Klarna learned this the hard way. After moving much of its customer service to AI, CEO Sebastian Siemiatkowski said: "what you end up having is lower quality." Klarna now offers customers a human option, while its chatbot still handles two-thirds of inquiries ([CX Dive](https://www.customerexperiencedive.com/news/klarna-reinvests-human-talent-customer-service-AI-chatbot/747586/)).
+
+Finally, treat every change as a new release. Grant's team revalidates after "any updates to our prompt, base model, or source API" before the agent runs in production again. Rerun the stage 2 dataset and compare against the baseline.
 
 ## What this looks like in Langfuse [#in-langfuse]
 
-| Stage               | What you do                                                                  | Where it lives in Langfuse                                                                                                                                                                                                                                                             |
-| ------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Trace offline    | Prompts, retrieval, tool calls, and outputs on offline and shadow runs       | [Tracing](/docs/observability/get-started)                                                                                                                                                                                                                                             |
-| 2. Starting dataset | Historical cases, shadow comparisons, no-gos, expert labels                  | [Datasets](/docs/evaluation/experiments/datasets), [experiments in the UI](/docs/evaluation/experiments/experiments-via-ui) or [via the SDK](/docs/evaluation/experiments/experiments-via-sdk), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)             |
-| 3. Monitors         | Compliance scores, chat user signals, alerts on a score                      | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [scores](/docs/evaluation/scores/overview), [online evaluation](/docs/evaluation/get-started/online), [alerts](/docs/observability/features/alerts), [user feedback](/docs/observability/features/user-feedback) |
-| 4. Live loop        | Sample the automated slice, promote reviewed failures, re-run before release | Annotation queues, datasets, experiments, and the [AI engineering loop](/academy/ai-engineering-loop)                                                                                                                                                                                  |
+| Stage               | What you do                                                      | Langfuse features                                                                                                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Trace offline    | Record every step of offline and shadow runs                     | [Tracing](/docs/observability/get-started), [masking](/docs/observability/features/masking)                                                                                                                               |
+| 2. Starting dataset | Build cases with experts, check labels, test guardrails          | [Datasets](/docs/evaluation/experiments/datasets), [experiments](/docs/evaluation/experiments/experiments-via-sdk), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)                            |
+| 3. Monitors         | Score compliance and user signals, alert on thresholds           | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [online evaluation](/docs/evaluation/get-started/online), [scores](/docs/evaluation/scores/overview), [alerts](/docs/observability/features/alerts) |
+| 4. Live loop        | Review a sample, add failures to datasets, rerun before releases | Annotation queues, datasets, experiments                                                                                                                                                                                  |
 
-Mask before you store. The [financial services](/financial-services) page calls for "Multiple layers of data redaction. Client-side and server-side PII protections before anything is stored." Set that in the SDK with [masking](/docs/observability/features/masking). The same page says to "Retain execution history: keep traces of AI executions as evidence for supervisory and regulatory reviews."
+DKB runs the full loop in Langfuse today. Laurenz Hemmen, a machine learning scientist at DKB, describes it: "We screen conversations, review flagged sessions, turn clusters of unwanted behavior into datasets, and run those evals as regression tests before every release."
 
-Healthcare teams processing protected health information on Langfuse Cloud complete a business associate agreement first. "Customers with HIPAA requirements should complete the BAA via Ironclad before processing Protected Health Information (PHI) in Langfuse." ([HIPAA](/security/hipaa)) When the data stays in your environment, [self-host](/self-hosting). "Langfuse does not receive or process your data, so no BAA with Langfuse is involved". Rao's constraint on the model is the same: "the data is sensitive, so you need a path to move these workflows entirely onto privately hosted models."
+**Data protection.** Redact sensitive data before it is stored. The SDKs support [masking](/docs/observability/features/masking) on the client, and the [Langfuse for financial services](/financial-services) page describes "Multiple layers of data redaction. Client-side and server-side PII protections before anything is stored."
 
-DKB's loop after launch is the one to copy. Laurenz Hemmen, a machine learning scientist at DKB, describes it: "We screen conversations, review flagged sessions, turn clusters of unwanted behavior into datasets, and run those evals as regression tests before every release."
+**Deployment.** Pick the setup that matches where your data is allowed to live. Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) and should sign a business associate agreement first: "Customers with HIPAA requirements should complete the BAA via Ironclad before processing Protected Health Information (PHI) in Langfuse." Teams that need everything in their own infrastructure can [self-host Langfuse](/self-hosting), as DKB does.
 
-The [deployment gates post](/blog/2026-07-15-llm-certification-financial-services) is the offline half of that loop. One limit in that post applies to every stage here. "Regulatory approval, independent validation, legal review, and accountable human sign-off stay with people."
+For a hands-on example of stage 2, read [Building deployment gates for LLMs and AI agents in financial services](/blog/2026-07-15-llm-certification-financial-services). It shows how to turn datasets and evaluators into pass or fail checks that a review board can inspect. It also states the limit that applies to every stage in this post: "Regulatory approval, independent validation, legal review, and accountable human sign-off stay with people."
