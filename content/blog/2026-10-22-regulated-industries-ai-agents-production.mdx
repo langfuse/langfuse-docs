@@ -32,7 +32,7 @@ AI development teams in regulated industries usually face three requirements for
 
 **Control over data.** Conversations contain account details, transactions, and health information. Teams need to know where that data is stored, what gets redacted, and who can see it. In healthcare, a [business associate agreement](/security/hipaa) has to be in place before any protected health information is processed.
 
-Teams still ship agents under these rules. They just need to take a different approach to successfully running the AI Engineering loop.
+Teams still ship agents under these rules. They just need to take a different approach to successfully running the AI engineering loop.
 
 ## The approach: start the loop offline [#the-approach]
 
@@ -49,7 +49,7 @@ flowchart LR
 
 Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. The traces you collect serve multiple purposes: datasets are built from traces, evaluators score traces, and reviewers use traces as evidence of what the agent did.
 
-Instrument you application to capture each step your agent is taking. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. This makes traces from offline tests, shadow runs, and production comparable, and each trace doubles as the decision log a reviewer will ask for.
+Instrument your application to capture each step your agent is taking. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. This makes traces from offline tests, shadow runs, and production comparable, and each trace doubles as the decision log a reviewer will ask for.
 
 Decide early where the traces will live. Many banks and healthcare providers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched.
 
@@ -59,7 +59,7 @@ Also mask sensitive fields before they are stored. The SDKs support [client-side
 
 ## Stage 2: Verify with a starting dataset [#starting-dataset]
 
-Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician. The goal is both to show that the agent handles the common cases the way your experts would, and to show that adversarial and edge-cases are handeled gracefully by your agent.
+Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician. The goal is both to show that the agent handles the common cases the way your experts would, and to show that adversarial and edge cases are handled gracefully by your agent.
 
 ### Where the cases come from [#where-cases-come-from]
 
@@ -67,15 +67,17 @@ Regulated teams rarely need to invent test cases. There are multiple sources tha
 
 - **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims, and compare the agent's output with the human decision. Clinical teams call this retrospective back-testing, and [Qualified Health](https://claude.com/customers/qualified-health) uses it as the first step of every deployment.
 - **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything, and compare its output with what the team did. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff.
-- **Work with Domain experts.** Domain experts often have a good intuition in typical cases, but also the ones where they know from experience that they are challenging to handle. Let them write typical cases and setups, including how they expect them to be handled.
+- **Work with domain experts.** Domain experts have a good intuition for typical cases, and they also know from experience which cases are hard to handle. Let them write typical cases and setups, including how they expect them to be handled.
 
 Those sources are often combined for an initial dataset of typical cases.
 
-CALLOUT (IF YOU WANT TO LEARN MORE ON SCOPING DATSET CHECK ACADEMY PAGE)
+<Callout type="info">
+  Want to go deeper on scoping a dataset? The Langfuse Academy guide on [designing datasets](/academy/datasets/designing-great-datasets) covers how to set the goal, choose the input distribution, and decide how each item will be evaluated.
+</Callout>
 
-### Check the ground-truth [#check-the-ground-truth]
+### Check the ground truth [#check-the-ground-truth]
 
-One expert's ground-truth is a good start. However, experts disagree more often than teams expect. The more disagreement we see between humans, the more difficult it is for agents to handle the same. ADD: IN QUALITATIVE RESERACH THIS IS OFTEN REFERRED TO AS INTERRATER,.... Ask a second expert to label a sample of the dataset. Where the two disagree, discuss the case, add the missing rule to your guidelines, and update the label.
+One expert's ground truth is a good start. However, experts disagree more often than teams expect. The more disagreement we see between humans, the more difficult it is for agents to handle the same cases. In qualitative and clinical research, this is called inter-rater reliability: the extent to which different raters assign the same score to the same item. It is usually measured as percent agreement or with Cohen's kappa, and many texts recommend at least 80% agreement between raters ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)). Langfuse [score analytics](/docs/evaluation/scores/score-analytics) calculates both metrics when you compare two sets of annotations. Ask a second expert to label a sample of the dataset. Where the two disagree, discuss the case, add the missing rule to your guidelines, and update the label.
 
 [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) give experts a place to annotate traces without touching code. At DKB, customer service specialists work in Langfuse directly and add typical examples to datasets that engineers then use to adjust prompts.
 
@@ -148,17 +150,17 @@ Finally, treat every change to a prompt, model, or tool as a new release. Rerun 
 
 ## How Langfuse supports each stage [#in-langfuse]
 
-| Stage               | What you do                                                      | Langfuse features                                                                                                                                                                                                         |
-| ------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Trace offline    | Record every step of offline and shadow runs                     | [Tracing](/docs/observability/get-started), [masking](/docs/observability/features/masking)                                                                                                                               |
-| 2. Starting dataset | Build cases with experts, check labels, test guardrails          | [Datasets](/docs/evaluation/experiments/datasets), [experiments](/docs/evaluation/experiments/experiments-via-sdk), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)                            |
-| 3. Monitors         | Score compliance and user signals, alert on thresholds           | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [online evaluation](/docs/evaluation/get-started/online), [scores](/docs/evaluation/scores/overview), [alerts](/docs/observability/features/alerts) |
-| 4. Live loop        | Review a sample, add failures to datasets, rerun before releases | Annotation queues, datasets, experiments                                                                                                                                                                                  |
+| Stage                           | What you do                                                                          | Langfuse features                                                                                                                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Trace the offline app        | Capture every step of the prototype and redact sensitive fields                      | [Tracing](/docs/observability/get-started), [masking](/docs/observability/features/masking), [self-hosting](/self-hosting)                                                                                                                                 |
+| 2. Verify on a starting dataset | Build ground truth with experts, check agreement, test guardrails, record a baseline | [Datasets](/docs/evaluation/experiments/datasets), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [score analytics](/docs/evaluation/scores/score-analytics), [experiments](/docs/evaluation/experiments/experiments-via-sdk) |
+| 3. Add monitors                 | Score compliance and user signals, alert when flags rise                             | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [online evaluation](/docs/evaluation/get-started/online), [user feedback](/docs/observability/features/user-feedback), [alerts](/docs/observability/features/alerts)                 |
+| 4. Go live and run the loop     | Review a sample, add failures to datasets, rerun before every release                | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [datasets](/docs/evaluation/experiments/datasets), [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)                                                      |
 
 On the infrastructure side, regulated teams usually choose between two setups:
 
 - **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting).
-- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regualted companies opt for the cloud version whenever self-hosting is not a must-have.
+- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regulated companies opt for the cloud version whenever self-hosting is not a must-have.
 
 The same need for visibility applies in life sciences. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
 
