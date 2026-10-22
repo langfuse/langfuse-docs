@@ -1,0 +1,281 @@
+---
+title: Generating ground truth
+sidebarTitle: Generating ground truth
+description: How to build expected outputs for agent evaluation datasets in regulated settings, using historical cases, shadow runs, synthetic inputs, and human review.
+---
+
+export const references = [
+  {
+    id: "anthropic-agent-evals",
+    title: "Demystifying evals for AI agents (Anthropic)",
+    url: "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+  },
+  {
+    id: "northcutt-label-errors",
+    title:
+      "Pervasive label errors in test sets destabilize machine learning benchmarks (Northcutt et al.)",
+    url: "https://arxiv.org/abs/2103.14749",
+  },
+  {
+    id: "swe-bench-plus",
+    title: "SWE-Bench+ (Aleithan et al.)",
+    url: "https://arxiv.org/abs/2410.06992",
+  },
+  {
+    id: "yang-contamination",
+    title:
+      "Rethinking benchmark and contamination for language models with rephrased samples (Yang et al.)",
+    url: "https://arxiv.org/abs/2311.04850",
+  },
+  {
+    id: "oscilar-shadow",
+    title: "How to evaluate an AI risk agent before production (Oscilar)",
+    url: "https://oscilar.com/blog/evaluate-ai-risk-agent",
+  },
+  {
+    id: "tikhomirov-silent-trials",
+    title:
+      "A scoping review of silent trials for medical artificial intelligence (Tikhomirov et al.)",
+    url: "https://www.nature.com/articles/s44360-025-00048-z",
+  },
+  {
+    id: "yan-product-evals",
+    title: "Product evals in three simple steps (Eugene Yan)",
+    url: "https://eugeneyan.com/writing/product-evals/",
+  },
+  {
+    id: "grant-thornton-validation",
+    title:
+      "AI validation in practice: testing AI agents in financial services (Grant Thornton Ireland)",
+    url: "https://www.grantthornton.ie/insights/factsheets/ai-validation-in-practice-testing-ai-agents-financial-services/",
+  },
+  {
+    id: "galileo-adjudication",
+    title: "Calibrate LLM judges with human annotations (Galileo)",
+    url: "https://galileo.ai/blog/calibrate-llm-judge-human-annotations",
+  },
+  {
+    id: "bansal-explanations",
+    title:
+      "Does the whole exceed its parts? The effect of AI explanations on complementary team performance (Bansal et al.)",
+    url: "https://arxiv.org/abs/2006.14779",
+  },
+  {
+    id: "shankar-validators",
+    title: "Who validates the validators? (Shankar et al.)",
+    url: "https://arxiv.org/abs/2404.12272",
+  },
+  {
+    id: "green-human-oversight",
+    title:
+      "The flaws of policies requiring human oversight of government algorithms (Green)",
+    url: "https://arxiv.org/abs/2109.05067",
+  },
+];
+
+# Generating ground truth for agent datasets
+
+A dataset item is only as useful as its expected output. A wrong expected output makes every experiment reward the wrong behavior.
+
+Most teams build a first dataset from production traces. In finance, insurance, or healthcare, you often cannot wait for those traces. An agent that approves a refund or flags a transaction cannot go live just to see what happens, and a live trace still arrives without a correct answer. Someone has to provide it.
+
+<Callout type="info">
+New to datasets? Start with
+
+- [Datasets](/academy/datasets), for the building blocks: input, expected output, and metadata
+- [Designing datasets](/academy/datasets/designing-great-datasets), for scope, input distribution, and item schema
+
+</Callout>
+
+The running example is **an agent that reads customer emails to a bank and handles requests to refund a fee.** It proposes approve, deny, or escalate, and drafts a reply. A human team handles these emails today.
+
+## What ground truth means here
+
+Ground truth is the expected output you grade the agent against. In a regulated process it has three properties:
+
+- **Two experts would agree on it.** Anthropic's guide to agent evals puts it this way: "A good task is one where two domain experts would independently reach the same pass/fail verdict."<Ref refs={references} id="anthropic-agent-evals" />
+- **It follows the current policy.** A refund that was correct last year can be wrong today.
+- **It is recorded in a fixed shape**, with who decided it, when, and why.
+
+**Inputs can come from many places. A domain expert always writes or confirms the expected output.**
+
+## Four approaches
+
+Each approach below ends with the same step: a person with domain knowledge writes, corrects, or confirms the expected output. Pick from the data you have, whether a human process already exists, how much expert time you can get, and whether the agent is live. Many teams combine them.
+
+| Approach          | Advantages                                                | Disadvantages                                                  | When it fits                                         | Poor fit                              |
+| ----------------- | --------------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------- |
+| Historical cases  | Real inputs, high volume, no live risk                    | Past decisions can be wrong, outdated, or leaked into the file | Large archive and a stable policy                    | No history, or the policy has changed |
+| Public benchmarks | Free, expert-built, comparable across models              | Built for other processes, and may already be in training data | Early model comparison                               | Your own decisions                    |
+| Shadow runs       | Real current inputs, no customer impact                   | Needs a human process, and every disagreement needs review     | A manual process the agent can run beside            | No human process, or very low volume  |
+| Synthetic inputs  | Covers rare and risky cases before launch, and avoids PII | Inputs can look artificial                                     | Named gaps, especially "should escalate"             | The main accuracy set                 |
+| Human in the loop | Ongoing labels after go-live, and a human always decides  | Weakest labels, because the reviewer has seen the proposal     | A live regulated decision, plus the safeguards below | Before launch, or the only reference  |
+
+## Existing data: historical cases
+
+Years of decided fee-refund emails are a starting set. Run the agent on the original inputs offline, and have an expert compare its output with the recorded decision. The [customer support chatbot example](/academy/examples/customer-support-chatbot) builds its first datasets this way.
+
+**A past human decision is a draft until an expert confirms it.** Even heavily reviewed public test sets contain label errors, at least 3.3% on average across ten well-known benchmarks.<Ref refs={references} id="northcutt-label-errors" />
+
+- **Audit a sample.** If the expert often disagrees with the original decision, review every case before it enters the dataset.
+- **Tag the policy version**, and drop or relabel cases decided under rules that no longer apply.
+- **Strip leaked answers.** A closed file often includes "refund approved", a later reply, or a status field. In one coding benchmark, about a third of successful runs had the solution in the issue text or comments.<Ref refs={references} id="swe-bench-plus" />
+- **Mask PII** before the case enters the dataset, and check that the masking worked.
+
+## Existing data: public benchmarks
+
+Expert-built sets such as FinanceBench help you compare models early, as in the [financial services deployment gates post](/blog/2026-07-15-llm-certification-financial-services). Treat them as a baseline next to your own dataset. They carry none of your fee policy or escalation rules, and they may already be in a model's training data.<Ref refs={references} id="yang-contamination" />
+
+## Shadow runs
+
+The agent proposes a decision on each live fee-refund email while the human team still decides, and nobody acts on the proposal. You then compare the two.
+
+**The comparison is the hard part.** A disagreement is often an agent error, and sometimes the human was wrong. A risk software vendor that runs these exercises with financial teams writes: "Some of the most useful findings in these exercises are cases where the agent was right and the original disposition was not."<Ref refs={references} id="oscilar-shadow" /> Clinical AI runs a similar practice called silent trials, and a review of them found that "Far fewer studies reported verification of outputs against an in situ clinical ground truth".<Ref refs={references} id="tikhomirov-silent-trials" /> An agent can match the human and still be wrong.
+
+- **Report agreement with the current process**, per category.
+- **Send every disagreement to an expert**, including cases where both were wrong. Only adjudicated cases become dataset items.
+- **Sample agreements too.** Both sides can be wrong in the same way.
+- **Set the review period and the thresholds** before you look at the results.
+- **Keep it a true shadow.** If the human sees the proposal before deciding, see [anchoring and automation bias](#anchoring-and-automation-bias).
+
+## Synthetic inputs with expert-corrected outputs
+
+Some cases will barely appear in the archive: a bereavement email, a second language, a fee you see twice a year. Write or generate the input, run the agent, and have an expert correct the output.
+
+**The input can be synthetic. An expert always writes or confirms the expected output.** A model that writes both is being tested against itself. The [financial services post](/blog/2026-07-15-llm-certification-financial-services) states the same rule: "The reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth." If a tool also generated an answer, discard or overwrite it.
+
+Use these inputs for named gaps, as [Designing datasets](/academy/datasets/designing-great-datasets) suggests, especially "should escalate" cases. Generated cases can be "out-of-distribution, either too exaggerated or too subtle".<Ref refs={references} id="yan-product-evals" /> Ask the expert to flag inputs that would never happen, and measure real accuracy on real inputs.
+
+## Human in the loop [#human-in-the-loop]
+
+Human in the loop is a valid but weak ground truth approach. The agent proposes, a named person decides, and that decision is a label. Store it with the source `hitl_decision`. Overrides show where the agent is weak. In a regulated process this often stays the setup for as long as the agent runs.
+
+<Callout type="info">
+In the [customer support chatbot example](/academy/examples/customer-support-chatbot), the bot eventually answers customers directly. Which ending fits depends on the cost of a wrong answer and on what your regulator and risk team expect.
+</Callout>
+
+The reviewer sees the proposal first, so the decision is anchored. A reviewer who approves everything adds no information. A survey of human oversight policies warns they can give "a false sense of security".<Ref refs={references} id="green-human-oversight" /> These labels sit below expert-corrected labels, and they are the steady source after go-live.
+
+- **Track override rates** per reviewer and per category. A rate near zero is a warning.
+- **Insert known-wrong cases** and check that reviewers catch them.
+- **Keep a blind sample**, where a second expert decides without seeing the proposal.
+- **Show the agent's sources** next to its answer.
+
+## Expert correction: the step every approach shares
+
+Experts review the agent output and correct it, and that correction becomes the expected output. Correcting is faster than writing from scratch, and the edits are data too: "Repeated corrections to the same type of output may point to a recurring weakness in the system."<Ref refs={references} id="grant-thornton-validation" /> Human in the loop is the same step, done lightly during daily work.
+
+In Langfuse, review traces in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) and save a [corrected output](/docs/observability/features/corrections), one per trace or observation. Use that corrected output as the dataset item's expected output. The main risk is [anchoring](#anchoring-and-automation-bias).
+
+## A recommended order
+
+No published source ranks these approaches. This order is a recommendation.
+
+1. **Historical cases or shadow runs, corrected after a calibrated setup.** Two experts set the criteria on the first examples, then a periodic sample gets a second reviewer. Historical is cheaper. Shadow is current.
+2. **The same real inputs, one expert, no calibration step.** Fine for low-risk, clear-cut items.
+3. **Synthetic inputs with expert-corrected outputs.** Best for gaps.
+4. **Human-in-the-loop decisions.** Valid and weak. The steady state after go-live, and stronger with the safeguards above.
+
+Public benchmarks sit outside this order. Use them as a baseline. A small reviewed set beats a large archive nobody checked. A historical backtest, then a shadow run, then human in the loop, is one path that works. Other orders work too.
+
+## Making labels trustworthy [#making-labels-trustworthy]
+
+A label becomes ground truth after a check.
+
+**Setup.** Two experts define the labeling approach on the first examples: they label independently, agree on criteria and edge cases, and a senior expert adjudicates disagreements. One evaluation vendor advises: "When they disagree, use adjudication rather than majority vote."<Ref refs={references} id="galileo-adjudication" /> Write the agreed rules down. Use Cohen's kappa, because raw agreement misleads when one outcome is common: if 90% of refunds are approved, two reviewers who always say "approve" agree 90% of the time. [Score Analytics](/docs/evaluation/scores/score-analytics) reports Cohen's kappa, F1, and overall agreement between two categorical or boolean scores. Low agreement usually means the policy is ambiguous, which also caps how well any [LLM-as-a-judge](/academy/evaluate/writing-evaluators#validate-the-judge) can be validated.
+
+After setup, one expert labels each new item, often by correcting the agent's output. On a fixed schedule, for example monthly, a second reviewer labels a small random sample and you recompute kappa. If kappa drops, or the policy changes, repeat the setup for that category.
+
+### Anchoring and automation bias [#anchoring-and-automation-bias]
+
+People tend to accept a machine's answer once they have seen it. One study found AI explanations "increased the chance that humans will accept the AI's recommendation, regardless of its correctness."<Ref refs={references} id="bansal-explanations" /> A light review can copy agent errors into the dataset. On a **blind sample**, the expert decides before seeing the agent's output. If agreement with the agent jumps once that output is visible, the corrections are anchored.
+
+### Criteria drift [#criteria-drift]
+
+Experts refine what "correct" means while they label: "users need criteria to grade outputs, but grading outputs helps users define criteria."<Ref refs={references} id="shankar-validators" /> Start from the written policy, refine it during setup, and re-check the first batch of labels once the criteria settle. Repeat the check when the policy changes.
+
+### Housekeeping [#housekeeping]
+
+- **Name an owner** for the labels, separate from the people tuning the agent.
+- **Write down the sample:** a random share, plus high-risk and rare cases.
+- **Tag policy version and source** on every item, and archive items when the policy changes.
+- **Version the dataset.** Every add, update, delete, or archive [creates a new dataset version](/docs/evaluation/experiments/datasets#versioning), so an experiment can be rerun on a past version.
+- **Keep a holdout set** aside from prompt and judge tuning.
+
+## Structuring the expected output in Langfuse
+
+Put the decision your evaluators check in `expectedOutput`. Put source, reviewers, rationale, and policy version in `metadata`. That follows the [design rule](/academy/datasets/designing-great-datasets) that notes and comments belong in metadata.
+
+One fee-refund item is below. A model wrote the email. After setup, one expert labeled it without seeing the agent output, a second expert agreed in the periodic sample, and the field names are illustrative.
+
+```json
+{
+  "input": {
+    "channel": "email",
+    "subject": "Refund of overdraft fee on my late father's account",
+    "body": "[synthetic email text, no real customer data]",
+    "account_context": { "segment": "retail", "prior_fee_refunds_12m": 0 }
+  },
+  "expectedOutput": {
+    "decision": "no_decision",
+    "escalate_to_human": true,
+    "escalation_reason": "bereavement_case",
+    "required_actions": ["acknowledge_request", "route_to_bereavement_team"],
+    "must_not": ["approve_refund", "share_account_details_with_sender"]
+  },
+  "metadata": {
+    "source": "synthetic_input",
+    "input_written_by": "llm",
+    "expected_output_written_by": "domain_expert",
+    "agent_output_seen_before_label": false,
+    "labeling_phase": "running",
+    "expert_reviewers": 2,
+    "second_review": "monthly_sample_2026-10",
+    "agreement": "agreed",
+    "adjudicated_by": null,
+    "rationale": "Sender may not be the account holder. Bereavement cases go to the specialist team under policy section 4.",
+    "policy_version": "fee-policy-2026-09",
+    "risk_tier": "high",
+    "dataset_role": "synthetic gap-fill",
+    "date_labeled": "2026-10-12"
+  }
+}
+```
+
+`source` is one of `historical_case`, `shadow_run`, `synthetic_input`, `public_benchmark`, or `hitl_decision`. `labeling_phase` is `setup` on the first examples and `running` afterwards. Most running items have one reviewer. A sampled item adds the second reviewer, and `adjudicated_by` names the senior expert who resolves a disagreement. Kappa describes the set. `agreement` describes one item.
+
+<Callout type="info">
+Once the shape is stable, use [schema enforcement](/docs/evaluation/experiments/datasets#schema-enforcement). Items that do not match the JSON Schema are rejected, so every expert adds items in the same structure.
+</Callout>
+
+## A note on regulation
+
+<Callout type="info">
+No regulator prescribes a method for agent ground truth yet. In US banking, SR 11-7 was replaced in April 2026 by [OCC Bulletin 2026-13](https://www.occ.gov/news-issuances/bulletins/2026/bulletin-2026-13.html) and Federal Reserve [SR 26-2](https://www.federalreserve.gov/supervisionreg/srletters/SR2602.pdf), and the new guidance places generative and agentic AI outside its scope. FINRA's [2026 oversight report](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai) says firms may consider "human in the loop" oversight for agents. [Article 14 of the EU AI Act](https://artificialintelligenceact.eu/article/14/) requires human oversight of high-risk systems and names automation bias. Your evaluation record is the evidence: how labels were made, who approved them, and how the agent scored against them.
+</Callout>
+
+## Outlook: production
+
+After go-live, watch for new fee types, stale items, and reviewers who rubber-stamp. Overrides, outcome signals such as reversed decisions ([capturing signals](/academy/monitoring/capturing-signals)), and [error analysis](/academy/monitoring/error-analysis) point to the failures. Label flagged traces in an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) with the same care as above. A production trace is a seed for a new item until an expert has labeled it.
+
+## Put it into practice
+
+- **Match the approach to what you have.** An archive, a live human process, a named gap, or a live agent with a person still deciding.
+- **Have an expert write every answer**, and audit past decisions before you trust them.
+- **Set up labeling once, then sample.** Two experts on the first examples, then one expert plus a periodic second review.
+- **Put the decision in `expectedOutput` and the rest in `metadata`.**
+- **Measure human-in-the-loop labels** with override rates, known-wrong cases, and a blind sample.
+
+## What comes next
+
+With trustworthy expected outputs, you can run [experiments](/academy/experiments) and build [evaluators](/academy/evaluate/writing-evaluators) against them, and check whether an LLM-as-a-judge agrees with your experts.
+
+<ManualGuideCallout
+  href="/guides/llm-as-a-judge-calibration-skill"
+  topic="Judge calibration"
+  lede="Use your expert labels as ground truth, run your judge against them, and get an agreement report with the exact disagreements."
+/>
+
+## References
+
+<FurtherReading numbered resources={references} />
