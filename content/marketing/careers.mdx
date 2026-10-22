@@ -10,13 +10,17 @@ import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
 import { CredibilitySentence } from "@/components/CredibilitySentence";
+import { EnterpriseLogos } from "@/components/EnterpriseLogos";
 import Image from "next/image";
 
 <div className="not-prose flex flex-col gap-4 mb-8 items-center text-center">
   <Heading as="h1" size="large">
     <TextHighlight>Building Langfuse</TextHighlight>
   </Heading>
-  <Text>Join the team building the leading open-source AI engineering platform</Text>
+  <Text>
+    Join the team building the leading open-source AI engineering platform, now
+    part of ClickHouse
+  </Text>
   <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
     <Button href="https://clickhouse.com/company/careers?search=langfuse" target="_blank" rel="noopener">
       View Open Positions →
@@ -36,17 +40,92 @@ import Image from "next/image";
   />
 </div>
 
-While LLMs improve a lot, we don't see enough applications in production. Building these applications requires a new workflow of continuous monitoring and evaluation that we enable with Langfuse (learn more about [our mission](/handbook/chapters/mission)).
+Teams building AI applications need a new workflow of continuous monitoring and evaluation to get them into production and keep improving them. Langfuse is the open-source platform for that workflow (learn more about [our mission](/handbook/chapters/mission)).
 
-We are seeing strong traction (see metrics below), thus it is the right time to grow the team to build out our backend systems, product, and how we communicate with developers.
+In January 2026, [we joined ClickHouse](/blog/joining-clickhouse). We run as an independent team with our own roadmap and now have the resources of a much larger company behind us.
 
-We are backed by Lightspeed, General Catalyst, Y Combinator, and angels. We are growing fast (see metrics below) and work with some of the best AI teams such as Canva, Samsara, Twilio, Khan Academy, and Intuit. In January 2026, [we joined ClickHouse](/blog/joining-clickhouse) to accelerate our growth even further.
+We work from San Francisco, from Berlin and remotely across Europe, and remotely anywhere in the US Eastern time zone.
 
-We operate out of San Francisco and Berlin, with team members spread across Europe. European roles are remote-first with 3-5 days every two months in Berlin (travel covered); SF and Berlin locals use the office when it's useful.
-
-If complex technical problems & great developer experiences excite you, we'd love to hear from you.
+If complex technical problems and great developer experiences excite you, we'd love to hear from you.
 
 – [Marc](https://x.com/MarcKlingen), [Clemens](https://x.com/rawert), [Max](https://x.com/maxdeichmann) and the Langfuse team
+
+## Why join Langfuse
+
+**We're winning the category through open source.** Langfuse is the [most used open-source AI engineering platform](/blog/2024-11-most-used-oss-llmops), with the largest distribution and scale in our space (see the [public metrics](#public-metrics) below). Being open source is our strongest advantage, and our strategy is to win the category through it.
+
+**From AI-native companies to large enterprises.** We work with some of the most AI-native companies, such as [Ramp](/users/ramp), as well as with very large enterprises. See more [companies building with Langfuse](/users).
+
+<EnterpriseLogos />
+
+**Work directly with customers.** Every engineer works with customers over Slack Connect, and customers review our RFCs before we build. You hear firsthand what teams need and see how your work lands.
+
+**Build in public with the community.** Much of what we build starts in [GitHub Discussions](https://github.com/orgs/langfuse/discussions), and every engineer works in public with our users. Self-hosting is a requirement for new features from day one, not something we port later.
+
+**Own your area and compound over time.** You own a feature area end to end, from RFC to docs, and every project has one owner from backlog to completion. RFCs compare real alternatives, and the best argument wins. As the team grows, you go deeper on your area instead of jumping between projects. Because everything is open source, your work builds a public track record that keeps growing the longer you're here.
+
+**Part of ClickHouse, run like a startup.** ClickHouse brings a sales organization that sells Langfuse, and the team building the database is in the same Slack. Its founders have taken companies to IPO and built world-class engineering organizations. They hold us accountable for results like an engaged board, not by managing our day-to-day. Next up: bringing Langfuse data together with ClickHouse Cloud and ClickStack.
+
+**AI-pilled, remote, and productive.** Every engineer gets a very high AI budget. We run our own coding agents and trace them in Langfuse. We work async-first with three scheduled meetings a week (see [how we work](/handbook/how-we-work/principles)).
+
+## What you'll work on
+
+### Challenging UI and UX for large, messy data
+
+Agent traces grow from twelve spans to thousands, with payloads of several megabytes. Making that readable and fast in the browser is a design problem and an engineering problem at the same time.
+
+- The [Responsive Timeline](/changelog/2026-08-28-responsive-timeline) fits any trace on one screen, from twelve spans to twelve hundred, and zooms like a map.
+- The [graph view](/changelog/2026-07-13-graph-view-modes) shows agent runs as an aggregated overview or an expanded, as-it-ran DAG on a deterministic renderer.
+- The [filter search bar](/changelog/2026-06-19-filter-search-bar), [Pulse](/changelog/2026-07-28-langfuse-pulse), and [Any table is a chart](/changelog/2026-07-24-any-table-is-a-chart) let users query, spot outliers, and chart billions of rows.
+- The [redesigned session view](/changelog/2026-10-13-redesigned-session-view) reads conversations across many traces as one thread.
+
+### Data infrastructure at petabyte scale
+
+Langfuse Cloud stores petabytes of tracing data for thousands of teams, and self-hosters run the same open-source codebase.
+
+- [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale) covers the queue-first write path, read isolation, and merge tuning, including a fix we contributed upstream together with ClickHouse engineers.
+- [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale) and [Langfuse v4](/changelog/2026-08-17-langfuse-v4) describe the move to an observations-first data model: table loads in tens of milliseconds and dashboards at least 10x faster.
+- On the [roadmap](/docs/roadmap): moving ingestion to Rust in stages and reducing storage costs.
+
+### AI agents inside the product
+
+We build agents for people who build agents, and our users notice every shortcut.
+
+- [Halo](/changelog/2026-09-03-langfuse-assistant), the in-app agent, runs code in a sandbox over thousands of observations, works in the background, and asks before it changes anything.
+- [Ask AI in the filter search bar](/changelog/2026-06-26-ask-ai-filter-search-bar) turns questions into filters.
+- On the [roadmap](/docs/roadmap): proactive issue detection with Topics, agent transcripts, and a more capable in-app agent.
+- We also use agents for our own work, for example to [review production infrastructure](/blog/2026-06-05-agentic-setup-for-operational-work).
+
+### Tooling for AI engineers, like evals at scale
+
+We build the tools teams use to improve their AI applications, and they have to work on every production trace.
+
+- The [code evaluator runtime](/blog/2026-06-22-code-evaluators-execution-model) runs untrusted user code safely in a multi-tenant environment.
+- [Evaluator backfills](/changelog/2026-09-07-evaluator-backfills), [consistent sampling](/changelog/2026-08-05-deterministic-evaluator-sampling), and [evaluator alerts](/changelog/2026-09-02-evaluator-alerts) score production traffic continuously.
+- [Experiments](/changelog/2026-10-19-experiments) and [CI/CD gates](/changelog/2026-05-25-experiment-ci-cd-gates) show which change moved which metric.
+- The [Langfuse CLI](/changelog/2026-08-21-langfuse-cli-v1), the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server), and the upcoming Langfuse Gateway on the [roadmap](/docs/roadmap) bring Langfuse to coding agents.
+
+## Teams we're hiring for
+
+**Product engineering.** Build product features end to end: UI and UX, AI agents inside Langfuse, evaluation tooling, and the SDKs and integrations that get data into Langfuse.
+
+**Data platform.** Own the ingestion pipeline, ClickHouse query performance, data processing, and the infrastructure behind Langfuse Cloud and self-hosting (Helm charts, Terraform).
+
+<CTACard
+  title="Curious to build with us?"
+  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
+  showArrow={true}
+>
+  <Button asChild variant="default" size="sm">
+    <a
+      href="https://clickhouse.com/company/careers?search=langfuse"
+      target="_blank"
+      rel="noopener"
+    >
+      See open roles
+    </a>
+  </Button>
+</CTACard>
 
 ## Team
 
@@ -65,22 +144,6 @@ import TeamMembers from "@/components-mdx/team-members.mdx";
 
 <PolaroidGallery />
 
-<CTACard
-  title="Curious to build with us?"
-  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
-  showArrow={true}
->
-  <Button asChild variant="default" size="sm">
-    <a
-      href="https://clickhouse.com/company/careers?search=langfuse"
-      target="_blank"
-      rel="noopener"
-    >
-      See open roles
-    </a>
-  </Button>
-</CTACard>
-
 ## Read our Handbook
 
 We publicly document our core principles and processes at Langfuse to align as a team, maintain transparency with our community, and help you determine if you'd enjoy working here.
@@ -95,6 +158,7 @@ import { ChapterIndex } from "@/components/handbook/ChapterIndex";
 
 The handbook contains many more resources that define how we do things. These might be interesting to you:
 
+- [Why join Langfuse](/handbook/how-we-hire/why-join)
 - [How we work](/handbook/how-we-work/principles)
 - [Working remotely at Langfuse](/handbook/how-we-work/remote)
 - [How we hire](/handbook/how-we-hire)
@@ -224,26 +288,10 @@ If you prefer watching videos or listening to podcasts to get an impression, her
   </Cards.Card>
 </Cards>
 
-## Public Metrics
+## Public Metrics [#public-metrics]
 
 import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
 
 <CredibilitySentence bold={false} />
 
 <PublicMetricsDashboard />
-
-<CTACard
-  title="Curious to build with us?"
-  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
-  showArrow={true}
->
-  <Button asChild variant="default" size="sm">
-    <a
-      href="https://clickhouse.com/company/careers?search=langfuse"
-      target="_blank"
-      rel="noopener"
-    >
-      See open roles
-    </a>
-  </Button>
-</CTACard>
