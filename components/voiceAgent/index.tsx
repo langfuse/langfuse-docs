@@ -8,7 +8,8 @@ import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { MicIcon, MicOffIcon, PhoneOffIcon } from "lucide-react";
-// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 
 type AgentState =
   | "idle"
@@ -115,11 +116,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
           ) {
             // Sent by the agent once the conversation's root span exists; the
             // link is shown after the call ends, when the trace is complete.
-            const params = new URLSearchParams({
-              traceId: data.traceId,
-              source: "voice_agent",
-            });
-            setTraceUrl(`/api/demo-public-trace?${params.toString()}`);
+            setTraceUrl(buildDemoTraceUrl({ traceId: data.traceId }));
           }
         } catch {
           // ignore invalid messages
@@ -281,14 +278,12 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
                 <p className="text-xs text-destructive mb-4">{error}</p>
               )}
 
-              {/* Temporarily disabled: link to the conversation's trace, shown once
-                  the call has ended (traces are not shared publicly right now)
+              {/* Link to the conversation's trace, shown once the call has ended */}
               {traceUrl && agentState === "idle" && (
                 <div className="flex justify-center mb-4">
                   <DemoTraceLink traceUrl={traceUrl} source="voice_agent" />
                 </div>
               )}
-              */}
 
               {/* Store-audio toggle (applies when the next conversation starts) */}
               <div className="flex items-center gap-2 mb-4">

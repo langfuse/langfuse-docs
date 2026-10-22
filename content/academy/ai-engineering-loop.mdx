@@ -3,6 +3,8 @@ title: AI Engineering Loop
 description: A high-level map of the AI engineering lifecycle, from tracing and monitoring to building datasets, experimenting, and evaluating.
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # The AI Engineering Loop
 
 The AI Engineering Loop is how teams approach the continuous evolution and improvement of their AI-powered systems. It connects what happens in production directly to the work of improving quality, cost, latency, and reliability during development.
@@ -47,6 +49,8 @@ Decide whether results are good enough to ship using manual review, code evaluat
 
 Once you ship a change, the cycle starts again. The updated system produces new traces, new monitoring signals, and new opportunities to improve.
 
+The workshop [Evals for High-Stakes AI Agents](/guides/videos/evals-for-high-stakes-ai-agents) walks through the full loop on a banking assistant: tracing with PII masking, offline evals, and a CI gate on a candidate prompt label.
+
 ## You don't have to close the full loop on day one [#you-dont-have-to-close-the-full-loop-on-day-one]
 
 Most teams don't start with all five steps in place. That is fine.
@@ -64,3 +68,5 @@ One natural place to begin is tracing. You cannot monitor what you cannot see, a
 Some teams prefer to start with building datasets to scope the surface area they expect their system to deal with. While this is a great way to build up repeatable cases early on, teams benefit from adding tracing to these early executions to deeply understand how the system behaves. Let's assume you have been working on your system for some time but you want to gain confidence in the quality before shipping to production. Your customers might even require this because they are in regulated environments with high quality bars. Building datasets, experimenting and systematically evaluating the outcomes will help you build the necessary trust and confidence.
 
 [→ Start with Datasets](/academy/datasets)
+
+<SignupCTA className="my-6" />

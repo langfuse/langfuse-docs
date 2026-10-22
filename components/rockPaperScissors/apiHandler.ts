@@ -7,8 +7,6 @@ import {
   propagateAttributes,
   startObservation,
   startActiveObservation,
-  setActiveTraceIO,
-  setActiveTraceAsPublic,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -16,10 +14,8 @@ import { context, trace } from "@opentelemetry/api";
 import { after } from "next/server";
 import { flush } from "@/src/instrumentation";
 import { rateLimit } from "@/lib/rateLimit";
-import {
-  buildDemoTraceRedirectUrl,
-  demoProjectLangfuseClient,
-} from "@/lib/demo-public-trace";
+import { demoProjectLangfuseClient } from "@/lib/demo-project-langfuse-client";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import {
   MAX_HISTORY_ROUNDS,
   MOVES,
@@ -37,7 +33,7 @@ import {
 } from "./game";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompt";
 
-export const MODEL_TIME_CAP_MS = 6_000;
+export const MODEL_TIME_CAP_MS = 10_000;
 
 type ProviderOptions = NonNullable<
   Parameters<typeof streamText>[0]["providerOptions"]
@@ -183,13 +179,10 @@ const handler = async (req: Request) => {
       // after the Response has been returned to Next.js.
       const traceContext = context.active();
 
-      // Trace-level and root-observation input. The full history goes to
-      // metadata-like detail on the trace; the root observation gets what a
-      // reviewer needs at a glance.
-      const traceInput = { round, userMove, opponent, history };
-      setActiveTraceIO({ input: traceInput });
+      // The root observation's input is the trace input, including the
+      // history the model saw.
       updateActiveObservation({
-        input: { round, opponent, userMove },
+        input: { round, userMove, opponent, history },
       });
 
       // The human commits first. The model never sees this value.
@@ -246,6 +239,7 @@ const handler = async (req: Request) => {
         let reasoningText = "";
         let plainText = "";
         let sawReasoningSummary = false;
+        let flushed = false;
 
         try {
           try {
@@ -401,11 +395,6 @@ const handler = async (req: Request) => {
                 value: timedOut ? 1 : 0,
                 dataType: "BOOLEAN",
               },
-              {
-                name: "response_time_ms",
-                value: responseTimeMs,
-                dataType: "NUMERIC",
-              },
             ];
             if (predictionCorrect !== null) {
               scores.push({
@@ -420,30 +409,24 @@ const handler = async (req: Request) => {
             }
           }
 
-          const traceOutput = {
-            round,
-            userMove,
-            modelMove: committedMove,
-            predictedUserMove,
-            outcome,
-            fallbackReason,
-            timedOut,
-            responseTimeMs,
-            reasoningSummary: reasoningText || undefined,
-            visibleReasoning: plainText || undefined,
-          };
-          setActiveTraceIO({ output: traceOutput });
           updateActiveObservation({
             output: {
+              round,
               userMove,
               modelMove: committedMove,
-              outcome,
               predictedUserMove,
+              outcome,
               fallbackReason,
+              timedOut,
+              responseTimeMs,
+              reasoningSummary: reasoningText || undefined,
+              visibleReasoning: plainText || undefined,
             },
           });
-          setActiveTraceAsPublic();
-
+          // Flush spans before exposing the Open-trace URL so Cloud has the
+          // run ready when the visitor clicks through.
+          await finalize();
+          flushed = true;
           write({
             type: "result",
             round,
@@ -457,15 +440,16 @@ const handler = async (req: Request) => {
             responseTimeMs,
             opponent,
             traceId,
-            traceUrl: buildDemoTraceRedirectUrl({
+            traceUrl: buildDemoTraceUrl({
               traceId,
               observationId: rootObservationId,
-              source: "rock_paper_scissors",
             }),
           });
           close();
         } finally {
-          after(finalize);
+          if (!flushed) {
+            after(finalize);
+          }
         }
       };
 

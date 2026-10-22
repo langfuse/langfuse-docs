@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-// import { DemoTraceLink } from "@/components/demoTraceLink"; // temporarily disabled
+import { DemoTraceLink } from "@/components/demoTraceLink";
 import { getPersistedNanoId } from "@/components/qaChatbot/utils/persistedNanoId";
 import {
   Select,
@@ -24,7 +24,7 @@ import {
 } from "./game";
 import type { RoundResultPayload, StreamChunk } from "./apiHandler";
 
-const TIME_CAP_MS = 6_000;
+const TIME_CAP_MS = 10_000;
 const DEFAULT_OPPONENT: OpponentId = "gpt-6-astra";
 
 const OPPONENTS: Record<OpponentId, { label: string; vendor: string }> = {
@@ -327,7 +327,7 @@ export const RockPaperScissors = ({
                   </div>
                   <div className="font-mono text-[11px] tabular-nums text-text-tertiary">
                     {phase === "thinking"
-                      ? `${(elapsedMs / 1000).toFixed(1)}s / 6.0s`
+                      ? `${(elapsedMs / 1000).toFixed(1)}s / ${(TIME_CAP_MS / 1000).toFixed(1)}s`
                       : result
                         ? `${(result.responseTimeMs / 1000).toFixed(1)}s`
                         : null}
@@ -396,13 +396,10 @@ export const RockPaperScissors = ({
                       >
                         New round
                       </button>
-                      {/* Temporarily disabled: trace link (traces are not shared publicly right now)
                       <DemoTraceLink
                         traceUrl={result.traceUrl}
                         source="rock_paper_scissors"
-                        label="Show trace"
                       />
-                      */}
                     </div>
                   </div>
                 </div>

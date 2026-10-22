@@ -1,0 +1,198 @@
+---
+title: Langfuse vs. MLflow
+shortTitle: MLflow
+seoTitle: "MLflow Alternative: Langfuse vs. MLflow for LLM and agent engineering"
+description: Langfuse is the open-source MLflow alternative for LLM and agent engineering. October 2026 comparison of Cloud and self-hosting, ClickHouse, published pricing, evaluation, and prompts.
+tags: [comparison]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
+
+# Langfuse vs. MLflow
+
+This guide outlines the key differences between **[Langfuse](/)** and **[MLflow](https://mlflow.org/)** for LLM and agent engineering. All MLflow facts were checked against public MLflow docs, release notes, and Databricks documentation in October 2026.
+
+## TL;DR
+
+- **Open-source core, on Cloud or self-hosted.** Langfuse's core tracing, evaluation, prompt management, and APIs are [MIT-licensed](#open-source-and-deployment) and available on Cloud or self-hosted; additional Enterprise features require a license, and Enterprise SSO and organization RBAC are in the free distribution. MLflow is Apache-2.0 open source under the Linux Foundation; its managed versions are cloud-provider products with their own feature tables and contracts, and SSO on the open-source server is a community plugin or a reverse proxy.
+- **Built for agent-scale traces.** Langfuse writes every observation to ClickHouse, [open source since 2016](#storage), keeps 3 years on Pro with full-text search, and self-hosters query it in SQL. MLflow's tracking server stores traces in a relational database and archives older span payloads to object storage, after which content search stops for those traces.
+- **Published pricing, 3 years of history.** Langfuse Cloud publishes [Core at $29, Pro at $199 with unlimited users, and Enterprise at $2,499](#pricing). Open-source MLflow has no license fee plus the infrastructure and judge inference you run; a managed MLflow workload is priced under the cloud provider's contract, and Databricks publishes no rate.
+- **The improvement loop runs in one project.** Langfuse [judges and code evaluators](#improvement-loop) score incoming observations and backfill history, prompt experiments run in the UI and applications through the SDK, annotation queues are on every plan, and prompt labels carry model and tool config. Open-source MLflow's automatic evaluation runs LLM judges through an AI Gateway endpoint without code-based scorers; Databricks Managed MLflow adds code scorers and historical backfills, and review queues are experimental as of 3.14.
+- **Same-day switch, or run both.** [Point the SDK or OpenTelemetry exporter at Langfuse](#switching-from-mlflow); `mlflow.otel.autolog()` can keep mirroring the same spans into MLflow during the overlap. Most teams see first traces in Langfuse the same day.
+
+**Choose Langfuse** if you want an independent AI engineering platform for the LLM application: an open-source core for production traces, datasets, experiments, annotation, and prompts on Cloud or self-hosted including air-gapped, SSO and RBAC in the free distribution, a published Cloud price with 3 years of history on Pro, and observations in ClickHouse you can query and export. Proven at 21 of the Fortune 50.
+
+**Choose MLflow** if you are already running it, for classical experiment tracking and the model registry or inside a Databricks, SageMaker, or Azure ML contract, and the differences on this page do not justify a second system for the LLM application. You accept a community plugin or reverse proxy for SSO on the open-source server, managed features and prices set by the cloud provider, and trace storage in a relational database with archival to object storage.
+
+---
+
+## Open source and deployment [#open-source-and-deployment]
+
+Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed and available on Cloud or self-hosted; additional Enterprise features require a license. [Self-hosting](/self-hosting) runs the UI, login, and data in your environment on every tier, including [air-gapped operation](/self-hosting/security/networking), and Enterprise SSO and organization-level RBAC ship in the [free distribution](/pricing-self-host). Langfuse Cloud is covered by [SOC 2 Type II and ISO 27001 audits, is GDPR compliant](/security), and signs a BAA from the Pro plan in the [HIPAA region](/security/hipaa). Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise).
+
+MLflow is [Apache-2.0 open source](https://github.com/mlflow/mlflow) under the Linux Foundation. The [self-hosting guide](https://mlflow.org/docs/latest/self-hosting/) runs the tracking server locally, with Docker Compose, or with a Helm chart, and lists Databricks, AWS SageMaker, Azure Machine Learning, Nebius, and GCP as managed options. Role-based access control is built in since 3.13; [SSO](https://mlflow.org/docs/latest/self-hosting/security/sso/) goes through a community-maintained OIDC plugin or a reverse proxy. Databricks' [Managed MLflow page](https://www.databricks.com/product/managed-mlflow) lists high availability and automated updates among managed-only features and publishes no price.
+
+|                            | Langfuse                                                                                                                                                                            | MLflow                                                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| License                    | **[MIT](https://github.com/langfuse/langfuse)** core: tracing, evaluation, prompts, APIs; Enterprise features licensed separately                                                   | Apache 2.0, Linux Foundation                                                                                                                                            |
+| GitHub stars               | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | [![MLflow GitHub stars](https://img.shields.io/github/stars/mlflow/mlflow?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://github.com/mlflow/mlflow) |
+| Managed service            | Langfuse Cloud, same open-source core plus licensed Enterprise features                                                                                                             | Databricks, SageMaker, Azure ML, Nebius                                                                                                                                 |
+| Enterprise SSO (self-host) | **Included in free OSS** ([self-hosted pricing](/pricing-self-host)); Cloud via the [Teams add-on](/pricing)                                                                        | Community OIDC plugin or reverse proxy                                                                                                                                  |
+| Org-level RBAC (self-host) | **Included in free OSS**                                                                                                                                                            | Built in since 3.13                                                                                                                                                     |
+
+---
+
+## Storage and data access [#storage]
+
+<CompareClickhouseDatastore />
+
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([details](/blog/2026-03-10-simplify-langfuse-for-scale)), which is how Pro keeps 3 years of raw traces queryable with [full-text search](/docs/observability/features/full-text-search). High-volume reads go through the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api#v2) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Pro with the Teams add-on, Enterprise, and self-hosted) land JSONL or Parquet in your own S3, GCS, or Azure bucket, and self-hosters query ClickHouse in SQL.
+
+MLflow's [backend store](https://mlflow.org/docs/latest/self-hosting/architecture/backend-store/) is a relational database, SQLite by default and PostgreSQL, MySQL, or MSSQL for scale, with an artifact store beside it. [Trace archival](https://mlflow.org/docs/latest/genai/tracing/observe-with-traces/archive-traces/) moves older span payloads to object storage; archived traces stay readable, but content search stops for them and archival cannot be undone. [3.17.0](https://mlflow.org/releases/) adds optional daily rollups for trace analytics behind a schema upgrade that requires writers to be stopped.
+
+|                       | Langfuse                                                                                                                                                                                                            | MLflow                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Data store            | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/open-source-10), Apache 2.0                                                                                                                       | Relational database plus artifact store                         |
+| Cloud and self-hosted | Same ClickHouse engine and observations-first data model ([v4](/docs/v4))                                                                                                                                           | Managed tiers differ by provider                                |
+| Trace analytics       | ClickHouse on Cloud and self-hosted; [Pulse](/docs/observability/features/pulse) and [custom dashboards](/docs/metrics/features/custom-dashboards) on the same table                                                | SQL queries; optional daily rollups in 3.17                     |
+| Full-text search      | On stored observations                                                                                                                                                                                              | Until a trace is archived                                       |
+| Getting data out      | SQL on ClickHouse when self-hosting; Observations and Metrics APIs; [scheduled export](/docs/api-and-data-platform/features/export-to-blob-storage) to your bucket (Pro with Teams add-on, Enterprise, self-hosted) | Your database and artifact store; provider tooling when managed |
+| Retention             | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                                                                                                                                                         | Your archival policy                                            |
+
+---
+
+## Pricing [#pricing]
+
+Langfuse Cloud publishes its prices: Core at $29, Pro at $199 with 3 years of history and unlimited users, Enterprise at $2,499, plus graduated [unit pricing](/pricing) where a unit is one trace, observation, or score. Judge inference runs on your own model connection, and scheduled bucket exports and Cloud SSO are the Teams add-on. Self-hosted Langfuse OSS has no license fee; you run the infrastructure.
+
+Open-source MLflow has no license fee either; the cost is the tracking server, its database and artifact store, upgrades, and the model calls behind every judge. A managed MLflow workload is priced by the cloud provider that hosts it, Databricks, SageMaker, Azure ML, or Nebius, under that provider's contract. Databricks' Managed MLflow page publishes no rate.
+
+See [Langfuse pricing](/pricing) or [talk to us](/talk-to-us) about Enterprise volumes.
+
+---
+
+## The improvement loop [#improvement-loop]
+
+Langfuse runs the loop in one project. Add a production observation to a [dataset](/docs/evaluation/experiments/datasets), run a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui) in the UI or a full-application experiment through the [SDK](/docs/evaluation/experiments/experiments-via-sdk), [compare the run to a baseline](/docs/evaluation/experiments/compare-experiments), and route outputs to [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues). [Prompt labels](/docs/prompt-management/features/prompt-version-control) promote a version without a redeploy, and the version can carry [model and tool config](/docs/prompt-management/features/config) that your application reads at runtime. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score incoming observations and experiment runs, and [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) backfills history. In production, [Pulse](/docs/observability/features/pulse) surfaces outliers, [alerts](/docs/observability/features/alerts) fire on metric thresholds, and [Halo](/docs/halo) investigates traces and creates datasets, prompts, and dashboards on request; it is on every Cloud plan and in public beta for self-hosted.
+
+MLflow's docs cover the same loop, with differences by tier. On the open-source server, [automatic evaluation](https://mlflow.org/docs/latest/genai/eval-monitor/automatic-evaluations/) runs LLM judges on new traces through an AI Gateway endpoint and does not support code-based scorers. On Databricks, [production monitoring](https://docs.databricks.com/aws/en/mlflow3/genai/eval-monitor/run-scorer-in-prod) runs built-in and custom judges and code-based scorers at a configurable sampling rate and can backfill historical traces. `mlflow.genai.evaluate()` runs offline evaluations, [review queues](https://mlflow.org/docs/latest/genai/assessments/review-queues/) are experimental since 3.14, the Prompt Registry versions prompts with aliases, and `@mlflow.test` gates CI with pytest. AI Issue Discovery analyzes one experiment and runs inside a coding agent.
+
+|                                 | Langfuse                                                                                                | MLflow                                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Finding a failure in production | Judges and code evaluators on incoming observations, backfill on history, Pulse, alerts, Halo           | OSS: LLM judges on new traces. Databricks: judges and code scorers, with backfill |
+| Who runs the comparison         | Prompts and models in the UI; applications through the SDK, compared in Langfuse                        | Code via `mlflow.genai.evaluate()`; results compared in the UI                    |
+| Human review                    | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues); unlimited on Pro            | Review queues, experimental                                                       |
+| Prompt release                  | [Labels](/docs/prompt-management/features/prompt-version-control) and versioned config your app applies | Aliases on immutable versions                                                     |
+| Alerts                          | [Threshold alerts](/docs/observability/features/alerts) on metrics                                      | Budget alerts on the AI Gateway                                                   |
+| CI                              | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd) on experiment results                   | `@mlflow.test` with pytest                                                        |
+
+---
+
+## Which should you choose [#which-should-you-choose]
+
+Choose **Langfuse** if you want **an independent, open-source platform for the LLM application**: an open-source core on Cloud or self-hosted including air-gapped with SSO and organization RBAC in the free distribution, evaluators, prompt experiments, annotation queues, and prompt config in one UI with application experiments through the SDK, observations in ClickHouse you can query and export, and a published Cloud price with 3 years of history.
+
+Choose **MLflow** if you are **already running it** for classical experiment tracking and the model registry, or inside a cloud-provider contract, and the differences above do not justify a second system for the LLM application.
+
+---
+
+## Why teams move away from MLflow [#why-teams-move-away]
+
+The same reasons recur in migration conversations.
+
+- **SSO is a plugin and the managed tier is a contract.** MLflow's open-source server authenticates with basic auth plus a [community OIDC plugin or a reverse proxy](#open-source-and-deployment), and Databricks lists high availability and automated updates as managed-only. Langfuse ships Enterprise SSO and organization RBAC in the free distribution and offers the same open-source core on Cloud.
+- **Trace storage is a relational database.** MLflow archives older span payloads to object storage, where [content search stops](#storage), and 3.17's faster analytics need a coordinated schema upgrade. Langfuse writes observations to ClickHouse on Cloud and self-hosted, with full-text search, Pulse, and dashboards on the same table and 3 years of history on Pro.
+- **Online evaluation depends on the tier.** On the open-source server, automatic evaluation [supports LLM judges but not code-based scorers](#improvement-loop), requires an AI Gateway endpoint, and evaluates traces at most one hour old when a judge is enabled; code scorers and historical backfills are a Databricks Managed MLflow capability. Langfuse runs code evaluators and judges on incoming observations and backfills history with batch evaluation on Cloud and self-hosted.
+- **No published managed price.** Databricks' Managed MLflow page has no rate card, and the open-source server's cost is the infrastructure you operate. Langfuse Cloud publishes [unit pricing, 3 years of history on Pro, and a $2,499 Enterprise plan](#pricing).
+
+---
+
+## Why teams choose Langfuse [#customers]
+
+A pattern repeats across production adopters: start where governance requires, often self-hosted, then grow into the platform.
+
+- **[Canva](/users/canva)** runs a multi-agent support system for a product with **250 million** monthly active users. LLM-as-a-judge evaluators score the systems across **15–20** metrics, and domain experts build evaluators without an engineering handoff. They self-hosted first, then moved to Cloud.
+- **[Merck](/users/merckgroup)** runs about **80** of 300+ GenAI use cases on Langfuse, with **200+** people building on it. They self-host for data sovereignty and provision projects via API.
+- **[SumUp](/users/sumup)** rolled AI support to **35+** markets and deflected almost **50%** of conversations, cutting external BPO cost by **30%**. They started self-hosted for the proof of concept, then moved to Langfuse Cloud.
+
+---
+
+## Switching from MLflow [#switching-from-mlflow]
+
+Move the LLM application workflow and leave model tracking where it is. Most teams see first traces in Langfuse the **same day**.
+
+- **Instrumentation:** initialize the [Langfuse SDK](/docs/observability/sdk/overview) or send OpenTelemetry to the [OTLP endpoint](/integrations/native/opentelemetry). MLflow's own [Langfuse integration](https://mlflow.org/docs/latest/genai/tracing/integrations/listing/langfuse/) mirrors Langfuse spans into a tracking server with `mlflow.otel.autolog()`, so a copy can keep flowing to MLflow during the overlap or for good.
+- **Datasets, judges, and prompts:** import cases through the [Langfuse CSV uploader, SDK, or API](/docs/evaluation/experiments/datasets). Recreate judges as evaluators and prompt versions with their model config in [prompt management](/docs/prompt-management/get-started).
+- **History:** stays in the tracking server or the managed workspace. Classical experiments and the model registry stay in MLflow.
+
+[Talk to us](/talk-to-us) if you want help deciding what stays in MLflow.
+
+---
+
+## Start free: Cloud or self-host [#get-started]
+
+[Langfuse Cloud](https://cloud.langfuse.com) Hobby includes 50k units/month, no credit card. Or [self-host](/self-hosting) the MIT stack. The [example project](/docs/demo) is populated before you instrument anything.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+---
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="is-langfuse-an-mlflow-alternative">
+<Summary>Is Langfuse an MLflow alternative?</Summary>
+
+Yes, for LLM and agent engineering: an independent platform with an open-source core for tracing, datasets, experiments, human review, and prompt management on Cloud or self-hosted, with a published price and 3 years of history on Pro. MLflow also covers classical experiment tracking and the model registry, which Langfuse does not replace, so many teams keep both. See [Which should you choose](#which-should-you-choose).
+
+</Details>
+
+<Details id="is-mlflow-open-source">
+<Summary>Is MLflow open source?</Summary>
+
+Yes, under the Apache 2.0 license as a Linux Foundation project. The managed versions are cloud-provider products from Databricks, AWS SageMaker, Azure Machine Learning, and Nebius, each with its own feature set and contract. Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed; Langfuse Cloud runs that core with additional Enterprise features under license. See [Open source and deployment](#open-source-and-deployment).
+
+</Details>
+
+<Details id="how-does-mlflow-pricing-compare">
+<Summary>How does MLflow pricing compare to Langfuse?</Summary>
+
+The open-source MLflow server has no license fee; you pay for the database, artifact storage, compute, upgrades, and judge-model calls. Managed MLflow follows your cloud-provider contract, and Databricks publishes no rate. Langfuse Cloud is $29 on Core, $199 on Pro with 3 years of history and unlimited users, and $2,499 on Enterprise, plus graduated unit pricing; judge inference runs on your own model connection. Self-hosted Langfuse OSS also has no license fee. See [Pricing](#pricing).
+
+</Details>
+
+<Details id="can-mlflow-ingest-langfuse-traces">
+<Summary>Can MLflow ingest Langfuse traces?</Summary>
+
+Yes. MLflow's Langfuse integration uses `mlflow.otel.autolog()` to mirror Langfuse spans into an MLflow tracking server, with Langfuse observation types mapped to MLflow span types. Langfuse tracing stays in place; prompts, datasets, and scores are not part of that mirror. See [Switching from MLflow](#switching-from-mlflow).
+
+</Details>
+
+<Details id="does-mlflow-evaluate-production-traces">
+<Summary>Does MLflow evaluate production traces automatically?</Summary>
+
+Yes, and the scope depends on the tier. Open-source MLflow's automatic evaluation runs LLM judges on new traces through an AI Gateway endpoint; code-based scorers are not supported there, and a newly enabled judge evaluates traces at most one hour old. Databricks Managed MLflow production monitoring supports built-in and custom judges and code-based scorers and can backfill historical traces. Langfuse runs LLM-as-a-judge and code evaluators on incoming observations and backfills history with batch evaluation on Cloud and self-hosted. See [The improvement loop](#improvement-loop).
+
+</Details>
+
+<Details id="how-do-i-move-from-mlflow-to-langfuse">
+<Summary>How do I move an LLM app from MLflow to Langfuse?</Summary>
+
+Point new traces at Langfuse, optionally keep `mlflow.otel.autolog()` on so MLflow still receives a copy, and recreate datasets, judges, and prompts. Model-registry history can stay in MLflow. See [Switching from MLflow](#switching-from-mlflow).
+
+</Details>
+
+</FaqDetails>
+
+<Callout type="info">
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/mlflow.mdx) with up-to-date information.
+</Callout>
+
+<SignupCTA className="my-6" />

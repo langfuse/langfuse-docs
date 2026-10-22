@@ -4,8 +4,9 @@ import { useState, useMemo } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoTraceUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import {
   EXAMPLE_TEXTS,
@@ -64,9 +65,9 @@ export const SentimentClassifier = ({
   const jevModel = result?.result.model;
 
   return (
-    <div className={cn("h-[62vh]", className)} {...props}>
-      <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
-        <div className="flex-1 overflow-y-auto relative z-10 space-y-4">
+    <div className={cn(className)} {...props}>
+      <div className="relative flex flex-col rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5">
+        <div className="relative z-10 space-y-4">
           <div className="space-y-3">
             <textarea
               value={input}
@@ -93,21 +94,21 @@ export const SentimentClassifier = ({
           {!result && !loading && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Try an example:</p>
-              <Suggestions>
-                {EXAMPLE_TEXTS.map((text, i) => (
-                  <Suggestion
-                    key={i}
-                    suggestion={text}
-                    onClick={(s) => {
-                      setInput(s);
-                      handleSubmit(s);
+              <div className="grid gap-2 sm:grid-cols-3">
+                {EXAMPLE_TEXTS.map((text) => (
+                  <button
+                    key={text}
+                    type="button"
+                    onClick={() => {
+                      setInput(text);
+                      handleSubmit(text);
                     }}
-                    className="text-xs whitespace-normal text-left h-auto py-2 max-w-64"
+                    className="min-w-0 whitespace-normal break-words rounded-[2px] border border-line-structure bg-surface-bg px-3 py-2 text-left text-xs leading-5 text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    {text.length > 60 ? `${text.slice(0, 60)}...` : text}
-                  </Suggestion>
+                    {text}
+                  </button>
                 ))}
-              </Suggestions>
+              </div>
             </div>
           )}
 
@@ -149,6 +150,11 @@ export const SentimentClassifier = ({
                   }}
                 />
               )}
+
+              <DemoTraceLink
+                traceUrl={buildDemoTraceUrl({ traceId: result.traceId })}
+                source="sentiment_classifier"
+              />
             </div>
           )}
         </div>

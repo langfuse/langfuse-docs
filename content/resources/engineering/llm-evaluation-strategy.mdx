@@ -4,9 +4,13 @@ description: "How to build an LLM evaluation strategy: quality dimensions from f
 tags: [guide, evaluation]
 ---
 
+import { SignupCTA } from "@/components/SignupCTA";
+
 # How to build an LLM evaluation strategy
 
 Most LLM evaluation content explains methods: what a judge prompt looks like, how to compute similarity, when exact match is enough. Rolling evaluation out across a team is a different problem. Someone has to decide which dimensions of quality matter for this application, which method measures each one, what score blocks a release, and what evidence exists when leadership asks how you know the system works. This guide covers that rollout, step by step, with Langfuse as the worked example.
+
+<SignupCTA className="my-6" />
 
 **TL;DR:** An LLM evaluation strategy assigns every quality dimension you care about to the cheapest method that measures it reliably, then wires those measurements into the points where decisions happen: experiments before merging, gates in CI, sampled evaluators on production traffic, and a human review loop for the judgments automation cannot make. Build it in six steps: derive dimensions from observed failure modes, pick a method per dimension, establish an offline baseline with datasets and experiments, gate changes in CI, monitor production with sampled evaluators and alerts, and close the loop by turning production failures into new test cases.
 

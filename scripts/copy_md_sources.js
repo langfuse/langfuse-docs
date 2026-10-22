@@ -12,6 +12,7 @@ const {
   replaceComponentsWithMarkdown,
 } = require("../lib/markdown-component-renderers.js");
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
+const { hasResourceSignupCta } = require("../lib/resource-signup-cta.js");
 const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
@@ -109,6 +110,17 @@ function appendAgentInstructionsFooter(markdown, destRel) {
   if (AGENT_FOOTER_EXCLUDED_PAGES.has(destRel)) return markdown;
   const footer = buildAgentInstructionsFooter(`${SITE_URL}/${destRel}`);
   return `${markdown.replace(/\s*$/, "")}\n\n${footer}`;
+}
+
+// Mirror layout-level CTAs before appending the Markdown-only agent footer.
+// Also applies to Markdown overrides and notebook-generated resource pages.
+function appendPageFooters(markdown, destRel) {
+  const pathname = `/${destRel.replace(/\.md$/, "")}`;
+  if (hasResourceSignupCta(pathname)) {
+    const cta = replaceComponentsWithMarkdown("<SignupCTA />").trim();
+    markdown = `${markdown.trimEnd()}\n\n${cta}`;
+  }
+  return appendAgentInstructionsFooter(markdown, destRel);
 }
 
 /**
@@ -212,7 +224,7 @@ function copyAll() {
       processed = injectChangelogAgentNotice(processed, originalContent);
     }
 
-    processed = appendAgentInstructionsFooter(processed, destRel);
+    processed = appendPageFooters(processed, destRel);
 
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;
@@ -260,7 +272,7 @@ function applyOverrides() {
     const destRel = rel.split(path.sep).join("/");
     fs.writeFileSync(
       dest,
-      appendAgentInstructionsFooter(fs.readFileSync(file, "utf8"), destRel),
+      appendPageFooters(fs.readFileSync(file, "utf8"), destRel),
       "utf8",
     );
     overridden += 1;

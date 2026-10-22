@@ -6,7 +6,6 @@ import {
   propagateAttributes,
   startActiveObservation,
   updateActiveObservation,
-  setActiveTraceIO,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { LangfuseClient } from "@langfuse/client";
@@ -46,8 +45,7 @@ export const handler = async (req: Request) => {
       userId,
     },
     async () => {
-      updateActiveObservation({ input: inputText }, { asType: "generation" });
-      setActiveTraceIO({ input: inputText });
+      updateActiveObservation({ input: inputText }, { asType: "agent" });
 
       const prompt = await tracedGetPrompt("langfuse-docs-assistant-chat", {
         type: "chat",
@@ -132,11 +130,7 @@ export const handler = async (req: Request) => {
                 .find((part: any) => part?.type === "text")?.text
             : (result as any).content;
 
-          updateActiveObservation(
-            { output: latestText },
-            { asType: "generation" },
-          );
-          setActiveTraceIO({ output: latestText });
+          updateActiveObservation({ output: latestText }, { asType: "agent" });
           trace.getActiveSpan()?.end();
         },
       });

@@ -23,13 +23,15 @@ Langfuse supports Postgres versions >= 12 and uses the `public` schema in the se
 Langfuse works with PostgreSQL and Postgres-compatible databases.
 We distinguish between officially supported and community-supported options:
 
-| Option                                                                    | Support Level |
-| ------------------------------------------------------------------------- | ------------- |
-| [PostgreSQL](https://www.postgresql.org/) (>= 12, self-hosted or managed) | Official      |
-| [Amazon Aurora PostgreSQL](https://aws.amazon.com/rds/aurora/)            | Official      |
-| Other Postgres-compatible databases (e.g., Google AlloyDB, YugabyteDB)    | Community     |
+| Option                                                                                        | Support Level |
+| --------------------------------------------------------------------------------------------- | ------------- |
+| [PostgreSQL](https://www.postgresql.org/) (>= 12, self-hosted or managed)                     | Official      |
+| [ClickHouse Managed Postgres](https://clickhouse.com/docs/products/managed-postgres/overview) | Official      |
+| [Amazon Aurora PostgreSQL](https://aws.amazon.com/rds/aurora/)                                | Official      |
+| Other Postgres-compatible databases (e.g., Google AlloyDB, YugabyteDB)                        | Community     |
 
 Managed services that run PostgreSQL, such as Amazon RDS, Azure Database for PostgreSQL, and GCP Cloud SQL, are covered by the official support level.
+[ClickHouse Managed Postgres](https://clickhouse.com/docs/products/managed-postgres/overview) is a recommended managed option for Langfuse's transactional Postgres. It is very fast because it is backed by NVMe. If you go commercial with Langfuse, it can be covered by the same contract.
 Aurora PostgreSQL is the default in our [AWS (Terraform)](/self-hosting/deployment/aws) deployment.
 
 import SelfHostSupportLevels from "@/components-mdx/self-host-support-levels.mdx";

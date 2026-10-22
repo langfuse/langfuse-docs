@@ -8,6 +8,7 @@ const SLUG_LABELS: Record<string, string> = {
   merckgroup: "Merck",
   sumup: "SumUp",
   "magic-patterns-ai-design-tools": "Magic Patterns",
+  dkb: "DKB",
 };
 
 export function companyLabelFromLogo(customerLogo: string): string {

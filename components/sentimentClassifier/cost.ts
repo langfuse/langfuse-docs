@@ -24,9 +24,24 @@ export function computeCostUsd(
   outputTokens: number,
   price: { input: number; output: number },
 ): number {
-  return (
-    (inputTokens / 1e6) * price.input + (outputTokens / 1e6) * price.output
+  const { input, output } = computeCostDetails(
+    inputTokens,
+    outputTokens,
+    price,
   );
+  return input + output;
+}
+
+/** Per-usage-type USD costs for Langfuse `costDetails` (input/output keys). */
+export function computeCostDetails(
+  inputTokens: number,
+  outputTokens: number,
+  price: { input: number; output: number },
+): { input: number; output: number } {
+  return {
+    input: (inputTokens / 1e6) * price.input,
+    output: (outputTokens / 1e6) * price.output,
+  };
 }
 
 export function formatCostUsd(costUsd: number): string {

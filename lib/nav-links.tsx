@@ -15,6 +15,8 @@ import {
   Presentation,
   ScrollText,
   Workflow,
+  HeartPulse,
+  Landmark,
   type LucideIcon,
 } from "lucide-react";
 
@@ -55,6 +57,19 @@ export const useCaseLinks: NavPanelLink[] = [
   { name: "Chat agents", href: "/chat-agents", icon: Bot },
   { name: "Coding agents", href: "/coding-agents", icon: Code2 },
   { name: "Workflow automation", href: "/workflow-automation", icon: Workflow },
+];
+
+export const industryLinks: NavPanelLink[] = [
+  {
+    name: "Financial Services",
+    href: "/financial-services",
+    icon: Landmark,
+  },
+  {
+    name: "Healthcare and life sciences",
+    href: "/healthcare",
+    icon: HeartPulse,
+  },
 ];
 
 export const simpleLinks = [

@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
 import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
+import { DemoTraceLink } from "@/components/demoTraceLink";
+import { buildDemoProjectUrl, buildDemoTraceUrl } from "@/lib/demo-trace";
 import { SendIcon } from "lucide-react";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 import {
@@ -22,9 +24,6 @@ import { CompareMetricBoxes } from "./metricBoxes";
 import { CLASSIFIER_SEQUENCE, type ClassifierDefinition } from "./criteria";
 import { sumUsage, type SentimentUsage } from "./cost";
 import type { ClassifierAnswer } from "./types";
-
-const PUBLIC_SAMPLE_PROJECT_TRACES_URL =
-  "https://cloud.langfuse.com/project/clkpwwm0m000gmm094odg11gi/traces";
 
 type EngineState = {
   result: ClassifierRunResult;
@@ -65,12 +64,22 @@ const LlmTaskSlot = ({
 }) => {
   if (slot?.status === "success") {
     return (
-      <SentimentResultPanel
-        answer={slot.answer}
-        compact={compact}
-        feedback={feedback}
-        onFeedback={onFeedback}
-      />
+      <div className={compact ? "space-y-1.5" : "space-y-3"}>
+        <SentimentResultPanel
+          answer={slot.answer}
+          compact={compact}
+          feedback={feedback}
+          onFeedback={onFeedback}
+        />
+        <DemoTraceLink
+          traceUrl={buildDemoTraceUrl({
+            traceId: slot.traceId,
+            campaign: "blog",
+          })}
+          source="sentiment_classifier"
+          className={compact ? "text-xs" : undefined}
+        />
+      </div>
     );
   }
 
@@ -395,6 +404,25 @@ export const SentimentClassifierCompare = ({
                       />
                     </div>
                   ))}
+                  <div
+                    className={cn(
+                      "border-t border-line-structure",
+                      compact ? "pt-1.5" : "pt-3",
+                    )}
+                  >
+                    <DemoTraceLink
+                      traceUrl={buildDemoTraceUrl({
+                        traceId: jev.traceId,
+                        campaign: "blog",
+                      })}
+                      source="jev_evals_blog"
+                      className={
+                        compact
+                          ? "w-full justify-center text-xs"
+                          : "w-full justify-center"
+                      }
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -488,13 +516,13 @@ export const SentimentClassifierCompare = ({
         >
           Traces in the{" "}
           <a
-            href={PUBLIC_SAMPLE_PROJECT_TRACES_URL}
+            href={buildDemoProjectUrl({ campaign: "blog" })}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => {
+            onClick={(event) => {
               capture("demo:view_trace_in_langfuse_clicked", {
                 source: "jev_evals_blog",
-                trace_url: PUBLIC_SAMPLE_PROJECT_TRACES_URL,
+                trace_url: event.currentTarget.href,
               });
             }}
             className="underline underline-offset-2 text-text-links hover:text-primary"

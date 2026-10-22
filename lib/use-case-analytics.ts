@@ -1,6 +1,11 @@
 import { cloudRegions } from "./cloud-regions";
 
-export type UseCase = "chat_agents" | "coding_agents" | "workflow_automation";
+export type UseCase =
+  | "chat_agents"
+  | "coding_agents"
+  | "workflow_automation"
+  | "financial_services"
+  | "healthcare";
 export type SetupPath = "gateway" | "hooks";
 export type DestinationGroup =
   | "signup"
@@ -43,9 +48,13 @@ const STORAGE_KEY = "lf_use_case_attribution";
 export const ATTRIBUTION_TTL_MS = 30 * 60 * 1000;
 
 export function isUseCase(value: unknown): value is UseCase {
-  return ["chat_agents", "coding_agents", "workflow_automation"].includes(
-    value as UseCase,
-  );
+  return [
+    "chat_agents",
+    "coding_agents",
+    "workflow_automation",
+    "financial_services",
+    "healthcare",
+  ].includes(value as UseCase);
 }
 
 export function destinationGroup(url: URL, origin: string): DestinationGroup {

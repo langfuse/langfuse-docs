@@ -6,13 +6,17 @@ import {
   getActiveTraceId,
   observe,
   propagateAttributes,
-  setActiveTraceIO,
   startActiveObservation,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
 import { after } from "next/server";
 import { context, ROOT_CONTEXT } from "@opentelemetry/api";
 import { z } from "zod";
+import {
+  faqPageContextInstructions,
+  sanitizeFaqPageUrl,
+  trustedPageOrigins,
+} from "@/lib/faq-page-context";
 import { flush } from "@/src/instrumentation";
 
 export const runtime = "nodejs";
@@ -42,6 +46,8 @@ const promptConfigSchema = z.object({
 
 const bodySchema = z.object({
   question: z.string().trim().min(1).max(500),
+  // Ignore a malformed url so question-only clients keep working.
+  url: z.string().max(2000).optional().catch(undefined),
 });
 const unavailable =
   "I couldn’t get an answer right now. Please try a new question in a moment.";
@@ -65,6 +71,7 @@ export async function POST(req: Request) {
   }
 
   const { question } = parsed.data;
+  const page = sanitizeFaqPageUrl(parsed.data.url, trustedPageOrigins(req));
   const abortSignal = AbortSignal.any([
     req.signal,
     AbortSignal.timeout(50_000),
@@ -80,8 +87,8 @@ export async function POST(req: Request) {
             tags: ["faq-bot"],
           },
           async () => {
-            observation.update({ input: question });
-            setActiveTraceIO({ input: question });
+            const traceInput = page ? { question, url: page.url } : question;
+            observation.update({ input: traceInput });
             let client: Awaited<ReturnType<typeof createMCPClient>> | undefined;
             let finished = false;
             let resolveFinished!: () => void;
@@ -103,7 +110,6 @@ export async function POST(req: Request) {
                     ? { level: "ERROR" as const, statusMessage: output }
                     : {}),
                 });
-                setActiveTraceIO({ output });
                 await client?.close();
               } catch {
                 console.warn("FAQ-bot: MCP cleanup failed");
@@ -117,9 +123,14 @@ export async function POST(req: Request) {
               const prompt = await getFaqPrompt();
               const config = promptConfigSchema.parse(prompt.config);
               const compiledPrompt = prompt.compile({ question });
-              const instructions = compiledPrompt
-                .filter((message) => message.role === "system")
-                .map((message) => message.content)
+              const instructions = [
+                compiledPrompt
+                  .filter((message) => message.role === "system")
+                  .map((message) => message.content)
+                  .join("\n\n"),
+                page ? faqPageContextInstructions(page) : "",
+              ]
+                .filter(Boolean)
                 .join("\n\n");
               const messages = compiledPrompt.filter(
                 (message) => message.role !== "system",
@@ -147,13 +158,16 @@ export async function POST(req: Request) {
                 instructions,
                 messages,
                 tools,
-                // Always retrieve docs first; reserve the last step for the answer.
+                // Ground in the current page when we have one; otherwise search first.
                 prepareStep: ({ stepNumber }) => ({
                   toolChoice:
                     stepNumber === 0
                       ? {
                           type: "tool" as const,
-                          toolName: "searchLangfuseDocs",
+                          toolName:
+                            page && page.docsUrl !== "https://langfuse.com/"
+                              ? "getLangfuseDocsPage"
+                              : "searchLangfuseDocs",
                         }
                       : stepNumber >= 3
                         ? ("none" as const)

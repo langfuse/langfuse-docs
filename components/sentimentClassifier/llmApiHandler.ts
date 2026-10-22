@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   observe,
   propagateAttributes,
-  setActiveTraceIO,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -14,6 +13,7 @@ import { rateLimit } from "@/lib/rateLimit";
 import {
   LUNA_PRICE_USD_PER_MTOK,
   addUsage,
+  computeCostDetails,
   computeCostUsd,
   emptyUsage,
   type SentimentUsage,
@@ -147,7 +147,6 @@ const handler = async (req: Request) => {
         text,
       };
 
-      setActiveTraceIO({ input });
       updateActiveObservation({ input }, { asType: "generation" });
 
       try {
@@ -167,7 +166,6 @@ const handler = async (req: Request) => {
           answers,
         };
 
-        setActiveTraceIO({ output: payload });
         updateActiveObservation(
           {
             input,
@@ -185,9 +183,11 @@ const handler = async (req: Request) => {
                 : {}),
               total: usage.totalTokens,
             },
-            costDetails: {
-              total: usage.costUsd,
-            },
+            costDetails: computeCostDetails(
+              usage.inputTokens,
+              usage.outputTokens,
+              LUNA_PRICE_USD_PER_MTOK,
+            ),
           },
           { asType: "generation" },
         );

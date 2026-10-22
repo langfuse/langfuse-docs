@@ -48,13 +48,13 @@ Langfuse is built on open standards and data portability, and will not lock in y
 - **MIT license** — all product features are MIT licensed, scale to billions of monthly events, and you can fork, modify, and contribute. See [open source](/handbook/chapters/open-source).
 - **[Self-host at scale](/self-hosting)** — [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), and Terraform for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure).
 - **APIs and exports** — [REST APIs](/docs/api-and-data-platform/features/public-api) for everything, a [query SDK](/docs/api-and-data-platform/features/query-via-sdk), and [S3 blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage).
-- **Active community** — 22,000+ GitHub stars, 5,000+ Discord members, weekly releases and community hours.
+- **Active community** — 35,000+ GitHub stars, 5,000+ Discord members, weekly releases and community hours.
 
 ## Made for developers, loved by agents
 
-Work in the app or from your IDE. The Assistant investigates production and takes approved actions, and `SKILL.md`, the CLI, and MCP connect coding agents to Langfuse.
+Work in the app or from your IDE. [Halo](/docs/halo), the Langfuse assistant, investigates production and takes approved actions, and `SKILL.md`, the CLI, and MCP connect coding agents to Langfuse.
 
-- **[Langfuse Assistant](/docs/langfuse-assistant)** (in-app) — automate the AI engineering loop: investigate production data, understand what happened, and turn findings into approved actions without leaving Langfuse. Debug traces, optimize spend, and build evals.
+- **[Halo](/docs/halo), the Langfuse Assistant** (in-app) — automate the AI engineering loop: investigate production data, understand what happened, and turn findings into approved actions without leaving Langfuse. Debug traces, optimize spend, and build evals.
 - **[SKILL.md](https://github.com/langfuse/skills)** (coding agents) — a ready-made skill for managing prompts, traces, and evals through natural language.
 - **[Langfuse CLI](/docs/api-and-data-platform/features/cli)** (terminal) — full API access for agent workflows, scripts, and CI/CD.
 - **[Platform MCP server](/docs/api-and-data-platform/features/mcp-server)** (IDE agents) — structured access for IDE agents to manage prompts, query traces, and use Langfuse data.
