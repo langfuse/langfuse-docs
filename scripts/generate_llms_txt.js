@@ -132,6 +132,7 @@ const IGNORED_SECTION_PATHS = new Set([
   "coding-agents",
   "workflow-automation",
   "financial-services",
+  "healthcare",
   "cloud",
   "status",
   "support",
