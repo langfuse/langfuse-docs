@@ -1,0 +1,218 @@
+---
+title: Langfuse for healthcare
+seoTitle: Langfuse for healthcare
+description: Observe and evaluate AI agents that handle patient data, on Langfuse's HIPAA-ready cloud region or your own infrastructure.
+contentWidth: full
+---
+
+{/* Markdown for agents and .md consumers lives in md-override/healthcare.md. Keep both files in sync. */}
+
+{/_ TODO(healthcare-review): Open items. Do not resolve in this PR. Details are in components/healthcare/content.ts.
+(a) Which plan includes HIPAA? Copy follows the HIPAA docs ("Pro plan or higher"). Pricing FAQ still says Enterprise.
+(b) Legal review of the clinical documentation and medical information use cases.
+(c) Audit logs are Enterprise only. Do not describe them as included with the HIPAA region.
+(d) Logo rights. Merck Group and Evolve only, from published stories. _/}
+
+import { CustomerStoriesSection } from "@/components/financial-services/CustomerStoriesSection";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { DeploymentModeSlider } from "@/components/financial-services/DeploymentModeSlider";
+import { EvalCapabilityGrid } from "@/components/financial-services/EvalCapabilityGrid";
+import { HeroReasons } from "@/components/financial-services/HeroReasons";
+import { TrustPoints } from "@/components/financial-services/TrustPoints";
+import { UseCaseGrid } from "@/components/financial-services/UseCaseGrid";
+import {
+  healthcareDeploymentModes,
+  healthcareEvalColumns,
+  healthcareFaqs,
+  healthcareFeaturedStory,
+  healthcareReasons,
+  healthcareStoryCards,
+  healthcareTrustPoints,
+  healthcareUseCases,
+} from "@/components/healthcare/content";
+import { MarketoContactFormCard } from "@/components/MarketoContactForm";
+import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
+import { FAQAccordion } from "@/components/shared/FAQAccordion";
+import { Button } from "@/components/ui/button";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { BookOpen, Play, Radar } from "lucide-react";
+
+<h1 className="sr-only">Langfuse for Healthcare</h1>
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[2fr_1fr]">
+    <div className="min-w-0 border-b border-line-structure px-6 pb-7 pt-10 sm:px-10 sm:pb-8 sm:pt-12 lg:border-b-0 lg:border-r">
+      <p className="font-mono text-[11px] uppercase tracking-[0.09em] text-text-tertiary">
+        {"Industries · Healthcare"}
+      </p>
+      <h2 className="mt-3 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">{"Langfuse for"}</span>
+        <TextHighlight highlightClassName="bg-surface-cta-primary" className="mt-1">
+          {"Healthcare"}
+        </TextHighlight>
+      </h2>
+      <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
+        {
+          "Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-ready cloud region or your own infrastructure. For healthcare and life sciences teams."
+        }
+      </p>
+      <div className="mt-6">
+        <Button href="/cloud" className="w-auto" wrapperClassName="w-fit">
+          Get started
+        </Button>
+      </div>
+      <HeroReasons reasons={healthcareReasons} />
+      <div className="mt-5">
+        <SecurityBadgesGrid compact />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-text-secondary">
+        <a href="/security/hipaa" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"HIPAA-ready · BAA available"}
+        </a>
+        <span aria-hidden className="text-text-tertiary">
+          {"·"}
+        </span>
+        <a href="/handbook/chapters/open-source" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"MIT · open source"}
+        </a>
+        <span aria-hidden className="text-text-tertiary">
+          {"·"}
+        </span>
+        <a href="/security" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
+          {"Security & compliance →"}
+        </a>
+      </div>
+    </div>
+
+    <div id="book" className="flex min-w-0 items-start bg-surface-1 px-4 pb-4 pt-10 sm:px-6 sm:pb-5 sm:pt-12">
+      <div className="w-full">
+        <h2 className="mb-3 text-center text-[22px] leading-tight text-text-primary sm:text-[24px]">
+          {"Talk to a healthcare expert at Langfuse"}
+        </h2>
+        <MarketoContactFormCard
+          className="mx-0 max-w-none"
+          compact
+          useCase="healthcare"
+          section="hero"
+        />
+      </div>
+    </div>
+
+  </section>
+
+  <section data-use-case-section="customer_stories" className="border-t border-line-structure bg-surface-1 px-5 py-6 sm:px-10 sm:py-[30px]">
+    {/* TODO(healthcare-review): (d) Logo rights. Published Merck Group and Evolve stories only. */}
+    <CustomerStoriesSection
+      featuredStory={healthcareFeaturedStory}
+      storyCards={healthcareStoryCards}
+    />
+  </section>
+
+  <section data-use-case-section="deployment" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      {"Run Langfuse where patient data is allowed to live"}
+    </h2>
+    <div className="mt-10 grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      {/* TODO(healthcare-review): (c) Audit logs link to Enterprise-only docs. */}
+      <TrustPoints points={healthcareTrustPoints} />
+      <DeploymentModeSlider modes={healthcareDeploymentModes} />
+    </div>
+  </section>
+
+  <section data-use-case-section="evaluation" className="border-t border-line-structure bg-surface-1 px-5 py-14 sm:px-10 sm:py-20">
+    <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      <TextHighlight highlightClassName="bg-surface-cta-primary">
+        {"Prove it works"}
+      </TextHighlight>
+      {" before patients are impacted by your agents"}
+    </h2>
+    <p className="mt-4 max-w-[64ch] text-[14px] leading-[1.45] text-text-secondary">
+      {
+        "Test agents on datasets before release. Have clinicians review the results, and check that your AI judges agree with those labels."
+      }
+    </p>
+    <EvalCapabilityGrid columns={healthcareEvalColumns} />
+  </section>
+
+  <section data-use-case-section="use_cases" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      {"Use cases"}
+    </p>
+    <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      {"What healthcare teams build on Langfuse."}
+    </h2>
+    {/* TODO(healthcare-review): (b) Legal review of medical information and clinical documentation. */}
+    <UseCaseGrid useCases={healthcareUseCases} />
+  </section>
+
+  <section data-use-case-section="resources" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-16">
+    <h2 className="mt-2 text-center text-[40px] leading-[1] text-text-primary">
+      {"Learn how to ship reliable agents in healthcare"}
+    </h2>
+    <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
+      {
+        "Start with datasets and release gates. Then read how Merck Group and Evolve use Langfuse."
+      }
+    </p>
+    <div className="mx-auto mt-8 max-w-4xl">
+      <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Building deployment gates for LLMs"
+          href="/blog/2026-07-15-llm-certification-financial-services"
+          icon={<Radar />}
+          description="Evaluate model and prompt changes against datasets before release."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Academy: designing datasets"
+          href="/academy/datasets/designing-great-datasets"
+          icon={<BookOpen />}
+          description="Design ground-truth datasets with clear inputs, expected outputs, and a review rubric."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Merck Group customer story"
+          href="/users/merckgroup"
+          icon={<Play />}
+          description="How Merck Group serves 80+ AI teams on self-hosted Langfuse."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Evolve customer story"
+          href="/users/evolve"
+          icon={<Play />}
+          description="How Evolve traces and evaluates Rest, a voice-and-text sleep coach."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+      </Cards>
+    </div>
+  </section>
+
+  <section
+    id="faq"
+    data-use-case-section="faq"
+    className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20"
+  >
+    <div className="grid items-start gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16">
+      <h2 className="text-[34px] leading-[1] text-text-primary sm:text-[46px]">
+        {"FAQ"}
+      </h2>
+      {/* TODO(healthcare-review): (a) "Which plan includes HIPAA?" follows the HIPAA docs. */}
+      <FAQAccordion faqs={healthcareFaqs} askMode="ask-ai" />
+    </div>
+  </section>
+
+  <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="mx-auto max-w-5xl">
+      <CustomerStoryCTA
+        title="Working on AI in healthcare or life sciences?"
+        description="Talk through the HIPAA-ready region, self-hosting, and how Merck Group and Evolve use Langfuse."
+        contactLabel="Talk to an expert"
+      />
+    </div>
+  </section>
+</div>

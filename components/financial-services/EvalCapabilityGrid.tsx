@@ -1,10 +1,22 @@
 import { Plus } from "lucide-react";
 import { financialServicesEvalColumns } from "./content";
 
-export function EvalCapabilityGrid() {
+type EvalColumn = {
+  title: string;
+  summary: string;
+  items: readonly { title: string; body: string; href: string }[];
+};
+
+export function EvalCapabilityGrid({
+  columns = financialServicesEvalColumns,
+}: {
+  columns?: readonly EvalColumn[];
+} = {}) {
+  const columnClass = columns.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2";
+
   return (
-    <div className="mt-10 grid gap-10 lg:grid-cols-3 lg:gap-8">
-      {financialServicesEvalColumns.map((column) => (
+    <div className={`mt-10 grid gap-10 lg:gap-8 ${columnClass}`}>
+      {columns.map((column) => (
         <div key={column.title} className="min-w-0">
           <h3 className="text-[22px] leading-[1.15] text-text-primary sm:text-[24px]">
             {column.title}

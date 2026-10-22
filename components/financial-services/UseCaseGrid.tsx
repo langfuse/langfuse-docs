@@ -1,31 +1,54 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Calendar,
   ClipboardCheck,
+  ClipboardPen,
   Code2,
+  FileText,
   LineChart,
   MessagesSquare,
+  Mic,
+  Receipt,
   Search,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { financialServicesUseCases } from "./content";
 
-const useCaseIcons: Record<
-  (typeof financialServicesUseCases)[number]["icon"],
-  LucideIcon
-> = {
+const useCaseIcons = {
   "shield-check": ShieldCheck,
   search: Search,
   "line-chart": LineChart,
   "clipboard-check": ClipboardCheck,
   "messages-square": MessagesSquare,
   "code-2": Code2,
+  calendar: Calendar,
+  "file-text": FileText,
+  "clipboard-pen": ClipboardPen,
+  receipt: Receipt,
+  mic: Mic,
+  users: Users,
+} as const satisfies Record<string, LucideIcon>;
+
+export type IndustryUseCase = {
+  area: string;
+  title: string;
+  icon: keyof typeof useCaseIcons;
+  description: string;
+  proof?: string;
+  featured?: boolean;
+  href?: string;
 };
 
-export function UseCaseGrid() {
+export function UseCaseGrid({
+  useCases = financialServicesUseCases,
+}: {
+  useCases?: readonly IndustryUseCase[];
+} = {}) {
   return (
     <div className="mt-8 grid gap-2 md:grid-cols-2">
-      {financialServicesUseCases.map((useCase, index) => {
+      {useCases.map((useCase, index) => {
         const Icon = useCaseIcons[useCase.icon];
         const inner = (
           <>

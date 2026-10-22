@@ -50,7 +50,7 @@ export function ContentColumns({
   className,
   footerClassName,
 }: ContentColumnsProps) {
-  // Wide gutters only when both sidebars are off (e.g. financial-services).
+  // Wide gutters only when both sidebars are off (e.g. financial-services, healthcare).
   // Pages that only hide the aside keep the previous 1px structural edge.
   const rightFallback =
     showLeftSidebar === false ? <SideGutter /> : <AsideEdge />;

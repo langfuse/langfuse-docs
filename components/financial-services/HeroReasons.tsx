@@ -1,9 +1,15 @@
 import { financialServicesReasons } from "./content";
 
-export function HeroReasons() {
+type Reason = { title: string; body: string };
+
+export function HeroReasons({
+  reasons = financialServicesReasons,
+}: {
+  reasons?: readonly Reason[];
+} = {}) {
   return (
     <ul className="mt-8">
-      {financialServicesReasons.map((reason, index) => (
+      {reasons.map((reason, index) => (
         <li
           key={reason.title}
           className="grid grid-cols-[36px_minmax(0,1fr)] gap-2 border-t border-dashed border-line-divider-dash py-3 first:border-t-0 first:pt-0"
