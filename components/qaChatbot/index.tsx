@@ -125,42 +125,36 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   };
 
   return (
-    <div className={cn("h-[62vh]", className)} {...props}>
+    <div
+      className={cn(
+        "h-[min(420px,50svh)] min-h-[340px] sm:min-h-[280px]",
+        className,
+      )}
+      {...props}
+    >
       <div className="flex flex-col h-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-corners p-5 relative overflow-hidden">
         <Conversation className="flex-1 overflow-y-hidden relative z-10">
           {!hasUserMessages && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-              <h2 className="text-xl font-semibold text-foreground mb-6 pointer-events-none text-center">
-                👋 Do you have any questions about Langfuse?
-                <br />
-                <span className="block mt-2">Ask me!</span>
+            <div className="absolute inset-0 flex flex-col items-start justify-center z-20">
+              <h2 className="text-xl font-semibold text-foreground mb-4 pointer-events-none">
+                Ask a question about Langfuse
               </h2>
-              <div className="flex gap-3 items-center flex-wrap justify-center">
+              <div className="flex gap-2 items-center flex-wrap">
                 <button
                   onClick={() =>
                     handleExampleQuestion("What can I use Langfuse for?")
                   }
-                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
+                  className="text-xs text-text-secondary hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-2 min-h-11 text-left bg-surface-bg"
                 >
                   What can I use Langfuse for?
                 </button>
                 <button
                   onClick={() =>
-                    handleExampleQuestion(
-                      "How do I link my prompts to my traces? My code is in python",
-                    )
-                  }
-                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
-                >
-                  How do I link my prompts to my traces? My code is in python
-                </button>
-                <button
-                  onClick={() =>
                     handleExampleQuestion("How do I get started with tracing?")
                   }
-                  className="text-xs text-text-tertiary italic hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-1.5 w-52 h-12 text-center whitespace-normal break-words bg-surface-bg"
+                  className="text-xs text-text-secondary hover:text-text-primary transition-colors cursor-pointer border border-line-structure hover:border-line-cta rounded-[2px] px-3 py-2 min-h-11 text-left bg-surface-bg"
                 >
-                  How do I get started with tracing?
+                  How do I start tracing?
                 </button>
               </div>
             </div>
@@ -379,11 +373,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
             />
           </div>
         </PromptInput>
-        <p className="mt-6 text-xs text-muted-foreground text-center relative z-10 italic">
-          ⚠️ Warning: Do not enter sensitive information. All chat messages can
-          be viewed in the public example project. Responses may be inaccurate.
-          Please check the documentation for details or reach out to us via the
-          chat widget.
+        <p className="mt-3 text-xs text-muted-foreground relative z-10">
+          Public demo: your messages are visible to everyone. Don’t enter
+          sensitive information. Responses may be inaccurate.
         </p>
       </div>
     </div>

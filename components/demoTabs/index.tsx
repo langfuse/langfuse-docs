@@ -72,26 +72,22 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
   return (
     <div className={cn("not-prose", className)} {...props}>
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="w-full">
+        <TabsList className="w-full flex-wrap">
           <TabsTrigger value="chatbot" className="gap-1.5">
             <MessageSquareIcon className="size-4" />
-            <span className="hidden sm:inline">Q&A Chatbot</span>
-            <span className="sm:hidden">Chat</span>
+            <span>Chat</span>
           </TabsTrigger>
           <TabsTrigger value="voice" className="gap-1.5">
             <MicIcon className="size-4" />
-            <span className="hidden sm:inline">Voice Agent</span>
-            <span className="sm:hidden">Voice</span>
+            <span>Voice</span>
           </TabsTrigger>
           <TabsTrigger value="image" className="gap-1.5">
             <ImageIcon className="size-4" />
-            <span className="hidden sm:inline">Image Generator</span>
-            <span className="sm:hidden">Image</span>
+            <span>Image</span>
           </TabsTrigger>
           <TabsTrigger value="sentiment" className="gap-1.5">
             <BarChart3Icon className="size-4" />
-            <span className="hidden sm:inline">Sentiment Classifier</span>
-            <span className="sm:hidden">Sentiment</span>
+            <span>Sentiment</span>
           </TabsTrigger>
           <TabsTrigger value="rps" className="gap-1.5">
             <HandIcon className="size-4" />
