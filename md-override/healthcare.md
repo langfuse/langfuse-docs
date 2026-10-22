@@ -102,35 +102,35 @@ Control prompts, protect data, and manage access.
 
 ### Patient support and intake
 
-Trace agents that answer patient questions and collect intake details. Score answers, and review the cases a clinician or domain expert flags.
+Write, trace, and monitor agents that answer patient questions and collect intake data. Score answers and review cases. Clinicians and domain experts review cases to build ground truth.
 
 ### Appointment booking
 
-Trace agents that book and change appointments. Test them on representative requests before they go live.
+Observe agents that book and change appointments. Catch failed tool calls and wrong bookings, and test them on representative cases before they go live.
 
 ### [Medical information](/users/merckgroup)
 
-Help medical information teams draft answers to questions from healthcare professionals. Merck Group uses Generative Medical Insights on Langfuse for this work.
+Companies like Merck Group build agents that use medical insights to draft answers, and trace them on Langfuse. Merck Group does this with Generative Medical Insights.
 
 Merck Group · Generative Medical Insights
 
 ### Clinical documentation
 
-Trace agents that draft clinical notes from visits and conversations. Review samples with clinicians or domain experts before release.
+Observe and improve agents that draft clinical notes from visits and conversations.
 
 ### Payer and claims workflows
 
-Observe agents in claims and utilization workflows. Score the outputs and keep traces for audit.
+Catch failing executions in production and evaluate changes before they go live. Keep traces for audit.
 
 ### [Voice agents](/users/evolve)
 
-Trace voice agents across speech, transcription, and the model call. Evolve traces its Rest sleep coach this way.
+Trace and evaluate voice agents across speech, transcripts, and model calls. Companies like Evolve trace assistive agents such as Rest, and improve them in annotation queues.
 
 Evolve · Rest sleep coach
 
 ### [Internal platform teams](/users/merckgroup)
 
-One platform for traces, prompts, and evaluations across AI teams. Merck Group's platform team serves 80+ use cases on Langfuse.
+Companies like Merck Group give AI teams one platform for traces, prompts, and evaluations. Merck Group's platform team serves 80+ use cases on Langfuse.
 
 Merck Group · 80+ use cases
 

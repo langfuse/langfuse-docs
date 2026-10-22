@@ -233,14 +233,14 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Patient support and intake",
     icon: "messages-square",
     description:
-      "Trace agents that answer patient questions and collect intake details. Score answers, and review the cases a clinician or domain expert flags.",
+      "Write, trace, and monitor agents that answer patient questions and collect intake data. Score answers and review cases. Clinicians and domain experts review cases to build ground truth.",
   },
   {
     area: "Access",
     title: "Appointment booking",
     icon: "calendar",
     description:
-      "Trace agents that book and change appointments. Test them on representative requests before they go live.",
+      "Observe agents that book and change appointments. Catch failed tool calls and wrong bookings, and test them on representative cases before they go live.",
   },
   {
     // TODO(healthcare-review): (b) Legal review of the name "medical information" before publish.
@@ -248,7 +248,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Medical information",
     icon: "file-text",
     description:
-      "Help medical information teams draft answers to questions from healthcare professionals. Merck Group uses Generative Medical Insights on Langfuse for this work.",
+      "Companies like Merck Group build agents that use medical insights to draft answers, and trace them on Langfuse. Merck Group does this with Generative Medical Insights.",
     proof: "Merck Group · Generative Medical Insights",
     href: "/users/merckgroup",
   },
@@ -258,21 +258,21 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Clinical documentation",
     icon: "clipboard-pen",
     description:
-      "Trace agents that draft clinical notes from visits and conversations. Review samples with clinicians or domain experts before release.",
+      "Observe and improve agents that draft clinical notes from visits and conversations.",
   },
   {
     area: "Payers",
     title: "Payer and claims workflows",
     icon: "receipt",
     description:
-      "Observe agents in claims and utilization workflows. Score the outputs and keep traces for audit.",
+      "Catch failing executions in production and evaluate changes before they go live. Keep traces for audit.",
   },
   {
     area: "Voice",
     title: "Voice agents",
     icon: "mic",
     description:
-      "Trace voice agents across speech, transcription, and the model call. Evolve traces its Rest sleep coach this way.",
+      "Trace and evaluate voice agents across speech, transcripts, and model calls. Companies like Evolve trace assistive agents such as Rest, and improve them in annotation queues.",
     proof: "Evolve · Rest sleep coach",
     href: "/users/evolve",
     featured: true,
@@ -282,7 +282,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Internal platform teams",
     icon: "users",
     description:
-      "One platform for traces, prompts, and evaluations across AI teams. Merck Group's platform team serves 80+ use cases on Langfuse.",
+      "Companies like Merck Group give AI teams one platform for traces, prompts, and evaluations. Merck Group's platform team serves 80+ use cases on Langfuse.",
     proof: "Merck Group · 80+ use cases",
     href: "/users/merckgroup",
     featured: true,
