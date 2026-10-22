@@ -16,81 +16,68 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
   authors={["annabellschafer"]}
 />
 
-Most teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
+Many teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
 
 A common way to start is human in the loop: the agent proposes an answer or action, and a person approves it before anything reaches the customer. Regulators recommend this kind of oversight, and it is a sensible first step. For it to work, the agent's proposals need to be good from the start. If reviewers have to rewrite most drafts, the agent saves no time and people stop trusting it. The bigger payoff comes later, when a reliable share of cases can run without review and the team can measure and trust that autonomy rate.
 
-This post describes how teams in regulated industries get there, from the first prototype to an agent that handles part of the work on its own.
+This blog describes how teams in regulated industries get there, from the first prototype to an agent that handles part of the work on its own.
 
 ## What makes regulated industries different [#the-challenge]
 
-AI and development teams in regulated industries usually face three requirements for their projects.
+AI development teams in regulated industries usually face three requirements for their projects.
 
-**Evidence before launch.** Banks already run model risk processes that ask for test results, review sign-offs, and documentation before a model reaches production ([deployment gates for LLMs in financial services](/blog/2026-07-15-llm-certification-financial-services)). AI agents go through the same process, and the review board will want to see how the agent behaves on realistic cases.
+**Evidence before launch.** Banks already run risk processes that ask for test results, review sign-offs, and documentation before an application reaches production ([deployment gates for LLMs in financial services](/blog/2026-07-15-llm-certification-financial-services)). The review board will want to see how the agent behaves on realistic cases.
 
 **Oversight after launch.** Regulators expect people to stay in control. FINRA's [2026 oversight report](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai) asks firms to define where humans review agent actions and how they track agent decisions. [Article 14 of the EU AI Act](https://artificialintelligenceact.eu/article/14/) requires that people can effectively oversee high-risk AI systems.
 
 **Control over data.** Conversations contain account details, transactions, and health information. Teams need to know where that data is stored, what gets redacted, and who can see it. In healthcare, a [business associate agreement](/security/hipaa) has to be in place before any protected health information is processed.
 
-Teams still ship agents under these rules. They just do the steps in a different order.
+Teams still ship agents under these rules. They just need to take a different approach to successfully running the AI Engineering loop.
 
 ## The approach: start the loop offline [#the-approach]
 
-The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. Teams with a live product usually start by adding tracing to production. Regulated teams start one step earlier. They trace the prototype, test it on a dataset with their domain experts, add monitors, and only then go live.
+The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. And then repeat this process. Teams with a live product usually start by adding tracing to production. Regulated teams need to evaluate and improve their application before going to production. They trace the prototype, build out ground truth with their domain experts, evaluate and improve the application, add monitors, and only then go live.
 
 ```mermaid
 flowchart LR
-    A["1. Trace the offline app"] --> B["2. Verify on a starting dataset"]
+    A["1. Trace the offline app"] --> B["2. Verify on a starting ground truth dataset"]
     B --> C["3. Add monitors"]
     C --> D["4. Go live and run the loop"]
 ```
 
-Each stage produces evidence that the next stage, and the review board, can use.
-
 ## Stage 1: Trace the offline application [#trace-offline]
 
-Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Every later stage depends on it: datasets are built from traces, evaluators score traces, and reviewers use traces as evidence of what the agent did.
+Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. The traces you collect serve multiple purposes: datasets are built from traces, evaluators score traces, and reviewers use traces as evidence of what the agent did.
 
-Instrument the prototype the same way you will instrument production. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. Then traces from offline tests, shadow runs, and production can be compared directly, and each trace doubles as the decision log a reviewer will ask for.
+Instrument you application to capture each step your agent is taking. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. This makes traces from offline tests, shadow runs, and production comparable, and each trace doubles as the decision log a reviewer will ask for.
 
 Decide early where the traces will live. Many banks and healthcare providers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched.
 
-<CustomerQuote
-  quote="There would have been no way to send an unknown company all the data from our customers."
-  name="David Hinrichs"
-  role="Senior Machine Learning Scientist"
-  company="DKB"
-/>
-
 [Trade Republic](/users/trade-republic), a fully licensed bank with over 10 million customers, went the same way. Its Ops Tools team runs self-hosted Langfuse and rolled it out across teams while meeting the bank's compliance requirements.
-
-<CustomerQuote
-  quote="We're using the open-source self-hosted version of Langfuse and we don't see any limitations there."
-  name="Paolo Tamagnini"
-  role="Senior Data Scientist"
-  company="Trade Republic"
-/>
 
 Also mask sensitive fields before they are stored. The SDKs support [client-side masking](/docs/observability/features/masking), so account numbers or patient identifiers can be redacted at the source.
 
 ## Stage 2: Verify with a starting dataset [#starting-dataset]
 
-Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician. The goal is to show that the agent handles the common cases the way your experts would.
+Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician. The goal is both to show that the agent handles the common cases the way your experts would, and to show that adversarial and edge-cases are handeled gracefully by your agent.
 
 ### Where the cases come from [#where-cases-come-from]
 
-Regulated teams rarely need to invent test cases. Two sources work well:
+Regulated teams rarely need to invent test cases. There are multiple sources that can be used to collect dataset cases.
 
 - **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims, and compare the agent's output with the human decision. Clinical teams call this retrospective back-testing, and [Qualified Health](https://claude.com/customers/qualified-health) uses it as the first step of every deployment.
 - **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything, and compare its output with what the team did. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff.
+- **Work with Domain experts.** Domain experts often have a good intuition in typical cases, but also the ones where they know from experience that they are challenging to handle. Let them write typical cases and setups, including how they expect them to be handled.
 
-Because both run through the same tracing as production, you can add any interesting trace to the dataset straight from the trace view.
+Those sources are often combined for an initial dataset of typical cases.
 
-### Check the labels [#check-the-labels]
+CALLOUT (IF YOU WANT TO LEARN MORE ON SCOPING DATSET CHECK ACADEMY PAGE)
 
-One expert's label is a good start. Experts disagree more often than teams expect. Each disagreement usually points to a rule nobody wrote down. Ask a second expert to label a sample of the dataset. Where the two disagree, discuss the case, add the missing rule to your guidelines, and update the label. [Generating ground truth](/academy/datasets/generating-ground-truth#making-labels-trustworthy) in the Langfuse Academy covers this process in detail.
+### Check the ground-truth [#check-the-ground-truth]
 
-[Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) give experts a place to label traces without touching code. At DKB, customer service specialists work in Langfuse directly and add typical examples to datasets that engineers then use to adjust prompts.
+One expert's ground-truth is a good start. However, experts disagree more often than teams expect. The more disagreement we see between humans, the more difficult it is for agents to handle the same. ADD: IN QUALITATIVE RESERACH THIS IS OFTEN REFERRED TO AS INTERRATER,.... Ask a second expert to label a sample of the dataset. Where the two disagree, discuss the case, add the missing rule to your guidelines, and update the label.
+
+[Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) give experts a place to annotate traces without touching code. At DKB, customer service specialists work in Langfuse directly and add typical examples to datasets that engineers then use to adjust prompts.
 
 <CustomerQuote
   quote="We have the AI expertise, but we don't necessarily have the banking customer service expertise. There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
@@ -170,8 +157,8 @@ Finally, treat every change to a prompt, model, or tool as a new release. Rerun 
 
 On the infrastructure side, regulated teams usually choose between two setups:
 
-- **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting). This is what DKB and Trade Republic do.
-- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement.
+- **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting).
+- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regualted companies opt for the cloud version whenever self-hosting is not a must-have.
 
 The same need for visibility applies in life sciences. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
 
