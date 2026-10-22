@@ -19,6 +19,10 @@ import rocketMoneyLogo from "../home/img/rocket-money.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
 import tradeRepublicLogo from "../home/img/trade-republic.svg";
+import {
+  enterpriseLogoCompanies,
+  type EnterpriseLogoCompany,
+} from "@/lib/enterprise-logo-companies";
 import { cn } from "@/lib/utils";
 import { LinkBox } from "@/components/ui/link-box";
 import { wordmarkDisplaySize } from "@/components/shared/wordmark";
@@ -26,91 +30,33 @@ import { wordmarkDisplaySize } from "@/components/shared/wordmark";
 const MARQUEE_DURATION_SEC = 40;
 const LOGO_DISPLAY_HEIGHT = 56;
 
-type CompanyLogo = {
-  name: string;
+type CompanyLogo = EnterpriseLogoCompany & {
   logo: StaticImageData;
-  customerStoryPath?: string;
-  hidden?: boolean;
 };
 
-const companies: CompanyLogo[] = [
-  {
-    name: "Ramp",
-    logo: rampLogo,
-    customerStoryPath: "/users/ramp",
-  },
-  {
-    name: "Trade Republic",
-    logo: tradeRepublicLogo,
-    customerStoryPath: "/users/trade-republic",
-    hidden: true,
-  },
-  {
-    name: "Canva",
-    logo: canvaLogo,
-    customerStoryPath: "/users/canva",
-  },
-  {
-    name: "Expedia Group",
-    logo: expediaGroupLogo,
-  },
-  {
-    name: "Pigment",
-    logo: pigmentLogo,
-  },
-  {
-    name: "Khan Academy",
-    logo: khanacademyLogo,
-    customerStoryPath: "/users/khan-academy",
-  },
-  {
-    name: "Hugging Face",
-    logo: huggingfaceLogo,
-    customerStoryPath: "/users/hugging-face",
-  },
-  {
-    name: "Intuit",
-    logo: intuitLogo,
-  },
-  {
-    name: "SumUp",
-    logo: sumupLogo,
-    customerStoryPath: "/users/sumup",
-  },
-  {
-    name: "Circleback",
-    logo: circlebackLogo,
-    hidden: true,
-  },
-  {
-    name: "Merck",
-    logo: merckLogo,
-    customerStoryPath: "/users/merckgroup",
-  },
-  {
-    name: "Samsara",
-    logo: samsaraLogo,
-  },
-  {
-    name: "freee",
-    logo: freeeLogo,
-    hidden: true,
-  },
-  {
-    name: "Magic Patterns",
-    logo: magicPatternsLogo,
-    customerStoryPath: "/users/magic-patterns-ai-design-tools",
-    hidden: true,
-  },
-  {
-    name: "Cisco",
-    logo: ciscoLogo,
-  },
-  {
-    name: "Rocket Money",
-    logo: rocketMoneyLogo,
-  },
-];
+const logosByName: Record<string, StaticImageData> = {
+  Ramp: rampLogo,
+  "Trade Republic": tradeRepublicLogo,
+  Canva: canvaLogo,
+  "Expedia Group": expediaGroupLogo,
+  Pigment: pigmentLogo,
+  "Khan Academy": khanacademyLogo,
+  "Hugging Face": huggingfaceLogo,
+  Intuit: intuitLogo,
+  SumUp: sumupLogo,
+  Circleback: circlebackLogo,
+  Merck: merckLogo,
+  Samsara: samsaraLogo,
+  freee: freeeLogo,
+  "Magic Patterns": magicPatternsLogo,
+  Cisco: ciscoLogo,
+  "Rocket Money": rocketMoneyLogo,
+};
+
+const companies: CompanyLogo[] = enterpriseLogoCompanies.map((company) => ({
+  ...company,
+  logo: logosByName[company.name],
+}));
 
 const LogoImage = ({
   logo,
