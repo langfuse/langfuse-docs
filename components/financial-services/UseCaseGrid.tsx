@@ -65,6 +65,11 @@ export function UseCaseGrid({
             <p className="mt-3 text-[13px] leading-[1.45] text-text-secondary">
               {useCase.description}
             </p>
+            {useCase.proof ? (
+              <p className="mt-3 text-[12px] leading-[1.4] text-text-tertiary">
+                {useCase.proof}
+              </p>
+            ) : null}
           </>
         );
 
