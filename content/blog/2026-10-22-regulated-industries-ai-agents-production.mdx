@@ -18,11 +18,13 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
 
 Most teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
 
-This post describes how teams in regulated industries get agents into production anyway. Financial services is the main example. Healthcare follows the same path, with clinicians as the domain experts and stricter rules for patient data.
+A common way to start is human in the loop: the agent proposes an answer or action, and a person approves it before anything reaches the customer. Regulators recommend this kind of oversight, and it is a sensible first step. For it to work, the agent's proposals need to be good from the start. If reviewers have to rewrite most drafts, the agent saves no time and people stop trusting it. The bigger payoff comes later, when a reliable share of cases can run without review and the team can measure and trust that autonomy rate.
+
+This post describes how teams in regulated industries get there, from the first prototype to an agent that handles part of the work on its own.
 
 ## What makes regulated industries different [#the-challenge]
 
-Three requirements shape every project.
+AI and development teams in regulated industries usually face three requirements for their projects.
 
 **Evidence before launch.** Banks already run model risk processes that ask for test results, review sign-offs, and documentation before a model reaches production ([deployment gates for LLMs in financial services](/blog/2026-07-15-llm-certification-financial-services)). AI agents go through the same process, and the review board will want to see how the agent behaves on realistic cases.
 
