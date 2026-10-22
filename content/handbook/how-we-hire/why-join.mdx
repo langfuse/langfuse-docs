@@ -1,0 +1,99 @@
+---
+title: Why join Langfuse
+description: Why engineers join Langfuse, what they work on, and answers to the questions candidates ask most often.
+---
+
+# Why join Langfuse
+
+This page collects the reasons people join Langfuse and the questions candidates ask us most often. It is the long version of the pitch on our [careers page](/careers), and everyone who talks to candidates can use it.
+
+## Why people join [#why]
+
+### We're winning the category through open source [#open-source]
+
+Langfuse is the [most used open-source AI engineering platform](/blog/2024-11-most-used-oss-llmops), with the largest distribution and scale in our space. Our [adoption and community metrics](/careers#public-metrics) are public. Being open source is our strongest competitive advantage, and our strategy is to win the category clearly through it.
+
+### From AI-native companies to large enterprises [#customers]
+
+We work with some of the most AI-native companies, such as [Ramp](/users/ramp), and with very large enterprises at the same time. That means you build for teams at the frontier of AI engineering and for organizations with demanding requirements on scale, security, and self-hosting. See the [companies building with Langfuse](/users).
+
+### Work directly with customers [#customer-contact]
+
+Every engineer works with customers directly over Slack Connect. Customers review our RFCs before we build, so feedback reaches the people who make the decisions. When you ship something, you see right away whether it helps. See [Shipping & Talking to Customers Above Little Else](/handbook/how-we-work/principles).
+
+### Build in public with the community [#community]
+
+Much of what we build comes out of conversations with our community in [GitHub Discussions](https://github.com/orgs/langfuse/discussions) and issues. Engineers work in public with our users: they answer questions, write the docs for their features, and talk about their work publicly. New features have to work for self-hosters from day one, not only on Langfuse Cloud.
+
+### Own your area and compound over time [#ownership]
+
+Every engineer owns a feature area end to end: deciding what to build and why, writing the RFC, building it, writing the docs, and talking about it publicly. Every project has one owner from backlog to completion.
+
+- **RFCs compare real alternatives.** A typical RFC weighs several architectures before we commit to one, for example S3-native processing versus ClickHouse-native processing.
+- **The best argument wins.** Decisions are written down, async, and data-driven. Nobody wins a decision on seniority.
+- **Small groups decide quickly.** Open questions are resolved by the few people involved, and the decisions and follow-ups are written down.
+
+As the team grows, engineers get more time to go deep on their area instead of jumping between projects. Because Langfuse is open source, your work in GitHub, the docs, and changelog posts builds a public track record that keeps growing the longer you're here.
+
+### Part of ClickHouse, run like a startup [#clickhouse]
+
+We [joined ClickHouse](/blog/joining-clickhouse) in January 2026 for two main reasons:
+
+- **Go-to-market.** Building a sales organization for a developer tool is hard. ClickHouse has one, and it now sells Langfuse.
+- **The database.** Langfuse runs on ClickHouse. Instead of building our own database team, we work with the team that builds the database, in the same Slack.
+
+Langfuse runs as an independent team with its own roadmap. ClickHouse's founders have taken companies to IPO and built world-class engineering organizations. They hold us accountable for business results like an engaged board, and they don't manage how we run our day-to-day.
+
+Next, we'll explore product synergies: making Langfuse data available in ClickHouse Cloud and connecting it with traditional observability data in ClickStack. Nobody has solved this yet, and it will matter a lot for our users.
+
+### AI-pilled, remote, and productive [#culture]
+
+- **AI budget:** Every engineer gets a very high AI budget for models and coding agents.
+- **We use what we build:** We run our own coding agents and trace them in Langfuse.
+- **Few meetings:** Three scheduled meetings a week. Everything else is async and written. See [Maker Schedule](/handbook/how-we-work/principles).
+- **Remote:** We work from San Francisco, from Berlin and remotely across Europe, and remotely in the US Eastern time zone. See [Working Remotely](/handbook/how-we-work/remote).
+
+## What you'll work on [#work]
+
+### Challenging UI and UX for large, messy data [#ui-ux]
+
+Agent traces grow from a dozen spans to thousands, with payloads of several megabytes. Making that readable and fast in the browser is a design problem and an engineering problem at the same time. Examples: the [Responsive Timeline](/changelog/2026-08-28-responsive-timeline), the [graph view](/changelog/2026-07-13-graph-view-modes), the [filter search bar](/changelog/2026-06-19-filter-search-bar), [Pulse](/changelog/2026-07-28-langfuse-pulse), and the [redesigned session view](/changelog/2026-10-13-redesigned-session-view).
+
+### Data infrastructure at petabyte scale [#data-infrastructure]
+
+Langfuse Cloud stores petabytes of tracing data for thousands of teams, and self-hosters run the same codebase. The infrastructure is fully automated in Terraform, and we are moving ingestion to Rust in stages. Read [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale) and [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale).
+
+### AI agents inside the product [#ai-agents]
+
+We build agents for people who build agents. [Halo](/docs/halo), our in-app agent, has access to all the data in a project and runs code over thousands of observations in a sandbox. The [roadmap](/docs/roadmap) includes proactive issue detection with Topics and a more capable in-app agent.
+
+### Tooling for AI engineers, like evals at scale [#tooling]
+
+We build the tools teams use to improve their AI applications: [code evaluators](/blog/2026-06-22-code-evaluators-execution-model) that run untrusted code safely, LLM-as-a-judge on production traffic, [experiments](/changelog/2026-10-19-experiments) with CI/CD gates, the [CLI](/docs/api-and-data-platform/features/cli), the [MCP server](/docs/api-and-data-platform/features/mcp-server), and the upcoming Langfuse Gateway.
+
+## Teams [#teams]
+
+- **Product engineering:** product features end to end, including UI and UX, AI agents inside Langfuse, evaluation tooling, and the SDKs and integrations that get data into Langfuse.
+- **Data platform:** the ingestion pipeline, ClickHouse query performance, data processing, and the infrastructure behind Langfuse Cloud and self-hosting (Helm charts, Terraform).
+
+## Questions candidates often ask [#faq]
+
+**How big is the team?** We keep the team small on purpose. You can see everyone on the [careers page](/careers).
+
+**How independent are you from ClickHouse?** We set our own roadmap and run our own processes. ClickHouse holds us accountable for results.
+
+**How much frontend work is there?** Product engineers build features end to end, and much of the hardest work is in the UI. You don't need to be a frontend specialist, but you should enjoy building interfaces people use every day.
+
+**Do I need ClickHouse experience?** No. Data platform engineers learn it on the job, with ClickHouse's engineers one message away.
+
+**What's the interview process?** See [Hiring Process](/handbook/how-we-hire/hiring-process).
+
+## What we look for [#what-we-look-for]
+
+Because engineers own their areas with few reviews in between, we look for:
+
+- **Motivation:** You want to go deep on one area, get better at it, and build something lasting.
+- **Clear thinking and communication:** You can reason through complex features on your own and explain your decisions in writing.
+- **Experience leading complex work:** Often as a tech lead or founding engineer, or by owning complex features at previous companies.
+
+See also our [hiring philosophy](/handbook/how-we-hire/philosophy).
