@@ -28,7 +28,7 @@ This video is a good fit if you already have an agent in production (or close to
 - How the online part of the [AI engineering loop](/academy/ai-engineering-loop) (tracing and monitoring) connects to the offline part (datasets, experiments, evaluation)
 - What a trace needs to contain before it can support useful monitoring
 - How to pick monitoring signals that fit your own application
-- How to set up an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator and a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators), and how to map trace fields into them
+- How to set up an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator and a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators), and which part of the trace they should read
 - How to use the [Langfuse CLI](/docs/api-and-data-platform/features/cli) and [Agent Skill](/docs/api-and-data-platform/features/agent-skill) so a coding agent can investigate your traces
 - Why datasets and evaluation criteria need regular maintenance
 
@@ -77,6 +77,10 @@ To run it yourself, follow the [setup lesson](/workshop/learner/00-setup): clone
 
 Ask a question like "How do I turn on my Bluetooth on my iPhone?" and a trace shows up in Langfuse. It is rooted in an **agent** observation, with **generations** and **tool calls** nested underneath. The sample app comes fully instrumented, so the workshop can focus on working with traces instead of setting them up.
 
+<Frame fullWidth>
+  ![Langfuse trace for Specs. The root is the dad-it-support-chat-turn agent observation, with an OpenAI generation and the get_support_context and search_help_library tool calls nested underneath.](/images/videos/specs-trace.png)
+</Frame>
+
 ## Choose signals that fit your application [#choose-signals]
 
 Monitoring starts with a question: what can go wrong in this specific app? You do not sit next to Dad while he uses Specs, so you want the traces to tell you when something went wrong. For a support agent, the workshop picks two signals to start with:
@@ -84,28 +88,23 @@ Monitoring starts with a question: what can go wrong in this specific app? You d
 - **User disagreement.** Dad asks how to turn on Bluetooth, then replies "Where's the button?" That usually means the instructions were unclear or not detailed enough.
 - **All-caps frustration.** When people get frustrated with a chat app, they often start typing in all caps.
 
-Annabell's key point: these are examples, so do not just copy them. Think about the typical failure modes of your own application and monitor for those.
+These are examples. Do not just copy them. It often makes sense to check out the specific failure modes for your application. In chat-like applications, [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) are generally a good starting point for monitoring how people interact with your application.
 
 To follow along, switch to the monitoring checkpoint with `git checkout checkpoint/04-monitoring` and open the [monitoring lesson](/workshop/learner/04-monitoring).
 
 ## Set up a user disagreement judge [#disagreement-judge]
 
-Langfuse offers two kinds of evaluators. **Code evaluators** handle deterministic checks, and **LLM-as-a-judge** evaluators handle the more implicit things you want to get out of a conversation. User disagreement needs judgment, so it uses an LLM judge built from the user disagreement template.
+Langfuse offers three kinds of evaluators:
 
-**1. Connect an evaluator model.** The judge needs an LLM connection. The workshop uses OpenAI, but you can connect other models or route through your own proxy if you already have a gateway set up.
+- **[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)** handle deterministic checks. You write a Python or TypeScript function, and the same input returns the same score every time.
+- **[LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)** evaluators handle the more implicit things you want to get out of a conversation. A model scores the trace and can explain the grade.
+- **[Decision model evaluators](/docs/evaluation/evaluation-methods/decision-models)** ask a typed question and write the answer as a score: a label, a level on a rubric, or a yes or no. Use them when the possible answers are known before you call the model.
 
-**2. Pick the observations to target.** Filter for the **agent** observation at the root of the trace, rather than individual generations or tool calls. You want to evaluate the user's side of the conversation, so the judge reads the observation input.
+This workshop covers code evaluators and LLM-as-a-judge. User disagreement needs judgment, so it uses an LLM judge built from the user disagreement template.
 
-**3. Map the variables.** The evaluator prompt pulls in context through variables in curly brackets. You fill each one with a JSONPath into the observation:
+To set one up, connect an evaluator model, choose the observations to target, and point the evaluator at the parts of the observation JSON that should be in context. The [evaluator setup](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step) walks through that in the UI.
 
-| Template variable          | Object field | JSONPath                  |
-| -------------------------- | ------------ | ------------------------- |
-| `{{conversation_history}}` | Input        | `$.messages`              |
-| `{{last_user_message}}`    | Input        | `$.messages[-1:].content` |
-
-The conversation history pulls in the whole message array: what Dad asked, what the tools returned, and the reply. The last user message isolates what Dad is saying right now. Together they let the judge connect a complaint about a missing Bluetooth button to the earlier instructions. The preview below the mapping shows exactly what gets sent to the judge, so you can check it is right.
-
-**4. Execute.** The evaluator now runs on incoming live observations. As Annabell puts it, of the first five hundred questions maybe only five to seven need more detail than the agent gave. This judge helps you find those few without reading every successful exchange.
+The evaluator then runs on incoming live observations. As Annabell puts it, of the first five hundred questions maybe only five to seven need more detail than the agent gave. This judge helps you find those few without reading every successful exchange.
 
 ## Detect frustration with a code evaluator [#code-evaluator]
 
@@ -202,7 +201,8 @@ This is what Annabell and Lotte would do:
 - [Langfuse workshop](/workshop): the full eight-module, self-paced version of this session, including prompt management, datasets, and experiments
 - [Monitoring lesson](/workshop/learner/04-monitoring) and the [langfuse-workshop repository](https://github.com/langfuse/langfuse-workshop)
 - [Langfuse Academy](/academy) and the [AI engineering loop](/academy/ai-engineering-loop)
-- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)
+- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), and [decision model evaluators](/docs/evaluation/evaluation-methods/decision-models)
+- [Conversation signals](/academy/monitoring/capturing-signals#conversation-signals)
 - [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) and [Langfuse CLI](/docs/api-and-data-platform/features/cli)
 - [Datasets](/docs/evaluation/experiments/datasets) and [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)
 - [Metrics and dashboards](/docs/metrics/overview)

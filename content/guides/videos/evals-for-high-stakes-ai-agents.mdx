@@ -80,7 +80,7 @@ Everything shown in the UI can also be done through the [CLI](/docs/api-and-data
 
 ## Expert review and failure modes [#expert-review]
 
-Before you can measure quality, you need to know what goes wrong. That is **error analysis**: looking at traces to see whether the agent took the right steps, called the right tools, and produced the output you want. Annabell spent days doing exactly this in her previous job.
+Before you can measure quality, you need to know what goes wrong. Looking at traces to see whether the agent took the right steps, called the right tools, and produced the output you want is [error analysis](/academy/monitoring/error-analysis). Annabell spent days doing exactly this in her previous job.
 
 You cannot read thousands of production traces by hand, so Doneyli recommends this process:
 
@@ -130,6 +130,10 @@ Annabell's warning: some teams hook their coding agent up to their traces and sa
 
 Picture two axes, time invested and system quality. Letting the agent fix everything on its own costs you no time and gives you a low-quality system. Doing everything by hand is no longer necessary either. The sweet spot:
 
+<Frame fullWidth>
+  ![Chart of time invested against system quality. Fully AI automated is low time and low quality. Manual AI engineering is high time and higher quality. A star marks the ideal balance of human and agent collaboration, where effort shifts to judgment. Outsourcing judgment leads to agent slop.](/images/videos/ideal-balance-human-agent-collaboration.png)
+</Frame>
+
 - **Automate** instrumenting your app, finding failure modes, running evals, and running 20 experiments where you would have come up with one.
 - **Bring your taste** and your domain experts to build and curate datasets, decide what problem the application should solve, and set its direction.
 
@@ -142,12 +146,6 @@ Over time you can automate more and more of the loop.
 3. **Collect ground truth.** Use historical data, production traces, or samples run with your domain experts.
 4. **Define your hard limits.** In a regulated space, write down what must never happen. For financial services, the agent should never give investment advice. Put those cases in your evaluation set so you know when it happens.
 
-## Questions from the audience [#qa]
-
-- **Where is the data stored?** Langfuse started on Postgres and moved to ClickHouse to handle billions of events. You can export data to S3 with [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage), or pull it through the API, CLI, or MCP server.
-- **Can I host it on AWS?** Yes. Langfuse Cloud runs on AWS, and you can also [self-host](/self-hosting) on your own infrastructure.
-- **How do I make sure an LLM judge grades like a human?** Label a representative sample yourself, run the judge on it, and tune the judge until it agrees with your human labels. Recheck over time so the sample stays representative. On production data, start with a few too many false positives so you miss nothing, then tune it down. The [LLM-as-a-judge calibration guide](/guides/llm-as-a-judge-calibration-skill) walks through this.
-
 ## Chapters [#chapters]
 
 - [00:00](https://www.youtube.com/watch?v=obfPzbapMIM&t=0s) Why evals are hard
@@ -159,13 +157,12 @@ Over time you can automate more and more of the loop.
 - [35:00](https://www.youtube.com/watch?v=obfPzbapMIM&t=2100s) Running evals automatically on every prompt change
 - [39:44](https://www.youtube.com/watch?v=obfPzbapMIM&t=2384s) Dashboards for stakeholders
 - [45:58](https://www.youtube.com/watch?v=obfPzbapMIM&t=2758s) Working with your coding agent
-- [52:13](https://www.youtube.com/watch?v=obfPzbapMIM&t=3133s) Q&A
 
 ## Resources [#resources]
 
 - [Banking assistant demo repo](https://github.com/doneyli/clickhouse-llm-observability/tree/main/demos/bank-assistant)
 - [Langfuse for financial services](/financial-services)
-- [Langfuse Academy](/academy) and the [AI engineering loop](/academy/ai-engineering-loop)
+- [Langfuse Academy](/academy), the [AI engineering loop](/academy/ai-engineering-loop), and [error analysis](/academy/monitoring/error-analysis)
 - [Langfuse workshop](/workshop): a self-paced walkthrough of every step of the loop
 - [Masking sensitive data](/docs/observability/features/masking)
 - [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)
