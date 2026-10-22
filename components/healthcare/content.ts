@@ -55,23 +55,6 @@ export const healthcareFeaturedStory = {
   ],
 } as const;
 
-export const healthcareStoryCards = [
-  {
-    company: "Merck Group",
-    route: "/users/merckgroup",
-    category: "Life sciences",
-    description:
-      "How Merck Group serves 80+ AI teams on self-hosted Langfuse, including Generative Medical Insights.",
-  },
-  {
-    company: "Evolve",
-    route: "/users/evolve",
-    category: "Health",
-    description:
-      "How Evolve traces and evaluates Rest, a voice-and-text sleep coach, on Langfuse.",
-  },
-] as const;
-
 export const healthcareTrustPoints = [
   {
     title: "HIPAA-ready cloud region",

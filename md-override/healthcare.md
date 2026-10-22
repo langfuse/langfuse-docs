@@ -33,14 +33,6 @@ Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** 
 - **80+** use cases built on Langfuse
 - **1** central platform team
 
-### [How Merck Group serves 80+ AI teams on self-hosted Langfuse, including Generative Medical Insights.](/users/merckgroup)
-
-Customer story · Life sciences. [Read story](/users/merckgroup)
-
-### [How Evolve traces and evaluates Rest, a voice-and-text sleep coach, on Langfuse.](/users/evolve)
-
-Customer story · Health. [Read story](/users/evolve)
-
 ## Run Langfuse where patient data is allowed to live
 
 1. **[HIPAA-ready cloud region](/security/hipaa).** A separate US region for healthcare and life sciences workloads. Sign the ClickHouse BAA before you send PHI.

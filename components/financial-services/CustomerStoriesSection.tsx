@@ -150,62 +150,64 @@ export function CustomerStoriesSection({
           </div>
         </Link>
 
-        <div className="grid gap-2 md:grid-cols-3">
-          {storyCards.map((card) => {
-            const story = byRoute.get(card.route);
-            const published = !(
-              "published" in card && card.published === false
-            );
-            const isLive = published && Boolean(story);
-            const company =
-              story?.frontMatter.quoteCompany ?? card.company ?? "Customer";
-            const logo =
-              story?.frontMatter.customerLogo ??
-              ("logo" in card ? card.logo : undefined);
-            const logoDark =
-              story?.frontMatter.customerLogoDark ??
-              ("logoDark" in card ? card.logoDark : undefined);
-            const body = (
-              <>
-                <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
-                  Customer story · {card.category}
-                </p>
-                <StoryLogo
-                  logo={logo}
-                  logoDark={logoDark}
-                  company={company}
-                  sizes="148px"
-                  widthClass="w-[148px]"
-                  heightClass="h-8"
-                />
-                <p className="text-[14px] leading-[1.45] text-text-primary">
-                  {card.description}
-                </p>
-                <span className="mt-auto pt-1 text-[13px] text-text-secondary">
-                  {isLive ? "Read story →" : "Coming soon"}
-                </span>
-              </>
-            );
-
-            if (!isLive) {
-              return (
-                <div key={card.route} className={storyCardClassName}>
-                  {body}
-                </div>
+        {storyCards.length > 0 ? (
+          <div className="grid gap-2 md:grid-cols-3">
+            {storyCards.map((card) => {
+              const story = byRoute.get(card.route);
+              const published = !(
+                "published" in card && card.published === false
               );
-            }
+              const isLive = published && Boolean(story);
+              const company =
+                story?.frontMatter.quoteCompany ?? card.company ?? "Customer";
+              const logo =
+                story?.frontMatter.customerLogo ??
+                ("logo" in card ? card.logo : undefined);
+              const logoDark =
+                story?.frontMatter.customerLogoDark ??
+                ("logoDark" in card ? card.logoDark : undefined);
+              const body = (
+                <>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                    Customer story · {card.category}
+                  </p>
+                  <StoryLogo
+                    logo={logo}
+                    logoDark={logoDark}
+                    company={company}
+                    sizes="148px"
+                    widthClass="w-[148px]"
+                    heightClass="h-8"
+                  />
+                  <p className="text-[14px] leading-[1.45] text-text-primary">
+                    {card.description}
+                  </p>
+                  <span className="mt-auto pt-1 text-[13px] text-text-secondary">
+                    {isLive ? "Read story →" : "Coming soon"}
+                  </span>
+                </>
+              );
 
-            return (
-              <Link
-                key={card.route}
-                href={card.route}
-                className={liveStoryCardClassName}
-              >
-                {body}
-              </Link>
-            );
-          })}
-        </div>
+              if (!isLive) {
+                return (
+                  <div key={card.route} className={storyCardClassName}>
+                    {body}
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={card.route}
+                  href={card.route}
+                  className={liveStoryCardClassName}
+                >
+                  {body}
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
     </div>
   );
