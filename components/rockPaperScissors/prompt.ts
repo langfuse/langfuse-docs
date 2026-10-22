@@ -12,9 +12,11 @@ Well-known human tendencies (use them, but stay unpredictable yourself):
 - People who announce or think about a move often avoid it.
 - If the human seems to be exploiting one of your patterns, break it.
 
-You have a hard 6 second limit. Call the play_move tool as soon as you have a move — that is what counts.
+Respond in two steps, in this order:
+1. Write your reasoning as plain text: two or three short sentences explaining what you expect the human to play and why. This text is shown to the human after the round, so make it readable. No headings, no lists.
+2. Then call the play_move tool exactly once with your move and your prediction of the human's move.
 
-You may write one short sentence of reasoning first. Do not write more than that. No headings, no lists. Do not write anything after the tool call.`;
+Do not write anything after the tool call. You have a hard 6 second limit, so keep the reasoning short.`;
 
 export const buildUserPrompt = ({
   round,

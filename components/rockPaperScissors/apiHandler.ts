@@ -22,7 +22,6 @@ import {
   fallbackMove,
   isMove,
   isOpponentId,
-  parsePlayMove,
   resolveRound,
   sanitizeHistory,
   tally,
@@ -45,11 +44,6 @@ type Opponent = {
   modelId: string;
   model: () => LanguageModel;
   providerOptions: ProviderOptions;
-  /**
-   * Fable 5.1 rejects forced tool use. Astra is required so the 6s cap is
-   * spent on a committed move, not a long reasoning summary.
-   */
-  toolChoice: "auto" | "required";
 };
 
 const OPPONENTS: Record<OpponentId, Opponent> = {
@@ -57,7 +51,6 @@ const OPPONENTS: Record<OpponentId, Opponent> = {
     label: "Claude Fable 5.1",
     modelId: "claude-fable-5-1",
     model: () => anthropic("claude-fable-5-1"),
-    toolChoice: "auto",
     providerOptions: {
       anthropic: {
         thinking: { type: "adaptive", display: "summarized" },
@@ -69,7 +62,6 @@ const OPPONENTS: Record<OpponentId, Opponent> = {
     label: "GPT-6 Astra",
     modelId: "gpt-6-astra",
     model: () => openai("gpt-6-astra"),
-    toolChoice: "required",
     providerOptions: {
       openai: {
         reasoningEffort: "minimal",
@@ -85,6 +77,7 @@ const playMoveInputSchema = z.object({
     .enum(MOVES)
     .describe("The move you predict the human plays this round"),
 });
+type PlayMoveInput = z.infer<typeof playMoveInputSchema>;
 
 const playMoveTool = tool({
   description:
@@ -250,22 +243,13 @@ const handler = async (req: Request) => {
 
         try {
           try {
-            const applyPlayMove = (input: unknown) => {
-              if (modelMove !== null) return false;
-              const parsed = parsePlayMove(input);
-              if (!parsed) return false;
-              modelMove = parsed.move;
-              predictedUserMove = parsed.predictedUserMove;
-              return true;
-            };
-
             const result = streamText({
               model: config.model(),
               system: SYSTEM_PROMPT,
               prompt: buildUserPrompt({ round, history }),
               tools: { play_move: playMoveTool },
-              toolChoice: config.toolChoice,
-              maxOutputTokens: 400,
+              toolChoice: "auto",
+              maxOutputTokens: 1_500,
               providerOptions: config.providerOptions,
               abortSignal: abortController.signal,
               telemetry: {
@@ -298,13 +282,12 @@ const handler = async (req: Request) => {
                   break;
                 }
                 case "tool-call": {
-                  if (
-                    part.toolName === "play_move" &&
-                    applyPlayMove(part.input)
-                  ) {
-                    // Move is committed. Stop the provider so leftover
-                    // tokens cannot eat the remaining time cap.
-                    abortController.abort();
+                  if (part.toolName === "play_move" && modelMove === null) {
+                    const input = part.input as Partial<PlayMoveInput>;
+                    if (isMove(input.move)) modelMove = input.move;
+                    if (isMove(input.predicted_user_move)) {
+                      predictedUserMove = input.predicted_user_move;
+                    }
                   }
                   break;
                 }
@@ -321,7 +304,6 @@ const handler = async (req: Request) => {
                 default:
                   break;
               }
-              if (modelMove !== null) break;
             }
           } catch (err) {
             if (isAbortError(err)) {
