@@ -1,28 +1,17 @@
 ---
 title: Overview
 seoTitle: Prompt and Skill Management
-description: Manage prompts and agent skills together in Langfuse, from versioning and deployment to tracing.
+description: Choose prompt templates for model calls or skills for tasks your agent loads as needed.
 noindex: true
 ---
 
 # Prompt and Skill Management
 
-Use Langfuse to version prompt templates and agent skills. Assign labels such as `staging` and `production` to select the versions your application receives.
+Langfuse versions prompt templates and agent skills. Choose based on what your application needs to load:
 
-## Prompts [#prompts]
+| Manage                                           | Use for                                                                         | Get started                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| [Prompts](/docs/prompt-management/overview)      | Text or chat templates your application compiles for model calls                | [Create a prompt](/docs/prompt-management/get-started) |
+| [Skills](/docs/skill-management/overview) (beta) | Task instructions in `SKILL.md` and supporting files your agent loads as needed | [Create a skill](/docs/skill-management/get-started)   |
 
-Use **Prompt Management** for text and chat templates with variables and model configuration. Fetch and compile a template for a model call, cache it in the SDK, or test it in the Playground.
-
-[Explore Prompt Management](/docs/prompt-management/overview) or [create your first prompt](/docs/prompt-management/get-started).
-
-## Skills [#skills]
-
-Use **Skill Management** for a `SKILL.md` file and its reference documents and scripts. Langfuse versions the files together; your agent decides when to load them.
-
-Skill Management is in beta. [Explore Skill Management](/docs/skill-management/overview) or [create and load your first skill](/docs/skill-management/get-started).
-
-## Use prompts and skills together [#choosing-what-to-manage]
-
-For example, a support agent can fetch a chat prompt for the conversation and load the refund skill when a customer asks for a refund.
-
-[Link prompts to generations](/docs/prompt-management/features/link-to-traces) and [trace skill availability and loads](/docs/skill-management/tracing) to inspect the instructions used during a run.
+Both support version labels such as `staging` and `production`. An agent can use a prompt for its conversation and load a skill for a specific task, such as handling a refund.

@@ -9,7 +9,7 @@ import { Details, Summary } from "@/components/Details";
 
 # Limits and troubleshooting
 
-These limits apply to the Skill Management beta. Your agent framework may impose additional requirements.
+Check these limits before uploading a skill. Your agent framework may have additional file or execution requirements.
 
 ## Current limits [#limits]
 
@@ -46,11 +46,13 @@ Extensions are matched without regard to case:
 
 ## I cannot open Skills [#beta-access]
 
-Open your **account menu → Feature Preview** and enable **Skill Management**. If its toggle is disabled, enable **V4 Preview** first. For API requests, check that your keys belong to the project containing the skill.
+Open your **account menu → Feature Preview** and enable **Skill Management**. If its toggle is disabled, enable **V4 Preview** first.
 
 ## A production skill cannot be found [#missing-label]
 
-API publishing assigns `latest`. To fetch by `production`, [assign that label to a version](/docs/skill-management/manage-skills#labels), or publish with `langfuse skills push ./refund-policy --label production`. You can also request another label or an exact version.
+Check that your API keys belong to the project containing the skill. Then check its labels: publishing through the API assigns `latest`, but fetching without a selector requests `production`.
+
+[Assign `production` to a version](/docs/skill-management/manage-skills#labels), publish with `langfuse skills push ./refund-policy --label production`, or request another label or an exact version.
 
 ## An upload is rejected [#upload-rejected]
 
@@ -66,16 +68,22 @@ Run `langfuse skills update` to fetch the versions currently assigned to saved l
 
 ## File content fetch fails [#content-fetch]
 
-Use hashes from a manifest in the same project. URL-encode them in REST requests and send at most 50 per request. Match results by hash rather than array position.
+Use hashes from a manifest fetched with the same project credentials. In REST requests, URL-encode base64 hashes with `--data-urlencode` so characters such as `+` are preserved, and send at most 50 hashes per request. Match returned files by hash rather than array position.
 
 ## Skills are missing from a trace [#missing-trace-skills]
 
-Check that your SDK and Langfuse deployment both support skill tracing, then verify:
+Check that your Langfuse deployment supports skill tracing, then use the checks for the missing field.
 
-- The available skill list is attached to the generation or tool observation before it ends.
-- For automatic attachment, discovery finishes before spans start and reads the correct installation directory.
-- The API manifest contains the expected version, or your CLI and SDK preview builds use compatible lockfile formats.
-- Your instrumentation records model and tool calls inside the callback that attaches available skills.
-- File-loading tools have recognized names, matching inputs, and successful, non-null outputs.
+### Available skills are missing [#missing-available-skills]
 
-See [skill tracing](/docs/skill-management/tracing) for setup and the **Preview → Skills** view.
+- Attach the skill list to the generation or tool observation before it ends. Raw OpenTelemetry attributes apply only to the span where you set them.
+- With preview SDK propagation, record model and tool calls inside the propagation scope.
+- With preview SDK discovery, check the installation directory and wait for discovery before starting spans. Check that the CLI and SDK use compatible lockfile formats to recover versions.
+
+### Loaded files are missing [#missing-loaded-files]
+
+- Attach the available skill list to the file-loading tool observation.
+- Use a [recognized tool name and input](/docs/skill-management/tracing#skill-loading-tools) that identifies a file from that list.
+- Record a successful tool call with a non-null output.
+
+See [skill tracing](/docs/skill-management/tracing) for the **Available skills** and **Loaded skill** views. If the skill's **Usage** tab is empty, check its date range and selected version.
