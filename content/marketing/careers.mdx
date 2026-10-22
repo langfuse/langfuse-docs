@@ -54,104 +54,53 @@ If you want to build great developer tools, or get developers to love them, we'd
 
 ### We're winning the category through open source
 
-Langfuse is the [most used open-source AI engineering platform](/blog/2024-11-most-used-oss-llmops), with the largest distribution and scale in our space (see the [public metrics](#public-metrics) below). Being open source is our biggest advantage, and it's how we plan to win the category.
+Langfuse is the [most used open-source AI engineering platform](/blog/2024-11-most-used-oss-llmops), with the largest distribution and scale in our space (see the [public metrics](#public-metrics)). Open source is how we plan to win the category.
 
 ### AI-native companies and large enterprises
 
-Some of the most AI-native companies, like [Ramp](/users/ramp), run on Langfuse. So do very large enterprises. See more [companies building with Langfuse](/users).
+AI-native companies like [Ramp](/users/ramp) run on Langfuse, and so do very large enterprises. See more [companies building with Langfuse](/users).
 
 <EnterpriseLogos />
 
 ### You work directly with customers
 
-Everyone at Langfuse talks to customers. Engineers are in shared Slack Connect channels with them, and customers review our RFCs before we build. Marketers hear customer stories and objections firsthand. You find out quickly whether what you shipped helps.
+Everyone talks to customers. Engineers share Slack Connect channels with them, and customers review our RFCs before we build.
 
 ### We build in public
 
-A lot of what we build starts as a thread in [GitHub Discussions](https://github.com/orgs/langfuse/discussions), and the people who build a feature answer users there themselves. New features have to work for self-hosters on day one.
+Features often start as a thread in [GitHub Discussions](https://github.com/orgs/langfuse/discussions), and the people who build them answer users there themselves.
 
 ### You own an area and compound over time
 
-Engineers own a feature area end to end, from the RFC to the docs. Marketers own launches and channels the same way. Every project has one owner. RFCs lay out real alternatives, and the best argument wins, whoever makes it. As the team grows, you get to stay with your area and go deeper. And since everything is open source, the work you do here stays public. The longer you stay, the bigger that track record gets.
+Every feature, launch, and channel has one owner. You stay with your area as the team grows, and because the work is open source, your track record stays public.
 
 ### ClickHouse backs us and stays out of the way
 
-ClickHouse's sales team sells Langfuse, and the people who build the database are in the same Slack as us. The founders have taken companies public before. They act like an involved board: they check our results and leave the day-to-day to us. Next, we want to bring Langfuse data into ClickHouse Cloud and ClickStack. We haven't figured out how yet, which is part of the fun.
+ClickHouse's sales team sells Langfuse, and the people who build the database are in the same Slack as us. We set our own roadmap.
 
 ### AI-pilled and remote
 
-Every engineer gets a very high AI budget, and everyone can expense the AI tools they want. We run our own agents and trace them in Langfuse, in engineering and in marketing. We have three scheduled meetings a week, and everything else happens in writing (see [how we work](/handbook/how-we-work/principles)).
+Engineers get a very high AI budget, and everyone can expense the AI tools they want. We have three scheduled meetings a week, and everything else happens in writing (see [how we work](/handbook/how-we-work/principles)).
 
-## What engineers work on
+## What you'll work on
 
-### Challenging UI and UX for large, messy data
+### Product engineering
 
-A single agent trace can have thousands of spans, each carrying megabytes of payload. Making that readable in a browser, and keeping it fast, is as much a design problem as an engineering one.
+You build features end to end, for traces that can have thousands of spans:
 
-- The [Responsive Timeline](/changelog/2026-08-28-responsive-timeline) fits any trace on one screen, from twelve spans to twelve hundred, and zooms like a map.
-- The [graph view](/changelog/2026-07-13-graph-view-modes) shows agent runs as an aggregated overview or an expanded, as-it-ran DAG on a deterministic renderer.
-- The [filter search bar](/changelog/2026-06-19-filter-search-bar), [Pulse](/changelog/2026-07-28-langfuse-pulse), and [Any table is a chart](/changelog/2026-07-24-any-table-is-a-chart) let users query, spot outliers, and chart billions of rows.
-- The [redesigned session view](/changelog/2026-10-13-redesigned-session-view) reads conversations across many traces as one thread.
+- UI and UX for large, messy data, like the [Responsive Timeline](/changelog/2026-08-28-responsive-timeline) and the [graph view](/changelog/2026-07-13-graph-view-modes)
+- AI agents inside the product, like [Halo](/changelog/2026-09-03-langfuse-assistant)
+- Tooling for evals at scale, like [code evaluators](/blog/2026-06-22-code-evaluators-execution-model) and [experiments](/changelog/2026-10-19-experiments)
 
-### Data infrastructure at petabyte scale
+### Data platform
 
-Langfuse Cloud stores petabytes of tracing data for thousands of teams, and self-hosters run the same open-source codebase.
+You own ingestion, ClickHouse query performance, and the infrastructure behind Langfuse Cloud and self-hosting, at petabyte scale. Read [how Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale).
 
-- [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale) covers the queue-first write path, read isolation, and merge tuning, including a fix we contributed upstream together with ClickHouse engineers.
-- [Simplifying Langfuse for Scale](/blog/2026-03-10-simplify-langfuse-for-scale) and [Langfuse v4](/changelog/2026-08-17-langfuse-v4) describe the move to an observations-first data model: table loads in tens of milliseconds and dashboards at least 10x faster.
-- On the [roadmap](/docs/roadmap): moving ingestion to Rust in stages and reducing storage costs.
+### Marketing and growth
 
-### AI agents inside the product
+Our audience is AI engineers, so most of our marketing is material they'd bookmark: docs, the [changelog](/changelog), [Langfuse Academy](/academy), and [launch weeks](/blog/2025-10-29-launch-week-4). The team also covers product marketing, [events](/events) and community, and growth, and ships website changes itself with coding agents.
 
-We build agents for people who build agents, and our users notice every shortcut.
-
-- [Halo](/changelog/2026-09-03-langfuse-assistant), the in-app agent, runs code in a sandbox over thousands of observations, works in the background, and asks before it changes anything.
-- [Ask AI in the filter search bar](/changelog/2026-06-26-ask-ai-filter-search-bar) turns questions into filters.
-- On the [roadmap](/docs/roadmap): proactive issue detection with Topics, agent transcripts, and a more capable in-app agent.
-- We also use agents for our own work, for example to [review production infrastructure](/blog/2026-06-05-agentic-setup-for-operational-work).
-
-### Tooling for AI engineers, like evals at scale
-
-Teams use these tools to improve their AI applications, so they have to keep up with every production trace, not a sample in a notebook.
-
-- The [code evaluator runtime](/blog/2026-06-22-code-evaluators-execution-model) runs untrusted user code safely in a multi-tenant environment.
-- [Evaluator backfills](/changelog/2026-09-07-evaluator-backfills), [consistent sampling](/changelog/2026-08-05-deterministic-evaluator-sampling), and [evaluator alerts](/changelog/2026-09-02-evaluator-alerts) score production traffic continuously.
-- [Experiments](/changelog/2026-10-19-experiments) and [CI/CD gates](/changelog/2026-05-25-experiment-ci-cd-gates) show which change moved which metric.
-- The [Langfuse CLI](/changelog/2026-08-21-langfuse-cli-v1), the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server), and the upcoming Langfuse Gateway on the [roadmap](/docs/roadmap) bring Langfuse to coding agents.
-
-## What marketing and growth work on
-
-### Marketing to developers who hate marketing
-
-Our audience is AI engineers, and they skip anything that reads like an ad. So most of our marketing is useful material: the [docs](/docs), the [changelog](/changelog), [Langfuse Academy](/academy), [monthly updates](/blog/2026-09-30-langfuse-september-update), and launch weeks like [Launch Week 4](/blog/2025-10-29-launch-week-4). The bar is whether an engineer would bookmark it.
-
-### Launches with a real owner
-
-Every launch gets a themed week and one marketing owner, who works directly with the engineer who built the feature. Together they cover the blog post, docs, video, social posts, newsletter, and website changes. Bigger launches also go out through ClickHouse, which puts them in front of a second, much larger audience.
-
-### Product marketing for a category that's still forming
-
-Nobody has settled how teams should think about AI engineering platforms yet, so there's real messaging work to do. That includes [customer stories](/users), industry pages like [financial services](/financial-services) and [healthcare](/healthcare), [comparison pages](/compare) with dated sources, and enablement for ClickHouse's global sales team.
-
-### Events and community
-
-We show up where AI engineers are: AI Engineer conferences, our own meetups, ClickHouse events, and a run club in Berlin. We also host a regular [community hour](/handbook/devrel/community-hour) and spend a lot of time on [Discord and GitHub](/community). See what's coming up on [events](/events).
-
-### AI-native marketing
-
-Our marketers ship. This website is an [open-source Next.js repo](https://github.com/langfuse/langfuse-docs), and the marketing team changes it themselves with coding agents, through pull requests like everyone else. We use agents for research, social listening, and first drafts. And we write for AI search and coding agents too: every page is available as Markdown, and our docs have their own [MCP server](/docs/docs-mcp).
-
-### Growth
-
-Growth engineers own the path from signup to the moment a team gets value from Langfuse: onboarding, activation, and the experiments in between. It's product work with a funnel attached.
-
-## Teams we're hiring for
-
-Product engineers build features end to end. That covers the UI, the agents inside Langfuse, evaluation tooling, and the SDKs and integrations that get data into Langfuse.
-
-The data platform team owns ingestion, ClickHouse query performance, and the infrastructure behind Langfuse Cloud and self-hosting, from Helm charts to Terraform.
-
-The marketing and growth team covers product marketing, content, developer relations, events and community, and growth engineering. See how we [hire for growth roles](/handbook/how-we-hire/growth-hiring-process).
+More detail, including the questions candidates often ask, is in [Why join Langfuse](/handbook/how-we-hire/why-join).
 
 <CTACard
   title="Curious to build with us?"
