@@ -164,8 +164,9 @@ export const USE_CASE_SECTIONS = new Set<string>([
 ]);
 
 /**
- * Sections that hide both HomeLayout sidebars and use wide gutters instead.
- * Keep slug membership here — do not hardcode section names in layouts.
+ * Sections that hide both HomeLayout sidebars and keep the content column
+ * flush with the navbar. Keep slug membership here — do not hardcode section
+ * names in layouts.
  */
 export const NO_SIDEBAR_SECTIONS = new Set<string>([
   "financial-services",
