@@ -9,25 +9,27 @@ import { Details, Summary } from "@/components/Details";
 
 # Load skills into your agent
 
-Choose how your agent reads skills:
+Choose how to supply skills to your agent:
 
 | Your agent reads…                                   | Use                                                               |
 | --------------------------------------------------- | ----------------------------------------------------------------- |
 | Skill folders from its workspace                    | [CLI installation](#cli-install)                                  |
 | Instructions and files supplied by your application | [API fetching](#api-fetch) and an [in-memory adapter](#in-memory) |
 
-Both require [project credentials](/docs/skill-management/get-started#before-you-start). Your agent framework controls which skills the model can select and how files are loaded.
+Configure [project credentials](/docs/skill-management/get-started#project-credentials) for either method. Keep the selected version fixed during a run so instructions and supporting files come from the same revision.
 
 ## Install with the CLI [#cli-install]
 
-Install the version labeled `production`:
+In the UI, open **Use skill → Install with CLI**, then expand **Configure install command**. Choose **Name** for one skill, **Tag** for a group, or **All** for the project. Select a label or version and an installation directory, then copy the command or setup prompt for your coding agent.
+
+To install the version labeled `production` directly:
 
 ```bash
 npm install -g @langfuse/cli@beta
 langfuse skills install refund-policy --label production
 ```
 
-By default, the CLI installs files in `.agents/skills/<name>/`. CLI `1.3.0-beta.2` records the selected versions in `langfuse-skills.lock.json` in your working directory. Keep the lockfile to restore those versions.
+By default, the CLI installs files in `.agents/skills/<name>/`. The CLI records the selected versions in `.agents/skills/langfuse-skills.lock`. Keep the lockfile to restore those versions.
 
 Pin version `2`, or install all skills tagged `support`:
 
@@ -49,12 +51,12 @@ langfuse skills update
 
 ## Fetch through the API [#api-fetch]
 
-First fetch a manifest: the selected version and its file list. Then fetch file contents by hash. You can request individual files and cache content by hash.
+Fetch a manifest to resolve a version and list its files. Then fetch the files you need by content hash. Cache content by hash to reuse it across requests.
 
 ### Resolve the version [#resolve-the-version]
 
 ```bash
-curl --get "$LANGFUSE_BASE_URL/api/public/unstable/skills/refund-policy" \
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/refund-policy" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --data-urlencode "label=production"
 ```
@@ -82,26 +84,26 @@ For a fixed version, replace `label=production` with `version=2`. You can specif
 Set `SKILL_FILE_HASH` to a file's `sha256Hash` from the manifest. Fetch its content with `--data-urlencode` to encode the base64 hash correctly:
 
 ```bash
-curl --get "$LANGFUSE_BASE_URL/api/public/unstable/skills/files/content" \
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/files/content" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --data-urlencode "sha256Hashes=$SKILL_FILE_HASH"
 ```
 
 The response's `data` array contains `{ sha256Hash, content }` objects. Match results to manifest files by hash. To fetch several files, send up to 50 unique hashes as a comma-separated `sha256Hashes` value.
 
-For JavaScript, see the [`@langfuse/client` example](/docs/skill-management/get-started#load-your-skill). For request fields, see the [Skills API reference](https://api.reference.langfuse.com/#tag/unstableskills).
+For Python and JavaScript/TypeScript SDK examples, see [Retrieve the instructions](/docs/skill-management/get-started#retrieve-the-instructions). For request fields, see the [Skills API reference](https://api.reference.langfuse.com/#tag/skills).
 
 ## Use skills in memory [#in-memory]
 
-For example, [Mastra](https://mastra.ai/docs/skills) accepts in-memory skills created with [`createSkill()`](https://mastra.ai/reference/agents/createSkill). Fetch a Langfuse manifest, convert its files, and pass the resulting skills to your agent.
+An agent framework can use skill contents without writing them to disk. This example uses [Mastra](https://mastra.ai/docs/skills): fetch a manifest, convert its files with [`createSkill()`](https://mastra.ai/reference/agents/createSkill), and pass the skills to an agent.
 
-Install the packages below and set `OPENAI_API_KEY` for the example model. This example requires Node.js 22.13 or later, plus the Langfuse project credentials configured above.
+Install the packages below and set `OPENAI_API_KEY` for the example model. The Langfuse client uses the [project credentials](/docs/skill-management/get-started#project-credentials) from your environment.
 
 ```bash
-npm install @langfuse/client@6.0.1 @mastra/core@1.78.0 gray-matter@4.0.3
+npm install @langfuse/client @mastra/core gray-matter
 ```
 
-Save the helper below as `to-mastra-skills.ts` next to your agent file:
+Create `agent.ts`. The imported `toMastraSkills` helper is defined below the example:
 
 ```typescript filename="agent.ts"
 import { LangfuseClient } from "@langfuse/client";
@@ -185,8 +187,6 @@ export async function toMastraSkills(
 
 This adapter supports `SKILL.md` instructions and files under `references/`. For skills that execute scripts or use other filesystem resources, use your framework's filesystem skill support with [CLI-installed files](#cli-install).
 
-Use the same manifest throughout a run so every file comes from the same version. For agent tracing, see the [Mastra integration](/integrations/frameworks/mastra). [Skill tracing](/docs/skill-management/tracing) describes the additional availability and file-load fields.
+## Trace the loaded skills [#tracing]
 
-## Report availability and use [#tracing]
-
-Pass the selected skill names and versions to [skill tracing](/docs/skill-management/tracing). Record your agent's model and file-loading tool calls to see usage in a trace.
+For Mastra agent tracing, configure the [Mastra integration](/integrations/frameworks/mastra). Then [report the selected skill names and versions](/docs/skill-management/tracing) on model and file-loading tool calls to see skill availability and loaded files in the trace.

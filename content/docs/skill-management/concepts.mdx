@@ -7,9 +7,7 @@ noindex: true
 
 # Skill Management concepts
 
-A skill packages the instructions and files an agent needs for a specific task. This page explains how those files are structured and how Langfuse manages their versions. For a complete walkthrough, see [Get Started](/docs/skill-management/get-started).
-
-Langfuse follows the open [Agent Skills format](https://agentskills.io/home). Its [specification](https://agentskills.io/specification) defines the file structure and loading conventions.
+A skill packages instructions and supporting files for a task. Langfuse follows the open [Agent Skills format](https://agentskills.io/specification) and versions each skill's files together.
 
 ## Skill structure [#skill-structure]
 
@@ -53,7 +51,7 @@ An agent can load skills in stages:
 2. Read that skill's `SKILL.md` instructions.
 3. Open reference files or run scripts as the task requires.
 
-Your agent framework provides the skill list, file-reading tools, and script execution. Langfuse stores and serves the files. For example, a support agent can discover `refund-policy` from its description, read `SKILL.md` when a refund request arrives, then open `references/eligibility.md` to check the rules.
+Your agent framework provides the skill list, file-reading tools, and script execution. Langfuse stores and serves the files; it does not decide when your agent should load a skill.
 
 ## Versions [#versions]
 
@@ -70,9 +68,3 @@ Langfuse assigns `latest` to the most recently created version. Assign `producti
 ## Tags [#tags]
 
 Tags such as `support` or `billing` group skills across their versions. Use them to filter the skill list or install several skills with the CLI. Labels select a version of each skill.
-
-## Prompts and skills [#prompts-and-skills]
-
-A prompt is a text or chat template for a model call. A skill supplies task instructions and supporting files that an agent can load. Use both when your agent needs a prompt template and a choice of task-specific skills. See [Prompt and Skill Management](/docs/prompt-and-skill-management/overview).
-
-Next: [create your first skill](/docs/skill-management/get-started), or read the [beta limits](/docs/skill-management/limits-and-troubleshooting).

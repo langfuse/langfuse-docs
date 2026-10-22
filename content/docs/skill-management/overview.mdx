@@ -13,24 +13,22 @@ Skill Management is in beta. Open your **account menu → Feature Preview** and 
 
 </Callout>
 
-Skill Management stores the instructions and supporting files your agents use for specific tasks. A skill contains a `SKILL.md` file and optional reference documents or scripts. Langfuse versions these files together, so your team can update an agent's instructions without changing its application code.
+Store and version agent skills in Langfuse. Each skill contains a `SKILL.md` file with task instructions and optional supporting files, such as reference documents or scripts.
 
-For example, you can share a refund workflow across support agents, test a revised policy in staging, and use traces to check which policy file an agent read.
-
-![A Skills list containing four support skills, with descriptions and version labels.](/images/changelog/2026-10-19-skill-management-list.jpg)
+![A Skills list containing four support skills, with descriptions and version labels.](/images/changelog/2026-10-22-skill-management-list.jpg)
 
 ## Publish and version skills [#manage-skills]
 
-Create skills in the UI, push a local folder with the CLI, or publish through the API. Use labels such as `staging` and `production` to select a version for each environment. Moving a label to an earlier version rolls back future requests for that label. See [publishing and versioning](/docs/skill-management/manage-skills).
+Create skills in the UI, push a local folder with the CLI, or publish through the API. Each version saves the complete set of files. [Move labels such as `staging` and `production`](/docs/skill-management/manage-skills#labels) to promote or roll back a version without changing application code.
 
 ## Load skills into your agent [#load-skills]
 
-Install skill folders on disk with the CLI, or fetch files through the API for an agent that works in memory. Your agent framework controls when to load instructions and run scripts. See [loading skills](/docs/skill-management/load-skills).
+[Install skill folders with the CLI or fetch files through the API](/docs/skill-management/load-skills). Your agent framework makes skills available to the model and controls file loading and script execution.
 
 ## Trace skill usage [#trace-skills]
 
-Attach the skill list your agent received to its model and tool observations. In the trace, inspect available versions on a generation and loaded files on a successful skill-loading tool. See [skill tracing](/docs/skill-management/tracing).
+[Report available skills and trace file-loading tools](/docs/skill-management/tracing) to see which versions a model could use and which files the agent loaded. Publishing or installing a skill does not trace its usage automatically.
 
 ## Get started [#get-started]
 
-[Create and load your first skill](/docs/skill-management/get-started), read about [file structure and versioning](/docs/skill-management/concepts), or check [beta limits](/docs/skill-management/limits-and-troubleshooting).
+[Create and load your first skill](/docs/skill-management/get-started). To bring existing skills, check the [file format](/docs/skill-management/concepts#skill-structure) and [beta limits](/docs/skill-management/limits-and-troubleshooting#limits).
