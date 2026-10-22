@@ -2,7 +2,6 @@ import { choice, TypeSafeClient } from "@typesafe-ai/sdk";
 import {
   observe,
   propagateAttributes,
-  setActiveTraceIO,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -105,7 +104,6 @@ const handler = async (req: Request) => {
       const traceId = getActiveTraceId();
       const request = buildSystemOneRequest(text, selected);
 
-      setActiveTraceIO({ input: request });
       updateActiveObservation({ input: request }, { asType: "generation" });
 
       try {
@@ -149,7 +147,6 @@ const handler = async (req: Request) => {
           answers,
         };
 
-        setActiveTraceIO({ output: result });
         updateActiveObservation(
           {
             input: request,
