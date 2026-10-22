@@ -111,8 +111,10 @@ The demo wires this into CI so nobody has to remember to run it:
 
 1. **Version your prompts.** The system prompt lives in [Langfuse prompt management](/docs/prompt-management/overview) with its full version history. Some customers keep a copy in GitHub or GitLab too.
 2. **Trigger on change.** An automation fires on any prompt change and launches a CI job in GitHub. See the [GitHub integration](/docs/prompt-management/features/github-integration) and [webhooks](/docs/prompt-management/features/webhooks-slack-integrations).
-3. **Promote a version.** In the demo, version 4 is promoted to the `production` label. This works from the UI, the API, or the CLI.
+3. **Promote a version.** In the demo, version 4 is promoted to the `production` label, which triggers the CI job. This works from the UI, the API, or the CLI.
 4. **Run the eval gate.** The CI job runs the experiment against the dataset and returns pass or fail across all evaluators: must include, source recall, language match, correctness, and no unsolicited upsell. Each score can have a **minimum threshold**, and the change passes only if it clears all of them.
+
+In the demo, the gate runs after `production` has already moved. If your application fetches the prompt by the `production` label, it serves the new version before the checks finish, and a failed job cannot stop that. In your own setup, put the new version on a candidate [label](/docs/prompt-management/features/prompt-version-control) such as `staging`, run the gate on that, and move `production` only after it passes.
 
 The demo leaves the final merge to a human, though the pipeline could also open a PR for review. Either way, there is a record of why a configuration went to production. Learn more in [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
 
