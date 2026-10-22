@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { FormEvent, HTMLAttributes } from "react";
 import { useChat } from "@ai-sdk/react";
 import { getPersistedNanoId } from "./utils/persistedNanoId";
+import { getPresentationParts } from "./presentation";
 
 import {
   Conversation,
@@ -65,6 +66,9 @@ type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
+  const [completedMessageIds, setCompletedMessageIds] = useState<Set<string>>(
+    new Set(),
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Track negative_user_feedback per message (true/false, null = none)
   const [userFeedback, setUserFeedback] = useState<Map<string, boolean | null>>(
@@ -104,7 +108,30 @@ export const Chat = ({ className, ...props }: ChatProps) => {
         api: "/api/qa-chatbot",
         body: { chatId, userId },
       }),
+      onFinish: ({ message, isAbort, isDisconnect, isError }) => {
+        if (isAbort || isDisconnect || isError) return;
+        setCompletedMessageIds(
+          (previous) => new Set([...previous, message.id]),
+        );
+      },
     });
+
+  const presentedMessages = useMemo(
+    () =>
+      messages.map((message, index) =>
+        message.role === "assistant"
+          ? {
+              ...message,
+              parts: getPresentationParts(
+                message.parts,
+                completedMessageIds.has(message.id) &&
+                  (index < messages.length - 1 || status === "ready"),
+              ),
+            }
+          : message,
+      ),
+    [messages, completedMessageIds, status],
+  );
 
   // Check if user has submitted any messages
   const hasUserMessages = messages.some((message) => message.role === "user");
@@ -119,6 +146,18 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleExampleQuestion = (question: string) => {
     if (!userId) return; // Don't send if userId is not ready
     sendMessage({ text: question });
+  };
+
+  const handleRegenerate = () => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === "assistant") {
+      setCompletedMessageIds((previous) => {
+        const next = new Set(previous);
+        next.delete(lastMessage.id);
+        return next;
+      });
+    }
+    regenerate();
   };
 
   const handleFeedback = (
@@ -177,7 +216,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
             </div>
           )}
           <ConversationContent className="space-y-2">
-            {messages.map((message, messageIndex) => (
+            {presentedMessages.map((message, messageIndex) => (
               <div key={message.id}>
                 {message.role === "assistant" && (
                   <Sources
@@ -217,7 +256,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                     message.role === "assistant" && "[&>div]:max-w-full",
                     startsWithThinking(message) && "pt-1",
                     message.role === "user" &&
-                      startsWithThinking(messages[messageIndex + 1]) &&
+                      startsWithThinking(presentedMessages[messageIndex + 1]) &&
                       "pb-1",
                   )}
                 >
@@ -233,22 +272,24 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                   >
                     {message.parts.map((part, i) => {
                       if (part.type === "text") {
+                        if (!part.text.trim()) return null;
                         const isLastMessage =
                           messageIndex === messages.length - 1;
                         const isNotFirstMessage = messageIndex > 0;
                         // Find the index of the last text part
                         const textPartIndices = message.parts
-                          .map((p, idx) => (p.type === "text" ? idx : -1))
+                          .map((p, idx) =>
+                            p.type === "text" && p.text.trim() ? idx : -1,
+                          )
                           .filter((idx) => idx !== -1);
                         const lastTextPartIndex =
                           textPartIndices[textPartIndices.length - 1];
                         const isLastTextPart = i === lastTextPartIndex;
-                        // Per-message completeness: earlier replies keep their
-                        // Open-trace link while a later turn is streaming.
-                        const hasStreamingParts = message.parts.some(
-                          (p) => "state" in p && p.state === "streaming",
-                        );
-                        const isMessageComplete = !hasStreamingParts;
+                        // Text-end events also occur before tool calls. Only
+                        // the successful response-finish event completes a reply.
+                        const isMessageComplete =
+                          completedMessageIds.has(message.id) &&
+                          (!isLastMessage || status === "ready");
                         const isChatIdle =
                           status !== "submitted" && status !== "streaming";
                         const traceUrl = TRACE_ID_PATTERN.test(message.id)
@@ -283,7 +324,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               isChatIdle && (
                                 <Actions className="mt-2">
                                   <Action
-                                    onClick={() => regenerate()}
+                                    onClick={handleRegenerate}
                                     label="Retry"
                                     tooltip="Retry"
                                   >
@@ -327,6 +368,7 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         return (
                           <Reasoning
                             key={`${message.id}-${i}`}
+                            defaultOpen={false}
                             className={cn(
                               "w-full",
                               hasNextThinkingStep
