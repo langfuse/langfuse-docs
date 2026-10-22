@@ -92,7 +92,7 @@ These are examples. Do not just copy them. It often makes sense to check out the
 
 To follow along, switch to the monitoring checkpoint with `git checkout checkpoint/04-monitoring` and open the [monitoring lesson](/workshop/learner/04-monitoring).
 
-## Set up a user disagreement judge [#disagreement-judge]
+## Evaluators for Specs [#evaluators]
 
 Langfuse offers three kinds of evaluators:
 
@@ -100,35 +100,15 @@ Langfuse offers three kinds of evaluators:
 - **[LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)** evaluators handle the more implicit things you want to get out of a conversation. A model scores the trace and can explain the grade.
 - **[Decision model evaluators](/docs/evaluation/evaluation-methods/decision-models)** ask a typed question and write the answer as a score: a label, a level on a rubric, or a yes or no. Use them when the possible answers are known before you call the model.
 
-This workshop covers code evaluators and LLM-as-a-judge. User disagreement needs judgment, so it uses an LLM judge built from the user disagreement template.
+This workshop covers the first two. To set one up, connect an evaluator model, choose the observations to target, and point the evaluator at the parts of the observation JSON that should be in context. The [evaluator setup](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step) walks through that in the UI.
 
-To set one up, connect an evaluator model, choose the observations to target, and point the evaluator at the parts of the observation JSON that should be in context. The [evaluator setup](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step) walks through that in the UI.
+These are the three the workshop sets up for Specs, and why each one is built that way:
 
-The evaluator then runs on incoming live observations. As Annabell puts it, of the first five hundred questions maybe only five to seven need more detail than the agent gave. This judge helps you find those few without reading every successful exchange.
+- **User disagreement** needs judgment, so it is an LLM judge on the **agent** observation. It reads the user's side of the conversation.
+- **All-caps frustration** is a concrete text check, so it is a code evaluator. A short Python function returns `true` when the user message is written in all caps.
+- **Out-of-scope requests** need the system prompt as well as the latest user message, so this one targets **generation** observations, where that prompt is available. Specs is scoped to phone support, and Dad also asks about a printer and a computer.
 
-## Detect frustration with a code evaluator [#code-evaluator]
-
-All caps is a concrete text feature, so a code evaluator is the better fit. The workshop provides a short Python function that extracts the user message with a JSONPath, checks whether it is in all caps, and returns a boolean score: `true` means the message was written in all caps. Code evaluators support Python and TypeScript.
-
-The same pattern works for any explicit text rule. Annabell mentions cuss words, or checking that your brand name is spelled correctly. For Langfuse, that could be catching a capital F.
-
-Set it up the same way as the judge: run it on **live observations** and target the **agent** observation type. Before you execute, use the test run on a sample observation. On a normal Bluetooth question it returns `false`, as expected.
-
-Evaluators like these can also run on experiments in your offline process. Here they run on live production data.
-
-## Test the monitors and filter by score [#test-monitors]
-
-Back in Specs, Annabell asks about Bluetooth again, gets frustrated, and pushes back with "No, there is no such Bluetooth sign." The agent acknowledges it and offers another way forward.
-
-In Langfuse, the root agent observation now carries a **user disagreement** score of `true`. Because scores are attached to observations, you can filter for user disagreement or all-caps frustration and bring the conversations that need attention to the top of your review queue. The score tells you where to look, and the trace tells you what actually happened.
-
-## Catch out-of-scope requests [#out-of-scope]
-
-A third signal worth monitoring in many apps: is the user trying to do something the application is not built for? Specs is scoped to phone IT support, but Dad also has a printer and a computer.
-
-This evaluator needs a different view of the trace. It compares what the system is supposed to do with what the user is asking for, so it needs the system prompt as well as the latest user message. That is why it targets **generation** observations, where the system prompt is available. The mapping uses the first message (the system prompt) and the last user message.
-
-When out-of-scope requests show up, you have an informed product decision to make: expand the scope of your application, or explain more clearly what it is for. Reading the actual cases tells you which one it is.
+They run on live observations. Scores attach to the observation, so you can filter for disagreement or all-caps frustration and bring those conversations to the top of your review queue. The same evaluators can also run later on experiments.
 
 ## Let a coding agent investigate your traces [#coding-agent]
 
