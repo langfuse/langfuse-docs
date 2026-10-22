@@ -1,9 +1,9 @@
 ---
-title: Langfuse for healthcare
+title: Langfuse for healthcare and life sciences
 description: Observe and evaluate AI agents that handle patient data, on Langfuse's HIPAA-ready cloud region or your own infrastructure.
 ---
 
-# Langfuse for Healthcare
+# Langfuse for healthcare and life sciences
 
 Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-ready cloud region or your own infrastructure. For healthcare and life sciences teams.
 
@@ -17,9 +17,9 @@ Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-re
 
 [ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [HIPAA](/security/hipaa) · [HIPAA-ready · BAA available](/security/hipaa) · [MIT · open source](/handbook/chapters/open-source) · [Security & compliance](/security)
 
-## Talk to a healthcare expert at Langfuse
+## Talk to a healthcare and life sciences expert at Langfuse
 
-Use the contact form on this page to talk to a healthcare expert at Langfuse.
+Use the contact form on this page to talk to a healthcare and life sciences expert at Langfuse.
 
 Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** engineers building on Langfuse.
 
@@ -90,7 +90,7 @@ Control prompts, protect data, and manage access.
 - **[Access controls](/docs/administration/rbac):** Organizations and projects are the data boundary. Role-based access limits who can open a project.
 - **[Retention](/docs/administration/data-retention):** Set a retention window per project. Export observations and scores to your own bucket when you need a longer archive.
 
-## What healthcare teams build on Langfuse.
+## What healthcare and life sciences teams build on Langfuse.
 
 ### Patient support and intake
 
@@ -126,7 +126,7 @@ Companies like Merck Group give AI teams one platform for traces, prompts, and e
 
 Merck Group · 80+ use cases
 
-## Learn how to ship reliable agents in healthcare
+## Learn how to ship reliable agents in healthcare and life sciences
 
 Start with datasets and release gates. Then read how Merck Group and Evolve use Langfuse.
 
@@ -159,7 +159,7 @@ Yes, on a self-hosted deployment. LLM-as-a-judge calls the model in an LLM conne
 
 [Ask anything else](/docs/ask-ai)
 
-## Working on AI in healthcare or life sciences?
+## Working on AI in healthcare and life sciences?
 
 Talk through the HIPAA-ready region, self-hosting, and how Merck Group and Evolve use Langfuse.
 

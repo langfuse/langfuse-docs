@@ -66,7 +66,7 @@ export const industryLinks: NavPanelLink[] = [
     icon: Landmark,
   },
   {
-    name: "Healthcare",
+    name: "Healthcare and life sciences",
     href: "/healthcare",
     icon: HeartPulse,
   },
