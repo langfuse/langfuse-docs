@@ -30,7 +30,7 @@ export const healthcareReasons = [
   },
   {
     title: "Quality gates and evidence for audits",
-    body: "Test changes on datasets, and keep traces and scores for review.",
+    body: "Evaluate changes on datasets, and keep traces and scores for review.",
   },
   {
     title: "One platform for every AI team",

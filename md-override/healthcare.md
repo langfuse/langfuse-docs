@@ -12,7 +12,7 @@ Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-re
 - **HIPAA-ready cloud region with a self-serve BAA:** Sign the ClickHouse BAA, then send PHI only to the dedicated US region.
 - **Self-host so patient data never leaves your network:** Run Langfuse in your VPC or in an air-gapped environment.
 - **Clinician or domain expert review before release:** Send traces and dataset items to annotation queues for clinicians or domain experts.
-- **Quality gates and evidence for audits:** Test changes on datasets, and keep traces and scores for review.
+- **Quality gates and evidence for audits:** Evaluate changes on datasets, and keep traces and scores for review.
 - **One platform for every AI team:** Share traces, prompts, and evaluations across the teams that build agents.
 
 [ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [HIPAA](/security/hipaa) · [HIPAA-ready · BAA available](/security/hipaa) · [MIT · open source](/handbook/chapters/open-source) · [Security & compliance](/security)
