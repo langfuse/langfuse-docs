@@ -1,0 +1,208 @@
+---
+title: "Continuously Improving Agents With Langfuse"
+description: "A hands-on AI Engineer workshop on online monitoring: trace a support agent, set up LLM-as-a-judge and code evaluators that target the right messages, let a coding agent investigate production traces, and feed what you find back into datasets."
+ogImage: /images/videos/continuously-improving-agents.jpg
+---
+
+# Continuously Improving Agents With Langfuse
+
+An agent can look perfectly healthy from the outside while giving bad answers. Requests return 200, latency is normal, there are no exceptions, and the user still did not get the help they needed. Because agents are nondeterministic, knowing that your software runs tells you very little about whether its responses are any good.
+
+In this workshop from AI Engineer, Lotte Verheyden and Annabell Schäfer build the online half of the improvement loop with a small sample app called **Specs, the Dad IT support agent**. You will see what a useful trace looks like, how to decide what is worth monitoring for your application, how to wire up evaluators that read exactly the parts of a trace they need, and how a coding agent can dig through production traces to find problems nobody set up a score for.
+
+This video is a good fit if you already have an agent in production (or close to it) and want a practical way to catch the conversations that go wrong. You can follow along step by step with the free [Langfuse workshop](/workshop).
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/BOCjybvJYM4"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## What you will learn [#what-you-will-learn]
+
+- How the online part of the [AI engineering loop](/academy/ai-engineering-loop) (tracing and monitoring) connects to the offline part (datasets, experiments, evaluation)
+- What a trace needs to contain before it can support useful monitoring
+- How to pick monitoring signals that fit your own application
+- How to set up an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator and a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators), and how to map trace fields into them
+- How to use the [Langfuse CLI](/docs/api-and-data-platform/features/cli) and [Agent Skill](/docs/api-and-data-platform/features/agent-skill) so a coding agent can investigate your traces
+- Why datasets and evaluation criteria need regular maintenance
+
+## The AI engineering loop: online and offline [#ai-engineering-loop]
+
+The workshop frames improvement as a loop with two parts:
+
+- **Online:** you trace your application in production and monitor those traces with dashboards, evaluators, and user feedback.
+- **Offline:** you build datasets of test cases, run experiments on proposed changes, and evaluate the results before you deploy.
+
+Lotte's advice for getting started: teams outside high-risk industries can get very far with the online part alone. Find a problem during monitoring, make a simple fix, deploy, and watch the next traces come in. Once your product matures, or when any mistake has serious consequences, add the offline part for structured testing. Your datasets will be heavily inspired by what you saw during monitoring, and you only ship a change once experiments show it is better and introduces no regressions.
+
+This video focuses on the online part.
+
+## Build traces that are worth monitoring [#useful-traces]
+
+Everything starts with the trace. If your trace is missing information, monitoring misses things, your datasets end up weaker, and you make less informed decisions about what to evaluate. So it pays to take the time to get tracing right.
+
+A trace is made of **observations**: the steps your agent takes to produce an answer. These are LLM calls, tool calls, and other steps, and they can be nested so the tree mirrors how your agent actually ran.
+
+What you record depends on the type of observation:
+
+- **LLM calls:** duration, token usage, cost, the model, and the prompt version. Anything that helps you judge the quality of that call.
+- **Tool calls:** whatever is relevant to the operation. For a web search, for example, the query that was used.
+
+Cost, latency, and tokens are captured per observation and rolled up to the trace level. See [Get started with tracing](/docs/observability/get-started) to set this up, or ask your coding agent to do it with the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill).
+
+## Three jobs of monitoring [#monitoring]
+
+Monitoring does a few things at once:
+
+1. **Aggregate metrics.** Cost, latency, and evaluator scores become trends you watch over time, so you notice if quality starts to drop. See [metrics and dashboards](/docs/metrics/overview).
+2. **Signal detection through user feedback.** As traffic grows you cannot read every trace. [User feedback](/docs/observability/features/user-feedback) surfaces the ones worth looking at right now.
+3. **Feedback and evals.** Automatic evaluators scale to all your traces, but they mostly catch problems you already thought of. User feedback and human annotation scale less well, and they are where you discover the things you never anticipated. Use both.
+
+## Meet Specs, the Dad IT support agent [#meet-specs]
+
+Specs started as a side project. Annabell's dad kept asking her on WhatsApp how to set up his phone, his printer, and his computer, so she built an agent to answer him. In the workshop it has a small web UI.
+
+Specs is a TypeScript app built on the OpenAI Agents SDK. It uses the OpenAI API to generate replies and has two tools:
+
+- `get_support_context` to look up Dad's phone, operating system, and installed apps
+- `search_help_library` to search a set of frequently asked questions with guidance on common issues
+
+To run it yourself, follow the [setup lesson](/workshop/learner/00-setup): clone the [langfuse-workshop repository](https://github.com/langfuse/langfuse-workshop), copy `.env.example` to `.env`, create a Langfuse account (a project is created for you) and add your API keys, install dependencies, and start the app with `npm run dev`.
+
+Ask a question like "How do I turn on my Bluetooth on my iPhone?" and a trace shows up in Langfuse. It is rooted in an **agent** observation, with **generations** and **tool calls** nested underneath. The sample app comes fully instrumented, so the workshop can focus on working with traces instead of setting them up.
+
+## Choose signals that fit your application [#choose-signals]
+
+Monitoring starts with a question: what can go wrong in this specific app? You do not sit next to Dad while he uses Specs, so you want the traces to tell you when something went wrong. For a support agent, the workshop picks two signals to start with:
+
+- **User disagreement.** Dad asks how to turn on Bluetooth, then replies "Where's the button?" That usually means the instructions were unclear or not detailed enough.
+- **All-caps frustration.** When people get frustrated with a chat app, they often start typing in all caps.
+
+Annabell's key point: these are examples, so do not just copy them. Think about the typical failure modes of your own application and monitor for those.
+
+To follow along, switch to the monitoring checkpoint with `git checkout checkpoint/04-monitoring` and open the [monitoring lesson](/workshop/learner/04-monitoring).
+
+## Set up a user disagreement judge [#disagreement-judge]
+
+Langfuse offers two kinds of evaluators. **Code evaluators** handle deterministic checks, and **LLM-as-a-judge** evaluators handle the more implicit things you want to get out of a conversation. User disagreement needs judgment, so it uses an LLM judge built from the user disagreement template.
+
+**1. Connect an evaluator model.** The judge needs an LLM connection. The workshop uses OpenAI, but you can connect other models or route through your own proxy if you already have a gateway set up.
+
+**2. Pick the observations to target.** Filter for the **agent** observation at the root of the trace, rather than individual generations or tool calls. You want to evaluate the user's side of the conversation, so the judge reads the observation input.
+
+**3. Map the variables.** The evaluator prompt pulls in context through variables in curly brackets. You fill each one with a JSONPath into the observation:
+
+| Template variable          | Object field | JSONPath                  |
+| -------------------------- | ------------ | ------------------------- |
+| `{{conversation_history}}` | Input        | `$.messages`              |
+| `{{last_user_message}}`    | Input        | `$.messages[-1:].content` |
+
+The conversation history pulls in the whole message array: what Dad asked, what the tools returned, and the reply. The last user message isolates what Dad is saying right now. Together they let the judge connect a complaint about a missing Bluetooth button to the earlier instructions. The preview below the mapping shows exactly what gets sent to the judge, so you can check it is right.
+
+**4. Execute.** The evaluator now runs on incoming live observations. As Annabell puts it, of the first five hundred questions maybe only five to seven need more detail than the agent gave. This judge helps you find those few without reading every successful exchange.
+
+## Detect frustration with a code evaluator [#code-evaluator]
+
+All caps is a concrete text feature, so a code evaluator is the better fit. The workshop provides a short Python function that extracts the user message with a JSONPath, checks whether it is in all caps, and returns a boolean score: `true` means the message was written in all caps. Code evaluators support Python and TypeScript.
+
+The same pattern works for any explicit text rule. Annabell mentions cuss words, or checking that your brand name is spelled correctly. For Langfuse, that could be catching a capital F.
+
+Set it up the same way as the judge: run it on **live observations** and target the **agent** observation type. Before you execute, use the test run on a sample observation. On a normal Bluetooth question it returns `false`, as expected.
+
+Evaluators like these can also run on experiments in your offline process. Here they run on live production data.
+
+## Test the monitors and filter by score [#test-monitors]
+
+Back in Specs, Annabell asks about Bluetooth again, gets frustrated, and pushes back with "No, there is no such Bluetooth sign." The agent acknowledges it and offers another way forward.
+
+In Langfuse, the root agent observation now carries a **user disagreement** score of `true`. Because scores are attached to observations, you can filter for user disagreement or all-caps frustration and bring the conversations that need attention to the top of your review queue. The score tells you where to look, and the trace tells you what actually happened.
+
+## Catch out-of-scope requests [#out-of-scope]
+
+A third signal worth monitoring in many apps: is the user trying to do something the application is not built for? Specs is scoped to phone IT support, but Dad also has a printer and a computer.
+
+This evaluator needs a different view of the trace. It compares what the system is supposed to do with what the user is asking for, so it needs the system prompt as well as the latest user message. That is why it targets **generation** observations, where the system prompt is available. The mapping uses the first message (the system prompt) and the last user message.
+
+When out-of-scope requests show up, you have an informed product decision to make: expand the scope of your application, or explain more clearly what it is for. Reading the actual cases tells you which one it is.
+
+## Let a coding agent investigate your traces [#coding-agent]
+
+Next, the workshop seeds a batch of example production traces and scores into the project with a script from the monitoring lesson. Now there are pages of traces. How do you find what is going wrong at that scale?
+
+Install the [Langfuse CLI](/docs/api-and-data-platform/features/cli) and the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill). Annabell usually just asks her coding agent to install them. The CLI exposes the Langfuse API, so your coding agent can read your traces, scores, datasets, and experiment runs, and start them too. The same skill can also add tracing to an app in the first place.
+
+Then ask your coding agent something like:
+
+> Please use the Langfuse skill to find issues in our traces.
+
+The agent looks at the scores you configured, such as disagreement and frustration, and also goes beyond them: latency, tool calls, and anything else that might be silently failing. In the workshop, the report on the seeded traces surfaced:
+
+- **A silent retrieval failure** in `search_help_library`. None of the evaluators checked for this, and nobody had noticed the tool was not returning useful information.
+- **Retries adding latency and cost.** Retrieval misses led to repeated tool calls.
+- **An evaluation coverage gap.** Only a subset of recent traces had evaluation scores at all.
+- A live run in Codex also flagged an issue with the **prompt version**.
+
+This shows the limits of the first monitors. Disagreement and all-caps scores tell you a user was unhappy. They do not tell you whether retrieval, retries, or something else caused it. Looking at the tool observations gives you that next level of diagnosis.
+
+Because the coding agent also has your repository as context, it can propose code changes and not only Langfuse configuration. Annabell asks it to remove the `search_help_library` tool, since it does not seem to help. A change like this still needs testing before you ship it, which leads to the offline part of the loop.
+
+## Close the loop [#close-the-loop]
+
+Catching signals is only the first half. To keep improving an agent over time, you need to maintain two things:
+
+- **Your evaluation criteria.** Check that evaluators are not over-indexing on one behavior and that they still tell you something useful.
+- **Your datasets.** When you first build an app, you think you know what people will do with it. Production shows you all the edge cases you did not account for. Turn good production examples into dataset items, add them to your offline evals, and run experiments on every change. You can make this part of your CI/CD with [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd) so you ship with confidence and catch regressions.
+
+None of this is a one-off. As Annabell puts it, you need to put in the reps and close the loop continuously so your dataset keeps representing what your users actually do.
+
+## If you start tomorrow [#start-tomorrow]
+
+This is what Annabell and Lotte would do:
+
+1. Use the Langfuse Agent Skill to add tracing to your repository, so you know what is happening in your app.
+2. Review traces manually to understand what people are really doing.
+3. Build evaluators for your production traces around the failures that matter to you.
+4. Use those signals to build datasets and experiments, and start optimizing offline.
+
+## Chapters [#chapters]
+
+- [0:00](https://www.youtube.com/watch?v=BOCjybvJYM4&t=0s) The AI engineering loop
+- [3:08](https://www.youtube.com/watch?v=BOCjybvJYM4&t=188s) Online and offline improvement
+- [5:12](https://www.youtube.com/watch?v=BOCjybvJYM4&t=312s) Build useful traces
+- [6:38](https://www.youtube.com/watch?v=BOCjybvJYM4&t=398s) Monitoring and user feedback
+- [8:01](https://www.youtube.com/watch?v=BOCjybvJYM4&t=481s) Meet Specs, the Dad IT support agent
+- [10:06](https://www.youtube.com/watch?v=BOCjybvJYM4&t=606s) Repository and account setup
+- [12:28](https://www.youtube.com/watch?v=BOCjybvJYM4&t=748s) Run the TypeScript application
+- [13:23](https://www.youtube.com/watch?v=BOCjybvJYM4&t=803s) Inspect a live support trace
+- [15:02](https://www.youtube.com/watch?v=BOCjybvJYM4&t=902s) Choose application specific signals
+- [16:21](https://www.youtube.com/watch?v=BOCjybvJYM4&t=981s) Configure the evaluator model
+- [18:16](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1096s) Set up a disagreement judge
+- [19:16](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1156s) Map trace messages into the evaluator
+- [21:07](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1267s) Code based all caps detection
+- [24:16](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1456s) Test and execute the monitors
+- [24:58](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1498s) Generate frustration and disagreement
+- [26:13](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1573s) Inspect evaluator scores
+- [27:47](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1667s) Detect out of scope requests
+- [31:51](https://www.youtube.com/watch?v=BOCjybvJYM4&t=1911s) Seed production traces
+- [33:50](https://www.youtube.com/watch?v=BOCjybvJYM4&t=2030s) Install the CLI and skill
+- [35:24](https://www.youtube.com/watch?v=BOCjybvJYM4&t=2124s) Investigate traces with a coding agent
+- [37:24](https://www.youtube.com/watch?v=BOCjybvJYM4&t=2244s) Retrieval, retries, and coverage findings
+- [39:05](https://www.youtube.com/watch?v=BOCjybvJYM4&t=2345s) Propose a code change
+- [40:03](https://www.youtube.com/watch?v=BOCjybvJYM4&t=2403s) Maintain datasets and close the loop
+- [42:25](https://www.youtube.com/watch?v=BOCjybvJYM4&t=2545s) Workshop resources and next steps
+
+## Resources [#resources]
+
+- [Langfuse workshop](/workshop): the full eight-module, self-paced version of this session, including prompt management, datasets, and experiments
+- [Monitoring lesson](/workshop/learner/04-monitoring) and the [langfuse-workshop repository](https://github.com/langfuse/langfuse-workshop)
+- [Langfuse Academy](/academy) and the [AI engineering loop](/academy/ai-engineering-loop)
+- [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) and [Langfuse CLI](/docs/api-and-data-platform/features/cli)
+- [Datasets](/docs/evaluation/experiments/datasets) and [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)
+- [Metrics and dashboards](/docs/metrics/overview)

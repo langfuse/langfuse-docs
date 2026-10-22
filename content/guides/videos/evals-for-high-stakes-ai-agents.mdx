@@ -1,0 +1,174 @@
+---
+title: "Evals for High-Stakes AI Agents"
+description: "A hands-on AI Engineer workshop for regulated industries: trace a banking assistant with PII masking, build datasets, turn domain-expert comments into failure modes, combine LLM-as-a-judge and code evaluators, and block prompt changes in CI when scores drop."
+ogImage: /images/videos/evals-for-high-stakes-ai-agents.jpg
+---
+
+# Evals for High-Stakes AI Agents
+
+Some AI agents can afford a few mistakes. A customer-facing agent at a bank cannot. A wrong answer can carry financial, legal, and reputational risk, and the system can look perfectly healthy while it happens. In the opening example, a support agent tells a user their refund has been issued. Every status is green and there are no latency issues, but the refund tool was never called. Nobody finds out until the customer comes back weeks later.
+
+In this workshop from AI Engineer, Annabell Schäfer and Doneyli De Jesus from Langfuse walk through the full AI engineering loop using a banking assistant built for the kind of financial institutions they work with. It is for teams in financial services, healthcare, and other regulated industries who have a working prototype and now need to answer the question leadership always asks: how do we know this agent is safe to put in front of customers?
+
+<iframe
+  width="100%"
+  className="aspect-[16/9] rounded-lg border mt-6 w-full"
+  src="https://www.youtube-nocookie.com/embed/obfPzbapMIM"
+  title="YouTube video player"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## What you will learn [#what-you-will-learn]
+
+- How regulated teams build a ground truth dataset when they do not have one yet
+- How to trace an agent with [PII masking](/docs/observability/features/masking) so sensitive data never lands in your observability tool
+- How to build datasets from spreadsheets and from production traces
+- How to run expert review with [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) and turn free-text comments into failure modes
+- Why a mix of [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) gives you a more reliable picture
+- How to run evals automatically on every prompt change and block it in CI when scores drop
+- How to build dashboards your business stakeholders will actually read
+- Where to use your coding agent, and where to keep humans in the loop
+
+## The AI engineering loop [#ai-engineering-loop]
+
+Annabell starts with the [AI engineering loop](/academy/ai-engineering-loop), the set of practices that teams who reliably ship and improve agents tend to follow:
+
+- **Tracing** records every step your agent takes in a log you can inspect as a human, and that your coding agent can work with at scale.
+- **Monitoring** makes sense of traces at scale: cost and latency, but also quality signals like whether compliance guardrails held, or how many users are frustrated.
+- **Datasets** are a representative set of cases your agent should handle, together with how it should handle them. That includes out-of-scope requests it should correctly decline, like giving investment advice. The expected output can be a sample reply, an expected behavior, or keywords that must be covered.
+- **Experiments** vary one thing at a time (a prompt, a model, the context, a tool description) and check what happens. Change only one thing, otherwise you cannot tell what caused the result.
+- **Evaluation** measures experiment results at scale with LLM-as-a-judge and code-based checks, while you still read some outputs yourself.
+
+You close this loop continuously, learning from production and feeding it back into your datasets.
+
+## Where regulated teams start [#regulated-entry-points]
+
+The right entry point depends on the stakes. A team building a low-stakes internal chat agent can start with tracing and a few monitors, go to production, and add test cases over time.
+
+Customer-facing agents in regulated industries need more up front. Tracing is always the foundation: what steps the agent took, what inputs and outputs it saw, and which tools it called. On top of that, these teams need a ground truth dataset, and Annabell describes three ways she has seen teams build one:
+
+- **Expert curation.** Work with domain experts in your company to build the dataset directly.
+- **Shadow runs.** Keep running the process manually, run the agent in parallel, and compare how the agent would have handled each case. This measures accuracy and builds your ground truth at the same time.
+- **Human in the loop first.** Run a fully human-reviewed system, then over time slice the work into parts you are confident to automate and parts where a human always stays involved. This is what Annabell did in her previous role building agents for medical device compliance.
+
+## Demo: a banking assistant with tracing and PII masking [#banking-assistant]
+
+Doneyli's demo is a typical banking assistant, with a few features that matter for financial services:
+
+- **Persona impersonation.** You can act as different kinds of customers, from an everyday account holder to an ultra high net worth individual, to check that the agent respects the guardrails for each.
+- **PII masking.** When a user types their credit card number in plain text, the trace in Langfuse shows it fully redacted. A [masking function](/docs/observability/features/masking) removes anything defined as PII before it is persisted. Financial institutions want this kind of data to stay in their own systems of record.
+- **Scores on every trace.** Each new trace is scored automatically: whether the answer is compliant with banking information, which failure modes occurred, and whether guardrails blocked anything.
+
+Ask the assistant "Can I put my savings in Bitcoin?" and it correctly declines. In the trace, the input guardrail names investment advice as the primary risk, and a categorical score records the customer's intent as investment advice. That makes these cases easy to filter for later.
+
+The demo also handles voice. A recorded contact center call goes through speech to text, the transcript is evaluated, and the trace links to the original audio along with the assistant's response. See [multi-modality](/docs/observability/features/multi-modality) for how media is attached to traces.
+
+## Building datasets [#datasets]
+
+Customers will always find ways to use your system that you did not design for, and you cannot anticipate every outcome of an LLM-powered system. That is why the evaluation work is anchored in [datasets](/docs/evaluation/experiments/datasets).
+
+A dataset is a set of inputs and expected outputs. Doneyli's framing for anyone from software development: these are your test cases, and you would not ship software without QA. A few practical points from the demo:
+
+- **The expected output does not have to be the exact answer.** It can describe the intent or behavior you expect.
+- **Use several datasets for different areas of quality.** The demo has one for red teaming (prompt injection and attempts to get around guardrails) and one for unresolved disputes.
+- **Two ways to create them.** Many teams already have a spreadsheet of what they want to test, so upload it as a CSV. Or add production traces straight into a dataset once you have decided they are good examples of what future outputs should look like.
+
+Everything shown in the UI can also be done through the [CLI](/docs/api-and-data-platform/features/cli), the [MCP server](/docs/api-and-data-platform/features/mcp-server), or the API.
+
+## Expert review and failure modes [#expert-review]
+
+Before you can measure quality, you need to know what goes wrong. That is **error analysis**: looking at traces to see whether the agent took the right steps, called the right tools, and produced the output you want. Annabell spent days doing exactly this in her previous job.
+
+You cannot read thousands of production traces by hand, so Doneyli recommends this process:
+
+1. **Sample.** Curate a representative slice of production, say 10% or 20%, and filter for what matters, for example conversations about disputes or credit cards.
+2. **Send it to an expert.** Put the sample into an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) for a domain expert, such as your risk expert.
+3. **Keep it simple for them.** Experts have a day job. Give them a couple of scores (yes or no, true or false, a 1 to 10 scale) and a comment field. In the demo, flagging a missing citation takes about ten seconds. A hundred traces at around 30 seconds each is under an hour of their time, and they can even dictate their comments.
+4. **Let an LLM find the patterns.** The annotations stay attached to the traces as evidence. Then use an LLM to group all the raw comments into recurring failure modes. You do not ask experts to invent categories. They give you unfiltered feedback, and the LLM does the pattern matching it is good at.
+
+Those failure modes become your quality dimensions, the scores you measure every experiment against. In the demo they include expected source correctness, formal register (addressing customers with the right level of formality and matching their language), must-include content, and no unsolicited upsell.
+
+## Choosing evaluators [#evaluators]
+
+With your failure modes defined, decide how to grade each one. You can build a library of evaluators that score traces automatically as they come in, and you can also send [scores from your application](/docs/evaluation/evaluation-methods/scores-via-sdk) in real time.
+
+The key lesson from working with these customers: **use a balanced mix of LLM-as-a-judge and deterministic evaluators**, depending on the failure mode.
+
+- **LLM-as-a-judge** handles judgment calls, but if you rely on it entirely there is a nonzero chance some grades are wrong. That is the nature of LLMs.
+- **Code evaluators** are plain functions. The demo uses a simple regex for an exact match. For the same input they return the same output every time.
+
+Together they give you a blended assessment of quality you can trust more than either one alone.
+
+## Running evals automatically on every prompt change [#ci]
+
+An [experiment](/docs/evaluation/experiments/data-model) is anchored on a dataset. You take your current agent (system prompt, model, tools) and test what happens when you change one of them, before promoting the change to production instead of shipping on vibes.
+
+The demo wires this into CI so no human has to remember to run it:
+
+1. **Version your prompts.** The system prompt lives in [Langfuse prompt management](/docs/prompt-management/overview) with its full version history. Some customers keep a copy in GitHub or GitLab too.
+2. **Trigger on change.** An automation fires on any prompt change and launches a CI job in GitHub. See the [GitHub integration](/docs/prompt-management/features/github-integration) and [webhooks](/docs/prompt-management/features/webhooks-slack-integrations).
+3. **Promote a version.** In the demo, Doneyli promotes version 4 to the `production` label. This works from the UI, the API, or the CLI.
+4. **Run the eval gate.** The CI job runs the experiment against the dataset and returns pass or fail across all evaluators: must include, source recall, language match, correctness, and no unsolicited upsell. Each score can have a **minimum threshold**, and the change only passes if it clears every bar.
+
+Doneyli leaves the final merge to a human, though you could have the pipeline open a PR for review automatically. Either way, you have a paper trail showing why a new configuration went to production. Learn more in [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
+
+## Dashboards for stakeholders [#dashboards]
+
+Business stakeholders want to see that the agent delivers value. Doneyli builds a [custom dashboard](/docs/metrics/features/custom-dashboards) from the data the agent already produces:
+
+- **Directional business value.** About 1,400 interactions in the last seven days that did not need a human agent, at a total cost of under $7. Doneyli is clear the logic will differ by organization, but it shows a direction.
+- **Failure modes over time.** Out of scope, informal register, and unresolved disputes are the top three and creeping up. Instead of searching hundreds of thousands of traces, filter tracing for unresolved disputes, save the filter as a view, and do a targeted investigation on dozens of traces.
+- **User feedback.** Thumbs up and thumbs down captured as scores. Most are positive, so focus on the 18% that are not.
+- **Security mix.** Most interactions carry no risk, but 89 in the last seven days involved investment advice. Filter by the categorical security risk score to see exactly those cases.
+
+## Working with your coding agent [#coding-agent]
+
+Annabell's warning: some teams hook their coding agent up to their traces and say "Please fix my agent. Make no mistakes." That mostly produces slop.
+
+Picture two axes, time invested and system quality. Letting the agent fix everything on its own costs you no time and gives you a low-quality system. Doing everything by hand is no longer necessary either. The sweet spot:
+
+- **Automate** instrumenting your app, finding failure modes, running evals, and running 20 experiments where you would have come up with one.
+- **Bring your taste** and your domain experts to build and curate datasets, decide what problem the application should solve, and set its direction.
+
+Over time you can automate more and more of the loop.
+
+## If you start tomorrow [#start-tomorrow]
+
+1. **Install the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill).** It is a set of markdown files that teaches your coding agent how to work with Langfuse, connected to the docs, the integration pages, and the [Academy](/academy) best practices on datasets, instrumentation, and evaluators.
+2. **Look at data manually.** Use the skill to automate what should be automated, and curate a set of traces to review yourself.
+3. **Collect ground truth.** Use historical data, production traces, or samples run with your domain experts.
+4. **Define your hard limits.** In a regulated space, write down what must never happen. For financial services, the agent should never give investment advice. Put those cases in your evaluation set so you know when it happens.
+
+## Questions from the audience [#qa]
+
+- **Where is the data stored?** Langfuse started on Postgres and moved to ClickHouse to handle billions of events. You can export data to S3 with [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage), or pull it through the API, CLI, or MCP server.
+- **Can I host it on AWS?** Yes. Langfuse Cloud runs on AWS, and you can also [self-host](/self-hosting) on your own infrastructure.
+- **How do I make sure an LLM judge grades like a human?** Label a representative sample yourself, run the judge on it, and tune the judge until it agrees with your human labels. Recheck over time so the sample stays representative. On production data, start with a few too many false positives so you miss nothing, then tune it down. The [LLM-as-a-judge calibration guide](/guides/llm-as-a-judge-calibration-skill) walks through this.
+
+## Chapters [#chapters]
+
+- [00:00](https://www.youtube.com/watch?v=obfPzbapMIM&t=0s) Why evals are hard
+- [05:01](https://www.youtube.com/watch?v=obfPzbapMIM&t=301s) The AI engineering loop
+- [12:47](https://www.youtube.com/watch?v=obfPzbapMIM&t=767s) Demo: a banking assistant with tracing and PII masking
+- [20:35](https://www.youtube.com/watch?v=obfPzbapMIM&t=1235s) Building datasets
+- [25:18](https://www.youtube.com/watch?v=obfPzbapMIM&t=1518s) Expert review and failure modes
+- [30:07](https://www.youtube.com/watch?v=obfPzbapMIM&t=1807s) Choosing evaluators
+- [35:00](https://www.youtube.com/watch?v=obfPzbapMIM&t=2100s) Running evals automatically on every prompt change
+- [39:44](https://www.youtube.com/watch?v=obfPzbapMIM&t=2384s) Dashboards for stakeholders
+- [45:58](https://www.youtube.com/watch?v=obfPzbapMIM&t=2758s) Working with your coding agent
+- [52:13](https://www.youtube.com/watch?v=obfPzbapMIM&t=3133s) Q&A
+
+## Resources [#resources]
+
+- [Langfuse for financial services](/financial-services)
+- [Langfuse Academy](/academy) and the [AI engineering loop](/academy/ai-engineering-loop)
+- [Langfuse workshop](/workshop): a self-paced walkthrough of every step of the loop
+- [Masking sensitive data](/docs/observability/features/masking)
+- [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues)
+- [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators)
+- [Datasets](/docs/evaluation/experiments/datasets) and [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)
+- [Custom dashboards](/docs/metrics/features/custom-dashboards)
+- [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill)
