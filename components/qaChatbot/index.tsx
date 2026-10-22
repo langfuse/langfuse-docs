@@ -49,6 +49,17 @@ import type { UIMessage } from "ai";
 const TRACE_ID_PATTERN = /^[0-9a-f]{32}$/i;
 
 type ChatMessage = UIMessage;
+type ChatMessagePart = ChatMessage["parts"][number];
+
+const isThinkingPart = (part?: ChatMessagePart) =>
+  part?.type === "reasoning" || part?.type === "dynamic-tool";
+
+const isVisibleMessagePart = (part: ChatMessagePart) =>
+  isThinkingPart(part) || (part.type === "text" && part.text.trim().length > 0);
+
+const startsWithThinking = (message?: ChatMessage) =>
+  message?.role === "assistant" &&
+  isThinkingPart(message.parts.find(isVisibleMessagePart));
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
@@ -169,7 +180,11 @@ export const Chat = ({ className, ...props }: ChatProps) => {
             {messages.map((message, messageIndex) => (
               <div key={message.id}>
                 {message.role === "assistant" && (
-                  <Sources>
+                  <Sources
+                    className={
+                      startsWithThinking(message) ? "empty:hidden" : undefined
+                    }
+                  >
                     {message.parts.map((part, i) => {
                       switch (part.type) {
                         case "source-url":
@@ -198,16 +213,21 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                 <Message
                   from={message.role}
                   key={message.id}
-                  className={
-                    message.role === "assistant"
-                      ? "[&>div]:max-w-full"
-                      : undefined
-                  }
+                  className={cn(
+                    message.role === "assistant" && "[&>div]:max-w-full",
+                    startsWithThinking(message) && "pt-1",
+                    message.role === "user" &&
+                      startsWithThinking(messages[messageIndex + 1]) &&
+                      "pb-1",
+                  )}
                 >
                   <MessageContent
                     className={
                       message.role === "assistant"
-                        ? "!bg-transparent px-0 rounded-none"
+                        ? cn(
+                            "!bg-transparent px-0 rounded-none",
+                            startsWithThinking(message) && "pt-0",
+                          )
                         : "!bg-[#403d391a] dark:!bg-[#b8b6a01a] !text-text-primary border border-line-structure rounded-[2px] px-3 py-2"
                     }
                   >
@@ -300,38 +320,46 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         );
                       }
                       if (part.type === "reasoning") {
-                        // Add spacing if next part is a different type (for consistent spacing between different types)
-                        const nextPart = message.parts[i + 1];
-                        const hasNextPartDifferentType =
-                          nextPart && nextPart.type !== "reasoning";
+                        const nextPart = message.parts
+                          .slice(i + 1)
+                          .find(isVisibleMessagePart);
+                        const hasNextThinkingStep = isThinkingPart(nextPart);
                         return (
                           <Reasoning
                             key={`${message.id}-${i}`}
-                            className={
-                              hasNextPartDifferentType
-                                ? "w-full"
-                                : "w-full mb-0"
-                            }
+                            className={cn(
+                              "w-full",
+                              hasNextThinkingStep
+                                ? "mb-1"
+                                : !nextPart
+                                  ? "mb-0"
+                                  : undefined,
+                            )}
                             isStreaming={part.state === "streaming"}
                           >
-                            <ReasoningTrigger />
+                            <ReasoningTrigger className="gap-1.5 text-xs font-normal leading-5 [&_p]:m-0 [&_svg]:size-3.5" />
                             <ReasoningContent>{part.text}</ReasoningContent>
                           </Reasoning>
                         );
                       }
                       if (part.type === "dynamic-tool") {
-                        // Add spacing if next part is a different type (for consistent spacing between different types)
-                        const nextPart = message.parts[i + 1];
-                        const hasNextPartDifferentType =
-                          nextPart && nextPart.type !== "dynamic-tool";
+                        const nextPart = message.parts
+                          .slice(i + 1)
+                          .find(isVisibleMessagePart);
+                        const hasNextThinkingStep = isThinkingPart(nextPart);
                         return (
                           <Tool
                             key={`${message.id}-${i}`}
                             className={
-                              hasNextPartDifferentType ? undefined : "mb-0"
+                              hasNextThinkingStep
+                                ? "mb-1"
+                                : !nextPart
+                                  ? "mb-0"
+                                  : undefined
                             }
                           >
                             <ToolHeader
+                              className="text-xs font-normal leading-5 [&>div]:gap-1.5 [&_span]:text-xs [&_span]:font-normal [&_svg]:size-3.5"
                               type={`tool-${part.toolName}` as const}
                               state={part.state}
                             />
