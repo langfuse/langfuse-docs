@@ -17,44 +17,42 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 />
 
 <Callout type="info">
-  The [Langfuse Academy](/academy) is the how-to for tracing, monitoring,
-  datasets, experiments, and evaluators. This post is the map in front of those
-  pages.
+  This post is a map. For the hands-on depth on tracing, monitoring, datasets,
+  experiments, and evaluators, head over to the [Langfuse Academy](/academy).
 </Callout>
 
-"How do I get started with evals?" is the question teams ask us most often. The Academy meets it once traces exist: the data is there, and the next step is unclear. There are three kinds of evals. Before you pick one, decide what is worth measuring. Risk chooses the entry point. Both paths end in the same closed loop.
+"How do I get started with evals?" is the question we hear more than any other. Here is how we answer it: there are three kinds of evals, you first need to figure out what is worth measuring, and where you start depends on how risky your use case is. Whichever way you start, you end up in the same loop of continuous improvement.
 
-## There are three kinds of evals [#three-kinds-of-evals]
+## Three kinds of evals [#three-kinds-of-evals]
 
-**Signal detection on production data.** You look for traces that deserve a person: a user who leaves, disagrees, or asks for a human; an agent that retries, calls the same tool in a loop, or sits in a slow tail. [Monitoring](/academy/monitoring#metrics-and-signals) keeps this separate from trend lines such as cost, latency, and scores. [Capturing signals](/academy/monitoring/capturing-signals#four-kinds) is the cheap quality judgment, because the user already reacted. For chat, start with disagreement or frustration, as in [high-signal production monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring) and [catching conversation signals](/blog/2026-09-23-catching-conversation-signals-in-langfuse).
+When teams say "evals", they usually mean one of three things.
 
-**Measuring quality in production.** You score live traffic, usually a sample, against criteria for this application: the answer stayed inside the retrieved policy, the agent called the right tool, the reply matched a required format. Setup is [online evaluation](/docs/evaluation/get-started/online).
+**1. Signal detection on production data.** Here you look for the traces that deserve a closer look, for example when a user disagrees or asks for a human, or when an agent calls the same tool over and over. [Signals](/academy/monitoring#metrics-and-signals) point you to the exact trace to open, and [user signals](/academy/monitoring/capturing-signals#four-kinds) are cheap because your users react to every output anyway. For chat applications, we like to start with user disagreement or frustration, as described in [high-signal production monitoring](/blog/2026-04-01-llm-as-a-judge-production-monitoring) and [catching conversation signals](/blog/2026-09-23-catching-conversation-signals-in-langfuse).
 
-**Offline evals before a ship.** You run a candidate on a dataset and check that it is better, or cheaper, than the version you run now. [Offline evaluation](/academy/evaluate) sits between an experiment and the ship decision. See [evaluate with datasets](/docs/evaluation/get-started/offline). An experiment checks a change before it goes out, production catches cases the dataset missed, and those cases go back into the dataset. The [evaluation guide](/blog/2025-11-12-evals) and the [evaluation overview](/docs/evaluation/overview) describe that loop.
+**2. Measuring quality in production.** Here you score live traffic, usually a sample of it, against criteria that matter for your application. Did the answer stay within the retrieved policy? Did the agent pick the right tool? Does the reply follow the required format? The setup is described in [online evaluation](/docs/evaluation/get-started/online).
 
-The Academy also sorts metrics into three roles. [Goal metrics](/academy/evaluate/choosing-what-to-evaluate#the-three-roles) are the ones you push up. Guardrail metrics watch failures that have to stay rare. Operational metrics, such as cost and latency, come from the trace. Use the jobs to pick a motion, and the roles to pick which scores to keep.
+**3. Offline evals on datasets.** Before you ship a new version, you run it against a dataset and check whether it is better, or cheaper, than the one in production. [Offline evaluation](/academy/evaluate) sits between running an experiment and deciding to ship. To set one up, follow [evaluate with datasets](/docs/evaluation/get-started/offline).
 
-## Decide what to measure [#decide-what-to-measure]
+The three feed into each other: production surfaces the cases your dataset missed, and those cases go back into the dataset for the next experiment. Our [evaluation guide](/blog/2025-11-12-evals) describes this in more detail, and the Academy sorts individual scores into [goal metrics, guardrails, and operational metrics](/academy/evaluate/choosing-what-to-evaluate#the-three-roles).
 
-Read traces before you name a metric. [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) states the rule: write evaluators for errors you discover. Helpfulness and hallucination rarely match how your application fails. [Hamel Husain's field guide](https://hamel.dev/blog/posts/field-guide/) names skipping error analysis as the central mistake. His [evals FAQ](https://hamel.dev/blog/posts/evals-faq/), with Shreya Shankar, describes projects where about 60 to 80 percent of development time goes to error analysis and evaluation.
+## First, figure out what to measure [#decide-what-to-measure]
 
-[Error analysis](/academy/monitoring/error-analysis) is the method. Pull 30 to 50 traces, note what happened, and mark pass or fail. Cluster the notes, then add one boolean score per category you will act on. The [choosing page](/academy/evaluate/choosing-what-to-evaluate#starting-from-zero) and the [cookbook](/guides/cookbook/error-analysis-llm-applications) walk through it. In our docs-chatbot writeup, most of the early value, somewhere around 80 percent, came from a person looking at the data. [You can copy that setup](/blog/2026-07-16-steal-our-eval-setup).
+Before you pick any of the three, you need to know what is worth measuring, and the best way to find out is to read your own traces. Generic criteria like helpfulness are tempting, but they rarely match how your application fails, so [write evaluators for the errors you discover](/academy/evaluate/choosing-what-to-evaluate). Hamel Husain calls skipping error analysis the most common mistake in his [field guide](https://hamel.dev/blog/posts/field-guide/), and in the [evals FAQ](https://hamel.dev/blog/posts/evals-faq/) he and Shreya Shankar describe spending 60 to 80 percent of development time on error analysis and evaluation.
 
-Seen failures get evaluators. [Compliance, safety, and format contracts](/academy/evaluate/choosing-what-to-evaluate#goals-and-hard-constraints) get one from the start. A prompt change that removes a failure can ship on its own. Keep a metric when the failure will return. See [one-time fixes](/academy/evaluate/choosing-what-to-evaluate#fix-first). Every score needs a decision behind it: block a deploy, roll back a prompt, or open an investigation. Start with one evaluator, a [code check](/docs/evaluation/evaluation-methods/code-evaluators) for a deterministic failure and an [LLM judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when the failure is about meaning. [When to run error analysis](/academy/monitoring/error-analysis#when-to-run-it) includes a small local set.
+[Error analysis](/academy/monitoring/error-analysis) gives this reading a structure. Pick 30 to 50 traces, note what went wrong in each, and mark it pass or fail. Then cluster the notes into failure categories and create one score per category you want to act on. The [error analysis guide](/guides/cookbook/error-analysis-llm-applications) walks you through it step by step. For our own docs chatbot, most of the value early on, somewhere around 80 percent, came from a person actually looking at the data. [Our full setup](/blog/2026-07-16-steal-our-eval-setup) is there for you to copy.
 
-## Where a golden dataset comes from [#where-a-golden-dataset-comes-from]
+A few rules of thumb help you keep your set of evals small:
 
-A dataset item is one case the application should handle. Expected output is optional. Use it for a known target: a label, a required fact, an expected tool call, or an action the reply must avoid. [Common patterns](/academy/datasets#common-expected-output-patterns) shows the shapes. A shared rubric, such as tone or format, can leave expected output empty and use a [reference-free evaluator](/academy/evaluate#reference-based-vs-reference-free).
+- **Start from failures you have seen.** The exceptions are hard requirements like [compliance, safety, and format rules](/academy/evaluate/choosing-what-to-evaluate#goals-and-hard-constraints), which deserve an evaluator from day one.
+- **Fix what you can fix.** If a prompt change solves the problem, make the change and move on. Only keep a metric for [failures that keep coming back](/academy/evaluate/choosing-what-to-evaluate#fix-first).
+- **Tie every score to a decision.** A score should tell you when to block a release, roll back a prompt, or start an investigation.
+- **Start with one evaluator.** Use a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks like valid JSON, and an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when the check needs language understanding. Add more as error analysis surfaces new failure modes.
 
-[Designing datasets](/academy/datasets/designing-great-datasets) names three sources. Production traces are seeds: a person reviews the trace and writes the expected behavior. Existing assets, such as resolved tickets, FAQs, policies, and old spreadsheets, cover many cases before anyone writes a row. Expert-written and synthetic cases fill named gaps, including behavior that has to work before it has appeared in production.
-
-Choose the evaluator first, and put notes in metadata. About 15 to 30 rows is a complete first set: common scenarios, a few high-risk cases, and one or two known failures. Run it, then expand. [Anthropic's agent-evals guide](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) describes 20 to 50 tasks drawn from real failures as a workable start, and treats early evals as the place a team writes down what success means.
-
-Live tools and live state are awkward to replay end to end. Scope the dataset to the failing step, and store the state that step sees: conversation history, retrieved context, tool results. Reuse those rows for a model swap or a cost cut. [Experiments](/academy/experiments) compare the candidate with the current version, and [optimizing agent cost](/academy/experiments/cost-optimization) covers the cost side. Anthropic's guide notes that a team with evals can judge a new model in days.
+You can do all of this before going live, too: a small set of representative inputs is enough to [run error analysis locally](/academy/monitoring/error-analysis#when-to-run-it).
 
 ## The entry point depends on risk [#entry-point-depends-on-risk]
 
-Closing the full loop on day one is optional. [The loop page](/academy/ai-engineering-loop#you-dont-have-to-close-the-full-loop-on-day-one) names two starts: tracing, or an early dataset. Risk chooses.
+You don't have to close the full loop on day one. The [AI engineering loop](/academy/ai-engineering-loop#you-dont-have-to-close-the-full-loop-on-day-one) describes two common starting points: tracing or an early dataset. Which one fits depends on how much damage a bad output can do.
 
 ```mermaid
 flowchart TD
@@ -77,39 +75,49 @@ flowchart TD
   nextShip --> monitor
 ```
 
-Low risk goes through tracing. Higher risk goes through a dataset.
+**Low-risk use cases: trace, ship, then review.** If a bad output is cheap and you have no historical data to learn from, add tracing and monitoring, go to production, and learn from real usage. In the Academy's [music streaming DJ](/academy/examples/music-streaming-dj) example, the worst case is a skipped song or an awkward comment, so the team goes live early and learns from listener behavior. Datasets and experiments follow once you know what is worth measuring.
 
-**Low risk.** Trace, ship, then read traces and run error analysis. This fits a cheap failure and a feature with no history. The [music streaming DJ](/academy/examples/music-streaming-dj) is that case: a skipped song or an awkward line, labeled beta, with listener behavior as the teacher. Datasets come after you know what to measure. The [monitoring page](/academy/monitoring) starts from that same reading.
+**Higher-risk use cases: dataset first, then ship.** If a single bad answer can hurt your users or your brand, start with a dataset of the cases your application must handle. Run your application against it, annotate the results, build evals from what you find, and ship once you are confident. Teams in regulated industries often need exactly this. The [customer support chatbot](/academy/examples/customer-support-chatbot) example rolls out in three phases: offline on historical tickets, then as internal drafts the support team edits, and finally answering customers directly.
 
-**Higher risk.** Collect the cases the application must handle, run them, annotate, build evals, then ship. One bad answer from a support bot can damage trust. Some customers, including teams in regulated environments, expect that confidence first. The [support chatbot](/academy/examples/customer-support-chatbot) uses three phases: offline on historical tickets, internal drafts a person edits, then customer-facing, often limited at first to categories that already passed.
+On both paths, add tracing early: it shows which step failed, and once you are live, traces become the source for your next dataset.
 
-Traces on a dataset run show which step failed. A later dataset gives the next change a fixed set to run against.
+## Where the golden dataset comes from [#where-a-golden-dataset-comes-from]
 
-## Both paths join the same loop [#both-paths-join-the-same-loop]
+A common follow-up question is where the expected outputs for a dataset come from. First of all, you might not need them: if every item can be judged with the same rule, like tone or format, a [reference-free evaluator](/academy/evaluate#reference-based-vs-reference-free) works on the input alone. When you do need a reference, it can be a label, a required fact, an expected tool call, or something the reply must not do, as shown in [common expected output patterns](/academy/datasets#common-expected-output-patterns).
 
-After the first ship, the work is shared. Traces, monitoring, and error analysis show what happened and which cases matter. Datasets and experiments compare a change with the current version. A person, a code evaluator, or an LLM judge turns that comparison into a ship decision, and the cycle starts again. The picture is the [AI engineering loop](/academy/ai-engineering-loop). Keep it closed: monitor, read traces, and pull cases back into the dataset.
+Good sources, covered in [designing datasets](/academy/datasets/designing-great-datasets), are reviewed production traces, resolved support tickets and FAQs, and expert-written or synthetic cases for the gaps. Start small. About 15 to 30 rows is enough for a first version, and [Anthropic's guide to agent evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) suggests a similar start of 20 to 50 tasks drawn from real failures.
 
-**Fix the trace before the eval.** Judges and code checks read named observations and their input and output. A fragmented trace gives them nothing stable. [What does a good trace look like?](/docs/observability/best-practices) is the checklist.
+For agents that depend on live tools or state, build the dataset around the step that fails and store the state that step sees, such as conversation history and tool results. Later, you can reuse the same dataset to [compare a new model](/academy/experiments) or [bring costs down](/academy/experiments/cost-optimization).
 
-**Sample online judges.** A typical [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) assessment costs about $0.01 to $0.10, depending on the model and the input size. When you attach a [rule](/docs/evaluation/get-started/online), check the last seven days of matching volume and the estimated cost, then lower the rate until the spend fits the decision the score supports. Code checks and conversation signals can run more widely. Point the judge at the traces those signals flag, plus a sample of the rest.
+## Both paths end in the same loop [#both-paths-join-the-same-loop]
 
-**Check the judge against people.** Label cases yourself, run the judge, and compare. [Calibration](/guides/llm-as-a-judge-calibration-skill) is the workflow, [score analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement) shows agreement, and [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) hold the labels. Compare again after the judge, the application, or the model changes. [Writing evaluators](/academy/evaluate/writing-evaluators#validate-the-judge) puts the labels ahead of trusting the prompt.
+After the first release, both paths look the same: you monitor production, run error analysis, pull interesting cases into datasets, test changes in experiments, and ship the version that holds up. This is the [AI engineering loop](/academy/ai-engineering-loop). A few tips we share with teams at this stage:
 
-**Reuse the dataset.** The same rows serve a model swap or a cost cut. [Experiments in CI](/docs/evaluation/experiments/experiments-ci-cd) can block a release when a required case fails or an approved case regresses.
+**Fix your traces before building evals.** Evaluators read the input and output of specific observations, so fragmented traces leave them nothing solid to work with. [What does a good trace look like?](/docs/observability/best-practices) is a good checklist.
+
+**Sample your online evals.** A typical [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation costs around $0.01 to $0.10. When you set up an [evaluation rule](/docs/evaluation/get-started/online), check the estimated cost and lower the sampling rate until the spend fits what the score is worth to you. Cheaper code checks can run on more traffic.
+
+**Validate your LLM judge with humans.** Label some cases yourself, run the judge on them, and compare. Our [calibration guide](/guides/llm-as-a-judge-calibration-skill) walks through the workflow, and [score analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement) shows the agreement. Repeat this whenever you change the judge prompt, your application, or the model.
+
+**Gate your releases.** Once your dataset is stable, run it in [CI](/docs/evaluation/experiments/experiments-ci-cd) so a prompt or model change gets checked against known failures before it ships.
 
 ## Common mistakes [#common-mistakes]
 
-- **Generic criteria first.** Read 30 to 50 traces before you add helpfulness or hallucination scores. An early evaluator still belongs on a constraint you already know, such as a compliance rule.
-- **Unreadable traces.** Unnamed spans and hidden tool results stall the reading, and later evals inherit the mess.
-- **A dataset with no error analysis behind it.** Build rows from failures you have read and from cases the product must handle.
-- **Treating monitoring as evaluation.** Latency, cost, and error rate show movement. Answer quality comes from reading the trace or scoring a criterion you chose.
-- **One pass of an LLM judge.** Keep a small labeled set and compare again after the judge, the application, or the model changes.
-- **Thumbs alone.** Ratings are clear and sparse, and dissatisfied users respond more often, as the [monitoring page](/academy/monitoring#user-feedback) describes. Add [conversation signals](/academy/monitoring/capturing-signals#conversation-signals).
-- **A score on a failure the user should never see.** Block or rewrite that response in the request path, then use the eval to see whether the check held. Runtime checks are in the [guardrails guide](/docs/security-and-guardrails). An Academy guardrail metric is the score you watch so the failure stays rare.
+These are the patterns we see most often when teams get started:
+
+- **Starting with generic criteria.** Helpfulness or hallucination scores added before anyone has read a trace are hard to act on. Read 30 to 50 traces first.
+- **Building evals on messy traces.** If spans are unnamed or tool results are missing, every evaluator built on top inherits the problem.
+- **Building datasets without error analysis.** Base your dataset on failures you have seen and on cases your product must handle.
+- **Treating monitoring as evaluation.** Latency, cost, and error rates tell you that something changed. Whether the answers are good, you only learn by reading or scoring traces.
+- **Trying an LLM judge once and giving up.** The first judge prompt often disagrees with your own labels. Keep a small labeled set and iterate.
+- **Relying only on thumbs up or down.** [Explicit feedback](/academy/monitoring#user-feedback) is clear but rare, and unhappy users respond more often. Add [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) to catch more.
+- **Using an evaluator where a guardrail belongs.** An evaluator scores what already happened. If a failure must never reach the user, add a [runtime guardrail](/docs/security-and-guardrails) and use evals to check that it works.
 
 ## Where to go next [#where-to-go-next]
+
+Pick the entry point that matches your risk, read your traces, and start with one evaluator you will actually act on. From there, the Academy has the details:
 
 - [Langfuse Academy](/academy) and the [AI engineering loop](/academy/ai-engineering-loop)
 - [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [error analysis](/academy/monitoring/error-analysis)
 - [Online evaluation](/docs/evaluation/get-started/online) and [offline evaluation](/docs/evaluation/get-started/offline)
-- Worked examples on the [examples index](/academy/examples): [music streaming DJ](/academy/examples/music-streaming-dj) and [customer support chatbot](/academy/examples/customer-support-chatbot)
+- [Worked examples](/academy/examples): the [music streaming DJ](/academy/examples/music-streaming-dj) and the [customer support chatbot](/academy/examples/customer-support-chatbot)
