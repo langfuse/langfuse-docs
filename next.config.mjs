@@ -264,6 +264,13 @@ const nextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
+      // Langfuse Cloud already sends CORS on the proxied spec; set it here too
+      // so the on-domain URL does not depend on upstream headers. Caching is
+      // left to the upstream response.
+      {
+        source: "/openapi.:ext(yml|yaml)",
+        headers: [{ key: "Access-Control-Allow-Origin", value: "*" }],
+      },
       {
         source: "/.well-known/mcp/:card(langfuse|langfuse-docs).json",
         headers: [
