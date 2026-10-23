@@ -59,6 +59,10 @@ Yes. Set `TELEMETRY_ENABLED=false` on all Langfuse application containers.
 Enterprise self-hosted telemetry is used for license compliance and cannot be disabled.
 If you have procurement, network, or privacy questions, please [contact us](/support).
 
+### Langfuse Government (self-hosted)
+
+Telemetry is off. Deployments with a [Government license key](/self-hosting/license-key#government) send no telemetry to Langfuse, whatever `TELEMETRY_ENABLED` is set to.
+
 ## Hostnames contacted by Langfuse [#hostnames]
 
 Langfuse does not require internet access. Use this list to configure an egress firewall or proxy, or to review which external services your deployment reaches. Langfuse keeps running when any of these hosts is unreachable; only the related feature is skipped.
@@ -67,11 +71,11 @@ The list does not include infrastructure you configure yourself: Postgres, Click
 
 ### Langfuse containers [#hostnames-containers]
 
-| Hostname         | Container | Purpose                                                                                                                                                                                                                                                                              | How to turn it off                                                                                |
-| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
-| `eu.posthog.com` | Web       | [Application telemetry](#application-telemetry), at most every 12 hours.                                                                                                                                                                                                             | Set `TELEMETRY_ENABLED=false` (Langfuse OSS only, see [above](#can-i-disable-telemetry)).         |
-| `langfuse.com`   | Web       | Update check. When a signed-in user loads the Langfuse UI, the Web container requests `https://langfuse.com/api/latest-releases` with the running Langfuse version to show a notice when a newer release is available. The endpoint serves a cached copy of the GitHub releases API. | Not configurable. The check fails gracefully if the host is unreachable.                          |
-| `langfuse.com`   | Worker    | Documentation search for [Halo](/self-hosting/configuration/halo). On each Halo run, the Worker connects to the Langfuse docs MCP server at `https://langfuse.com/api/mcp`. Only applies when `LANGFUSE_IN_APP_AGENT_ENABLED=true`.                                                  | Keep Halo disabled (default). If the host is unreachable, Halo runs without documentation search. |
+| Hostname         | Container | Purpose                                                                                                                                                                                                                                                                              | How to turn it off                                                                                          |
+| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `eu.posthog.com` | Web       | [Application telemetry](#application-telemetry), at most every 12 hours.                                                                                                                                                                                                             | Set `TELEMETRY_ENABLED=false` (Langfuse OSS; Government sends none, see [above](#can-i-disable-telemetry)). |
+| `langfuse.com`   | Web       | Update check. When a signed-in user loads the Langfuse UI, the Web container requests `https://langfuse.com/api/latest-releases` with the running Langfuse version to show a notice when a newer release is available. The endpoint serves a cached copy of the GitHub releases API. | Not configurable. The check fails gracefully if the host is unreachable.                                    |
+| `langfuse.com`   | Worker    | Documentation search for [Halo](/self-hosting/configuration/halo). On each Halo run, the Worker connects to the Langfuse docs MCP server at `https://langfuse.com/api/mcp`. Only applies when `LANGFUSE_IN_APP_AGENT_ENABLED=true`.                                                  | Keep Halo disabled (default). If the host is unreachable, Halo runs without documentation search.           |
 
 ### Browser [#hostnames-browser]
 
