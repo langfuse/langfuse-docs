@@ -201,7 +201,9 @@ const Carousel = React.forwardRef<
       (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (
           event.target instanceof Element &&
-          event.target.closest("video, audio")
+          event.target.closest(
+            "video, audio, media-player, [data-media-player]",
+          )
         ) {
           return;
         }
