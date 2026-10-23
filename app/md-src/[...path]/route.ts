@@ -16,7 +16,7 @@ To find what you were looking for:
 
 - [llms.txt](https://langfuse.com/llms.txt): index of the site for agents, with links to per-section indexes
 - [Documentation](https://langfuse.com/docs.md): Langfuse documentation home
-- [Docs search](https://langfuse.com/api/search-docs?query=your+question): semantic search over the documentation, no authentication
+- [Docs search](https://langfuse.com/docs/docs-mcp#rest-endpoint): semantic search over the documentation at \`https://langfuse.com/api/search-docs?query=<question>\`, no authentication
 - [Sitemap](https://langfuse.com/sitemap.xml): every public URL
 
 Every page on langfuse.com is available as Markdown at its URL plus \`.md\`.
