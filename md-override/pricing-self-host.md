@@ -139,7 +139,6 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | [Instance management API](/self-hosting/administration/instance-management-api)                 | --                          | Yes                                        | Yes                   |
 | [NIST hardening](/self-hosting/configuration/hardening#hardening-for-government)                | --                          | --                                         | Yes                   |
 | [FIPS 140-3](/self-hosting/configuration/fips-mode)                                             | --                          | --                                         | Yes                   |
-| [Air-gapped deployment](/self-hosting/security/networking#internet-access)                      | --                          | --                                         | Yes                   |
 | **Compliance**                                                                                  |                             |                                            |                       |
 | SOC2 Type II & ISO27001 reports                                                                 | --                          | Yes                                        | Yes                   |
 | InfoSec/legal reviews                                                                           | --                          | Yes                                        | Yes                   |

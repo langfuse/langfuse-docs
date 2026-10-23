@@ -1366,17 +1366,6 @@ const sections: Section[] = [
           },
         },
       },
-      {
-        name: "Air-gapped deployment",
-        href: "/self-hosting/security/networking#internet-access",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
     ],
   },
   {
