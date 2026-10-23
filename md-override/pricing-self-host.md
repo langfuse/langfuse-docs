@@ -69,6 +69,8 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | [Multi-modal](/docs/observability/features/multi-modality)                                      | Yes                         | Yes                                        | Yes                   |
 | **Langfuse AI**                                                                                 |                             |                                            |                       |
 | [Halo (in-app agent)](/docs/halo)                                                               | Yes                         | Yes                                        | Yes                   |
+| [MCP](/agents#mcp)                                                                              | Yes                         | Yes                                        | Yes                   |
+| [CLI](/agents#cli)                                                                              | Yes                         | Yes                                        | Yes                   |
 | **Prompt Management**                                                                           |                             |                                            |                       |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                         | Yes                                        | Yes                   |
 | Prompt fetching                                                                                 | Unlimited                   | Unlimited                                  | Unlimited             |

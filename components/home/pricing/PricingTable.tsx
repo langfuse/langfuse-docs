@@ -525,6 +525,34 @@ const sections: Section[] = [
           },
         },
       },
+      {
+        name: "MCP",
+        description:
+          "Native Model Context Protocol server so AI assistants can work with your Langfuse data.",
+        href: "/agents#mcp",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "CLI",
+        description:
+          "Command-line access to the full Langfuse API for coding agents and power users.",
+        href: "/agents#cli",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
     ],
   },
   {

@@ -111,6 +111,8 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | **Langfuse AI**                                                                                 |                     |                     |                     |                              |
 | [Halo (in-app agent)](/docs/halo)                                                               | Yes                 | Yes                 | Yes                 | Yes                          |
 | [Halo usage limits](/docs/halo)                                                                 | Low                 | Medium              | High                | High                         |
+| [MCP](/agents#mcp)                                                                              | Yes                 | Yes                 | Yes                 | Yes                          |
+| [CLI](/agents#cli)                                                                              | Yes                 | Yes                 | Yes                 | Yes                          |
 | **Prompt Management**                                                                           |                     |                     |                     |                              |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                 | Yes                 | Yes                 | Yes                          |
 | Prompt fetching                                                                                 | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |
