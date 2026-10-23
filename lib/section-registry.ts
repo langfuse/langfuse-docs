@@ -160,13 +160,18 @@ export const USE_CASE_SECTIONS = new Set<string>([
   "coding-agents",
   "workflow-automation",
   "financial-services",
+  "healthcare",
 ]);
 
 /**
- * Sections that hide both HomeLayout sidebars and use wide gutters instead.
- * Keep slug membership here — do not hardcode section names in layouts.
+ * Sections that hide both HomeLayout sidebars and keep the content column
+ * flush with the navbar. Keep slug membership here — do not hardcode section
+ * names in layouts.
  */
-export const NO_SIDEBAR_SECTIONS = new Set<string>(["financial-services"]);
+export const NO_SIDEBAR_SECTIONS = new Set<string>([
+  "financial-services",
+  "healthcare",
+]);
 
 /** Build a unified config that includes both doc sections and marketing entries. */
 const marketingEntries: Record<string, SectionMeta> = Object.fromEntries(

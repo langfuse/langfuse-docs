@@ -1,6 +1,6 @@
 ---
 title: Data Retention
-description: Configure project data retention and understand what happens to traces, audit logs, dataset items, experiment results, and media.
+description: Configure project data retention and understand what happens to traces, Halo conversations, audit logs, dataset items, experiment results, and media.
 sidebarTitle: Data Retention
 ---
 
@@ -18,6 +18,8 @@ sidebarTitle: Data Retention
 
 With Langfuse's Data Retention feature, you can control how long your event data (Traces, Observations, Scores, and Media Assets) is stored in Langfuse.
 
+The same project retention policy also applies to [Halo](/docs/halo) conversations, based on when each conversation was last updated.
+
 **Project data retention does not delete audit logs or dataset items.** If you add a trace to a dataset, the saved dataset item remains usable after the original trace expires. Adding a trace to a dataset does not protect the trace from deletion.
 
 ## Configuration
@@ -30,7 +32,9 @@ Project owners and administrators can change the setting in **Project Settings â
   (Traces, Observations, Scores, and Media Assets). On self-hosted instances,
   data is stored indefinitely by default. On Langfuse Cloud, each plan includes
   a data access window (Hobby: 30 days, Core: 90 days, Pro and Enterprise: 3
-  years); see [pricing](/pricing) for details.
+  years). The data access window limits how much history you can view, but
+  does not delete data. See [data access vs. data
+  retention](/faq/all/data-access-vs-data-retention) for details.
 </Callout>
 
 <Frame className="my-10" fullWidth>
@@ -55,13 +59,22 @@ Deleted assets cannot be recovered. If you need to preserve data beyond the rete
 
 ## What does project retention delete? [#retention-scope]
 
-| Data                               | Effect of project retention                                                                             |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Traces, observations, and scores   | Deleted when they fall outside the retention window, including those linked to datasets or experiments. |
-| Audit logs                         | Unaffected by project retention.                                                                        |
-| Datasets and dataset items         | Unaffected. Saved input, expected output, and metadata remain available.                                |
-| Dataset runs and dataset run items | The records remain, but their linked experiment traces, observations, and scores can expire.            |
-| Media assets stored in Langfuse    | Deleted when they expire, unless associated with saved dataset items.                                   |
+| Data                               | Effect of project retention                                                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Traces, observations, and scores   | Deleted when they fall outside the retention window, including those linked to datasets or experiments.                 |
+| Halo conversations                 | Deleted based on their last update, together with their runs and events. See [Halo conversations](#halo-conversations). |
+| Audit logs                         | Unaffected by project retention.                                                                                        |
+| Datasets and dataset items         | Unaffected. Saved input, expected output, and metadata remain available.                                                |
+| Dataset runs and dataset run items | The records remain, but their linked experiment traces, observations, and scores can expire.                            |
+| Media assets stored in Langfuse    | Deleted when they expire, unless associated with saved dataset items.                                                   |
+
+### Halo conversations [#halo-conversations]
+
+Halo conversations expire when their last update (`updated_at`) falls outside the project's retention window. Without a project retention policy, conversations are not automatically deleted by retention.
+
+Conversation cleanup runs separately from the nightly event-data cleanup. Deletion is asynchronous: conversations with unfinished runs are retained until those runs finish or are reconciled, and run-specific MCP API keys must be revoked before deletion. Deleting a conversation also deletes its runs and events and cannot be undone.
+
+Disabling Halo does not pause conversation retention. For worker controls and licensing requirements, see [self-hosted Halo retention](/self-hosting/configuration/halo#conversation-retention).
 
 ### If I add a trace to a dataset, will the dataset item be deleted? [#dataset-items-and-source-traces]
 

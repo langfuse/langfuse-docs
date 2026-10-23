@@ -7,6 +7,7 @@ import {
   SECTION_SLUGS,
   MARKETING_SECTIONS,
   USE_CASE_SECTIONS,
+  NO_SIDEBAR_SECTIONS,
 } from "@/lib/section-registry";
 import { loadPage, buildSectionMetadata, primitiveOnly } from "@/lib/mdx-page";
 import { buildPageUrl } from "@/lib/og-url";
@@ -35,6 +36,7 @@ export default async function SectionDocPage(props: PageProps) {
   );
   const effectiveSlug = isMarketing ? [section] : slug;
   const isUseCase = USE_CASE_SECTIONS.has(section);
+  const isFlushWithNav = NO_SIDEBAR_SECTIONS.has(section);
   const isWrapped = section === "wrapped";
 
   if (!SECTION_SLUGS.includes(section)) notFound();
@@ -102,6 +104,9 @@ export default async function SectionDocPage(props: PageProps) {
         "mx-auto w-full pb-10 md:pb-16",
         isUseCase ? "pt-4 md:pt-8" : "pt-10 md:pt-16",
         contentWidthClasses[contentWidth],
+        // `full` padding would inset the bordered card inside the navbar.
+        // Override every breakpoint; `px-0` alone does not clear sm:/md: padding.
+        isFlushWithNav && "px-0 sm:px-0 md:px-0",
       )}
       data-content-width={contentWidth}
       data-use-case={isUseCase ? section.replaceAll("-", "_") : undefined}

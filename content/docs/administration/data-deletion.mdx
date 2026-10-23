@@ -270,7 +270,7 @@ project.
 
 </LangTabs>
 
-## Deleting an Organization
+## Deleting an Organization [#deleting-an-organization]
 
 <LangTabs items={["Langfuse UI"]}>
 
@@ -291,24 +291,20 @@ Two errors can block the deletion:
 
 </LangTabs>
 
-## Deleting a User Account (Cloud)
+## Deleting a User Account [#deleting-a-user-account]
 
-<LangTabs items={["Langfuse UI"]}>
+Users can delete their own account from the Account Settings page on both Langfuse Cloud and self-hosted Langfuse (v3.117.0 and later). Navigate to Account Settings from the user menu, then select **Delete Account** in the Danger Zone and confirm with your email address.
 
-<Tab>
-
-Users can delete their own account from the Account Settings page. Navigate to Account Settings from the user menu in the bottom right.
-
-If you are the sole owner of an organization, you must first transfer ownership to another user or delete the organization before you can delete your account.
+If you are the sole owner of an organization, you must first add another owner or [delete the organization](#deleting-an-organization) before you can delete your account.
 
 <Frame className="my-10">
   ![Delete user account](/images/docs/delete-account-settings.png)
 </Frame>
 
-</Tab>
+Deleting an account removes the user record together with the user's organization and project memberships, sessions, and linked sign-in methods. References to the user on shared resources (for example, "created by" on prompts, API keys, or evaluators) are set to empty. Organizations, projects, and the data in them (traces, observations, scores, datasets, prompts) are not deleted; delete these separately if needed.
 
-</LangTabs>
+<Callout type="info">
 
-## Deleting a User Account (Self-Host)
+**Self-hosted Langfuse:** If you run a version older than v3.117.0 or need to remove a user who can no longer sign in, delete the user from the `users` table in Postgres (`DELETE FROM users WHERE email = '<email>';`). Related records are removed or unlinked by the database's foreign key constraints. This bypasses the last-owner check, so make sure every organization the user owns has another owner first.
 
-Remove the corresponding user record from the `users` table and drop all foreign keys to it using cascade.
+</Callout>

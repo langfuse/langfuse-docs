@@ -26,6 +26,7 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/talk-to-us(\/|$)/,
   /^\/watch-demo(\/|$)/,
   /^\/financial-services(\/|$)/,
+  /^\/healthcare(\/|$)/,
   /^\/pricing(\/|$)/,
   /^\/pricing-self-host(\/|$)/,
   /^\/careers(\/|$)/,
