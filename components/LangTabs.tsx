@@ -1,72 +1,44 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Tabs as FumadocsTabs,
-  Tab as FumadocsTab,
   TabsList as FumadocsTabsList,
   TabsTrigger as FumadocsTabsTrigger,
-} from "fumadocs-ui/components/tabs";
+  TabsContent as FumadocsTabsContent,
+  type TabsProps as FumadocsTabsProps,
+} from "fumadocs-ui/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { resolveTabsPersist } from "@/lib/tabs-persist";
 import { CornerBox } from "./ui";
 
-const KEY = "synced-tabs:language";
-const normalize = (s: string) => s.trim().toLowerCase();
-
-type Store = {
-  getSnapshot: () => string | null;
-  subscribe: (cb: () => void) => () => void;
-  set: (label: string) => void;
-};
-
-const storeEntry: { value: string | null; subs: Set<() => void> } = {
-  value: null,
-  subs: new Set(),
-};
-
-const store: Store = {
-  getSnapshot: () => storeEntry.value,
-  subscribe: (cb) => {
-    storeEntry.subs.add(cb);
-    return () => storeEntry.subs.delete(cb);
-  },
-  set: (label: string) => {
-    if (storeEntry.value === label) return;
-    storeEntry.value = label;
-    storeEntry.subs.forEach((cb) => cb());
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.setItem(KEY, label);
-      } catch {}
-    }
-  },
-};
-
-if (typeof window !== "undefined") {
-  try {
-    const saved = window.localStorage.getItem(KEY);
-    if (saved != null) storeEntry.value = saved;
-  } catch {}
-  window.addEventListener("storage", (e: StorageEvent) => {
-    if (e.key !== KEY) return;
-    const next = e.newValue == null ? null : e.newValue;
-    if (storeEntry.value !== next) {
-      storeEntry.value = next;
-      storeEntry.subs.forEach((cb) => cb());
-    }
-  });
+/**
+ * Match fumadocs-ui simple-mode value escaping so persist keys stay compatible
+ * with stock `items` tabs.
+ */
+function escapeValue(v: string): string {
+  return v.toLowerCase().replace(/\s/, "-");
 }
 
-function toValue(s: string): string {
-  return s.toLowerCase().replace(/\s/g, "-");
+function itemLabel(item: unknown, index: number): string {
+  if (typeof item === "string") return item;
+  if (
+    item &&
+    typeof item === "object" &&
+    "label" in item &&
+    typeof (item as { label: unknown }).label === "string"
+  ) {
+    return (item as { label: string }).label;
+  }
+  return String(index);
 }
 
 export function LangTab({
   className,
   forceMount = true,
   ...props
-}: React.ComponentProps<typeof FumadocsTab>) {
+}: React.ComponentProps<typeof FumadocsTabsContent>) {
   return (
-    <FumadocsTab
+    <FumadocsTabsContent
       // Fumadocs 16.12+ unmounts inactive tabs by default. Keep previous
       // behavior so TOC/hash links and mermaid/code in other tabs still work.
       forceMount={forceMount}
@@ -79,102 +51,75 @@ export function LangTab({
   );
 }
 
-export function LangTabs(props: {
-  items: any[];
+type LangTabsProps = {
+  items: unknown[];
   children: React.ReactNode;
   defaultIndex?: number;
   onChange?: (next: number) => void;
-}) {
-  const { items, children, defaultIndex = 0, onChange } = props;
+} & Omit<FumadocsTabsProps, "children">;
 
-  const labels: (string | null)[] = useMemo(() => {
-    return items.map((it) => {
-      if (typeof it === "string") return it;
-      if (
-        it &&
-        typeof it === "object" &&
-        "label" in it &&
-        typeof it.label === "string"
-      )
-        return it.label as string;
-      return null;
-    });
-  }, [items]);
-
+export function LangTabs({
+  items,
+  children,
+  defaultIndex = 0,
+  onChange,
+  groupId: groupIdProp,
+  persist: persistProp,
+  defaultValue: defaultValueProp,
+  value: valueProp,
+  onValueChange,
+  className,
+  ...props
+}: LangTabsProps) {
+  const labels = useMemo(
+    () => items.map((item, i) => itemLabel(item, i)),
+    [items],
+  );
   const values = useMemo(
-    () => labels.map((l, i) => (l ? toValue(l) : String(i))),
+    () => labels.map((label) => escapeValue(label)),
     [labels],
   );
-  const storedLabel = useSyncExternalStore(
-    store.subscribe,
-    store.getSnapshot,
-    store.getSnapshot,
-  );
+  const { groupId, persist } = resolveTabsPersist({
+    labels,
+    groupId: groupIdProp,
+    persist: persistProp,
+  });
 
-  const initialLabel = useMemo(
-    () => labels[defaultIndex] ?? null,
-    [labels, defaultIndex],
-  );
-
-  useEffect(() => {
-    if (storedLabel == null && initialLabel) store.set(initialLabel);
-  }, [storedLabel, initialLabel]);
-
-  const [internalValue, setInternalValue] = React.useState(
-    values[defaultIndex] ?? values[0],
-  );
+  const fallbackValue = values[defaultIndex] ?? values[0];
+  const defaultValue = defaultValueProp ?? fallbackValue;
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue);
+  const value = valueProp ?? uncontrolledValue;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingOffsetRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const target = storedLabel ?? initialLabel;
-    if (target) {
-      const idx = labels.findIndex(
-        (l) => typeof l === "string" && normalize(l) === normalize(target),
-      );
-      if (idx !== -1) {
-        setInternalValue(values[idx]);
-        return;
+    if (pendingOffsetRef.current === null || !containerRef.current) return;
+    const savedOffset = pendingOffsetRef.current;
+    pendingOffsetRef.current = null;
+    const restoreScroll = () => {
+      if (!containerRef.current) return;
+      const adjustment =
+        containerRef.current.getBoundingClientRect().top - savedOffset;
+      if (Math.abs(adjustment) > 1) {
+        window.scrollBy({ top: adjustment, behavior: "instant" });
       }
-      const asNum = Number(target);
-      if (!Number.isNaN(asNum) && asNum >= 0 && asNum < items.length) {
-        setInternalValue(values[asNum]);
-        return;
-      }
-    }
-  }, [storedLabel, initialLabel, labels, items.length, values]);
+    };
+    restoreScroll();
+    requestAnimationFrame(restoreScroll);
+    setTimeout(restoreScroll, 0);
+    setTimeout(restoreScroll, 50);
+  }, [value]);
 
-  useEffect(() => {
-    if (pendingOffsetRef.current !== null && containerRef.current) {
-      const savedOffset = pendingOffsetRef.current;
-      pendingOffsetRef.current = null;
-      const restoreScroll = () => {
-        if (containerRef.current) {
-          const currentRect = containerRef.current.getBoundingClientRect();
-          const scrollAdjustment = currentRect.top - savedOffset;
-          if (Math.abs(scrollAdjustment) > 1) {
-            window.scrollBy({ top: scrollAdjustment, behavior: "instant" });
-          }
-        }
-      };
-      restoreScroll();
-      requestAnimationFrame(restoreScroll);
-      setTimeout(restoreScroll, 0);
-      setTimeout(restoreScroll, 50);
-    }
-  }, [internalValue]);
-
-  const handleValueChange = (v: string) => {
+  const handleValueChange = (next: string) => {
+    if (!values.includes(next)) return;
     if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      pendingOffsetRef.current = rect.top;
+      pendingOffsetRef.current =
+        containerRef.current.getBoundingClientRect().top;
     }
-    setInternalValue(v);
-    const idx = values.indexOf(v);
-    const label = idx !== -1 ? labels[idx] : null;
-    if (typeof label === "string") store.set(label);
-    else store.set(v);
+    if (valueProp === undefined) setUncontrolledValue(next);
+    onValueChange?.(next);
+    const idx = values.indexOf(next);
     if (typeof onChange === "function" && idx !== -1) onChange(idx);
   };
 
@@ -182,23 +127,28 @@ export function LangTabs(props: {
     <div ref={containerRef}>
       <CornerBox>
         <FumadocsTabs
-          key={internalValue}
-          defaultValue={internalValue}
-          className="flex overflow-hidden flex-col my-0 rounded-none border-none"
+          {...props}
+          groupId={groupId}
+          persist={persist}
+          value={value}
+          onValueChange={handleValueChange}
+          className={cn(
+            "flex overflow-hidden flex-col my-0 rounded-none border-none",
+            className,
+          )}
         >
           <FumadocsTabsList
             className={
               "flex overflow-x-auto overflow-y-hidden flex-nowrap gap-2 px-4 pt-1 rounded-none border-b sm:gap-4 not-prose border-line-structure min-h-9 bg-surface-bg"
             }
           >
-            {items.map((item, i) => (
+            {labels.map((label, i) => (
               <FumadocsTabsTrigger
-                key={i}
+                key={values[i]}
                 value={values[i]}
-                onClick={() => handleValueChange(values[i])}
                 className="inline-flex items-center gap-2 whitespace-nowrap rounded-none border-b border-transparent pb-2 pt-1.5 text-xs text-text-tertiary transition-colors font-[430] hover:text-foreground cursor-pointer disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-line-cta data-[state=active]:text-text-primary data-[state=active]:font-medium"
               >
-                {typeof item === "string" ? item : (item?.label ?? String(i))}
+                {label}
               </FumadocsTabsTrigger>
             ))}
           </FumadocsTabsList>
