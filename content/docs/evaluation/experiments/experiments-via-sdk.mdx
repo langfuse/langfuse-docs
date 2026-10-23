@@ -660,18 +660,22 @@ You need to set up an HTTP endpoint to receive the trigger request from Langfuse
 - **Navigate to** `Your Project` > `Datasets`
 - **Click on** the dataset you want to set up a remote experiment trigger for
 
-<Frame className="max-w-lg">![New Experiment Button](/images/docs/navigate-to-dataset.png)</Frame>
+<Frame className="max-w-lg">
+  ![Datasets list with the capital-cities benchmark](/images/docs/navigate-to-dataset.png)
+</Frame>
 
 ### Open the setup page
 
-**Click on** `Start Experiment` to open the setup page
-
-<Frame className="max-w-lg">![New Experiment Button](/images/docs/trigger-process.png)</Frame>
-
-**Click on** `⚡` below `Custom Experiment`
+**Click on** `Run experiment` to open the setup page
 
 <Frame className="max-w-lg">
-  ![New Experiment Button](/images/docs/trigger-remote-experiment-1.png)
+  ![Dataset Experiments tab with the Run experiment button](/images/docs/trigger-process.png)
+</Frame>
+
+**Click on** `Configure` under `via Webhook`.
+
+<Frame className="max-w-lg">
+  ![Run Experiment dialog with via Webhook selected](/images/docs/trigger-remote-experiment-1.png)
 </Frame>
 
 ### Configure the webhook [#configure-webhook]
@@ -687,10 +691,10 @@ Remote experiment trigger requests can optionally include the same HMAC-signed `
 
 ### Trigger experiments
 
-Once configured, team members can trigger remote experiments via the `Run` button under the **Custom Experiment** option. Langfuse will send the dataset metadata (ID and name) along with any custom configuration to your webhook.
+Once configured, team members can trigger remote experiments via the `Run` button under the **via Webhook** option. Langfuse will send the dataset metadata (ID and name) along with any custom configuration to your webhook.
 
 <Frame className="max-w-lg">
-  ![New Experiment Button](/images/docs/trigger-remote-experiment-3.png)
+  ![Configured via Webhook option with Run and settings controls](/images/docs/trigger-remote-experiment-3.png)
 </Frame>
 
 </Steps>
