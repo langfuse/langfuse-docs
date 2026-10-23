@@ -291,7 +291,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "NIST hardening",
         "FIPS 140-3",
         "Air-gapped deployment",
-        "Requires ClickHouse Government as the database",
       ],
       cta: "Talk to sales",
     },
@@ -503,11 +502,15 @@ const sections: Section[] = [
       {
         name: "Halo (in-app agent)",
         description:
-          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval. Available on Langfuse Cloud only.",
+          "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval.",
         href: "/docs/halo",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
-          selfHosted: { "Open Source": false, Enterprise: false },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+            Government: true,
+          },
         },
       },
       {
@@ -1171,39 +1174,6 @@ const sections: Section[] = [
         },
       },
       {
-        name: "NIST hardening",
-        href: "/self-hosting/configuration/hardening#hardening-for-government",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
-      {
-        name: "FIPS 140-3",
-        href: "/self-hosting/configuration/fips-mode",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
-      {
-        name: "Air-gapped deployment",
-        href: "/self-hosting/security/networking",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
-      {
         name: "Organization-level RBAC",
         href: "/docs/administration/rbac",
         tiers: {
@@ -1344,6 +1314,39 @@ const sections: Section[] = [
         href: "/self-hosting/administration/instance-management-api",
         tiers: {
           selfHosted: { "Open Source": false, Enterprise: true },
+        },
+      },
+      {
+        name: "NIST hardening",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: false,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "FIPS 140-3",
+        href: "/self-hosting/configuration/fips-mode",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: false,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "Air-gapped deployment",
+        href: "/self-hosting/security/networking",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: false,
+            Government: true,
+          },
         },
       },
     ],

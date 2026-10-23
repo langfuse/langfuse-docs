@@ -68,7 +68,7 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | Included usage                                                                                  | Unlimited                   | Unlimited                                  | Unlimited             |
 | [Multi-modal](/docs/observability/features/multi-modality)                                      | Yes                         | Yes                                        | Yes                   |
 | **Langfuse AI**                                                                                 |                             |                                            |                       |
-| [Halo (in-app agent)](/docs/halo)                                                               | --                          | --                                         | --                    |
+| [Halo (in-app agent)](/docs/halo)                                                               | Yes                         | Yes                                        | Yes                   |
 | **Prompt Management**                                                                           |                             |                                            |                       |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                         | Yes                                        | Yes                   |
 | Prompt fetching                                                                                 | Unlimited                   | Unlimited                                  | Unlimited             |
@@ -123,9 +123,6 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | [Support SLA](/enterprise#faq)                                                                  | --                          | Yes                                        | Yes                   |
 | **Security**                                                                                    |                             |                                            |                       |
 | Sign in with Google, AzureAD, GitHub                                                            | Yes                         | Yes                                        | Yes                   |
-| [NIST hardening](/self-hosting/configuration/hardening#hardening-for-government)                | --                          | --                                         | Yes                   |
-| [FIPS 140-3](/self-hosting/configuration/fips-mode)                                             | --                          | --                                         | Yes                   |
-| [Air-gapped deployment](/self-hosting/security/networking)                                      | --                          | --                                         | Yes                   |
 | [Organization-level RBAC](/docs/administration/rbac)                                            | Yes                         | Yes                                        | Yes                   |
 | Enterprise SSO (e.g. Okta, EntraID)                                                             | Yes                         | Yes                                        | Yes                   |
 | SSO enforcement                                                                                 | Yes                         | Yes                                        | Yes                   |
@@ -139,6 +136,9 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | [Audit logs](/docs/administration/audit-logs)                                                   | --                          | Yes                                        | Yes                   |
 | [Admin API (project management, SCIM)](/docs/administration/scim-and-org-api)                   | --                          | Yes                                        | Yes                   |
 | [Instance management API](/self-hosting/administration/instance-management-api)                 | --                          | Yes                                        | Yes                   |
+| [NIST hardening](/self-hosting/configuration/hardening#hardening-for-government)                | --                          | --                                         | Yes                   |
+| [FIPS 140-3](/self-hosting/configuration/fips-mode)                                             | --                          | --                                         | Yes                   |
+| [Air-gapped deployment](/self-hosting/security/networking)                                      | --                          | --                                         | Yes                   |
 | **Compliance**                                                                                  |                             |                                            |                       |
 | SOC2 Type II & ISO27001 reports                                                                 | --                          | Yes                                        | Yes                   |
 | InfoSec/legal reviews                                                                           | --                          | Yes                                        | Yes                   |
