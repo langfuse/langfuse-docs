@@ -90,8 +90,8 @@ export function HiringBadge({
 
   const idleLabel = adaptive ? (
     <>
-      <span className="hidden @[16rem]/hiring:inline">{FULL_LABEL}</span>
-      <span className="inline @[16rem]/hiring:hidden">{COMPACT_LABEL}</span>
+      <span className="hidden @[14rem]/hiring:inline">{FULL_LABEL}</span>
+      <span className="inline @[14rem]/hiring:hidden">{COMPACT_LABEL}</span>
     </>
   ) : (
     FULL_LABEL
@@ -99,8 +99,8 @@ export function HiringBadge({
 
   const hoverLabel = adaptive ? (
     <>
-      <span className="hidden @[16rem]/hiring:inline">{HOVER_LABEL}</span>
-      <span className="inline @[16rem]/hiring:hidden">
+      <span className="hidden @[14rem]/hiring:inline">{HOVER_LABEL}</span>
+      <span className="inline @[14rem]/hiring:hidden">
         {COMPACT_HOVER_LABEL}
       </span>
     </>
