@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Loader } from "@/components/ai-elements/loader";
-import { Suggestions, Suggestion } from "@/components/ai-elements/suggestion";
 import { scoreDemoNegativeUserFeedback } from "@/components/demoLangfuseBrowserClients";
 import { DemoTraceLink } from "@/components/demoTraceLink";
 import { buildDemoTraceUrl } from "@/lib/demo-trace";
@@ -95,21 +94,21 @@ export const SentimentClassifier = ({
           {!result && !loading && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Try an example:</p>
-              <Suggestions>
-                {EXAMPLE_TEXTS.map((text, i) => (
-                  <Suggestion
-                    key={i}
-                    suggestion={text}
-                    onClick={(s) => {
-                      setInput(s);
-                      handleSubmit(s);
+              <div className="grid gap-2 sm:grid-cols-3">
+                {EXAMPLE_TEXTS.map((text) => (
+                  <button
+                    key={text}
+                    type="button"
+                    onClick={() => {
+                      setInput(text);
+                      handleSubmit(text);
                     }}
-                    className="text-xs whitespace-normal text-left h-auto py-2 max-w-64"
+                    className="min-w-0 whitespace-normal break-words rounded-[2px] border border-line-structure bg-surface-bg px-3 py-2 text-left text-xs leading-5 text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    {text.length > 60 ? `${text.slice(0, 60)}...` : text}
-                  </Suggestion>
+                    {text}
+                  </button>
                 ))}
-              </Suggestions>
+              </div>
             </div>
           )}
 
