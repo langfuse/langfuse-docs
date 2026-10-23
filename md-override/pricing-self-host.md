@@ -167,9 +167,6 @@ Yes, Langfuse is open source and you can self-host it for free. Use Docker Compo
 **What is the difference between Open Source and Enterprise?**
 Open Source includes all core platform features under the MIT license with community support. Enterprise adds management APIs, project-level RBAC, data retention policies, audit logs, dedicated support, and is bundled with a ClickHouse commercial plan.
 
-**What is the difference between Enterprise and Government?**
-Government includes everything in Enterprise, plus NIST hardening, FIPS 140-3, and air-gapped deployment. It requires ClickHouse Government as the database.
-
 **Where is the data stored?**
 Self-hosted Langfuse stores data in your own infrastructure. You control data residency and can deploy in any region. See [security documentation](/security) for details.
 

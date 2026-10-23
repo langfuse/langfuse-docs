@@ -91,27 +91,16 @@ const faqs: FAQItem[] = [
   },
 ];
 
-const selfHostedOnlyFaqs: FAQItem[] = [
-  {
-    question: "What is the difference between Enterprise and Government?",
-    answer:
-      "Government includes everything in Enterprise, plus NIST hardening, FIPS 140-3, and air-gapped deployment. It requires ClickHouse Government as the database.",
-  },
-];
-
 export function PricingFAQ({
   variant = "cloud",
 }: {
   variant?: "cloud" | "selfHosted";
 }) {
-  const faqsForVariant = [
-    ...faqs.map((faq) =>
-      faq.question === MARKETPLACE_QUESTION
-        ? marketplaceFaqByVariant[variant]
-        : faq,
-    ),
-    ...(variant === "selfHosted" ? selfHostedOnlyFaqs : []),
-  ];
+  const faqsForVariant = faqs.map((faq) =>
+    faq.question === MARKETPLACE_QUESTION
+      ? marketplaceFaqByVariant[variant]
+      : faq,
+  );
 
   return (
     <div id="faq">
