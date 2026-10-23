@@ -387,7 +387,7 @@ Requests need an API key with read access to traces. Bound every request with `f
 | `expandMetadata`      | comma-separated keys         | Metadata keys to return untruncated (values are otherwise cut at 200 characters)                            |
 | `limit`, `cursor`     | int (≤ 1,000), string        | [Pagination](#observations-pagination)                                                                      |
 
-Everything else — tags, cost, latency, token counts, model, prompt, input/output text, metadata by key, negations, and multi-value matches — goes through the `filter` parameter: a URL-encoded JSON array of conditions with the same columns and operators the filter bar in the Langfuse UI uses. When `filter` is present it takes precedence over the fixed parameters above.
+Everything else — tags, cost, latency, token counts, model, prompt, input/output text, metadata by key, negations, and multi-value matches — goes through the `filter` parameter: a URL-encoded JSON array of conditions with the same columns and operators the filter bar in the Langfuse UI uses. A condition in `filter` replaces the fixed parameter for the same field; the other fixed parameters still apply.
 
 Each condition is `{"type", "column", "operator", "value"}` (plus `"key"` for metadata). Columns include `id`, `type`, `name`, `traceId`, `traceName`, `startTime`, `endTime`, `environment`, `level`, `statusMessage`, `version`, `userId`, `sessionId`, `isRootObservation`, `tags`, `latency`, `timeToFirstToken`, `tokensPerSecond`, `inputTokens`, `outputTokens`, `totalTokens`, `inputCost`, `outputCost`, `totalCost`, `model`, `promptName`, `promptVersion`, `input`, `output`, and `metadata`. The operators depend on the condition type:
 
