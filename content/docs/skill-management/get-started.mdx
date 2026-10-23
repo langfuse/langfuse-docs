@@ -1,33 +1,129 @@
 ---
 title: Get Started
-seoTitle: Get started with Skill Management
+sidebarTitle: Get Started
+seoTitle: Get Started with Skill Management
 description: Create your first versioned agent skill and load it with the Langfuse CLI or API.
 noindex: true
 ---
 
-# Get started with Skill Management
+import { SignupCTA } from "@/components/SignupCTA";
 
-Create a `refund-policy` skill, assign the `production` label, and retrieve its instructions with the CLI or API. Then connect the retrieved files to your agent's skill loader.
+# Get Started with Skill Management
 
-## Create a skill [#create-a-skill]
+This guide walks you through creating and using a skill with Langfuse. If you're looking to understand what skill management is and why it matters, check out the [Prompt and Skill Management Overview](/docs/prompt-and-skill-management/overview) first. For details on how skills are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/prompt-and-skill-management/concepts).
 
-Use this `SKILL.md` in either the UI or CLI steps below:
+<SignupCTA className="my-6" />
 
-```markdown filename="SKILL.md"
----
-name: refund-policy
-description: Review refund requests and explain eligibility. Use when a customer asks for a refund.
----
+import { Details, Summary } from "@/components/Details";
+import { FaqPreview } from "@/components/faq/FaqPreview";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
 
-# Handle a refund request
+<div className="rounded-lg border bg-muted-blue/5 px-6 pb-6 [&>h2]:mt-6 [&>h2]:mb-4">
 
-Ask for the order number, purchase date, and whether the item was used.
-For this example, an unused item is eligible for a refund within 30 days
-of purchase. Explain the outcome using those rules. Ask for missing
-information before deciding eligibility.
+## Agentic installation [#agentic-installation]
+
+Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
+
+<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+
+<Tab>
+
+Ask your coding agent to install the skill by pointing to the [GitHub repository](https://github.com/langfuse/skills) and instruct it to get started with Skill Management.
+
+```txt filename="Agent instruction"
+Install the Langfuse Agent Skill from github.com/langfuse/skills
+and use it to create and publish a skill for this application
+with Langfuse.
 ```
 
-The rules above are sample content. Replace them with your own policy before using the skill with customers.
+</Tab>
+
+<Tab>
+
+Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes the skill automatically.
+
+<div className="flex gap-2 mt-3 mb-6">
+  <Button asChild>
+    <Link
+      href="https://cursor.com/marketplace/langfuse"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Install Plugin in Cursor
+    </Link>
+  </Button>
+</div>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Create and publish a skill for this application with Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+Install via npm ([skills CLI](https://www.npmjs.com/package/skills)):
+
+```bash
+npx skills add langfuse/skills --skill "langfuse"
+```
+
+If you want to target a specific agent directly:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
+```
+
+<Details>
+<Summary>Alternatively you can manually clone the skill</Summary>
+
+1. Clone repo somewhere stable
+
+```bash
+git clone https://github.com/langfuse/skills.git /path/to/langfuse-skills
+```
+
+2. Make sure your agent's skills dir exists
+
+```bash
+mkdir -p /path/to/<agent-skill-root>/skills
+```
+
+3. Symlink the skill folder
+
+```bash
+ln -s /path/to/langfuse-skills/skills/langfuse /path/to/<agent-skill-root>/skills/langfuse
+```
+
+</Details>
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Create and publish a skill for this application with Langfuse.
+```
+
+</Tab>
+
+</Tabs>
+
+</div>
+
+## Manual installation [#manual-installation]
+
+This guide helps you get started with Langfuse Skill Management manually.
+
+<Steps>
+
+### Get API keys [#get-api-keys]
+
+1.  [Create Langfuse account](https://langfuse.com/cloud) or [self-host Langfuse](/self-hosting).
+2.  Create new API credentials in the project settings.
+
+### Create a skill [#create-a-skill]
 
 <Tabs items={["UI", "CLI"]}>
 <Tab>
@@ -44,14 +140,14 @@ If **Skills** is not visible, enable **Skill Management** under **account menu â
 </Tab>
 <Tab>
 
-[Configure project credentials](#project-credentials), then install the CLI:
+Install the CLI:
 
 ```bash
 npm install -g @langfuse/cli@beta
 mkdir -p refund-policy
 ```
 
-Save the example above as `refund-policy/SKILL.md`. Publish the folder and assign `production`:
+Save your skill locally, for example as `refund-policy/SKILL.md`. Publish the folder and assign `production`:
 
 ```bash
 langfuse skills push ./refund-policy --label production
@@ -62,21 +158,11 @@ The command prints the saved version. See [publishing and versioning](/docs/skil
 </Tab>
 </Tabs>
 
-## Load your skill [#load-your-skill]
+### Load your skill [#load-your-skill]
 
 Install files for an agent that reads skill folders, or fetch them from your application with the Python SDK, JavaScript/TypeScript SDK, or REST API.
 
-### Configure project credentials [#project-credentials]
-
-Create a key pair under **Project settings â†’ API Keys**. Set the keys and the URL of your Langfuse region or self-hosted deployment in the environment where your CLI or application runs:
-
-```bash
-export LANGFUSE_PUBLIC_KEY="pk-lf-..."
-export LANGFUSE_SECRET_KEY="sk-lf-..."
-export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
-```
-
-### Retrieve the instructions [#retrieve-the-instructions]
+#### Retrieve the instructions [#retrieve-the-instructions]
 
 <Tabs items={["CLI", "Python", "JavaScript / TypeScript", "REST API"]}>
 <Tab>
@@ -178,8 +264,16 @@ The response includes `files`, each with a `path` and `content`. Pass the `SKILL
 </Tab>
 </Tabs>
 
+</Steps>
+
+## Not seeing what you expected?
+
+<FaqPreview tags={["skill-management"]} />
+
 ## Next steps [#next-steps]
+
+Now that you've created and loaded your first skill, here are a few things we recommend next to make the most of Langfuse Skill Management:
 
 - [Publish a revision and promote it with labels](/docs/skill-management/manage-skills).
 - [Trace available skills and loaded files](/docs/skill-management/tracing).
-- [Troubleshoot missing skills or failed uploads](/docs/skill-management/limits-and-troubleshooting).
+- [Troubleshoot missing skills or failed uploads](/faq/all/skill-management-limits-and-troubleshooting).

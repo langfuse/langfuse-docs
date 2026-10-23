@@ -16,7 +16,7 @@ Choose how to supply skills to your agent:
 | Skill folders from its workspace                    | [CLI installation](#cli-install)                                  |
 | Instructions and files supplied by your application | [API fetching](#api-fetch) and an [in-memory adapter](#in-memory) |
 
-Configure [project credentials](/docs/skill-management/get-started#project-credentials) for either method. Keep the selected version fixed during a run so instructions and supporting files come from the same revision.
+Configure [project credentials](/docs/skill-management/get-started#get-api-keys) for either method. Keep the selected version fixed during a run so instructions and supporting files come from the same revision.
 
 ## Install with the CLI [#cli-install]
 
@@ -97,7 +97,7 @@ For Python and JavaScript/TypeScript SDK examples, see [Retrieve the instruction
 
 An agent framework can use skill contents without writing them to disk. This example uses [Mastra](https://mastra.ai/docs/skills): fetch a manifest, convert its files with [`createSkill()`](https://mastra.ai/reference/agents/createSkill), and pass the skills to an agent.
 
-Install the packages below and set `OPENAI_API_KEY` for the example model. The Langfuse client uses the [project credentials](/docs/skill-management/get-started#project-credentials) from your environment.
+Install the packages below and set `OPENAI_API_KEY` for the example model. The Langfuse client uses the [project credentials](/docs/skill-management/get-started#get-api-keys) from your environment.
 
 ```bash
 npm install @langfuse/client @mastra/core gray-matter
