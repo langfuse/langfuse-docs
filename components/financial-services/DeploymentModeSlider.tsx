@@ -2,21 +2,30 @@
 
 import { useId, useRef, useState, type KeyboardEvent } from "react";
 import { cn } from "@/lib/utils";
-import {
-  financialServicesDeploymentModes,
-  type FinancialServicesDeploymentModeId,
-} from "./content";
+import { financialServicesDeploymentModes } from "./content";
 
-export function DeploymentModeSlider() {
-  const [modeId, setModeId] =
-    useState<FinancialServicesDeploymentModeId>("cloud");
+type DeploymentMode = {
+  id: string;
+  label: string;
+  title: string;
+  href: string;
+  flow: readonly string[];
+  specs: readonly { k: string; v: string }[];
+};
+
+export function DeploymentModeSlider({
+  modes = financialServicesDeploymentModes,
+}: {
+  modes?: readonly DeploymentMode[];
+} = {}) {
+  const [modeId, setModeId] = useState(modes[0]?.id ?? "cloud");
   const groupRef = useRef<HTMLDivElement>(null);
   const labelId = useId();
-  const mode =
-    financialServicesDeploymentModes.find((item) => item.id === modeId) ??
-    financialServicesDeploymentModes[0];
+  const mode = modes.find((item) => item.id === modeId) ?? modes[0];
 
-  const selectMode = (id: FinancialServicesDeploymentModeId) => {
+  if (!mode) return null;
+
+  const selectMode = (id: string) => {
     setModeId(id);
   };
 
@@ -24,7 +33,7 @@ export function DeploymentModeSlider() {
     event: KeyboardEvent<HTMLButtonElement>,
     index: number,
   ) => {
-    const last = financialServicesDeploymentModes.length - 1;
+    const last = modes.length - 1;
     let nextIndex: number | null = null;
 
     if (event.key === "ArrowRight" || event.key === "ArrowDown") {
@@ -40,7 +49,7 @@ export function DeploymentModeSlider() {
     if (nextIndex === null) return;
 
     event.preventDefault();
-    const next = financialServicesDeploymentModes[nextIndex];
+    const next = modes[nextIndex];
     selectMode(next.id);
     const buttons =
       groupRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
@@ -58,7 +67,7 @@ export function DeploymentModeSlider() {
         <span id={labelId} className="sr-only">
           Deployment mode
         </span>
-        {financialServicesDeploymentModes.map((item, index) => {
+        {modes.map((item, index) => {
           const active = item.id === modeId;
           return (
             <button

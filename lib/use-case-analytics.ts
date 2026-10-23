@@ -4,7 +4,8 @@ export type UseCase =
   | "chat_agents"
   | "coding_agents"
   | "workflow_automation"
-  | "financial_services";
+  | "financial_services"
+  | "healthcare";
 export type SetupPath = "gateway" | "hooks";
 export type DestinationGroup =
   | "signup"
@@ -52,6 +53,7 @@ export function isUseCase(value: unknown): value is UseCase {
     "coding_agents",
     "workflow_automation",
     "financial_services",
+    "healthcare",
   ].includes(value as UseCase);
 }
 
