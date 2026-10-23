@@ -29,7 +29,7 @@ Configure the gateway in the Claude Desktop UI:
 4. Set **Gateway base URL** to `https://staging.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
 5. Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
 6. Under **Custom headers**, add `langfuse-user-id` with your email or handle as the value, for example `<you>@example.com`.
-7. Under **Capabilities → General restrictions**, add `*` to **Allowed egress hosts**, or at least `github.com`, `api.github.com`, `codeload.github.com`, `*.githubusercontent.com`, and the package registries you need. In gateway mode, Claude Desktop applies this list as a managed sandbox policy, so the agent's shell cannot reach any other host and you get no prompt.
+7. Under **Capabilities → General restrictions**, we recommend adding `*` to **Allowed egress hosts**. Otherwise, Claude can't reach websites or services outside the gateway, such as GitHub, and it won't ask you for permission.
 8. Test the connection, select **Apply Changes**, then select **Save & Restart**. Start a new session so that the egress settings apply.
 
 For more information about these settings, see the [Claude Desktop third-party inference guide](https://claude.com/docs/third-party/claude-desktop/in-app-configuration).
