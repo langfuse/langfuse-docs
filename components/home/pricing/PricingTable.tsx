@@ -68,6 +68,8 @@ type Tier = {
   featured: boolean;
   pillClassName?: string;
   description: string;
+  /** Stable in-page anchor, e.g. `government` for /pricing-self-host#government */
+  anchor?: string;
   pill?: React.ReactNode;
   price: string;
   priceUnit?: string;
@@ -266,7 +268,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Solutions architect support during evaluation and rollout",
         "Direct access to the product team for feedback",
         "SOC 2 Type II and ISO 27001 reports",
-        "Hardening for Government (in development)",
         "Support SLA",
         "Billing via AWS Marketplace or invoice",
       ],
@@ -275,6 +276,24 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         text: "Enterprise FAQ",
         href: "/enterprise",
       },
+    },
+    {
+      name: "Government",
+      id: "tier-self-hosted-government",
+      href: "/talk-to-us?deployment=self-hosted",
+      featured: false,
+      anchor: "government",
+      description:
+        "Dedicated Langfuse deployment for government and highly regulated environments.",
+      price: "Custom Pricing",
+      mainFeatures: [
+        "Everything in Enterprise",
+        "NIST hardening",
+        "FIPS 140-3",
+        "Air-gapped deployment",
+        "Requires ClickHouse Government as the database",
+      ],
+      cta: "Talk to sales",
     },
   ],
 } as const;
@@ -915,11 +934,12 @@ const sections: Section[] = [
       {
         name: "ClickHouse deployment model",
         description:
-          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private.",
+          "Open Source assumes you operate ClickHouse yourself. Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private. Government requires ClickHouse Government.",
         tiers: {
           selfHosted: {
             "Open Source": "Self-managed ClickHouse OSS",
             Enterprise: "Bundled: ClickHouse Cloud / BYOC / Private",
+            Government: "ClickHouse Government",
           },
         },
       },
@@ -1151,10 +1171,36 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Hardening for Government (in development)",
+        name: "NIST hardening",
         href: "/self-hosting/configuration/hardening#hardening-for-government",
         tiers: {
-          selfHosted: { "Open Source": false, Enterprise: true },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: false,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "FIPS 140-3",
+        href: "/self-hosting/configuration/fips-mode",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: false,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "Air-gapped deployment",
+        href: "/self-hosting/security/networking",
+        tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: false,
+            Government: true,
+          },
         },
       },
       {
@@ -1462,6 +1508,23 @@ const FeatureDetails = ({
   );
 };
 
+// Government includes everything in Enterprise unless a feature overrides it.
+function resolveTierValue(
+  values:
+    | Partial<Record<string, boolean | string | React.ReactNode>>
+    | undefined,
+  tierName: string,
+): boolean | string | React.ReactNode {
+  if (!values) return false;
+  if (Object.prototype.hasOwnProperty.call(values, tierName)) {
+    return values[tierName] ?? false;
+  }
+  if (tierName === "Government") {
+    return values.Enterprise ?? false;
+  }
+  return false;
+}
+
 // Helper component for feature cell rendering
 const FeatureCell = ({
   value,
@@ -1532,10 +1595,12 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
         return (
           <Card
             key={tier.id}
+            id={tier.anchor}
             hoverStripes
             className={cn(
               "relative h-full flex flex-col",
               selectedTiers.length === 1 && "w-full max-w-lg",
+              tier.anchor && "scroll-mt-28",
             )}
           >
             {tier.pill && (
@@ -1875,9 +1940,10 @@ export function PricingTable({
                             </TableHead>
                             <TableCell className="w-3/12 text-center">
                               <FeatureCell
-                                value={
-                                  feature.tiers[variant]?.[tier.name] ?? false
-                                }
+                                value={resolveTierValue(
+                                  feature.tiers[variant],
+                                  tier.name,
+                                )}
                               />
                             </TableCell>
                           </TableRow>
@@ -2007,9 +2073,10 @@ export function PricingTable({
                         {selectedTiers.map((tier) => (
                           <TableCell key={tier.id}>
                             <FeatureCell
-                              value={
-                                feature.tiers[variant]?.[tier.name] ?? false
-                              }
+                              value={resolveTierValue(
+                                feature.tiers[variant],
+                                tier.name,
+                              )}
                             />
                           </TableCell>
                         ))}
