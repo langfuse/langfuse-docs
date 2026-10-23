@@ -6,7 +6,7 @@ import NextLink from "next/link";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "@/components/ui/corner-box";
 
-const FULL_LABEL = "Hiring in Europe and the US";
+const FULL_LABEL = "Hiring remotely";
 const COMPACT_LABEL = "Hiring";
 const HOVER_LABEL = "Looking for GOATS!";
 const COMPACT_HOVER_LABEL = "GOATS!";
@@ -90,8 +90,8 @@ export function HiringBadge({
 
   const idleLabel = adaptive ? (
     <>
-      <span className="hidden @[14rem]/hiring:inline">{FULL_LABEL}</span>
-      <span className="inline @[14rem]/hiring:hidden">{COMPACT_LABEL}</span>
+      <span className="hidden @[9rem]/hiring:inline">{FULL_LABEL}</span>
+      <span className="inline @[9rem]/hiring:hidden">{COMPACT_LABEL}</span>
     </>
   ) : (
     FULL_LABEL
@@ -99,8 +99,8 @@ export function HiringBadge({
 
   const hoverLabel = adaptive ? (
     <>
-      <span className="hidden @[14rem]/hiring:inline">{HOVER_LABEL}</span>
-      <span className="inline @[14rem]/hiring:hidden">
+      <span className="hidden @[9rem]/hiring:inline">{HOVER_LABEL}</span>
+      <span className="inline @[9rem]/hiring:hidden">
         {COMPACT_HOVER_LABEL}
       </span>
     </>
