@@ -151,13 +151,13 @@ The Azure integration authenticates with a storage account name and account key.
 
 ### Field selection [#export-field-groups]
 
-Observation columns are configurable; score columns are fixed.
+Field groups select which columns appear in observation and score files.
 
 <Tabs items={["Observations", "Scores"]}>
 
 <Tab>
 
-New integrations select all eleven field groups. `core` is required; disable other groups to reduce file size or omit sensitive data.
+New integrations select all eleven observation field groups. `core` is required; disable other groups to reduce file size or omit sensitive data.
 
 | Group           | Fields                                                                                                                              |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -179,15 +179,15 @@ Changes apply only to future exports. See the [observation field reference](#enr
 
 <Tab>
 
-Scores are always exported and their fields cannot be selected.
+Scores are always exported with their core columns, shown as a locked **Core** group in the settings. Score field groups are optional and add columns on top of the core columns. They are never selected by default, including on new integrations.
 
-| Category          | Fields                                                                      |
-| ----------------- | --------------------------------------------------------------------------- |
-| Identity          | `id`, `project_id`, `timestamp`, `created_at`, `updated_at`                 |
-| Context and links | `trace_id`, `observation_id`, `session_id`, `dataset_run_id`, `environment` |
-| Score             | `name`, `data_type`, `value`, `string_value`, `source`, `comment`           |
+| Group              | Fields                                                                                                                                                                                                      |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Core (always)      | `id`, `timestamp`, `project_id`, `environment`, `trace_id`, `observation_id`, `session_id`, `dataset_run_id`, `name`, `value`, `source`, `comment`, `data_type`, `string_value`, `created_at`, `updated_at` |
+| `score_metadata`   | `metadata`                                                                                                                                                                                                  |
+| `score_provenance` | `author_user_id`, `config_id`, `queue_id`, `evaluator_id`, `evaluation_rule_id`, `execution_trace_id`                                                                                                       |
 
-See the [score field reference](#scores) for types and descriptions.
+Group columns are appended after the core columns. Changes apply only to future exports. See the [score field reference](#scores) for types and descriptions.
 
 </Tab>
 
@@ -202,7 +202,7 @@ GET /api/public/integrations/blob-storage
 PUT /api/public/integrations/blob-storage
 ```
 
-On `PUT`, `exportFieldGroups` must include `core`; omit the property to keep the current selection. `compressed` applies only to CSV, JSON, and JSONL.
+On `PUT`, `exportFieldGroups` must include `core`; omit the property to keep the current selection. Add `score_metadata` or `score_provenance` to the same list to export the optional score columns. `compressed` applies only to CSV, JSON, and JSONL.
 
 See the [REST API reference](https://api.reference.langfuse.com/#tag/blobstorageintegrations) for authentication, provider settings, and the complete schema.
 
@@ -383,26 +383,33 @@ Each row represents one observation and includes its trace context. Only the [se
 
 <span id="scores" />
 
-Scores are always exported. Their fields are not configurable. Scores with data type `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT` are included; [corrections](/docs/observability/features/corrections) (data type `CORRECTION`) are not.
+Scores are always exported. The first sixteen fields are always included; the rest appear only when their [score field group](#export-field-groups) is selected. Scores with data type `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT` are included; [corrections](/docs/observability/features/corrections) (data type `CORRECTION`) are not.
 
-| Field            | Type               | Description                                            |
-| ---------------- | ------------------ | ------------------------------------------------------ |
-| `id`             | string             | Unique score identifier.                               |
-| `timestamp`      | string (timestamp) | Score creation time.                                   |
-| `project_id`     | string             | Langfuse project identifier.                           |
-| `environment`    | string             | Environment label.                                     |
-| `trace_id`       | string or null     | Associated trace identifier.                           |
-| `observation_id` | string or null     | Associated observation identifier.                     |
-| `session_id`     | string or null     | Associated session identifier.                         |
-| `dataset_run_id` | string or null     | Associated dataset run identifier.                     |
-| `name`           | string             | Score name.                                            |
-| `value`          | number             | Numeric value; `TEXT` scores use `0`.                  |
-| `source`         | string             | `API`, `ANNOTATION`, or `EVAL`.                        |
-| `comment`        | string or null     | Optional comment or evaluator reasoning.               |
-| `data_type`      | string             | `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT`.        |
-| `string_value`   | string or null     | Category label or text value; null for numeric scores. |
-| `created_at`     | string (timestamp) | Row creation time.                                     |
-| `updated_at`     | string (timestamp) | Last row update time.                                  |
+| Field                | Type                     | Description                                                                                            |
+| -------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `id`                 | string                   | Unique score identifier.                                                                               |
+| `timestamp`          | string (timestamp)       | Score creation time.                                                                                   |
+| `project_id`         | string                   | Langfuse project identifier.                                                                           |
+| `environment`        | string                   | Environment label.                                                                                     |
+| `trace_id`           | string or null           | Associated trace identifier.                                                                           |
+| `observation_id`     | string or null           | Associated observation identifier.                                                                     |
+| `session_id`         | string or null           | Associated session identifier.                                                                         |
+| `dataset_run_id`     | string or null           | Associated dataset run identifier.                                                                     |
+| `name`               | string                   | Score name.                                                                                            |
+| `value`              | number                   | Numeric value; `TEXT` scores use `0`.                                                                  |
+| `source`             | string                   | `API`, `ANNOTATION`, or `EVAL`.                                                                        |
+| `comment`            | string or null           | Optional comment or evaluator reasoning.                                                               |
+| `data_type`          | string                   | `NUMERIC`, `BOOLEAN`, `CATEGORICAL`, or `TEXT`.                                                        |
+| `string_value`       | string or null           | Category label or text value; null for numeric scores.                                                 |
+| `created_at`         | string (timestamp)       | Row creation time.                                                                                     |
+| `updated_at`         | string (timestamp)       | Last row update time.                                                                                  |
+| `metadata`           | object (string → string) | User-supplied score metadata. Group: `score_metadata`.                                                 |
+| `author_user_id`     | string or null           | Langfuse user who created the score, e.g. in an annotation. Group: `score_provenance`.                 |
+| `config_id`          | string or null           | [Score config](/docs/evaluation/scores/data-model#score-config) identifier. Group: `score_provenance`. |
+| `queue_id`           | string or null           | Annotation queue identifier. Group: `score_provenance`.                                                |
+| `evaluator_id`       | string                   | Evaluator identifier; empty for scores not created by an evaluator. Group: `score_provenance`.         |
+| `evaluation_rule_id` | string                   | Evaluation rule identifier; empty for scores not created by an evaluator. Group: `score_provenance`.   |
+| `execution_trace_id` | string or null           | Trace of the LLM-as-a-judge execution that produced the score. Group: `score_provenance`.              |
 
 </details>
 

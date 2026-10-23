@@ -1,9 +1,15 @@
 import { financialServicesTrustPoints } from "./content";
 
-export function TrustPoints() {
+type TrustPoint = { title: string; body: string; href: string };
+
+export function TrustPoints({
+  points = financialServicesTrustPoints,
+}: {
+  points?: readonly TrustPoint[];
+} = {}) {
   return (
     <ol>
-      {financialServicesTrustPoints.map((point, index) => (
+      {points.map((point, index) => (
         <li
           key={point.title}
           className="grid grid-cols-[36px_minmax(0,1fr)] gap-2 border-t border-dashed border-line-divider-dash py-4 first:border-t-0 first:pt-0"

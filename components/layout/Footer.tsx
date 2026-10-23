@@ -44,6 +44,7 @@ const menuItems: {
       { name: "Coding agents", href: "/coding-agents" },
       { name: "Workflow automation", href: "/workflow-automation" },
       { name: "Financial Services Industry", href: "/financial-services" },
+      { name: "Healthcare and life sciences", href: "/healthcare" },
       {
         name: "Playground",
         href: "/docs/prompt-management/features/playground",

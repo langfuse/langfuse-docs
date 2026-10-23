@@ -15,6 +15,7 @@ import {
   Presentation,
   ScrollText,
   Workflow,
+  HeartPulse,
   Landmark,
   type LucideIcon,
 } from "lucide-react";
@@ -60,9 +61,14 @@ export const useCaseLinks: NavPanelLink[] = [
 
 export const industryLinks: NavPanelLink[] = [
   {
-    name: "Financial Services Industry",
+    name: "Financial Services",
     href: "/financial-services",
     icon: Landmark,
+  },
+  {
+    name: "Healthcare and life sciences",
+    href: "/healthcare",
+    icon: HeartPulse,
   },
 ];
 
