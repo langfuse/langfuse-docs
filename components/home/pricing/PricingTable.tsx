@@ -529,7 +529,7 @@ const sections: Section[] = [
         name: "MCP",
         description:
           "Native Model Context Protocol server so AI assistants can work with your Langfuse data.",
-        href: "/agents#mcp",
+        href: "/docs/api-and-data-platform/features/mcp-server",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
@@ -543,7 +543,7 @@ const sections: Section[] = [
         name: "CLI",
         description:
           "Command-line access to the full Langfuse API for coding agents and power users.",
-        href: "/agents#cli",
+        href: "/docs/api-and-data-platform/features/cli",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
@@ -1368,7 +1368,7 @@ const sections: Section[] = [
       },
       {
         name: "Air-gapped deployment",
-        href: "/self-hosting/security/networking",
+        href: "/self-hosting/security/networking#internet-access",
         tiers: {
           selfHosted: {
             "Open Source": false,

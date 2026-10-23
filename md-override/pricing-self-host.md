@@ -47,7 +47,6 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 - NIST hardening
 - FIPS 140-3
 - Air-gapped deployment
-- Requires ClickHouse Government as the database
 
 [Talk to sales](/talk-to-us?deployment=self-hosted)
 
@@ -69,8 +68,8 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | [Multi-modal](/docs/observability/features/multi-modality)                                      | Yes                         | Yes                                        | Yes                   |
 | **Langfuse AI**                                                                                 |                             |                                            |                       |
 | [Halo (in-app agent)](/docs/halo)                                                               | Yes                         | Yes                                        | Yes                   |
-| [MCP](/agents#mcp)                                                                              | Yes                         | Yes                                        | Yes                   |
-| [CLI](/agents#cli)                                                                              | Yes                         | Yes                                        | Yes                   |
+| [MCP](/docs/api-and-data-platform/features/mcp-server)                                          | Yes                         | Yes                                        | Yes                   |
+| [CLI](/docs/api-and-data-platform/features/cli)                                                 | Yes                         | Yes                                        | Yes                   |
 | **Prompt Management**                                                                           |                             |                                            |                       |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                         | Yes                                        | Yes                   |
 | Prompt fetching                                                                                 | Unlimited                   | Unlimited                                  | Unlimited             |
@@ -140,7 +139,7 @@ Dedicated Langfuse deployment for government and highly regulated environments.
 | [Instance management API](/self-hosting/administration/instance-management-api)                 | --                          | Yes                                        | Yes                   |
 | [NIST hardening](/self-hosting/configuration/hardening#hardening-for-government)                | --                          | --                                         | Yes                   |
 | [FIPS 140-3](/self-hosting/configuration/fips-mode)                                             | --                          | --                                         | Yes                   |
-| [Air-gapped deployment](/self-hosting/security/networking)                                      | --                          | --                                         | Yes                   |
+| [Air-gapped deployment](/self-hosting/security/networking#internet-access)                      | --                          | --                                         | Yes                   |
 | **Compliance**                                                                                  |                             |                                            |                       |
 | SOC2 Type II & ISO27001 reports                                                                 | --                          | Yes                                        | Yes                   |
 | InfoSec/legal reviews                                                                           | --                          | Yes                                        | Yes                   |
