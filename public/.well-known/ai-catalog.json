@@ -1,0 +1,73 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Langfuse",
+    "identifier": "langfuse.com",
+    "documentationUrl": "https://langfuse.com/docs"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:langfuse.com:mcp:docs",
+      "displayName": "Langfuse Docs MCP Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://langfuse.com/.well-known/mcp/langfuse-docs.json",
+      "description": "Public MCP server for the Langfuse documentation: search the docs, fetch pages as Markdown, and get an overview of Langfuse. No authentication.",
+      "tags": ["mcp", "documentation", "search"],
+      "representativeQueries": [
+        "how do I trace a LangGraph agent with Langfuse",
+        "how do Langfuse prompt management and versioning work",
+        "which Langfuse SDK version supports OpenTelemetry"
+      ]
+    },
+    {
+      "identifier": "urn:air:langfuse.com:mcp:langfuse",
+      "displayName": "Langfuse MCP Server",
+      "type": "application/mcp-server-card+json",
+      "url": "https://langfuse.com/.well-known/mcp/langfuse.json",
+      "description": "Authenticated MCP server for Langfuse project data: prompts, datasets, scores, observations, metrics, and more. HTTP Basic auth with a project API key pair; one endpoint per Cloud region.",
+      "tags": ["mcp", "llm-observability", "prompts", "datasets", "evaluation"],
+      "representativeQueries": [
+        "fetch the production version of my Langfuse prompt",
+        "list the latest failing traces in my Langfuse project",
+        "add items to a Langfuse dataset"
+      ]
+    },
+    {
+      "identifier": "urn:air:langfuse.com:skill:langfuse",
+      "displayName": "Langfuse agent skill",
+      "type": "application/ai-skill+md",
+      "url": "https://raw.githubusercontent.com/langfuse/skills/main/skills/langfuse/SKILL.md",
+      "description": "Agent skill for working with Langfuse: up-to-date documentation lookup, instrumentation and prompt management workflows, and API access through the Langfuse CLI. Install it before implementing anything with Langfuse.",
+      "tags": ["skill", "llm-observability", "tracing", "cli"],
+      "representativeQueries": [
+        "add Langfuse tracing to my application",
+        "migrate my prompts to Langfuse prompt management",
+        "query Langfuse traces from the command line"
+      ]
+    },
+    {
+      "identifier": "urn:air:langfuse.com:api:public",
+      "displayName": "Langfuse Public API",
+      "type": "application/vnd.oai.openapi",
+      "url": "https://langfuse.com/openapi.yml",
+      "description": "OpenAPI description of the Langfuse public REST API (traces, observations, scores, prompts, datasets, experiments, metrics). HTTP Basic auth with a project API key pair.",
+      "tags": ["api", "openapi", "rest"]
+    },
+    {
+      "identifier": "urn:air:langfuse.com:api:organizations",
+      "displayName": "Langfuse Organization API",
+      "type": "application/vnd.oai.openapi",
+      "url": "https://cloud.langfuse.com/generated/organizations-api/openapi.yml",
+      "description": "OpenAPI description of the Langfuse organization API for managing projects, members, and API keys with an organization-scoped key.",
+      "tags": ["api", "openapi", "administration"]
+    },
+    {
+      "identifier": "urn:air:langfuse.com:docs:llms-txt",
+      "displayName": "Langfuse llms.txt",
+      "type": "text/markdown",
+      "url": "https://langfuse.com/llms.txt",
+      "description": "Index of the Langfuse website for agents, with links to per-section indexes. Every page is also available as Markdown at its URL plus .md.",
+      "tags": ["documentation", "llms", "markdown"]
+    }
+  ]
+}

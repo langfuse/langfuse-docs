@@ -244,20 +244,30 @@ const nextConfig = {
         source: "/academy/japan/:path*",
         headers: [{ key: "Content-Language", value: "ja" }],
       },
-      // Agent Skills Discovery — CORS and caching
+      // Agent discovery documents (Agent Skills index, MCP manifest and server
+      // cards, ARD / AI Catalog, RFC 9727 API catalog) — CORS and caching, so
+      // browser-based agents and crawlers can fetch them cross-origin.
       {
-        source: "/.well-known/agent-skills/:path*",
+        source: "/.well-known/:path*",
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Cache-Control", value: "public, max-age=3600" },
         ],
       },
-      // MCP Discovery — CORS and caching
       {
-        source: "/.well-known/mcp.json",
+        source: "/.well-known/mcp/:card(langfuse|langfuse-docs).json",
         headers: [
-          { key: "Access-Control-Allow-Origin", value: "*" },
-          { key: "Cache-Control", value: "public, max-age=3600" },
+          { key: "Content-Type", value: "application/mcp-server-card+json" },
+        ],
+      },
+      {
+        source: "/.well-known/api-catalog",
+        headers: [
+          {
+            key: "Content-Type",
+            value:
+              'application/linkset+json; profile="https://www.rfc-editor.org/info/rfc9727"',
+          },
         ],
       },
       // Content negotiation: these paths return markdown instead of HTML when
@@ -273,7 +283,22 @@ const nextConfig = {
       // vary on Accept either.
       {
         source: "/",
-        headers: [{ key: "Vary", value: "Accept" }],
+        headers: [
+          { key: "Vary", value: "Accept" },
+          // RFC 8288 discovery for agents that read headers before parsing
+          // HTML: the markdown mirror, the sitemap, the ARD catalog, the
+          // RFC 9727 API catalog, and the public API's OpenAPI description.
+          {
+            key: "Link",
+            value: [
+              '</index.md>; rel="alternate"; type="text/markdown"',
+              '</sitemap.xml>; rel="sitemap"; type="application/xml"',
+              '</.well-known/ard.json>; rel="ard"; type="application/json"',
+              '</.well-known/api-catalog>; rel="api-catalog"; type="application/linkset+json"',
+              '</openapi.yml>; rel="service-desc"; type="application/vnd.oai.openapi"',
+            ].join(", "),
+          },
+        ],
       },
       {
         source:
@@ -352,6 +377,29 @@ const nextConfig = {
         {
           source: "/.well-known/agent-skills/index.json",
           destination: "/well-known-agent-skills.json",
+        },
+        // Agentic Resource Discovery: ard.json is the ARD canonical path,
+        // ai-catalog.json the AI Catalog Standard's. Both serve one file.
+        {
+          source: "/.well-known/ard.json",
+          destination: "/.well-known/ai-catalog.json",
+        },
+        // MCP discovery document (servers[] plus the mcpServers client
+        // config). `/.well-known/mcp/` itself holds the server cards.
+        {
+          source: "/.well-known/mcp",
+          destination: "/.well-known/mcp.json",
+        },
+        // RFC 9727 API catalog
+        {
+          source: "/.well-known/api-catalog",
+          destination: "/well-known-api-catalog.json",
+        },
+        // On-domain OpenAPI description of the public API, proxied from
+        // Langfuse Cloud so it always matches the deployed API.
+        {
+          source: "/openapi.:ext(yml|yaml)",
+          destination: "https://cloud.langfuse.com/generated/api/openapi.yml",
         },
 
         // Optional: make "/" negotiable too (remove if you don't have md-src/index.md)

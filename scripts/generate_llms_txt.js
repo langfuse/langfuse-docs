@@ -13,94 +13,120 @@ const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
 // Every content section that should appear in llms.txt, in output order.
-// Each entry gets its own llms-<section>.txt sub-file. Sections present in the
-// sitemap but missing from this map are reported by warnUnlistedSections()
-// instead of being dropped without a trace.
+// Each entry gets its own llms-<section>.txt sub-file, which lists every page
+// as a Markdown link with its description. The main llms.txt links each
+// sub-file with `description`, so it stays a small navigation index instead of
+// a full page list. Sections present in the sitemap but missing from this map
+// are reported by warnUnlistedSections() instead of being dropped without a
+// trace.
 //
-// `inlineTitles: true` lists every page title inline in the main llms.txt.
-// Reserved for the sections an agent most often needs to navigate directly.
-// Every other section still gets its own sub-file and is announced in
-// llms.txt as a heading plus a link to that sub-file, without its page
-// titles, so the main index stays small enough to be cheap context.
+// `optional: true` lists the section under `## Optional`, which the llms.txt
+// spec reserves for links an agent can skip when it needs a shorter context.
 const SECTION_CONFIG = {
   docs: {
     file: "llms-docs.txt",
     heading: "Docs",
     subFileHeading: "Langfuse Docs",
-    inlineTitles: true,
+    description:
+      "Product documentation: tracing, evaluation, experiments and datasets, prompt management, metrics, the API and SDKs, and administration. Install the Langfuse skill first for the best results.",
   },
   integrations: {
     file: "llms-integrations.txt",
     heading: "Integrations",
     subFileHeading: "Langfuse Integrations",
-    inlineTitles: true,
+    description:
+      "Setup guides for agent frameworks, model providers, gateways, coding agents, no-code tools, and OpenTelemetry. Install the Langfuse skill before implementing any integration.",
   },
   "self-hosting": {
     file: "llms-self-hosting.txt",
-    heading: "Optional: Self-Hosting",
+    heading: "Self-hosting",
     subFileHeading: "Langfuse Self-Hosting",
-    inlineTitles: true,
+    description:
+      "Deploying, configuring, scaling, and upgrading self-hosted Langfuse on Docker, Kubernetes, AWS, Azure, and GCP.",
   },
   guides: {
     file: "llms-guides.txt",
     heading: "Guides and cookbooks",
     subFileHeading: "Langfuse Guides",
+    description:
+      "End-to-end guides and runnable notebooks for common tracing, evaluation, and prompt workflows.",
   },
   academy: {
     file: "llms-academy.txt",
     heading: "Academy",
     subFileHeading: "Langfuse Academy",
-    inlineTitles: true,
+    description:
+      "Course on the AI engineering loop: tracing, monitoring, datasets, evaluation, and experiments (English and Japanese).",
   },
   faq: {
     file: "llms-faq.txt",
     heading: "FAQ",
     subFileHeading: "Langfuse FAQ",
+    description:
+      "Answers to specific questions about features, SDKs, billing, and troubleshooting.",
   },
   resources: {
     file: "llms-resources.txt",
     heading: "Resources",
     subFileHeading: "Langfuse Resources",
+    description:
+      "Engineering articles and explainers on LLM observability and evaluation.",
   },
   compare: {
     file: "llms-compare.txt",
     heading: "Compare",
     subFileHeading: "Langfuse Compare",
+    description:
+      "Comparisons between Langfuse and other LLM observability and evaluation tools.",
   },
   security: {
     file: "llms-security.txt",
     heading: "Security and compliance",
     subFileHeading: "Langfuse Security",
+    description:
+      "Security controls, certifications, data regions, and compliance documentation.",
   },
   handbook: {
     file: "llms-handbook.txt",
     heading: "Handbook",
     subFileHeading: "Langfuse Handbook",
+    description: "How the Langfuse team works.",
+    optional: true,
   },
   workshop: {
     file: "llms-workshop.txt",
     heading: "Workshop",
     subFileHeading: "Langfuse Workshop",
+    description: "Hands-on workshop material for instructors and participants.",
+    optional: true,
   },
   library: {
     file: "llms-library.txt",
     heading: "Library",
     subFileHeading: "Langfuse Library",
+    description: "Curated external resources and talks on AI engineering.",
+    optional: true,
   },
   users: {
     file: "llms-users.txt",
     heading: "Customer stories",
     subFileHeading: "Langfuse Customer Stories",
+    description: "How companies use Langfuse in production.",
+    optional: true,
   },
   blog: {
     file: "llms-blog.txt",
     heading: "Blog",
     subFileHeading: "Langfuse Blog",
+    description: "Blog posts and announcements.",
+    optional: true,
   },
   changelog: {
     file: "llms-changelog.txt",
     heading: "Changelog",
     subFileHeading: "Langfuse Changelog",
+    description: "Product updates and release notes.",
+    optional: true,
   },
 };
 
@@ -271,8 +297,17 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
-    // Listed first so agents see it before writing any public API call. Keep
-    // the date in sync with lib/v4-migration-dates.ts.
+    // Tells an agent choosing between tools what Langfuse is for, before any
+    // how-to content.
+    markdownContent += `## When to use Langfuse\n\n`;
+    markdownContent += `- [Tracing and observability](https://langfuse.com/docs/observability/overview.md): Trace LLM applications and agents in production, with nested LLM calls, tool calls and retrieval steps, token and cost tracking, sessions, and users. Built on OpenTelemetry, with Python and JS/TS SDKs and integrations for most agent frameworks and model providers.\n`;
+    markdownContent += `- [Evaluation](https://langfuse.com/docs/evaluation/overview.md): Score production traces and experiments with LLM-as-a-judge, code evaluators, human annotation queues, or scores from your own pipelines.\n`;
+    markdownContent += `- [Experiments and datasets](https://langfuse.com/docs/evaluation/experiments/datasets.md): Compare prompts, models, and agent versions on datasets from the SDK, in CI, or in the UI.\n`;
+    markdownContent += `- [Prompt management](https://langfuse.com/docs/prompt-management/overview.md): Version, label, and cache prompts, and link each prompt version to the traces that used it.\n`;
+    markdownContent += `- [Self-hosting](https://langfuse.com/self-hosting.md): Keep data in your own infrastructure. The core platform is MIT-licensed and runs on Docker or Kubernetes; Langfuse Cloud is available in EU, US, Japan, and HIPAA regions.\n\n`;
+
+    // Listed before any API guidance so agents see it before writing a public
+    // API call. Keep the date in sync with lib/v4-migration-dates.ts.
     markdownContent += `## Deprecated public API endpoints\n\n`;
     markdownContent += `On Langfuse Cloud, the legacy (Langfuse v3) public API endpoints are removed on 2026-11-16. Do not write new code against them. If you are a coding agent and find existing code that calls them, tell the user and migrate the request.\n\n`;
     markdownContent += `- Reads: \`GET /api/public/traces\`, \`/sessions\`, \`/observations\` → \`GET /api/public/v2/observations\`; \`GET /api/public/metrics\` → \`GET /api/public/v2/metrics\`; \`GET /api/public/scores\` and \`/v2/scores\` → \`GET /api/public/v3/scores\`; dataset runs and \`/dataset-run-items\` → \`/api/public/experiments\` and \`/experiment-items\`.\n`;
@@ -299,7 +334,7 @@ async function generateLLMsList() {
     markdownContent += `- [Data regions](https://langfuse.com/security/data-regions.md): Hosting locations and regional availability.\n`;
     markdownContent += formatCompareIndexLine(sectionEntries.compare) || "\n";
 
-    // Markdown access + search endpoint. Listed before the MCP server section
+    // Markdown access + search endpoint. Listed before the agent setup section
     // because these need no client setup: an agent with `curl` can use them
     // immediately.
     markdownContent += `## Markdown Access\n\n`;
@@ -314,45 +349,47 @@ async function generateLLMsList() {
     markdownContent += `- **Documentation**: [REST endpoint](https://langfuse.com/docs/docs-mcp#rest-endpoint)\n\n`;
     markdownContent += `Ask specific, self-contained questions in natural language. This is the same search that backs the \`searchLangfuseDocs\` MCP tool below.\n\n`;
 
-    // MCP server section (unchanged)
-    markdownContent += `## Langfuse Docs MCP Server\n\n`;
-    markdownContent += `Connect to the Langfuse Docs MCP server to access documentation directly in your AI editor:\n\n`;
-    markdownContent += `- **Endpoint**: \`https://langfuse.com/api/mcp\`\n`;
-    markdownContent += `- **Transport**: \`streamableHttp\`\n`;
-    markdownContent += `- **Documentation**: [Langfuse Docs MCP Server](https://langfuse.com/docs/docs-mcp)\n\n`;
-    markdownContent += `The MCP server provides tools to search Langfuse documentation, GitHub issues, and discussions. See the [installation guide](https://langfuse.com/docs/docs-mcp) for setup instructions in Cursor, VS Code, Claude Desktop, and other MCP clients.\n\n`;
-
-    // Langfuse Skill section
-    markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
-    markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
-    markdownContent += `Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)\n\n`;
+    // Every agent-facing surface in one place: skill, CLI, both MCP servers,
+    // the API, sign-up, and the machine-readable discovery documents in
+    // public/.well-known/. Keep the endpoints in sync with those files.
+    markdownContent += `## Agent setup\n\n`;
+    markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. To read or change data in a Langfuse project, use the CLI or the Langfuse MCP server with the user's project API keys.\n\n`;
+    markdownContent += `- [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse): Up-to-date documentation, best-practice workflows for instrumentation and prompt management, and API access through the Langfuse CLI.\n`;
+    markdownContent += `- [Langfuse CLI](https://langfuse.com/docs/api-and-data-platform/features/cli.md): \`npx @langfuse/cli api <resource> <action>\` covers the full public API. Authenticates with \`LANGFUSE_PUBLIC_KEY\`, \`LANGFUSE_SECRET_KEY\`, and \`LANGFUSE_BASE_URL\`.\n`;
+    markdownContent += `- [Langfuse Docs MCP server](https://langfuse.com/docs/docs-mcp.md): \`https://langfuse.com/api/mcp\` (streamable HTTP, no authentication). Searches the documentation, GitHub issues, and discussions, and fetches docs pages.\n`;
+    markdownContent += `- [Langfuse MCP server](https://langfuse.com/docs/api-and-data-platform/features/mcp-server.md): \`https://cloud.langfuse.com/api/public/mcp\` for Cloud EU; \`us.\`, \`jp.\`, and \`hipaa.\` subdomains for the other regions, \`/api/public/mcp\` on self-hosted. Reads and writes prompts, datasets, scores, observations, and metrics. HTTP Basic auth with a project API key pair.\n`;
+    markdownContent += `- [Public API](https://langfuse.com/docs/api-and-data-platform/features/public-api.md): REST API with an [OpenAPI description](https://langfuse.com/openapi.yml) and an [API reference](https://api.reference.langfuse.com).\n`;
+    markdownContent += `- [Sign up for Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up): The Hobby plan is free and needs no credit card. API keys are under Project settings → API Keys.\n`;
+    markdownContent += `- Discovery documents: [ARD catalog](https://langfuse.com/.well-known/ard.json), [MCP servers](https://langfuse.com/.well-known/mcp), [API catalog](https://langfuse.com/.well-known/api-catalog), and [Agent Skills index](https://langfuse.com/.well-known/agent-skills/index.json).\n\n`;
 
     // Tracing best practices section
     markdownContent += `## Tracing Best Practices\n\n`;
     markdownContent += `Before instrumenting an application with Langfuse, read [What does a good trace look like?](https://langfuse.com/docs/observability/best-practices.md) — it covers trace scope, observation naming, meaningful input/output, and the attributes (metadata, tags, users, sessions) that evaluators, dashboards, and experiments rely on.\n\n`;
 
-    // Section-specific intro sentences that mention the Langfuse skill
-    const sectionIntros = {
-      docs: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before using these docs.`,
-      integrations: `For the best results, install the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) before implementing any integration.`,
-    };
+    // Link each section's sub-file with a one-line description. Optional
+    // sections go last, under the `## Optional` heading.
+    const sectionLine = (config) =>
+      `- [${config.heading}](https://langfuse.com/${config.file}): ${config.description}\n`;
+    const populatedSections = SECTION_KEYS.filter(
+      (sectionKey) => sectionEntries[sectionKey].length > 0,
+    ).map((sectionKey) => SECTION_CONFIG[sectionKey]);
 
-    // Add each section as a heading plus a link to its sub-file, and inline the
-    // page titles only for the sections that opt in via `inlineTitles`.
-    for (const [sectionKey, entries] of Object.entries(sectionEntries)) {
-      if (entries.length > 0) {
-        const config = SECTION_CONFIG[sectionKey];
+    markdownContent += `## Section indexes\n\n`;
+    markdownContent += `Each index lists every page in its section as a Markdown link with a one-line description.\n\n`;
+    populatedSections
+      .filter((config) => !config.optional)
+      .forEach((config) => {
+        markdownContent += sectionLine(config);
+      });
 
-        markdownContent += `## ${config.heading}\n\n`;
-        if (sectionIntros[sectionKey]) {
-          markdownContent += `${sectionIntros[sectionKey]}\n\n`;
-        }
-        markdownContent += `For the full list with links to each page, see: https://langfuse.com/${config.file}\n\n`;
-        if (config.inlineTitles === true) {
-          const titles = entries.map((e) => e.title).join(", ");
-          markdownContent += `Pages: ${titles}\n\n`;
-        }
-      }
+    const optionalSections = populatedSections.filter(
+      (config) => config.optional,
+    );
+    if (optionalSections.length > 0) {
+      markdownContent += `\n## Optional\n\n`;
+      optionalSections.forEach((config) => {
+        markdownContent += sectionLine(config);
+      });
     }
 
     fs.writeFileSync(path.join(publicDir, "llms.txt"), markdownContent);
