@@ -284,7 +284,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       featured: false,
       anchor: "government",
       description:
-        "Dedicated Langfuse deployment for government and highly regulated environments.",
+        "Dedicated Langfuse deployment for government and regulated industries.",
       price: "Custom Pricing",
       mainFeatures: [
         "Everything in Enterprise",

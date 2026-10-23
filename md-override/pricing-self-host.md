@@ -41,7 +41,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 
 ### Self-Hosted Government (Custom Pricing) [#government]
 
-Dedicated Langfuse deployment for government and highly regulated environments.
+Dedicated Langfuse deployment for government and regulated industries.
 
 - Everything in Enterprise
 - NIST hardening
