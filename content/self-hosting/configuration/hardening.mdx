@@ -19,14 +19,15 @@ For related operational guides, see [Authentication and SSO](/self-hosting/secur
     core: "not-available",
     pro: "not-available",
     enterprise: "not-available",
-    selfHosted: "ee",
+    selfHosted: "gov",
   }}
 />
 
-Langfuse Self-Hosted Enterprise supports government and other highly regulated environments with:
+Langfuse Government (self-hosted) supports government and other highly regulated environments with:
 
 - **[FIPS mode](/self-hosting/configuration/fips-mode):** Langfuse runs its cryptography on FIPS 140-3 validated cryptographic modules operated in approved mode, and refuses to start when it cannot.
 - **[Hardened images](#hardened-images):** the web and worker images are built on Iron Bank's hardened Red Hat Universal Base Image (UBI) 9.
+- **[No telemetry](/self-hosting/security/telemetry#can-i-disable-telemetry):** deployments with a Government license key send no telemetry to Langfuse.
 
 We are also working on end-to-end documentation for operating Langfuse and all required subcomponents as a complete air-gapped deployment stack. [Contact our sales team](/talk-to-us?deployment=self-hosted) to discuss your requirements.
 
@@ -170,7 +171,7 @@ Administrative actions, including blob storage integration validate/run-now and 
 
 ## Telemetry [#telemetry]
 
-Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected. `TELEMETRY_ENABLED` doesn't cover the [newsletter step](/self-hosting/security/telemetry#hostnames-browser): to stop new users' browsers from contacting `langfuse.com` for it, set `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`.
+Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry, and instances running with a Government license key never do. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected. `TELEMETRY_ENABLED` doesn't cover the [newsletter step](/self-hosting/security/telemetry#hostnames-browser): to stop new users' browsers from contacting `langfuse.com` for it, set `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`.
 
 ## Reporting security issues [#disclosure]
 

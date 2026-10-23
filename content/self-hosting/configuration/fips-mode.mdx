@@ -1,6 +1,6 @@
 ---
 title: FIPS mode for self-hosted Langfuse
-description: Run self-hosted Langfuse Enterprise on FIPS 140-3 validated cryptographic modules in approved mode.
+description: Run self-hosted Langfuse Government on FIPS 140-3 validated cryptographic modules in approved mode.
 label: "Version: v4"
 sidebarTitle: "FIPS mode"
 ---
@@ -13,7 +13,7 @@ sidebarTitle: "FIPS mode"
     core: "not-available",
     pro: "not-available",
     enterprise: "not-available",
-    selfHosted: "ee",
+    selfHosted: "gov",
   }}
 />
 
@@ -44,7 +44,7 @@ The migration CLI is built with `GOFIPS140=v1.0.0`, which turns on the Go module
 
 ## Requirements [#fips-requirements]
 
-- **Enterprise license:** an Enterprise license key (`LANGFUSE_EE_LICENSE_KEY`) on both containers. See [License Key](/self-hosting/license-key).
+- **Government license:** a Government license key (`LANGFUSE_EE_LICENSE_KEY`, starting with `lf_gov_`) on both containers. An Enterprise license key does not enable FIPS mode. See [License Key](/self-hosting/license-key#government).
 - **Host FIPS mode:** the hosts that run the containers must boot in FIPS mode (`cat /proc/sys/crypto/fips_enabled` returns `1`). The FIPS provider follows the host kernel's FIPS mode, so a container cannot turn it on by itself.
 - **Infrastructure:** you are responsible for running Postgres, ClickHouse, Redis, blob storage, and the load balancer or ingress that terminates TLS for Langfuse with validated modules. In particular:
   - Use `scram-sha-256` password authentication for Postgres. `md5` authentication is not available on a Postgres server in FIPS mode.
@@ -57,22 +57,22 @@ Set the following on both the web and the worker container:
 
 ```bash
 LANGFUSE_REQUIRE_FIPS=true
-LANGFUSE_EE_LICENSE_KEY=<your-license-key>
+LANGFUSE_EE_LICENSE_KEY=<your-government-license-key>
 ```
 
 When `LANGFUSE_REQUIRE_FIPS=true` is set, startup fails closed:
 
 1. The image entrypoint sets `OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf`, which applies Red Hat's FIPS crypto policy to OpenSSL. An `OPENSSL_CONF` you set yourself takes precedence.
 2. The entrypoint exits before running database migrations if Node.js reports that the FIPS provider is not active.
-3. The web and worker processes check again before they connect to any database. They also require an Enterprise license and reject storage options that need MD5. These checks also run when your deployment overrides the image entrypoint. In that case, set `OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf` yourself.
+3. The web and worker processes check again before they connect to any database. They also require a Government license and reject storage options that need MD5. These checks also run when your deployment overrides the image entrypoint. In that case, set `OPENSSL_CONF=/etc/pki/tls/openssl-fips.cnf` yourself.
 
 If a check fails, the container logs the reason and exits:
 
-| Log message contains                         | Cause                                          | Fix                                       |
-| -------------------------------------------- | ---------------------------------------------- | ----------------------------------------- |
-| `requires a Langfuse enterprise license`     | No Enterprise license key is configured.       | Set `LANGFUSE_EE_LICENSE_KEY`.            |
-| `Node's OpenSSL FIPS provider is not active` | The host does not run in FIPS mode.            | Run the containers on hosts in FIPS mode. |
-| `cannot be combined with`                    | A storage option that needs MD5 is configured. | Change the option named in the message.   |
+| Log message contains                         | Cause                                          | Fix                                                  |
+| -------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------- |
+| `requires a Langfuse government license`     | No Government license key is configured.       | Set `LANGFUSE_EE_LICENSE_KEY` to your `lf_gov_` key. |
+| `Node's OpenSSL FIPS provider is not active` | The host does not run in FIPS mode.            | Run the containers on hosts in FIPS mode.            |
+| `cannot be combined with`                    | A storage option that needs MD5 is configured. | Change the option named in the message.              |
 
 A running container with `LANGFUSE_REQUIRE_FIPS=true` has passed these checks.
 To check the module by hand, for example during an assessment, run Node.js in the container with the same OpenSSL configuration:
