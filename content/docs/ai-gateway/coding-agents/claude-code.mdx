@@ -23,14 +23,15 @@ Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. 
 
 Configure the gateway in the Claude Desktop UI:
 
-1. If the **Developer** menu is unavailable, open **Help → Troubleshooting** and enable Developer Mode.
-2. Open **Developer → Configure Third-Party Inference**.
-3. Under **Connection**, set **Inference provider** to **Gateway**.
-4. Set **Gateway base URL** to `https://staging.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
-5. Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
-6. Under **Custom headers**, add `langfuse-user-id` with your email or handle as the value, for example `<you>@example.com`.
-7. Under **Capabilities → General restrictions**, we recommend adding `*` to **Allowed egress hosts**. Otherwise, Claude can't reach websites or services outside the gateway, such as GitHub, and it won't ask you for permission.
-8. Test the connection, select **Apply Changes**, then select **Save & Restart**. Start a new session so that the egress settings apply.
+1. Optional: to keep your existing claude.ai chats and sessions (gateway mode uses a separate profile), turn on **Claude.ai data import** under **Capabilities** when you configure the gateway in the steps below. After restarting, use **Settings → Import & export**. See [Import and export](https://claude.com/docs/third-party/claude-desktop/import).
+2. If the **Developer** menu is unavailable, open **Help → Troubleshooting** and enable Developer Mode.
+3. Open **Developer → Configure Third-Party Inference**.
+4. Under **Connection**, set **Inference provider** to **Gateway**.
+5. Set **Gateway base URL** to `https://staging.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
+6. Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
+7. Under **Custom headers**, add `langfuse-user-id` with your email or handle as the value, for example `<you>@example.com`.
+8. Under **Capabilities → General restrictions**, we recommend adding `*` to **Allowed egress hosts**. Otherwise, Claude can't reach websites or services outside the gateway, such as GitHub, and it won't ask you for permission.
+9. Test the connection, select **Apply Changes**, then select **Save & Restart**. Start a new session so that the egress settings apply.
 
 For more information about these settings, see the [Claude Desktop third-party inference guide](https://claude.com/docs/third-party/claude-desktop/in-app-configuration).
 
@@ -38,8 +39,6 @@ For more information about these settings, see the [Claude Desktop third-party i
   Use HTTPS git remotes or `gh` to push. SSH push fails in the macOS sandbox,
   see [anthropics/claude-code#98752](https://github.com/anthropics/claude-code/issues/98752).
 </Callout>
-
-Chats and sessions from your claude.ai login are not visible in gateway mode because it uses a separate profile. To bring them over, enable [Claude.ai data import](https://claude.com/docs/third-party/claude-desktop/configuration#claudeaiimport) (`claudeAiImport` with `enabled` and `exportEnabled`), then use **Settings → Import & export**. See [Import and export](https://claude.com/docs/third-party/claude-desktop/import).
 
 <Callout type="warning">
   MCP servers connected through Claude Desktop are associated with your
