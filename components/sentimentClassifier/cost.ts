@@ -10,6 +10,16 @@ export const LUNA_PRICE_USD_PER_MTOK = {
   output: 1.2,
 } as const;
 
+/**
+ * OpenAI Decisions API (`gpt-6-luna` on `/v1/decisions`) bills input tokens
+ * only — no cache or output charges.
+ * https://developers.openai.com/api/docs/guides/decisions#pricing-and-availability
+ */
+export const OPENAI_DECISIONS_PRICE_USD_PER_MTOK = {
+  input: 0.1,
+  output: 0,
+} as const;
+
 export type SentimentUsage = {
   inputTokens: number;
   outputTokens: number;

@@ -56,7 +56,7 @@ Jev covers this surface with three [question types](https://docs.typesafe.ai/pri
 
 ## Try a Jev-based sentiment classifier [#try-a-jev-based-sentiment-classifier]
 
-Run Jev and GPT-5.6 Luna (high reasoning) on the same text. Add up to four classifications — sentiment, urgency, intent, and next action. Jev answers them in one pass; Luna makes a parallel call per classification, so its cost scales with the count. Jev returns all answers together; each Luna call appears as it finishes. Latency and estimated cost are compared below.
+Race TypeSafe Jev, OpenAI's Decisions API (`gpt-6-luna`), and GPT-5.6 Luna (high reasoning) on the same text. Add up to four classifications — sentiment, urgency, intent, and next action. Jev and OpenAI Decisions answer them in one pass each; Luna makes a parallel call per classification, so its cost scales with the count. Decision-model answers return together; each Luna call appears as it finishes. Latency and estimated cost are compared below.
 
 <div className="not-prose my-6">
   <SentimentClassifierCompare />
