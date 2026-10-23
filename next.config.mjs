@@ -21,6 +21,16 @@ const MIRRORED_URL_PREFIXES = Array.from(
   ),
 ).sort();
 
+// File extensions that never negotiate to markdown: markdown, text and JSON
+// indexes, the sitemap, the OpenAPI description, and static assets. Shared by
+// the content-negotiation rewrite and its `Vary: Accept` header so a request
+// for `/sitemap.xml` with `Accept: text/markdown` gets the sitemap, not a
+// lookup for `/md-src/sitemap.xml.md`. The agent-traffic matcher in proxy.ts
+// mirrors this list (minus `md`, which it tracks) — keep in sync.
+const NON_NEGOTIATED_EXTENSIONS =
+  "md|txt|json|ya?ml|png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|webmanifest|ipynb";
+const NEGOTIATED_PATH = `/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.(?:${NON_NEGOTIATED_EXTENSIONS})$).*)`;
+
 const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
@@ -301,8 +311,7 @@ const nextConfig = {
         ],
       },
       {
-        source:
-          "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.(?:md|txt|json|png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|webmanifest|ipynb)$).*)",
+        source: NEGOTIATED_PATH,
         headers: [{ key: "Vary", value: "Accept" }],
       },
       // Advertise the markdown representation over HTTP as well as in the HTML
@@ -410,11 +419,11 @@ const nextConfig = {
         },
 
         // Content negotiation: /docs or /docs/observability/overview -> /md-src/... .md
-        // Excludes /api, /_next, md-src, .md files, and .txt files (served directly from public/).
+        // Excludes /api, /_next, md-src, .well-known, and NON_NEGOTIATED_EXTENSIONS
+        // (served directly from public/ or by their own rewrites).
         // The agent-traffic matcher in proxy.ts mirrors these exclusions — keep in sync.
         {
-          source:
-            "/:path((?!api|_next|md-src|\\.well-known)(?!.*\\.md$)(?!.*\\.txt$)(?!.*\\.json$).*)",
+          source: NEGOTIATED_PATH,
           has: [{ type: "header", key: "accept", value: ".*text/markdown.*" }],
           destination: "/md-src/:path.md",
         },
