@@ -93,3 +93,5 @@ All three user-facing features (Copy, PDF, MCP) depend on the same foundation of
 ## Bundle analysis
 
 Run `pnpm run analyze` to analyze the bundle size of the production build using `@next/bundle-analyzer`.
+
+<!-- Test PR: verifying the PR workflow. Safe to close. -->
