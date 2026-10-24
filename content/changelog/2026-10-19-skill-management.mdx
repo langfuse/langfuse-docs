@@ -1,0 +1,45 @@
+---
+date: 2026-10-19
+title: Manage, version, and trace agent skills
+description: Version agent instructions and files, deploy them with labels, and inspect skill usage in traces.
+badge: Beta
+noindex: true
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+{/* Confirm author and beta SDK package versions before publication. Remove noindex when ready. */}
+
+Skill Management is in beta. Store agent instructions and supporting files together, deploy versions with labels, and see which skills your agents load in traces.
+
+Share a refund workflow across support agents, test revised instructions in staging, or check which policy file an agent read before answering a customer.
+
+![Four customer-support skills with descriptions and latest and production versions in the Skills beta list.](/images/changelog/2026-10-22-skill-management-list.jpg)
+
+## Version the whole skill
+
+A skill contains `SKILL.md` instructions and optional reference files and scripts. Its name and description tell an agent when to load it. See [how skills are structured](/docs/prompt-and-skill-management/concepts).
+
+Edit skills in the UI, push a local folder with the CLI, or publish through the API. Each saved version contains all of the skill's files.
+
+Assign `staging` or `production` to the version your agents should fetch. To roll back, move the label to an earlier version. Saved versions stay unchanged.
+
+![The refund-policy skill with version history, labels, supporting files, and the Files and Usage tabs.](/images/changelog/2026-10-22-skill-management-editor.jpg)
+
+## Install or fetch skills
+
+Install skill folders with the CLI, or fetch files through the API for an agent that works in memory. Follow a label for updates or pin an exact version. The [getting started guide](/docs/skill-management/get-started) covers both.
+
+## See available skills and loaded files
+
+With [skill tracing configured](/docs/skill-management/tracing), generations show the reported skill list, with links to each version.
+
+![A generation showing four available skills and their version links in the trace's Preview view.](/images/changelog/2026-10-22-skill-management-generation.jpg)
+
+Traced skill-loading tool calls show which files the agent read. Open **Preview → Loaded skill** on a successful call to see the version and file paths. The skill's **Usage** tab combines usage counts, file loads, and linked observations.
+
+![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-10-22-skill-management-tool-load.jpg)
+
+See the [Skill Management docs](/docs/skill-management/overview) or [create your first skill](/docs/skill-management/get-started).

@@ -1,0 +1,192 @@
+---
+title: Load Skills
+seoTitle: Load agent skills with the CLI or API
+description: Install versioned skills on disk or fetch manifests and file contents for agents that work in memory.
+noindex: true
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# Load skills into your agent
+
+Choose how to supply skills to your agent:
+
+| Your agent reads…                                   | Use                                                               |
+| --------------------------------------------------- | ----------------------------------------------------------------- |
+| Skill folders from its workspace                    | [CLI installation](#cli-install)                                  |
+| Instructions and files supplied by your application | [API fetching](#api-fetch) and an [in-memory adapter](#in-memory) |
+
+Configure [project credentials](/docs/skill-management/get-started#get-api-keys) for either method. Keep the selected version fixed during a run so instructions and supporting files come from the same revision.
+
+## Install with the CLI [#cli-install]
+
+In the UI, open **Use skill → Install with CLI**, then expand **Configure install command**. Choose **Name** for one skill, **Tag** for a group, or **All** for the project. Select a label or version and an installation directory, then copy the command or setup prompt for your coding agent.
+
+To install the version labeled `production` directly:
+
+```bash
+npm install -g @langfuse/cli@beta
+langfuse skills install refund-policy --label production
+```
+
+By default, the CLI installs files in `.agents/skills/<name>/`. The CLI records the selected versions in `.agents/skills/langfuse-skills.lock`. Keep the lockfile to restore those versions.
+
+Pin version `2`, or install all skills tagged `support`:
+
+```bash
+langfuse skills install refund-policy --version 2
+langfuse skills install --tag support
+```
+
+Configure your agent to read the installation path printed by the CLI. See the [CLI reference](https://github.com/langfuse/langfuse-cli#readme) for directory options.
+
+### Restore or update [#restore-or-update]
+
+Run `langfuse skills install` without arguments to restore locked versions. Run `langfuse skills update` to fetch the versions currently assigned to saved labels. Exact version pins stay fixed.
+
+```bash
+langfuse skills install
+langfuse skills update
+```
+
+## Fetch through the API [#api-fetch]
+
+Fetch a manifest to resolve a version and list its files. Then fetch the files you need by content hash. Cache content by hash to reuse it across requests.
+
+### Resolve the version [#resolve-the-version]
+
+```bash
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/refund-policy" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --data-urlencode "label=production"
+```
+
+The response includes these fields (other metadata omitted):
+
+```json
+{
+  "name": "refund-policy",
+  "description": "Review refund requests and explain eligibility.",
+  "version": 1,
+  "files": [
+    {
+      "path": "SKILL.md",
+      "sha256Hash": "snYnN5wiUtXzc9TnW6PYmmP7ExRMEfzZRH+89O90rVg="
+    }
+  ]
+}
+```
+
+For a fixed version, replace `label=production` with `version=2`. You can specify a label or a version; omitting both selects `production`. The hash above is an example; use the value from your response.
+
+### Read a file [#read-a-file]
+
+Set `SKILL_FILE_HASH` to a file's `sha256Hash` from the manifest. Fetch its content with `--data-urlencode` to encode the base64 hash correctly:
+
+```bash
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/files/content" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --data-urlencode "sha256Hashes=$SKILL_FILE_HASH"
+```
+
+The response's `data` array contains `{ sha256Hash, content }` objects. Match results to manifest files by hash. To fetch several files, send up to 50 unique hashes as a comma-separated `sha256Hashes` value.
+
+For Python and JavaScript/TypeScript SDK examples, see [Retrieve the instructions](/docs/skill-management/get-started#retrieve-the-instructions). For request fields, see the [Skills API reference](https://api.reference.langfuse.com/#tag/skills).
+
+## Use skills in memory [#in-memory]
+
+An agent framework can use skill contents without writing them to disk. This example uses [Mastra](https://mastra.ai/docs/skills): fetch a manifest, convert its files with [`createSkill()`](https://mastra.ai/reference/agents/createSkill), and pass the skills to an agent.
+
+Install the packages below and set `OPENAI_API_KEY` for the example model. The Langfuse client uses the [project credentials](/docs/skill-management/get-started#get-api-keys) from your environment.
+
+```bash
+npm install @langfuse/client @mastra/core gray-matter
+```
+
+Create `agent.ts`. The imported `toMastraSkills` helper is defined below the example:
+
+```typescript filename="agent.ts"
+import { LangfuseClient } from "@langfuse/client";
+import { Agent } from "@mastra/core/agent";
+import { toMastraSkills } from "./to-mastra-skills";
+
+const langfuse = new LangfuseClient();
+const manifest = await langfuse.api.unstable.skills.get("refund-policy", {
+  label: "production",
+});
+const skills = await toMastraSkills(langfuse, [manifest]);
+const agent = new Agent({
+  id: "support-agent",
+  name: "Support agent",
+  instructions:
+    "Help customers with refund requests. Use the refund-policy skill.",
+  model: "openai/gpt-4.1-mini",
+  skills,
+});
+
+const result = await agent.generate(
+  "Can I return a purchase from 20 days ago?",
+);
+console.log(result.text);
+```
+
+<Details>
+<Summary>Helper: convert Langfuse manifests to Mastra skills</Summary>
+
+The helper fetches file contents in batches of at most 50 hashes, removes YAML frontmatter, and maps `references/` files to Mastra references. Save it as `to-mastra-skills.ts`:
+
+```typescript filename="to-mastra-skills.ts"
+import { LangfuseClient } from "@langfuse/client";
+import { createSkill } from "@mastra/core/skills";
+import matter from "gray-matter";
+
+export async function toMastraSkills(
+  client: LangfuseClient,
+  manifests: Awaited<ReturnType<typeof client.api.unstable.skills.get>>[],
+) {
+  return Promise.all(
+    manifests.map(async (manifest) => {
+      const files = manifest.files.filter(
+        (file) =>
+          file.path === "SKILL.md" || file.path.startsWith("references/"),
+      );
+      const hashes = [...new Set(files.map((file) => file.sha256Hash))];
+      const contents = new Map<string, string>();
+      for (let offset = 0; offset < hashes.length; offset += 50) {
+        const { data } = await client.api.unstable.skills.getFileContents({
+          sha256Hashes: hashes.slice(offset, offset + 50).join(","),
+        });
+        for (const file of data) contents.set(file.sha256Hash, file.content);
+      }
+      const read = (path: string) => {
+        const file = files.find((file) => file.path === path);
+        const content = file && contents.get(file.sha256Hash);
+        if (content === undefined)
+          throw new Error(`Missing skill file: ${path}`);
+        return content;
+      };
+      return createSkill({
+        name: manifest.name,
+        description: manifest.description,
+        instructions: matter(read("SKILL.md")).content,
+        references: Object.fromEntries(
+          files
+            .filter((file) => file.path.startsWith("references/"))
+            .map((file) => [
+              file.path.slice("references/".length),
+              read(file.path),
+            ]),
+        ),
+      });
+    }),
+  );
+}
+```
+
+</Details>
+
+This adapter supports `SKILL.md` instructions and files under `references/`. For skills that execute scripts or use other filesystem resources, use your framework's filesystem skill support with [CLI-installed files](#cli-install).
+
+## Trace the loaded skills [#tracing]
+
+For Mastra agent tracing, configure the [Mastra integration](/integrations/frameworks/mastra). Then [report the selected skill names and versions](/docs/skill-management/tracing) on model and file-loading tool calls to see skill availability and loaded files in the trace.
