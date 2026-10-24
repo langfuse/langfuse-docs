@@ -199,10 +199,20 @@ pricing = await flashdata.call("get_pricing", {})
 
 request = {"query": "battery recycling research", "gl": "us", "hl": "en", "num": 10}
 search_result = None
-if "error" not in catalog and "error" not in pricing:
-    print("Review catalog and pricing locally. One Google Search will use your Credits.")
+search_schema = next(
+    (tool for tool in catalog.get("tools", []) if tool["name"] == "google_search"),
+    None,
+)
+if "error" in catalog or "error" in pricing or search_schema is None:
+    print("Schema or pricing unavailable. No paid request was submitted.")
+else:
+    print("Google Search schema:")
+    print(json.dumps(search_schema, indent=2))
+    print("Current pricing (review the Google Search rate):")
+    print(json.dumps(pricing, indent=2))
+    print("Request to submit once; this will consume your FlashData Credits:")
     print(json.dumps(request, indent=2))
-    if input("Submit the displayed request once? [y/N] ").strip().lower() == "y":
+    if input("Approve this request after reviewing the schema and pricing? [y/N] ").strip().lower() == "y":
         search_result = await flashdata.call("google_search", request, approved=True)
 
 # Send only the safe tool observations defined above.
