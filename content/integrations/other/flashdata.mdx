@@ -1,0 +1,250 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Trace FlashData research tools with Langfuse
+sidebarTitle: FlashData
+logo: /images/integrations/flashdata_icon.svg
+description: Trace Google and YouTube research tools with Langfuse while keeping query inputs, results, and credentials out of observations.
+category: Integrations
+---
+
+# Trace FlashData research tools with Langfuse
+
+Measure the latency and outcome of Google search, news, places, and YouTube transcript tools using Langfuse observations. This Python notebook uses the existing FlashData MCP endpoint and records tool names and safe status only.
+
+> **What is FlashData?** [FlashData](https://flashdata.dev/?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=overview) provides structured Google and YouTube data for research agents. Users bring their own API key and pay with their own Credits.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications.
+
+<Steps>
+## Step 1: Install dependencies
+
+Use Python 3.10+ in a fresh environment. The example was checked offline with Langfuse 5.0.4, MCP 1.30.0 and HTTPX 0.28.1.
+
+```python
+%pip install -U "langfuse>=5,<6" "mcp==1.30.0" "httpx==0.28.1"
+```
+
+## Step 2: Set up environment variables
+
+Get keys from your project settings in [Langfuse Cloud](https://langfuse.com/cloud) or [self-host Langfuse](https://langfuse.com/self-hosting). Use the region matching your project. The connection check contacts your Langfuse project; the tool cells later export safe observations to it.
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+os.environ.setdefault("FLASHDATA_API_KEY", "YOUR_FLASHDATA_API_KEY");
+```
+
+With the environment variables set, initialize the Langfuse client. `get_client()` picks up the env vars above and returns a client bound to your project.
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+
+# Verify connection
+if langfuse.auth_check():
+    print("Langfuse client is authenticated and ready!")
+else:
+    print("Authentication failed. Please check your credentials and host.")
+```
+
+## Step 3: Observe tool calls without capturing their data
+
+Use the [observe decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper) with input/output capture disabled. Exceptions are handled **inside** the decorated function because disabling IO alone does not disable error capture. Only the allowed tool name, elapsed time and fixed outcome/status are recorded; queries, arguments, responses, job IDs, signed URLs and keys are not attached to spans.
+
+The following thin client reuses the [existing FlashData MCP connection pattern](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/registry/examples/call_tool.py). It reads current schemas, sends the key only in `X-API-Key`, does not follow redirects and never retries a tool call. Download and batch submissions are excluded.
+
+```python
+import asyncio
+import json
+from contextlib import asynccontextmanager
+from datetime import timedelta
+
+import httpx
+from langfuse import observe
+from mcp import ClientSession
+from mcp.client.streamable_http import streamable_http_client
+
+QUERY_TOOLS = frozenset(
+    {
+        "google_search",
+        "google_news",
+        "google_images",
+        "google_shopping",
+        "google_videos",
+        "google_places",
+        "youtube_search",
+        "youtube_search_extended",
+        "youtube_metadata",
+        "youtube_transcript",
+        "youtube_captions",
+        "youtube_trainability",
+        "youtube_channel",
+        "youtube_suggestions",
+    }
+)
+ALLOWED_TOOLS = QUERY_TOOLS | {"get_pricing", "get_job", "get_result"}
+FAILURE = "Request failed or was interrupted; it may have consumed Credits. Check Jobs before resubmitting."
+
+
+class FlashDataTools:
+    def __init__(self, api_key, *, transport=None):
+        self.api_key = api_key
+        self.transport = transport
+
+    @asynccontextmanager
+    async def session(self):
+        async with httpx.AsyncClient(
+            headers={"X-API-Key": self.api_key},
+            timeout=120,
+            follow_redirects=False,
+            trust_env=False,
+            transport=self.transport,
+        ) as http:
+            async with streamable_http_client(
+                "https://data.flashdata.dev/mcp",
+                http_client=http,
+            ) as (read, write, _):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    yield session
+
+    async def catalog(self):
+        try:
+            async with self.session() as session:
+                tools, cursor = [], None
+                while True:
+                    page = await session.list_tools(cursor=cursor)
+                    tools.extend(
+                        {
+                            "name": t.name,
+                            "description": t.description,
+                            "input_schema": t.inputSchema,
+                        }
+                        for t in page.tools
+                        if t.name in ALLOWED_TOOLS
+                    )
+                    cursor = page.nextCursor
+                    if not cursor:
+                        return {"tools": tools}
+        except Exception:
+            return {"error": "Discovery failed. Check your key and source permissions."}
+
+    @observe(
+        name="flashdata.call", as_type="tool", capture_input=False, capture_output=False
+    )
+    async def call(self, name, arguments, *, approved=False):
+        # Catch exceptions inside the observation: decorator IO flags do not suppress errors.
+        try:
+            if name not in ALLOWED_TOOLS or not isinstance(arguments, dict):
+                langfuse.update_current_span(metadata={"outcome": "rejected"})
+                return {
+                    "error": "Tool unavailable. Downloads use the protected local CLI."
+                }
+            langfuse.update_current_span(metadata={"tool": name})
+            if name in QUERY_TOOLS and not approved:
+                langfuse.update_current_span(metadata={"outcome": "declined"})
+                return {"error": "Approval required before spending FlashData Credits."}
+            async with self.session() as session:
+                result = await session.call_tool(
+                    name,
+                    arguments=arguments,
+                    read_timeout_seconds=timedelta(seconds=120),
+                )
+            if result.isError:
+                raise RuntimeError("Tool failure")
+            body = result.structuredContent
+            if body is None:
+                body = json.loads(
+                    next(c.text for c in result.content if c.type == "text")
+                )
+            if not isinstance(body, dict):
+                raise ValueError("Unexpected tool output")
+            if (
+                name == "get_job"
+                and body.get("job", {}).get("source") == "youtube_download"
+            ):
+                job = body["job"]
+                body = {"job": {"id": job.get("id"), "status": job.get("status")}}
+            langfuse.update_current_span(metadata={"outcome": "returned"})
+            return body
+        except (Exception, asyncio.CancelledError):
+            langfuse.update_current_span(
+                level="ERROR",
+                status_message="FlashData request failed",
+                metadata={"outcome": "failed"},
+            )
+            return {"error": FAILURE}
+
+```
+
+## Step 4: Discover schemas and approve one search
+
+Get a [FlashData key](https://flashdata.dev/app/api-keys) and check [current pricing](https://flashdata.dev/pricing). Installation is free; data calls consume your Credits. Langfuse usage follows your selected deployment and plan. This example needs no model call. Load keys through a protected environment or secret manager before running; do not save real keys in notebook cells or outputs.
+
+Discovery and pricing reads below are not proof of paid data retrieval. Review the returned schema and pricing locally. The data query runs only after explicit confirmation; do not pass `approved=True` as a default in an agent.
+
+```python
+flashdata = FlashDataTools(os.environ["FLASHDATA_API_KEY"])
+catalog = await flashdata.catalog()
+pricing = await flashdata.call("get_pricing", {})
+
+request = {"query": "battery recycling research", "gl": "us", "hl": "en", "num": 10}
+search_result = None
+if "error" not in catalog and "error" not in pricing:
+    print("Review catalog and pricing locally. One Google Search will use your Credits.")
+    print(json.dumps(request, indent=2))
+    if input("Submit the displayed request once? [y/N] ").strip().lower() == "y":
+        search_result = await flashdata.call("google_search", request, approved=True)
+
+# Send only the safe tool observations defined above.
+langfuse.flush()
+```
+
+## Step 5: Inspect the observations
+
+Open [your Langfuse traces](https://cloud.langfuse.com/project/~/traces) after running your own example. Each `flashdata.call` observation has type `tool`, duration, an allowed tool name and a fixed outcome. Failure status is generic. No query/result I/O, model generations, token usage or computed FlashData costs are claimed by this example. The decorator nests within your existing trace; any parent agent or independent HTTP/model instrumentation needs its own data-capture policy.
+
+No live trace or screenshot is included: this contribution was validated with synthetic MCP responses and a local in-memory span exporter, without a model call, paid FlashData query, external trace upload or storage write. These checks establish protocol and tracing behavior, not live source availability or data quality.
+
+</Steps>
+
+## Fifteen research workflows
+
+For a Google Search, returned `results[0].organic` items can include position, title, link and snippet; keep source URLs and actual counts. `get_job` follows an existing asynchronous job, and `get_result` retrieves result chunks without submitting the paid query again. Retain job IDs and chunk metadata locally. Read only research jobs returned by your workflow or explicitly authorized by the user.
+
+The 14 query capabilities below use the same observed `call` method and current `catalog` schemas. Each guide includes a concrete task, input JSON, structured output fields and processing steps. This is one integration with 15 workflow mappings. The fifteenth, media delivery, uses the separate protected local workflow below.
+
+| Tool                      | Task guide and example                                                                                                                                                      | Source contract                                                                                                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `google_search`           | [Google Search](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/google-search/README.md)                                    | [API input/output](https://flashdata.dev/docs/sources/google_search?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_search-task)                     |
+| `google_news`             | [Google News](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/google-news/README.md)                                        | [API input/output](https://flashdata.dev/docs/sources/google_news?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_news-task)                         |
+| `google_images`           | [Google Images](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/google-images/README.md)                                    | [API input/output](https://flashdata.dev/docs/sources/google_images?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_images-task)                     |
+| `google_shopping`         | [Google Shopping](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/google-shopping/README.md)                                | [API input/output](https://flashdata.dev/docs/sources/google_shopping?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_shopping-task)                 |
+| `google_videos`           | [Google Video Search](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/google-video-search/README.md)                        | [API input/output](https://flashdata.dev/docs/sources/google_videos?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_videos-task)                     |
+| `google_places`           | [Google Places](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/google-places/README.md)                                    | [API input/output](https://flashdata.dev/docs/sources/google_places?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=google_places-task)                     |
+| `youtube_search`          | [YouTube Search](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-search/README.md)                                  | [API input/output](https://flashdata.dev/docs/sources/youtube_search?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_search-task)                   |
+| `youtube_search_extended` | [YouTube Extended Search](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-extended-search/README.md)                | [API input/output](https://flashdata.dev/docs/sources/youtube_search_extended?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_search_extended-task) |
+| `youtube_metadata`        | [YouTube Metadata](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-metadata/README.md)                              | [API input/output](https://flashdata.dev/docs/sources/youtube_metadata?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_metadata-task)               |
+| `youtube_transcript`      | [YouTube Transcript](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-transcript/README.md)                          | [API input/output](https://flashdata.dev/docs/sources/youtube_transcript?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_transcript-task)           |
+| `youtube_captions`        | [YouTube Captions](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-captions/README.md)                              | [API input/output](https://flashdata.dev/docs/sources/youtube_captions?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_captions-task)               |
+| `youtube_trainability`    | [YouTube Creative Commons License Metadata](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-trainability/README.md) | [API input/output](https://flashdata.dev/docs/sources/youtube_trainability?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_trainability-task)       |
+| `youtube_channel`         | [YouTube Channel Data](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-channel/README.md)                           | [API input/output](https://flashdata.dev/docs/sources/youtube_channel?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_channel-task)                 |
+| `youtube_suggestions`     | [YouTube Autocomplete](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-autocomplete/README.md)                      | [API input/output](https://flashdata.dev/docs/sources/youtube_suggestions?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_suggestions-task)         |
+| `youtube_download`        | [YouTube Download to Cloud Storage](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-cloud-storage/README.md)        | [API input/output](https://flashdata.dev/docs/sources/youtube_download?utm_source=langfuse&utm_medium=integration&utm_campaign=intent_gtm_2026q4&utm_content=youtube_download-task)               |
+
+### Media delivery and limits
+
+`youtube_download` and `submit_batch` are unavailable in the observed client. Use the [existing local download CLI](https://github.com/rocosen/flashdata-mcp/blob/8e7f5cb6641f76e78a3db73ba0fe8c992aa5d5c9/npm/docs/youtube-cloud-storage/README.md) with Node.js 22.18+, a protected request file or stdin, your authorized writable storage and byte-based cost approval. Storage fees are separate. Keep populated storage parameters and final manifests outside notebook outputs, agents and telemetry; `get_job` in this example returns only ID/status for downloads. Do not retrieve a private delivery through `get_result`. An interrupted data request may already be charged: check existing Jobs before deciding to resubmit.
+
+News does not promise full articles; Images returns references, not downloaded images; Shopping cannot guarantee stock or checkout prices; Places may omit contacts. YouTube Search caps requests at 20, Extended at 700 with different pricing, without guaranteeing result counts. Transcript defaults to `auto=true`, Captions to `auto=false`: both read existing tracks without ASR or translation. Trainability is license/CC-label metadata and does not grant training rights. Avoid verbose provider logs and clear local outputs before sharing notebooks.
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
