@@ -33,7 +33,7 @@ import {
 } from "./game";
 import { SYSTEM_PROMPT, buildUserPrompt } from "./prompt";
 
-export const MODEL_TIME_CAP_MS = 6_000;
+export const MODEL_TIME_CAP_MS = 10_000;
 
 type ProviderOptions = NonNullable<
   Parameters<typeof streamText>[0]["providerOptions"]
