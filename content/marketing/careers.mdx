@@ -10,13 +10,17 @@ import { Heading } from "@/components/ui/heading";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { Text } from "@/components/ui/text";
 import { CredibilitySentence } from "@/components/CredibilitySentence";
+import { EnterpriseLogos } from "@/components/EnterpriseLogos";
 import Image from "next/image";
 
 <div className="not-prose flex flex-col gap-4 mb-8 items-center text-center">
   <Heading as="h1" size="large">
     <TextHighlight>Building Langfuse</TextHighlight>
   </Heading>
-  <Text>Join the team building the leading open-source AI engineering platform</Text>
+  <Text>
+    Join the team building the leading open-source AI engineering platform, now
+    part of ClickHouse
+  </Text>
   <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
     <Button href="https://clickhouse.com/company/careers?search=langfuse" target="_blank" rel="noopener">
       View Open Positions →
@@ -36,17 +40,87 @@ import Image from "next/image";
   />
 </div>
 
-While LLMs improve a lot, we don't see enough applications in production. Building these applications requires a new workflow of continuous monitoring and evaluation that we enable with Langfuse (learn more about [our mission](/handbook/chapters/mission)).
+Teams building AI applications need a new workflow of continuous monitoring and evaluation to get them into production and keep improving them. Langfuse is the open-source platform for that workflow (learn more about [our mission](/handbook/chapters/mission)).
 
-We are seeing strong traction (see metrics below), thus it is the right time to grow the team to build out our backend systems, product, and how we communicate with developers.
+In January 2026, [we joined ClickHouse](/blog/joining-clickhouse). We still run as our own team.
 
-We are backed by Lightspeed, General Catalyst, Y Combinator, and angels. We are growing fast (see metrics below) and work with some of the best AI teams such as Canva, Samsara, Twilio, Khan Academy, and Intuit. In January 2026, [we joined ClickHouse](/blog/joining-clickhouse) to accelerate our growth even further.
+We hire engineers in Europe and the US Eastern time zone. Marketing also hires in San Francisco.
 
-We are a remote team with offices in Berlin, San Francisco, Amsterdam and New York, and team members across Europe and North America. European roles are remote-first with 3-5 days every two months in Berlin (travel covered); people near an office use it when it's useful.
-
-If complex technical problems & great developer experiences excite you, we'd love to hear from you.
+If you want to build great developer tools, or get developers to love them, we'd love to hear from you.
 
 – [Marc](https://x.com/MarcKlingen), [Clemens](https://x.com/rawert), [Max](https://x.com/maxdeichmann) and the Langfuse team
+
+## Why join Langfuse
+
+### We're winning the category through open source
+
+Langfuse is the [most used open-source AI engineering platform](/blog/2024-11-most-used-oss-llmops), with the largest distribution and scale in our space. See the [public metrics](#public-metrics) below.
+
+### AI-native companies and large enterprises
+
+AI-native companies like [Ramp](/users/ramp) run on Langfuse, and so do very large enterprises. See more [companies building with Langfuse](/users).
+
+<EnterpriseLogos />
+
+### You work directly with customers, in public
+
+Everyone talks to customers, and customers review our RFCs before we build. Features often start as a thread in [GitHub Discussions](https://github.com/orgs/langfuse/discussions), and the people who build them answer users there themselves.
+
+### You own an area and compound over time
+
+Engineers own a feature area. Marketers own launches, events, or a content program like Langfuse Academy. You stay with your area as the team grows, and because the work is open source, your track record stays public.
+
+### ClickHouse backs us and stays out of the way
+
+We set our own roadmap. ClickHouse gives us a global sales team that sells Langfuse and a much larger audience for our launches, and the engineers who build the database are one message away.
+
+### AI-pilled and remote
+
+Everyone gets a very high AI budget. We build slides with AI, maintain our own coding harness, and almost everyone runs a small army of agents. We have three scheduled meetings a week, and everything else happens in writing (see [how we work](/handbook/how-we-work/principles)).
+
+<CredibilitySentence bold={false} />
+
+## What you'll work on
+
+### Product engineering
+
+You build features end to end that help engineers build agents, increasingly with agents:
+
+- UI and UX for large, messy data, like the [Responsive Timeline](/changelog/2026-08-28-responsive-timeline) and the [graph view](/changelog/2026-07-13-graph-view-modes)
+- [Halo](/changelog/2026-09-03-langfuse-assistant), the AI agent inside Langfuse
+- Tooling for evals at scale, like [code evaluators](/blog/2026-06-22-code-evaluators-execution-model) and [experiments](/changelog/2026-10-19-experiments)
+
+### Data platform
+
+You own ingestion, ClickHouse query performance, and the infrastructure behind Langfuse Cloud and self-hosting, at petabyte scale. Read [how Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale).
+
+### Marketing and growth
+
+Our audience is AI engineers, so most of our marketing is material they'd bookmark:
+
+- Developer content, like the [changelog](/changelog), [Langfuse Academy](/academy), and the docs
+- [Launches](/blog/2025-10-29-launch-week-4) with one owner each, which also go out through ClickHouse's much larger audience
+- Product marketing, [events](/events) and community, and growth
+
+The team ships website changes itself with coding agents.
+
+Questions about the team or the interview process? See [questions candidates often ask](/handbook/how-we-hire/hiring-process#faq).
+
+<CTACard
+  title="Want to work on this?"
+  description="We hire engineers and marketers. Take a look at the open roles."
+  showArrow={true}
+>
+  <Button asChild variant="default" size="sm">
+    <a
+      href="https://clickhouse.com/company/careers?search=langfuse"
+      target="_blank"
+      rel="noopener"
+    >
+      See open roles
+    </a>
+  </Button>
+</CTACard>
 
 ## Team
 
@@ -64,22 +138,6 @@ import TeamMembers from "@/components-mdx/team-members.mdx";
 </div>
 
 <PolaroidGallery />
-
-<CTACard
-  title="Curious to build with us?"
-  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
-  showArrow={true}
->
-  <Button asChild variant="default" size="sm">
-    <a
-      href="https://clickhouse.com/company/careers?search=langfuse"
-      target="_blank"
-      rel="noopener"
-    >
-      See open roles
-    </a>
-  </Button>
-</CTACard>
 
 ## Read our Handbook
 
@@ -224,26 +282,8 @@ If you prefer watching videos or listening to podcasts to get an impression, her
   </Cards.Card>
 </Cards>
 
-## Public Metrics
+## Public Metrics [#public-metrics]
 
 import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
 
-<CredibilitySentence bold={false} />
-
 <PublicMetricsDashboard />
-
-<CTACard
-  title="Curious to build with us?"
-  description="If you are excited about delivering exceptional open-source developer experiences alongside an insanely motivated team that ships, reach out!"
-  showArrow={true}
->
-  <Button asChild variant="default" size="sm">
-    <a
-      href="https://clickhouse.com/company/careers?search=langfuse"
-      target="_blank"
-      rel="noopener"
-    >
-      See open roles
-    </a>
-  </Button>
-</CTACard>
