@@ -1,0 +1,65 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json",
+  "name": "com.langfuse/langfuse",
+  "version": "1.0.0",
+  "title": "Langfuse MCP Server",
+  "description": "Authenticated MCP server for the Langfuse data platform. Lets agents read and write prompts, datasets, scores, observations, metrics, and other project data. Each API key pair is scoped to one Langfuse project and is sent as an HTTP Basic Authorization header (public key as username, secret key as password). Read and write tools are enabled by default; use a client-side allowlist for read-only access. Pick the remote that matches the project's data region; self-hosted deployments serve the same server at /api/public/mcp.",
+  "websiteUrl": "https://langfuse.com/docs/api-and-data-platform/features/mcp-server",
+  "icons": [
+    {
+      "src": "https://langfuse.com/langfuse-icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Basic base64(public_key:secret_key) for a project in Langfuse Cloud EU",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://us.cloud.langfuse.com/api/public/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Basic base64(public_key:secret_key) for a project in Langfuse Cloud US",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://jp.cloud.langfuse.com/api/public/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Basic base64(public_key:secret_key) for a project in Langfuse Cloud Japan",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://hipaa.cloud.langfuse.com/api/public/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Basic base64(public_key:secret_key) for a project in Langfuse Cloud HIPAA US",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
