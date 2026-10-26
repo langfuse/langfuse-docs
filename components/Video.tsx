@@ -10,6 +10,9 @@ export const Video = ({
   className,
   gifStyle = false,
   poster,
+  autoPlay = false,
+  muted = false,
+  playsInline = false,
   onCanPlay,
 }: {
   src: string;
@@ -17,6 +20,9 @@ export const Video = ({
   gifStyle?: boolean;
   className?: string;
   poster?: string;
+  autoPlay?: boolean;
+  muted?: boolean;
+  playsInline?: boolean;
   onCanPlay?: () => void;
 }) => {
   return (
@@ -25,11 +31,11 @@ export const Video = ({
       poster={poster}
       posterLoad="eager"
       controls={!gifStyle}
-      autoPlay={gifStyle}
-      muted={gifStyle}
+      autoPlay={gifStyle || autoPlay}
+      muted={gifStyle || muted}
       loop={gifStyle}
       load={"visible"}
-      playsInline={gifStyle}
+      playsInline={gifStyle || playsInline}
       aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
       className={cn(
         "overflow-hidden shadow-lg bg-surface-bg object-cover",
