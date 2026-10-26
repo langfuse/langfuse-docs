@@ -16,11 +16,13 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
   authors={["annabellschafer"]}
 />
 
-Many teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
+Banks, insurers, and healthcare providers handle a lot of routine work: answering the same customer questions, checking documents, summarizing cases. AI agents can take on a large share of it, so people can spend their time on the cases that need judgment. The goal is less routine work, with the same quality and control the business has today.
+
+Getting there takes more upfront work than in other industries. Many teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
 
 A common way to start is human in the loop: the agent proposes an answer or action, and a person approves it before anything reaches the customer. Regulators recommend this kind of oversight, and it is a sensible first step. For it to work, the agent's proposals need to be good from the start. If reviewers have to rewrite most drafts, the agent saves no time and people stop trusting it. The bigger payoff comes later, when a reliable share of cases can run without review and the team can measure and trust that autonomy rate.
 
-This blog describes how teams in regulated industries get there, from the first prototype to an agent that handles part of the work on its own.
+We will show you how teams in regulated industries get there, from the first prototype to an agent that handles part of the work on its own.
 
 ## What makes regulated industries different [#the-challenge]
 
@@ -32,7 +34,7 @@ AI development teams in regulated industries usually face three requirements for
 
 **Control over data.** Conversations contain account details, transactions, and health information. Teams need to know where that data is stored, what gets redacted, and who can see it. In healthcare, a [business associate agreement](/security/hipaa) has to be in place before any protected health information is processed.
 
-Teams still ship agents under these rules. They just need to take a different approach to successfully running the AI engineering loop.
+Together, these requirements raise three questions every team has to answer: how do you decide whether an agent is ready for production, where do people need to stay involved, and when can you automate more? The rest of this post walks through how teams answer each one.
 
 ## The approach: start the loop offline [#the-approach]
 
@@ -51,11 +53,16 @@ Add [tracing](/docs/observability/get-started) before anyone outside the team us
 
 Instrument your application to capture each step your agent is taking. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. This makes traces from offline tests, shadow runs, and production comparable, and each trace doubles as the decision log a reviewer will ask for.
 
-Decide early where the traces will live. Many banks and healthcare providers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched.
+Decide early where the traces will live. This is where the data control requirement becomes concrete, and regulated teams usually choose between two setups:
 
-[Trade Republic](/users/trade-republic), a fully licensed bank with over 10 million customers, went the same way. Its Ops Tools team runs self-hosted Langfuse and rolled it out across teams while meeting the bank's compliance requirements.
+- **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting), so trace data never leaves your environment.
+- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regulated companies opt for the cloud version whenever self-hosting is not a must-have.
+
+[DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched. [Trade Republic](/users/trade-republic), a fully licensed bank with over 10 million customers, went the same way. Its Ops Tools team runs self-hosted Langfuse and rolled it out across teams while meeting the bank's compliance requirements.
 
 Also mask sensitive fields before they are stored. The SDKs support [client-side masking](/docs/observability/features/masking), so account numbers or patient identifiers can be redacted at the source.
+
+At the end of this stage, the team can see what happened in every run, explain why the agent responded the way it did, and show that evidence to whoever needs to review it, from a compliance officer to a model risk committee.
 
 ## Stage 2: Verify with a starting dataset [#starting-dataset]
 
@@ -66,7 +73,7 @@ Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together
 Regulated teams rarely need to invent test cases. There are multiple sources that can be used to collect dataset cases.
 
 - **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims, and compare the agent's output with the human decision. Clinical teams call this retrospective back-testing, and [Qualified Health](https://claude.com/customers/qualified-health) uses it as the first step of every deployment.
-- **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything, and compare its output with what the team did. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff.
+- **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything, and compare its output with what the team did. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff. Shadow runs usually start once the agent does well on historical cases, and they keep running while you set up monitors in stage 3.
 - **Work with domain experts.** Domain experts have a good intuition for typical cases, and they also know from experience which cases are hard to handle. Let them write typical cases and setups, including how they expect them to be handled.
 
 Those sources are often combined for an initial dataset of typical cases.
@@ -94,13 +101,28 @@ Before launch, agree with compliance on what the agent must never do. For a bank
 
 Build a guardrail for each no-go and test it like any other component. Add dataset cases that should trigger the guardrail and normal cases that should pass through. A guardrail that fires too often gets ignored, so measure both.
 
-Then run the full dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) and record the results as your baseline. Rerun it every time you change a prompt, model, or tool. Trade Republic takes this a step further when migrating live workflows to new agent architectures. The team iterates on one dataset and keeps a second, held-out dataset as a final exam, and only ships when the new agent passes both.
+### Improve the agent one failure at a time [#improve]
+
+Run the full dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) and record the results as your baseline. The first run rarely meets the bar your experts set. From here, improvement follows a simple cycle:
+
+1. **Find a failure.** Sort the experiment results by score and pick a case that failed, or one your experts flagged.
+2. **Understand it through the trace.** Open the trace and find the step where things went wrong. Retrieval may have missed the right document, the prompt may lack a rule, or a tool may have returned outdated data.
+3. **Make a change.** Fix the prompt, the retrieval, or the tool, depending on what the trace shows.
+4. **Test again.** Rerun the experiment and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments). Check that the failure is fixed and that no other case got worse.
+
+Repeat the cycle until the agent meets the bar, and rerun the dataset every time you change a prompt, model, or tool. Trade Republic takes this a step further when migrating live workflows to new agent architectures. The team iterates on one dataset and keeps a second, held-out dataset as a final exam, and only ships when the new agent passes both.
 
 ## Stage 3: Add compliance and user-signal monitors [#monitors]
 
-Set up monitors before launch, and turn them on during the shadow runs so you know what normal looks like.
+Set up monitors before launch. The shadow runs from stage 2 are the right place to turn them on first: the agent processes real cases, nothing reaches customers, and you learn what normal looks like. You can tune thresholds and fix noisy evaluators before a single customer is affected.
 
-**Compliance monitors come first.** They check every trace against your no-gos. An [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator can flag a response that sounds like investment advice. A code check can flag a missing disclaimer. Route flagged traces to the right experts, and set [alerts](/docs/observability/features/alerts) when the share of flagged traces rises.
+**Compliance monitors come first.** They check every trace against your no-gos. An [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator can flag a response that sounds like investment advice. A code check can flag a missing disclaimer. Set [alerts](/docs/observability/features/alerts) for when the share of flagged traces rises.
+
+Decide upfront who acts on each type of flag. A typical split looks like this:
+
+- **Domain experts** review flagged conversations in annotation queues, rate how serious each one is, and confirm or correct the agent's response.
+- **Engineers** take recurring issues, find the cause in the trace, and add the case to the dataset so the fix can be tested.
+- **Compliance** gets an alert right away for critical flags, such as a possible data leak or advice the agent must never give.
 
 DKB screens every answer its assistant gives and sends flagged conversations to annotation queues sorted by service area, such as brokerage or credit. Specialists rank each case by severity and handle the critical ones first. For DKB, this screening is part of its license to operate.
 
@@ -139,6 +161,16 @@ In practice, classify incoming requests by category. Let the agent handle catego
 
 Keep a small random sample of each automated category in an annotation queue. Once humans only see exceptions, the biggest risk is the case the agent failed to flag, and sampling is how you catch quality drift.
 
+### Track the autonomy rate [#autonomy-rate]
+
+This is where the autonomy rate from the beginning becomes measurable. It is the share of cases the agent handles end to end without a person. Track it per category, together with three numbers that show whether quality holds:
+
+- **Quality on sampled reviews.** The share of randomly sampled cases your experts rate as correct.
+- **Flag and escalation rate.** How often compliance monitors fire and how often the agent hands off to a person.
+- **Review time.** How many hours your team spends reviewing each week.
+
+The agent is saving time when the autonomy rate goes up and review time goes down, while sampled quality and the flag rate stay stable. If quality drops in a category, move that category back to sampled review until the next fix has passed the dataset. You can record each of these as [scores](/docs/evaluation/scores/overview) and chart them in a [custom dashboard](/docs/metrics/features/custom-dashboards), so the same numbers are available to engineering, the business, and the review board.
+
 Finally, treat every change to a prompt, model, or tool as a new release. Rerun the stage 2 dataset, compare it against the baseline, and only then deploy. DKB runs this full loop in Langfuse today.
 
 <CustomerQuote
@@ -157,12 +189,11 @@ Finally, treat every change to a prompt, model, or tool as a new release. Rerun 
 | 3. Add monitors                 | Score compliance and user signals, alert when flags rise                             | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [online evaluation](/docs/evaluation/get-started/online), [user feedback](/docs/observability/features/user-feedback), [alerts](/docs/observability/features/alerts)                 |
 | 4. Go live and run the loop     | Review a sample, add failures to datasets, rerun before every release                | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [datasets](/docs/evaluation/experiments/datasets), [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)                                                      |
 
-On the infrastructure side, regulated teams usually choose between two setups:
+## Where to start [#where-to-start]
 
-- **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting).
-- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regulated companies opt for the cloud version whenever self-hosting is not a must-have.
+Bringing an agent into production in a regulated industry takes more work upfront. In return, the team ends up with what the review board, the regulator, and the business all ask for: evidence that the agent works before launch, people involved where the risk is highest, and a measured path toward automating more of the routine work.
 
-The same need for visibility applies in life sciences. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
+The same holds outside banking. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
 
 <CustomerQuote
   quote="Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets."
@@ -171,6 +202,8 @@ The same need for visibility applies in life sciences. [Merck](/users/merckgroup
   company="Merck"
   image="/images/customers/merck/walid.jpeg"
 />
+
+Start with one workflow. Pick one with high volume, clear rules, and low risk per case, such as answering account questions or summarizing support tickets. Trace it, build a starting dataset with your experts, set up monitors, and launch with people reviewing every output. Then expand automation one category at a time, as far as the evidence supports. Much of what you build for the first workflow, from the tracing setup to the evaluators and the review process, carries over to the next one, so each new agent gets to production faster.
 
 ## Further reading [#further-reading]
 
