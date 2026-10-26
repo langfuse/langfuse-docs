@@ -111,6 +111,13 @@ export function VideoCarousel({
         opts={{
           align: showNavigation ? "center" : "start",
           loop: showNavigation,
+          watchDrag: (_api, event) =>
+            !(
+              event.target instanceof Element &&
+              event.target.closest(
+                "video, audio, media-player, [data-media-player]",
+              )
+            ),
         }}
         className="mx-auto w-full"
       >
