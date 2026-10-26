@@ -1,0 +1,143 @@
+---
+title: "How we built Langfuse Halo"
+date: 2026/10/21
+description: "How we built Langfuse Halo, our powerful in-app assistant, on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
+tag: engineering
+author: Ben
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { AssistantMilestones } from "@/components/blog/AssistantMilestones";
+import { AssistantAccessDiagram } from "@/components/blog/AssistantAccessDiagram";
+import { SilentToolCallsDiagram } from "@/components/blog/SilentToolCallsDiagram";
+import { BackgroundRunDiagram } from "@/components/blog/BackgroundRunDiagram";
+import { AssistantArchitectureDiagram } from "@/components/blog/AssistantArchitectureDiagram";
+
+<BlogHeader
+  title="How we built Langfuse Halo"
+  description="How we built Langfuse Halo, our powerful in-app assistant, on our existing MCP server, why the agent runs outside its sandbox, and how we handle background runs."
+  authors={["lotteverheyden", "benbachem"]}
+  date="October 21, 2026"
+/>
+
+In June, we [launched](/changelog/2026-06-19-langfuse-assistant-public-beta) Halo, the [Langfuse Assistant](/docs/halo). You can ask it to interpret your traces, build a dashboard or dataset, or help set up evals without leaving the Langfuse UI.
+
+It's somewhat ironic: as a company focused on helping others build agents, we didn't have an in-app assistant of our own. Users have been using our [Langfuse skill](/docs/api-and-data-platform/features/agent-skill), [MCP server](/docs/api-and-data-platform/features/mcp-server), and [CLI](/docs/api-and-data-platform/features/cli), extensively with their own agents, now we wanted to bring those capabilities into Langfuse itself.
+
+<Video src="https://static.langfuse.com/docs-videos/halo-video-v14.mp4" />
+
+When we first discussed whether we should write this post, I wasn't sure there was much to write about. The first version was simply a Mastra agent, an MCP server, and some code to glue them together. We didn't invent some super-efficient algorithm for agent execution, and we didn't rewrite anything in Rust (although there might be some other posts here coming soon). Building the in-app assistant was mostly about integrating existing pieces and making them work smoothly together while laying the foundations for future agentic features.
+
+From the start, we knew we wanted to reuse as much as possible and share the tools and instructions behind Halo with people using Langfuse directly with their own agents. We didn't want a second set of things to maintain just for Halo. With MCP and CLI usage growing quickly, we wanted to make sure that if we improved a tool or fixed some guidance, it would benefit both our in-app assistant and our power-users who will continue using their preferred tools. By dogfooding the MCP in an environment controlled by us, we have a continued feedback loop to improve it.
+
+<AssistantAccessDiagram />
+
+## How Halo is put together
+
+The first step of building Halo was expanding the [MCP server](/blog/2025-12-09-building-langfuse-mcp-server). The [May 29 release](/changelog/2026-05-29-mcp-update) added tools for observations, metrics, scores, comments, datasets, and annotation queues, making most Langfuse project data available to agents. We needed these tools for Halo, but they were also useful to anyone connecting their own agent.
+
+In June, we launched the first beta version of Halo: a [Mastra](https://mastra.ai) agent that ran behind an HTTP endpoint, streaming responses to the browser. It handled one conversation at a time, with no parallel work or background execution. In early July, we gave it write access with human-in-the-loop approvals, and later that month added a sandbox. We added background execution in August. We [announced all these capabilities together in September](/changelog/2026-09-03-langfuse-assistant).
+
+<AssistantMilestones />
+
+Here's the high-level architecture that we ended up with:
+
+<div className="my-8">
+  <AssistantArchitectureDiagram />
+</div>
+
+Users can ask Halo to investigate something, close the tab, and come back to its progress and results. The worker keeps going independently of the browser, while the saved event log lets the UI catch up when you return. MCP tools let Halo work with the user's project data. The optional sandbox lets Halo process larger results with scripts instead of reading everything into the model's context. Neither gives it more access than you have, and actions that change data still need approval.
+
+## Reusing the MCP server and skill
+
+Halo accesses project data through our public MCP server. In addition, Halo gets sandbox tools similar to those in coding agents, plus UI-specific tools such as proposing navigation to another page. We also give Halo the user's name, time zone, browser languages, and current URL through the system prompt. By relying on MCP and tools, we can control which tools Halo gets to call without having to secure arbitrary network requests.
+
+For each run, the worker creates a temporary API key scoped to the project. By default, it can only call read-only MCP tools. We maintain our own mapping of tool permissions in the in-app assistant's code rather than trusting the MCP server's read-only annotations. We also filter tools by the signed-in user's role before exposing them to the model. If the user's role doesn't allow an action, we don't expose the corresponding tool to the agent at all.
+
+Tools that change data require approval. Choosing **Always approve** saves the approval for that conversation only. We still recheck it against the user's current role on each run, so an approval can't give the agent permissions the user doesn't have.
+
+If Halo needs another way to access project data, we have to add an MCP tool first. This might seem restrictive at first, but I actually like that constraint, because the same tool is then available to people using their own agents.
+
+We do the same with instructions. Halo's system prompt explains how to handle approvals, link to Langfuse pages, and keep answers short. For guidance on using Langfuse, such as setting up evals or migrating prompts, we load the open-source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) as a Mastra skill and rely on the [Docs MCP](/docs/docs-mcp). You can also use both of these with external agents like Claude Code or Cursor.
+
+## Using Langfuse for Halo
+
+Of course, we're using Langfuse itself to observe and analyze the behavior of Halo.
+
+When an organization opts into [AI feature telemetry](/docs/langfuse-assistant#data-privacy-and-security), we can use traces of Halo runs to see where it struggles. When we see Halo struggle with a tool or give poor guidance, we fix the MCP tool or shared skill, or improve our documentation. This way, improvements driven by Halo's interactions benefit all users.
+
+Some of those fixes can be very straightforward. Agents kept asking to sort metrics by `totalCost_sum` when the tool expected `sum_totalCost`, so we [made the MCP adapter accept both](https://github.com/langfuse/langfuse/pull/15623). When dashboard creation failed validation, the error told the agent which field was wrong but not what it could use instead. We [added the allowed values and guidance on looking up the schema](https://github.com/langfuse/langfuse/pull/15630), so it had enough information to correct the call.
+
+When Halo became expensive to run, we used Langfuse to drill into its costs and found that prompt caching wasn't working as expected. Fixing it brought costs down enough to make running Halo with more capable models viable again. You can use the same approach to [find what's driving your own agent's costs and test ways to reduce them](/academy/experiments/cost-optimization).
+
+Reviewing Halo traces made the challenges of debugging multi-turn agents more tangible. That helped clarify the direction and priorities for UI improvements such as the [redesigned session view](/changelog/2026-10-13-redesigned-session-view).
+
+People have been trying to break or exploit Halo since we announced it, and those attempts still turn up regularly. Security shaped the design of both the agent and the sandbox from the start. These attempts reinforce why we keep strict boundaries around what the agent can access and what sandbox scripts can do. Some of those boundaries limit functionality, but they help keep the system secure and protect user data.
+
+## The agent does not run in a sandbox
+
+When we added the sandbox, we deliberately kept the agent loop in our backend workers rather than moving it into the sandbox. Instead, we gave the agent four tools to work with files and run scripts in a separate environment: `read`, `write`, `edit`, and `bash`.
+
+When the agent first uses one of these tools in a conversation, we create a sandbox for that conversation. It has no network access by default, and code runs as an unprivileged user. After some time without activity, we suspend the sandbox and eventually terminate it and clean up its files.
+
+From within the sandbox, no process can make additional requests to Langfuse or the wider internet directly. The agent can only push data into the sandbox after fetching it through authorized MCP calls. Keeping data access in MCP meant we could add the sandbox without also having to secure against arbitrary network calls made from within it.
+
+Many conversations don't need a sandbox at all. Answering a docs question or looking up yesterday's traces might only take a few MCP-based lookups. Starting a VM for those conversations would consume memory and disk without adding value.
+
+There's also self-hosting. Langfuse is proudly open-source, and we have lots of users self-hosting it. For Langfuse Cloud, we use [AWS Lambda MicroVMs](https://docs.aws.amazon.com/lambda/latest/dg/microvms-networking.html) for the sandbox, but the sandbox interface the agent interacts with is built to be adaptable to different providers. Ultimately though, self-hosters can also choose to not use a sandbox at all. Without one, Halo still works.
+
+## Processing tool results with code
+
+Those simple lookups don't need a sandbox, but other tasks may require fetching thousands of traces or observations and can easily exceed a model's context window. The sandbox lets Halo process that data with code and bring only the relevant results back into context.
+
+Halo can scan through large amounts of data using the sandbox and tools like `grep`, `head`, `jq`, or a short Python script. Say you ask it to group the errors in a few hundred failed observations. It doesn't need to read every field of every observation to do that. It can inspect the files, group the errors, and read only the output it needs. To allow for this, we add an optional `silent` parameter to every MCP tool when a sandbox is available. This allows the agent to fetch data without putting the full result into the model's context:
+
+```ts
+// Simplified: when a sandbox is available, every MCP tool gets an optional `silent` flag.
+tool.execute = async ({ silent, ...input }, context) => {
+  const result = await execute(input, context);
+  persistToolCall({ toolName, toolCallId, result }); // stored with the run
+
+  if (!silent || isError(result)) return result; // failures are never silenced
+  return `Output available at /workspace/tool_calls/${toolName}_${toolCallId}.json`;
+};
+```
+
+With `silent: true`, the model gets a file path instead of the full result. Before the next sandbox operation, we then write the saved calls into the sandbox as JSON files containing the request and response.
+
+<SilentToolCallsDiagram />
+
+When looking through runs for this post to find examples, I saw Halo use short Python scripts to count observations, combine results from several files, and count errors by environment or model. Sometimes it just printed part of a file to see what was there. The agent decides what to inspect rather than having to read the whole response.
+
+<Callout type="info">
+
+You might have heard of code mode, or programmatic tool calling, where the model writes a script that calls tools and processes their results without sending everything back through the model. Mastra has [Code Mode](https://mastra.ai/blog/introducing-code-mode) for this. The tools still run on the host, but the script decides which ones to call and what to do with the results. Our setup is more limited: because we currently prevent requests from the sandbox back to Langfuse, scripts can't ask the worker to execute tools, which keeps the sandbox interface very narrow and controlled. We're exploring ways to allow this in the future but only if it doesn't compromise security.
+
+</Callout>
+
+## Background runs
+
+As Halo took on longer-running tasks, we wanted users to be able to close the tab and come back to the results. In the initial implementation, the agent loop ran in an HTTP handler, so closing the browser interrupted the request and stopped the agent. We needed to separate execution from the HTTP request, both for these conversations and for headless invocation.
+
+Langfuse already had separate web and worker processes, so we moved the agent loop from the HTTP handler to the worker. The web server saves new runs to Postgres and queues them through BullMQ. The worker executes each run and saves its progress and results to Postgres. While a user watches a conversation, the web server polls Postgres for new events and streams them to the browser over Server-Sent Events. This lets the worker keep going when the user closes the tab, and the browser catch up on saved events when they return.
+
+When an approval step is presented to the user, the run completes with a pending approval status. When the user approves or denies a proposed step, it creates a new run that continues from the saved conversation in Postgres.
+
+<BackgroundRunDiagram />
+
+**We decided not to automatically retry failed runs.** Most of Halo's runs are currently short, so we chose to keep run management simple rather than add automatic recovery. The trade-off is that a failed run stays failed instead of being retried automatically. If your runs take hours, cost a lot, or have side effects you can't check afterward, I'd probably make a different choice and use a durable workflow engine. Should we see similar requirements in the future, we might revisit this decision.
+
+## What's next
+
+We're exploring how to let sandbox scripts do more while keeping the access secure. Giving them access to the Langfuse SDK and the project's configured LLM connections would let Halo take on tasks such as evaluator calibration, an end-to-end process of testing an evaluator against human-labeled examples, changing its prompt, and checking whether the results improve. We'd need to restrict scripts to the requests the user is allowed to make and has approved. Given security concerns, this is non-trivial and we're still exploring how to do that.
+
+Halo is live on [Langfuse Cloud](https://cloud.langfuse.com) and in public beta for [self-hosted deployments](/self-hosting/configuration/langfuse-assistant). If one of these decisions gets in your way, tell us in the [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).
+
+<Callout type="info">
+
+**Want to use this as inspiration for your own assistant?** The [implementation is open source](https://github.com/langfuse/langfuse), so you can use it as a starting point or inspiration when building your own in-app assistant.
+
+</Callout>
+
+If you like working on this kind of problem, [we are hiring](/careers) to help build and improve Halo.

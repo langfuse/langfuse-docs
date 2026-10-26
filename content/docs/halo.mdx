@@ -24,7 +24,7 @@ sidebarTitle: Halo
 
 Halo is the Langfuse assistant for exploring your project data and taking actions in Langfuse with your approval. You can ask about traces, observations, sessions, and metrics, or ask it to create datasets, dashboards, and other resources. It brings the same Langfuse project tools available to external coding agents into the Langfuse UI.
 
-<Video src="https://static.langfuse.com/docs-videos/in-app-agent.mp4" />
+<Video src="https://static.langfuse.com/docs-videos/halo-video-v14.mp4" />
 
 ## What you can do [#what-you-can-do]
 
@@ -38,6 +38,27 @@ For work inside Langfuse, use Halo for the same investigation and resource-manag
 | Monitor performance      | "Build a dashboard of error rate and p95 latency for the last 7 days."        |
 | Navigate Langfuse        | "Open the traces table filtered to today's errors."                           |
 | Learn how Langfuse works | "How do I set up an evaluator?"                                               |
+
+<VideoCarousel
+  videos={[
+    {
+      title: "Optimize costs",
+      src: "https://static.langfuse.com/docs-videos/halo-cost-optimization.mp4",
+    },
+    {
+      title: "Create a dashboard",
+      src: "https://static.langfuse.com/docs-videos/halo-create-dashboard.mp4",
+    },
+    {
+      title: "Get started with evaluations",
+      src: "https://static.langfuse.com/docs-videos/halo-get-started-with-evals.mp4",
+    },
+    {
+      title: "Halo walkthrough with Boris",
+      src: "https://static.langfuse.com/docs-videos/halo-walkthrough-boris.mp4",
+    },
+  ]}
+/>
 
 ## How it works [#how-it-works]
 
@@ -61,6 +82,8 @@ Runs continue independently of your browser, so you can keep using Langfuse or s
 ### Conversation history [#conversation-history]
 
 Halo conversations are saved per user and project so you can return to previous conversations.
+
+Conversations follow the project's [data retention policy](/docs/administration/data-retention#halo-conversations), measured from each conversation's last update. When an expired conversation is deleted, its runs and events are deleted too. Cleanup waits for unfinished runs and credential cleanup, so deletion is not immediate at expiration. Disabling Halo does not pause retention.
 
 ## Data privacy and security [#data-privacy-and-security]
 
