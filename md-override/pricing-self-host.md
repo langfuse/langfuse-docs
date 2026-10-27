@@ -67,7 +67,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | Included usage                                                                                  | Unlimited                   | Unlimited                                  | Unlimited             |
 | [Multi-modal](/docs/observability/features/multi-modality)                                      | Yes                         | Yes                                        | Yes                   |
 | **Langfuse AI**                                                                                 |                             |                                            |                       |
-| [Halo (in-app agent)](/docs/halo)                                                               | Yes                         | Yes                                        | Yes                   |
+| [Halo (in-app agent)](/docs/api-and-data-platform/features/halo)                                | Yes                         | Yes                                        | Yes                   |
 | [MCP](/docs/api-and-data-platform/features/mcp-server)                                          | Yes                         | Yes                                        | Yes                   |
 | [CLI](/docs/api-and-data-platform/features/cli)                                                 | Yes                         | Yes                                        | Yes                   |
 | **Prompt Management**                                                                           |                             |                                            |                       |
