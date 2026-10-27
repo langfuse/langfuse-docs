@@ -136,6 +136,7 @@ Please check the following:
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
+- When documentation is added or expanded, do not repeat the same information on a page. Each fact or explanation should appear once; later sections should link back instead of restating it.
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
