@@ -75,7 +75,9 @@ Add an **OpenAI** connection with access to `gpt-6-luna`. Langfuse calls the Ope
 
 Map observation data to the single state named `input`. Questions evaluate that state as a whole and cannot reference individual fields. Score levels need a label and can include an optional description.
 
-If OpenAI refuses any question, the run fails and writes no scores.
+<Callout type="warning">
+  If OpenAI refuses any question, the run fails and writes no scores.
+</Callout>
 
 ### TypeSafe Jev [#connect-typesafe-jev]
 
@@ -87,15 +89,23 @@ Add a connection with the adapter **typesafe**, choose the upstream that serves 
 | Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
 | OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
 
-These upstreams need no base URL or extra headers. Use `jev-latest` to follow new releases, or pin a version such as `jev-1.13.0` when an evaluation threshold should stay stable.
+These upstreams need no base URL or extra headers.
+
+<Callout type="info">
+  Use `jev-latest` to follow new releases, or pin a version such as `jev-1.13.0`
+  when an evaluation threshold should stay stable.
+</Callout>
 
 Build the JSON state from observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference those fields in question instructions with backticks, for example ``Compare `output` with `expectedOutput`.`` Jev Score levels require a description.
 
-TypeSafe connections are only available to decision-model evaluators because Jev cannot generate text.
+<Callout type="info">
+  TypeSafe connections are only available to decision-model evaluators because
+  Jev cannot generate text.
+</Callout>
 
 ### Other System One-compatible models [#connect-system-one-compatible]
 
-Other vendors serve decision models through TypeSafe's System One API (`POST <base URL>/systemone`). Add a **TypeSafe (System One)** connection, select the **Custom** upstream, enter the vendor's base URL without the `/systemone` suffix, and add the model name under **Custom models**. Langfuse authenticates with `Authorization: Bearer <API key>`; use **Extra Headers** for any additional headers the vendor requires.
+Other vendors serve decision models through TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one) (`POST <base URL>/systemone`). Add a **TypeSafe (System One)** connection, select the **Custom** upstream, enter the vendor's base URL without the `/systemone` suffix, and add the model name under **Custom models**. Langfuse authenticates with `Authorization: Bearer <API key>`; use **Extra Headers** for any additional headers the vendor requires.
 
 | Vendor                                                                         | Model                                   | Base URL                                                       | Notes                                                                                                                           |
 | ------------------------------------------------------------------------------ | --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
