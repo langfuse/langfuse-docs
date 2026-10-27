@@ -6,7 +6,7 @@ description: Use OpenAI or TypeSafe decision models to ask typed questions about
 
 # Decision model evaluators
 
-Decision models answer **typed questions** about an observation instead of generating free-form text. In Langfuse, you can run them with OpenAI's `gpt-6-luna` or [TypeSafe Jev](https://docs.typesafe.ai/introduction). Each Choice, Score, or Yes / no question writes one [score](/docs/evaluation/scores/overview).
+Decision models answer **typed questions** about an observation instead of generating free-form text. Each Choice, Score, or Yes / no question writes one [score](/docs/evaluation/scores/overview).
 
 Use a decision model when the verdict is a label, a rubric level, or a yes/no probability. Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when you need written reasoning, or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks.
 
@@ -17,35 +17,15 @@ Use a decision model when the verdict is a label, a rubric level, or a yes/no pr
   ![Decision-model evaluator with a Score question, mapped input, and live test results](/images/docs/evaluation/configure-decision-model-evaluator.png)
 </Frame>
 
-## Question types [#question-types]
-
-One evaluator can ask several questions in a single call. Each question writes one score.
-
-| Question type | What the model returns                              | Langfuse score                                             | Example                                                                   |
-| ------------- | --------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------- |
-| **Choice**    | One option from a set you define (2 to 255)         | Categorical score with the selected option                 | "Which team should handle this ticket?" → `billing`, `technical`, `sales` |
-| **Score**     | A position on ordered levels you describe (2 to 10) | Numeric score with the expected level, `0` to `levels - 1` | "How frustrated is the customer?" → `0` calm … `3` angry                  |
-| **Yes / no**  | The probability that a statement is true            | Numeric score with `P(true)` between `0` and `1`           | "Does the message request a refund?" → `0.93`                             |
-
-<Callout type="info">
-  Keep each question **atomic**: one decision per question. If you are asking
-  "is the answer correct and polite?", split it into two. Both run in the same
-  call.
-</Callout>
-
 ## Set up step-by-step [#set-up-step-by-step]
 
 <Steps>
 
-### Connect credentials [#connect-credentials]
+### Create a decision-model evaluator [#create-a-jev-evaluator]
 
-Go to **Settings → LLM Connections** and add an [OpenAI](#connect-openai) or [TypeSafe](#connect-typesafe-jev) connection, or reuse an existing compatible one.
+Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose **New decision model evaluator**, then select an [OpenAI](#connect-openai) or [TypeSafe](#connect-typesafe-jev) connection and model. Add the connection under **Settings → LLM Connections** if you do not have one yet.
 
-<span id="create-a-jev-evaluator" />
-
-### Create a decision-model evaluator
-
-Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose **New decision model evaluator**, then select your connection and model. You can also start from a template:
+You can also start from a template:
 
 - **Assign Input Topic** (Choice): classify the user's primary goal
 - **Flag Out-of-Scope Request** (Yes / no): flag requests outside the assistant's role
@@ -56,15 +36,27 @@ Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and clic
   ![New decision model evaluator in the template gallery, with a Yes / no question](/images/docs/evaluation/create-decision-model-evaluator.png)
 </Frame>
 
-### Define the questions
+### Define the questions [#question-types]
 
-Add one question per criterion. For each question, pick the [type](#question-types), write the instruction, define the allowed answers, and set the score name.
+Add one question per criterion. For each question, pick the type, write the instruction, define the allowed answers, and set the score name. One evaluator can ask several questions in a single call.
+
+| Question type | Langfuse score                                             | Example                                                                   |
+| ------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------- |
+| **Choice**    | Categorical score with the selected option                 | "Which team should handle this ticket?" → `billing`, `technical`, `sales` |
+| **Score**     | Numeric score with the expected level, `0` to `levels - 1` | "How frustrated is the customer?" → `0` calm … `3` angry                  |
+| **Yes / no**  | Numeric score with `P(true)` between `0` and `1`           | "Does the message request a refund?" → `0.93`                             |
+
+<Callout type="info">
+  Keep each question **atomic**: one decision per question. If you are asking
+  "is the answer correct and polite?", split it into two. Both run in the same
+  call.
+</Callout>
 
 <span id="build-the-state" />
 
 ### Map the model input
 
-Map the observation data the model should evaluate. OpenAI takes one general state named `input`. TypeSafe takes a JSON state with named fields that questions can reference with backticks.
+Map the observation data the model should evaluate.
 
 ### Test the evaluator
 
@@ -118,21 +110,13 @@ Other vendors serve decision models through TypeSafe's System One API (`POST <ba
 
 On Langfuse Cloud, custom base URLs must use HTTPS and resolve to a public address. Self-hosted Langfuse can reach `localhost` or internal hosts once you allow them with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`; otherwise saving the connection fails with `Blocked hostname detected`.
 
-## Scores and debugging [#scores]
+<span id="scores" />
 
-Each question writes one score. The value is the answer; probabilities and confidence are stored in score metadata so you can inspect and filter on them.
-
-| Question type | Score value                                | Metadata                                                 |
-| ------------- | ------------------------------------------ | -------------------------------------------------------- |
-| Choice        | Selected option as `CATEGORICAL`           | Probabilities, confidence, and the resolved model        |
-| Score         | Expected level as `NUMERIC`                | Probability-weighted level, confidence, and level legend |
-| Yes / no      | `P(true)` as `NUMERIC` between `0` and `1` | Probability only                                         |
-
-The comment summarizes the distribution, for example `ready (p=0.91); confidence 0.82`. Provider details live under `metadata.openai` or `metadata.typesafe` (`questionId`, `type`, `model`, and where available `probabilities` and `confidence`). Decision models do not return written reasoning. When a score looks wrong, tighten the question or add an `other` / `unclear` option.
-
-<span id="debug-executions" />
+## Debug executions [#debug-executions]
 
 Every run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. Internal environments are hidden from the default tracing view: filter by `environment = langfuse-llm-as-a-judge` or open the trace from a score.
+
+Probabilities and confidence are stored in score metadata (`metadata.openai` or `metadata.typesafe`), not in the score value.
 
 ## Limits [#limits]
 
