@@ -53,7 +53,7 @@ Map the observation data the model should evaluate.
 
 ### Test the evaluator
 
-On the right, filter to representative sample observations, select one, and run the evaluator. The test panel shows one row per question with its probability distribution, confidence, and estimated cost. Use **Raw output** to inspect the provider request.
+On the right, filter to representative sample observations, select one, and run the evaluator. The test panel shows one row per question with its probability distribution and confidence where available, along with the estimated cost. Use **Raw output** to inspect the provider request.
 
 ### Save the evaluator
 
@@ -148,7 +148,7 @@ Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in th
 
 Every run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. Internal environments are hidden from the default tracing view: filter by `environment = langfuse-llm-as-a-judge` or open the trace from a score.
 
-Probabilities and confidence are stored in score metadata (`metadata.openai` or `metadata.typesafe`), not in the score value.
+Probabilities and confidence are stored in score metadata (`metadata.openai` or `metadata.typesafe`) where the provider returns them, not in the score value.
 
 </Details>
 
