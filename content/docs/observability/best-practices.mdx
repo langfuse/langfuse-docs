@@ -180,11 +180,13 @@ You can see these attributes on the `GENERATION` observation in the Langfuse UI.
 
 ![Generation attributes in Langfuse](/images/docs/faq/good-trace-generation-attributes.png)
 
-### Use tags for business-level dimensions
+### Choose attributes for filtering and reporting [#use-tags-for-business-level-dimensions]
 
-[Tags](/docs/observability/features/tags) enable filtering and metric breakdowns across dimensions that matter to your business. Good tags answer questions like "how does latency differ between our `web` and `api` users?".
+Prefer [metadata](/docs/observability/features/metadata#choosing-between-tags-and-metadata) for named attributes such as workflow, customer ID, and experiment variant. Use [tags](/docs/observability/features/tags#choosing-between-tags-and-metadata) for a small set of independent labels.
 
-One property of tags is that they are **immutable and must be set at observation creation time**. This makes them great for things you know upfront (where the request came from, which feature it's part of), but not for things you learn later.
+When designing dashboard breakdowns, consider the number of distinct values, whether categories overlap, and which grouping dimensions your Langfuse version supports.
+
+Tags are **immutable and must be set at observation creation time**, so use them for labels you know upfront.
 
 If you need to label traces based on something determined after the fact, like an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation result, use [scores](/docs/evaluation/overview) instead.
 
