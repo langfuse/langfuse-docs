@@ -91,6 +91,16 @@ For Amazon Bedrock, the AWS credentials need the `bedrock:InvokeModel` and `bedr
 
 You may connect to third party LLM providers if their API schema implements the schema of one of our supported provider adapters. For example, you may connect to Mistral by using the OpenAI adapter in Langfuse to connect to Mistral's OpenAI compliant API.
 
+### Fetch models from the endpoint [#fetch-models]
+
+For connections that use the OpenAI adapter, you can load the custom models from the endpoint instead of typing them. Under **Custom models**, click **Fetch models from endpoint**. Langfuse calls the endpoint's `GET /models` route (`https://api.openai.com/v1/models` when no base URL is set) with the connection's API key and extra headers, and lists the models it returns.
+
+- All returned models are selected. Use the search field and **Select all** to narrow the selection.
+- Models the endpoint returns that are not configured yet are marked **New**. Configured models the endpoint no longer returns stay selected and are marked **Not returned by the endpoint**, so you decide whether to remove them.
+- Click **Use N models** to replace the custom models with the selection, then save the connection. Nothing changes until you save.
+
+To pick up models added to the endpoint later, edit the connection and fetch again. When editing, the stored API key and headers are used, so you do not need to enter the key again. The request follows the same [SSRF protection](#blocked-ip-address) as other calls from the connection.
+
 ## Advanced configurations
 
 ### Additional provider options
@@ -169,7 +179,7 @@ To set this up:
 2. Select **OpenAI** as the provider.
 3. Enter the API key for your gateway.
 4. Under **Advanced Settings**, set the **Base URL** to your gateway's endpoint, e.g. `https://your-litellm-instance.com/v1`.
-5. Add any **custom model names** that your gateway exposes.
+5. Add the **custom model names** that your gateway exposes, or [fetch them from the gateway](#fetch-models) if it implements the `/models` route.
 
 <Callout type="info">
   The gateway must support [tool
