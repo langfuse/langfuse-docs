@@ -43,7 +43,13 @@ export const Video = ({
       )}
       onCanPlay={onCanPlay}
     >
-      <MediaProvider />
+      <MediaProvider
+        mediaProps={{
+          playsInline: true,
+          // iOS/WebViews still honor the prefixed attribute.
+          "webkit-playsinline": "",
+        }}
+      />
     </MediaPlayer>
   );
 };

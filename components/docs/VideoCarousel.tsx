@@ -65,11 +65,12 @@ export function VideoCarousel({
         return;
       }
 
+      media.playsInline = true;
+      media.setAttribute("playsinline", "");
+      media.setAttribute("webkit-playsinline", "");
+
       if (index === current) {
         media.muted = true;
-        media.playsInline = true;
-        media.setAttribute("playsinline", "");
-        media.setAttribute("webkit-playsinline", "");
         void media.play().catch(() => undefined);
       } else {
         media.pause();
