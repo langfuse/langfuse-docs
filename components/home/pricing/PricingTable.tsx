@@ -547,7 +547,7 @@ const sections: Section[] = [
         name: "Halo (in-app agent)",
         description:
           "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval.",
-        href: "/docs/halo",
+        href: "/docs/api-and-data-platform/features/halo",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
@@ -559,7 +559,7 @@ const sections: Section[] = [
       },
       {
         name: "Halo usage limits",
-        href: "/docs/halo",
+        href: "/docs/api-and-data-platform/features/halo",
         tiers: {
           cloud: {
             Hobby: "Low",
