@@ -12,7 +12,6 @@ export const Video = ({
   poster,
   autoPlay = false,
   muted = false,
-  playsInline = false,
   onCanPlay,
 }: {
   src: string;
@@ -22,7 +21,6 @@ export const Video = ({
   poster?: string;
   autoPlay?: boolean;
   muted?: boolean;
-  playsInline?: boolean;
   onCanPlay?: () => void;
 }) => {
   return (
@@ -35,7 +33,9 @@ export const Video = ({
       muted={gifStyle || muted}
       loop={gifStyle}
       load={"visible"}
-      playsInline={gifStyle || playsInline}
+      // Always inline. Vidstack enters fullscreen on coarse pointers
+      // (phones) when this is false, which overlays the docs page.
+      playsInline
       aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
       className={cn(
         "overflow-hidden shadow-lg bg-surface-bg object-cover",
