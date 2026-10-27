@@ -1,8 +1,17 @@
 "use client";
 
+import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import "@vidstack/react/player/styles/base.css";
+
+// Vidstack types mediaProps as HTMLAttributes<HTMLMediaElement>, which
+// omits video-only playsInline. Cast so the attributes still land on
+// the native <video> as soon as it is created.
+const INLINE_MEDIA_PROPS = {
+  playsInline: true,
+  "webkit-playsinline": "",
+} as HTMLAttributes<HTMLMediaElement>;
 
 export const Video = ({
   src,
@@ -43,13 +52,7 @@ export const Video = ({
       )}
       onCanPlay={onCanPlay}
     >
-      <MediaProvider
-        mediaProps={{
-          playsInline: true,
-          // iOS/WebViews still honor the prefixed attribute.
-          "webkit-playsinline": "",
-        }}
-      />
+      <MediaProvider mediaProps={INLINE_MEDIA_PROPS} />
     </MediaPlayer>
   );
 };
