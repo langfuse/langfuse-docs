@@ -65,6 +65,10 @@ export function VideoCarousel({
         return;
       }
 
+      media.playsInline = true;
+      media.setAttribute("playsinline", "");
+      media.setAttribute("webkit-playsinline", "");
+
       if (index === current) {
         media.muted = true;
         void media.play().catch(() => undefined);
@@ -143,7 +147,6 @@ export function VideoCarousel({
                       className="w-full rounded-none shadow-none"
                       autoPlay={index === current}
                       muted
-                      playsInline
                     />
                   ) : (
                     <div
