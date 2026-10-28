@@ -8,7 +8,6 @@ import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import { useAISearchContext } from "@/components/inkeep/search";
 import { RightSidebarHiringAndCommunity } from "@/components/home/layout/RightSidebarHiringAndCommunity";
-import { useSidebarCtaPlacement } from "@/components/blog/SidebarCloudCta";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -198,19 +197,16 @@ export function HomeAside({
   const domItems = useDOMHeadings();
   const items = toc ?? (pathname === "/" ? HOME_SECTIONS : domItems);
   const { open: aiOpen } = useAISearchContext();
-  const placement = useSidebarCtaPlacement(Boolean(cta));
-  const showCta = Boolean(cta) && placement !== "inline";
 
   const tocNode = (
     <AnchorProvider toc={items} single key={pathname}>
-      <TocOnThisPage items={items} compact={showCta} />
+      <TocOnThisPage items={items} compact={Boolean(cta)} />
     </AnchorProvider>
   );
 
   return (
     <aside
       data-ai-open={aiOpen || undefined}
-      data-placement={cta ? placement : undefined}
       className="hidden wide:flex wide:data-ai-open:hidden flex-col bg-line-structure sticky p-px pt-0 w-[240px] shrink-0"
       style={{
         top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
@@ -221,32 +217,10 @@ export function HomeAside({
       <nav
         className={cn(
           "flex flex-col flex-1 rounded-sm bg-surface-1",
-          showCta
-            ? "min-h-0 overflow-hidden"
-            : "overflow-y-auto overflow-x-hidden",
+          cta ? "min-h-0 overflow-hidden" : "overflow-y-auto overflow-x-hidden",
         )}
       >
-        {showCta && placement === "dock" ? (
-          <>
-            <div className="flex min-h-0 flex-1 flex-col bg-line-structure pb-px">
-              <div className="min-h-0 flex-1 overflow-y-auto rounded-sm bg-surface-1 [scrollbar-width:none]">
-                {tocNode}
-              </div>
-            </div>
-            <CtaBand>{cta}</CtaBand>
-            <RightSidebarHiringAndCommunity />
-          </>
-        ) : showCta && placement === "flow" ? (
-          <>
-            <div className="flex min-h-0 flex-1 flex-col bg-line-structure pb-px">
-              <div className="min-h-0 flex-1 overflow-y-auto rounded-sm bg-surface-1 [scrollbar-width:none]">
-                {tocNode}
-                <div className="border-t border-line-structure">{cta}</div>
-              </div>
-            </div>
-            <RightSidebarHiringAndCommunity />
-          </>
-        ) : showCta ? (
+        {cta ? (
           <>
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="min-h-0 overflow-y-auto bg-line-structure pb-px [scrollbar-width:none]">
