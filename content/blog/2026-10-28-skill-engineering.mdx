@@ -1,8 +1,7 @@
 ---
-title: How we engineer a skill we cannot observe
-seoTitle: Skill engineering without production traces
+title: Engineering the Langfuse skill
 date: 2026/10/28
-description: The Langfuse skill recorded 22,000 unique clones in two weeks. Almost none of those runs are traced. Here is the loop we use anyway, and how Halo closes it.
+description: How we improve the Langfuse skill with datasets, experiments on coding agents, and traces from Halo.
 tag: engineering
 author: Lotte
 highlight: true
@@ -11,8 +10,8 @@ highlight: true
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="How we engineer a skill we cannot observe"
-  description="The Langfuse skill recorded 22,000 unique clones in two weeks. Almost none of those runs are traced. Here is the loop we use anyway, and how Halo closes it."
+  title="Engineering the Langfuse skill"
+  description="How we improve the Langfuse skill with datasets, experiments on coding agents, and traces from Halo."
   date="October 28, 2026"
   authors={["lotteverheyden"]}
 />
@@ -21,9 +20,9 @@ The [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) is a play
 
 Almost none of those runs are traced. We still ship improvements to the skill every week.
 
-This post is how. It is the [AI engineering loop](/academy/ai-engineering-loop) applied to something you cannot watch in production: datasets, experiments on coding agents, evaluation of the traces those agents produce, and a deploy step that is just publishing a new skill version. Then [Halo](/docs/api-and-data-platform/features/halo), our in-app assistant, gives us the online half we were missing.
+This post is the [AI engineering loop](/academy/ai-engineering-loop) applied to an external skill: datasets, experiments on coding agents, evaluation of the traces those agents produce, and a deploy step that is publishing a new skill version. [Halo](/docs/api-and-data-platform/features/halo), our in-app assistant, is the production surface we can observe.
 
-## What the Langfuse skill is [#what-the-langfuse-skill-is]
+## The Langfuse skill [#the-langfuse-skill]
 
 We started building the skill a few months ago as part of making Langfuse usable by coding agents, not only by humans in the UI. The longer version of that work is in [Will you be my CLI?](/blog/2026-02-13-will-you-be-my-cli) and on the [Langfuse for agents](/agents) page. The short version: agents need a playbook, a CLI, and docs they can actually read.
 
@@ -51,7 +50,7 @@ That routing step is the whole product. If the agent never opens `instrumentatio
 
 We have written about pieces of this before: [evaluating the skill](/blog/2026-02-26-evaluate-ai-agent-skills), [using it to improve prompts](/blog/2026-02-16-prompt-improvement-claude-skills), [running autoresearch on it](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch). This post is the loop we now run as a habit, not a one-off experiment.
 
-## Two kinds of skills [#two-kinds-of-skills]
+## Internal vs external skills [#internal-vs-external-skills]
 
 Skills split cleanly into two kinds, and the split is about observability, not about file format.
 
@@ -65,7 +64,7 @@ The Langfuse skill is the second kind. 22,000 unique clones over two weeks is a 
 This is the default situation for anyone shipping a public skill. If you cannot see the run, you cannot monitor it. The online half of the AI engineering loop is just not available.
 </Callout>
 
-## The loop, with a hole in it [#the-loop-with-a-hole-in-it]
+## The AI engineering loop [#ai-engineering-loop]
 
 We describe AI engineering as a loop. Trace what the system does, monitor the traces that matter, turn those into datasets, experiment, evaluate, deploy, repeat. We teach it in the [academy](/academy/ai-engineering-loop). We [argued](/blog/2026-06-09-ai-is-eating-ai-engineering) that you should not hand the whole thing to an agent.
 
@@ -92,7 +91,7 @@ That does not mean you stop. It means you live in the offline half until you fin
 
 The rest of this post is that offline loop in detail, then the online half we got back once the same skill started running inside Halo.
 
-## Offline is still a complete way to ship [#offline-is-still-a-complete-way-to-ship]
+## Evaluation datasets [#evaluation-datasets]
 
 If you cannot observe, you can still measure. You create [datasets](/academy/datasets) that stand in for real use, you [run experiments](/academy/experiments) against them, you [evaluate](/academy/evaluate) the traces, and you ship only when the new version is better.
 
@@ -100,7 +99,7 @@ This is the same move you make before an application is in production. The acade
 
 We keep the datasets in a Langfuse project dedicated to this. Each dataset is a slice of skill behavior, not a dump of every prompt we could think of. Two slices matter most right now: **routing** (did the agent read the right reference file?) and **workflows** (did it then do the job?).
 
-### Routing: the right file for the question [#routing]
+### Routing [#routing]
 
 The skill has a lot of reference files, and `SKILL.md` has to send the agent to the right one. That is a classification problem with a very cheap expected output: a filename.
 
@@ -126,7 +125,7 @@ You do not need an LLM-as-a-judge for this. The expected output is a string you 
 
 Routing is the first dataset we run after any change to `SKILL.md`. A more conceptual description, a new reference file, a tweak to the frontmatter: all of these have, in the past, stopped the skill from being invoked at all. We [wrote about that failure](/blog/2026-02-26-evaluate-ai-agent-skills) when we first evaluated the skill. It is still the cheapest way to catch a broken skill before we talk about whether the workflow itself is any good.
 
-### Workflows: does the agent actually behave? [#workflows]
+### Workflows [#workflows]
 
 Routing says the agent opened the right file. It does not say the agent then instrumented the app, migrated the prompts, or built a dataset the way we want.
 
@@ -148,7 +147,7 @@ Once a failure mode repeats, _then_ we add an evaluator. CLI errors per run. Ski
 
 This is also why we keep looking at traces even when the numbers look fine. The numbers tell you something moved. The trace tells you whether it moved in a direction you would defend.
 
-## How the experiments actually run [#how-the-experiments-actually-run]
+## Experiment harness [#experiment-harness]
 
 A dataset in Langfuse is inert until something executes each item. For a skill, that something has to be a real coding agent, in a real sandbox, with the skill installed.
 
@@ -192,7 +191,7 @@ A few details that matter in practice:
 
 After the run, the work is the same as any other experiment. Open the run. Sort by the scores you have. Open the failures. For workflow datasets, open a sample of the passes too. If a change to `SKILL.md` fixed routing and broke instrumentation, you only see that by looking.
 
-## Skill management is part of the loop [#skill-management]
+## Skill management [#skill-management]
 
 A skill is not one prompt. It is a folder: frontmatter, `SKILL.md`, a growing set of reference files, sometimes scripts. Shipping a change means shipping a consistent set of those files, being able to tell which set a given experiment used, and being able to roll back.
 
@@ -209,7 +208,7 @@ For the Langfuse skill specifically:
 Treat the skill folder as the unit you evaluate, not the individual markdown file. Routing tests the index. Workflow tests the chapter. Together they are the version you are willing to publish.
 </Callout>
 
-## The online signal we had, and why it was weak [#the-online-signal-we-had]
+## Skill feedback and GitHub issues [#skill-feedback-and-github-issues]
 
 Before Halo, we did try to get a little production signal out of the external skill.
 
@@ -223,7 +222,7 @@ We still want that channel. A well-written issue about a wrong instruction is mo
 
 So we ran the offline loop, published versions, and treated GitHub as a trickle of extra cases for the datasets. That is a valid way to ship. It is also incomplete.
 
-## Halo closes the loop [#halo-closes-the-loop]
+## Tracing the skill in Halo [#tracing-the-skill-in-halo]
 
 Halo is the assistant inside Langfuse. It uses the same MCP tools, the same docs, and **the same open-source skill** that external coding agents use. We [built it that way on purpose](/blog/2026-10-21-building-the-langfuse-assistant): there is no private Halo playbook. If we fix a workflow in the skill, Halo gets it, and so does everyone else.
 
@@ -259,7 +258,7 @@ Halo is not a perfect proxy for Cursor or Claude Code. It has UI context, approv
 
 This is the thing that made skill engineering feel like normal AI engineering again. Offline was always possible. Online was the missing feed. We could not get it from the public skill. We could get it by running the same skill ourselves.
 
-## What we would copy if this were not our skill [#what-we-would-copy]
+## A setup you can copy [#a-setup-you-can-copy]
 
 If you ship a skill, especially a public one, the setup is:
 
