@@ -7,7 +7,7 @@ description: Experiment with different prompt versions and models on a dataset a
 
 You can execute Experiments via UI (also called Prompt Experiments) in the Langfuse UI to test different prompt versions from [Prompt Management](/docs/prompt-management) or language models and compare the results side-by-side.
 
-Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) to automatically score the responses based on the expected outputs to further analyze the results on an aggregate level.
+Optionally, you can use [managed evaluators](/docs/evaluation/evaluation-methods/evaluators) — [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [decision-model](/docs/evaluation/evaluation-methods/decision-models), or [code](/docs/evaluation/evaluation-methods/code-evaluators) — to automatically score the responses based on the expected outputs to further analyze the results on an aggregate level.
 
 <Video
   src="https://static.langfuse.com/docs-videos/prompt-experiments.mp4"
@@ -20,7 +20,7 @@ Optionally, you can use [LLM-as-a-Judge Evaluators](/docs/evaluation/evaluation-
 - Quickly test different prompt versions or models
 - Structure your prompt testing by using a dataset to test different prompt versions and models
 - Quickly iterate on prompts through Prompt Experiments
-- Optionally use LLM-as-a-Judge or code evaluators to score the responses based on the expected outputs from the dataset
+- Optionally use managed evaluators to score the responses based on the expected outputs from the dataset
 - Prevent regressions by running tests when making prompt changes
 
 Select a **Dataset Version** when configuring the experiment to run against a historical dataset state. If no version is selected, the experiment uses the latest version. See [Run experiments on versioned datasets](/docs/evaluation/experiments/datasets#run-experiments-on-versioned-datasets).
@@ -169,7 +169,7 @@ As your prompt will be executed for each dataset item, you need to configure an 
 
 ### Optional: Set up evaluators
 
-You can set up an [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) to score semantic criteria or a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks. Make sure to target experiments and filter for the dataset you want to use.
+You can set up a [managed evaluator](/docs/evaluation/evaluation-methods/evaluators) to score experiment outputs: [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for semantic criteria, a [decision-model evaluator](/docs/evaluation/evaluation-methods/decision-models) for typed verdicts, or a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks. Make sure to target experiments and filter for the dataset you want to use.
 
 </Steps>
 
