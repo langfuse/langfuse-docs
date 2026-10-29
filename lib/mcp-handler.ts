@@ -9,7 +9,7 @@ import {
   sendFeedbackToSlack,
 } from "@/lib/feedback-slack";
 import {
-  docsMarkdownPath,
+  docsMarkdownUrl,
   GET_LANGFUSE_DOCS_PAGE_DESCRIPTION,
   GET_LANGFUSE_DOCS_PAGE_PATH_DESCRIPTION,
   GET_LANGFUSE_OVERVIEW_DESCRIPTION,
@@ -230,9 +230,7 @@ export const mcpHandler = createMcpHandler(
       async ({ pathOrUrl }: { pathOrUrl: string }) => {
         try {
           const pathname = normalizeDocsPath(pathOrUrl);
-          const mdPath = docsMarkdownPath(pathname);
-          const base = "https://langfuse.com";
-          const mdUrl = `${base}${mdPath}`;
+          const mdUrl = docsMarkdownUrl(pathname, "https://langfuse.com");
 
           const res = await fetch(mdUrl, {
             // Self-identify so these fetches are distinguishable from external

@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import posthog from "posthog-js";
 import {
-  docsMarkdownPath,
+  docsMarkdownUrl,
   GET_LANGFUSE_DOCS_PAGE_DESCRIPTION,
   GET_LANGFUSE_DOCS_PAGE_PATH_DESCRIPTION,
   GET_LANGFUSE_OVERVIEW_DESCRIPTION,
@@ -89,10 +89,12 @@ const tools: WebMcpTool[] = [
       required: ["pathOrUrl"],
     },
     annotations: { readOnlyHint: true },
-    // Only the pathname is kept, so the fetch always stays on this origin.
     execute: async ({ pathOrUrl }) =>
       fetchText(
-        docsMarkdownPath(normalizeDocsPath(String(pathOrUrl ?? ""))),
+        docsMarkdownUrl(
+          normalizeDocsPath(String(pathOrUrl ?? "")),
+          window.location.origin,
+        ),
         "text/markdown",
       ),
   },

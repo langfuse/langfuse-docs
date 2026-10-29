@@ -20,14 +20,24 @@ export const GET_LANGFUSE_OVERVIEW_DESCRIPTION =
 
 // Reduces a docs path or full URL to its pathname, dropping the host, query
 // and anchor (e.g. https://langfuse.com/docs/foo?x=1#y -> /docs/foo).
+// Leading slashes and backslashes collapse to one "/" so the result can never
+// be read as a protocol-relative URL (//evil.com) or an opaque path.
 export const normalizeDocsPath = (pathOrUrl: string): string => {
   const input = pathOrUrl.trim();
+  let pathname = input;
   try {
-    return new URL(input, "https://langfuse.com").pathname || "/";
-  } catch {
-    return input.startsWith("/") ? input : `/${input}`;
-  }
+    pathname = new URL(input, "https://langfuse.com").pathname;
+  } catch {}
+  return `/${pathname.replace(/^[/\\]+/, "")}`;
 };
 
-export const docsMarkdownPath = (pathname: string): string =>
-  pathname.endsWith(".md") ? pathname : `${pathname}.md`;
+// Resolves a normalized docs path to the URL of its Markdown mirror on
+// `origin`, and refuses anything that would resolve to another host.
+export const docsMarkdownUrl = (pathname: string, origin: string): string => {
+  const mdPath = pathname.endsWith(".md") ? pathname : `${pathname}.md`;
+  const url = new URL(mdPath, origin);
+  if (url.origin !== new URL(origin).origin) {
+    throw new Error(`Refusing to fetch docs from another host: ${url.origin}`);
+  }
+  return url.href;
+};
