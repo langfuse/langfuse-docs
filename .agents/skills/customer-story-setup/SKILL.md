@@ -18,6 +18,32 @@ description: >-
 Turns a plain **Markdown draft** into **`content/customers/<slug>.mdx`** in the
 same pattern as `content/customers/canva.mdx` and `cresta.mdx`.
 
+## Draft fidelity
+
+The draft is the copy. Do not add sentences, claims, or metrics that are not
+already in the story body.
+
+- Social copy, LinkedIn/X posts, and a separate metrics or "customer insights"
+  table are **not** body copy. Do not fold them into the article. If a number
+  only appears there, leave it out of the page.
+- Do not merge, tighten, or paraphrase paragraphs. Keep the draft's sentences.
+  Fix typos, stray punctuation, em dashes (use `-`), and British spelling only.
+- Summary text in an `ImpactChart` is the draft's summary sentences, not a
+  rewrite. Short `area` labels are fine because the component needs them.
+- YAML `description` comes from the draft summary. Do not write a new one.
+
+## Quotes
+
+- A `<CustomerQuote>` is only for a quote the draft **explicitly marks as a
+  callout** (for example "(Callout quote)").
+- If the draft marks one callout, that is the **only** `<CustomerQuote>` on the
+  page. Every other quote stays inline, in the paragraph where the draft has it.
+- If the draft marks none, do not invent callouts. Ask which quote is the callout.
+- Frontmatter `customerQuote` (the users-index card) is that same marked callout.
+  Do not pick a different quote for the card.
+- Do not repeat the callout both inline and in `<CustomerQuote>`. Keep the
+  lead-in sentence; the component carries the quote.
+
 ## Before writing any file: collect missing input
 
 **Do not guess.** If any item below is missing from the user's draft or
@@ -25,15 +51,15 @@ message, **ask explicitly** and wait for answers (or confirm defaults).
 
 ### Content & publishing
 
-| Topic                 | Ask                                                                                       |
-| --------------------- | ----------------------------------------------------------------------------------------- |
-| **Company name**      | Legal/marketing name for copy and quotes                                                  |
-| **Company website**   | Public URL for the `[Company](https://...)` link in **About &lt;Company&gt;**             |
-| **Slug**              | Filename: `<slug>.mdx` (lowercase, hyphens), e.g. `cresta` -> `cresta.mdx`                |
-| **Page title**        | H1 string for `BlogHeader` + YAML `title` (often "How &lt;Company&gt; ... with Langfuse") |
-| **Short description** | YAML `description` + `BlogHeader` description (SEO/social; 1-2 sentences)                 |
-| **Publish date**      | YAML `date` + `BlogHeader` `date` (e.g. `March 26, 2026`)                                 |
-| **OG image**          | Optional `ogImage:` path; if unset, leave empty like other stories                        |
+| Topic                 | Ask                                                                                                |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
+| **Company name**      | Legal/marketing name for copy and quotes                                                           |
+| **Company website**   | Public URL for the `[Company](https://...)` link in **About &lt;Company&gt;**                      |
+| **Slug**              | Filename: `<slug>.mdx` (lowercase, hyphens), e.g. `cresta` -> `cresta.mdx`                         |
+| **Page title**        | H1 string for `BlogHeader` + YAML `title` (often "How &lt;Company&gt; ... with Langfuse")          |
+| **Short description** | YAML `description` + `BlogHeader` description. Use the draft summary. Do not write a new sentence. |
+| **Publish date**      | YAML `date` + `BlogHeader` `date` (e.g. `March 26, 2026`)                                          |
+| **OG image**          | Optional `ogImage:` path; if unset, leave empty like other stories                                 |
 
 ### Authors (BlogHeader `authors={["..."]}`)
 
@@ -47,7 +73,7 @@ message, **ask explicitly** and wait for answers (or confirm defaults).
 | Topic                           | Ask                                                                                                                      |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **Logos**                       | Paths for `customerLogo` and `customerLogoDark` (light + dark mode), usually under **`public/images/customers/<slug>/`** |
-| **Pull quote**                  | `customerQuote` (short, for grid card)                                                                                   |
+| **Pull quote**                  | `customerQuote` is the draft's marked callout, not a quote you choose. See **Quotes** above.                             |
 | **Quote attribution**           | `quoteAuthor`, `quoteRole`, `quoteCompany`                                                                               |
 | **Speaker headshot (optional)** | `quoteAuthorImage` for card/SEO if you use the same as Canva                                                             |
 | **Show on /users**              | `showInCustomerIndex: true \| false`                                                                                     |
@@ -98,9 +124,11 @@ available-internal-links** rule so links resolve.
    optional `image` for hero.
 4. **Body headings**: **One conceptual H1 only** (from `BlogHeader`). Body uses
    **`##`** and **`###`**; do not skip levels.
-5. **Quote block**: `<CustomerQuote quote="..." name="..." role="..." company="..." />`
+5. **Quote block**: one `<CustomerQuote>`, and only when the draft marks that quote as a callout. See **Quotes** above.
+   - `<CustomerQuote quote="..." name="..." role="..." company="..." />`
    - align `role` / `company` with frontmatter so the byline reads "Name, Role at Company"
    - avoid duplicating company name in `role`
+   - other quotes stay inline in the draft's paragraphs
 6. **Images**: size by aspect ratio (see checklist item 4 under Images above)
    - portrait/square -> `w-1/2` centered
    - landscape -> `w-2/3` centered
@@ -145,6 +173,9 @@ available-internal-links** rule so links resolve.
 - [ ] Image checklist given to user with folder path
 - [ ] Company website link in About section
 - [ ] Docs links only where agreed; no broken internal URLs
+- [ ] No sentences or metrics added that were not in the story body (social posts and side metrics tables stay out)
+- [ ] The only `<CustomerQuote>` is the quote the draft marked as a callout; every other quote stays inline
+- [ ] Frontmatter `customerQuote` is that same callout
 - [ ] Replace all em dashes with regular hyphens (`-`) - the linter will do this anyway; better to do it upfront
 - [ ] Follow `AGENTS.md` / `documentation-pages.mdc`: one H1 via BlogHeader, American English, accessible alt text
 
