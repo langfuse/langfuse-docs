@@ -138,7 +138,7 @@ Measurement only pays off when it changes the application. The loop that connect
 1. A production trace fails: a score crosses a threshold, an alert fires, or a reviewer flags it.
 2. The trace goes into a dataset, with a corrected expected output where a reviewer supplied one. Your regression set now contains this failure forever.
 3. You iterate on the prompt (or retrieval, or tool definitions) and run an experiment against the updated dataset, comparing the candidate to the current baseline.
-4. If the experiment wins, you promote the change. For prompts managed in Langfuse, promotion means moving the `production` label to the new version; [protected labels](/docs/prompt-management/features/prompt-version-control) restrict who can move it, so an experiment result plus an authorized approver becomes your promotion gate. (Label protection requires the Teams add-on, an Enterprise plan, or self-hosted EE.)
+4. If the experiment wins, you promote the change. For prompts managed in Langfuse, promotion means moving the `production` label to the new version; [protected labels](/docs/prompt-and-skill-management/features/version-control) restrict who can move it, so an experiment result plus an authorized approver becomes your promotion gate. (Label protection requires the Teams add-on, an Enterprise plan, or self-hosted EE.)
 5. The CI gate from step 3 keeps the fix from silently regressing later.
 
 Each pass through the loop grows the dataset, tightens the evaluators, and makes the next incident shorter. If your team is new to the underlying features, [Langfuse Academy](/academy) walks through this loop end to end, from tracing through datasets and experiments to production monitoring.

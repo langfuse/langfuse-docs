@@ -61,7 +61,7 @@ Dedicated Langfuse deployment with enterprise capabilities and support. Bundled 
 | **Prompt Management**                                                                                       |                             |                                            |
 | [Prompt versioning](/docs/prompt-management/get-started)                                                    | Yes                         | Yes                                        |
 | Prompt fetching                                                                                             | Unlimited                   | Unlimited                                  |
-| [Prompt release management](/docs/prompt-management/features/prompt-version-control)                        | Yes                         | Yes                                        |
+| [Prompt release management](/docs/prompt-and-skill-management/features/version-control)                     | Yes                         | Yes                                        |
 | [Prompt composability](/docs/prompt-management/features/composability)                                      | Yes                         | Yes                                        |
 | [Prompt caching (server and client)](/docs/prompt-management/features/caching)                              | Yes                         | Yes                                        |
 | [Playground](/docs/prompt-management/features/playground)                                                   | Yes                         | Yes                                        |

@@ -97,7 +97,7 @@ Test before release. Monitor production. Review with your experts.
 
 Control changes, protect sensitive data, and manage access.
 
-- **[Prompt governance](/docs/prompt-management/features/prompt-version-control):** Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
+- **[Prompt governance](/docs/prompt-and-skill-management/features/version-control):** Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.
 - **[Redaction](/docs/observability/features/masking):** Masking in the SDK before data leaves your application, with trace structure preserved for debugging.
 - **[Administration](/docs/administration/rbac):** Organizations and projects as the data boundary, project-level RBAC, OIDC SSO with domain enforcement, SCIM provisioning, audit logs, and a metrics API for chargebacks.
 
