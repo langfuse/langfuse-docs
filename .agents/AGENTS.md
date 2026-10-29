@@ -136,6 +136,7 @@ Please check the following:
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
+- When a code example is added, unless the page is specifically about one programming language, include examples for at least the Python SDK, the JS/TS SDK, and OpenTelemetry (API), using `<LangTabs>`. Additional tabs are fine when relevant. The tab names must be exactly `Python SDK`, `JS/TS SDK`, and `OpenTelemetry (API)`. Flag new or edited examples that omit one of these tabs or use a different name.
 - When documentation is added or expanded, do not repeat the same information on a page. Each fact or explanation should appear once; later sections should link back instead of restating it.
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
 - Avoid specific model names in documentation; they go stale quickly. Prefer generic phrasing such as "your model" or the provider family, and flag new or edited docs that pin a versioned model name unless the page is specifically about that model.
