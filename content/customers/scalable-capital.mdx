@@ -1,7 +1,7 @@
 ---
 title: "How Scalable Capital traces and evaluates AI agents for over 1 million customers with Langfuse"
 date: October 29, 2026
-description: Learn how Scalable Capital uses self-hosted Langfuse to trace, score, and evaluate its support chatbot and Insights, a financial AI assistant.
+description: Scalable Capital, a leading European digital bank, uses Langfuse to trace and evaluate its support chatbot and financial AI assistant, Insights.
 ogImage:
 tag: customer-story
 author: Annabell
@@ -22,7 +22,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
   title="How Scalable Capital traces and evaluates AI agents for over 1 million customers with Langfuse"
-  description="Learn how Scalable Capital uses self-hosted Langfuse to trace, score, and evaluate its support chatbot and Insights, a financial AI assistant."
+  description="Scalable Capital, a leading European digital bank, uses Langfuse to trace and evaluate its support chatbot and financial AI assistant, Insights."
   customerLogo="/images/customers/scalable-capital/scalable-capital-light.svg"
   authors={["annabellschafer"]}
   date="October 29, 2026"
@@ -35,12 +35,12 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
     {
       area: "Support chatbot and Insights",
       impact:
-        "Scalable Capital uses Langfuse to trace and evaluate its support chatbot and Insights, a financial AI assistant.",
+        "Scalable Capital, a leading European digital bank, uses Langfuse to trace and evaluate its support chatbot and financial AI assistant, Insights.",
     },
     {
-      area: "Self-hosted, with the features the team needed",
+      area: "Self-hosting and feature scope",
       impact:
-        "Self-hosting and the platform's feature scope were key reasons for choosing Langfuse, so observability data stays in Scalable's own cloud environment.",
+        "Self-hosting and the platform's wide feature scope were key reasons for choosing Langfuse, allowing the team to keep observability data within its own cloud environment.",
     },
     {
       area: "Quality, improvements, and cost",
@@ -52,7 +52,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 ## About Scalable Capital
 
-[Scalable Capital](https://scalable.capital/) is a leading bank that empowers people in Europe to shape their own finances. Launched in 2016, Scalable Capital makes it easy and affordable for over 1 million clients across Germany, Austria, France, Italy, Spain, and the Netherlands to invest professionally in stocks, ETFs, and more, and to save with access to attractive interest rate options.
+[Scalable Capital](https://scalable.capital/) is a leading bank that empowers people in Europe to shape their own finances. Launched in 2016, Scalable Capital makes it easy and affordable for over 1 million clients across Germany, Austria, France, Italy, Spain, and the Netherlands to invest professionally in stocks, ETFs, and more and save with access to attractive interest rate options.
 
 Konstantin Rink joined Scalable in 2022, a few months before the launch of ChatGPT. "This was the turning point for us to focus heavily on generative AI," says Konstantin, who now leads the company's data science and AI group as senior engineering manager.
 
@@ -70,33 +70,21 @@ The platform also has to hold up in production. "It's critical to have a robust 
 
 When evaluating alternatives, the team found that some options did not meet self-hosting requirements, while others lacked the maturity or feature coverage needed. Langfuse stood out for offering the right combination of deployment flexibility, maturity, and functionality.
 
-Langfuse lets the team run tracing, evaluation, and prompt management in their own cloud environment. "Langfuse was the best option," Konstantin says.
-
-<CustomerQuote
-  quote="Self-hosting gives us complete control over our data within our own environment. Beyond data control, Langfuse gave us the exact feature depth we needed - and as our scope expanded, the platform evolved alongside us."
-  name="Konstantin Rink"
-  role="Senior Engineering Manager, Data Science & AI"
-  company="Scalable Capital"
-/>
+Langfuse lets the team run tracing, evaluation, and prompt management in their own cloud environment. "Langfuse was the best option," Konstantin says. "Self-hosting gives us complete control over our data within our own environment. Beyond data control, Langfuse gave us the exact feature depth we needed - and as our scope expanded, the platform evolved alongside us."
 
 ## From internal testing to production with Langfuse
 
-To get the Insights agent into production, the team closed the full [AI engineering loop](/academy/ai-engineering-loop): from tracing and catching where things go wrong, to building datasets for evaluating the agent before it goes into production.
+To get their Insights agent into production, the team closed the full [AI engineering loop](/academy/ai-engineering-loop), from initially tracing, and catching where things are going wrong, to building out datasets for evaluating the agent before it goes into production.
 
-Insights went through extensive internal testing before launch. "When you have dozens of internal stakeholders testing the system, visibility is everything," Konstantin explains. By breaking each trace down into individual steps, the team could map the exact path a multi-step agent took and pinpoint where to refine its reasoning.
-
-<CustomerQuote
-  quote="When you have dozens of internal stakeholders testing the system, visibility is everything. Langfuse gave us complete transparency into how the agent responds."
-  name="Konstantin Rink"
-  role="Senior Engineering Manager, Data Science & AI"
-  company="Scalable Capital"
-/>
+Insights went through extensive internal testing before launch. "When you have dozens of internal stakeholders testing the system, visibility is everything," Konstantin explains. "Langfuse gave us complete transparency into how the agent responds." By breaking each trace down into individual steps, he explains, the team was able to map the exact path a multi-step agent took and pinpoint precisely where to refine its reasoning.
 
 <Frame fullWidth className="w-full">
   ![Phase 1 of getting Insights ready for launch: trace agent workflows, review responses, score answers, then measure cost and latency before going live](/images/customers/scalable-capital/insights-phase-1.png)
 </Frame>
 
-He offers the handling of complex questions as an example. Some questions are straightforward to interpret. Others combine multiple topics or use specialized terminology, such as product names or informal financial language. Traces help the team see how Insights interprets these questions, spot recurring patterns, and refine the system so answers stay useful within its intended scope.
+He offers the handling of complex questions as an example. Some questions are straightforward to interpret. Others combine multiple topics or use specialized terminology, such as product names or informal financial language. Traces help the team understand how Insights interprets these questions and identify where it needs to improve.
+
+Langfuse helps the team understand how Insights handles different types of questions and where responses could be improved. By reviewing traces, the team can identify recurring patterns and refine the system to provide useful answers within its intended scope.
 
 [Scores](/docs/evaluation/scores/overview) were another big help during testing. Internal testers rated answers with a thumbs up or down. "This made it easier for us to look up in the system what went wrong and what went right," Konstantin says. "Integrating that feedback into Langfuse was straightforward using its [API](/docs/evaluation/evaluation-methods/scores-via-sdk)."
 
@@ -114,9 +102,9 @@ Automated evaluators complement that review, both before releases and in product
 
 Product managers use Langfuse to monitor quality indicators and investigate changes that warrant a closer look. This helps the team identify areas for improvement as the product evolves.
 
-The support chatbot resolves more than half of customer inquiries, and customers can always speak to a support specialist if they choose. It was designed from day one to help customers reach a human when it can't resolve their issue. "The chatbot was designed from the outset to provide reliable support to customers," Konstantin says.
+The support chatbot was designed from day one to help customers reach a human when it can't resolve their issue. "The chatbot was designed from the outset to provide reliable support to customers," Konstantin says.
 
-For Insights, reviewing negative feedback is an important part of that process. Among users who submit feedback, more than 90% of ratings are positive. "We treat negative feedback as valuable data," Konstantin says. "By filtering scores and comments through Langfuse, we can immediately see where customer expectations diverge from the agent's actual performance."
+For Insights, reviewing negative feedback is an important part of that process. "We treat negative feedback as valuable data," Konstantin says. "By filtering scores and comments through Langfuse, we can immediately see where customer expectations diverge from the agent's actual performance."
 
 Langfuse remains central to the team's ongoing evaluation and refinement across both products.
 
