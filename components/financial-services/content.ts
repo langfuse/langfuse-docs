@@ -174,7 +174,7 @@ export const financialServicesEvalColumns = [
       {
         title: "Prompt governance",
         body: "Immutable versions, staging and production labels, protected labels for separation of duties, and full audit history.",
-        href: "/docs/prompt-management/features/prompt-version-control",
+        href: "/docs/prompt-and-skill-management/features/version-control",
       },
       {
         title: "Redaction",
