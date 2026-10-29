@@ -10,8 +10,6 @@ import { Details, Summary } from "@/components/Details";
 
 Record which skill versions a model could use and which files the agent loaded. Use your framework's OpenTelemetry instrumentation or the Langfuse Python or JavaScript/TypeScript SDK, then attach the skill metadata below. First [configure tracing](/docs/observability/sdk/overview) for your model and tool calls.
 
-{/* Before publishing the SDK tabs, verify compatible released SDK and backend versions, including skill attribute names and lockfile formats. */}
-
 ## Available skills and loaded files [#availability-and-loads]
 
 - **Available skills**: the names and versions reported on a generation. Report the same skills your agent can use; Langfuse does not expose them to the model.
@@ -21,73 +19,101 @@ Installing or fetching skills alone does not record either list.
 
 ## Attach available skills [#attach-available-skills]
 
-<Tabs items={["OpenTelemetry", "⚠️ Fetched skills (SDK)", "⚠️ Installed skills (SDK)"]} defaultIndex={0}>
+<Tabs items={["OpenTelemetry", "Python SDK", "JS/TS SDK"]} defaultIndex={0}>
 <Tab>
 
 ### Use raw OpenTelemetry [#opentelemetry]
 
-Set `langfuse.observation.skills_available` on the active model-call span before it ends. The value is a JSON string containing skill names and versions:
+Set this attribute on the active model-call span before it ends. The value must be a JSON string:
 
-<Tabs items={["Python", "JavaScript / TypeScript"]}>
-<Tab>
-
-```python
-import json
-from opentelemetry import trace
-
-trace.get_current_span().set_attribute(
-    "langfuse.observation.skills_available",
-    json.dumps([{"name": "refund-policy", "version": 2}]),
-)
+```json
+{
+  "langfuse.observation.skills_available": "[{\"name\":\"refund-policy\",\"version\":2}]"
+}
 ```
-
-</Tab>
-<Tab>
-
-```typescript
-import { trace } from "@opentelemetry/api";
-
-trace.getActiveSpan()?.setAttributes({
-  "langfuse.observation.skills_available": JSON.stringify([
-    { name: "refund-policy", version: 2 },
-  ]),
-});
-```
-
-</Tab>
-</Tabs>
 
 Use the name and version from the manifest your agent received. This attribute applies only to the current span: set it on each model or skill-loading tool span you want to link. Langfuse also accepts the legacy field names `skillName` and `skillVersion`.
 
 </Tab>
 <Tab>
 
-<Callout type="warning">
+Run your instrumented model and tool calls inside `propagate_attributes` to attach the skill list.
 
-**Release pending.** This SDK API is not yet released and is subject to change.
+### Installed skills [#python-installed-skills]
 
-</Callout>
+Discover skills from your installation directory and configure them on the Langfuse client. Enable the configured list for each run with `attach_skills=True`:
 
-Pass the manifest's name and version to the propagation scope. Run your instrumented model and tool calls inside that scope:
+```python
+from langfuse import Langfuse, discover_skills, propagate_attributes
+from agent import run_agent
 
-<Tabs items={["Python", "JavaScript / TypeScript"]}>
-<Tab>
+skills = discover_skills(dir=".agents/skills")
+langfuse = Langfuse(skills={"available": skills})
+
+try:
+    with propagate_attributes(attach_skills=True):
+        run_agent()
+finally:
+    langfuse.shutdown()
+```
+
+Discovery reads skill folders and looks for `langfuse-skills.lock` in the installation directory, then the working directory. Folders without lockfile entries have no version. Discovery is synchronous. Configure the client before your agent creates any Langfuse observations. For a long-running application, shut down the client when the application exits.
+
+### Fetched skills (in memory) [#python-fetched-skills]
+
+Pass the name and version of each skill you fetched for your agent:
 
 ```python
 from langfuse import Langfuse, propagate_attributes
 from agent import run_agent
 
 langfuse = Langfuse()
-skill = langfuse.api.unstable.skills.get("refund-policy", label="production")
+skill = langfuse.api.skills.get("refund-policy", label="production")
 
 with propagate_attributes(
-    available_skills=[{"name": skill.name, "version": skill.version}],
+    skills_available=[{"name": skill.name, "version": skill.version}],
 ):
     run_agent()
 ```
 
+Fetch the [skill contents](/docs/skill-management/load-skills#api-fetch) separately and make them available to your agent. Reporting a skill here only attaches tracing metadata.
+
 </Tab>
 <Tab>
+
+Run your instrumented model and tool calls inside `propagateAttributes` to attach the skill list.
+
+### Installed skills [#javascript-installed-skills]
+
+In Node.js, configure the discovered skills on `LangfuseSpanProcessor`. Enable the configured list for each run with `attachSkills: true`:
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { discoverSkills } from "@langfuse/otel/node";
+import { propagateAttributes } from "@langfuse/tracing";
+import { runAgent } from "./agent";
+
+const skills = await discoverSkills({ dir: ".agents/skills" });
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({ skills: { available: skills } }),
+  ],
+});
+sdk.start();
+
+try {
+  await propagateAttributes({ attachSkills: true }, () => runAgent());
+} finally {
+  await sdk.shutdown();
+}
+```
+
+Discovery reads skill folders and looks for `langfuse-skills.lock` in the installation directory, then the working directory. Folders without lockfile entries have no version. Await discovery before starting the run. If tracing is already configured, add the skill list to your existing Langfuse processor. For a long-running application, shut down the SDK when the application exits.
+
+### Fetched skills (in memory) [#javascript-fetched-skills]
+
+Pass the name and version of each skill you fetched for your agent:
 
 ```typescript
 import { LangfuseClient } from "@langfuse/client";
@@ -95,86 +121,22 @@ import { propagateAttributes } from "@langfuse/tracing";
 import { runAgent } from "./agent";
 
 const langfuse = new LangfuseClient();
-const skill = await langfuse.api.unstable.skills.get("refund-policy", {
+const skill = await langfuse.api.skills.get("refund-policy", {
   label: "production",
 });
 
 await propagateAttributes(
-  { availableSkills: [{ name: skill.name, version: skill.version }] },
+  { skillsAvailable: [{ name: skill.name, version: skill.version }] },
   () => runAgent(),
 );
 ```
 
-</Tab>
-</Tabs>
-
-`run_agent` or `runAgent` is your existing instrumented agent. With tracing configured, the propagation scope attaches the skill list to the active observation and new child spans. A nested skill list replaces the outer list; `[]` clears it. The list stays within this process. Include a version to link observations to a saved Langfuse skill version; unversioned skills can still be reported by name.
-
-</Tab>
-<Tab>
-
-<Callout type="warning">
-
-**Release pending.** This SDK API is not yet released and is subject to change.
-
-</Callout>
-
-Discover the installed skills before starting a run. Set `dir` to your installation directory:
-
-<Tabs items={["Python", "JavaScript / TypeScript"]}>
-<Tab>
-
-```python
-from langfuse import discover_skills, propagate_attributes
-from agent import run_agent
-
-available_skills = discover_skills(dir=".agents/skills")
-
-with propagate_attributes(available_skills=available_skills):
-    run_agent()
-```
-
-This reads the skill list synchronously. Configure Langfuse tracing before running your agent.
-
-</Tab>
-<Tab>
-
-```typescript
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { discoverSkills, LangfuseSpanProcessor } from "@langfuse/otel/node";
-import { propagateAttributes } from "@langfuse/tracing";
-import { runAgent } from "./agent";
-
-const availableSkills = await discoverSkills({ dir: ".agents/skills" });
-const processor = new LangfuseSpanProcessor({ skills: { availableSkills } });
-const sdk = new NodeSDK({ spanProcessors: [processor] });
-sdk.start();
-
-try {
-  await propagateAttributes({ attachDiscoveredSkills: true }, () => runAgent());
-} finally {
-  await sdk.shutdown();
-}
-```
-
-`runAgent` is your existing instrumented agent. If tracing is already configured, add the processor to your existing provider.
+Fetch the [skill contents](/docs/skill-management/load-skills#api-fetch) separately and make them available to your agent. Reporting a skill here only attaches tracing metadata.
 
 </Tab>
 </Tabs>
 
-Discovery reads skill folders and their `langfuse-skills.lock` lockfile to identify versions. The CLI writes this lockfile in the installation directory by default. Folders without lockfile entries have no version.
-
-<Details>
-<Summary>JavaScript/TypeScript: background discovery and automatic attachment</Summary>
-
-Configure `skills: { dir: ".agents/skills" }` on the Node processor to discover skills in the background. Spans started before discovery finishes will lack the automatic skill list; await `discoverSkills` as shown above if the first run needs it.
-
-Use `propagateAttributes({ attachDiscoveredSkills: true }, callback)` to attach the discovered list within a callback, or set `skills.attachByDefault: true` to attach it by default. A nested scope can set `attachDiscoveredSkills: false` to disable automatic attachment. An explicit `availableSkills` list takes precedence.
-
-</Details>
-
-</Tab>
-</Tabs>
+In the SDK examples, `run_agent` or `runAgent` is your existing instrumented agent. The propagation scope attaches the skill list to the active observation and new child spans. A nested skill list replaces the outer list; `[]` clears it. The list stays within this process. Include a version to link observations to a saved Langfuse skill version; unversioned skills can still be reported by name.
 
 ## Instrument skill-loading tools [#skill-loading-tools]
 
