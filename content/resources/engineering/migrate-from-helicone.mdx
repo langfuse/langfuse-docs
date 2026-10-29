@@ -29,17 +29,17 @@ There is a real timing angle: your Helicone request history, prompts, and config
 
 ## Concept mapping [#concept-mapping]
 
-| Helicone                                     | Langfuse                                                                                                                     | Notes                                                     |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Request log entry                            | [Trace](/docs/observability/data-model) with nested observations                                                             | One request becomes a generation inside a trace           |
-| `Helicone-User-Id` header                    | `user_id` on the trace ([user tracking](/docs/observability/features/users))                                                 | Per-user cost and usage views carry over                  |
-| `Helicone-Session-Id` / `-Name` headers      | `session_id` on the trace ([sessions](/docs/observability/features/sessions))                                                | Groups multi-step interactions                            |
-| `Helicone-Session-Path` hierarchy            | Span nesting via [instrumentation](/docs/observability/sdk/instrumentation)                                                  | Path strings become a real trace tree                     |
-| `Helicone-Property-*` custom properties      | [Metadata](/docs/observability/features/metadata) and [tags](/docs/observability/features/tags)                              | Filterable in tables and dashboards                       |
-| Prompts + environments (production, staging) | [Prompts](/docs/prompt-and-skill-management/concepts) + [labels](/docs/prompt-and-skill-management/features/version-control) | The production environment becomes the `production` label |
-| Prompt variables `{{hc:name:type}}`          | [Variables](/docs/prompt-management/features/variables) `{{name}}`                                                           | Type validation moves into application code               |
-| AI Gateway (routing, failover)               | Not needed for tracing; [LiteLLM Proxy](/integrations/gateways/litellm) if you want a gateway                                | Langfuse SDKs capture client-side                         |
-| Requests table, dashboards                   | Observations table, [custom dashboards](/docs/metrics/features/custom-dashboards)                                            | Rebuild saved views as dashboards                         |
+| Helicone                                     | Langfuse                                                                                                                  | Notes                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Request log entry                            | [Trace](/docs/observability/data-model) with nested observations                                                          | One request becomes a generation inside a trace           |
+| `Helicone-User-Id` header                    | `user_id` on the trace ([user tracking](/docs/observability/features/users))                                              | Per-user cost and usage views carry over                  |
+| `Helicone-Session-Id` / `-Name` headers      | `session_id` on the trace ([sessions](/docs/observability/features/sessions))                                             | Groups multi-step interactions                            |
+| `Helicone-Session-Path` hierarchy            | Span nesting via [instrumentation](/docs/observability/sdk/instrumentation)                                               | Path strings become a real trace tree                     |
+| `Helicone-Property-*` custom properties      | [Metadata](/docs/observability/features/metadata) and [tags](/docs/observability/features/tags)                           | Filterable in tables and dashboards                       |
+| Prompts + environments (production, staging) | [Prompts](/docs/prompt-and-skill-management/concepts) + [labels](/docs/prompt-management/features/prompt-version-control) | The production environment becomes the `production` label |
+| Prompt variables `{{hc:name:type}}`          | [Variables](/docs/prompt-management/features/variables) `{{name}}`                                                        | Type validation moves into application code               |
+| AI Gateway (routing, failover)               | Not needed for tracing; [LiteLLM Proxy](/integrations/gateways/litellm) if you want a gateway                             | Langfuse SDKs capture client-side                         |
+| Requests table, dashboards                   | Observations table, [custom dashboards](/docs/metrics/features/custom-dashboards)                                         | Rebuild saved views as dashboards                         |
 
 ## Supported data types [#supported-data-types]
 
@@ -294,7 +294,7 @@ The mapping the script applies:
   | `{{hc:customer_name:string}}` | `{{customer_name}}` |
   | `{{hc:is_premium:boolean}}`   | `{{is_premium}}`    |
 
-- **Environments → labels**: the version deployed to Helicone's `production` environment gets the `production` [label](/docs/prompt-and-skill-management/features/version-control); map other environments (staging, development) to labels the same way.
+- **Environments → labels**: the version deployed to Helicone's `production` environment gets the `production` [label](/docs/prompt-management/features/prompt-version-control); map other environments (staging, development) to labels the same way.
 - **Partials**: Helicone prompt partials (`{{hcp:prompt_id:index:environment}}`) pull messages from other prompts. Recreate shared snippets as Langfuse text prompts referenced via [composability](/docs/prompt-management/features/composability), or insert message lists at runtime with [message placeholders](/docs/prompt-management/features/message-placeholders).
 
 Confirm in the Langfuse UI that each prompt shows its full version history, variables render in the preview, and the `production` label sits on the right version.

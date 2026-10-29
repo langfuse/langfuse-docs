@@ -73,7 +73,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | **Prompt Management**                                                                           |                             |                                            |                       |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                         | Yes                                        | Yes                   |
 | Prompt fetching                                                                                 | Unlimited                   | Unlimited                                  | Unlimited             |
-| [Prompt release management](/docs/prompt-and-skill-management/features/version-control)         | Yes                         | Yes                                        | Yes                   |
+| [Prompt release management](/docs/prompt-management/features/prompt-version-control)            | Yes                         | Yes                                        | Yes                   |
 | [Prompt composability](/docs/prompt-management/features/composability)                          | Yes                         | Yes                                        | Yes                   |
 | [Prompt caching (server and client)](/docs/prompt-management/features/caching)                  | Yes                         | Yes                                        | Yes                   |
 | [Playground](/docs/prompt-management/features/playground)                                       | Yes                         | Yes                                        | Yes                   |
