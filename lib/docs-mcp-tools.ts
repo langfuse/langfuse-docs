@@ -21,14 +21,15 @@ export const GET_LANGFUSE_OVERVIEW_DESCRIPTION =
 // Reduces a docs path or full URL to its pathname, dropping the host, query
 // and anchor (e.g. https://langfuse.com/docs/foo?x=1#y -> /docs/foo).
 // Leading slashes and backslashes collapse to one "/" so the result can never
-// be read as a protocol-relative URL (//evil.com) or an opaque path.
+// be read as a protocol-relative URL (//evil.com) or an opaque path. Trailing
+// slashes are dropped so /docs/foo/ maps to /docs/foo.md, not /docs/foo/.md.
 export const normalizeDocsPath = (pathOrUrl: string): string => {
   const input = pathOrUrl.trim();
   let pathname = input;
   try {
     pathname = new URL(input, "https://langfuse.com").pathname;
   } catch {}
-  return `/${pathname.replace(/^[/\\]+/, "")}`;
+  return `/${pathname.replace(/^[/\\]+/, "").replace(/\/+$/, "")}`;
 };
 
 // Resolves a normalized docs path to the URL of its Markdown mirror on
