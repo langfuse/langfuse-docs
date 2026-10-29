@@ -80,7 +80,7 @@ Ask whether to add **sparse** internal links. **Default policy:** only link
 - [OpenTelemetry](/integrations/native/opentelemetry)
 - [Experiments](/docs/evaluation/core-concepts#experiments)
 - [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
-- [Prompt version control](/docs/prompt-and-skill-management/features/version-control)
+- [Prompt version control](/docs/prompt-management/features/prompt-version-control)
 
 Do **not** pepper every noun with links. Use paths from **`llms-docs.txt` /
 available-internal-links** rule so links resolve.

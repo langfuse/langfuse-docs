@@ -635,7 +635,7 @@ const sections: Section[] = [
       {
         name: "Prompt Release Management",
         description: "Deploy and rollback prompts to different environments",
-        href: "/docs/prompt-and-skill-management/features/version-control",
+        href: "/docs/prompt-management/features/prompt-version-control",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {

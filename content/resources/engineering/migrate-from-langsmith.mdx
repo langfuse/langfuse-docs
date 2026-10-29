@@ -462,7 +462,7 @@ console.log(`migrated ${count} dataset items`);
 
 ## Step 3: Copy Prompt Hub prompts [#prompts]
 
-Pull each prompt from the Prompt Hub and create it in [Langfuse prompt management](/docs/prompt-management). Two things change in the transfer: LangSmith's f-string variables (`{question}`) become Langfuse variables (`{{question}}`), and Prompt Hub commits become Langfuse versions with [labels](/docs/prompt-and-skill-management/features/version-control) (for example `production`) taking the place of commit tags. `MessagesPlaceholder` entries (chat history) map to Langfuse [message placeholders](/docs/prompt-management/features/message-placeholders).
+Pull each prompt from the Prompt Hub and create it in [Langfuse prompt management](/docs/prompt-management). Two things change in the transfer: LangSmith's f-string variables (`{question}`) become Langfuse variables (`{{question}}`), and Prompt Hub commits become Langfuse versions with [labels](/docs/prompt-management/features/prompt-version-control) (for example `production`) taking the place of commit tags. `MessagesPlaceholder` entries (chat history) map to Langfuse [message placeholders](/docs/prompt-management/features/message-placeholders).
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab>
