@@ -79,7 +79,9 @@ Experts disagree more often than teams expect. A case one expert marks as correc
 
 To get there, let your experts review each other's work. Have parts of the dataset labeled independently by several experts and look at where they disagree. Ideally, bring the experts into one room to talk through those cases, agree on the right handling, and write the missing rule into your guidelines. Tejas Kumar from IBM described the pattern at AI Engineer World's Fair 2026: "When we don't agree, it's just usually because there's a knowledge gap." ([talk](https://www.youtube.com/watch?v=NdrSPm6NCdk))
 
-The more humans disagree on a case, the harder it is for an agent to handle it. Research has a name for this: inter-rater reliability, the extent to which different raters assign the same score to the same item. It comes from qualitative and clinical research, where it is usually measured as percent agreement or with Cohen's kappa, and many texts recommend at least 80% agreement between raters ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)).
+<Callout type="info">
+  The more humans disagree on a case, the harder it is for an agent to handle it. Research has a name for this: inter-rater reliability, the extent to which different raters assign the same score to the same item. It comes from qualitative and clinical research, where it is usually measured as percent agreement or with Cohen's kappa, and many texts recommend at least 80% agreement between raters ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)).
+</Callout>
 
 In Langfuse, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) let several experts label the same items without touching code. [Score analytics](/docs/evaluation/scores/score-analytics) then calculates percent agreement and Cohen's kappa between them, so you can see which cases need a discussion. At DKB, customer service specialists work in Langfuse directly and add typical examples to datasets that engineers then use to adjust prompts.
 
