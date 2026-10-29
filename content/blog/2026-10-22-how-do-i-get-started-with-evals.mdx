@@ -29,9 +29,9 @@ When teams say "evals", they usually mean one of three things.
 
 **1. Signal detection on production data.** Here you look for the traces that deserve a closer look, for example when a user disagrees or asks for a human, or when an agent calls the same tool over and over. [Signals](/academy/monitoring#metrics-and-signals) point you to the exact trace to open, and [user signals](/academy/monitoring/capturing-signals#four-kinds) are cheap because your users react to every output anyway.
 
-**2. Measuring quality in production.** Here you score live traffic, usually a sample of it, against criteria that matter for your application. Did the answer stay within the retrieved policy? Did the agent pick the right tool? The setup is described in [online evaluation](/docs/evaluation/get-started/online).
+**2. Measuring quality in production.** Here you score a sample of live traffic against criteria that matter for your application. Did the answer stay within the retrieved policy? Did the agent pick the right tool? The setup is described in [online evaluation](/docs/evaluation/get-started/online).
 
-**3. Offline evals on datasets.** Before you ship a new version, you run it against a dataset and check whether it is better, or cheaper, than the one in production. To set one up, follow [evaluate with datasets](/docs/evaluation/get-started/offline).
+**3. Offline evals on datasets.** Before you ship a new version, you run it against a dataset and check whether it is better, or cheaper, than the one in production. Put cost per successful task and p95 latency next to the quality scores, so a version that keeps quality flat while cutting cost counts as a win. To set one up, follow [evaluate with datasets](/docs/evaluation/get-started/offline).
 
 You will end up using all three. The path map below shows the order in which they usually show up.
 
@@ -65,7 +65,7 @@ flowchart TD
 
 ### Do your traces record everything you need? [#check-your-traces]
 
-Every eval reads from traces, so this comes first on both paths. For a single run, can you see the input, the output, the retrieved context, and every tool call with its result? If spans are unnamed or tool results are missing, every evaluator you build on top inherits the gap. [What does a good trace look like?](/docs/observability/best-practices) is the checklist we use. Before launch, your traces come from running test cases, which works just as well.
+Every eval reads from traces, so this comes first on both paths. Can you see the input, output, retrieved context, and every tool call with its result? If not, every evaluator you build on top inherits the gap. [What does a good trace look like?](/docs/observability/best-practices) is the checklist we use. Before launch, your traces come from running test cases, which works just as well.
 
 ### How much damage can a wrong run do? [#how-much-damage]
 
@@ -87,17 +87,17 @@ In the Academy's [music streaming DJ](/academy/examples/music-streaming-dj) exam
 ### High risk: simulate production first [#high-risk]
 
 1. **Define typical cases with domain experts**, including how each one should be handled. About [15 to 30 rows](/academy/datasets/designing-great-datasets) is enough for a first version, and [Anthropic's guide to agent evals](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) suggests a similar start of 20 to 50 tasks.
-2. **Run them before going live**, with tracing on.
+2. **Run them before going live**, with tracing on. Agents are non-deterministic, so run each case several times: at 80 percent success per run, all five of five runs succeed only about 33 percent of the time (0.8^5). Sierra's [τ-bench paper](https://arxiv.org/abs/2406.12045) measures this kind of consistency as pass^k.
 3. **Run error analysis** on the results to find out what to evaluate for.
 4. **Optimize your application** against this dataset.
 5. **Set up monitors** that catch the same failures in production. If a failure must never reach a user, add a [runtime guardrail](/docs/security-and-guardrails) as well.
 6. **Go live**, catch signals, and keep running error analysis.
 
-The [customer support chatbot](/academy/examples/customer-support-chatbot) example follows this path in three phases: offline on historical tickets, then as internal drafts the support team edits, and finally answering customers directly. Teams in regulated industries often need exactly this.
+The [customer support chatbot](/academy/examples/customer-support-chatbot) example follows this path: offline on historical tickets, then internal drafts, then answering customers directly.
 
 ## Same motion, different data [#same-motion-different-data]
 
-Put the two lanes side by side and you see the same motion: collect cases, run them, find failures, measure them, improve, and watch for regressions. What changes is where the cases come from. The low-risk path learns from live traffic, and the high-risk path simulates it with cases you define.
+Side by side, the two lanes follow the same motion. What changes is where the cases come from: live traffic on the low-risk path, and cases you define on the high-risk path.
 
 | Step          | Low risk: live production data                    | High risk: simulated production                  |
 | ------------- | ------------------------------------------------- | ------------------------------------------------ |
@@ -108,17 +108,19 @@ Put the two lanes side by side and you see the same motion: collect cases, run t
 | Improve       | Fix the top failures and grow a dataset from them | Optimize against the dataset until it holds up   |
 | Watch         | Monitors on the evaluators you set up             | Monitors set up before launch, then live signals |
 
-In both lanes, error analysis is the step that decides what you measure. Hamel Husain calls skipping it the most common mistake in his [field guide](https://hamel.dev/blog/posts/field-guide/), and in the [evals FAQ](https://hamel.dev/blog/posts/evals-faq/) he and Shreya Shankar describe spending 60 to 80 percent of development time on error analysis and evaluation. The Academy's [error analysis](/academy/monitoring/error-analysis) page walks you through the method, and [our own setup](/blog/2026-07-16-steal-our-eval-setup) is there for you to copy.
+In both lanes, error analysis is the step that decides what you measure. Hamel Husain calls skipping it the most common mistake in his [field guide](https://hamel.dev/blog/posts/field-guide/), and in the [evals FAQ](https://hamel.dev/blog/posts/evals-faq/) he and Shreya Shankar describe spending 60 to 80 percent of development time on error analysis and evaluation. The Academy's [error analysis](/academy/monitoring/error-analysis) page walks you through the method.
+
+When you write your first evaluators in either lane, start with the checks [code can verify](/docs/evaluation/evaluation-methods/code-evaluators): JSON schema, required fields, length limits, and whether generated SQL or code actually runs. These checks are cheap, fast, and deterministic. Use an LLM judge only for what code cannot check.
 
 ## Both paths end in the same loop [#both-paths-join-the-same-loop]
 
-After the first release, the lanes merge: you monitor production, run error analysis, pull interesting cases into datasets, test changes in experiments, and ship the version that holds up. This is the [AI engineering loop](/academy/ai-engineering-loop). A few tips we share with teams at this stage:
+After the first release, the lanes merge into the [AI engineering loop](/academy/ai-engineering-loop): monitor, analyze, experiment, and ship. A few tips we share with teams at this stage:
 
 **Keep your dataset fresh.** Once you optimize against a dataset, it only tells you about the failures it contains. Keep adding cases from production, especially on the high-risk path.
 
-**Sample your online evals.** A typical [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation costs around $0.01 to $0.10. When you set up an [evaluation rule](/docs/evaluation/get-started/online), check the estimated cost and lower the sampling rate until the spend fits what the score is worth to you. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) are cheaper and can run on more traffic.
+**Sample your online evals.** A typical [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluation costs around $0.01 to $0.10. When you set up an [evaluation rule](/docs/evaluation/get-started/online), check the estimated cost and lower the sampling rate until the spend fits what the score is worth to you.
 
-**Validate your LLM judge with humans.** Label some cases yourself, run the judge on them, and compare. Our [calibration guide](/guides/llm-as-a-judge-calibration-skill) walks through the workflow, and [score analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement) shows the agreement. Repeat this whenever you change the judge prompt, your application, or the model.
+**Validate your LLM judge with humans.** Label some cases yourself, run the judge on them, and compare. Our [calibration guide](/guides/llm-as-a-judge-calibration-skill) walks through the workflow, and [score analytics](/docs/evaluation/scores/score-analytics#human-vs-ai-annotation-agreement) shows the agreement. Repeat this whenever the judge prompt or model changes.
 
 **Gate your releases.** Once your dataset is stable, run it in [CI](/docs/evaluation/experiments/experiments-ci-cd) so a prompt or model change gets checked against known failures before it ships.
 
