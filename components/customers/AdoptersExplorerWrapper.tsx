@@ -39,6 +39,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
+  DKB: { src: "/images/customers/dkb/dkb-light.svg" },
   EnBW: { src: enbwLogo },
   "Expedia Group": { src: expediaLogo },
   freee: { src: freeeLogo },
@@ -74,6 +75,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   CyberAgent: "Digital advertising, media, and internet services company",
   Cybozu: "Workplace collaboration software company",
   "Dep for Environment, Food & Rural Affairs": "UK government department",
+  DKB: "German direct bank",
   Draftbit: "Visual mobile app development platform",
   Ecosia: "Search engine and technology company",
   EnBW: "German energy and utilities company",
@@ -122,6 +124,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Swisscom: "Swiss communications, IT, and entertainment company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
+  Todoist: "Task and work management application",
   "Trade Republic": "European fintech bank",
   Twilio: "Customer communications platform",
 };
@@ -135,6 +138,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "CyberAgent",
   "Cybozu",
   "Dep for Environment, Food & Rural Affairs",
+  "DKB",
   "Ecosia",
   "Equinix",
   "freee",
@@ -162,6 +166,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Samsara",
   "Sanofi",
   "Slite",
+  "Todoist",
   "Twilio",
 ]);
 

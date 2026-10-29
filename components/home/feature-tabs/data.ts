@@ -100,12 +100,13 @@ from_ms = now - 30 * 24 * 60 * 60 * 1000          # 30 days ago
 
 # Construct the query object
 query = {
-  "view": "traces",
+  "view": "observations",
   "dimensions": [{"field": "userId"}],
   "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
   "fromTimestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(from_ms/1000)),
   "toTimestamp":   time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now/1000)),
-  "orderBy": [{"field": "totalCost_sum", "direction": "desc"}],
+  "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+  "config": {"row_limit": 100},
 }
 
 # Get metrics from Langfuse API
@@ -121,12 +122,13 @@ const from = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
 // Construct the query object
 const query = JSON.stringify({
-  view: "traces",
+  view: "observations",
   dimensions: [{ field: "userId" }],
   metrics: [{ measure: "totalCost", aggregation: "sum" }],
   fromTimestamp: from,
   toTimestamp: new Date(now).toISOString(),
-  orderBy: [{ field: "totalCost_sum", direction: "desc" }],
+  orderBy: [{ field: "sum_totalCost", direction: "desc" }],
+  config: { row_limit: 100 },
 });
 
 // Get metrics from Langfuse API

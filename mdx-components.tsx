@@ -27,6 +27,14 @@ import { TracingHierarchyDiagram } from "@/components/academy/TracingHierarchyDi
 import { RagTraceViewDiagram } from "@/components/academy/RagTraceViewDiagram";
 import { DatasetFieldsDiagram } from "@/components/academy/DatasetFieldsDiagram";
 import { ErrorAnalysisProcessDiagram } from "@/components/academy/ErrorAnalysisProcessDiagram";
+import {
+  CostPriceVsQualityDiagram,
+  CostSpecializedModelDiagram,
+} from "@/components/academy/CostPriceQualityDiagram";
+import { CostPerStepDiagram } from "@/components/academy/CostPerStepDiagram";
+import { CostOptimizationLoopDiagram } from "@/components/academy/CostOptimizationLoopDiagram";
+import { CostCachingVsPruningDiagram } from "@/components/academy/CostCachingVsPruningDiagram";
+import { CostSubAgentsDiagram } from "@/components/academy/CostSubAgentsDiagram";
 import { AnnotatedLoop } from "@/components/academy/AnnotatedLoop";
 import { DatasetBlock } from "@/components/academy/DatasetBlock";
 import { EvaluatorBlock } from "@/components/academy/EvaluatorBlock";
@@ -63,6 +71,12 @@ import { FaqDetails } from "@/components/faq/FaqDetails";
 const Video = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
 ) as typeof import("@/components/Video").Video;
+
+const VideoCarousel = dynamic(() =>
+  import("@/components/docs/VideoCarousel").then((m) => ({
+    default: m.VideoCarousel,
+  })),
+) as typeof import("@/components/docs/VideoCarousel").VideoCarousel;
 
 const BLOCK_TAGS = new Set([
   "div",
@@ -105,6 +119,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     p: MdxParagraph,
     Frame,
     Video,
+    VideoCarousel,
     LangTabs,
     Callout,
     Tabs: LangTabsWithTab,
@@ -129,6 +144,12 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     RagTraceViewDiagram,
     DatasetFieldsDiagram,
     ErrorAnalysisProcessDiagram,
+    CostPriceVsQualityDiagram,
+    CostSpecializedModelDiagram,
+    CostPerStepDiagram,
+    CostOptimizationLoopDiagram,
+    CostCachingVsPruningDiagram,
+    CostSubAgentsDiagram,
     AnnotatedLoop,
     DatasetBlock,
     EvaluatorBlock,

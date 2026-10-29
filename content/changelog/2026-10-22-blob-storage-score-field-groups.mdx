@@ -1,0 +1,27 @@
+---
+date: 2026-10-22
+title: "Export score metadata and provenance to blob storage"
+description: Two opt-in field groups add score metadata and the annotation, config, and evaluator behind each score to scheduled S3, GCS, and Azure exports.
+author: Niklas
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+Score files in scheduled blob storage exports can now include each score's metadata and where it came from. Two new field groups add these columns on top of the core score columns:
+
+- **Join scores to their origin in your warehouse.** `score_provenance` adds `author_user_id`, `config_id`, `queue_id`, `evaluator_id`, `evaluation_rule_id`, and `execution_trace_id`, so you can break down annotation scores by reviewer and queue, or LLM-as-a-judge scores by evaluator.
+- **Debug a judge's verdict.** Follow `execution_trace_id` to the trace of the evaluator run that produced the score.
+- **Analyze custom score attributes.** `score_metadata` adds the `metadata` column with the key-value pairs you attached when creating the score.
+
+Enable the groups under **Project Settings → Integrations → Blob Storage**, or add `score_metadata` and `score_provenance` to `exportFieldGroups` on [`PUT /api/public/integrations/blob-storage`](https://api.reference.langfuse.com/#tag/blobstorageintegrations). Both groups are off by default, including on new integrations, so existing score files keep their current columns. Group columns are appended after the core columns and apply to future exports only.
+
+## Learn more
+
+import { FileCode } from "lucide-react";
+
+<Cards num={2}>
+  <Card title="Export field selection" href="/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups" icon={<FileCode />} arrow />
+  <Card title="Score field reference" href="/docs/api-and-data-platform/features/export-to-blob-storage#scores" icon={<FileCode />} arrow />
+</Cards>

@@ -1,0 +1,29 @@
+---
+date: 2026-10-13
+title: Use any System One decision model
+description: Point the TypeSafe System One adapter at a custom base URL to run decision-model evaluators with SubQ Snap or Strands Decider.
+author: Hassieb
+canonical: /docs/evaluation/evaluation-methods/decision-models#connect-system-one-compatible
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now run [decision-model evaluators](/docs/evaluation/evaluation-methods/decision-models) on any model that serves TypeSafe's System One API, not only Jev. Add a **TypeSafe (System One)** connection, select the **Custom** upstream, and enter the vendor's base URL and model name. Your Choice, Score, and Yes / no questions work unchanged, for example:
+
+- Route traces by topic or failure mode with a Choice question on a cheaper model.
+- Flag out-of-scope requests or PII in outputs with a Yes / no guardrail.
+- Grade answer completeness on a Score rubric with an open-weights model you host yourself.
+
+Models you can connect today include [Subquadratic SubQ Snap](https://subq.ai/introducing-subq-snap) (`subq-snap-preview`) and [Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/), an open-weights model you serve with `strands-decider serve`. The docs list the base URL and authentication for each.
+
+<Cards num={1}>
+  <Card
+    title="Connect a System One-compatible model"
+    href="/docs/evaluation/evaluation-methods/decision-models#connect-system-one-compatible"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

@@ -57,9 +57,13 @@ Only publishes to `content/guides/cookbook/evaluation_of_rag_with_ragas.mdx`. No
 The `docsPath` segment after `integrations/` determines the sidebar category:
 
 - `integrations/model-providers/<slug>` — inference APIs, model providers, hosted model offerings.
-- `integrations/frameworks/<slug>` — agent and app frameworks.
+- `integrations/frameworks/<slug>` — agent and app frameworks and platforms you build with.
 - `integrations/gateways/<slug>` — LLM proxies/routers.
-- `integrations/other/<slug>` — everything else (scraping tools, UI frameworks, IDE integrations, etc.).
+- `integrations/no-code/<slug>` — chat UIs, workflow automation, and standalone agents you configure rather than code against.
+- `integrations/developer-tools/<slug>` — AI coding assistants, editors, and CLIs.
+- `integrations/analytics/<slug>` — tools that visualize Langfuse traces and metrics.
+- `integrations/clickhouse/<slug>` — ClickHouse products and the LibreChat + ClickHouse stack.
+- `integrations/other/<slug>` — everything else (scraping, search, vector/memory, OTEL instrumentors, eval tools).
 
 The `<slug>` is kebab-case and should match the part after `integration_` in the notebook filename, with underscores replaced by hyphens. Example: `integration_fireworks_ai.ipynb` → `fireworks-ai`.
 

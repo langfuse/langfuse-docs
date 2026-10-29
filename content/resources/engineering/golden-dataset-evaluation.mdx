@@ -111,7 +111,8 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-scores = langfuse.api.scores_v3.get_many_v3(
+# Python SDK v4: langfuse.api.scores_v3.get_many_v3(...)
+scores = langfuse.api.scores.get_many(
     name="user-feedback",
     from_timestamp=datetime.now(timezone.utc) - timedelta(days=1),
     fields="subject",  # what the score is attached to: trace, observation, session, or experiment

@@ -61,6 +61,18 @@ litellm_settings:
   callbacks: ["langfuse_otel"]
 ```
 
+<Callout type="warning">
+  If you run LiteLLM's [OpenTelemetry
+  v2](https://docs.litellm.ai/docs/observability/opentelemetry_v2)
+  (`LITELLM_OTEL_V2=true`), also set
+  `LITELLM_OTEL_LANGFUSE_SPAN_SCOPE=llm_only`. Without it, the `langfuse_otel`
+  callback sends every proxy span to Langfuse (HTTP, auth, Postgres, Redis,
+  spend writes, health checks), not just the LLM calls. This can increase the
+  number of observations, and with it your Langfuse Cloud bill, by an order of
+  magnitude or more. LiteLLM's Terraform modules enable `LITELLM_OTEL_V2`
+  automatically when an OTel collector endpoint is configured.
+</Callout>
+
 **3. Start the proxy**
 
 ```bash

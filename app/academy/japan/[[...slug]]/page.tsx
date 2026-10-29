@@ -24,6 +24,7 @@ export default async function JaAcademyPage({ params }: PageProps) {
   return (
     <DocsChromePage
       page={page}
+      contentDir="content/academy/japan"
       bodyChromeProps={{ lang: "ja" }}
       topPrefix={
         <TranslationNotice

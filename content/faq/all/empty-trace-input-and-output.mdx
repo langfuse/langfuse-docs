@@ -217,10 +217,12 @@ If your provider uses different names, map them to the Langfuse observation attr
 ## Temporary compatibility for legacy evaluators
 
 <Callout type="warning">
-The trace I/O methods are deprecated. Use them only while an existing trace-level evaluator still reads trace input or output. Do not add them to new instrumentation.
+The trace I/O methods are deprecated in Python SDK v4 and JS/TS SDK v5, and removed in Python SDK v5 and JS/TS SDK v6. Use them only while an existing trace-level evaluator still reads trace input or output. Do not add them to new instrumentation.
 </Callout>
 
-After upgrading your SDK or ingestion path, trace input and output are no longer written automatically. Until you have [upgraded the evaluator](/faq/all/llm-as-a-judge-migration), you can continue supplying the legacy fields explicitly:
+After upgrading your SDK or ingestion path, trace input and output are no longer written automatically. Until you have [upgraded the evaluator](/faq/all/llm-as-a-judge-migration), you can continue supplying the legacy fields explicitly.
+
+On **Python SDK v5 and JS/TS SDK v6**, trace input and output come from the root observation, so set `input` and `output` on the root observation (see [Update trace](/docs/observability/sdk/instrumentation#trace-inputoutput-behavior)). On **Python SDK v4 and JS/TS SDK v5**, use the deprecated trace I/O methods:
 
 <Tabs items={["Python", "JS/TS"]}>
 <Tab>
