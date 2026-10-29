@@ -88,6 +88,10 @@ Here's a typical workflow for deploying prompt or skill changes:
 
 Since your code references the labels, all this happens without changing code.
 
+### Tags [#tags]
+
+Tags such as `support` or `billing` group prompts or skills across their versions. Use them to filter prompt and skill lists. For skills, you can also use tags to install several skills with the CLI. Labels select a version of each prompt or skill.
+
 ## How prompts work [#prompt-concepts]
 
 ### The prompt object
@@ -208,7 +212,3 @@ An agent can load skills in stages:
 The API returns a **manifest** containing the skill's name, description, version, and file list. Each file has a path and a content hash. A path identifies a file within the skill; a hash identifies its contents. You can fetch only the files you need and reuse content you have already cached. See [API loading](/docs/skill-management/load-skills#api-fetch).
 
 Keep the selected version fixed during a run so the instructions and supporting files come from the same revision.
-
-### Tags [#tags]
-
-Tags such as `support` or `billing` group skills across their versions. Use them to filter the skill list or install several skills with the CLI. Labels select a version of each skill.
