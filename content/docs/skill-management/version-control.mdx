@@ -39,7 +39,7 @@ To import existing skills, open **New skill → Import skills → Upload**. Uplo
 [Configure project credentials](/docs/skill-management/get-started#get-api-keys) and install the CLI, then push the skill folder:
 
 ```bash
-langfuse skills push ./refund-policy --label staging
+langfuse skills push ./skill_name --label staging
 ```
 
 The folder must contain a root `SKILL.md`. The CLI creates a version unless the files match the latest saved version, in which case it reuses it. The command assigns `staging` to the resulting version.
@@ -56,7 +56,7 @@ curl --request POST "$LANGFUSE_BASE_URL/api/public/skills" \
   --data '{
     "files": [{
       "path": "SKILL.md",
-      "content": "---\nname: refund-policy\ndescription: Review refund requests.\n---\nCheck the refund policy before responding."
+      "content": "---\nname: skill_name\ndescription: Describe when to use this skill.\n---\nInstructions for the agent."
     }],
     "commitMessage": "Update skill instructions"
   }'
@@ -86,8 +86,8 @@ Some notes on fetching skills:
 Install the version labeled `staging`, or pin version `2`:
 
 ```bash
-langfuse skills install refund-policy --label staging
-langfuse skills install refund-policy --version 2
+langfuse skills install skill_name --label staging
+langfuse skills install skill_name --version 2
 ```
 
 Run `langfuse skills update` to fetch the versions currently assigned to saved labels. Exact version pins stay fixed.
@@ -102,12 +102,12 @@ langfuse = Langfuse()
 
 # Get specific version
 skill = langfuse.api.skills.get(
-    "refund-policy", version=2, include_content=True,
+    "skill_name", version=2, include_content=True,
 )
 
 # Get specific label
 skill = langfuse.api.skills.get(
-    "refund-policy", label="staging", include_content=True,
+    "skill_name", label="staging", include_content=True,
 )
 ```
 
@@ -120,13 +120,13 @@ import { LangfuseClient } from "@langfuse/client";
 const langfuse = new LangfuseClient();
 
 // Get specific version
-const skillByVersion = await langfuse.api.skills.get("refund-policy", {
+const skillByVersion = await langfuse.api.skills.get("skill_name", {
   version: 2,
   includeContent: true,
 });
 
 // Get specific label
-const skillByLabel = await langfuse.api.skills.get("refund-policy", {
+const skillByLabel = await langfuse.api.skills.get("skill_name", {
   label: "staging",
   includeContent: true,
 });
@@ -138,13 +138,13 @@ const skillByLabel = await langfuse.api.skills.get("refund-policy", {
 Fetch the version labeled `staging`:
 
 ```bash
-curl --get "$LANGFUSE_BASE_URL/api/public/skills/refund-policy" \
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/skill_name" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --data-urlencode "label=staging" \
   --data-urlencode "includeContent=true"
 ```
 
-For a fixed version, replace `label=staging` with `version=2`. See [Load Skills](/docs/skill-management/load-skills) for file retrieval and installation details.
+For a fixed version, replace `label=staging` with `version=2`. See [loading skills](/docs/skill-management/get-started#load-your-skill) for file retrieval and installation details.
 
 </Tab>
 </LangTabs>
@@ -174,7 +174,7 @@ In the UI, select a version, open **Labels**, select `production`, and click **S
 
 ```bash
 curl --request PATCH \
-  "$LANGFUSE_BASE_URL/api/public/skills/refund-policy/versions/2" \
+  "$LANGFUSE_BASE_URL/api/public/skills/skill_name/versions/2" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --header "Content-Type: application/json" \
   --data '{"labels":["production"]}'
@@ -192,5 +192,5 @@ When publishing a skill in the UI, review the file changes before creating the v
 
 ## Related Resources
 
-- To load a skill by label or version, see [Load Skills](/docs/skill-management/load-skills).
+- To load a skill by label or version, see [loading skills](/docs/skill-management/get-started#load-your-skill).
 - To report the selected skill version on a trace, see [Trace Skill Usage](/docs/skill-management/tracing).
