@@ -114,7 +114,7 @@ To import existing skills, open **New skill → Import skills → Upload**. Uplo
 [Configure project credentials](/docs/skill-management/get-started#get-api-keys) and install the CLI, then push the skill folder:
 
 ```bash
-langfuse skills push ./refund-policy --label staging
+langfuse skills push ./skill_name --label staging
 ```
 
 The folder must contain a root `SKILL.md`. The CLI creates a version unless the files match the latest saved version, in which case it reuses it. The command assigns `staging` to the resulting version.
@@ -131,9 +131,9 @@ curl --request POST "$LANGFUSE_BASE_URL/api/public/skills" \
   --data '{
     "files": [{
       "path": "SKILL.md",
-      "content": "---\nname: refund-policy\ndescription: Review refund requests.\n---\nCheck the refund policy before responding."
+      "content": "---\nname: skill_name\ndescription: Describe when to use this skill.\n---\nInstructions for the agent."
     }],
-    "commitMessage": "Add refund workflow"
+    "commitMessage": "Update skill instructions"
   }'
 ```
 
@@ -229,8 +229,8 @@ Some notes on fetching skills:
 Install the version labeled `staging`, or pin version `2`:
 
 ```bash
-langfuse skills install refund-policy --label staging
-langfuse skills install refund-policy --version 2
+langfuse skills install skill_name --label staging
+langfuse skills install skill_name --version 2
 ```
 
 Run `langfuse skills update` to fetch the versions currently assigned to saved labels. Exact version pins stay fixed.
@@ -241,7 +241,7 @@ Run `langfuse skills update` to fetch the versions currently assigned to saved l
 Fetch the version labeled `staging`:
 
 ```bash
-curl --get "$LANGFUSE_BASE_URL/api/public/skills/refund-policy" \
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/skill_name" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --data-urlencode "label=staging"
 ```
@@ -309,7 +309,7 @@ In the UI, select a version, open **Labels**, select `production`, and click **S
 
 ```bash
 curl --request PATCH \
-  "$LANGFUSE_BASE_URL/api/public/skills/refund-policy/versions/2" \
+  "$LANGFUSE_BASE_URL/api/public/skills/skill_name/versions/2" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --header "Content-Type: application/json" \
   --data '{"labels":["production"]}'
@@ -387,10 +387,10 @@ Edit **Tags** in the prompt header to organize and filter related prompts.
 Edit **Tags** in the skill header or set them through the API:
 
 ```bash
-curl --request PATCH "$LANGFUSE_BASE_URL/api/public/skills/refund-policy" \
+curl --request PATCH "$LANGFUSE_BASE_URL/api/public/skills/skill_name" \
   --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
   --header "Content-Type: application/json" \
-  --data '{"tags":["support","billing"]}'
+  --data '{"tags":["tag"]}'
 ```
 
 This replaces the skill's tag list. Include every tag you want to retain. You can then [install all skills with a tag](/docs/skill-management/load-skills#cli-install).
