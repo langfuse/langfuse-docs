@@ -94,22 +94,23 @@ description if useful):
 If the draft says "screenshot here" without files, **list placeholders** in
 MDX with consistent paths so the user can drop files in later.
 
-### Docs links (optional but recommended)
+### Docs links (always)
 
-Ask whether to add **sparse** internal links. **Default policy:** only link
-**major** product concepts (match what we used on Cresta):
+Always link these concepts. Do not ask first. Link the first mention, and link
+again when a later section discusses that concept at length. Do not link the
+same concept twice in one paragraph, and do not link words inside a customer's
+quotation.
 
-- [Observability overview](/docs/observability/overview)
-- [Prompt management](/docs/prompt-management/overview) and/or [Playground](/docs/prompt-management/features/playground)
-- [Scores](/docs/evaluation/evaluation-methods/scores-via-sdk)
-- [Self-hosting](/self-hosting)
-- [OpenTelemetry](/integrations/native/opentelemetry)
-- [Experiments](/docs/evaluation/core-concepts#experiments)
-- [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)
-- [Prompt version control](/docs/prompt-management/features/prompt-version-control)
+- **AI engineering loop** -> [/academy/ai-engineering-loop](/academy/ai-engineering-loop)
+- **Observability** -> [/docs/observability/overview](/docs/observability/overview)
+- **Tracing** -> [/docs/observability/overview](/docs/observability/overview)
+- **Evaluation / evals** -> [/docs/evaluation/overview](/docs/evaluation/overview)
+- **Prompt management** -> [/docs/prompt-management/overview](/docs/prompt-management/overview)
+- **Self-hosting** -> [/self-hosting](/self-hosting)
 
-Do **not** pepper every noun with links. Use paths from **`llms-docs.txt` /
-available-internal-links** rule so links resolve.
+Leave other product nouns unlinked unless that feature is what the paragraph is
+about (for example scores, datasets, annotation queues, or cost). Use paths
+from **`llms-docs.txt` / available-internal-links** so every link resolves.
 
 ---
 
@@ -172,7 +173,7 @@ available-internal-links** rule so links resolve.
 - [ ] `meta.json` includes slug in desired order
 - [ ] Image checklist given to user with folder path
 - [ ] Company website link in About section
-- [ ] Docs links only where agreed; no broken internal URLs
+- [ ] AI engineering loop, observability, tracing, evaluation, prompt management, and self-hosting are linked (see **Docs links**); no broken internal URLs
 - [ ] No sentences or metrics added that were not in the story body (social posts and side metrics tables stay out)
 - [ ] The only `<CustomerQuote>` is the quote the draft marked as a callout; every other quote stays inline
 - [ ] Frontmatter `customerQuote` is that same callout
