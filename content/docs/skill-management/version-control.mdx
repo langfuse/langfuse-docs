@@ -1,0 +1,196 @@
+---
+title: Version Control
+seoTitle: "Skill Version Control"
+sidebarTitle: Version Control
+description: Use skill labels to fetch specific skill versions with the CLI, SDKs, or API.
+---
+
+# Skill Version Control
+
+In Langfuse, version control & deployment of skills is managed via `versions` and `labels`.
+
+## Implementation
+
+### Versions & Labels [#versions--labels]
+
+Each skill version is automatically assigned a `version ID`. Additionally, you can assign `labels` to follow your own versioning scheme.
+
+Labels can be used to assign skills to environments (staging, production), tenants (tenant-1, tenant-2), or experiments (prod-a, prod-b).
+
+<LangTabs items={["Langfuse UI", "CLI", "API"]}>
+<Tab>
+
+To create a new skill version in the Langfuse UI:
+
+1. Open **[Skills](https://cloud.langfuse.com/project/~/skills)** and select the version to start from.
+2. Click **Edit** to create a local draft.
+3. Edit `SKILL.md` or its supporting files, then click **Publish**.
+4. Review the file changes, add an optional version note, and confirm with **Create version**.
+
+Saved versions are read-only. Keep the same frontmatter `name` to add a version to the existing skill. Changing it to an unused name creates a separate skill starting at version 1.
+
+To assign a label, select a version, open **Labels**, select the label, and save your changes.
+
+To import existing skills, open **New skill → Import skills → Upload**. Upload files, folders, or ZIPs containing `SKILL.md`, review the detected skills, and select those to import. Changed skills create a new version; unchanged skills show **Already up to date**. Importing leaves existing `production` labels unchanged.
+
+</Tab>
+<Tab>
+
+[Configure project credentials](/docs/skill-management/get-started#get-api-keys) and install the CLI, then push the skill folder:
+
+```bash
+langfuse skills push ./skill_name --label staging
+```
+
+The folder must contain a root `SKILL.md`. The CLI creates a version unless the files match the latest saved version, in which case it reuses it. The command assigns `staging` to the resulting version.
+
+</Tab>
+<Tab>
+
+Send every file the new version should contain to `POST /api/public/skills`. Omitting a file removes it from the new version; earlier versions stay unchanged. Langfuse reads the name and description from the frontmatter in `SKILL.md`:
+
+```bash
+curl --request POST "$LANGFUSE_BASE_URL/api/public/skills" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "files": [{
+      "path": "SKILL.md",
+      "content": "---\nname: skill_name\ndescription: Describe when to use this skill.\n---\nInstructions for the agent."
+    }],
+    "commitMessage": "Update skill instructions"
+  }'
+```
+
+Use the version number in the response to [assign a label](#labels). Publishing assigns `latest`; assign `staging` or `production` separately. To reuse file content already stored in the project, provide its `sha256Hash` instead of `content`. See the [Skills API reference](https://api.reference.langfuse.com/#tag/skills).
+
+</Tab>
+</LangTabs>
+
+## Fetching by Label or Version
+
+When fetching skills to use them in your application you can either do so by fetching a specific version or label.
+Here are examples for fetching skills by label or version.
+
+**To "deploy" a skill version**, you have to assign the label `production` or any environment label you created to that skill version.
+
+Some notes on fetching skills:
+
+- The `latest` label points to the most recently created version.
+- When fetching a skill without specifying a label, Langfuse will serve the version with the `production` label.
+- If no version carries the requested label, the request fails with `404 Not Found`. Langfuse never silently falls back to `production` or `latest`; see [how label resolution works](#label-resolution).
+
+<LangTabs items={["CLI", "Python SDK", "JS/TS SDK", "API"]}>
+<Tab>
+
+Install the version labeled `staging`, or pin version `2`:
+
+```bash
+langfuse skills install skill_name --label staging
+langfuse skills install skill_name --version 2
+```
+
+Run `langfuse skills update` to fetch the versions currently assigned to saved labels. Exact version pins stay fixed.
+
+</Tab>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse()
+
+# Get specific version
+skill = langfuse.api.skills.get(
+    "skill_name", version=2, include_content=True,
+)
+
+# Get specific label
+skill = langfuse.api.skills.get(
+    "skill_name", label="staging", include_content=True,
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+
+// Get specific version
+const skillByVersion = await langfuse.api.skills.get("skill_name", {
+  version: 2,
+  includeContent: true,
+});
+
+// Get specific label
+const skillByLabel = await langfuse.api.skills.get("skill_name", {
+  label: "staging",
+  includeContent: true,
+});
+```
+
+</Tab>
+<Tab>
+
+Fetch the version labeled `staging`:
+
+```bash
+curl --get "$LANGFUSE_BASE_URL/api/public/skills/skill_name" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --data-urlencode "label=staging" \
+  --data-urlencode "includeContent=true"
+```
+
+For a fixed version, replace `label=staging` with `version=2`. See [loading skills](/docs/skill-management/get-started#load-your-skill) for file retrieval and installation details.
+
+</Tab>
+</LangTabs>
+
+### How label resolution works [#label-resolution]
+
+The CLI and SDKs fetch skills from `GET /api/public/skills/{name}`, so these rules apply whether you call the API directly or use a Langfuse client:
+
+| You pass                      | Langfuse returns                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Neither `label` nor `version` | The version labeled `production`. If no version has that label, the request fails with `404`.                               |
+| `label="staging"`             | The version that currently carries `staging`. If no version does, `404` — there is no fallback to `production` or `latest`. |
+| `version=3`                   | Version 3, regardless of its labels.                                                                                        |
+| Both `label` and `version`    | A `400` error: the two are mutually exclusive.                                                                              |
+
+Because a missing label is an error rather than a fallback, a typo in a label name or an environment whose label was never assigned surfaces immediately as a failed fetch, not as the wrong skill being served.
+
+Labels are visible in the skill's version history in the UI. For CLI installations, moving a label does not change installed files until you run `langfuse skills update`. An exact version pin remains fixed.
+
+## Operational workflows
+
+### Rollbacks [#labels]
+
+Move `production` to the version you want agents to fetch. Move it to an earlier version to roll back. Requests pinned to an exact version are unaffected.
+
+In the UI, select a version, open **Labels**, select `production`, and click **Save and promote to production**. For the API, replace `2` below with the version you want to promote:
+
+```bash
+curl --request PATCH \
+  "$LANGFUSE_BASE_URL/api/public/skills/skill_name/versions/2" \
+  --user "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"labels":["production"]}'
+```
+
+The request replaces this version's user-managed labels. Include every label it should retain. Assigning a label moves it from any other version of the same skill. Langfuse manages `latest` automatically.
+
+Publishing version 2 leaves `production` on version 1 until you move the label. API clients receive the change on their next manifest request; refresh any application cache to pick it up. For CLI installations, run `langfuse skills update`.
+
+### Skill Diffs
+
+When publishing a skill in the UI, review the file changes before creating the version. The saved skill view shows its file tree, version history, labels, and Files and Usage tabs.
+
+![The saved refund-policy skill with its file tree, version history, labels, and Files and Usage tabs.](/images/changelog/2026-10-22-skill-management-editor.jpg)
+
+## Related Resources
+
+- To load a skill by label or version, see [loading skills](/docs/skill-management/get-started#load-your-skill).
+- To report the selected skill version on a trace, see [Trace Skill Usage](/docs/skill-management/tracing).
