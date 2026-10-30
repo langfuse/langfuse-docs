@@ -22,6 +22,7 @@ import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrati
 import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 import { SpendByTaskMock } from "@/components/coding-agents/SpendByTaskMock";
+import { Button } from "@/components/ui/button";
 import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
 
 <h1 className="sr-only">Track and optimize coding agent usage</h1>
@@ -42,19 +43,9 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
           unpredictable. Govern it centrally. See spend by team and by
           developer. Trace sessions to improve token efficiency.
         </p>
-        <div className="mt-6 flex flex-wrap gap-2">
-          <a
-            href="/cloud"
-            className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
-          >
-            Start free
-          </a>
-          <a
-            href="/talk-to-us"
-            className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
-          >
-            Talk to sales
-          </a>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+          <Button href="/talk-to-us" variant="secondary" size="default" shortcutKey="t" className="w-auto" wrapperClassName="w-fit">Talk to sales</Button>
         </div>
       </div>
 
