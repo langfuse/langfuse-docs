@@ -5,8 +5,12 @@ import type { StaticImageData } from "next/image";
 import { Fan, ListTree, MoveHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { HoverCorners } from "@/components/ui/corner-box";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
+
+const controlType =
+  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]";
 
 export type Adopter = {
   id: string;
@@ -77,7 +81,7 @@ function referenceCtaLabel(adopter: Adopter) {
 function AdopterReference({ adopter }: { adopter: Adopter }) {
   if (!adopter.referenceHref) {
     return (
-      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-text-tertiary">
+      <span className={cn(controlType, "text-text-tertiary")}>
         {adopter.referenceLabel || "Public reference"}
       </span>
     );
@@ -89,7 +93,10 @@ function AdopterReference({ adopter }: { adopter: Adopter }) {
       href={adopter.referenceHref}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
-      className="font-mono text-[10px] uppercase tracking-[0.1em] text-text-secondary no-underline transition-colors hover:text-text-primary"
+      className={cn(
+        controlType,
+        "text-text-secondary no-underline transition-colors hover:text-text-primary",
+      )}
     >
       {referenceCtaLabel(adopter)} <span aria-hidden>→</span>
     </a>
@@ -138,9 +145,7 @@ function TracePreview({
       </div>
 
       <div className="min-h-0 flex-1 py-3">
-        <p className="m-0 font-mono text-[9px] uppercase tracking-[0.12em] text-text-tertiary">
-          Trace
-        </p>
+        <p className={cn("m-0", controlType, "text-text-tertiary")}>Trace</p>
         <div className="mt-2 min-w-0 font-mono text-[11px] leading-[1.45] text-text-secondary">
           <div className="flex min-w-0 items-center gap-2 font-medium text-text-primary">
             <TraceTypeIcon type="TRACE" />
@@ -167,7 +172,11 @@ function TracePreview({
         <button
           type="button"
           onClick={onClose}
-          className="cursor-pointer font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary transition-colors hover:text-text-primary"
+          className={cn(
+            "cursor-pointer transition-colors hover:text-text-primary",
+            controlType,
+            "text-text-tertiary",
+          )}
         >
           Close <span aria-hidden>×</span>
         </button>
@@ -223,7 +232,12 @@ function AdopterCard({
               {adopter.name}
             </span>
           )}
-          <span className="mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span
+            className={cn(
+              "mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-2.5 text-text-tertiary",
+              controlType,
+            )}
+          >
             <span className="truncate">{adopter.companyDescription}</span>
             <span className="shrink-0 text-text-primary">
               Trace <span aria-hidden>→</span>
@@ -259,7 +273,7 @@ function AdoptersTable({ adopters }: { adopters: Adopter[] }) {
   return (
     <div className="overflow-x-auto border border-line-structure bg-surface-bg">
       <table className="w-full min-w-[720px] border-collapse text-left text-[13px]">
-        <thead className="bg-surface-2 font-mono text-[10px] uppercase tracking-[0.1em] text-text-tertiary">
+        <thead className={cn("bg-surface-2 text-text-tertiary", controlType)}>
           <tr>
             <th className="border-b border-line-structure px-4 py-3 font-normal">
               Company
@@ -299,6 +313,11 @@ function AdoptersTable({ adopters }: { adopters: Adopter[] }) {
   );
 }
 
+const VIEW_OPTIONS = [
+  { value: "wall", label: "Wall" },
+  { value: "table", label: "Table" },
+] as const;
+
 function ViewToggle({
   view,
   onChange,
@@ -308,26 +327,36 @@ function ViewToggle({
 }) {
   return (
     <div
-      className="inline-flex border border-line-structure bg-surface-bg p-1"
+      className="inline-flex items-center"
       role="group"
       aria-label="Adopters view"
     >
-      {(["wall", "table"] as const).map((option) => (
-        <button
-          key={option}
-          type="button"
-          aria-pressed={view === option}
-          onClick={() => onChange(option)}
-          className={cn(
-            "min-w-16 cursor-pointer px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            view === option
-              ? "bg-text-primary text-surface-bg"
-              : "text-text-tertiary hover:bg-surface-1 hover:text-text-primary",
-          )}
-        >
-          {option}
-        </button>
-      ))}
+      {VIEW_OPTIONS.map((option) => {
+        const active = view === option.value;
+        return (
+          <div
+            key={option.value}
+            className="button-wrapper group relative flex items-center overflow-visible p-1"
+          >
+            <HoverCorners />
+            <button
+              type="button"
+              aria-pressed={active}
+              onClick={() => onChange(option.value)}
+              className={cn(
+                "inline-flex h-[26px] min-w-16 cursor-pointer items-center justify-center whitespace-nowrap rounded-[2px] border px-[10px] transition-colors",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                controlType,
+                active
+                  ? "border-line-structure bg-surface-bg text-text-primary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
+                  : "border-transparent bg-transparent text-text-tertiary hover:border-line-structure hover:bg-surface-bg hover:text-text-primary hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+              )}
+            >
+              {option.label}
+            </button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -350,7 +379,7 @@ export function AdoptersExplorer({
       <header className="border-b border-line-structure px-4 py-10 sm:px-8 sm:py-14 lg:px-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
+            <p className={cn("m-0", controlType, "text-text-tertiary")}>
               — Adopters
             </p>
             <HeadingTag
@@ -378,7 +407,12 @@ export function AdoptersExplorer({
       </header>
 
       <div className="px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
-        <div className="mb-4 flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.1em] text-text-tertiary">
+        <div
+          className={cn(
+            "mb-4 flex items-center justify-between gap-4 text-text-tertiary",
+            controlType,
+          )}
+        >
           <span>{view === "wall" ? "Adopter wall" : "Simple table"}</span>
           <span>{adopters.length} companies</span>
         </div>

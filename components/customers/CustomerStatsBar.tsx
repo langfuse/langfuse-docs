@@ -19,7 +19,7 @@ function formatCompact(value: number): string {
 
 const stats = [
   { value: formatObservationsPerMonth(), label: "Observations / month" },
-  { value: String(FORTUNE_50_COMPANIES), label: "of the Fortune 50" },
+  { value: String(FORTUNE_50_COMPANIES), label: "Of the Fortune 50" },
   {
     value: formatCompact(getGitHubStars()),
     label: "GitHub stars",
@@ -41,7 +41,7 @@ export function CustomerStatsBar({ className }: { className?: string }) {
             <p className="m-0 font-analog text-[28px] font-medium leading-none tracking-tight text-text-primary sm:text-[32px]">
               {stat.value}
             </p>
-            <p className="m-0 font-mono text-[10px] uppercase tracking-[0.12em] text-text-tertiary">
+            <p className="m-0 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-tertiary">
               {stat.label}
             </p>
           </div>

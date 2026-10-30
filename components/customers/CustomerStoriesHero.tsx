@@ -5,8 +5,12 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
+import { HoverCorners } from "@/components/ui/corner-box";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
+
+const controlType =
+  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]";
 
 const ROTATE_MS = 5500;
 
@@ -127,7 +131,12 @@ function QuoteSlide({
         <HighlightedQuote quote={quote} highlight={quoteHighlight} />
       </blockquote>
       {quoteTag && (
-        <span className="mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-text-primary">
+        <span
+          className={cn(
+            "mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 text-text-primary",
+            controlType,
+          )}
+        >
           {quoteTag}
         </span>
       )}
@@ -146,7 +155,10 @@ function QuoteSlide({
           href={story.route}
           tabIndex={isActive ? undefined : -1}
           aria-label={`${story.frontMatter.ctaLabel === "Watch" ? "Watch" : "Read"} ${company} customer story`}
-          className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
+          className={cn(
+            "inline-flex items-center gap-1.5 text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring",
+            controlType,
+          )}
         >
           {story.frontMatter.ctaLabel === "Watch"
             ? "Watch the talk"
@@ -198,7 +210,12 @@ export function CustomerStoriesHero({
     >
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:min-h-[580px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="relative flex min-w-0 flex-col">
-          <h1 className="mt-0 mb-8 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
+          <h1
+            className={cn(
+              "mt-0 mb-8 font-normal text-text-tertiary",
+              controlType,
+            )}
+          >
             Customer stories
           </h1>
 
@@ -268,19 +285,27 @@ export function CustomerStoriesHero({
           {stories.map((s, i) => {
             const isActive = i === active;
             return (
-              <button
+              <div
                 key={s.route}
-                type="button"
-                onClick={() => setActive(i)}
-                className={cn(
-                  "shrink-0 rounded-sm border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors",
-                  isActive
-                    ? "border-line-cta bg-surface-bg text-text-primary"
-                    : "border-line-structure text-text-tertiary hover:text-text-primary",
-                )}
+                className="button-wrapper group relative flex shrink-0 items-center overflow-visible p-1"
               >
-                {companyName(s)}
-              </button>
+                <HoverCorners />
+                <button
+                  type="button"
+                  onClick={() => setActive(i)}
+                  aria-current={isActive ? "true" : undefined}
+                  className={cn(
+                    "inline-flex h-[26px] items-center whitespace-nowrap rounded-[2px] border px-[10px] transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    controlType,
+                    isActive
+                      ? "border-line-structure bg-surface-bg text-text-primary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
+                      : "border-transparent bg-transparent text-text-tertiary hover:border-line-structure hover:bg-surface-bg hover:text-text-primary hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
+                  )}
+                >
+                  {companyName(s)}
+                </button>
+              </div>
             );
           })}
         </div>
