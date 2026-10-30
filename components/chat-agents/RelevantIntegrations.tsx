@@ -120,13 +120,20 @@ function resolveChipIcon(item: IntegrationItem): ReactNode {
 function IntegrationRow({
   title,
   items,
+  uppercaseTitle,
 }: {
   title: string;
   items: readonly IntegrationItem[];
+  uppercaseTitle: boolean;
 }) {
   return (
     <div className="grid gap-3 border-b border-line-structure py-4 md:grid-cols-[170px_1fr] md:gap-6 md:py-5">
-      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary md:pt-1">
+      <p
+        className={cn(
+          "font-mono text-[9px] text-text-tertiary md:pt-1",
+          uppercaseTitle && "uppercase tracking-[0.08em]",
+        )}
+      >
         {title}
       </p>
       <div className="flex flex-wrap gap-1.5 md:gap-2">
@@ -152,6 +159,7 @@ export function RelevantIntegrations({
   browseLabel = "Need another framework?",
   browseHref = "/integrations",
   browseCta = "Browse all 80+ integrations →",
+  uppercaseGroupTitles = true,
 }: {
   headingLine1?: string;
   headingLine2?: string;
@@ -160,6 +168,7 @@ export function RelevantIntegrations({
   browseLabel?: string;
   browseHref?: string;
   browseCta?: string;
+  uppercaseGroupTitles?: boolean;
 } = {}) {
   return (
     <div>
@@ -178,6 +187,7 @@ export function RelevantIntegrations({
           key={group.title}
           title={group.title}
           items={group.items}
+          uppercaseTitle={uppercaseGroupTitles}
         />
       ))}
 
