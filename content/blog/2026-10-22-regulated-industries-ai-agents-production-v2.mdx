@@ -17,23 +17,21 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
   authors={["annabellschafer"]}
 />
 
-Many teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
+Many teams ship AI agents early and improve them in production. In banking, insurance, and healthcare, that rarely gets past the first review. A wrong answer can be a compliance incident, and someone has to sign off before the agent talks to a customer.
 
-A common way to start is human in the loop: the agent proposes an answer or action, and a person approves it before anything reaches the customer. Regulators recommend this kind of oversight, and it is a sensible first step. For it to work, the agent's proposals need to be good from the start. If reviewers have to rewrite most drafts, the agent saves no time and people stop trusting it. The bigger payoff comes later, when a reliable share of cases can run without review and the team can measure and trust that autonomy rate.
-
-We will show you how teams in regulated industries get there, from the first prototype to an agent that handles part of the work on its own.
+Most teams start with human in the loop, as regulators recommend: the agent proposes, and a person approves. This only saves time if the proposals are good from the start. The bigger payoff is the autonomy rate: the share of cases the agent handles on its own. Here is how teams get there.
 
 ## What makes regulated industries different [#the-challenge]
 
 AI development teams in regulated industries usually face three requirements for their projects:
 
-- **Evidence before launch.** Risk processes ask for test results, review sign-offs, and documentation before an application reaches production ([deployment gates for LLMs in financial services](/blog/2026-07-15-llm-certification-financial-services)).
-- **Oversight after launch.** FINRA's [2026 oversight report](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai) asks firms to define where humans review agent actions. [Article 14 of the EU AI Act](https://artificialintelligenceact.eu/article/14/) requires that people can effectively oversee high-risk AI systems.
-- **Control over data.** Teams need to know where conversation data is stored, what gets redacted, and who can see it. In healthcare, a [business associate agreement](/security/hipaa) has to be in place before any protected health information is processed.
+- **Evidence before launch.** Review boards ask for test results and sign-offs ([deployment gates for LLMs](/blog/2026-07-15-llm-certification-financial-services)).
+- **Oversight after launch.** [FINRA](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai) and [Article 14 of the EU AI Act](https://artificialintelligenceact.eu/article/14/) expect people to oversee what the agent does.
+- **Control over data.** Teams need to know where data is stored and what gets redacted. Healthcare also needs a [business associate agreement](/security/hipaa).
 
 ## The approach: start the loop offline [#the-approach]
 
-The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate, then repeat. Regulated teams run most of this loop before launch. They learn how the agent fails, prove that it handles realistic cases, and only then go live.
+The [AI engineering loop](/academy/ai-engineering-loop) is how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. Regulated teams run most of it before launch.
 
 ```mermaid
 flowchart TB
@@ -115,7 +113,7 @@ Match the review rate to the risk. The [Joint Commission and CHAI](https://asset
 
 Reviewers who approve hundreds of routine cases a day stop looking closely. So automate one category at a time, starting with the ones that score well, such as a password reset, and keep sending the rest to a person. Keep a small random sample of each automated category in review to catch drift. The [customer support chatbot example](/academy/examples/customer-support-chatbot) shows how.
 
-The autonomy rate is the share of cases the agent handles end to end without a person. Track it per category next to sampled quality, flag and escalation rate, and weekly review time. The agent is paying off when autonomy goes up and review time goes down while quality and flags stay stable. Record these as [scores](/docs/evaluation/scores/overview) and chart them in a [custom dashboard](/docs/metrics/features/custom-dashboards) your review board can see.
+Track the autonomy rate per category next to sampled quality, flag and escalation rate, and weekly review time. The agent is paying off when autonomy goes up and review time goes down while quality and flags stay stable. Record these as [scores](/docs/evaluation/scores/overview) and chart them in a [custom dashboard](/docs/metrics/features/custom-dashboards) your review board can see.
 
 From here, you are in the regular AI engineering loop. DKB runs it fully in Langfuse.
 
