@@ -10,24 +10,33 @@
   "model": "claude-opus-5-5",
   "effort": "medium",
   "maxOutputTokens": 64000,
-  "concurrency": 6,
+  "concurrency": 4,
   "maxSourceChars": 120000,
   "include": [
     "content/docs/**",
     "content/self-hosting/**",
     "content/integrations/**",
     "content/guides/**",
-    "content/academy/**"
+    "content/academy/**",
+    "content/compare/**",
+    "content/workshop/**"
   ],
   "exclude": [
-    "content/academy/japan/**",
     "content/docs/roadmap.mdx",
     "content/docs/v4.mdx",
     "content/self-hosting/v2/**",
-    "content/self-hosting/oss-newsletter.mdx",
-    "content/self-hosting/license-key.mdx"
+    "content/self-hosting/oss-newsletter.mdx"
   ],
-  "excludeByLanguage": {
-    "ja": ["content/academy/**"]
-  }
+  "excludeByLanguage": {},
+  "$neverTranslate": "Legal and contractual pages stay in English only, even if a later change to include covers them. Translations of these pages are removed.",
+  "neverTranslate": [
+    "content/security/**",
+    "content/marketing/privacy.mdx",
+    "content/marketing/cookie-policy.mdx",
+    "content/marketing/imprint.mdx",
+    "content/marketing/pricing.mdx",
+    "content/marketing/pricing-self-host.mdx",
+    "content/self-hosting/license-key.mdx",
+    "content/docs/administration/billable-units.mdx"
+  ]
 }

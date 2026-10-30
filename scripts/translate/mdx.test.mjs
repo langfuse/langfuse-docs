@@ -70,6 +70,7 @@ test("masking round-trips on every docs page", () => {
     "integrations",
     "guides",
     "academy",
+    "compare",
   ].flatMap((d) => walk(path.join(ROOT, "content", d)));
   assert.ok(files.length > 100);
   for (const file of files) {

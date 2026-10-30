@@ -101,6 +101,7 @@ function sourceFiles(lang) {
   const exclude = [
     ...config.exclude,
     ...(config.excludeByLanguage?.[lang] ?? []),
+    ...config.neverTranslate,
   ].map(globToRegExp);
   return listFiles(CONTENT_DIR)
     .filter(
@@ -203,8 +204,9 @@ function documentPrompt({ file, fields, masked, previous }) {
   const frontmatter = Object.keys(fields).length
     ? `⟦FRONTMATTER⟧\n${JSON.stringify(fields, null, 2)}\n⟦/FRONTMATTER⟧\n\n`
     : "";
-  const reference = previous
-    ? `The English page changed since it was last translated. The previous English version and its translation follow. Reviewers may have edited the translation, so reuse it wherever the English did not change, and only translate new or changed passages. Code is shown as ⟦…⟧ in both.
+  let reference = "";
+  if (previous?.english) {
+    reference = `The English page changed since it was last translated. The previous English version and its translation follow. Reviewers may have edited the translation, so reuse it wherever the English did not change, and only translate new or changed passages. Code is shown as ⟦…⟧ in both.
 
 <previous_english>
 ${previous.english}
@@ -214,8 +216,17 @@ ${previous.english}
 ${previous.translation}
 </previous_translation>
 
-`
-    : "";
+`;
+  } else if (previous) {
+    // The previous English version is not in git, e.g. for synced workshop pages.
+    reference = `The English page changed since it was last translated. Its existing translation follows. Reviewers may have edited it, so reuse its wording wherever it still matches the English, and only translate new or changed passages. Code is shown as ⟦…⟧.
+
+<previous_translation>
+${previous.translation}
+</previous_translation>
+
+`;
+  }
   return `${reference}Translate the page ${file}:
 
 <document>
@@ -325,15 +336,11 @@ async function translatePage(lang, file, source, previous) {
 
   let previousReference = null;
   if (previous) {
-    const prevEnglish = maskBody(
-      splitFrontmatter(previous.english).body,
-    ).masked;
-    const prevTranslation = maskBody(
-      splitFrontmatter(previous.translation).body,
-    ).masked;
+    const hide = (text) =>
+      hidePlaceholders(maskBody(splitFrontmatter(text).body).masked);
     previousReference = {
-      english: hidePlaceholders(prevEnglish),
-      translation: hidePlaceholders(prevTranslation),
+      english: previous.english ? hide(previous.english) : null,
+      translation: hide(previous.translation),
     };
   }
 
@@ -447,14 +454,26 @@ async function runLanguage(lang) {
     deleted: [],
     failed: [],
     warnings: [],
+    humanBehind: [],
+    humanOrphaned: [],
     pending: 0,
     estimatedChars: 0,
   };
 
-  // Remove translations whose English page was deleted or excluded.
+  // Remove translations whose English page was deleted or excluded. Skip
+  // sections whose source is missing in this checkout (workshop pages are
+  // synced, not committed), and never remove human translations.
   if (!pathFilter) {
-    for (const file of Object.keys(lock.files)) {
+    for (const [file, entry] of Object.entries(lock.files)) {
       if (fileSet.has(file)) continue;
+      if (
+        !fs.existsSync(path.join(ROOT, file.split("/").slice(0, 2).join("/")))
+      )
+        continue;
+      if (entry.human) {
+        stats.humanOrphaned.push(file);
+        continue;
+      }
       if (!args["dry-run"]) {
         fs.rmSync(outputPath(lang, file), { force: true });
         delete lock.files[file];
@@ -470,17 +489,19 @@ async function runLanguage(lang) {
     const entry = lock.files[file];
     const out = outputPath(lang, file);
     const exists = fs.existsSync(out);
+    // Human translations are never overwritten, not even with --force. The
+    // report lists the ones whose English page changed since.
+    if (entry?.human && exists) {
+      if (entry.source !== sha) stats.humanBehind.push(file);
+      continue;
+    }
     if (!args.force && entry?.source === sha && exists) continue;
     let previous = null;
-    if (
-      exists &&
-      entry?.source &&
-      entry.source !== sha &&
-      !file.endsWith(".json")
-    ) {
-      const english = readBlob(entry.source);
-      if (english)
-        previous = { english, translation: fs.readFileSync(out, "utf8") };
+    if (exists && entry?.source !== sha && !file.endsWith(".json")) {
+      previous = {
+        english: entry?.source ? readBlob(entry.source) : null,
+        translation: fs.readFileSync(out, "utf8"),
+      };
     }
     queue.push({ file, source, sha, previous, isNew: !exists });
   }
@@ -574,6 +595,14 @@ function report(allStats) {
     );
     if (s.failed.length)
       parts.push(`### Failed\n${s.failed.map((f) => `- ${f}`).join("\n")}`);
+    if (s.humanBehind.length)
+      parts.push(
+        `### Human translations behind the English page\nThese are not changed automatically. Ask the translator to update them, then set \`source\` in \`i18n/${s.lang}/.translation-lock.json\` to the new English version.\n\n${list(s.humanBehind)}`,
+      );
+    if (s.humanOrphaned.length)
+      parts.push(
+        `### Human translations without an English page\n${list(s.humanOrphaned)}`,
+      );
     if (s.warnings.length)
       parts.push(
         `### Glossary warnings\n${s.warnings.map((w) => `- ${w}`).join("\n")}`,
@@ -586,8 +615,8 @@ function report(allStats) {
   return `${sections.join("\n\n")}\n\n${footer}\n`;
 }
 
-const allStats = [];
-for (const lang of languages) allStats.push(await runLanguage(lang));
+// Languages run in parallel; each runs `concurrency` requests at a time.
+const allStats = await Promise.all(languages.map(runLanguage));
 const markdown = report(allStats);
 console.log(`\n${markdown}`);
 if (args.report) fs.writeFileSync(args.report, markdown);
