@@ -9,20 +9,23 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
 });
 
+const BY_CLICKHOUSE_ASSETS = {
+  light:
+    "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg",
+  dark: "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg",
+  alt: "Langfuse by ClickHouse",
+} as const;
+
 const WORDMARKS = {
+  // Default site mark: lockup sized to the 60px nav bar.
   langfuse: {
-    light: "/langfuse-wordart.svg",
-    dark: "/langfuse-wordart-white.svg",
-    alt: "Langfuse Logo",
-    width: 120,
-    height: 20,
-    className: "h-auto max-w-28 sm:max-w-none",
+    ...BY_CLICKHOUSE_ASSETS,
+    width: 128,
+    height: 34,
+    className: "h-[30px] w-auto sm:h-[34px]",
   },
   byClickHouse: {
-    light:
-      "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg",
-    dark: "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg",
-    alt: "Langfuse by ClickHouse",
+    ...BY_CLICKHOUSE_ASSETS,
     // Lockup is taller (includes "by ClickHouse"); size it as a page hero mark.
     width: 220,
     height: 59,
@@ -32,14 +35,11 @@ const WORDMARKS = {
 
 export function Logo({
   wrapInLink = true,
-  showAffiliation = false,
   variant = "langfuse",
 }: {
   /** When false, render only the image block (use when already inside a link, e.g. NavbarLogo). */
   wrapInLink?: boolean;
-  /** When true, show the "by ClickHouse" affiliation link next to the logo. */
-  showAffiliation?: boolean;
-  /** Use the co-branded "Langfuse by ClickHouse" wordmark lockup. */
+  /** Use the larger "Langfuse by ClickHouse" lockup for page heroes. */
   variant?: keyof typeof WORDMARKS;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,7 +52,7 @@ export function Logo({
         width={wordmark.width}
         height={wordmark.height}
         className={`hidden dark:block ${wordmark.className}`}
-        priority={variant === "byClickHouse"}
+        priority
       />
       <Image
         src={wordmark.light}
@@ -60,42 +60,32 @@ export function Logo({
         width={wordmark.width}
         height={wordmark.height}
         className={`block dark:hidden ${wordmark.className}`}
-        priority={variant === "byClickHouse"}
+        priority
       />
       <style jsx>{`
-      .logo-images {
-        mask-image: linear-gradient(
-          60deg,
-          #bba0ff 25%,
-          rgba(187, 160, 255, 0.2) 50%,
-          #bba0ff 75%
-        );
-        mask-size: 400%;
-        mask-position: 0%;
-      }
-      .logo-images:hover {
-        mask-position: 100%;
-        transition: mask-position 1s ease, -webkit-mask-position 1s ease;
-      }
-    `}</style>
+        .logo-images {
+          mask-image: linear-gradient(
+            60deg,
+            #bba0ff 25%,
+            rgba(187, 160, 255, 0.2) 50%,
+            #bba0ff 75%
+          );
+          mask-size: 400%;
+          mask-position: 0%;
+        }
+        .logo-images:hover {
+          mask-position: 100%;
+          transition:
+            mask-position 1s ease,
+            -webkit-mask-position 1s ease;
+        }
+      `}</style>
     </div>
-  );
-
-  const byClickHouse = (
-    <a
-      href="https://clickhouse.com"
-      target="_blank"
-      // Explicitly omit `noreferrer` to pass on referrer to ClickHouse
-      rel="noopener"
-      className="text-[10px] sm:text-[11px] leading-none text-text-tertiary/60 hover:text-text-tertiary transition-colors whitespace-nowrap"
-    >
-      by ClickHouse
-    </a>
   );
 
   return (
     <>
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center">
         {wrapInLink ? (
           <Link
             href="/"
@@ -118,7 +108,6 @@ export function Logo({
             {images}
           </div>
         )}
-        {showAffiliation && variant !== "byClickHouse" && byClickHouse}
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>
