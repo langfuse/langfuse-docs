@@ -1,3 +1,4 @@
+import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 
 type SignupCTAProps = {
@@ -18,7 +19,7 @@ export function SignupCTA({
       aria-label="Langfuse signup"
       className={cn("not-prose w-full", className)}
     >
-      <div className="grid w-full overflow-hidden rounded-[2px] border border-line-structure sm:grid-cols-[1fr_auto]">
+      <CornerBox className="grid w-full sm:grid-cols-[1fr_auto]">
         <div className="flex items-center bg-surface-bg px-4 py-3">
           <span className="text-[14px] font-medium text-text-secondary">
             {message}
@@ -30,7 +31,7 @@ export function SignupCTA({
         >
           {actionLabel} <span aria-hidden>→</span>
         </a>
-      </div>
+      </CornerBox>
     </aside>
   );
 }
