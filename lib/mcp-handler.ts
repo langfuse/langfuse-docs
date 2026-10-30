@@ -8,6 +8,15 @@ import {
   buildDocsMcpFeedbackMessage,
   sendFeedbackToSlack,
 } from "@/lib/feedback-slack";
+import {
+  docsMarkdownUrl,
+  GET_LANGFUSE_DOCS_PAGE_DESCRIPTION,
+  GET_LANGFUSE_DOCS_PAGE_PATH_DESCRIPTION,
+  GET_LANGFUSE_OVERVIEW_DESCRIPTION,
+  normalizeDocsPath,
+  SEARCH_LANGFUSE_DOCS_DESCRIPTION,
+  SEARCH_LANGFUSE_DOCS_QUERY_DESCRIPTION,
+} from "@/lib/docs-mcp-tools";
 
 const posthog = process.env.NEXT_PUBLIC_POSTHOG_KEY
   ? new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
@@ -178,13 +187,9 @@ export const mcpHandler = createMcpHandler(
 
     (server as any).tool(
       "searchLangfuseDocs",
-      "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. The raw provider response is included in _meta. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.",
+      `${SEARCH_LANGFUSE_DOCS_DESCRIPTION} The raw provider response is included in _meta.`,
       {
-        query: z
-          .string()
-          .describe(
-            "The user's question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters.",
-          ),
+        query: z.string().describe(SEARCH_LANGFUSE_DOCS_QUERY_DESCRIPTION),
       },
       { readOnlyHint: true },
       async ({ query }) => {
@@ -219,31 +224,15 @@ export const mcpHandler = createMcpHandler(
 
     (server as any).tool(
       "getLangfuseDocsPage",
-      "Fetch the raw Markdown for a single Langfuse docs page. Accepts a docs path (e.g., /docs/observability/overview) or a full https://langfuse.com URL. Returns the exact Markdown (may include front matter). Use when you need a specific page content (Integration, Features, API, etc.) or code samples. Prefer searchLangfuseDocs for broader questions where there is not one specific page about it. Changelog pages (/changelog/...) are historical release notes: use them only to confirm that a feature exists or when it shipped, not as an implementation reference. Their code samples reflect the SDK/API at release time and may be outdated, so for implementation follow the current docs and the API/SDK reference instead.",
+      GET_LANGFUSE_DOCS_PAGE_DESCRIPTION,
       {
-        pathOrUrl: z
-          .string()
-          .describe(
-            'Docs path starting with "/" (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored.',
-          ),
+        pathOrUrl: z.string().describe(GET_LANGFUSE_DOCS_PAGE_PATH_DESCRIPTION),
       },
       { readOnlyHint: true },
       async ({ pathOrUrl }: { pathOrUrl: string }) => {
-        const normalizePath = (input: string): string => {
-          try {
-            if (/^https?:\/\//i.test(input)) {
-              const u = new URL(input);
-              return u.pathname || "/";
-            }
-          } catch {}
-          return input.startsWith("/") ? input : `/${input}`;
-        };
-
         try {
-          const pathname = normalizePath(pathOrUrl.trim());
-          const mdPath = pathname.endsWith(".md") ? pathname : `${pathname}.md`;
-          const base = "https://langfuse.com";
-          const mdUrl = `${base}${mdPath}`;
+          const pathname = normalizeDocsPath(pathOrUrl);
+          const mdUrl = docsMarkdownUrl(pathname, "https://langfuse.com");
 
           const res = await fetch(mdUrl, {
             // Self-identify so these fetches are distinguishable from external
@@ -288,7 +277,7 @@ export const mcpHandler = createMcpHandler(
 
     (server as any).tool(
       "getLangfuseOverview",
-      "Get a high-level, machine-readable index by downloading https://langfuse.com/llms.txt. Use this at the start of a session when needed to discover key docs endpoints or to seed follow-up calls to searchLangfuseDocs or getLangfuseDocsPage. Returns the plain text contents of llms.txt. Avoid repeated calls within the same session.",
+      GET_LANGFUSE_OVERVIEW_DESCRIPTION,
       {},
       { readOnlyHint: true },
       async () => {
