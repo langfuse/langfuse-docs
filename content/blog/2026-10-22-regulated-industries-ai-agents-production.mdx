@@ -11,7 +11,7 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
 
 <BlogHeader
   title="How Teams in Regulated Industries Get AI Agents into Production"
-  description="How banks, insurers, and healthcare teams take an AI agent from an offline prototype to production, with evidence, compliance checks, and human oversight at every step."
+  description="Banks, insurers, and healthcare teams face stricter requirements to take an AI agent from an offline prototype to production. Learn how they use evidence, compliance checks, and human oversight at every step."
   date="October 22, 2026"
   authors={["annabellschafer"]}
 />
@@ -36,40 +36,42 @@ Teams still ship agents under these rules. They just need to take a different ap
 
 ## The approach: start the loop offline [#the-approach]
 
-The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. And then repeat this process. Teams with a live product usually start by adding tracing to production. Regulated teams need to evaluate and improve their application before going to production. They trace the prototype, build out ground truth with their domain experts, evaluate and improve the application, add monitors, and only then go live.
+The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. And then repeat this process. Regulated teams need to evaluate and improve their application before going to production. They set up tracing, learn how the agent fails, define what to evaluate together with compliance, build a ground truth dataset, and iterate until the agent passes. Only then do they set up production monitors and go live.
 
 ```mermaid
-flowchart LR
-    A["1. Trace the offline app"] --> B["2. Verify on a starting ground truth dataset"]
-    B --> C["3. Add monitors"]
-    C --> D["4. Go live and run the loop"]
+flowchart TB
+    subgraph learn["Learn how the agent fails"]
+        direction LR
+        A["1. Set up tracing"] --> B["2. Run example inputs"] --> C["3. Error analysis"] --> D["4. Define what to evaluate"]
+    end
+    subgraph ship["Prove it and launch"]
+        direction LR
+        E["5. Build ground truth"] --> F["6. Iterate"] --> G["7. Production monitors"] --> H["8. Go live"]
+    end
+    learn --> ship
 ```
 
-## Stage 1: Trace the offline application [#trace-offline]
+## Step 1: Set up tracing [#trace-offline]
 
 Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Traces provide you insight into what happened during a run and provide you with a way of showing evidence to whoever needs to review it. Beyond, the traces you collect help you build out the setup to continuously improve your agents: datasets are built from traces, evaluators score traces, and reviewers use traces as evidence of what the agent did.
 
 Instrument your application to capture each step your agent is taking. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. Decide where to mask sensitive fields before they are stored. The SDKs support [client-side masking](/docs/observability/features/masking), so account numbers or patient identifiers can be redacted at the source.
 
-Decide early where the traces will live. Many banks and healthcare providers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched.
+Decide early where the traces will live. Many banks and healthcare providers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched. [Trade Republic](/users/trade-republic), a bank with over 10 million customers, went the same way. Its Ops Tools team runs self-hosted Langfuse and rolled it out across teams while meeting the bank's compliance requirements.
 
-[Trade Republic](/users/trade-republic), a bank with over 10 million customers, went the same way. Its Ops Tools team runs self-hosted Langfuse and rolled it out across teams while meeting the bank's compliance requirements.
+## Step 2: Run example inputs through the agent [#example-inputs]
 
-## Stage 2: Verify with a starting dataset [#starting-dataset]
+Next, run a set of examples through the agent that roughly matches what you expect to hit your system in production. Each run produces a trace you can learn from. At this point, you do not need expected answers yet. Good sources are:
 
-Next, build a starting [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician. By creating this 'Golden Dataset' you can show that the agent handles the common cases the way your experts would, and that adversarial and edge cases are handled gracefully by your agent.
+- **Synthetic examples.** Generate inputs that cover typical requests and their variations. Domain experts can add cases they know from experience are hard to handle. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician.
+- **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims, and compare the agent's output with the human decision. Clinical teams call this retrospective back-testing.
+- **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything. This gives you traces from live data without bringing the agent into customer contact. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff.
 
-### Where the cases come from [#where-cases-come-from]
+## Step 3: Find failure modes with error analysis [#error-analysis]
 
-Teams rarely need to invent test cases. There are multiple sources that can be used to collect dataset cases.
+Now have your domain experts read a sample of those traces. For each one, they note the first thing that went wrong, then group the notes into named failure modes. Some failures show that the agent needs more specification, such as a missing rule in the prompt, and you can fix them right away. Others keep coming back, and those are the ones worth evaluating.
 
-- **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims, and compare the agent's output with the human decision. Clinical teams call this retrospective back-testing, and teams use it as the first step of every deployment.
-- **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything, and compare its output with what the team did. This allows you do build out the ground truth from live data, without bringing the agent into customer contact. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff.
-- **Work with domain experts.** Domain experts have a good intuition for typical cases, and they also know from experience which cases are hard to handle. Let them write typical cases and setups, including how they expect them to be handled.
-
-Those sources are often combined for an initial dataset of typical cases.
-
-At DKB, customer service specialists work in Langfuse directly and add typical examples to datasets that engineers then use to adjust prompts.
+At DKB, customer service specialists work in Langfuse directly, review conversations, and add typical examples to datasets that engineers then use to adjust prompts.
 
 <CustomerQuote
   quote="We have the AI expertise, but we don't necessarily have the banking customer service expertise. There's a lot of regulation, a lot of very specific things you need to get right. Langfuse really is a place where we bring the two halves together."
@@ -77,6 +79,23 @@ At DKB, customer service specialists work in Langfuse directly and add typical e
   role="Machine Learning Scientist"
   company="DKB"
 />
+
+## Step 4: Define what to evaluate, including compliance [#what-to-evaluate]
+
+What you evaluate comes from two places:
+
+- **Failure modes.** The recurring failures from error analysis become quality evaluators. Generic metrics such as helpfulness rarely match how your agent fails, and they can make it look better than it is.
+- **Compliance requirements.** Agree with compliance on what the agent must never do. For a bank, that could be giving investment advice, quoting a rate that is not on the price list, or sending a customer message without approval. These hard limits get evaluators from day one, even before you have seen them break, and a single failure blocks the release.
+
+A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a regex for a missing disclaimer, is often enough. Use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for anything that needs judgment, such as a response that sounds like investment advice.
+
+<Callout type="info">
+  The Langfuse Academy covers both steps in detail. [Error analysis](/academy/monitoring/error-analysis) walks through reading traces and building a failure taxonomy, and [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to turn those failures and your compliance rules into a small set of metrics.
+</Callout>
+
+## Step 5: Build a ground truth dataset [#ground-truth]
+
+With the evaluation criteria in place, build a ground truth [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. It should contain your typical inputs, the cases that could go wrong, and cases that should trigger each compliance limit, along with how the agent should handle each one. This 'Golden Dataset' lets you show that the agent handles common cases the way your experts would, and that adversarial and edge cases are handled gracefully. Include normal cases that should pass the compliance checks as well. A guardrail that fires too often gets ignored, so measure both.
 
 <Callout type="info">
   Want to go deeper on scoping a dataset? The Langfuse Academy guide on [designing datasets](/academy/datasets/designing-great-datasets) covers how to set the goal, choose the input distribution, and decide how each item will be evaluated.
@@ -94,37 +113,15 @@ To get there, let your experts review each other's work. Have parts of the datas
 
 In Langfuse, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) let several experts label the same items without touching code. [Score analytics](/docs/evaluation/scores/score-analytics) then calculates percent agreement and Cohen's kappa between them, so you can see which cases need a discussion.
 
-### Define the no-gos and test the guardrails [#guardrails]
+## Step 6: Iterate until the agent passes [#iterate]
 
-Before launch, agree with compliance on what the agent must never do. For a bank, that could be giving investment advice, quoting a rate that is not on the price list, or sending a customer message without approval.
+Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) and record the scores as your baseline. Then improve the agent by changing its context, tool calls, or prompts, rerun the experiment, and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments). Repeat error analysis on new runs from time to time. When new runs stop producing new failure modes, your evaluators cover the failures that matter, and every improvement in those scores brings the agent closer to what your experts expect.
 
-Build a guardrail for each no-go and test it like any other component. Add dataset cases that should trigger the guardrail and normal cases that should pass through. A guardrail that fires too often gets ignored, so measure both.
+Trade Republic takes this a step further when migrating live workflows to new agent architectures. The team iterates on one dataset and keeps a second, held-out dataset as a final exam, and only ships when the new agent passes both.
 
-### Run, evaluate, and improve [#evaluate-first-runs]
+## Step 7: Set up production monitors [#monitors]
 
-Your compliance rules get evaluators from day one, even before you have seen them break: no investment advice, required disclaimers present, no rates outside the price list. A single failure there blocks the release. For everything else, let the failures you actually observe decide what to evaluate. Generic metrics such as helpfulness rarely match how your agent fails, and they can make it look better than it is.
-
-From here, improvement follows a loop:
-
-1. **Run the dataset.** Run the full dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk). Every item produces a trace.
-2. **Find the error categories.** Have your domain experts do error analysis on a sample of those traces. They read each one, note the first thing that went wrong, and group the notes into named error categories.
-3. **Build evaluators for them.** Write a simple evaluator for each recurring category. A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a regex for a missing disclaimer, is often enough. Use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for categories that need judgment.
-4. **Change the agent and rerun.** Adjust prompts, tools, permissions, or retrieval, rerun the experiment, and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments).
-5. **Repeat.** Go back to error analysis on the new run.
-
-When new runs stop producing new error categories, your evaluator set covers the failures that matter. From then on, every improvement in those scores brings the agent closer to what your experts expect.
-
-<Callout type="info">
-  The Langfuse Academy covers these steps in detail. [Error analysis](/academy/monitoring/error-analysis) walks through reading traces and building a failure taxonomy, and [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to turn those failures and your compliance rules into a small set of metrics.
-</Callout>
-
-Record the scores of each run as your baseline, and rerun the experiment every time you change a prompt, model, or tool. Trade Republic takes this a step further when migrating live workflows to new agent architectures. The team iterates on one dataset and keeps a second, held-out dataset as a final exam, and only ships when the new agent passes both.
-
-## Stage 3: Add compliance and user-signal monitors [#monitors]
-
-Set up monitors before launch, and turn them on during the shadow runs so you know what normal looks like.
-
-**Compliance monitors come first.** They check every trace against your no-gos. An [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator can flag a response that sounds like investment advice. A code check can flag a missing disclaimer. Route flagged traces to the right experts, and set [alerts](/docs/observability/features/alerts) when the share of flagged traces rises.
+Once you are happy with the results, decide which evaluators should also run in production with [online evaluation](/docs/evaluation/get-started/online). Compliance evaluators belong on every trace. Add the quality evaluators you want to keep watching live, for example whether answers are phrased the way your guidelines require. Turn the monitors on during shadow runs first, so you know what normal looks like, and set [alerts](/docs/observability/features/alerts) for when the share of flagged traces rises.
 
 DKB screens every answer its assistant gives and sends flagged conversations to annotation queues sorted by service area, such as brokerage or credit. Specialists rank each case by severity and handle the critical ones first. For DKB, this screening is part of its license to operate.
 
@@ -135,15 +132,13 @@ DKB screens every answer its assistant gives and sends flagged conversations to 
   company="DKB"
 />
 
-Compliance also decides what may be screened at all. DKB is not allowed to auto-review conversations of its own employees or of customers under 18, so it keeps those conversations in a separate Langfuse instance outside automated screening. Check rules like these with your compliance team before you set up evaluators.
+Compliance also decides what may be screened at all. DKB is not allowed to auto-review conversations of its own employees or of customers under 18, so it keeps those conversations in a separate Langfuse instance outside automated screening.
 
-**User-signal monitors** matter for chat agents. Track [explicit feedback](/docs/observability/features/user-feedback), and score conversations for signs of trouble, such as a user asking for a person, repeating a question, or correcting the agent. The Academy page on [capturing signals](/academy/monitoring/capturing-signals) lists the most useful ones.
+For chat agents, also track [explicit feedback](/docs/observability/features/user-feedback) and signs of trouble, such as a user asking for a person or correcting the agent. The Academy page on [capturing signals](/academy/monitoring/capturing-signals) lists the most useful ones. At launch, let the agent escalate a little too often. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more. The [AWS Well-Architected Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops01-bp02.html) suggests three triggers for a handoff: low confidence, high stakes, and an exhausted retry budget.
 
-At launch, let the agent escalate a little too often. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time. A wrong answer in a regulated setting can cost much more. The [AWS Well-Architected Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops01-bp02.html) suggests three triggers for a handoff: low confidence, high stakes, and an exhausted retry budget.
+## Step 8: Go live and run the AI engineering loop [#go-live]
 
-## Stage 4: Go live and run the loop [#go-live]
-
-Once the dataset passes, the shadow runs match what your experts expect, and the monitors are in place, go live. From here you run the normal loop: trace production, watch the monitors, and turn interesting traces into new dataset items.
+Now go live. From here on, you are in the regular AI engineering loop: trace production, watch the monitors, turn interesting traces into new dataset items, and rerun the dataset before every release.
 
 ### Keep humans on a subset [#humans-on-a-subset]
 
@@ -157,13 +152,9 @@ Match the review rate to the risk. Guidance from the [Joint Commission and CHAI]
 
 ### Automate the slices that work [#automate-slices]
 
-Asking a person to approve everything does not scale, and reviewers who approve hundreds of routine cases a day stop looking closely. The fix is to automate what is clearly routine.
+Asking a person to approve everything does not scale, and reviewers who approve hundreds of routine cases a day stop looking closely. Classify incoming requests by category, let the agent handle categories that score well in your dataset and in production, such as a password reset, and keep sending the rest to a person. The Academy's [customer support chatbot example](/academy/examples/customer-support-chatbot) walks through this approach. Keep a small random sample of each automated category in an annotation queue, so you notice when quality drifts.
 
-In practice, classify incoming requests by category. Let the agent handle categories that score well in your dataset and in production, such as a password reset, and keep sending the rest to a person. The Academy's [customer support chatbot example](/academy/examples/customer-support-chatbot) walks through this approach, automating only the request categories that cleared the quality gate.
-
-Keep a small random sample of each automated category in an annotation queue. Once humans only see exceptions, the biggest risk is the case the agent failed to flag, and sampling is how you catch quality drift.
-
-Finally, treat every change to a prompt, model, or tool as a new release. Rerun the stage 2 dataset, compare it against the baseline, and only then deploy. DKB runs this full loop in Langfuse today.
+DKB runs this full loop in Langfuse today.
 
 <CustomerQuote
   quote="The whole pipeline to improve our chat agent happens entirely in Langfuse. We screen conversations, review flagged sessions, turn clusters of unwanted behavior into datasets, and run those evals as regression tests before every release."
@@ -172,14 +163,18 @@ Finally, treat every change to a prompt, model, or tool as a new release. Rerun 
   company="DKB"
 />
 
-## How Langfuse supports each stage [#in-langfuse]
+## How Langfuse supports each step [#in-langfuse]
 
-| Stage                           | What you do                                                                          | Langfuse features                                                                                                                                                                                                                                          |
-| ------------------------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Trace the offline app        | Capture every step of the prototype and redact sensitive fields                      | [Tracing](/docs/observability/get-started), [masking](/docs/observability/features/masking), [self-hosting](/self-hosting)                                                                                                                                 |
-| 2. Verify on a starting dataset | Build ground truth with experts, check agreement, test guardrails, record a baseline | [Datasets](/docs/evaluation/experiments/datasets), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [score analytics](/docs/evaluation/scores/score-analytics), [experiments](/docs/evaluation/experiments/experiments-via-sdk) |
-| 3. Add monitors                 | Score compliance and user signals, alert when flags rise                             | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [online evaluation](/docs/evaluation/get-started/online), [user feedback](/docs/observability/features/user-feedback), [alerts](/docs/observability/features/alerts)                 |
-| 4. Go live and run the loop     | Review a sample, add failures to datasets, rerun before every release                | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [datasets](/docs/evaluation/experiments/datasets), [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)                                                      |
+| Step                        | Langfuse features                                                                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Set up tracing           | [Tracing](/docs/observability/get-started), [masking](/docs/observability/features/masking), [self-hosting](/self-hosting)                                                                |
+| 2. Run example inputs       | [Datasets](/docs/evaluation/experiments/datasets), [experiments](/docs/evaluation/experiments/experiments-via-sdk)                                                                        |
+| 3. Error analysis           | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [scores](/docs/evaluation/scores/overview)                                                                    |
+| 4. Define what to evaluate  | [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)                                              |
+| 5. Build ground truth       | [Datasets](/docs/evaluation/experiments/datasets), [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [score analytics](/docs/evaluation/scores/score-analytics) |
+| 6. Iterate                  | [Experiments](/docs/evaluation/experiments/experiments-via-sdk), [compare experiments](/docs/evaluation/experiments/compare-experiments)                                                  |
+| 7. Production monitors      | [Online evaluation](/docs/evaluation/get-started/online), [user feedback](/docs/observability/features/user-feedback), [alerts](/docs/observability/features/alerts)                      |
+| 8. Go live and run the loop | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)                                        |
 
 On the infrastructure side, regulated teams usually choose between two setups:
 
