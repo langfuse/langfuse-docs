@@ -14,8 +14,15 @@
 # Status: DRAFT. Each language needs a sign-off from a native speaker before
 # its first translations are published. Record the reviewer in `reviewedBy`.
 #
-# Japanese entries follow the existing human translation of the Academy
-# (content/academy/japan) where it uses the term.
+# Sources:
+# - Japanese entries follow the existing human translation of the Academy
+#   (content/academy/japan) where it uses the term.
+# - Where the terms overlap, entries match the ClickHouse docs, so Langfuse and
+#   ClickHouse read the same in every language: the translated Langfuse and
+#   ClickStack pages on clickhouse.com/docs (translated with General
+#   Translation), and the ClickHouse glossary in ClickHouse/clickhouse-docs
+#   (scripts/translate/glossary.csv and languages/jp.json). The Japanese
+#   Academy wins where the two disagree (instrumentation: 計装).
 
 reviewedBy:
   fr: null
@@ -123,9 +130,9 @@ terms:
     fr: session
     es: sesión
   - term: score
-    note: Langfuse object holding an evaluation result.
+    note: Langfuse object holding an evaluation result. In Korean, write 점수(score) the first time it appears on a page.
     ja: スコア
-    ko: 스코어
+    ko: 점수
     fr: score
     es: score
   - term: dataset
@@ -178,7 +185,7 @@ terms:
   # Product areas and concepts
   - term: observability
     ja: オブザーバビリティ
-    ko: 옵저버빌리티
+    ko: 관측성
     fr: observabilité
     es: observabilidad
   - term: tracing
@@ -222,10 +229,11 @@ terms:
     fr: annotation humaine
     es: anotación humana
   - term: self-hosting
-    ja: セルフホスティング
-    ko: 셀프 호스팅
+    note: As an adjective ("self-hosted"), use auto-hébergé in French and autohospedado in Spanish.
+    ja: セルフホスト
+    ko: 자체 호스팅
     fr: auto-hébergement
-    es: autoalojamiento
+    es: autohospedaje
   - term: integration
     ja: インテグレーション
     ko: 통합
@@ -296,3 +304,43 @@ terms:
     ko: 기대 출력
     fr: sortie attendue
     es: salida esperada
+  - term: dashboard
+    ja: ダッシュボード
+    ko: 대시보드
+    fr: tableau de bord
+    es: dashboard
+
+  # ClickHouse terms used in the self-hosting docs. Japanese and Spanish come
+  # from the ClickHouse docs glossary; it has no French or Korean entries.
+  - term: Keeper
+    keep: true
+    note: ClickHouse Keeper.
+  - term: Parquet
+    keep: true
+  - term: query
+    ja: クエリ
+    es: consulta
+  - term: row
+    ja: 行
+    es: fila
+  - term: column
+    ja: カラム
+    es: columna
+  - term: replica
+    ja: レプリカ
+    es: réplica
+  - term: replication
+    ja: レプリケーション
+    es: replicación
+  - term: object storage
+    es: almacenamiento de objetos
+  - term: access key
+    es: clave de acceso
+  - term: authentication
+    es: autenticación
+  - term: access control
+    es: control de acceso
+  - term: self-managed
+    note: ClickHouse deployment term, distinct from Langfuse self-hosting.
+    ja: セルフマネージド
+    es: autogestionado
