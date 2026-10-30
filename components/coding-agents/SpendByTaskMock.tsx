@@ -58,9 +58,9 @@ export function SpendByTaskMock() {
         {CATEGORIES.map((item) => (
           <div
             key={item.label}
-            className="grid grid-cols-[auto_minmax(0,1fr)_2.75rem] items-center gap-2"
+            className="grid grid-cols-[7.5rem_minmax(0,1fr)_2.75rem] items-center gap-2"
           >
-            <span className="whitespace-nowrap font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-secondary">
+            <span className="truncate font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-secondary">
               {item.label}
             </span>
             <div className="h-2.5 bg-surface-1">
