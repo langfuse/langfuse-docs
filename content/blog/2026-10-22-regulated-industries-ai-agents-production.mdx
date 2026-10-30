@@ -100,18 +100,25 @@ Before launch, agree with compliance on what the agent must never do. For a bank
 
 Build a guardrail for each no-go and test it like any other component. Add dataset cases that should trigger the guardrail and normal cases that should pass through. A guardrail that fires too often gets ignored, so measure both.
 
-### Run and evaluate the first experiments [#evaluate-first-runs]
+### Run, evaluate, and improve [#evaluate-first-runs]
 
-Run the full dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk), then decide how to judge the results. Two kinds of checks matter here:
+Your compliance rules get evaluators from day one, even before you have seen them break: no investment advice, required disclaimers present, no rates outside the price list. A single failure there blocks the release. For everything else, let the failures you actually observe decide what to evaluate. Generic metrics such as helpfulness rarely match how your agent fails, and they can make it look better than it is.
 
-- **Compliance checks.** Every no-go gets an evaluator from day one, even before you have seen it break: no investment advice, required disclaimers present, no rates outside the price list. A single failure here blocks the release.
-- **Quality checks.** For everything else, start from what actually goes wrong. Have your domain experts do error analysis on the first runs: read the traces, note the first thing that went wrong in each one, and group those notes into failure categories. Fix the categories a prompt change solves, and turn the recurring ones into evaluators.
+From here, improvement follows a loop:
+
+1. **Run the dataset.** Run the full dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk). Every item produces a trace.
+2. **Find the error categories.** Have your domain experts do error analysis on a sample of those traces. They read each one, note the first thing that went wrong, and group the notes into named error categories.
+3. **Build evaluators for them.** Write a simple evaluator for each recurring category. A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a regex for a missing disclaimer, is often enough. Use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for categories that need judgment.
+4. **Change the agent and rerun.** Adjust prompts, tools, permissions, or retrieval, rerun the experiment, and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments).
+5. **Repeat.** Go back to error analysis on the new run.
+
+When new runs stop producing new error categories, your evaluator set covers the failures that matter. From then on, every improvement in those scores brings the agent closer to what your experts expect.
 
 <Callout type="info">
-  The Langfuse Academy covers both steps in detail. [Error analysis](/academy/monitoring/error-analysis) walks through reading traces and building a failure taxonomy, and [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to turn those failures and your compliance rules into a small set of metrics.
+  The Langfuse Academy covers these steps in detail. [Error analysis](/academy/monitoring/error-analysis) walks through reading traces and building a failure taxonomy, and [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to turn those failures and your compliance rules into a small set of metrics.
 </Callout>
 
-Record the results as your baseline. Rerun the experiment every time you change a prompt, model, or tool. Trade Republic takes this a step further when migrating live workflows to new agent architectures. The team iterates on one dataset and keeps a second, held-out dataset as a final exam, and only ships when the new agent passes both.
+Record the scores of each run as your baseline, and rerun the experiment every time you change a prompt, model, or tool. Trade Republic takes this a step further when migrating live workflows to new agent architectures. The team iterates on one dataset and keeps a second, held-out dataset as a final exam, and only ships when the new agent passes both.
 
 ## Stage 3: Add compliance and user-signal monitors [#monitors]
 
