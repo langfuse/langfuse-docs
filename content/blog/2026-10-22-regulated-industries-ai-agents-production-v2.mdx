@@ -51,7 +51,7 @@ flowchart TB
 
 Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Capture each LLM call, tool call, and retrieval step as its own observation, and attach the prompt version, model, and any human approval. Configure [client-side masking](/docs/observability/features/masking) for account numbers, IBANs, or patient identifiers, so they are redacted before they leave your application.
 
-Then agree with compliance on where traces live. Many banks [self-host Langfuse](/self-hosting) so trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched. [Trade Republic](/users/trade-republic), a bank with over 10 million customers, went the same way.
+Then agree with compliance on where traces live. Many banks [self-host Langfuse](/self-hosting) so trace data never leaves their infrastructure.
 
 ### 2. Run example inputs through the agent [#example-inputs]
 
@@ -64,8 +64,6 @@ Collect inputs that roughly match what the agent will see in production, put the
 ### 3. Find failure modes with error analysis [#error-analysis]
 
 Put 30 to 50 traces into an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues). For each one, an expert marks pass or fail and writes a short note on the first thing that went wrong. Then group the notes into named failure modes and count how often each one occurs. Fix the ones caused by a missing instruction right away. The ones that keep coming back are worth an evaluator. The Academy guide on [error analysis](/academy/monitoring/error-analysis) walks through each step.
-
-At DKB, customer service specialists do this work in Langfuse and add typical examples to datasets that engineers use to adjust prompts.
 
 ### 4. Define what to evaluate, including compliance [#what-to-evaluate]
 
@@ -81,7 +79,7 @@ Experts disagree more often than teams expect. Have parts of the dataset labeled
 
 ### 6. Iterate until the agent passes [#iterate]
 
-Agree on a passing threshold for each evaluator with your review board before you start. Run the dataset as an experiment and record the scores as your baseline. Then change one thing at a time, such as the context, a tool, or the prompt, rerun, and [compare the run](/docs/evaluation/experiments/compare-experiments) with the previous one. Repeat error analysis on new runs. When no new failure modes appear, your evaluators cover what matters. Trade Republic also keeps a second, held-out dataset as a final exam and only ships when the agent passes both.
+Agree on a passing threshold for each evaluator with your review board before you start. Run the dataset as an experiment and record the scores as your baseline. Then change one thing at a time, such as the context, a tool, or the prompt, rerun, and [compare the run](/docs/evaluation/experiments/compare-experiments) with the previous one. Repeat error analysis on new runs. When no new failure modes appear, your evaluators cover what matters. Keep a second, held-out dataset as a final exam, and only ship when the agent passes both.
 
 When the agent passes, put together a short pack for your review board:
 
@@ -94,16 +92,9 @@ When the agent passes, put together a short pack for your review board:
 
 ### 7. Set up production monitors [#monitors]
 
-Turn the compliance evaluators on for every live trace with [online evaluation](/docs/evaluation/get-started/online), and add the quality evaluators you most want to watch. Set [alerts](/docs/observability/features/alerts) for when the share of flagged traces rises. Then decide who acts on each kind of flag and how fast. DKB screens every answer its assistant gives and routes flagged conversations to annotation queues by service area, such as brokerage or credit, where specialists handle the critical cases first.
+Turn the compliance evaluators on for every live trace with [online evaluation](/docs/evaluation/get-started/online), and add the quality evaluators you most want to watch. Set [alerts](/docs/observability/features/alerts) for when the share of flagged traces rises. Then decide who acts on each kind of flag and how fast. Route flagged traces to annotation queues by area, such as brokerage or credit, so the right specialists handle the critical cases first.
 
-<CustomerQuote
-  quote="If I disabled the screening tomorrow, we would have to stop all our agent activity."
-  name="David Hinrichs"
-  role="Senior Machine Learning Scientist"
-  company="DKB"
-/>
-
-Check with compliance what may be screened at all. DKB may not auto-review conversations of its own employees or of customers under 18, so it keeps those in a separate Langfuse instance.
+Check with compliance what may be screened at all. Conversations of your own employees or of minors may need to stay out of automated review, for example in a separate Langfuse instance.
 
 At launch, let the agent escalate a little too often. A handoff costs a few minutes of staff time, and a wrong answer can cost much more. The [AWS Well-Architected Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops01-bp02.html) suggests three triggers for a handoff: low confidence, high stakes, and an exhausted retry budget.
 
@@ -121,14 +112,7 @@ Reviewers who approve hundreds of routine cases a day stop looking closely. So a
 
 Each week, check the autonomy rate per category next to sampled quality, the flag and escalation rate, and the hours your team spent reviewing. The agent is paying off when autonomy goes up and review time goes down while quality and flags stay stable. Record these as [scores](/docs/evaluation/scores/overview) and chart them in a [custom dashboard](/docs/metrics/features/custom-dashboards) your review board can see.
 
-From here, you are in the regular AI engineering loop. DKB runs it fully in Langfuse.
-
-<CustomerQuote
-  quote="The whole pipeline to improve our chat agent happens entirely in Langfuse. We screen conversations, review flagged sessions, turn clusters of unwanted behavior into datasets, and run those evals as regression tests before every release."
-  name="Laurenz Hemmen"
-  role="Machine Learning Scientist"
-  company="DKB"
-/>
+From here, you are in the regular AI engineering loop.
 
 ## Where to start [#where-to-start]
 
@@ -152,18 +136,18 @@ On the infrastructure side, regulated teams usually choose between two setups:
 - **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting).
 - **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regulated companies use the cloud version whenever self-hosting is not a must-have.
 
-The same need for visibility applies in life sciences. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
+## Regulated teams on Langfuse [#customers]
+
+[DKB](/users/dkb), one of Germany's largest direct banks, and [Trade Republic](/users/trade-republic), a bank with over 10 million customers, both self-host Langfuse. DKB runs the full loop in it, from screening every answer to regression tests before each release. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
 
 <CustomerQuote
-  quote="Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets."
-  name="Walid Mehanna"
-  role="Chief Data & AI Officer"
-  company="Merck"
-  image="/images/customers/merck/walid.jpeg"
+  quote="The whole pipeline to improve our chat agent happens entirely in Langfuse. We screen conversations, review flagged sessions, turn clusters of unwanted behavior into datasets, and run those evals as regression tests before every release."
+  name="Laurenz Hemmen"
+  role="Machine Learning Scientist"
+  company="DKB"
 />
 
 ## Further reading [#further-reading]
 
 - [Langfuse for financial services](/financial-services): data protection, deployment options, and compliance documentation for banks and insurers.
 - [Building deployment gates for LLMs and AI agents in financial services](/blog/2026-07-15-llm-certification-financial-services): how to turn datasets and evaluators into pass or fail checks that a review board can inspect.
-- Customer stories from regulated industries: [DKB](/users/dkb), [Trade Republic](/users/trade-republic), and [Merck](/users/merckgroup).
