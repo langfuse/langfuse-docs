@@ -1,13 +1,13 @@
 # Docs translations
 
-The docs are written in English. A weekly GitHub Action translates them into French, Japanese, Korean, and Spanish with Claude and opens one pull request for all languages.
+The docs are written in English. A weekly GitHub Action translates them into French, Japanese, Korean, Spanish, and Simplified Chinese with Claude and opens one pull request for all languages.
 
 Only the Japanese Academy (`i18n/ja/academy/`, served at `/academy/japan`) is on langfuse.com today. The machine translations are not served yet. Routing (`/ja/docs/...`), hreflang, sitemaps, and the language switcher will follow in a separate change.
 
 ## How it works
 
 - [`config.json`](./config.json) lists the languages, the model, and which content is translated (`include` / `exclude`). Pages in `neverTranslate` (legal, contractual, and billing pages) always stay English-only, even if `include` covers them.
-- [`glossary.yaml`](./glossary.yaml) holds the required translation of each Langfuse and industry term, the terms that stay in English, and style rules per language. It is sent with every request. Native speakers own it.
+- [`glossary.yaml`](./glossary.yaml) holds the required translation of each Langfuse and industry term, the terms that stay in English, and style rules per language. It is sent with every request. Native speakers review it in an internal Google Sheet, one set of columns per language; the reviewed entries are copied into `glossary.yaml`, and each language records its reviewer in `reviewedBy`.
 - [`scripts/translate/translate.mjs`](../scripts/translate/translate.mjs) translates new and changed pages:
   - Front matter, imports, code blocks, and lines with only JSX tags are replaced by placeholders, so the model never sees or changes code.
   - Only the `title`, `description`, `sidebarTitle`, `shortTitle`, and `seoTitle` front matter fields are translated.

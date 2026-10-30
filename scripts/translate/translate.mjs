@@ -60,6 +60,24 @@ const config = JSON.parse(
 const glossary = YAML.parse(
   fs.readFileSync(path.join(I18N_DIR, "glossary.yaml"), "utf8"),
 );
+// An unquoted ": " in glossary.yaml turns an entry into a mapping, which would
+// reach the model as "[object Object]".
+for (const [lang, rules] of Object.entries(glossary.rules ?? {})) {
+  for (const rule of rules) {
+    if (typeof rule !== "string")
+      throw new Error(
+        `glossary.yaml: a ${lang} rule is not a string. Quote rules that contain ": ".`,
+      );
+  }
+}
+for (const term of glossary.terms) {
+  for (const [key, value] of Object.entries(term)) {
+    if (value !== null && typeof value === "object")
+      throw new Error(
+        `glossary.yaml: "${term.term}" has a non-string ${key}. Quote values that contain ": ".`,
+      );
+  }
+}
 const languages = (args.lang ?? Object.keys(config.languages))
   .flatMap((l) => l.split(","))
   .map((l) => l.trim())
