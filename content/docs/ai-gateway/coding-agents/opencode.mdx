@@ -1,17 +1,17 @@
 ---
 title: OpenCode
-seoTitle: "Trace OpenCode with the Langfuse AI Gateway (alpha)"
+seoTitle: "Trace OpenCode with the Langfuse AI Gateway (beta)"
 description: Route OpenCode's Anthropic and OpenAI providers through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
 noindex: true
 ---
 
-import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 # OpenCode
 
-<AiGatewayAlphaCallout />
+<AiGatewayBetaCallout />
 
-**Requires** OpenCode 2.0 or later and an `ANTHROPIC` and/or `OPENAI` provider connection. Verified with OpenCode 2.0.25.
+**Requires** OpenCode 2.0 or later and an `ANTHROPIC` and/or `OPENAI` provider credential. Verified with OpenCode 2.0.25.
 
 ## Setup [#setup]
 
@@ -53,7 +53,7 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
 - The Anthropic `baseURL` **includes `/v1`**, because OpenCode appends only `/messages`. Claude Code and pi are the opposite.
 - The built-in OpenAI provider uses the Responses API. OpenAI-compatible providers that use Chat Completions are supported by the gateway but have not been verified with OpenCode.
 - To set a session per run, add `"langfuse-session-id": "{env:LF_SESSION}"`. An unset variable sends an empty value, which is ignored.
-- Headers apply to every call from that provider, including title generation and subagents. See [request headers](/docs/ai-gateway/request-headers).
+- Headers apply to every call from that provider, including title generation and subagents. See [request headers](/docs/ai-gateway/features/request-headers).
 
 <Callout type="warning">
   OpenCode continues to use stored account connections when you override the

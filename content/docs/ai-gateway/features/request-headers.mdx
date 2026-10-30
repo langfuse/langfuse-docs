@@ -1,28 +1,28 @@
 ---
 title: Request Headers
-seoTitle: "Langfuse AI Gateway request headers (alpha)"
+seoTitle: "Langfuse AI Gateway request headers (beta)"
 description: Optional langfuse-* request headers that set the user, session, tags, metadata, environment, and trace name of AI Gateway generations, and the request, trace, and observation IDs returned in response headers.
 noindex: true
 ---
 
-import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 # Request headers
 
-<AiGatewayAlphaCallout />
+<AiGatewayBetaCallout />
 
-Any client can send these optional headers to enrich the traces the gateway records. They work in both `FULL` and `USAGE` [capture modes](/docs/ai-gateway/overview#capture-modes). Each [coding agent guide](/docs/ai-gateway/coding-agents) shows where to configure them.
+Any client can send these optional headers to enrich the traces the gateway records. They work in both `FULL` and `USAGE` [capture modes](/docs/ai-gateway/features/tracing#capture-modes). Each [coding agent guide](/docs/ai-gateway/coding-agents) shows where to configure them.
 
 ## Headers [#headers]
 
-| Header                 | Format                      | Effect                                                                                                                                              |
-| ---------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse-user-id`     | string                      | Trace [user](/docs/observability/features/users). **Never inferred**, so set it if you want per-user views.                                         |
-| `langfuse-session-id`  | string                      | Overrides the agent's own [session](/docs/observability/features/sessions).                                                                         |
-| `langfuse-environment` | string                      | [Environment](/docs/observability/features/environments) of the trace. Invalid values fall back to `default`.                                       |
-| `langfuse-tags`        | comma-separated             | [Tags](/docs/observability/features/tags), trimmed and deduplicated.                                                                                |
-| `langfuse-metadata`    | comma-separated `key:value` | Top-level [metadata](/docs/observability/features/metadata). Splits at the first colon, values stay strings. Percent-encode literal commas (`%2C`). |
-| `langfuse-trace-name`  | string                      | Overrides the default trace name (the agent name).                                                                                                  |
+| Header                 | Format                      | Effect                                                                                                                                                                                                                                                      |
+| ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse-user-id`     | string                      | Trace [user](/docs/observability/features/users). Only used with service account keys: user keys always record the key owner. See [trace user](/docs/ai-gateway/features/api-keys#trace-user).                                                              |
+| `langfuse-session-id`  | string                      | Overrides the agent's own [session](/docs/observability/features/sessions).                                                                                                                                                                                 |
+| `langfuse-environment` | string                      | [Environment](/docs/observability/features/environments) of the trace. Invalid values fall back to `default`.                                                                                                                                               |
+| `langfuse-tags`        | comma-separated             | [Tags](/docs/observability/features/tags), trimmed and deduplicated.                                                                                                                                                                                        |
+| `langfuse-metadata`    | comma-separated `key:value` | Top-level [metadata](/docs/observability/features/metadata). Splits at the first colon, values stay strings. Percent-encode literal commas (`%2C`). For metadata clients can't change, use [key metadata](/docs/ai-gateway/features/api-keys#key-metadata). |
+| `langfuse-trace-name`  | string                      | Overrides the default trace name (the agent name).                                                                                                                                                                                                          |
 
 Example:
 

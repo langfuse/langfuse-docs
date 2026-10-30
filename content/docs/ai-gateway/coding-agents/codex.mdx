@@ -1,17 +1,17 @@
 ---
 title: Codex
-seoTitle: "Trace OpenAI Codex with the Langfuse AI Gateway (alpha)"
+seoTitle: "Trace OpenAI Codex with the Langfuse AI Gateway (beta)"
 description: Route the OpenAI Codex CLI through the Langfuse AI Gateway to trace every turn, model round, tool call, token, and cost.
 noindex: true
 ---
 
-import AiGatewayAlphaCallout from "@/components-mdx/ai-gateway-alpha-callout.mdx";
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 # Codex
 
-<AiGatewayAlphaCallout />
+<AiGatewayBetaCallout />
 
-**Requires** Codex CLI 0.157 or later and an `OPENAI` provider connection. Verified with Codex 0.157.0.
+**Requires** Codex CLI 0.157 or later and an `OPENAI` provider credential. Verified with Codex 0.157.0.
 
 ## Setup [#setup]
 
@@ -33,7 +33,7 @@ Replace the placeholders with your gateway key and email. The file is only reada
 
 - Values in this file **override** variables with the same name exported in your shell.
 - Codex ignores keys in this file that start with `CODEX_`, so `CODEX_HOME` itself must be set in your shell profile. If it is set, it must point to an existing directory.
-- Only Codex reads this file. To run the [sanity check](/docs/ai-gateway/get-started#sanity-check) with `curl`, export the key in that shell as well.
+- Only Codex reads this file. To [list models](/docs/ai-gateway/get-started/first-request#list-models) with `curl`, export the key in that shell as well.
 
 ### 2. Add the gateway provider [#add-the-provider]
 
@@ -54,7 +54,7 @@ env_http_headers = { "langfuse-user-id" = "LF_USER_ID" }   # header value read f
 
 Then start Codex as usual with `codex`. No `export` is needed.
 
-Use `env_http_headers` for any header you want to vary per run, for example `"langfuse-session-id" = "LF_SESSION"`, and set that variable per run (`LF_SESSION=<id> codex`). Keep per-run variables such as `LF_SESSION` out of `.env`: a value there overrides the shell and would merge all your sessions into one. See [request headers](/docs/ai-gateway/request-headers).
+Use `env_http_headers` for any header you want to vary per run, for example `"langfuse-session-id" = "LF_SESSION"`, and set that variable per run (`LF_SESSION=<id> codex`). Keep per-run variables such as `LF_SESSION` out of `.env`: a value there overrides the shell and would merge all your sessions into one. See [request headers](/docs/ai-gateway/features/request-headers).
 
 ## Verify [#verify]
 
