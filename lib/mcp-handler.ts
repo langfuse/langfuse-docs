@@ -186,6 +186,7 @@ export const mcpHandler = createMcpHandler(
             "The user's question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters.",
           ),
       },
+      { readOnlyHint: true },
       async ({ query }) => {
         try {
           const inkeepResult = await searchLangfuseDocsWithInkeep(query);
@@ -226,6 +227,7 @@ export const mcpHandler = createMcpHandler(
             'Docs path starting with "/" (e.g., /docs/observability/overview) or a full URL on https://langfuse.com. Do not include anchors (#...) or queries (?foo=bar) — they will be ignored.',
           ),
       },
+      { readOnlyHint: true },
       async ({ pathOrUrl }: { pathOrUrl: string }) => {
         const normalizePath = (input: string): string => {
           try {
@@ -288,6 +290,7 @@ export const mcpHandler = createMcpHandler(
       "getLangfuseOverview",
       "Get a high-level, machine-readable index by downloading https://langfuse.com/llms.txt. Use this at the start of a session when needed to discover key docs endpoints or to seed follow-up calls to searchLangfuseDocs or getLangfuseDocsPage. Returns the plain text contents of llms.txt. Avoid repeated calls within the same session.",
       {},
+      { readOnlyHint: true },
       async () => {
         try {
           const llmsTxtRes = await fetch("https://langfuse.com/llms.txt", {
