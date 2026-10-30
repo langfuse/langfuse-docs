@@ -89,7 +89,7 @@ The following tokenizers are currently supported:
 
 Model definitions include prices per usage type. Usage types must match exactly with the keys in the `usage_details` object of the generation.
 
-Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
+Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) no cost is ingested, (2) usage is ingested or inferred, and (3) a matching model definition includes prices. If you ingest any cost value, Langfuse uses only the [ingested cost](#cost-details-contract) and does not infer cost from model prices for that generation.
 
 ### Adding custom model definitions [#custom-model-definitions]
 
@@ -265,7 +265,7 @@ with langfuse.start_as_current_observation(
             "input": 1,
             "cache_read_input_tokens": 0.5,
             "output": 1,
-            # "total": float, # if not set, it is derived as the sum of all usage types
+            # "total": float, # if not set, it is derived as the sum of all other cost keys
         }
     )
 ```
@@ -301,7 +301,7 @@ generation.update({
     output: 1,
     cache_read_input_tokens: 0.5,
     some_other_token_count: 1,
-    total: 3.5,
+    total: 3.5, // optional, it is derived as the sum of all other cost keys
   },
   output: { content: "The capital of France is Paris." },
 });
@@ -448,7 +448,7 @@ Langfuse treats every key in `usage_details` as a separate, non-overlapping buck
 
 `total` is the sum of the buckets, not a bucket itself.
 
-If buckets overlap, usage and inferred cost will be counted double, and cost shown in Langfuse overstates what your provider actually charged. Directly ingested `cost_details` are unchanged.
+If buckets overlap, usage and inferred cost will be counted double, and cost shown in Langfuse overstates what your provider actually charged. Directly ingested `cost_details` follow their own [contract](#cost-details-contract).
 
 <Callout type="info" title="Be careful with inclusive provider counts">
 
@@ -473,6 +473,26 @@ For example, an OpenAI-style response with 17,903 prompt tokens (of which 17,817
 | Flat `usage_details` / `usageDetails`, including `langfuse.observation.usage_details`                         | Stored unchanged; values must already be exclusive                                  |
 
 </Callout>
+
+### How the total of ingested cost is derived [#cost-details-contract]
+
+The total cost that Langfuse shows in the UI, dashboards, and the Metrics API is the `total` key of `cost_details`. Langfuse resolves it as follows:
+
+1. If `cost_details` contains a total key, it is used. Langfuse checks `total`, then `totalCost`, then `total_cost`, and stores the first one it finds as `total`.
+2. Otherwise, `total` is the sum of all other numeric keys in `cost_details`, such as `input`, `output`, `cache_read_input_tokens`, or a custom key like `web_search`.
+
+Like usage types, cost keys must not overlap. For example, do not include the cost of cache reads in `input` and also send it as `cache_read_input_tokens`, because the derived total would count it twice. If your cost keys overlap, send `total` explicitly.
+
+| Ingested `cost_details`                             | Total cost in Langfuse |
+| --------------------------------------------------- | ---------------------- |
+| `{"input": 0.002, "output": 0.004}`                 | `0.006`                |
+| `{"web_search": 0.01}`                              | `0.01`                 |
+| `{"input": 0.002, "output": 0.004, "total": 0.005}` | `0.005`                |
+| `{"total_cost": 0.0023}`                            | `0.0023`               |
+
+If you ingest any cost value, Langfuse does not infer cost from model definition prices for that generation, even for usage types you did not send a cost for.
+
+This rule applies to newly ingested observations. Cost totals of observations that were already ingested are not recalculated.
 
 ### Compatibility with OpenAI [#openai-usage-schema]
 
