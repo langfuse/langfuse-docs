@@ -25,7 +25,8 @@ already in the story body.
 
 - Social copy, LinkedIn/X posts, and a separate metrics or "customer insights"
   table are **not** body copy. Do not fold them into the article. If a number
-  only appears there, leave it out of the page.
+  only appears there, leave it out of the page. Draft the posts in the PR
+  instead. See **Social posts** below.
 - Do not merge, tighten, or paraphrase paragraphs. Keep the draft's sentences.
   Fix typos, stray punctuation, em dashes (use `-`), and British spelling only.
 - Summary text in an `ImpactChart` is the draft's summary sentences, not a
@@ -43,6 +44,17 @@ already in the story body.
   Do not pick a different quote for the card.
 - Do not repeat the callout both inline and in `<CustomerQuote>`. Keep the
   lead-in sentence; the component carries the quote.
+
+## Social posts
+
+Every customer story PR includes a LinkedIn draft and an X draft, in the PR
+description, not in the MDX.
+
+- If the source draft has a Social section, use that copy. Fix typos only.
+- If it does not, draft both from the story body and the marked callout. Do not
+  pull in numbers that appear only in a side metrics table.
+- Add the public URL, `https://langfuse.com/users/<slug>`, once the slug is set.
+- Keep the X post short enough for the post plus the URL.
 
 ## Before writing any file: collect missing input
 
@@ -174,7 +186,8 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 - [ ] Image checklist given to user with folder path
 - [ ] Company website link in About section
 - [ ] AI engineering loop, observability, tracing, evaluation, prompt management, and self-hosting are linked (see **Docs links**); no broken internal URLs
-- [ ] No sentences or metrics added that were not in the story body (social posts and side metrics tables stay out)
+- [ ] No sentences or metrics added that were not in the story body (social posts and side metrics tables stay out of the MDX)
+- [ ] PR description includes a LinkedIn draft and an X draft (from the draft's Social section when it has one)
 - [ ] The only `<CustomerQuote>` is the quote the draft marked as a callout; every other quote stays inline
 - [ ] Frontmatter `customerQuote` is that same callout
 - [ ] Replace all em dashes with regular hyphens (`-`) - the linter will do this anyway; better to do it upfront
