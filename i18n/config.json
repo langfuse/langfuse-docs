@@ -1,0 +1,33 @@
+{
+  "$comment": "Configuration for scripts/translate/translate.mjs. See i18n/README.md.",
+  "sourceLanguage": "en",
+  "languages": {
+    "fr": { "name": "French", "nativeName": "Français" },
+    "ja": { "name": "Japanese", "nativeName": "日本語" },
+    "ko": { "name": "Korean", "nativeName": "한국어" },
+    "es": { "name": "Spanish", "nativeName": "Español" }
+  },
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "maxOutputTokens": 64000,
+  "concurrency": 6,
+  "maxSourceChars": 120000,
+  "include": [
+    "content/docs/**",
+    "content/self-hosting/**",
+    "content/integrations/**",
+    "content/guides/**",
+    "content/academy/**"
+  ],
+  "exclude": [
+    "content/academy/japan/**",
+    "content/docs/roadmap.mdx",
+    "content/docs/v4.mdx",
+    "content/self-hosting/v2/**",
+    "content/self-hosting/oss-newsletter.mdx",
+    "content/self-hosting/license-key.mdx"
+  ],
+  "excludeByLanguage": {
+    "ja": ["content/academy/**"]
+  }
+}
