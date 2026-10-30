@@ -19,7 +19,7 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
 
 Many teams ship AI agents early and improve them in production. In banking, insurance, and healthcare, that rarely gets past the first review. A wrong answer can be a compliance incident, and someone has to sign off before the agent talks to a customer.
 
-Most teams start with human in the loop, as regulators recommend: the agent proposes, and a person approves. This only saves time if the proposals are good from the start. The bigger payoff is the autonomy rate: the share of cases the agent handles on its own. Here is how teams get there.
+Most teams start with human in the loop, as regulators recommend: the agent proposes, and a person approves. This only saves time if the proposals are good from the start. The bigger payoff is the autonomy rate: the share of cases the agent handles on its own. This guide walks through the eight steps teams use to get there. Each step ends with what you should have in hand before you move on.
 
 ## What makes regulated industries different [#the-challenge]
 
@@ -49,33 +49,49 @@ flowchart TB
 
 ### 1. Set up tracing [#trace-offline]
 
-Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. Traces become your evidence for reviewers and the raw material for datasets and evaluators. Use [client-side masking](/docs/observability/features/masking) to redact account numbers or patient identifiers at the source. Many banks [self-host Langfuse](/self-hosting) so trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched. [Trade Republic](/users/trade-republic), a bank with over 10 million customers, went the same way.
+Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Capture each LLM call, tool call, and retrieval step as its own observation, and attach the prompt version, model, and any human approval. Configure [client-side masking](/docs/observability/features/masking) for account numbers, IBANs, or patient identifiers, so they are redacted before they leave your application.
+
+Then agree with compliance on where traces live. Many banks [self-host Langfuse](/self-hosting) so trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched. [Trade Republic](/users/trade-republic), a bank with over 10 million customers, went the same way.
+
+**You now have:** a masked trace for every run, stored where compliance agreed.
 
 ### 2. Run example inputs through the agent [#example-inputs]
 
-Run a set of examples that roughly matches what you expect in production. You do not need expected answers yet. Good sources are:
+Collect inputs that roughly match what the agent will see in production, put them in a [dataset](/docs/evaluation/experiments/datasets), and run the agent over it as an [experiment](/docs/evaluation/experiments/experiments-via-sdk). You do not need expected answers yet. Good sources are:
 
-- **Synthetic examples.** Generate typical requests and their variations. Domain experts, such as a compliance officer or a clinician, add the cases they know are hard.
+- **Synthetic examples.** Generate typical requests and their variations. Ask domain experts, such as a compliance officer or a clinician, to add the cases they know are hard.
 - **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed insurance claims, and compare its output with the human decision. Clinical teams call this retrospective back-testing.
 - **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything. Healthcare calls this silent evaluation.
 
+**You now have:** a set of traces that looks like the work the agent will do.
+
 ### 3. Find failure modes with error analysis [#error-analysis]
 
-Have your domain experts read a sample of traces, note the first thing that went wrong in each, and group the notes into named failure modes. Fix the ones caused by a missing instruction right away. The ones that keep coming back are worth evaluating. The Academy guide on [error analysis](/academy/monitoring/error-analysis) walks through the process. At DKB, customer service specialists review conversations in Langfuse and add typical examples to datasets that engineers use to adjust prompts.
+Put 30 to 50 traces into an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues). For each one, an expert marks pass or fail and writes a short note on the first thing that went wrong. Then group the notes into named failure modes and count how often each one occurs. Fix the ones caused by a missing instruction right away. The ones that keep coming back are worth an evaluator. The Academy guide on [error analysis](/academy/monitoring/error-analysis) walks through each step.
+
+At DKB, customer service specialists do this work in Langfuse and add typical examples to datasets that engineers use to adjust prompts.
+
+**You now have:** a list of failure modes, ranked by how often they occur.
 
 ### 4. Define what to evaluate, including compliance [#what-to-evaluate]
 
-Recurring failure modes become quality evaluators. Next to them, agree with compliance on what the agent must never do. For a bank, that could be giving investment advice or quoting a rate that is not on the price list. For an insurer, it could be telling a customer a claim is approved before an adjuster has signed off. These limits get evaluators from day one, and a single failure blocks the release. Use [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for simple checks and [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for anything that needs judgment. The Academy guide on [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to keep the set small.
+Write one pass or fail evaluator for each recurring failure mode. Then sit down with compliance and list what the agent must never do. For a bank, that could be giving investment advice or quoting a rate that is not on the price list. For an insurer, it could be telling a customer a claim is approved before an adjuster has signed off. Each of these limits gets its own evaluator from day one, and a single failure blocks the release.
+
+Use a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) when a rule can be checked mechanically, such as a missing disclaimer. Use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) when it needs judgment, such as whether an answer sounds like investment advice. The Academy guide on [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to keep the set small.
+
+**You now have:** a short list of quality evaluators and a separate list of compliance evaluators with zero tolerance.
 
 ### 5. Build a ground truth dataset [#ground-truth]
 
-Build a [dataset](/docs/evaluation/experiments/datasets) with your experts that covers typical inputs, risky cases, and cases that should trigger each compliance limit. Add normal cases that should pass those checks too, since a guardrail that fires too often gets ignored.
+Build a [dataset](/docs/evaluation/experiments/datasets) with your experts that covers typical inputs, the risky cases from error analysis, and the expected handling for each. For every compliance limit, add items that should trigger it and similar items that should pass, since a guardrail that fires too often gets ignored. For a release check, the Academy suggests 100 to 1,000 items that cover the production distribution.
 
-Experts disagree more often than teams expect. Have parts of the dataset labeled independently by several experts in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and talk through the cases where they differ, ideally in one room. Researchers call this inter-rater reliability, measure it as percent agreement or Cohen's kappa, and often treat 80% agreement as the minimum ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)). [Score analytics](/docs/evaluation/scores/score-analytics) calculates both metrics between your experts.
+Experts disagree more often than teams expect. Have parts of the dataset labeled independently by several experts in annotation queues, and talk through the cases where they differ, ideally in one room. Researchers call this inter-rater reliability, measure it as percent agreement or Cohen's kappa, and often treat 80% agreement as the minimum ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)). [Score analytics](/docs/evaluation/scores/score-analytics) calculates both metrics between your experts.
+
+**You now have:** a versioned dataset your experts agree on.
 
 ### 6. Iterate until the agent passes [#iterate]
 
-Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk), change the agent's context, tools, or prompts, and [compare each run](/docs/evaluation/experiments/compare-experiments) with the last. Repeat error analysis on new runs. When no new failure modes appear, your evaluators cover what matters. Trade Republic also keeps a second, held-out dataset as a final exam and only ships when the agent passes both.
+Agree on a passing threshold for each evaluator with your review board before you start. Run the dataset as an experiment and record the scores as your baseline. Then change one thing at a time, such as the context, a tool, or the prompt, rerun, and [compare the run](/docs/evaluation/experiments/compare-experiments) with the previous one. Repeat error analysis on new runs. When no new failure modes appear, your evaluators cover what matters. Trade Republic also keeps a second, held-out dataset as a final exam and only ships when the agent passes both.
 
 When the agent passes, put together a short pack for your review board:
 
@@ -86,9 +102,11 @@ When the agent passes, put together a short pack for your review board:
 - Example traces of the failures you found and how you fixed them.
 - The monitoring and review plan for launch.
 
+**You now have:** a release candidate and the evidence to get it approved.
+
 ### 7. Set up production monitors [#monitors]
 
-Run compliance evaluators and the quality evaluators you care most about on live traces with [online evaluation](/docs/evaluation/get-started/online), and set [alerts](/docs/observability/features/alerts) for when flagged traces rise. DKB screens every answer its assistant gives and routes flagged conversations to annotation queues by service area, such as brokerage or credit, where specialists handle the critical cases first.
+Turn the compliance evaluators on for every live trace with [online evaluation](/docs/evaluation/get-started/online), and add the quality evaluators you most want to watch. Set [alerts](/docs/observability/features/alerts) for when the share of flagged traces rises. Then decide who acts on each kind of flag and how fast. DKB screens every answer its assistant gives and routes flagged conversations to annotation queues by service area, such as brokerage or credit, where specialists handle the critical cases first.
 
 <CustomerQuote
   quote="If I disabled the screening tomorrow, we would have to stop all our agent activity."
@@ -97,23 +115,25 @@ Run compliance evaluators and the quality evaluators you care most about on live
   company="DKB"
 />
 
-Compliance also decides what may be screened at all. DKB may not auto-review conversations of its own employees or of customers under 18, so it keeps those in a separate Langfuse instance.
+Check with compliance what may be screened at all. DKB may not auto-review conversations of its own employees or of customers under 18, so it keeps those in a separate Langfuse instance.
 
 At launch, let the agent escalate a little too often. A handoff costs a few minutes of staff time, and a wrong answer can cost much more. The [AWS Well-Architected Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops01-bp02.html) suggests three triggers for a handoff: low confidence, high stakes, and an exhausted retry budget.
+
+**You now have:** live monitors, alerts, and a named owner for every kind of flag.
 
 ### 8. Go live and reduce review over time [#go-live]
 
 People stay in the process after launch, and the amount they review shrinks as the evidence grows. [Coinbase](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md) describes three stages:
 
 1. **Supervised.** Reviewers check every output.
-2. **Sampled.** Once measured quality passes a threshold, reviewers check a sample.
+2. **Sampled.** Once measured quality passes a threshold, reviewers check a sample. Agree on that threshold with your review board before launch.
 3. **Exceptions.** Reviewers mainly handle flagged cases.
 
 Match the review rate to the risk. The [Joint Commission and CHAI](https://assets.ctfassets.net/7s4afyr9pmov/5RX4XUbRg0l1JG0gwXGkTM/bea3c1949d6d8cdd8ec2ae2f82f737ad/JC-CHAI_RUAIH_Guidance.pdf) recommend checking tools that inform clinical decisions more often than administrative ones. In a bank, a credit decision deserves more review than a branch-hours question.
 
 Reviewers who approve hundreds of routine cases a day stop looking closely. So automate one category at a time, starting with the ones that score well, such as a password reset, and keep sending the rest to a person. Keep a small random sample of each automated category in review to catch drift. The [customer support chatbot example](/academy/examples/customer-support-chatbot) shows how.
 
-Track the autonomy rate per category next to sampled quality, flag and escalation rate, and weekly review time. The agent is paying off when autonomy goes up and review time goes down while quality and flags stay stable. Record these as [scores](/docs/evaluation/scores/overview) and chart them in a [custom dashboard](/docs/metrics/features/custom-dashboards) your review board can see.
+Each week, check the autonomy rate per category next to sampled quality, the flag and escalation rate, and the hours your team spent reviewing. The agent is paying off when autonomy goes up and review time goes down while quality and flags stay stable. Record these as [scores](/docs/evaluation/scores/overview) and chart them in a [custom dashboard](/docs/metrics/features/custom-dashboards) your review board can see.
 
 From here, you are in the regular AI engineering loop. DKB runs it fully in Langfuse.
 
