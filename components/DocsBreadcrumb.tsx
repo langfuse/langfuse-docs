@@ -81,23 +81,16 @@ function resolveSectionUrl(
  *
  * Mirrors Fumadocs' `getBreadcrumbItemsFromPath` with `{ includeRoot: true,
  * includePage: true }`; the only addition is the `resolveFirstUrl` fallback.
- *
- * Pass `sectionUrl` when the section's landing page is not in the sidebar tree
- * (e.g. `/docs`), since it cannot be resolved from the tree then.
  */
-export function DocsBreadcrumb({
-  sectionUrl: sectionUrlOverride,
-}: {
-  sectionUrl?: string;
-} = {}) {
+export function DocsBreadcrumb() {
   const path = useTreePath();
   const { root } = useTreeContext();
 
   const items = useMemo<Crumb[]>(() => {
     const result: Crumb[] = [];
-    const sectionUrl =
-      sectionUrlOverride ??
-      resolveSectionUrl(root as PageTree.Root | PageTree.Folder);
+    const sectionUrl = resolveSectionUrl(
+      root as PageTree.Root | PageTree.Folder,
+    );
     const activePage = path[path.length - 1];
     const integrationCategory =
       sectionUrl === "/integrations" && activePage?.type === "page"
@@ -131,7 +124,7 @@ export function DocsBreadcrumb({
       url: sectionUrl,
     });
     return result;
-  }, [path, root, sectionUrlOverride]);
+  }, [path, root]);
 
   if (items.length === 0) return null;
 
