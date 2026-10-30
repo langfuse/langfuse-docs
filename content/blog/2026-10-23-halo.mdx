@@ -1,0 +1,66 @@
+---
+title: "We launched Halo 😇"
+date: 2026/10/23
+description: "We launched Halo, the assistant inside Langfuse. It can investigate traces, help set up evals, build dashboards, and take action with your approval."
+tag: engineering
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { Frame } from "@/components/Frame";
+
+<BlogHeader
+  title="We launched Halo 😇"
+  description="We launched Halo, the assistant inside Langfuse. It can investigate traces, help set up evals, build dashboards, and take action with your approval."
+  authors={["lotteverheyden"]}
+  date="October 23, 2026"
+/>
+
+This week, we launched [Halo](/docs/api-and-data-platform/features/halo), the assistant that lives inside Langfuse. Halo grew out of the infrastructure we built to support external agents using Langfuse, which we’ve been encouraging for a while.
+
+Halo can look at what is happening in your project, work with your traces, sessions, and metrics, and take action.
+
+<Video src="https://static.langfuse.com/docs-videos/halo-video-v14.mp4" />
+
+## What we've been using Halo for
+
+We've been using Halo for many different things:
+
+- **Getting started with evals.** Halo looks at your project, determines a useful first step, and proposes concrete signals to collect.
+- **Catching conversation signals.** Halo can set up an evaluator that catches users who disagree, sound frustrated, ask repeated follow-up questions, or say they are happy.
+- **Building dashboards.** Describe what you want to monitor and let Halo create the widgets for you.
+- **Finding ways to reduce costs.** Halo can analyze your traces and suggest concrete optimizations.
+- **Investigating and fixing regressions.** Halo can find the root cause in your traces, test a revised prompt, and make the change live with your approval.
+
+<VideoCarousel
+  videos={[
+    {
+      title: "Optimize costs",
+      src: "https://static.langfuse.com/docs-videos/halo-cost-optimization.mp4",
+    },
+    {
+      title: "Create a dashboard",
+      src: "https://static.langfuse.com/docs-videos/halo-create-dashboard.mp4",
+    },
+    {
+      title: "Get started with evaluations",
+      src: "https://static.langfuse.com/docs-videos/halo-get-started-with-evals.mp4",
+    },
+    {
+      title: "Investigate and fix a regression",
+      src: "https://static.langfuse.com/docs-videos/halo-walkthrough-boris.mp4",
+    },
+  ]}
+/>
+
+## Built on the same tools as your agents
+
+Halo does not have a separate, private set of Langfuse tools. When we add a tool or improve its instructions for Halo, people using Langfuse through their own coding agents benefit too. Running Halo ourselves also gives us a tight feedback loop for improving these shared tools.
+
+<Frame fullWidth>
+  ![Diagram showing Halo and coding agents accessing Langfuse through shared APIs, MCP, CLI, docs, and skills](/images/blog/2026-10-23-halo/halo-engineering.png)
+</Frame>
+
+We wrote a separate [engineering deep dive](/blog/2026-10-21-building-the-langfuse-assistant) on how this works, including why the agent loop runs outside the sandbox, how Halo processes large tool results with code, and how conversations continue in the background.
+
+Halo is available on all Langfuse Cloud plans and in public beta for self-hosted deployments. Read the [Halo docs](/docs/api-and-data-platform/features/halo) to get started, and let us know what you think in the [feedback discussion](https://github.com/orgs/langfuse/discussions/14196).

@@ -1,9 +1,18 @@
 "use client";
 
+import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import "@vidstack/react/player/styles/base.css";
 import { useId } from "react";
+
+// Vidstack types mediaProps as HTMLAttributes<HTMLMediaElement>, which
+// omits video-only playsInline. Cast so the attributes still land on
+// the native <video> as soon as it is created.
+const INLINE_MEDIA_PROPS = {
+  playsInline: true,
+  "webkit-playsinline": "",
+} as HTMLAttributes<HTMLMediaElement>;
 
 /**
  * `title` and `description` say what the video shows in the UI. They give the
@@ -17,6 +26,8 @@ export const Video = ({
   className,
   gifStyle = false,
   poster,
+  autoPlay = false,
+  muted = false,
   onCanPlay,
   title,
   description,
@@ -26,6 +37,8 @@ export const Video = ({
   gifStyle?: boolean;
   className?: string;
   poster?: string;
+  autoPlay?: boolean;
+  muted?: boolean;
   onCanPlay?: () => void;
   title?: string;
   description?: string;
@@ -38,11 +51,13 @@ export const Video = ({
         poster={poster}
         posterLoad="eager"
         controls={!gifStyle}
-        autoPlay={gifStyle}
-        muted={gifStyle}
+        autoPlay={gifStyle || autoPlay}
+        muted={gifStyle || muted}
         loop={gifStyle}
         load={"visible"}
-        playsInline={gifStyle}
+        // Always inline. Vidstack enters fullscreen on coarse pointers
+        // (phones) when this is false, which overlays the docs page.
+        playsInline
         aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
         title={title}
         aria-describedby={description ? descriptionId : undefined}
@@ -52,7 +67,7 @@ export const Video = ({
         )}
         onCanPlay={onCanPlay}
       >
-        <MediaProvider />
+        <MediaProvider mediaProps={INLINE_MEDIA_PROPS} />
       </MediaPlayer>
       {description ? (
         <p id={descriptionId} className="sr-only">

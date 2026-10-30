@@ -51,25 +51,21 @@ const communityStats: Array<{
   label: string;
   value: string;
   href: string;
-  tooltip: string;
 }> = [
   {
     label: "GitHub Stars",
     value: formatCount(githubStars),
     href: "https://github.com/langfuse/langfuse",
-    tooltip: "Leave a Star ⭐",
   },
   {
     label: "Community Q&A threads",
     value: formatCount(qaCount),
     href: "https://github.com/orgs/langfuse/discussions/categories/support",
-    tooltip: "Browse Q&A",
   },
   {
     label: "Roadmap threads",
     value: formatCount(ideasCount),
     href: "https://github.com/orgs/langfuse/discussions/categories/ideas",
-    tooltip: "Browse ideas",
   },
 ];
 
@@ -100,8 +96,6 @@ function RecentArticleList({ items }: { items: RecentArticle[] }) {
         <LinkBox
           key={item.route}
           href={item.route}
-          tooltip="Read article"
-          tooltipPlacement="bottom-right"
           className="block px-2 w-full hover:bg-surface-bg"
         >
           <div className="flex flex-col gap-1.5">
@@ -183,7 +177,6 @@ export async function HomeSidebar() {
                 <LinkBox
                   key={stat.label}
                   href={stat.href}
-                  tooltip={stat.tooltip}
                   className="block px-2 w-full hover:bg-surface-bg"
                 >
                   <div className="flex gap-2 justify-between items-center w-full">
@@ -207,7 +200,6 @@ export async function HomeSidebar() {
             {latestReleaseDate && (
               <LinkBox
                 href="https://github.com/langfuse/langfuse/releases"
-                tooltip="View releases"
                 className="block px-2 w-full hover:bg-surface-bg"
               >
                 <div className="flex gap-2 justify-between items-center w-full">
