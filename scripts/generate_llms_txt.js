@@ -56,7 +56,7 @@ const SECTION_CONFIG = {
     heading: "Academy",
     subFileHeading: "Langfuse Academy",
     description:
-      "Course on the AI engineering loop: tracing, monitoring, datasets, evaluation, and experiments (English and Japanese).",
+      "Course on the AI engineering loop: tracing, monitoring, datasets, evaluation, and experiments (English and Japanese), plus a library of curated talks and articles on AI engineering.",
   },
   faq: {
     file: "llms-faq.txt",
@@ -98,13 +98,6 @@ const SECTION_CONFIG = {
     heading: "Workshop",
     subFileHeading: "Langfuse Workshop",
     description: "Hands-on workshop material for instructors and participants.",
-    optional: true,
-  },
-  library: {
-    file: "llms-library.txt",
-    heading: "Library",
-    subFileHeading: "Langfuse Library",
-    description: "Curated external resources and talks on AI engineering.",
     optional: true,
   },
   users: {

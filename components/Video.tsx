@@ -1,8 +1,17 @@
 "use client";
 
+import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import "@vidstack/react/player/styles/base.css";
+
+// Vidstack types mediaProps as HTMLAttributes<HTMLMediaElement>, which
+// omits video-only playsInline. Cast so the attributes still land on
+// the native <video> as soon as it is created.
+const INLINE_MEDIA_PROPS = {
+  playsInline: true,
+  "webkit-playsinline": "",
+} as HTMLAttributes<HTMLMediaElement>;
 
 export const Video = ({
   src,
@@ -10,6 +19,8 @@ export const Video = ({
   className,
   gifStyle = false,
   poster,
+  autoPlay = false,
+  muted = false,
   onCanPlay,
 }: {
   src: string;
@@ -17,6 +28,8 @@ export const Video = ({
   gifStyle?: boolean;
   className?: string;
   poster?: string;
+  autoPlay?: boolean;
+  muted?: boolean;
   onCanPlay?: () => void;
 }) => {
   return (
@@ -25,11 +38,13 @@ export const Video = ({
       poster={poster}
       posterLoad="eager"
       controls={!gifStyle}
-      autoPlay={gifStyle}
-      muted={gifStyle}
+      autoPlay={gifStyle || autoPlay}
+      muted={gifStyle || muted}
       loop={gifStyle}
       load={"visible"}
-      playsInline={gifStyle}
+      // Always inline. Vidstack enters fullscreen on coarse pointers
+      // (phones) when this is false, which overlays the docs page.
+      playsInline
       aspectRatio={aspectRatio ? `${aspectRatio}` : undefined}
       className={cn(
         "overflow-hidden shadow-lg bg-surface-bg object-cover",
@@ -37,7 +52,7 @@ export const Video = ({
       )}
       onCanPlay={onCanPlay}
     >
-      <MediaProvider />
+      <MediaProvider mediaProps={INLINE_MEDIA_PROPS} />
     </MediaPlayer>
   );
 };

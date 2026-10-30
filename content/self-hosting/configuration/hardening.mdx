@@ -19,17 +19,43 @@ For related operational guides, see [Authentication and SSO](/self-hosting/secur
     core: "not-available",
     pro: "not-available",
     enterprise: "not-available",
-    selfHosted: "ee",
+    selfHosted: "gov",
   }}
 />
 
-We are extending Langfuse Self-Hosted Enterprise for government and other highly regulated environments. Current work includes:
+Langfuse Government (self-hosted) supports government and other highly regulated environments with:
 
-- **FIPS-compatible deployment support** for environments that require approved cryptographic implementations.
-- **Hardened deployment images** designed to reduce the attack surface and support security-focused deployment baselines.
-- **End-to-end deployment documentation** for operating Langfuse and all required subcomponents as a complete air-gapped government deployment stack.
+- **[FIPS mode](/self-hosting/configuration/fips-mode):** Langfuse runs its cryptography on FIPS 140-3 validated cryptographic modules operated in approved mode, and refuses to start when it cannot.
+- **[Hardened images](#hardened-images):** the web and worker images are built on Iron Bank's hardened Red Hat Universal Base Image (UBI) 9.
+- **[No telemetry](/self-hosting/security/telemetry#can-i-disable-telemetry):** deployments with a Government license key send no telemetry to Langfuse.
 
-These capabilities are under active development. [Contact our sales team](/talk-to-us?deployment=self-hosted) to discuss your requirements and early access.
+We are also working on end-to-end documentation for operating Langfuse and all required subcomponents as a complete air-gapped deployment stack. [Contact our sales team](/talk-to-us?deployment=self-hosted) to discuss your requirements.
+
+### FIPS mode [#fips-mode]
+
+See [FIPS mode](/self-hosting/configuration/fips-mode) for supported cryptographic modules, requirements, and setup.
+
+### Hardened images [#hardened-images]
+
+From v4.55.0, the `langfuse/langfuse` (web) and `langfuse/langfuse-worker` images:
+
+- Are built on Iron Bank's hardened Red Hat UBI 9 images (`registry1.dso.mil/ironbank/redhat/ubi/ubi9` and `ubi9-micro`, version 9.8).
+- Run Node.js 24 from Red Hat's packages, which links the system OpenSSL library and its FIPS provider.
+- Ship no package manager, `curl`, or Python. The runtime contains `bash`, `sed`, and `wget`; use `wget` for [container health checks](/self-hosting/configuration/health-readiness-endpoints#container-health-checks).
+- Run as a non-root user with the numeric UID `1001`.
+- Keep the RPM database, so image scanners such as Trivy, Grype, or Syft can list every OS package.
+- Are published for `linux/amd64` and `linux/arm64`.
+
+Images that extend the Langfuse images cannot install packages with a package manager. Use a multi-stage build to copy additional files in.
+
+The Dockerfiles default to Red Hat's public UBI 9 images, so you can [build the images yourself](/self-hosting/deployment/infrastructure/containers#build-from-source) without credentials. To build on the Iron Bank images instead, log in to `registry1.dso.mil` and pass both base images:
+
+```bash
+docker build -f web/Dockerfile \
+  --build-arg BASE_IMAGE=registry1.dso.mil/ironbank/redhat/ubi/ubi9:9.8 \
+  --build-arg MICRO_BASE_IMAGE=registry1.dso.mil/ironbank/redhat/ubi/ubi9-micro:9.8 \
+  .
+```
 
 ## Restrict who can sign in [#access]
 
@@ -145,7 +171,7 @@ Administrative actions, including blob storage integration validate/run-now and 
 
 ## Telemetry [#telemetry]
 
-Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected. `TELEMETRY_ENABLED` doesn't cover the [newsletter step](/self-hosting/security/telemetry#hostnames-browser): to stop new users' browsers from contacting `langfuse.com` for it, set `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`.
+Langfuse self-hosted reports anonymized usage telemetry by default. Set `TELEMETRY_ENABLED=false` to opt out; note that instances running with an Enterprise Edition license key always report telemetry, and instances running with a Government license key never do. See [Telemetry](/self-hosting/security/telemetry) for the exact fields collected. `TELEMETRY_ENABLED` doesn't cover the [newsletter step](/self-hosting/security/telemetry#hostnames-browser): to stop new users' browsers from contacting `langfuse.com` for it, set `LANGFUSE_DISABLE_SIGNUP_ONBOARDING=true`.
 
 ## Reporting security issues [#disclosure]
 

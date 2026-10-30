@@ -16,7 +16,7 @@ export const sectionNavData: SectionNavData[] = [
   { name: "Handbook", href: "/handbook" },
   { name: "Changelog", href: "/changelog" },
   { name: "Pricing", href: "/pricing" },
-  { name: "Library", href: "/library" },
+  { name: "Library", href: "/academy/library" },
   { name: "Security & Compliance", href: "/security" },
 ];
 
