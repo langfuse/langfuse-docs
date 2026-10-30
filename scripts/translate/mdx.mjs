@@ -164,7 +164,7 @@ function headingText(markdown) {
   return markdown
     .replace(/!?\[([^\]]*)]\([^)]*\)/g, "$1")
     .replace(/<[^>]+>/g, "")
-    .replace(/[`*_~]/g, "")
+    .replace(/[<>`*_~]/g, "")
     .trim();
 }
 
