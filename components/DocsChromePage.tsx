@@ -71,6 +71,7 @@ const getIsoDate = (value: unknown): string | undefined => {
 export async function DocsChromePage({
   page,
   contentDir,
+  sectionUrl,
   bodyChromeProps,
   topPrefix,
   bottomSuffix,
@@ -78,6 +79,8 @@ export async function DocsChromePage({
   page: LoadedPage;
   /** Collection directory override for collections nested in another one, e.g. `content/academy/japan`. */
   contentDir?: string;
+  /** Leading breadcrumb link target when the section landing page is not in the sidebar tree. */
+  sectionUrl?: string;
   /** Extra props forwarded to `DocBodyChrome` (e.g. `versionLabel` on self-hosting). */
   bodyChromeProps?: BodyChromeProps;
   /** Optional node rendered inside DocBodyChrome, before the MDX body. */
@@ -102,7 +105,7 @@ export async function DocsChromePage({
     <DocsPage
       toc={toc}
       lastUpdate={lastModified}
-      breadcrumb={{ component: <DocsBreadcrumb /> }}
+      breadcrumb={{ component: <DocsBreadcrumb sectionUrl={sectionUrl} /> }}
       tableOfContent={{
         footer: (
           <DocsTocFooter lastModified={lastModified} sourcePath={sourcePath} />

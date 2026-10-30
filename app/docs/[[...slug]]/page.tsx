@@ -12,7 +12,7 @@ export default async function DocPage({ params }: PageProps) {
   const { slug = [] } = await params;
   const page = source.getPage(slug);
   if (!page) notFound();
-  return <DocsChromePage page={page} />;
+  return <DocsChromePage page={page} sectionUrl="/docs" />;
 }
 
 export async function generateMetadata({
