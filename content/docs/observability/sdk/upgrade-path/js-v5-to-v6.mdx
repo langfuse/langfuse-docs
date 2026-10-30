@@ -22,6 +22,7 @@ You only need to change something if one of these applies to you.
 
 - **You self-host Langfuse v3, or v4 older than v4.59.0** → v6 doesn't support it. Upgrade Langfuse, or stay on JS/TS SDK v5. See [Minimum versions](#minimum-versions).
 - **You run Node.js older than 22, or use `@langchain/core` older than 1.0** → [Minimum versions](#minimum-versions)
+- **You use OpenTelemetry JS SDK 2.x and install `@langfuse/otel` 6.1.0 or later** → [OpenTelemetry JS SDK 2.x](#opentelemetry-sdk)
 - **You pass `requestOptions` to a generated API method without query parameters or a body**, such as `api.datasets.get(name, { timeoutInSeconds })` → [Request placeholder before `requestOptions`](#request-placeholder)
 - **You call `api.scores.create` or `api.legacy.scoreV1.*` directly** → [`api.scores.create` takes an array of scores](#scores-api)
 - **You call `api.scoresV3.getManyV3`** → [Score reads move to `api.scores.getMany`](#scores-reads)
@@ -57,6 +58,20 @@ These are new in v6.
 ```bash
 npm install @langfuse/langchain@6 @langchain/core@^1
 ```
+
+### OpenTelemetry JS SDK 2.x [#opentelemetry-sdk]
+
+**Affects:** apps on OpenTelemetry JS SDK 2.x that install `@langfuse/otel` 6.1.0 or later.
+
+**Breaks:** `npm install` fails with `ERESOLVE`.
+
+From 6.1.0, `@langfuse/otel` supports OpenTelemetry JS SDK 2.x and 3.x, so its OpenTelemetry peer dependencies accept both. npm installs the newest version of any peer your app doesn't list, which is 3.x, and 3.x packages can't be installed next to 2.x ones. To keep your OpenTelemetry 2.x setup, list these peers with 2.x ranges when you upgrade. `@opentelemetry/sdk-trace` 2.9 or later is required; your other OpenTelemetry packages stay as they are.
+
+```bash
+npm install @langfuse/otel@6 @opentelemetry/api@~1.9 @opentelemetry/core@^2 @opentelemetry/sdk-trace@^2.9 "@opentelemetry/exporter-trace-otlp-http@<0.300" "@opentelemetry/otlp-exporter-base@<0.300"
+```
+
+On OpenTelemetry JS SDK 3.x, upgrade `@langfuse/otel` without pinning anything.
 
 ### Request placeholder before `requestOptions` [#request-placeholder]
 
@@ -273,6 +288,7 @@ Work through this list, or paste it into your coding agent. Skip items that don'
 
 - Use Node.js 22+ and Langfuse Cloud or self-hosted Langfuse v4.59.0+. On self-hosted v3, stay on v5.
 - Upgrade every `@langfuse/*` package to `@6`. With LangChain: `@langchain/core@^1`.
+- OpenTelemetry JS SDK 2.x with `@langfuse/otel` 6.1.0+: install with the [2.x peer pins](#opentelemetry-sdk).
 - Generated API methods in the [affected list](#request-placeholder): `method(...pathArgs, requestOptions)` → `method(...pathArgs, {}, requestOptions)`.
 - `api.scores.create({ ... })` → `api.scores.create([{ ... }])`; set `id` on the request if you need it, and handle partial rejections (`rejected` > 0).
 - `api.legacy.scoreV1.create(...)` → `api.scores.create([...])`; `api.legacy.scoreV1.delete(id)` → `api.scores.delete(id)`; drop the `legacy.` prefix from score types.

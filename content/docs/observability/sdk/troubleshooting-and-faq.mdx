@@ -56,6 +56,20 @@ Seeing `AttributeError` or `is not a function` errors after upgrading? Follow th
 
 </Details>
 
+<Details id="eresolve-opentelemetry-peer">
+<Summary>`ERESOLVE` or `peer @opentelemetry/api` errors when installing `@langfuse/otel`</Summary>
+
+- `@langfuse/otel` 6.1.0 and later supports OpenTelemetry JS SDK 2.x and 3.x. If your app uses 2.x, directly or through a library such as `@vercel/otel`, npm installs 3.x versions of the OpenTelemetry peers your app doesn't list. 3.x packages need `@opentelemetry/api` 1.10, so the install fails or ends with mixed 2.x and 3.x packages.
+- Install with the OpenTelemetry peers pinned to 2.x:
+
+```bash
+npm install @langfuse/otel @opentelemetry/api@~1.9 @opentelemetry/core@^2 @opentelemetry/sdk-trace@^2.9 "@opentelemetry/exporter-trace-otlp-http@<0.300" "@opentelemetry/otlp-exporter-base@<0.300"
+```
+
+- See [OpenTelemetry JS SDK 2.x](/docs/observability/sdk/upgrade-path/js-v5-to-v6#opentelemetry-sdk) in the upgrade guide.
+
+</Details>
+
 <Details id="missing-traces-with-vercelotel">
 <Summary>Missing traces with `@vercel/otel`</Summary>
 
