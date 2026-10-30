@@ -22,14 +22,18 @@ interface EventDefinitions {
       | "sentiment_classifier"
       | "voice_agent"
       | "rock_paper_scissors"
-      | "jev_evals_blog";
+      | "jev_evals_blog"
+      | "openai_decisions_changelog";
     trace_url: string;
   };
   "demo:sentiment_analyze_submitted": {
-    source: "jev_evals_blog" | "sentiment_classifier";
-    /** Both engines run side-by-side on the blog compare widget. */
+    source:
+      | "jev_evals_blog"
+      | "sentiment_classifier"
+      | "openai_decisions_changelog";
+    /** Engines run side-by-side on the blog/changelog compare widget. */
     mode: "compare" | "single";
-    engine?: "jev" | "llm";
+    engine?: "jev" | "llm" | "decisions";
     from_example: boolean;
     text_char_count: number;
     classification_count?: number;
