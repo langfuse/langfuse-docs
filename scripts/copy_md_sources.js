@@ -22,6 +22,14 @@ const SITE_URL = "https://langfuse.com";
 const SOURCE_DIR = path.join(process.cwd(), "content");
 const OUTPUT_DIR = path.join(process.cwd(), "public", "md-src");
 const OVERRIDE_DIR = path.join(process.cwd(), "md-override");
+// Translations in i18n/ that are served on the site, with the content path
+// they are served under. The machine translations in i18n/ are not served yet.
+const TRANSLATED_SOURCES = [
+  {
+    dir: path.join(process.cwd(), "i18n", "ja", "academy"),
+    contentPath: path.join("academy", "japan"),
+  },
+];
 const SELF_HOSTING_FOOTER_PATH = path.join(
   process.cwd(),
   "components-mdx",
@@ -158,7 +166,15 @@ function ensureDir(dirPath) {
  * - Map content/foo/index.mdx -> public/md-src/foo.md
  */
 function mapDestination(sourceFile) {
-  const rel = path.relative(SOURCE_DIR, sourceFile);
+  const translated = TRANSLATED_SOURCES.find((source) =>
+    sourceFile.startsWith(source.dir + path.sep),
+  );
+  const rel = translated
+    ? path.join(
+        translated.contentPath,
+        path.relative(translated.dir, sourceFile),
+      )
+    : path.relative(SOURCE_DIR, sourceFile);
   const base = path.basename(rel);
   if (base === "meta.json" || base.startsWith("_")) return null;
 
@@ -194,7 +210,12 @@ function copyAll() {
     console.log("copy_md_sources: content/ not found, skipping");
     return;
   }
-  const allFiles = walkDir(SOURCE_DIR);
+  const allFiles = [
+    SOURCE_DIR,
+    ...TRANSLATED_SOURCES.map((source) => source.dir).filter((dir) =>
+      fs.existsSync(dir),
+    ),
+  ].flatMap(walkDir);
   let copied = 0;
   for (const file of allFiles) {
     const dest = mapDestination(file);

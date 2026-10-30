@@ -177,12 +177,12 @@ export const academy = defineDocs({
   dir: "content/academy",
   docs: {
     schema: sidebarFrontmatterSchema,
-    files: ["**/*.mdx", "!japan/**"],
   },
-  meta: { files: ["**/*.json", "!japan/**"] },
 });
 
-// Japanese Academy pages are translated in batches and therefore lag the
+// The Japanese Academy is a human translation. It lives with the other
+// translations in i18n/ja/, and the translation workflow never overwrites it
+// (see i18n/README.md). Its pages are translated in batches and therefore lag the
 // English source between syncs. `translatedAt` records the date a page was last
 // brought in line with the English version, so the page can tell readers which
 // snapshot they are looking at and point them at the English original.
@@ -191,7 +191,7 @@ const academyJaFrontmatterSchema = sidebarFrontmatterSchema.extend({
 });
 
 export const academyJa = defineDocs({
-  dir: "content/academy/japan",
+  dir: "i18n/ja/academy",
   docs: { schema: academyJaFrontmatterSchema },
 });
 

@@ -1,0 +1,402 @@
+# Translation glossary for the docs translation pipeline (scripts/translate).
+#
+# Every entry is sent to the model with each translation request, and the
+# `keep` entries are checked after translation.
+#
+# - `keep: true`: never translate. Use for brand and product names, Langfuse
+#   feature names that are proper nouns, plan and role names, and UI labels.
+#   The Langfuse UI is English-only, so anything the reader has to find in the
+#   UI stays in English.
+# - Otherwise, give the required translation per language. Omit a language to
+#   let the model choose.
+# - `note`: guidance passed to the model, e.g. when a term is ambiguous.
+#
+# Status: DRAFT. Each language needs a sign-off from a native speaker before
+# its first translations are published. Record the reviewer in `reviewedBy`.
+#
+# Sources:
+# - Japanese entries follow the existing human translation of the Academy
+#   (content/academy/japan) where it uses the term.
+# - Where the terms overlap, entries match the ClickHouse docs, so Langfuse and
+#   ClickHouse read the same in every language: the translated Langfuse and
+#   ClickStack pages on clickhouse.com/docs (translated with General
+#   Translation), and the ClickHouse glossary in ClickHouse/clickhouse-docs
+#   (scripts/translate/glossary.csv and languages/jp.json). The Japanese
+#   Academy wins where the two disagree (instrumentation: 計装).
+
+reviewedBy:
+  fr: null
+  ja: null
+  ko: null
+  es: null
+  zh: null
+
+rules:
+  all:
+    - Keep code, identifiers, CLI commands, environment variables, file names, URLs, and API fields exactly as in the source.
+    - Keep the names of third-party products, frameworks, model providers, and libraries in English (for example OpenAI, LangChain, Vercel AI SDK, Kubernetes).
+    - Keep UI labels in English when the text tells the reader to find, click, or select them (for example "Click **New Prompt**"). You may add a translation in parentheses the first time a label appears on a page.
+    - Keep Langfuse plan names (Hobby, Core, Pro, Teams, Enterprise) and RBAC role names (Owner, Admin, Member, Viewer, None) in English.
+  ja:
+    - Use the polite です/ます style.
+    - Put a half-width space between Japanese text and Latin words (for example "Langfuse のトレース"), as the Japanese Academy does, but not before Japanese punctuation (、。).
+    - Use katakana for established loanwords (トレース, スパン, データセット) and keep English for terms marked keep.
+  ko:
+    - Use the formal 합니다 style.
+    - Use established Korean loanwords for common technical terms (트레이스, 데이터셋, 프롬프트) and keep English for terms marked keep.
+  fr:
+    - Use "vous", never "tu".
+    - "Follow French typography: a non-breaking space before : ; ? ! and « » quotes in prose."
+    - Many developer terms are used in English in French technical writing; follow the glossary instead of forcing a French equivalent.
+  es:
+    - Use "tú" (informal second person), which is common in Spanish developer documentation.
+    - Use neutral international Spanish, not a regional variant.
+  zh:
+    - Write Simplified Chinese (zh-CN) and address the reader as "您".
+    - Use full-width punctuation (，。：；？！（）) in Chinese sentences, and put a space between Chinese characters and Latin words or numbers (for example "在 Langfuse 中创建 3 个评分").
+    - Keep English for terms marked keep and for Span, which Chinese developer documentation usually leaves untranslated.
+
+terms:
+  # Brand and product names
+  - term: Langfuse
+    keep: true
+  - term: Langfuse Cloud
+    keep: true
+  - term: ClickHouse
+    keep: true
+  - term: OpenTelemetry
+    keep: true
+  - term: Langfuse CLI
+    keep: true
+  - term: MCP Server
+    keep: true
+    note: Product name of the Langfuse MCP server. "MCP" itself is never translated.
+  - term: Halo
+    keep: true
+    note: Name of the Langfuse assistant.
+  - term: Pulse
+    keep: true
+    note: Name of the outlier-chart strip above the Observations table.
+  - term: Playground
+    keep: true
+  - term: LLM-as-a-Judge
+    keep: true
+  - term: Jev as a Judge
+    keep: true
+  - term: Agent Graph
+    keep: true
+  - term: Annotation Queue
+    keep: true
+    note: UI feature name. Keep in English, including the plural "Annotation Queues".
+  - term: Score Config
+    keep: true
+  - term: Model Definition
+    keep: true
+  - term: LLM Connection
+    keep: true
+  - term: Public API
+    keep: true
+  - term: Metrics API
+    keep: true
+  - term: AI Engineering Loop
+    keep: true
+    note: Named concept from the Langfuse Academy.
+
+  # Langfuse data model
+  - term: trace
+    note: Core Langfuse object (one request or workflow execution).
+    ja: トレース
+    ko: 트레이스
+    fr: trace
+    es: traza
+    zh: 追踪
+  - term: observation
+    note: Langfuse object that a trace is made of (spans, generations, events, ...).
+    ja: オブザベーション
+    ko: 옵저베이션
+    fr: observation
+    es: observación
+    zh: 观测
+  - term: span
+    ja: スパン
+    ko: 스팬
+    fr: span
+    es: span
+    zh: Span
+  - term: generation
+    keep: true
+    note: Observation type for LLM calls. Keep the English word so it matches the UI and the SDK; do not translate it as the generic word for "generating".
+  - term: event
+    note: Observation type for discrete events.
+    ja: イベント
+    ko: 이벤트
+    fr: événement
+    es: evento
+    zh: 事件
+  - term: session
+    ja: セッション
+    ko: 세션
+    fr: session
+    es: sesión
+    zh: 会话
+  - term: score
+    note: Langfuse object holding an evaluation result. In Korean, write 점수(score) the first time it appears on a page.
+    ja: スコア
+    ko: 점수
+    fr: score
+    es: score
+    zh: 评分
+  - term: dataset
+    ja: データセット
+    ko: 데이터셋
+    fr: dataset
+    es: dataset
+    zh: 数据集
+  - term: dataset item
+    ja: データセットアイテム
+    ko: 데이터셋 아이템
+    fr: élément de dataset
+    es: elemento del dataset
+    zh: 数据集条目
+  - term: experiment
+    ja: 実験
+    ko: 실험
+    fr: expérimentation
+    es: experimento
+    zh: 实验
+  - term: evaluator
+    ja: 評価器
+    ko: 평가기
+    fr: évaluateur
+    es: evaluador
+    zh: 评估器
+  - term: environment
+    ja: 環境
+    ko: 환경
+    fr: environnement
+    es: entorno
+    zh: 环境
+  - term: tag
+    ja: タグ
+    ko: 태그
+    fr: tag
+    es: etiqueta
+    zh: 标签
+  - term: prompt label
+    note: Labels such as `production` and `latest` are identifiers and stay in English.
+    ja: プロンプトラベル
+    ko: 프롬프트 라벨
+    fr: label de prompt
+    es: label del prompt
+    zh: 提示词标签
+  - term: project
+    ja: プロジェクト
+    ko: 프로젝트
+    fr: projet
+    es: proyecto
+    zh: 项目
+  - term: organization
+    ja: 組織
+    ko: 조직
+    fr: organisation
+    es: organización
+    zh: 组织
+
+  # Product areas and concepts
+  - term: observability
+    ja: オブザーバビリティ
+    ko: 관측성
+    fr: observabilité
+    es: observabilidad
+    zh: 可观测性
+  - term: tracing
+    ja: トレーシング
+    ko: 트레이싱
+    fr: traçage
+    es: trazabilidad
+    zh: 追踪
+  - term: instrumentation
+    ja: 計装
+    ko: 계측
+    fr: instrumentation
+    es: instrumentación
+    zh: 插桩
+  - term: prompt management
+    ja: プロンプト管理
+    ko: 프롬프트 관리
+    fr: gestion des prompts
+    es: gestión de prompts
+    zh: 提示词管理
+  - term: prompt
+    ja: プロンプト
+    ko: 프롬프트
+    fr: prompt
+    es: prompt
+    zh: 提示词
+  - term: evaluation
+    ja: 評価
+    ko: 평가
+    fr: évaluation
+    es: evaluación
+    zh: 评估
+  - term: online evaluation
+    ja: オンライン評価
+    ko: 온라인 평가
+    fr: évaluation en ligne
+    es: evaluación en línea
+    zh: 在线评估
+  - term: offline evaluation
+    ja: オフライン評価
+    ko: 오프라인 평가
+    fr: évaluation hors ligne
+    es: evaluación fuera de línea
+    zh: 离线评估
+  - term: human annotation
+    ja: 人手によるアノテーション
+    ko: 휴먼 어노테이션
+    fr: annotation humaine
+    es: anotación humana
+    zh: 人工标注
+  - term: self-hosting
+    note: As an adjective ("self-hosted"), use auto-hébergé in French and autohospedado in Spanish.
+    ja: セルフホスト
+    ko: 자체 호스팅
+    fr: auto-hébergement
+    es: autohospedaje
+    zh: 自托管
+  - term: integration
+    ja: インテグレーション
+    ko: 통합
+    fr: intégration
+    es: integración
+    zh: 集成
+  - term: agent
+    ja: エージェント
+    ko: 에이전트
+    fr: agent
+    es: agente
+    zh: 智能体
+  - term: tool call
+    ja: ツール呼び出し
+    ko: 도구 호출
+    fr: appel d'outil
+    es: llamada a herramienta
+    zh: 工具调用
+  - term: guardrail
+    ja: ガードレール
+    ko: 가드레일
+    fr: guardrail
+    es: guardrail
+    zh: 护栏
+  - term: latency
+    ja: レイテンシ
+    ko: 지연 시간
+    fr: latence
+    es: latencia
+    zh: 延迟
+  - term: token usage
+    ja: トークン使用量
+    ko: 토큰 사용량
+    fr: consommation de tokens
+    es: uso de tokens
+    zh: Token 用量
+  - term: metadata
+    ja: メタデータ
+    ko: 메타데이터
+    fr: métadonnées
+    es: metadatos
+    zh: 元数据
+  - term: sampling
+    ja: サンプリング
+    ko: 샘플링
+    fr: échantillonnage
+    es: muestreo
+    zh: 采样
+  - term: masking
+    ja: マスキング
+    ko: 마스킹
+    fr: masquage
+    es: enmascaramiento
+    zh: 脱敏
+  - term: data retention
+    ja: データ保持
+    ko: 데이터 보존
+    fr: rétention des données
+    es: retención de datos
+    zh: 数据保留
+  - term: API key
+    ja: APIキー
+    ko: API 키
+    fr: clé API
+    es: clave de API
+    zh: API 密钥
+  - term: billable unit
+    ja: 課金対象ユニット
+    ko: 과금 단위
+    fr: unité facturable
+    es: unidad facturable
+    zh: 计费单位
+  - term: hallucination
+    ja: ハルシネーション
+    ko: 환각
+    fr: hallucination
+    es: alucinación
+    zh: 幻觉
+  - term: expected output
+    ja: 期待される出力
+    ko: 기대 출력
+    fr: sortie attendue
+    es: salida esperada
+    zh: 预期输出
+  - term: dashboard
+    ja: ダッシュボード
+    ko: 대시보드
+    fr: tableau de bord
+    es: dashboard
+    zh: 仪表盘
+
+  # ClickHouse terms used in the self-hosting docs. Japanese, Spanish, and
+  # Chinese come from the ClickHouse docs glossary; it has no French or Korean
+  # entries.
+  - term: Keeper
+    keep: true
+    note: ClickHouse Keeper.
+  - term: Parquet
+    keep: true
+  - term: query
+    ja: クエリ
+    es: consulta
+    zh: 查询
+  - term: row
+    ja: 行
+    es: fila
+    zh: 行
+  - term: column
+    ja: カラム
+    es: columna
+    zh: 列
+  - term: replica
+    ja: レプリカ
+    es: réplica
+    zh: 副本
+  - term: replication
+    ja: レプリケーション
+    es: replicación
+    zh: 复制
+  - term: object storage
+    es: almacenamiento de objetos
+    zh: 对象存储
+  - term: access key
+    es: clave de acceso
+    zh: 访问密钥
+  - term: authentication
+    es: autenticación
+    zh: 身份验证
+  - term: access control
+    es: control de acceso
+    zh: 访问控制
+  - term: self-managed
+    note: ClickHouse deployment term, distinct from Langfuse self-hosting.
+    ja: セルフマネージド
+    es: autogestionado
+    zh: 自管理
