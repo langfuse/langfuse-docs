@@ -1,0 +1,113 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Monitor FlexAI with Langfuse
+sidebarTitle: FlexAI
+logo: /images/integrations/flexai_icon.svg
+logoAppearance: dark
+description: Learn how to integrate FlexAI with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for FlexAI with Langfuse
+
+This guide shows you how to integrate FlexAI with Langfuse. FlexAI's chat completions API is fully compatible with OpenAI's API. This allows us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
+
+> **What is FlexAI?** [FlexAI](https://flex.ai) runs open-weight models on its own GPU clusters and serves them through an OpenAI-compatible API at `https://api.flex.ai/v1`. The list of available models is returned by `GET https://api.flex.ai/v1/models`.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
+
+<Steps>
+## Step 1: Install Dependencies
+
+Make sure you have installed the necessary Python packages:
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+
+# Get your FlexAI API key from https://platform.flex.ai
+os.environ.setdefault("FLEXAI_API_KEY", "...");
+```
+
+## Step 3: Langfuse OpenAI drop-in Replacement
+
+In this step we use the native [OpenAI drop-in replacement](https://langfuse.com/integrations/model-providers/openai-py) by importing `from langfuse.openai import openai`.
+
+To start using FlexAI with OpenAI's client libraries, pass in your FlexAI API key to the `api_key` option, and change the `base_url` to `https://api.flex.ai/v1`:
+
+```python
+# instead of import openai:
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ["FLEXAI_API_KEY"],
+  base_url="https://api.flex.ai/v1",
+)
+```
+
+<Callout type="info" emoji="ℹ️">
+**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts of your application.
+
+</Callout>
+
+## Step 4: Run An Example
+
+The following cell demonstrates how to call a FlexAI chat model using the traced OpenAI client. All API calls will be automatically traced by Langfuse.
+
+```python
+client = openai.OpenAI(
+  api_key=os.environ["FLEXAI_API_KEY"],
+  base_url="https://api.flex.ai/v1",
+)
+
+response = client.chat.completions.create(
+  model="DeepSeek-V4-Flash-0731",
+  messages=[
+    {"role": "system", "content": "Act like you are a helpful assistant."},
+    {"role": "user", "content": "What are the famous attractions in San Francisco?"},
+  ]
+)
+
+print(response.choices[0].message.content)
+
+# Ensure all traces are sent to Langfuse before the script exits
+from langfuse import get_client
+get_client().flush()
+```
+
+## Step 5: See Traces in Langfuse
+
+After running the example model call, you can see the traces in Langfuse. You will see detailed information about your FlexAI API calls, including:
+
+- Request parameters (model, messages, temperature, etc.)
+- Response content
+- Token usage statistics
+- Latency metrics
+
+_Example trace link in Langfuse_
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
+## Resources
+
+- Check the [FlexAI Inference API quickstart](https://docs.flex.ai/inference-api/quickstart) for further details on available models and API options.
+- Visit the [FlexAI platform](https://platform.flex.ai) to get your API key, and see [FlexAI pricing](https://flex.ai/pricing) for current per-model prices.
+- Visit [Langfuse](https://langfuse.com) to learn more about monitoring and tracing capabilities for your LLM applications.
