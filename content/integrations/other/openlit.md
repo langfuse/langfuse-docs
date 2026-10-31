@@ -8,7 +8,7 @@ category: Integrations
 
 # OpenLIT Integration via OpenTelemetry
 
-Langfuse is an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/get-started), allowing trace ingestion from various OpenTelemetry instrumentation libraries. This guide demonstrates how to use the [OpenLit](https://docs.openlit.io/latest/features/tracing) instrumentation library to instrument a compatible framework or LLM provider.
+Langfuse is an [OpenTelemetry backend](https://langfuse.com/docs/opentelemetry/get-started), allowing trace ingestion from various OpenTelemetry instrumentation libraries. This guide demonstrates how to use the [OpenLit](https://docs.openlit.io/latest/sdk/features/tracing) instrumentation library to instrument a compatible framework or LLM provider.
 
 ## Step 1: Install Dependencies
 
