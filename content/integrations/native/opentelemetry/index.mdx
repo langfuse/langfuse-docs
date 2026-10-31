@@ -483,7 +483,7 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 ### Input and output content [#input-and-output-content]
 
-The [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/) carry prompt and response content as JSON on `gen_ai.input.messages` and `gen_ai.output.messages`. Langfuse maps them to the observation `input` and `output` as-is, so the message shape is what the traces show.
+The [GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/gen-ai-spans/) carry prompt and response content as JSON on `gen_ai.input.messages` and `gen_ai.output.messages`. Langfuse maps them to the observation `input` and `output`, keeping the message shape except where `gen_ai.system_instructions` adds a system message.
 
 An input is a list of messages, each with a `role` and a list of `parts`:
 
@@ -514,21 +514,15 @@ An output is the same shape. Assistant messages may add a `finish_reason`:
 
 `gen_ai.system_instructions` is prepended to the input as a `{"role":"system","content":"..."}` message, unless the input already contains a system message. It accepts a JSON string of text parts (`[{"type":"text","content":"..."}]`, joined with newlines), a JSON string of anything else, or a plain string. Without `gen_ai.input.messages` it does nothing.
 
-`gen_ai.prompt.*` and `gen_ai.completion.*` still work. Langfuse matches them by prefix and rebuilds the key paths into nested objects.
+Langfuse matches legacy `gen_ai.prompt.*` and `gen_ai.completion.*` keys by prefix and rebuilds their key paths into nested objects.
 
 <Callout type="warning">
-  **Precedence.** Langfuse stops at the first convention that produces content for
-  either field, so the lowest entry in this list rarely wins. In order:
-  `langfuse.observation.input`/`output`, vendor conventions (Genkit, Vercel AI
-  SDK, Flue, GenAI span events, Google Vertex AI, Logfire, LiveKit, MLflow,
-  Traceloop, SmolAgents, Pydantic AI, and others), legacy
-  `gen_ai.prompt.*`/`gen_ai.completion.*`, OpenInference
-  `llm.input_messages.*`/`llm.output_messages.*`, `gen_ai.input.messages`/
-  `gen_ai.output.messages`, then `gen_ai.tool.call.arguments`/
-  `gen_ai.tool.call.result`. A span that carries both a vendor attribute and
-  `gen_ai.input.messages` keeps the vendor content. See
-  [#17963](https://github.com/langfuse/langfuse/issues/17963) for the remaining
-  gaps.
+  **Precedence.** The first convention in the table above that produces content
+  for either field wins. `gen_ai.prompt.*`/`gen_ai.completion.*` are matched
+  before `gen_ai.input.messages`/`gen_ai.output.messages`, so provider extras
+  under those legacy prefixes shadow the current attributes (see
+  [#17963](https://github.com/langfuse/langfuse/issues/17963)). Send one
+  convention per span.
 </Callout>
 
 ### Ingestion transformations [#ingestion-transformations]

@@ -129,11 +129,12 @@ package com.langfuse.springai;
 import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
+import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.observation.ChatModelObservationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Component
 public class ChatModelCompletionContentObservationFilter implements ObservationFilter {
@@ -144,23 +145,37 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
             return context;
         }
 
-        var input = chatModelObservationContext.getRequest().getInstructions().stream()
-                .filter(instruction -> StringUtils.hasText(instruction.getText()))
-                .map(instruction -> message(instruction.getMessageType().getValue(), instruction.getText(), null))
-                .collect(Collectors.joining(",", "[", "]"));
+        var instructions = chatModelObservationContext.getRequest().getInstructions();
+        List<String> input = instructions == null
+                ? List.of()
+                : instructions.stream()
+                        .filter(instruction -> StringUtils.hasText(instruction.getText()))
+                        .map(instruction -> message(instruction.getMessageType().getValue(), instruction.getText(), null))
+                        .toList();
+        if (!input.isEmpty()) {
+            chatModelObservationContext.addHighCardinalityKeyValue(
+                    keyValue("gen_ai.input.messages", "[" + String.join(",", input) + "]"));
+        }
 
         var response = chatModelObservationContext.getResponse();
-        var output = response == null || response.getResults() == null
-                ? "[]"
-                : response.getResults().stream()
+        var results = response == null ? null : response.getResults();
+        List<String> output = results == null
+                ? List.of()
+                : results.stream()
                         .filter(generation -> generation.getOutput() != null && StringUtils.hasText(generation.getOutput().getText()))
-                        .map(generation -> message("assistant", generation.getOutput().getText(), generation.getMetadata().getFinishReason()))
-                        .collect(Collectors.joining(",", "[", "]"));
-
-        chatModelObservationContext.addHighCardinalityKeyValue(keyValue("gen_ai.input.messages", input));
-        chatModelObservationContext.addHighCardinalityKeyValue(keyValue("gen_ai.output.messages", output));
+                        .map(generation -> message("assistant", generation.getOutput().getText(), finishReason(generation)))
+                        .toList();
+        if (!output.isEmpty()) {
+            chatModelObservationContext.addHighCardinalityKeyValue(
+                    keyValue("gen_ai.output.messages", "[" + String.join(",", output) + "]"));
+        }
 
         return chatModelObservationContext;
+    }
+
+    private static String finishReason(Generation generation) {
+        var metadata = generation.getMetadata();
+        return metadata == null ? null : metadata.getFinishReason();
     }
 
     private static KeyValue keyValue(String key, String value) {
@@ -207,6 +222,8 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
     }
 }
 ```
+
+The filter serializes text only; tool calls and media parts are not included in the emitted messages.
 
 With these configurations and dependencies in place, your Spring Boot application is ready to produce OpenTelemetry traces. Spring AI’s internal calls (e.g. when you invoke a chat model or generate an embedding) will be recorded as spans.
 
