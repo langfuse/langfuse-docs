@@ -517,8 +517,10 @@ An output is the same shape. Assistant messages may add a `finish_reason`:
 Langfuse matches legacy `gen_ai.prompt.*` and `gen_ai.completion.*` keys by prefix and rebuilds their key paths into nested objects.
 
 <Callout type="warning">
-  **Precedence.** The first convention in the table above that produces content
-  for either field wins. `gen_ai.prompt.*`/`gen_ai.completion.*` are matched
+  **Precedence.** Langfuse takes input and output from the first convention
+  that produces content for either field; vendor handlers such as Genkit,
+  Vercel AI SDK, and Flue are gated on the instrumentation scope and are
+  checked first. `gen_ai.prompt.*`/`gen_ai.completion.*` are matched
   before `gen_ai.input.messages`/`gen_ai.output.messages`, so provider extras
   under those legacy prefixes shadow the current attributes (see
   [#17963](https://github.com/langfuse/langfuse/issues/17963)). Send one
