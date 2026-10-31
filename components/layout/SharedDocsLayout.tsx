@@ -18,7 +18,7 @@ import { Banner } from "./Banner";
 
 /**
  * Shared wrapper used by all sidebar-based section layouts
- * (docs, guides, integrations, self-hosting, library, handbook, security).
+ * (docs, guides, integrations, self-hosting, academy, handbook, security).
  * Each layout only needs to pass the correct page tree.
  *
  * Renders two sticky headers by default:

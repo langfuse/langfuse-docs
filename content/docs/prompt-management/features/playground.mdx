@@ -9,7 +9,9 @@ sidebarTitle: Playground
 
 Test and iterate on your prompts directly in the Langfuse Prompt Playground. Tweak the prompt and model parameters to see how different models respond to these input changes. This allows you to quickly iterate on your prompts and optimize them for the best results in your LLM app without having to switch between tools or use any code.
 
-<Frame fullWidth>![LLM Playground](/images/docs/playground-overview.png)</Frame>
+<Frame fullWidth>
+  ![Langfuse Playground comparing two executed support-prompt variants with completed model outputs](/images/docs/playground-overview.png)
+</Frame>
 
 ## Core features
 
@@ -21,6 +23,8 @@ Compare multiple prompt variants alongside each other. Execute them all at once 
   src="https://static.langfuse.com/docs-videos/playground-side-by-side-comparison.mp4"
   gifStyle
   aspectRatio={16 / 9}
+  title="Compare prompts side by side in the playground"
+  description="Playground with one window. Click “New split window” to copy it, open the copy's “Variables” and change language from typescript to go, then click “Run All” to run both windows at once and compare their outputs. Close the copy with “Remove window”."
 />
 
 ### Open your prompt in the playground
@@ -31,6 +35,8 @@ You can open a prompt you created with [Langfuse Prompt Management](/docs/prompt
   src="https://static.langfuse.com/docs-videos/playground-open-prompt.mp4"
   gifStyle
   aspectRatio={16 / 9}
+  title="Open a prompt in the playground"
+  description="Prompts > movie-critic, version 3. Click “Playground” > “Fresh playground”, fill the variables criticlevel (expert) and movie (Dune: Part Two) in the Variables panel and click “Submit” to get the model's answer in Output."
 />
 
 ### Save your prompt to Prompt Management
@@ -41,16 +47,20 @@ When you're satisfied with your prompt, you can save it to Prompt Management by 
   src="https://static.langfuse.com/docs-videos/playground-save-prompt.mp4"
   gifStyle
   aspectRatio={16 / 9}
+  title="Save a playground prompt to Prompt Management"
+  description="Playground with a chat prompt. Click “Save as prompt” in the window header > “Save as new prompt”. The new-prompt form opens with the playground's messages; enter the name movie-critic-chat, keep “Set the production label” checked and click “Create prompt”. It lands on version 1 with the production and latest labels."
 />
 
 ### Open a generation in the playground
 
-You can open a generation from [Langfuse Observability](/docs/observability) in the playground by clicking the `Open in Playground` button in the generation details page.
+You can open a generation from [Langfuse Observability](/docs/observability) in the playground: select the generation in a trace, then choose **Add to** → **Playground** → **Fresh playground**. The playground opens with the generation's messages and model settings.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/playground-open-prompt.mp4"
+  src="https://static.langfuse.com/docs-videos/playground-open-generation.mp4"
   gifStyle
   aspectRatio={16 / 9}
+  title="Open a generation in the playground"
+  description="Trace detail with a qa-answer generation selected. Click “Add to” in the observation header > “Playground” > “Fresh playground”; the playground opens with the generation's system and user messages and model settings. Click “Submit” to rerun it."
 />
 
 ### Tool calling and structured outputs
@@ -92,7 +102,7 @@ The Langfuse Playground supports tool calling and structured output schemas, ena
 You can add prompt variables in the playground to simulate different inputs to your prompt.
 
 <Frame fullWidth>
-  ![Add prompt variables](/images/docs/playground-variables.png)
+  ![Playground variables panel with context and customer-question values for a support prompt](/images/docs/playground-variables.png)
 </Frame>
 
 ### Use your favorite model
@@ -100,8 +110,7 @@ You can add prompt variables in the playground to simulate different inputs to y
 You can use your favorite model by adding the API key for the model you want to use in the Langfuse project settings. Learn how to [set up an LLM connection](/docs/administration/llm-connection).
 
 <Frame fullWidth>
-  ![Select the model you want to
-  use](/images/docs/playground-model-selection.png)
+  ![Playground model advanced settings for temperature, output token limit, Top P, and additional provider options](/images/docs/playground-model-selection.png)
 </Frame>
 
 Optionally, many LLM providers allow for additional parameters when invoking a model. You can pass these parameters in the playground when toggling "Additional Options" in the model selection dropdown. [Read this documentation about additional provider options](/docs/administration/llm-connection#advanced-configurations) for more information.

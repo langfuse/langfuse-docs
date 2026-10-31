@@ -72,7 +72,6 @@ const pathsWithCopyAsMarkdownButton = [
   "/integrations",
   "/handbook",
   "/security",
-  "/library",
   "/enterprise",
   "/chat-agents",
   "/coding-agents",
