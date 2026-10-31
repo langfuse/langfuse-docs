@@ -183,7 +183,7 @@ export default function CloudRegionSelectorPage() {
       <div className="flex w-full max-w-[480px] flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-col items-center gap-1">
-            <Logo variant="byClickHouse" />
+            <Logo variant="hero" />
             <Text size="s" className="tracking-[0.01em]">
               Agent Observability and Evals
             </Text>

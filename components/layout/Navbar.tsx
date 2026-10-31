@@ -41,7 +41,7 @@ export function Navbar() {
           )}
         >
           <div className={cn(contentStyle, "rounded-r-none lg:rounded-r-sm")}>
-            <Logo showAffiliation />
+            <Logo />
           </div>
         </div>
         <div

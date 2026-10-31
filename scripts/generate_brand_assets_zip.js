@@ -34,9 +34,22 @@ if (fs.existsSync(zipPath)) {
   fs.rmSync(zipPath, { force: true });
 }
 
+// Retired standalone wordmark (wordmark/Langfuse). Do not ship it in the
+// public package. The current wordmark lives in wordmark/{light,dark,monochrome}.
 const result = spawnSync(
   "zip",
-  ["-q", "-r", "brand-assets.zip", "brand-assets", "-x", "*/.DS_Store"],
+  [
+    "-q",
+    "-r",
+    "brand-assets.zip",
+    "brand-assets",
+    "-x",
+    "*/.DS_Store",
+    "-x",
+    "brand-assets/wordmark/Langfuse/*",
+    "-x",
+    "brand-assets/wordmark/Langfuse/*/*",
+  ],
   {
     cwd: publicDir,
     encoding: "utf8",

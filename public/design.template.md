@@ -23,20 +23,16 @@ The Langfuse trademark includes the Langfuse name and logo assets. **Do not**
 modify these assets or use them in a way that suggests sponsorship, endorsement,
 or confuses Langfuse with another brand.
 
-Three asset families are available, each in light, dark, and monochrome
+Two asset families are available, each in light, dark, and monochrome
 variants (SVG and PNG):
 
 - **Icon** - the standalone mark. Color and monochrome.
   - [Color (SVG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.svg) / [Color (PNG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.png)
   - [Monochrome (SVG)](https://langfuse.com/brand-assets/icon/monochrome/langfuse-icon-monochrome.svg)
-- **Wordmark - Langfuse by ClickHouse** - the primary/default logo.
-  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.png)
-  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.png)
-  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/monochrome/langfuse-by-clickhouse-monochrome.svg)
-- **Wordmark - Langfuse** - the standalone wordmark (secondary option).
-  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse/light/langfuse-wordart.png)
-  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.png)
-  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse/monochrome/langfuse-wordart-monochrome.svg)
+- **Wordmark** - the Langfuse logo.
+  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/light/langfuse-by-clickhouse.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/light/langfuse-by-clickhouse.png)
+  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/monochrome/langfuse-by-clickhouse-monochrome.svg)
 
 Usage rules:
 
@@ -44,6 +40,7 @@ Usage rules:
 - Use the monochrome variants when color reproduction is constrained (single-color print, embossing, watermarks).
 - Maintain clear space around the logo and never stretch, recolor, or add effects to it.
 - Download the complete package (all variants) from [langfuse.com/brand](https://langfuse.com/brand).
+- Team photo: [JPEG](https://langfuse.com/brand-assets/team/langfuse-team.jpg).
 
 ## Color palette
 
