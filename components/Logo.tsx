@@ -13,11 +13,11 @@ const BY_CLICKHOUSE_ASSETS = {
   light:
     "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg",
   dark: "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg",
-  alt: "Langfuse by ClickHouse",
+  alt: "Langfuse",
 } as const;
 
 const WORDMARKS = {
-  // Default site mark: lockup sized to the 60px nav bar.
+  // Default site mark sized to the 60px nav bar.
   langfuse: {
     ...BY_CLICKHOUSE_ASSETS,
     width: 128,
@@ -26,7 +26,7 @@ const WORDMARKS = {
   },
   byClickHouse: {
     ...BY_CLICKHOUSE_ASSETS,
-    // Lockup is taller (includes "by ClickHouse"); size it as a page hero mark.
+    // Taller wordmark for page heroes.
     width: 220,
     height: 59,
     className: "h-auto max-w-[200px] sm:max-w-[220px]",
@@ -39,7 +39,7 @@ export function Logo({
 }: {
   /** When false, render only the image block (use when already inside a link, e.g. NavbarLogo). */
   wrapInLink?: boolean;
-  /** Use the larger "Langfuse by ClickHouse" lockup for page heroes. */
+  /** Use the larger wordmark for page heroes. */
   variant?: keyof typeof WORDMARKS;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
