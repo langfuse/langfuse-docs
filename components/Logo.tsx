@@ -10,9 +10,8 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
 });
 
 const WORDMARK_ASSETS = {
-  light:
-    "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg",
-  dark: "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg",
+  light: "/brand-assets/wordmark/light/langfuse-by-clickhouse.svg",
+  dark: "/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.svg",
   alt: "Langfuse",
 } as const;
 

@@ -30,9 +30,9 @@ variants (SVG and PNG):
   - [Color (SVG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.svg) / [Color (PNG)](https://langfuse.com/brand-assets/icon/color/langfuse-icon.png)
   - [Monochrome (SVG)](https://langfuse.com/brand-assets/icon/monochrome/langfuse-icon-monochrome.svg)
 - **Wordmark** - the Langfuse logo.
-  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.png)
-  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.png)
-  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/Langfuse%20by%20ClickHouse/monochrome/langfuse-by-clickhouse-monochrome.svg)
+  - [Light (SVG)](https://langfuse.com/brand-assets/wordmark/light/langfuse-by-clickhouse.svg) / [Light (PNG)](https://langfuse.com/brand-assets/wordmark/light/langfuse-by-clickhouse.png)
+  - [Dark / white (SVG)](https://langfuse.com/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.svg) / [Dark / white (PNG)](https://langfuse.com/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.png)
+  - [Monochrome (SVG)](https://langfuse.com/brand-assets/wordmark/monochrome/langfuse-by-clickhouse-monochrome.svg)
 
 Usage rules:
 
