@@ -40,7 +40,7 @@ Usage rules:
 - Use the monochrome variants when color reproduction is constrained (single-color print, embossing, watermarks).
 - Maintain clear space around the logo and never stretch, recolor, or add effects to it.
 - Download the complete package (all variants) from [langfuse.com/brand](https://langfuse.com/brand).
-- Team photo: [JPEG](https://langfuse.com/brand-assets/team/langfuse-team.jpg).
+- Team photo: [JPEG](https://langfuse.com/images/people/team.jpg).
 
 ## Color palette
 
