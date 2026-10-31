@@ -35,7 +35,7 @@ if (fs.existsSync(zipPath)) {
 }
 
 // Retired standalone wordmark (wordmark/Langfuse). Do not ship it in the
-// public package. The current wordmark lives in "Langfuse by ClickHouse".
+// public package. Keep the current wordmark folder.
 const result = spawnSync(
   "zip",
   [

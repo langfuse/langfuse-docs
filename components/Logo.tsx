@@ -9,7 +9,7 @@ const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
 });
 
-const BY_CLICKHOUSE_ASSETS = {
+const WORDMARK_ASSETS = {
   light:
     "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/light/langfuse-by-clickhouse.svg",
   dark: "/brand-assets/wordmark/Langfuse%20by%20ClickHouse/dark/langfuse-by-clickhouse-white.svg",
@@ -19,13 +19,13 @@ const BY_CLICKHOUSE_ASSETS = {
 const WORDMARKS = {
   // Default site mark sized to the 60px nav bar.
   langfuse: {
-    ...BY_CLICKHOUSE_ASSETS,
+    ...WORDMARK_ASSETS,
     width: 128,
     height: 34,
     className: "h-[30px] w-auto sm:h-[34px]",
   },
-  byClickHouse: {
-    ...BY_CLICKHOUSE_ASSETS,
+  hero: {
+    ...WORDMARK_ASSETS,
     // Taller wordmark for page heroes.
     width: 220,
     height: 59,

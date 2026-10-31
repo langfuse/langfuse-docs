@@ -821,7 +821,7 @@ const HEADER_TOP = 102;
 const HEADER_HEIGHT = 40;
 /**
  * Left offset of the section label relative to `CONTENT_INSET_X`.
- * Sized for the Langfuse by ClickHouse lockup (ink ~x 113–277, 164×37).
+ * Sized for the current Langfuse wordmark (ink ~x 113–277, 164×37).
  */
 const SECTION_LABEL_LEFT_OFFSET = 220;
 const TITLE_BAND_H = 238;
