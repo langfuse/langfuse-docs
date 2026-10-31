@@ -178,7 +178,7 @@ def analyze_customer_query(query, customer_id):
         result = response.choices[0].message.content
 
     # Set input and output on the current observation
-    langfuse.update_current_observation(
+    langfuse.update_current_span(
         input={"query": query, "customer_id": customer_id},
         output={"response": result},
     )
