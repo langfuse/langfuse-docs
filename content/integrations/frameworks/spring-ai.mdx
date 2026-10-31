@@ -130,13 +130,10 @@ import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
 import org.springframework.ai.chat.observation.ChatModelObservationContext;
-import org.springframework.ai.content.Content;
-import org.springframework.ai.observation.ObservabilityHelper;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class ChatModelCompletionContentObservationFilter implements ObservationFilter {
@@ -147,53 +144,73 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
             return context;
         }
 
-        var prompts = processPrompts(chatModelObservationContext);
-        var completions = processCompletion(chatModelObservationContext);
+        var input = chatModelObservationContext.getRequest().getInstructions().stream()
+                .filter(instruction -> StringUtils.hasText(instruction.getText()))
+                .map(instruction -> message(instruction.getMessageType().getValue(), instruction.getText(), null))
+                .collect(Collectors.joining(",", "[", "]"));
 
-        chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
-            @Override
-            public String getKey() {
-                return "gen_ai.prompt";
-            }
+        var response = chatModelObservationContext.getResponse();
+        var output = response == null || response.getResults() == null
+                ? "[]"
+                : response.getResults().stream()
+                        .filter(generation -> generation.getOutput() != null && StringUtils.hasText(generation.getOutput().getText()))
+                        .map(generation -> message("assistant", generation.getOutput().getText(), generation.getMetadata().getFinishReason()))
+                        .collect(Collectors.joining(",", "[", "]"));
 
-            @Override
-            public String getValue() {
-                return ObservabilityHelper.concatenateStrings(prompts);
-            }
-        });
-
-        chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
-            @Override
-            public String getKey() {
-                return "gen_ai.completion";
-            }
-
-            @Override
-            public String getValue() {
-                return ObservabilityHelper.concatenateStrings(completions);
-            }
-        });
+        chatModelObservationContext.addHighCardinalityKeyValue(keyValue("gen_ai.input.messages", input));
+        chatModelObservationContext.addHighCardinalityKeyValue(keyValue("gen_ai.output.messages", output));
 
         return chatModelObservationContext;
     }
 
-    private List<String> processPrompts(ChatModelObservationContext chatModelObservationContext) {
-            return CollectionUtils.isEmpty((chatModelObservationContext.getRequest()).getInstructions()) ? List.of() : (chatModelObservationContext.getRequest()).getInstructions().stream().map(Content::getText).toList();
+    private static KeyValue keyValue(String key, String value) {
+        return new KeyValue() {
+            @Override
+            public String getKey() {
+                return key;
+            }
+
+            @Override
+            public String getValue() {
+                return value;
+            }
+        };
     }
 
-    private List<String> processCompletion(ChatModelObservationContext context) {
-        if (context.getResponse() != null && (context.getResponse()).getResults() != null && !CollectionUtils.isEmpty((context.getResponse()).getResults())) {
-            return !StringUtils.hasText((context.getResponse()).getResult().getOutput().getText()) ? List.of() : (context.getResponse()).getResults().stream().filter((generation) -> generation.getOutput() != null && StringUtils.hasText(generation.getOutput().getText())).map((generation) -> generation.getOutput().getText()).toList();
-        } else {
-            return List.of();
+    // GenAI content format: [{"role": "...", "parts": [{"type": "text", "content": "..."}]}]
+    private static String message(String role, String text, String finishReason) {
+        var reason = finishReason == null ? "" : ",\"finish_reason\":\"" + escape(finishReason) + "\"";
+        return "{\"role\":\"" + role + "\",\"parts\":[{\"type\":\"text\",\"content\":\"" + escape(text) + "\"}]" + reason + "}";
+    }
+
+    // Escape JSON string content: quotes, backslashes and control characters are valid in prompts.
+    private static String escape(String text) {
+        var builder = new StringBuilder(text.length());
+        for (var i = 0; i < text.length(); i++) {
+            var c = text.charAt(i);
+            switch (c) {
+                case '"' -> builder.append("\\\"");
+                case '\\' -> builder.append("\\\\");
+                case '\n' -> builder.append("\\n");
+                case '\r' -> builder.append("\\r");
+                case '\t' -> builder.append("\\t");
+                default -> {
+                    if (c < 0x20) {
+                        builder.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        builder.append(c);
+                    }
+                }
+            }
         }
+        return builder.toString();
     }
 }
 ```
 
 With these configurations and dependencies in place, your Spring Boot application is ready to produce OpenTelemetry traces. Spring AI’s internal calls (e.g. when you invoke a chat model or generate an embedding) will be recorded as spans.
 
-Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc., and – since we enabled them – events for the prompt and response content.
+Each span will carry attributes like `gen_ai.operation.name`, `gen_ai.system` (the provider, e.g. “openai”), model names, token usage, etc. The filter above adds the prompt and response content as `gen_ai.input.messages` and `gen_ai.output.messages`; see the [observation-level attribute mapping](/integrations/native/opentelemetry#observation-level-attributes) for the message format Langfuse expects.
 
 ## Step 2: Configure Langfuse
 
