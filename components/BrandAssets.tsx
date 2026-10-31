@@ -35,7 +35,6 @@ interface BrandAssetCardProps {
   variant?: BrandAssetVariant;
   tall?: boolean;
   fill?: boolean;
-  wide?: boolean;
 }
 
 export function BrandAssetCard({
@@ -45,21 +44,17 @@ export function BrandAssetCard({
   variant = "light",
   tall,
   fill,
-  wide,
 }: BrandAssetCardProps) {
   return (
     <a
       download
       href={src}
-      className={cn(
-        "block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out",
-        wide && "col-span-2 md:col-span-3",
-      )}
+      className="block no-underline relative group border border-line-structure bg-surface-bg rounded-[2px] corner-box-corners--hover corner-box-hover-stripes transition-[background] duration-180 ease-out"
     >
       <div
         className={cn(
           "flex items-center justify-center border-b border-line-structure min-h-28",
-          fill || wide ? "p-0" : "p-6",
+          fill ? "p-0" : "p-6",
           variant === "dark"
             ? "bg-text-primary dark:bg-surface-code"
             : "bg-surface-bg",
@@ -69,10 +64,10 @@ export function BrandAssetCard({
           src={src}
           alt={alt}
           className={cn(
-            fill || wide
-              ? cn("w-full object-cover", wide ? "h-48" : "h-28")
+            fill
+              ? "w-full h-28 object-cover"
               : "max-w-full max-h-full w-auto object-contain",
-            !fill && !wide && (tall ? "h-12" : "h-10"),
+            !fill && (tall ? "h-12" : "h-10"),
           )}
         />
       </div>
