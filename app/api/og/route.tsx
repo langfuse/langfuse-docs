@@ -819,8 +819,11 @@ const CONTENT_TOP = 172;
 /** Vertical band where the baked logo + right-side tagline sit; section label aligns to this. */
 const HEADER_TOP = 102;
 const HEADER_HEIGHT = 40;
-/** Left offset of the section label relative to `CONTENT_INSET_X` (sits right of the logo). */
-const SECTION_LABEL_LEFT_OFFSET = 215;
+/**
+ * Left offset of the section label relative to `CONTENT_INSET_X`.
+ * Sized for the Langfuse by ClickHouse lockup (ink ~x 113–277, 164×37).
+ */
+const SECTION_LABEL_LEFT_OFFSET = 220;
 const TITLE_BAND_H = 238;
 const DESC_BAND_H = 138;
 /** Spacer so the middle divider in the PNG stays visible between title and description. */
