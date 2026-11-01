@@ -1,0 +1,32 @@
+---
+date: 2026-10-30
+title: Manage, version, and trace agent skills
+description: Collaborate and version AI agent skills in Langfuse, and connect them with your agent traces. Now available in beta.
+badge: Beta
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+{/* Confirm author and beta SDK package versions before publication. Remove noindex when ready. */}
+
+## Skill management UI in Langfuse
+
+Next to the prompt management UI, Langfuse now also offers a skill management UI. Teams can centrally store and iterate on skills together. As with all features, skill editing is also supported via API, CLI, MCP and SDKs.
+
+![The refund-policy skill with version history, labels, supporting files, and the Files and Usage tabs.](/images/changelog/2026-10-22-skill-management-editor.jpg)
+
+## Connect skills with your traces
+
+With [skill tracing configured](/docs/skill-management/tracing), generations show the reported skill list, with links to each version.
+
+![A generation showing four available skills and their version links in the trace's Preview view.](/images/changelog/2026-10-22-skill-management-generation.jpg)
+
+Traced skill-loading tool calls show which files the agent read. Open **Preview → Loaded skill** on a successful call to see the version and file paths. The skill's **Usage** tab combines usage counts, file loads, and linked observations.
+
+![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-10-22-skill-management-tool-load.jpg)
+
+## Get Started with skill management
+
+See the [Skill Management docs](/docs/skill-management/overview) or [create your first skill](/docs/skill-management/get-started).

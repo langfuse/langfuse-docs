@@ -1,0 +1,33 @@
+---
+title: Overview
+seoTitle: Agent Skill Management
+description: Manage agent instructions and supporting files as versioned skills in Langfuse.
+---
+
+# Skill Management
+
+<Callout type="info">
+
+Skill Management is in beta. Open your **account menu → Feature Preview** and turn on **Skill Management**. If the toggle is disabled, enable **V4 Preview** first.
+
+</Callout>
+
+Store and version agent skills in Langfuse. Each skill contains a `SKILL.md` file with task instructions and optional supporting files, such as reference documents or scripts.
+
+![A Skills list containing four support skills, with descriptions and version labels.](/images/changelog/2026-10-22-skill-management-list.jpg)
+
+## Publish and version skills [#manage-skills]
+
+Create skills in the UI, push a local folder with the CLI, or publish through the API. Each version saves the complete set of files. [Move labels such as `staging` and `production`](/docs/skill-management/version-control#labels) to promote or roll back a version without changing application code.
+
+## Load skills into your agent [#load-skills]
+
+[Install skill folders with the CLI or fetch files through the API](/docs/skill-management/get-started#load-your-skill). Your agent framework makes skills available to the model and controls file loading and script execution.
+
+## Trace skill usage [#trace-skills]
+
+[Report available skills and trace file-loading tools](/docs/skill-management/tracing) to see which versions a model could use and which files the agent loaded. Publishing or installing a skill does not trace its usage automatically.
+
+## Get started [#get-started]
+
+[Create and load your first skill](/docs/skill-management/get-started). To bring existing skills, check the [file format](/docs/prompt-and-skill-management/concepts#skill-structure) and [beta limits](/faq/all/skill-management-limits-and-troubleshooting#limits).

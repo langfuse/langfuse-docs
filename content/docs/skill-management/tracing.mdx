@@ -1,0 +1,238 @@
+---
+title: Link to Traces
+seoTitle: Link skills to Langfuse traces
+description: Report available skills on generations and inspect skill-loading tools in Langfuse traces.
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# Link to traces
+
+Record which skill versions a model could use and which files the agent loaded. Use your framework's OpenTelemetry instrumentation or the Langfuse Python or JavaScript/TypeScript SDK, then attach the skill metadata below. First [configure tracing](/docs/observability/sdk/overview) for your model and tool calls.
+
+## Available skills and loaded files [#availability-and-loads]
+
+- **Available skills**: the names and versions reported on a generation. Report the same skills your agent can use; Langfuse does not expose them to the model.
+- **Loaded skill**: the skill version and files identified from a successful traced skill-loading tool. Attach the available skill list to the tool observation too, so Langfuse can resolve the loaded version.
+
+Installing or fetching skills alone does not record either list.
+
+## Attach available skills [#attach-available-skills]
+
+Replace `skill_name` with the name of your skill.
+
+<Tabs items={["OpenTelemetry", "Python SDK", "JS/TS SDK"]} defaultIndex={0}>
+<Tab>
+
+### Use raw OpenTelemetry [#opentelemetry]
+
+Set this attribute on the active model-call span before it ends. The value must be a JSON string:
+
+```json
+{
+  "langfuse.observation.skills_available": "[{\"name\":\"skill_name\",\"version\":2}]"
+}
+```
+
+Use the name and version from the manifest your agent received. This attribute applies only to the current span: set it on each model or skill-loading tool span you want to link. Langfuse also accepts the legacy field names `skillName` and `skillVersion`.
+
+</Tab>
+<Tab>
+
+Run your instrumented model and tool calls inside `propagate_attributes` to attach the skill list.
+
+### Installed skills [#python-installed-skills]
+
+Discover skills from your installation directory and configure them on the Langfuse client. Enable the configured list for each run with `attach_skills=True`:
+
+```python
+from langfuse import Langfuse, discover_skills, propagate_attributes
+from agent import run_agent
+
+skills = discover_skills(dir=".agents/skills")
+langfuse = Langfuse(skills={"available": skills})
+
+try:
+    with propagate_attributes(attach_skills=True):
+        run_agent()
+finally:
+    langfuse.shutdown()
+```
+
+Discovery reads skill folders and looks for `langfuse-skills.lock` in the installation directory, then the working directory. Folders without lockfile entries have no version. Discovery is synchronous. Configure the client before your agent creates any Langfuse observations. For a long-running application, shut down the client when the application exits.
+
+### Fetched skills [#python-fetched-skills]
+
+Pass the name and version of each skill you fetched for your agent:
+
+```python
+from langfuse import Langfuse, propagate_attributes
+from agent import run_agent
+
+langfuse = Langfuse()
+skill = langfuse.api.skills.get("skill_name", label="production")
+
+with propagate_attributes(
+    skills_available=[{"name": skill.name, "version": skill.version}],
+):
+    run_agent()
+```
+
+Fetch the [skill contents](/docs/skill-management/get-started#api-fetch) separately and make them available to your agent. Reporting a skill here only attaches tracing metadata.
+
+</Tab>
+<Tab>
+
+Run your instrumented model and tool calls inside `propagateAttributes` to attach the skill list.
+
+### Installed skills [#javascript-installed-skills]
+
+In Node.js, configure the discovered skills on `LangfuseSpanProcessor`. Enable the configured list for each run with `attachSkills: true`:
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { discoverSkills } from "@langfuse/otel/node";
+import { propagateAttributes } from "@langfuse/tracing";
+import { runAgent } from "./agent";
+
+const skills = await discoverSkills({ dir: ".agents/skills" });
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor({ skills: { available: skills } }),
+  ],
+});
+sdk.start();
+
+try {
+  await propagateAttributes({ attachSkills: true }, () => runAgent());
+} finally {
+  await sdk.shutdown();
+}
+```
+
+Discovery reads skill folders and looks for `langfuse-skills.lock` in the installation directory, then the working directory. Folders without lockfile entries have no version. Await discovery before starting the run. If tracing is already configured, add the skill list to your existing Langfuse processor. For a long-running application, shut down the SDK when the application exits.
+
+### Fetched skills [#javascript-fetched-skills]
+
+Pass the name and version of each skill you fetched for your agent:
+
+```typescript
+import { LangfuseClient } from "@langfuse/client";
+import { propagateAttributes } from "@langfuse/tracing";
+import { runAgent } from "./agent";
+
+const langfuse = new LangfuseClient();
+const skill = await langfuse.api.skills.get("skill_name", {
+  label: "production",
+});
+
+await propagateAttributes(
+  { skillsAvailable: [{ name: skill.name, version: skill.version }] },
+  () => runAgent(),
+);
+```
+
+Fetch the [skill contents](/docs/skill-management/get-started#api-fetch) separately and make them available to your agent. Reporting a skill here only attaches tracing metadata.
+
+</Tab>
+</Tabs>
+
+In the SDK examples, `run_agent` or `runAgent` is your existing instrumented agent. The propagation scope attaches the skill list to the active observation and new child spans. A nested skill list replaces the outer list; `[]` clears it. The list stays within this process. Include a version to link observations to a saved Langfuse skill version; unversioned skills can still be reported by name.
+
+## Instrument skill-loading tools [#skill-loading-tools]
+
+Attach the available skill list to each file-loading tool observation and record its input and output. Langfuse recognizes these tool names and inputs:
+
+| Tool                          | Input identifying the resource                                |
+| ----------------------------- | ------------------------------------------------------------- |
+| `loadSkill`, `skill`, `Skill` | Skill name in `name` or `skill`; resolves the root `SKILL.md` |
+| `skill_read`                  | `skillName` and a relative `path`                             |
+| `readFile`, `Read`            | Installed file path in `path` or `file_path`                  |
+
+Langfuse records a skill load when the tool succeeds, returns a non-null output, and its input matches a skill in the available list. For `readFile` and `Read`, the path must contain the skill name as a directory segment, such as `.agents/skills/skill_name/SKILL.md`. See [SDK instrumentation](/docs/observability/sdk/instrumentation) for recording tool observations.
+
+If your agent loads skills through a different tool or input format, [open a GitHub issue](https://github.com/langfuse/langfuse/issues) with the tool name and a sample input and output.
+
+### Record an example skill load [#example-skill-load]
+
+This example fetches `SKILL.md` in a `loadSkill` tool and records a sample generation in the same trace. It uses raw attributes rather than preview SDK helpers.
+
+<Details>
+<Summary>JavaScript/TypeScript example: fetch a skill and trace the load</Summary>
+
+[Configure JavaScript tracing](/docs/observability/sdk/overview) before running this code. The sample generation does not call a model; replace its input and output with your actual request and response.
+
+```typescript
+import { trace } from "@opentelemetry/api";
+import { LangfuseClient } from "@langfuse/client";
+import { startActiveObservation } from "@langfuse/tracing";
+
+const langfuse = new LangfuseClient();
+const skill = await langfuse.api.skills.get("skill_name", {
+  label: "production",
+});
+const availability = JSON.stringify([
+  { name: skill.name, version: skill.version },
+]);
+
+await startActiveObservation("agent-run", async () => {
+  const instructions = await startActiveObservation(
+    "loadSkill",
+    async (tool) => {
+      trace
+        .getActiveSpan()
+        ?.setAttribute("langfuse.observation.skills_available", availability);
+      tool.update({ input: { name: skill.name } });
+      const file = skill.files.find((file) => file.path === "SKILL.md");
+      if (!file) throw new Error("Skill has no SKILL.md");
+      const { data } = await langfuse.api.skills.getFileContents({
+        sha256Hashes: file.sha256Hash,
+      });
+      const loaded = data.find((item) => item.sha256Hash === file.sha256Hash);
+      if (!loaded) throw new Error("Skill instructions were not returned");
+      tool.update({ output: loaded.content });
+      return loaded.content;
+    },
+    { asType: "tool" },
+  );
+
+  await startActiveObservation(
+    "example-response",
+    async (generation) => {
+      trace
+        .getActiveSpan()
+        ?.setAttribute("langfuse.observation.skills_available", availability);
+      generation.update({
+        input: { instructions, question: "How should I complete this task?" },
+        output: "Follow the skill instructions.",
+      });
+    },
+    { asType: "generation" },
+  );
+});
+```
+
+Flush or shut down your tracing exporter before exiting a one-off script. The trace should contain `loadSkill` and `example-response` under `agent-run`.
+
+</Details>
+
+## Inspect a trace [#inspect-a-trace]
+
+Select a **generation** and open **Preview → Available skills** to see the reported skills and links to their versions:
+
+![A generation with four available skills and version links.](/images/changelog/2026-10-22-skill-management-generation.jpg)
+
+Select a successful **loadSkill** tool call and open **Preview → Loaded skill**. A single loaded skill shows its files directly. If the tool loaded multiple skills, expand a skill under **Loaded skills** to see its files:
+
+![A skill-loading tool showing refund-policy version 1 and its loaded SKILL.md resource.](/images/changelog/2026-10-22-skill-management-tool-load.jpg)
+
+## Inspect usage across runs [#skill-usage]
+
+Open a skill version's **Usage** tab to see **Available** and **Loaded** observation counts, loads per file, and linked observations. Choose a date range that includes your runs.
+
+Use **Any**, **Available**, or **Loaded** to filter observations. Click a file under **File usage** to show calls that loaded it; clear the **File** filter to remove that restriction.
+
+![The refund-policy Usage tab showing available and loaded counts, per-file loads, and linked observations.](/images/changelog/2026-10-22-skill-management-usage.jpg)
+
+If skills or loaded files are missing, see [troubleshooting](/faq/all/skill-management-limits-and-troubleshooting#missing-trace-skills).
