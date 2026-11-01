@@ -109,6 +109,7 @@ export default async function SectionDocPage(props: PageProps) {
         isFlushWithNav && "px-0 sm:px-0 md:px-0",
       )}
       data-content-width={contentWidth}
+      data-flush={isFlushWithNav ? "" : undefined}
       data-use-case={isUseCase ? section.replaceAll("-", "_") : undefined}
       data-use-case-page={isUseCase ? `/${section}` : undefined}
     >

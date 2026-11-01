@@ -39,9 +39,9 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
           </span>
         </h2>
         <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
-          Coding agents make engineers faster, but they also make AI spend
-          unpredictable. Govern it centrally. See spend by team and by
-          developer. Trace sessions to improve token efficiency.
+          {
+            "Coding agents make engineers faster, but they also make AI spend unpredictable. Govern it centrally. See spend by team and by developer. Trace sessions to improve token efficiency."
+          }
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
@@ -141,8 +141,9 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
         Learn how to trace and govern coding agents
       </h2>
       <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
-        Start with hooks or a gateway, then use traces to cut wasted tokens and
-        turn repeated work into shared skills.
+        {
+          "Start with hooks or a gateway, then use traces to cut wasted tokens and turn repeated work into shared skills."
+        }
       </p>
       <div className="mx-auto mt-8 max-w-4xl">
         <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
@@ -185,13 +186,12 @@ import { BookOpen, Network, Radar, Sparkles } from "lucide-react";
     </section>
 
     <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
-      <div className="mx-auto max-w-5xl">
-        <CustomerStoryCTA
-          title="Ready to govern coding agent usage?"
-          description="Use a gateway or hooks to trace sessions, attribute spend, and improve token efficiency with Langfuse."
-          contactLabel="Talk to sales"
-        />
-      </div>
+      <CustomerStoryCTA
+        className="mt-0"
+        title="Ready to govern coding agent usage?"
+        description="Use a gateway or hooks to trace sessions, attribute spend, and improve token efficiency with Langfuse."
+        contactLabel="Talk to sales"
+      />
     </section>
 
   </CodingAgentPathDial>

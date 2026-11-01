@@ -54,10 +54,9 @@ import { BookOpen, Play, Radar } from "lucide-react";
           "Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-ready cloud region or your own infrastructure. For healthcare and life sciences teams."
         }
       </p>
-      <div className="mt-6">
-        <Button href="/cloud" className="w-auto" wrapperClassName="w-fit">
-          Get started
-        </Button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+        <Button href="/docs" variant="secondary" size="default" shortcutKey="d" className="w-auto" wrapperClassName="w-fit">Documentation</Button>
       </div>
       <HeroReasons reasons={healthcareReasons} />
       <div className="mt-5">
@@ -133,7 +132,7 @@ import { BookOpen, Play, Radar } from "lucide-react";
   </section>
 
   <section data-use-case-section="use_cases" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+    <p className="text-[12px] leading-[150%] text-text-tertiary">
       {"Use cases"}
     </p>
     <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
@@ -205,12 +204,11 @@ import { BookOpen, Play, Radar } from "lucide-react";
   </section>
 
   <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
-    <div className="mx-auto max-w-5xl">
-      <CustomerStoryCTA
-        title="Working on AI in healthcare and life sciences?"
-        description="Talk through the HIPAA-ready region, self-hosting, and how Merck Group and Evolve use Langfuse."
-        contactLabel="Talk to an expert"
-      />
-    </div>
+    <CustomerStoryCTA
+      className="mt-0"
+      title="Working on AI in healthcare and life sciences?"
+      description="Talk through the HIPAA-ready region, self-hosting, and how Merck Group and Evolve use Langfuse."
+      contactLabel="Talk to an expert"
+    />
   </section>
 </div>
