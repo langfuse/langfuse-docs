@@ -1,0 +1,39 @@
+---
+title: Overview
+seoTitle: "Langfuse AI Gateway (beta)"
+description: The Langfuse AI Gateway relays native OpenAI and Anthropic API calls through Langfuse and records every model call as a generation, with no SDK or code changes.
+noindex: true
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# AI Gateway
+
+<AiGatewayBetaCallout />
+
+The Langfuse AI Gateway is a relay for native provider APIs. Your application or coding agent talks to Langfuse instead of OpenAI or Anthropic. The gateway forwards each request unchanged, using a provider credential that your organization stores in Langfuse, and records the call in Langfuse. You get full traces of every model call without installing an SDK or changing code: you only change the base URL and the API key.
+
+Without the gateway, every developer and application needs its own provider key, and tracing depends on each client's instrumentation. With the gateway, provider keys stay in Langfuse, each person or service authenticates with a gateway API key, and every call shows up as a trace with its model, usage, and cost.
+
+The gateway is an optional component of the Langfuse platform. It uses the same organizations, projects, [roles](/docs/administration/rbac), and [traces](/docs/observability/overview) as the rest of Langfuse, so gateway traces work with [evaluations](/docs/evaluation/overview), [dashboards](/docs/metrics/overview), and the [public API](/docs/api-and-data-platform/features/public-api) like any other trace.
+
+## Choose a request format [#request-formats]
+
+The gateway serves the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages APIs. It does not translate between them: an OpenAI request goes to an OpenAI credential, an Anthropic request to an Anthropic credential. Keep the format your client already uses. See [API formats](/docs/ai-gateway/features/api-formats) for endpoints and authentication.
+
+## How credentials work [#credentials]
+
+There are two kinds of keys:
+
+- **Provider credentials** are your OpenAI and Anthropic API keys. An admin adds them once per organization, and the gateway uses them to call the provider. Clients never see them.
+- **Gateway API keys** authenticate clients to the gateway. A key is either tied to a person or issued for a service account. See [API keys](/docs/ai-gateway/features/api-keys).
+
+Admins also control which provider models gateway keys can call. See [Models](/docs/ai-gateway/features/models). To track cost and usage per user, API key, and model, see [Analytics](/docs/ai-gateway/features/analytics).
+
+## Next steps [#next-steps]
+
+Start with the guide for your role:
+
+- [Set up the gateway](/docs/ai-gateway/get-started/admin-setup): for admins. Configure where traces go, add provider credentials, choose models, and give your team access.
+- [Send your first request](/docs/ai-gateway/get-started/first-request): for developers. Create a gateway key, call a model, and find the trace.
+- [Coding agents](/docs/ai-gateway/coding-agents): route Claude Code, Codex, OpenCode, pi, or GitHub Copilot through the gateway.
