@@ -1,0 +1,121 @@
+name: Translate docs
+
+# Translates new and changed English docs pages into all languages and opens
+# one pull request per run. See i18n/README.md.
+
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Mondays 04:00 UTC
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: "Comma-separated language codes (default: all in i18n/config.json)"
+        required: false
+        default: ""
+      paths:
+        description: "Only translate these content paths (comma-separated files or folders)"
+        required: false
+        default: ""
+      limit:
+        description: "Maximum number of pages per language in this run"
+        required: false
+        default: ""
+      force:
+        description: "Re-translate machine translations even if the English source did not change"
+        type: boolean
+        required: false
+        default: false
+
+permissions: {}
+
+concurrency:
+  group: translate-docs
+  cancel-in-progress: false
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    environment: "main"
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    env:
+      BRANCH: translations/docs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+        with:
+          runtime: node@22
+          cache: true
+          require-lockfile: true
+
+      # Continue on the open translation branch, so pages translated in an
+      # earlier, not yet merged run are not translated again.
+      - name: Check out the translation branch
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null; then
+            git fetch origin "$BRANCH"
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+            if ! git merge --no-edit origin/main; then
+              git merge --abort
+              echo "Could not merge main into $BRANCH; starting a fresh branch from main."
+              git checkout -B "$BRANCH" origin/main
+            fi
+          else
+            git checkout -B "$BRANCH" origin/main
+          fi
+
+      # Workshop pages are synced from langfuse/langfuse-workshop, not committed.
+      - name: Sync workshop pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm workshop:sync
+
+      - name: Translate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          INPUT_LANGUAGES: ${{ inputs.languages }}
+          INPUT_PATHS: ${{ inputs.paths }}
+          INPUT_LIMIT: ${{ inputs.limit }}
+          INPUT_FORCE: ${{ inputs.force }}
+        run: |
+          args=(--report "$RUNNER_TEMP/report.md")
+          if [ -n "$INPUT_LANGUAGES" ]; then args+=(--lang "$INPUT_LANGUAGES"); fi
+          if [ -n "$INPUT_PATHS" ]; then args+=(--paths "$INPUT_PATHS"); fi
+          if [ -n "$INPUT_LIMIT" ]; then args+=(--limit "$INPUT_LIMIT"); fi
+          if [ "$INPUT_FORCE" = "true" ]; then args+=(--force); fi
+          node scripts/translate/translate.mjs "${args[@]}"
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
+        run: |
+          git add i18n
+          if git diff --staged --quiet && [ "$(git rev-list --count origin/main..HEAD)" = "0" ]; then
+            echo "No translation changes."
+            exit 0
+          fi
+          git diff --staged --quiet || git commit -m "docs(i18n): update translations"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
+
+          {
+            echo "Automated translation run for all languages. Review the translations, then merge."
+            echo
+            echo "Edit the English source pages, not the files in \`i18n/\`: the next run updates the translations. Fixes to the wording can be made directly in this pull request; later runs reuse them."
+            echo
+            cat "$RUNNER_TEMP/report.md"
+          } > "$RUNNER_TEMP/body.md"
+
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]; then
+            gh pr comment "$BRANCH" --body-file "$RUNNER_TEMP/report.md"
+          else
+            gh pr create --base main --head "$BRANCH" --title "docs(i18n): update translations" --body-file "$RUNNER_TEMP/body.md"
+          fi
