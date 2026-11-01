@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { controlTextClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
@@ -101,7 +102,7 @@ export function CustomerIndex({
                       )}
                     </div>
                   ) : (
-                    <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-text-tertiary">
+                    <span className="font-analog text-[18px] font-medium leading-none text-text-primary">
                       {company}
                     </span>
                   )}
@@ -118,7 +119,12 @@ export function CustomerIndex({
                     {story.frontMatter.description}
                   </p>
                 ) : null}
-                <span className="mt-auto inline-flex items-center gap-1.5 pt-4 font-mono text-[11px] uppercase tracking-[0.1em] text-text-secondary transition-colors group-hover:text-text-primary">
+                <span
+                  className={cn(
+                    "mt-auto inline-flex items-center gap-1.5 pt-4 text-text-secondary transition-colors group-hover:text-text-primary",
+                    controlTextClassName,
+                  )}
+                >
                   {story.frontMatter.ctaLabel ?? "Read"}
                   <span aria-hidden>→</span>
                 </span>

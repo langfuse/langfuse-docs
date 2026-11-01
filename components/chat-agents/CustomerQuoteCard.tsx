@@ -63,7 +63,7 @@ export function CustomerQuoteCard({
               )}
             </div>
           ) : (
-            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+            <span className="font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-tertiary">
               {quoteCompany ?? "Customer"}
             </span>
           )}

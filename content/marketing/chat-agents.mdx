@@ -8,6 +8,7 @@ import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
 import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { Button } from "@/components/ui/button";
 import { Activity, BookOpen, Rocket } from "lucide-react";
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
@@ -19,10 +20,10 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
         <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">keep talking to</span>
       </h1>
       <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">Chat-like agents are multi-turn, stateful, and stubbornly hard to debug. Langfuse traces every session end to end. See where a conversation went sideways, what each turn cost, and whether users are satisfied.</p>
-      <div className="mt-6 flex flex-wrap items-center gap-2">
-        <a href="/cloud" className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90">Start free</a>
-        <a href="/talk-to-us" className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary">Talk to sales</a>
-        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Chat agent quickstart →</a>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+        <Button href="/talk-to-us" variant="secondary" size="default" shortcutKey="t" className="w-auto" wrapperClassName="w-fit">Talk to sales</Button>
+        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-1">Chat agent quickstart →</a>
       </div>
     </div>
 
@@ -32,30 +33,30 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
           <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
             <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">01</p>
             <p className="justify-self-end rounded-[2px] border border-line-structure bg-surface-2 px-2 py-2 text-[11px] leading-[1.45] text-text-primary">Where is my payout for last week?</p>
-            <p className="col-start-2 text-right font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">User · 0.9s</p>
+            <p className="col-start-2 text-right font-mono text-[9px] leading-[1.4] text-text-tertiary">User · 0.9s</p>
           </div>
 
           <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
             <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">02</p>
             <p className="justify-self-start rounded-[2px] border border-line-structure bg-surface-bg px-2 py-2 text-[11px] leading-[1.45]">Your payout for 12–18 May was $248.10.</p>
-            <p className="col-start-2 font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Agent · retrieve_payouts · 0.4s</p>
+            <p className="col-start-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">Agent · retrieve_payouts · 0.4s</p>
           </div>
 
           <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
             <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">03</p>
             <p className="justify-self-end rounded-[2px] border border-line-structure bg-surface-2 px-2 py-2 text-[11px] leading-[1.45] text-text-primary">That&apos;s not what I asked. Last <em>week</em>.</p>
-            <p className="col-start-2 text-right font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Frustration true · flagged</p>
+            <p className="col-start-2 text-right font-mono text-[9px] leading-[1.4] text-text-tertiary">Frustration true · flagged</p>
           </div>
 
           <div className="grid grid-cols-[18px_minmax(0,1fr)] items-start gap-x-2 gap-y-1">
             <p className="pt-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">04</p>
             <p className="justify-self-start rounded-[2px] border border-line-structure bg-surface-bg px-2 py-2 text-[11px] leading-[1.45]">You&apos;re right — 20–26 May: $412.60, settling tomorrow.</p>
-            <p className="col-start-2 font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Agent · retry_payouts_v2 · 2.1s · helpfulness 0.92</p>
+            <p className="col-start-2 font-mono text-[9px] leading-[1.4] text-text-tertiary">Agent · retry_payouts_v2 · 2.1s · helpfulness 0.92</p>
           </div>
         </div>
 
         <div className="border-t border-line-structure px-3 py-2.5">
-          <p className="font-mono text-[9px] leading-[1.4] uppercase tracking-[0.08em] text-text-tertiary">Resolved</p>
+          <p className="font-mono text-[9px] leading-[1.4] text-text-tertiary">Resolved</p>
           <p className="mt-1 text-[18px] leading-none text-text-primary">yes</p>
         </div>
       </div>
@@ -129,13 +130,12 @@ import { Activity, BookOpen, Rocket } from "lucide-react";
   </section>
 
   <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
-    <div className="mx-auto max-w-5xl">
-      <CustomerStoryCTA
-        title="Ready to improve your production chat agent?"
-        description="Use traces, evals, and cost analytics to observe and improve every production chat session with Langfuse."
-        contactLabel="Talk to sales"
-      />
-    </div>
+    <CustomerStoryCTA
+      className="mt-0"
+      title="Ready to improve your production chat agent?"
+      description="Use traces, evals, and cost analytics to observe and improve every production chat session with Langfuse."
+      contactLabel="Talk to sales"
+    />
   </section>
 
 </div>

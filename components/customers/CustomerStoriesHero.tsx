@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
+import { controlTextClassName } from "@/components/ui/button";
+import { TabButton } from "@/components/ui/tab-button";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
 
@@ -127,7 +129,12 @@ function QuoteSlide({
         <HighlightedQuote quote={quote} highlight={quoteHighlight} />
       </blockquote>
       {quoteTag && (
-        <span className="mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 font-mono text-[11px] uppercase tracking-[0.1em] text-text-primary">
+        <span
+          className={cn(
+            "mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 text-text-primary",
+            controlTextClassName,
+          )}
+        >
           {quoteTag}
         </span>
       )}
@@ -146,7 +153,10 @@ function QuoteSlide({
           href={story.route}
           tabIndex={isActive ? undefined : -1}
           aria-label={`${story.frontMatter.ctaLabel === "Watch" ? "Watch" : "Read"} ${company} customer story`}
-          className="inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-[0.08em] text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
+          className={cn(
+            "inline-flex items-center gap-1.5 text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring",
+            controlTextClassName,
+          )}
         >
           {story.frontMatter.ctaLabel === "Watch"
             ? "Watch the talk"
@@ -198,7 +208,12 @@ export function CustomerStoriesHero({
     >
       <div className="relative grid gap-8 px-6 py-10 sm:px-8 lg:min-h-[580px] lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)] lg:gap-10 lg:py-12">
         <div className="relative flex min-w-0 flex-col">
-          <h1 className="mt-0 mb-8 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-text-tertiary">
+          <h1
+            className={cn(
+              "mt-0 mb-8 font-normal text-text-tertiary",
+              controlTextClassName,
+            )}
+          >
             Customer stories
           </h1>
 
@@ -268,19 +283,15 @@ export function CustomerStoriesHero({
           {stories.map((s, i) => {
             const isActive = i === active;
             return (
-              <button
+              <TabButton
                 key={s.route}
-                type="button"
+                active={isActive}
+                aria-current={isActive ? "true" : undefined}
                 onClick={() => setActive(i)}
-                className={cn(
-                  "shrink-0 rounded-sm border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] transition-colors",
-                  isActive
-                    ? "border-line-cta bg-surface-bg text-text-primary"
-                    : "border-line-structure text-text-tertiary hover:text-text-primary",
-                )}
+                wrapperClassName="shrink-0"
               >
                 {companyName(s)}
-              </button>
+              </TabButton>
             );
           })}
         </div>
