@@ -1,7 +1,7 @@
 ---
 title: Tracing
 seoTitle: "Tracing with the Langfuse AI Gateway (beta)"
-description: What the Langfuse AI Gateway records for every model call, the FULL, USAGE, and NONE capture modes, and where gateway traces are stored.
+description: What the Langfuse AI Gateway records for every model call, the FULL and USAGE capture modes, and where gateway traces are stored.
 noindex: true
 ---
 
@@ -31,11 +31,16 @@ Add tags, metadata, an environment, a session, or a trace name with optional [re
 
 Gateway managers set the capture mode for the whole organization in **Organization settings → AI Gateway → Setup**:
 
-| Mode    | Recorded                                                          |
-| ------- | ----------------------------------------------------------------- |
-| `FULL`  | Input, output, model parameters, usage, and cost                  |
-| `USAGE` | Usage, cost, and scalar model parameters, without input or output |
-| `NONE`  | Nothing. The gateway only routes requests.                        |
+| Mode                        | Recorded                                                          |
+| --------------------------- | ----------------------------------------------------------------- |
+| `FULL`                      | Input, output, model parameters, usage, and cost                  |
+| `USAGE` (default)           | Usage, cost, and scalar model parameters, without input or output |
+| `NONE` (self-hosted only)   | Nothing. The gateway only routes requests.                        |
+
+<Callout type="info">
+  Langfuse Cloud always records usage, so every gateway call has a trace.
+  `NONE` is only available on self-hosted Langfuse.
+</Callout>
 
 [Request headers](/docs/ai-gateway/features/request-headers) work in `FULL` and `USAGE` modes.
 

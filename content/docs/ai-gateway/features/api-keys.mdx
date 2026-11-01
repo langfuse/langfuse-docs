@@ -24,13 +24,13 @@ Manage keys under **Organization settings → AI Gateway → Gateway keys**.
 
 |                       | User key                                                                                           | Service account key                                                                     |
 | --------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Who can create it** | Anyone who can call the gateway: `MEMBER`, `ADMIN`, or `OWNER`                                     | Gateway managers: `ADMIN` or `OWNER`                                                    |
+| **Who can create it** | Anyone who can call the gateway: AI Gateway, `MEMBER`, `ADMIN`, or `OWNER`                         | Gateway managers: `ADMIN` or `OWNER`                                                    |
 | **What it can do**    | Call every model the organization's [provider credentials](/docs/ai-gateway/features/models) allow | Same as a user key                                                                      |
 | **Trace user**        | Always the key owner's email. The client can't change it.                                          | The client's `langfuse-user-id`, otherwise the key name. See [trace user](#trace-user). |
 | **When it stops**     | When it is revoked or expires, or when its owner [loses gateway access](#revocation)               | When it is revoked or expires. Membership changes don't affect it.                      |
 | **In the dialog**     | **Issued as: My user**, "Stops working if you leave the organization."                             | **Issued as: Service account**, "Keeps working when people leave the organization."     |
 
-`VIEWER` can see the enabled models but can't create keys. Only gateway managers see the **Service account** option.
+`VIEWER` can see the enabled models but can't create keys. The organization role `NONE` has no gateway access. Only gateway managers see the **Service account** option. See [roles](/docs/ai-gateway/get-started/admin-setup#give-your-team-access).
 
 All keys of an organization call the same models through the same provider credentials, and record traces in the same ingestion project. Keys don't have per-key model lists or spend limits.
 
@@ -39,7 +39,7 @@ All keys of an organization call the same models through the same provider crede
 1. Go to **Organization settings → AI Gateway → Gateway keys** and select **Issue API key**.
 2. Choose **Issued as**: **My user** or **Service account**.
 3. Enter a **name** that describes what uses the key, for example `Checkout agent` or `CI release pipeline`. The name is shown in the key list, and service account keys use it as the [trace user](#trace-user).
-4. Optionally set an **expiry**.
+4. Optionally set an **expiry**. It must be in the future.
 5. Optionally add [**metadata**](#key-metadata) as key-value pairs.
 6. Select **Create key** and copy the secret key. It's shown only once.
 
@@ -79,7 +79,7 @@ Langfuse deletes a person's user keys for an organization when they lose gateway
 - their role changes to one that can't call the gateway, for example `VIEWER`
 - they delete their Langfuse account
 
-Calls with a deleted key fail with `401` right away. Service account keys aren't affected. Before you remove someone, check whether a shared service uses one of their user keys, and replace it with a service account key.
+Calls with a deleted key fail with `401` right away. Service account keys aren't affected. When a role change doesn't delete a key, the new permissions reach that key within 60 seconds. Before you remove someone, check whether a shared service uses one of their user keys, and replace it with a service account key.
 
 ## List and revoke keys [#list-and-revoke]
 

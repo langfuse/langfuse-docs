@@ -16,7 +16,7 @@ This page walks an organization admin through preparing the gateway for a team. 
 ## Before you begin [#prerequisites]
 
 - **Langfuse Cloud:** the gateway is available to every organization, with no extra setup.
-- **Self-hosted Langfuse:** the gateway is a separate service that runs next to Langfuse. Until it is deployed, the AI Gateway settings show a notice instead of the setup page.
+- **Self-hosted Langfuse:** the gateway is a separate service that runs next to Langfuse. Until it is deployed, the AI Gateway settings show a notice instead of the setup page. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
 - **Role:** the setup steps need the `OWNER` or `ADMIN` organization role.
 
 All gateway settings are under **Organization settings → AI Gateway**.
@@ -30,9 +30,9 @@ All gateway settings are under **Organization settings → AI Gateway**.
 Go to **Organization settings → AI Gateway → Setup** and choose:
 
 - the **ingestion project**, where the gateway records generations
-- the [capture mode](/docs/ai-gateway/features/tracing#capture-modes): `FULL` (input and output), `USAGE` (usage and cost only), or `NONE` (route without recording)
+- the [capture mode](/docs/ai-gateway/features/tracing#capture-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
 
-Both are set per organization, not per key. The other AI Gateway pages stay disabled until an ingestion project is set.
+Both are set per organization, not per key. The other AI Gateway pages stay disabled until an ingestion project is set (not needed with `NONE` on self-hosted Langfuse).
 
 ### Add provider credentials [#add-provider-connections]
 
@@ -42,6 +42,13 @@ On the same page, select **Add credential** and add an OpenAI or Anthropic API k
 - an `ANTHROPIC` credential serves the Anthropic route (Claude Code, Claude Desktop, and the Anthropic routes of OpenCode, pi, and GitHub Copilot)
 
 Each credential needs a **name** of letters, numbers, `-` and `_`, starting with a letter or number, at most 64 characters. `ft` is reserved. The name becomes the prefix of the credential's [model IDs](/docs/ai-gateway/features/models#model-ids), so renaming a credential changes them. The key is validated when you save it, and the gateway always calls the vendor's official base URL.
+
+<Callout type="warning">
+  **HIPAA region:** requests are forwarded to the provider you configure, using
+  your credentials and on your instruction. Before you send protected health
+  information (PHI) through the gateway, make sure you have a [BAA with
+  Langfuse](/security/hipaa) and a BAA with that provider.
+</Callout>
 
 Provider credentials are separate from project [LLM connections](/docs/administration/llm-connection), which power the Playground and LLM-as-a-Judge.
 
@@ -53,14 +60,18 @@ By default, a credential allows every model the provider offers, including model
 
 Who can do what depends on the organization role:
 
-| Role     | Gateway access                                                                       |
-| -------- | ------------------------------------------------------------------------------------ |
-| `OWNER`  | Everything below, plus setup, provider credentials, models, and service account keys |
-| `ADMIN`  | Same as `OWNER`                                                                      |
-| `MEMBER` | Sees the enabled models, creates and revokes their own gateway keys                  |
-| `VIEWER` | Sees the enabled models, cannot create gateway keys or call the gateway              |
+| Role                  | Gateway access                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------ |
+| `OWNER`               | Everything below, plus setup, provider credentials, models, analytics, and service account keys        |
+| `ADMIN`               | Same as `OWNER`                                                                                        |
+| `MEMBER`              | Sees the enabled models, creates and revokes their own gateway keys                                    |
+| AI Gateway            | Same gateway access as `MEMBER`, with no access to projects or other organization settings             |
+| `VIEWER`              | Sees the enabled models, cannot create gateway keys or call the gateway                                |
+| `NONE` (organization) | No gateway access                                                                                      |
 
-Use **Notify your team** in the setup guide to email teammates. People who are not in the organization yet join as `MEMBER`. See [roles and permissions](/docs/administration/rbac) for project access.
+The **AI Gateway** role is for people who only need to call models, for example developers who use the gateway for their coding agent. Assign it in the organization's members settings. See [roles and permissions](/docs/administration/rbac) for all roles and project access.
+
+Use **Notify your team** in the setup guide to email teammates. People who are not in the organization yet are invited with the **AI Gateway** role: they can call the gateway and manage their own keys, but can't open projects. To let them see their traces, give them a role on the ingestion project, or change their organization role.
 
 <Callout type="warning">
   To see traces, people need access to the ingestion project. Everyone with

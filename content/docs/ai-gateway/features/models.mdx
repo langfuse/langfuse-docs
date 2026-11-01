@@ -15,7 +15,7 @@ The gateway doesn't have its own model catalog. It offers the models that your o
 
 ## Available models [#available-models]
 
-Go to **Organization settings → AI Gateway → Models** to see every model gateway keys can call, with its provider, provider credential, and API formats. Everyone in the organization can open this page, including `VIEWER`.
+Go to **Organization settings → AI Gateway → Models** to see every model gateway keys can call, with its provider, provider credential, and API formats. Everyone with gateway access can open this page, including `VIEWER` and the AI Gateway role.
 
 The list comes from each provider credential:
 
@@ -39,6 +39,13 @@ Gateway managers (`OWNER` and `ADMIN`) choose models per provider credential:
 3. Select **Refresh provider models** to fetch the provider's current list right away.
 
 A credential with every model enabled also allows models that the provider publishes later. As soon as you turn one model off, the credential keeps an explicit list: models the provider adds later stay off until you enable them. Select **Enable all** to go back to allowing every model.
+
+<Callout type="info">
+  Turning every model back on one by one has the same effect as **Enable all**:
+  once no model is off, the credential allows every model again, including
+  models the provider publishes later. To keep an explicit list, leave at least
+  one model off.
+</Callout>
 
 Model choices apply to every gateway key in the organization. There are no per-key or per-user model lists.
 
