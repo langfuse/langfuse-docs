@@ -116,7 +116,7 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="<your-otel-collector>"
 
 ### Gotchas [#gotchas]
 
-- With a service account key, there is no user unless you send `langfuse-user-id`. Keys issued as your user always record you. Claude Code's own `metadata.user_id` only lands in `langfuse.gateway.request.metadata`.
+- With a service account key, there is no user unless you send `langfuse-user-id`. Keys issued as your user always record you. Claude Code's own `metadata.user_id` only lands in `langfuse.gateway.client.request.metadata`.
 - When a model call fails, Claude Code retries once without streaming, so a failed prompt shows **two** `ERROR` generations.
 - Subagent calls carry `agent.id` but no link to their parent, unless you enable [turn grouping](#turn-grouping).
 - Thinking text is often empty (`thinking.display: "omitted"`), so time to first token is close to latency. Thinking tokens are counted inside output tokens.
