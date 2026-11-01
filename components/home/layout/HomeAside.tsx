@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { AnchorProvider, useActiveAnchors } from "fumadocs-core/toc";
 import { Link } from "@/components/ui/link";
@@ -85,7 +85,13 @@ function useDOMHeadings(): TocItem[] {
 
 // ─── "On this page" TOC ───────────────────────────────────────────────────────
 
-function TocOnThisPage({ items }: { items: TocItem[] }) {
+function TocOnThisPage({
+  items,
+  compact = false,
+}: {
+  items: TocItem[];
+  compact?: boolean;
+}) {
   const active = useActiveAnchors();
   const activeId = active[0] ?? null;
   const listRef = useRef<HTMLDivElement>(null);
@@ -106,7 +112,7 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex-1 px-4 py-4 min-h-0">
+    <div className={cn("px-4 py-4 min-h-0", !compact && "flex-1")}>
       <Text
         size="s"
         className="block text-left font-[580] text-text-primary mb-3 -ml-1.5"
@@ -171,11 +177,32 @@ function TocOnThisPage({ items }: { items: TocItem[] }) {
 
 // ─── Main aside ───────────────────────────────────────────────────────────────
 
-export function HomeAside({ toc }: { toc?: TocItem[] } = {}) {
+function CtaBand({ children }: { children: ReactNode }) {
+  return (
+    <div className="shrink-0 bg-line-structure pb-px">
+      <div className="rounded-sm bg-surface-1">{children}</div>
+    </div>
+  );
+}
+
+export function HomeAside({
+  toc,
+  cta,
+}: {
+  toc?: TocItem[];
+  /** Blog posts pass a signup / sales block. Other pages leave this empty. */
+  cta?: ReactNode;
+} = {}) {
   const pathname = usePathname();
   const domItems = useDOMHeadings();
   const items = toc ?? (pathname === "/" ? HOME_SECTIONS : domItems);
   const { open: aiOpen } = useAISearchContext();
+
+  const tocNode = (
+    <AnchorProvider toc={items} single key={pathname}>
+      <TocOnThisPage items={items} compact={Boolean(cta)} />
+    </AnchorProvider>
+  );
 
   return (
     <aside
@@ -187,15 +214,33 @@ export function HomeAside({ toc }: { toc?: TocItem[] } = {}) {
           "calc(100vh - var(--fd-banner-height, 0px) - var(--lf-nav-primary-height))",
       }}
     >
-      <nav className="flex overflow-y-auto overflow-x-hidden flex-col flex-1 rounded-sm bg-surface-1">
-        <div className="flex flex-col flex-1 pb-px bg-line-structure">
-          <div className="flex flex-col flex-1 rounded-sm bg-surface-1">
-            <AnchorProvider toc={items} single key={pathname}>
-              <TocOnThisPage items={items} />
-            </AnchorProvider>
-          </div>
-        </div>
-        <RightSidebarHiringAndCommunity />
+      <nav
+        className={cn(
+          "flex flex-col flex-1 rounded-sm bg-surface-1",
+          cta ? "min-h-0 overflow-hidden" : "overflow-y-auto overflow-x-hidden",
+        )}
+      >
+        {cta ? (
+          <>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="min-h-0 overflow-y-auto bg-line-structure pb-px [scrollbar-width:none]">
+                <div className="rounded-sm bg-surface-1">{tocNode}</div>
+              </div>
+              <CtaBand>{cta}</CtaBand>
+              <div className="flex-1 bg-surface-1" />
+            </div>
+            <RightSidebarHiringAndCommunity withTopRule />
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col flex-1 pb-px bg-line-structure">
+              <div className="flex flex-col flex-1 rounded-sm bg-surface-1">
+                {tocNode}
+              </div>
+            </div>
+            <RightSidebarHiringAndCommunity />
+          </>
+        )}
       </nav>
     </aside>
   );
