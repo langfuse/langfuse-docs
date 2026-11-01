@@ -282,7 +282,7 @@ export const financialServicesFaqs: FAQItem[] = [
     question:
       "How does Langfuse work with our AI gateway and existing observability tools?",
     answer:
-      "Langfuse integrates with gateways such as Kong and LiteLLM to capture model calls, token usage, cost, and latency. Its OpenTelemetry support lets you add AI tracing and evaluation alongside your existing observability stack. [Gateway integrations](/integrations/gateways/kong-ai-plugin), [LiteLLM](/integrations/gateways/litellm), [existing OpenTelemetry setups](/faq/all/existing-otel-setup). We're also working on our own Langfuse Gateway, bringing model access controls together with tracing and cost tracking. It is currently in development; follow our [roadmap](/docs/roadmap) for updates.",
+      "Langfuse integrates with gateways such as Kong and LiteLLM to capture model calls, token usage, cost, and latency. Its OpenTelemetry support lets you add AI tracing and evaluation alongside your existing observability stack. [Gateway integrations](/integrations/gateways/kong-ai-plugin), [LiteLLM](/integrations/gateways/litellm), [existing OpenTelemetry setups](/faq/all/existing-otel-setup). The [Langfuse AI Gateway](/docs/ai-gateway/overview) (beta) brings model access controls together with tracing and cost tracking for OpenAI and Anthropic.",
   },
   {
     question: "How do retention and exports support our evidence requirements?",
