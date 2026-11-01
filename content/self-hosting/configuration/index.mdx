@@ -143,6 +143,10 @@ Halo is available from `>=v4.28.0`. It stays hidden until `LANGFUSE_IN_APP_AGENT
 
 </div>
 
+## AI Gateway [#ai-gateway]
+
+The AI Gateway (beta) runs as a separate container next to web and is deployed with the Helm chart. Web needs `LANGFUSE_AI_GATEWAY_DEPLOYED=true`, `LANGFUSE_AI_GATEWAY_SERVICE_KEY`, and `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`; the chart sets them when `langfuse.gateway.enabled` is `true`. See [AI Gateway](/self-hosting/configuration/ai-gateway) for the setup, TLS, and the [full configuration reference](/self-hosting/configuration/ai-gateway#configuration).
+
 ## Additional Features
 
 There are additional features that can be enabled and configured via environment variables.
