@@ -119,7 +119,7 @@ export function CodingAgentPathSwitcher() {
 
   return (
     <div className="flex items-center gap-2.5 px-5 py-2 sm:px-10">
-      <p className="shrink-0 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+      <p className="shrink-0 font-mono text-[10px] text-text-tertiary">
         Set up
       </p>
       <div
@@ -150,9 +150,7 @@ export function CodingAgentPathSwitcher() {
                   : "bg-surface-bg text-text-primary hover:bg-surface-1",
               )}
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em]">
-                {item.label}
-              </span>
+              <span className="font-mono text-[10px]">{item.label}</span>
               <span
                 className={cn(
                   "text-[10px] leading-none",
