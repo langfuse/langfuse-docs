@@ -1,0 +1,80 @@
+---
+title: Models
+seoTitle: "Langfuse AI Gateway models and routing (beta)"
+description: See which models the Langfuse AI Gateway can call, enable or disable models per provider credential, and learn how model IDs route requests to provider credentials.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Models
+
+<AiGatewayBetaCallout />
+
+The gateway doesn't have its own model catalog. It offers the models that your organization's provider credentials can access, minus the models an admin turned off. This page explains where the model list comes from, how admins choose models, and how the gateway decides which credential serves a request.
+
+## Available models [#available-models]
+
+Go to **Organization settings → AI Gateway → Models** to see every model gateway keys can call, with its provider, provider credential, and API formats. Everyone with gateway access can open this page, including `VIEWER` and the AI Gateway role.
+
+The list comes from each provider credential:
+
+- The gateway asks the provider's own `/models` endpoint which models the credential can access, and caches the answer for 5 minutes. New provider models appear without a Langfuse update.
+- OpenAI credentials serve the OpenAI Responses and Chat Completions formats. Anthropic credentials serve the Anthropic Messages format. See [API formats](/docs/ai-gateway/features/api-formats).
+- Clients get the same list from `GET /openai/v1/models` and `GET /anthropic/v1/models`, filtered by the format of the route.
+
+<Callout type="warning">
+  If a provider rejects a credential during model discovery, for example
+  because the key was rotated, the credential is marked as failing and the
+  gateway stops routing to it. Update the key or select **Retry** in
+  **Organization settings → AI Gateway → Setup** to restore it.
+</Callout>
+
+## Manage models [#manage-models]
+
+Gateway managers (`OWNER` and `ADMIN`) choose models per provider credential:
+
+1. Go to **Organization settings → AI Gateway → Setup** and open a provider credential.
+2. Turn models on or off with the **Enabled** switch, or select several models and change them together. **Enable all** and **Disable all** change every model at once.
+3. Select **Refresh provider models** to fetch the provider's current list right away.
+
+A credential with every model enabled also allows models that the provider publishes later. As soon as you turn one model off, the credential keeps an explicit list: models the provider adds later stay off until you enable them. Select **Enable all** to go back to allowing every model.
+
+<Callout type="info">
+  Turning every model back on one by one has the same effect as **Enable all**:
+  once no model is off, the credential allows every model again, including
+  models the provider publishes later. To keep an explicit list, leave at least
+  one model off.
+</Callout>
+
+Model choices apply to every gateway key in the organization. There are no per-key or per-user model lists.
+
+## Model IDs [#model-ids]
+
+Requests can name a model in two ways:
+
+- **Prefixed with a credential:** `<credential>:<model>`, for example `openai-prod:<model>`. This is the form `/models` returns, and it always routes to the named credential. The gateway removes the prefix before it calls the provider.
+- **Bare provider ID**, the provider's own model name without a prefix. The gateway picks the credential, see [routing](#routing). Bare IDs only work for models whose names start with `gpt-`, `codex-`, `claude-`, or `ft:` (OpenAI fine-tuned models).
+
+Use the prefixed form for models with other names, for example OpenAI `o`-series models, and when your organization has several credentials for the same provider. Coding agents that discover models from `/models`, such as [GitHub Copilot](/docs/ai-gateway/coding-agents/github-copilot), use the prefixed form automatically.
+
+Renaming a provider credential changes its prefix, so update clients that use the old prefixed IDs.
+
+## Routing [#routing]
+
+The gateway only considers enabled credentials that serve the request's API format. For each request it resolves the model ID like this:
+
+1. **`<credential>:<model>` with a known credential name:** routes to that credential.
+2. **`ft:…`:** routes to an OpenAI credential.
+3. **`gpt-…` or `codex-…`:** routes to an OpenAI credential. **`claude-…`:** routes to an Anthropic credential.
+4. Anything else, including a prefix that doesn't name a credential, fails.
+
+When several credentials of the provider match in steps 2 and 3, the gateway uses the oldest credential that allows the model. If none of them allows it, the request goes to the oldest credential of that provider and fails with `403`.
+
+| Response                                                | Cause                                                                                                          |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `403` `model_not_allowed`                               | The model is turned off on the credential that serves the request.                                             |
+| `404` `No eligible provider connection`                 | No enabled credential serves this API format, or the prefix doesn't name a credential of the route's provider. |
+| `400` `Invalid gateway model`                           | A bare ID that doesn't start with `gpt-`, `codex-`, `claude-`, or `ft:`. Use the prefixed form.                |
+| `404` `not_found_error` or `model_not_found` (provider) | The provider doesn't know the model, or the provider account has no access to it.                              |
+
+The gateway doesn't fall back to another credential or model when a provider call fails.

@@ -1,0 +1,92 @@
+---
+title: API keys
+seoTitle: "Langfuse AI Gateway API keys: user and service account keys (beta)"
+description: Gateway API keys authenticate clients to the Langfuse AI Gateway. Learn the difference between user keys and service account keys, who can create them, when they stop working, and how they set the trace user.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# API keys
+
+<AiGatewayBetaCallout />
+
+Clients authenticate to the gateway with a gateway API key. A gateway key can only call the gateway: it can't read or write other Langfuse data through the [public API](/docs/api-and-data-platform/features/public-api).
+
+Every key is issued in one of two ways:
+
+- **User keys** belong to the person who creates them. Use them for your own coding agent or local development.
+- **Service account keys** belong to the organization. Use them for CI, shared services, and agents that should keep working when people leave.
+
+Manage keys under **Organization settings → AI Gateway → Gateway keys**.
+
+## User and service account keys [#key-types]
+
+|                       | User key                                                                                           | Service account key                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Who can create it** | Anyone who can call the gateway: AI Gateway, `MEMBER`, `ADMIN`, or `OWNER`                         | Gateway managers: `ADMIN` or `OWNER`                                                    |
+| **What it can do**    | Call every model the organization's [provider credentials](/docs/ai-gateway/features/models) allow | Same as a user key                                                                      |
+| **Trace user**        | Always the key owner's email. The client can't change it.                                          | The client's `langfuse-user-id`, otherwise the key name. See [trace user](#trace-user). |
+| **When it stops**     | When it is revoked or expires, or when its owner [loses gateway access](#revocation)               | When it is revoked or expires. Membership changes don't affect it.                      |
+| **In the dialog**     | **Issued as: My user**, "Stops working if you leave the organization."                             | **Issued as: Service account**, "Keeps working when people leave the organization."     |
+
+`VIEWER` can see the enabled models but can't create keys. The organization role `NONE` has no gateway access. Only gateway managers see the **Service account** option. See [roles](/docs/ai-gateway/get-started/admin-setup#give-your-team-access).
+
+All keys of an organization call the same models through the same provider credentials, and record traces in the same ingestion project. Keys don't have per-key model lists or spend limits.
+
+## Create a key [#create-a-key]
+
+1. Go to **Organization settings → AI Gateway → Gateway keys** and select **Issue API key**.
+2. Choose **Issued as**: **My user** or **Service account**.
+3. Enter a **name** that describes what uses the key, for example `Checkout agent` or `CI release pipeline`. The name is shown in the key list, and service account keys use it as the [trace user](#trace-user).
+4. Optionally set an **expiry**. It must be in the future.
+5. Optionally add [**metadata**](#key-metadata) as key-value pairs.
+6. Select **Create key** and copy the secret key. It's shown only once.
+
+Creating and revoking a key are recorded in the [audit log](/docs/administration/audit-logs).
+
+## Key metadata [#key-metadata]
+
+Metadata on a key lets you segment and attribute gateway traffic without changing any client. Add key-value pairs such as `team: platform`, `cost_center: 4711`, or `environment: production` when you create the key. The gateway attaches them to every generation recorded with the key, under `langfuse.gateway.api_key.metadata.<key>`, for example `langfuse.gateway.api_key.metadata.team`. Filter traces, observations, and [custom dashboard](/docs/metrics/features/custom-dashboards) charts on these keys to see usage and cost for one team, cost center, or service.
+
+Key metadata is set by whoever creates the key, so clients can't change it. A `langfuse-metadata` [request header](/docs/ai-gateway/features/request-headers#headers) with the same name is recorded as a separate top-level key and doesn't overwrite it. The **Gateway keys** list shows each key's metadata.
+
+<Callout type="info">
+  Metadata can only be set when you create a key. To change it, issue a new key
+  and revoke the old one.
+</Callout>
+
+## Trace user [#trace-user]
+
+The gateway sets the [trace user](/docs/observability/features/users) depending on the key type:
+
+| Key                                                       | Trace user                                                                                                        | `langfuse.gateway.user_id_source` |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| User key                                                  | The owner's email, or their Langfuse user ID if the email is unknown. `langfuse-user-id` and baggage are ignored. | `api_key_owner`                   |
+| Service account key, client sends a user ID               | The value of the `langfuse-user-id` header or the `langfuse_user_id` baggage entry                                | `client`                          |
+| Service account key, no user ID, gateway starts the trace | The key name                                                                                                      | `api_key_name`                    |
+| Service account key, no user ID, call inside your trace   | Not set, so the user on your own spans stays in effect                                                            | not set                           |
+
+Because a user key can't be overridden, a trace from a user key always shows who made the call. A service account serves many end users, so forward the end user's ID with the [`langfuse-user-id` header](/docs/ai-gateway/features/request-headers#headers).
+
+Each generation also records the key under `langfuse.gateway.api_key.id` and `langfuse.gateway.api_key.name`, and, for user keys, the owner under `langfuse.gateway.api_key.owner.user_id` and `langfuse.gateway.api_key.owner.name`. To attribute traces by team or cost center as well, add [key metadata](#key-metadata).
+
+## When a user key stops working [#revocation]
+
+Langfuse deletes a person's user keys for an organization when they lose gateway access:
+
+- they are removed from the organization, in the members settings, through [SCIM](/docs/administration/scim-and-org-api), or through the admin API
+- their role changes to one that can't call the gateway, for example `VIEWER`
+- they delete their Langfuse account
+
+Calls with a deleted key fail with `401` right away. Service account keys aren't affected. When a role change doesn't delete a key, the new permissions reach that key within 60 seconds. Before you remove someone, check whether a shared service uses one of their user keys, and replace it with a service account key.
+
+## List and revoke keys [#list-and-revoke]
+
+The **Gateway keys** page lists keys with their creation date, key prefix, name, user, expiration, and metadata. Gateway managers see and revoke every key of the organization. Everyone else sees and revokes only their own keys. Revoked keys stop working immediately.
+
+<Callout type="info">
+  **Self-hosted, legacy API key authorization:** if your instance sets
+  `API_AUTH_MIGRATION` to `legacy` or `shadow`, only gateway managers can create
+  user keys, and service account keys also need the `OWNER` role. The default,
+  `enforce`, uses the rules on this page.
+</Callout>

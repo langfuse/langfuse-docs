@@ -9,7 +9,7 @@ export const codingAgentsGatewayInsights: InsightItem[] = [
     imageAlt:
       "Organization budget of $40,000 per month allocated across four teams, with each team's spend shown against its budget",
     description:
-      "Give teams and departments a spend envelope on the gateway, then see what actually landed in Langfuse. A developer cannot disable a gateway the way they can a local hook.",
+      "Give teams and departments a spend envelope on gateways that enforce budgets, such as LiteLLM, then see what actually landed in Langfuse. A developer cannot disable a gateway the way they can a local hook.",
     href: "/resources/engineering/llm-gateway",
     ctaLabel: "What is an LLM gateway?",
   },
@@ -80,8 +80,8 @@ export const codingAgentsGatewayIntegrationGroups: IntegrationGroup[] = [
       { label: "LiteLLM", href: "/integrations/gateways/litellm" },
       { label: "OpenRouter", href: "/integrations/gateways/openrouter" },
       {
-        label: "Langfuse Gateway (coming soon)",
-        href: "/docs/roadmap",
+        label: "Langfuse AI Gateway (beta)",
+        href: "/docs/ai-gateway/coding-agents",
       },
     ],
   },

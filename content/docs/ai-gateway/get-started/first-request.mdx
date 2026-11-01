@@ -1,0 +1,104 @@
+---
+title: Send your first request
+seoTitle: "Send your first request through the Langfuse AI Gateway (beta)"
+description: Create a personal gateway API key, call a model through the Langfuse AI Gateway, connect a coding agent, and find the trace in Langfuse.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Send your first request
+
+<AiGatewayBetaCallout />
+
+This page is for developers who want to call models through the gateway. You create a gateway API key, send a request, and find the trace in Langfuse. If the gateway is not set up for your organization yet, ask an admin to follow [Set up the gateway](/docs/ai-gateway/get-started/admin-setup) first.
+
+## Before you begin [#prerequisites]
+
+- Your organization has set up the gateway and added at least one provider credential. **Organization settings → AI Gateway → Models** lists the models you can call. If it says "No active providers", ask your admin.
+- You have the AI Gateway, `MEMBER`, `ADMIN`, or `OWNER` organization role. `VIEWER` can't create gateway keys. See [roles](/docs/ai-gateway/get-started/admin-setup#give-your-team-access).
+- To see traces, you need access to the organization's ingestion project.
+
+<Steps>
+
+### Create a gateway API key [#create-a-key]
+
+Go to **Organization settings → AI Gateway → Gateway keys** and select **Issue API key**. Keep **Issued as: My user**, give the key a name, and optionally set an expiry. Copy the secret key: it's shown only once.
+
+A key issued as your user records you as the user of every trace, and stops working when you leave the organization or lose gateway access. For CI or a shared service, ask an admin for a service account key. See [API keys](/docs/ai-gateway/features/api-keys).
+
+<Callout type="warning">
+  Never paste a gateway key into a repository, a ticket, or a shared config
+  file. Anyone with the key can call models on your organization's provider
+  account.
+</Callout>
+
+### Export the key [#export-the-key]
+
+Export the gateway host and key in your shell. The examples and most coding agent guides use these variables. [Codex](/docs/ai-gateway/coding-agents/codex#store-the-key) reads the key from `~/.codex/.env` instead, so it persists across sessions.
+
+```sh
+export LANGFUSE_GATEWAY_HOST="https://gateway.cloud.langfuse.com"   # EU; see the table below for other regions
+export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+```
+
+#### Gateway hosts [#gateway-hosts]
+
+Use the gateway host of the region your organization is in. A gateway key only works on its own region's host.
+
+| Region | Langfuse Cloud             | Gateway host                               |
+| ------ | -------------------------- | ------------------------------------------ |
+| EU     | `cloud.langfuse.com`       | `https://gateway.cloud.langfuse.com`       |
+| US     | `us.cloud.langfuse.com`    | `https://gateway.us.cloud.langfuse.com`    |
+| JP     | `jp.cloud.langfuse.com`    | `https://gateway.jp.cloud.langfuse.com`    |
+| HIPAA  | `hipaa.cloud.langfuse.com` | `https://gateway.hipaa.cloud.langfuse.com` |
+
+On self-hosted Langfuse, use the gateway URL your deployment configured (`LANGFUSE_AI_GATEWAY_PUBLIC_URL`, see [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway)).
+
+The gateway is path-routed: OpenAI under `/openai/v1`, Anthropic under `/anthropic/v1`. All snippets in these docs use the EU host.
+
+### List models [#list-models]
+
+List the models your key can call:
+
+```sh
+curl -s "$LANGFUSE_GATEWAY_HOST/openai/v1/models" \
+  -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" | head -c 300
+
+curl -s "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models?limit=1000" \
+  -H "x-api-key: $LANGFUSE_GATEWAY_KEY" \
+  -H "anthropic-version: 2023-06-01" | head -c 300
+```
+
+Each ID has the form `<credential>:<model>`, for example `openai-prod:<model>`. A model list means that the key, the organization's access, and the provider credential work. See [model IDs](/docs/ai-gateway/features/models#model-ids) for which form to send.
+
+### Send a request [#send-a-request]
+
+Call a model with the OpenAI Chat Completions API:
+
+```sh
+curl -si "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
+  -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" \
+  -H "Content-Type: application/json" \
+  -H "langfuse-tags: first-request" \
+  -d '{"model":"<model-id>","messages":[{"role":"user","content":"Say hello"}]}'
+```
+
+Replace `<model-id>` with an ID from your list. The response is OpenAI's own response. Its headers include `langfuse-trace-id`, the ID of the trace the gateway recorded. To use an SDK or the Anthropic Messages API instead, see [API formats](/docs/ai-gateway/features/api-formats).
+
+### View the trace [#view-the-trace]
+
+Open the ingestion project in Langfuse and go to **Tracing**. The call appears as a trace with a generation named `openai.chat-completions`, with its input, output, token usage, and cost. Filter by the `first-request` tag, or by your user: a key issued as your user records your email as the trace user.
+
+What's recorded depends on the organization's [capture mode](/docs/ai-gateway/features/tracing#capture-modes).
+
+</Steps>
+
+## Connect a coding agent [#connect-a-coding-agent]
+
+To route your coding agent through the gateway, follow its guide: [Claude Code](/docs/ai-gateway/coding-agents/claude-code), [Codex](/docs/ai-gateway/coding-agents/codex), [OpenCode](/docs/ai-gateway/coding-agents/opencode), [pi](/docs/ai-gateway/coding-agents/pi), or [GitHub Copilot](/docs/ai-gateway/coding-agents/github-copilot). Each guide uses the variables you exported above.
+
+## Next steps [#next-steps]
+
+- [Request headers](/docs/ai-gateway/features/request-headers): add tags, metadata, a session, or an environment to your traces.
+- [Tracing](/docs/ai-gateway/features/tracing): what the gateway records and how traces are grouped.
+- [Troubleshooting](/docs/ai-gateway/troubleshooting-and-faq#troubleshooting): fix errors. Quote the `langfuse-request-id` response header when you report a problem.

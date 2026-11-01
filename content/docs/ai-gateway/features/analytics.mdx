@@ -1,0 +1,60 @@
+---
+title: Analytics
+seoTitle: "Langfuse AI Gateway analytics: cost and usage per user, key, and model (beta)"
+description: Track cost, requests, and tokens of the Langfuse AI Gateway per user, API key, and model, and build your own dashboards in the gateway's ingestion project.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Analytics
+
+<AiGatewayBetaCallout />
+
+The **Analytics** page shows what your organization spends on the gateway and who uses it. Use it to see which teammates or services drive cost, which API key a spike came from, or how spend splits across models.
+
+Open it under **Organization settings → AI Gateway → Analytics**. Only `OWNER` and `ADMIN` can see it.
+
+## What the page shows [#widgets]
+
+| Chart             | Shows                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Total cost        | Cost of all gateway requests                                                             |
+| Requests          | Number of generations the gateway recorded                                               |
+| Tokens            | Input and output tokens                                                                  |
+| Cost over time    | Cost of all gateway requests over time                                                   |
+| Cost by user      | Top 20 users by cost. Service account keys have no owner, so they aren't included.       |
+| Requests per user | Top 20 users by requests. Service account keys aren't included.                          |
+| Cost by API key   | Top 20 [gateway keys](/docs/ai-gateway/features/api-keys) by cost, user and service keys |
+| Cost by model     | Top 20 models by cost                                                                    |
+
+Users are the owners of [user keys](/docs/ai-gateway/features/api-keys#key-types), shown by name.
+
+## Filters and time range [#filters]
+
+- **User** and **API key** filter every chart. You can select several values. To filter by a deleted key or a former member, type their ID.
+- The **time range** defaults to the last 30 days. Presets go from the last day to the last year.
+
+## Where the data comes from [#data-source]
+
+The charts read the generations the gateway records in its [ingestion project](/docs/ai-gateway/features/tracing#ingestion-project). Only calls made with a gateway key count, so SDK traces sent to the same project don't change the numbers. Cost comes from Langfuse [model prices](/docs/observability/features/token-and-cost-tracking), not from your provider's invoice.
+
+If some calls used models that have no Langfuse price, the page shows a **Cost excludes unpriced usage** alert with the number of requests, tokens, and models affected. The cost charts count those calls as $0. Add the missing prices as [custom model definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions) in the ingestion project.
+
+<Callout type="info">
+  Analytics need recorded traces. `USAGE` [capture
+  mode](/docs/ai-gateway/features/tracing#capture-modes) is enough. On
+  self-hosted Langfuse with capture mode `NONE`, the page shows "Gateway
+  requests are not recorded" instead of charts. Cost is subject to the [known
+  cost bugs](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
+</Callout>
+
+## Build your own dashboards [#custom-dashboards]
+
+Gateway traces are regular Langfuse traces, so admins and owners can build their own [custom dashboards](/docs/metrics/features/custom-dashboards) in the ingestion project, for example cost per environment or trace name. To limit a chart to gateway traffic, filter on the metadata key `langfuse.gateway.api_key.id`. To chart a single team or cost center, add [key metadata](/docs/ai-gateway/features/api-keys#key-metadata) when you create keys and filter on `langfuse.gateway.api_key.metadata.<key>`.
+
+Building a dashboard needs access to the ingestion project, like viewing gateway traces.
+
+<Callout type="info">
+  **Self-hosted:** gateway analytics read the v4 events tables, so the page
+  isn't available while `LANGFUSE_MIGRATION_V4_WRITE_MODE` is `legacy`.
+</Callout>

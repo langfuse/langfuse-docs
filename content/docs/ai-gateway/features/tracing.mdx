@@ -1,0 +1,58 @@
+---
+title: Tracing
+seoTitle: "Tracing with the Langfuse AI Gateway (beta)"
+description: What the Langfuse AI Gateway records for every model call, the FULL and USAGE capture modes, and where gateway traces are stored.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Tracing
+
+<AiGatewayBetaCallout />
+
+The gateway records every model call it relays as a Langfuse [generation](/docs/observability/data-model), without any instrumentation in your client. Gateway traces are regular Langfuse traces, so you can filter, evaluate, and chart them like traces from the SDKs.
+
+## What gets recorded [#what-gets-recorded]
+
+Every model call becomes a generation with:
+
+- the model (the dated response model when the provider returns one), matched to [model prices](/docs/observability/features/token-and-cost-tracking)
+- the full input (system prompt, tool definitions, messages, tool calls and results) and the streamed output (text, reasoning or thinking, and tool calls with parsed arguments)
+- token usage, including cached and reasoning tokens, plus cost, latency, and time to first token
+- level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations
+- sessions, grouped automatically from each coding agent's own session ID
+- the [trace user](/docs/ai-gateway/features/api-keys#trace-user), which depends on the key type
+- the gateway key, its [key metadata](/docs/ai-gateway/features/api-keys#key-metadata), and the provider credential in metadata, under `langfuse.gateway.api_key.*` and `langfuse.gateway.connection.*`
+
+Add tags, metadata, an environment, a session, or a trace name with optional [request headers](/docs/ai-gateway/features/request-headers). For how coding agent calls are grouped into traces and sessions, see [trace shape](/docs/ai-gateway/coding-agents#trace-shape).
+
+## Capture modes [#capture-modes]
+
+Gateway managers set the capture mode for the whole organization in **Organization settings → AI Gateway → Setup**:
+
+| Mode                      | Recorded                                                          |
+| ------------------------- | ----------------------------------------------------------------- |
+| `FULL`                    | Input, output, model parameters, usage, and cost                  |
+| `USAGE` (default)         | Usage, cost, and scalar model parameters, without input or output |
+| `NONE` (self-hosted only) | Nothing. The gateway only routes requests.                        |
+
+<Callout type="info">
+  Langfuse Cloud always records usage, so every gateway call has a trace.
+  `NONE` is only available on self-hosted Langfuse.
+</Callout>
+
+[Request headers](/docs/ai-gateway/features/request-headers) work in `FULL` and `USAGE` modes.
+
+## Where traces go [#ingestion-project]
+
+The gateway records all traces of an organization in one **ingestion project**, chosen in **Organization settings → AI Gateway → Setup**. To see gateway traces, you need access to that project.
+
+<Callout type="warning">
+  Everyone with access to the ingestion project sees every gateway trace in it,
+  not only their own. In `FULL` mode this includes prompts and outputs. Limit
+  project access, or use `USAGE` mode, if that's a concern.
+</Callout>
+
+For cost and usage across the organization, see [gateway analytics](/docs/ai-gateway/features/analytics). Admins and owners can also build their own [custom dashboards](/docs/metrics/features/custom-dashboards) in the ingestion project.
+
+To find a single call, filter on the metadata key `langfuse.gateway.request.id`, the value of the `langfuse-request-id` [response header](/docs/ai-gateway/features/request-headers#response-headers).
