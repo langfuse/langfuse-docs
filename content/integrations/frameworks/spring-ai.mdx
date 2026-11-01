@@ -131,15 +131,19 @@ import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
 import org.springframework.ai.chat.observation.ChatModelObservationContext;
 import org.springframework.ai.content.Content;
-import org.springframework.ai.observation.ObservabilityHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ChatModelCompletionContentObservationFilter implements ObservationFilter {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public Observation.Context map(Observation.Context context) {
@@ -153,28 +157,40 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
         chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
             @Override
             public String getKey() {
-                return "gen_ai.prompt";
+                return "gen_ai.input.messages";
             }
 
             @Override
             public String getValue() {
-                return ObservabilityHelper.concatenateStrings(prompts);
+                return toMessagesJson("user", prompts);
             }
         });
 
         chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
             @Override
             public String getKey() {
-                return "gen_ai.completion";
+                return "gen_ai.output.messages";
             }
 
             @Override
             public String getValue() {
-                return ObservabilityHelper.concatenateStrings(completions);
+                return toMessagesJson("assistant", completions);
             }
         });
 
         return chatModelObservationContext;
+    }
+
+    private String toMessagesJson(String role, List<String> parts) {
+        var messages = parts.stream()
+                .filter(StringUtils::hasText)
+                .map(text -> Map.of("role", role, "content", text))
+                .toList();
+        try {
+            return OBJECT_MAPPER.writeValueAsString(messages);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to serialize chat messages", e);
+        }
     }
 
     private List<String> processPrompts(ChatModelObservationContext chatModelObservationContext) {
