@@ -9,12 +9,10 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { HoverCorners } from "@/components/ui/corner-box";
+import { controlTextClassName } from "@/components/ui/button";
+import { TabButton } from "@/components/ui/tab-button";
 import { cn } from "@/lib/utils";
 import { dispatchUseCaseInteraction } from "@/lib/use-case-analytics";
-
-const controlType =
-  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]";
 
 export type CodingAgentPath = "gateway" | "hooks";
 
@@ -123,7 +121,13 @@ export function CodingAgentPathSwitcher() {
 
   return (
     <div className="flex flex-wrap items-center gap-1 px-4 py-1 sm:px-9">
-      <p className={cn("shrink-0 px-1", controlType, "text-text-tertiary")}>
+      <p
+        className={cn(
+          "shrink-0 px-1",
+          controlTextClassName,
+          "text-text-tertiary",
+        )}
+      >
         Set up
       </p>
       <div
@@ -135,34 +139,21 @@ export function CodingAgentPathSwitcher() {
         {PATHS.map((item) => {
           const active = value === item.value;
           return (
-            <div
+            <TabButton
               key={item.value}
-              className="relative flex items-center overflow-visible p-1 group button-wrapper"
+              ref={(node) => {
+                buttonRefs.current[item.value] = node;
+              }}
+              active={active}
+              role="radio"
+              aria-checked={active}
+              tabIndex={active ? 0 : -1}
+              onClick={() => selectPath(item.value)}
+              onKeyDown={handleKeyDown}
             >
-              <HoverCorners />
-              <button
-                ref={(node) => {
-                  buttonRefs.current[item.value] = node;
-                }}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                tabIndex={active ? 0 : -1}
-                onClick={() => selectPath(item.value)}
-                onKeyDown={handleKeyDown}
-                className={cn(
-                  "inline-flex h-[26px] items-center gap-2 whitespace-nowrap rounded-[2px] border px-[10px] text-left transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  controlType,
-                  active
-                    ? "border-line-structure bg-surface-bg text-text-primary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
-                    : "border-transparent bg-transparent text-text-tertiary hover:border-line-structure hover:bg-surface-bg hover:text-text-primary hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
-                )}
-              >
-                <span className="text-text-primary">{item.label}</span>
-                <span className="text-text-tertiary">{item.description}</span>
-              </button>
-            </div>
+              <span className="text-text-primary">{item.label}</span>
+              <span className="text-text-tertiary">{item.description}</span>
+            </TabButton>
           );
         })}
       </div>

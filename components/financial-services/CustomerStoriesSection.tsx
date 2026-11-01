@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCustomerStories } from "@/lib/getCustomerStories";
 import { HeroStatsStrip } from "@/components/home/HeroStatsStrip";
+import { controlTextClassName } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   financialServicesFeaturedStory,
   financialServicesStoryCards,
@@ -43,7 +45,7 @@ function StoryLogo({
 }) {
   if (!logo) {
     return (
-      <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+      <span className={cn(controlTextClassName, "text-text-tertiary")}>
         {company}
       </span>
     );
@@ -168,7 +170,7 @@ export function CustomerStoriesSection({
                 ("logoDark" in card ? card.logoDark : undefined);
               const body = (
                 <>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+                  <p className={cn(controlTextClassName, "text-text-tertiary")}>
                     Customer story · {card.category}
                   </p>
                   <StoryLogo

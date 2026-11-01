@@ -5,12 +5,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { CustomerStory } from "./CustomerCarousel";
 import { companyName } from "./customerStoryLabels";
-import { HoverCorners } from "@/components/ui/corner-box";
+import { controlTextClassName } from "@/components/ui/button";
+import { TabButton } from "@/components/ui/tab-button";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
-
-const controlType =
-  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]";
 
 const ROTATE_MS = 5500;
 
@@ -134,7 +132,7 @@ function QuoteSlide({
         <span
           className={cn(
             "mt-4 inline-flex w-fit bg-[#FBFF7A] px-2 py-1 text-text-primary",
-            controlType,
+            controlTextClassName,
           )}
         >
           {quoteTag}
@@ -157,7 +155,7 @@ function QuoteSlide({
           aria-label={`${story.frontMatter.ctaLabel === "Watch" ? "Watch" : "Read"} ${company} customer story`}
           className={cn(
             "inline-flex items-center gap-1.5 text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring",
-            controlType,
+            controlTextClassName,
           )}
         >
           {story.frontMatter.ctaLabel === "Watch"
@@ -213,7 +211,7 @@ export function CustomerStoriesHero({
           <h1
             className={cn(
               "mt-0 mb-8 font-normal text-text-tertiary",
-              controlType,
+              controlTextClassName,
             )}
           >
             Customer stories
@@ -285,27 +283,15 @@ export function CustomerStoriesHero({
           {stories.map((s, i) => {
             const isActive = i === active;
             return (
-              <div
+              <TabButton
                 key={s.route}
-                className="button-wrapper group relative flex shrink-0 items-center overflow-visible p-1"
+                active={isActive}
+                aria-current={isActive ? "true" : undefined}
+                onClick={() => setActive(i)}
+                wrapperClassName="shrink-0"
               >
-                <HoverCorners />
-                <button
-                  type="button"
-                  onClick={() => setActive(i)}
-                  aria-current={isActive ? "true" : undefined}
-                  className={cn(
-                    "inline-flex h-[26px] items-center whitespace-nowrap rounded-[2px] border px-[10px] transition-colors",
-                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    controlType,
-                    isActive
-                      ? "border-line-structure bg-surface-bg text-text-primary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
-                      : "border-transparent bg-transparent text-text-tertiary hover:border-line-structure hover:bg-surface-bg hover:text-text-primary hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
-                  )}
-                >
-                  {companyName(s)}
-                </button>
-              </div>
+                {companyName(s)}
+              </TabButton>
             );
           })}
         </div>
