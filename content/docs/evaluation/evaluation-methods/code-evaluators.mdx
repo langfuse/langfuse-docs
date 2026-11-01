@@ -5,6 +5,8 @@ description: Use Python or TypeScript code in Langfuse to run deterministic eval
 
 # Code evaluators
 
+import { Details, Summary } from "@/components/Details";
+
 <AvailabilityBanner
   availability={{
     hobby: "full",
@@ -32,7 +34,11 @@ Code evaluators run custom Python or TypeScript logic in Langfuse and return one
 
 Common examples include exact match checks, regex validation, JSON parseability, schema validation, keyword checks, tool-call checks, and custom business rules.
 
-Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead when the evaluation needs semantic judgment, rubric-based reasoning, or subjective assessment such as helpfulness, tone, or answer quality. To score live production traces with an evaluator and a rule, start with [Evaluate Production Traffic](/docs/evaluation/get-started/online).
+Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead when the evaluation needs semantic judgment, rubric-based reasoning, or subjective assessment such as helpfulness, tone, or answer quality.
+
+Code evaluators use the same targeting, rules, testing, and execution model as [other Langfuse evaluators](/docs/evaluation/evaluation-methods/evaluators). This page covers the `evaluate` function, context fields, and runtime constraints.
+
+To score live production traces with an evaluator and a rule, start with [Evaluate Production Traffic](/docs/evaluation/get-started/online).
 
 <Video
   src="https://static.langfuse.com/docs-videos/2026-08-21-evaluator-code-setup.mp4"
@@ -42,131 +48,7 @@ Use [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) instead
   description="Evaluators > “New evaluator” > browse templates, search for and pick “Detect User Frustration (ALL CAPS)” (TypeScript code evaluator). In “Test with sample observations”, filter to the support chatbot's generations, select one and click “Run test on this sample” to see the score and comment. “Create evaluator” at the bottom right saves it."
 />
 
-## How to use code evaluators?
-
-Code evaluators can run on two types of data: **Observations** (individual operations from live production traffic) or **Experiments** (controlled test datasets). Your choice depends on whether you're testing in development or
-monitoring production.
-
-### Decision tree
-
-import { Details, Summary } from "@/components/Details";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-<div className="flex flex-col items-center gap-6 py-8 my-6">
-
-<Card className="border-2 border-primary">
-  <CardContent className="p-4 text-center font-semibold">
-    Which data needs deterministic evaluation?
-  </CardContent>
-</Card>
-
-<div className="text-2xl text-primary">↓</div>
-
-<div className="flex flex-col md:flex-row gap-12 w-full justify-center">
-
-{/* Live Production Branch */}
-
-<div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
-  <Card className="border-2 border-primary w-full">
-    <CardHeader className="p-4">
-      <CardTitle className="text-base text-center">Live production data</CardTitle>
-      <CardDescription className="text-center text-xs">Monitor real-time traffic</CardDescription>
-    </CardHeader>
-  </Card>
-
-  <div className="text-xl text-primary">↓</div>
-
-  <Card className="border-2 border-primary w-full">
-    <CardContent className="p-3">
-      <div className="font-semibold text-sm">Observations</div>
-      <div className="text-xs text-muted-foreground mt-1">Individual operations: LLM calls, retrievals, tool calls</div>
-    </CardContent>
-  </Card>
-</div>
-
-{/* Offline Experiments Branch */}
-
-<div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
-  <Card className="border-2 border-primary w-full">
-    <CardHeader className="p-4">
-      <CardTitle className="text-base text-center">Offline experiment data</CardTitle>
-      <CardDescription className="text-center text-xs">Test in controlled environment</CardDescription>
-    </CardHeader>
-  </Card>
-
-  <div className="text-xl text-primary">↓</div>
-
-  <Card className="border-2 border-primary w-full">
-    <CardContent className="p-3">
-      <div className="font-semibold text-sm">Experiments</div>
-      <div className="text-xs text-muted-foreground mt-1">Controlled test cases with datasets</div>
-    </CardContent>
-  </Card>
-</div>
-
-</div>
-
-</div>
-
-<Callout type="info">
-**Production pattern**: Teams typically use **Experiments** during development to validate deterministic checks, then deploy **Observation-level** evaluators in production for scalable monitoring.
-</Callout>
-
-### Understanding each evaluation target
-
-<Tabs items={["Live production data", "Offline experiment data"]}>
-<Tab>
-
-Run evaluators on individual observations within your traces, such as LLM calls, retrieval operations, embedding generations, or tool calls.
-
-Use the **Is Root Observation** filter to target logical roots: observations without a physical parent or observations explicitly marked as application roots by the SDK. A logical root may still have a physical parent; use a name or type filter when you need a specific operation instead.
-
-**Why target observations**
-
-- **Operation-level precision**: Filter by observation type to evaluate only the operations that matter, not complete traces.
-- **Deterministic production monitoring**: Check JSON validity, schema compliance, exact matches, or business rules on live traffic.
-- **Compositional evaluation**: Run different code evaluators on different operations within one trace.
-- **Combined filtering**: Stack observation filters with trace filters such as `userId`, `sessionId`, tags, version, and metadata.
-
-**Data flow**
-
-When an incoming observation matches a rule's filters, the rule triggers its attached code evaluators. Scores are attached to the specific observation.
-
-**Example use cases**
-
-- Validate that final LLM responses are parseable JSON
-- Check whether a tool call includes required arguments
-- Enforce custom business rules for selected model calls
-
-</Tab>
-
-<Tab>
-
-Run evaluators on controlled test datasets to compare model versions, prompt variations, or system configurations in a reproducible environment.
-
-**Why target experiments**
-
-- You need deterministic pass/fail checks for development workflows
-- You want to compare multiple prompt versions or model configurations
-- You have datasets with expected outputs or metadata that your evaluator should inspect
-
-**Data flow**
-
-Each experiment run generates traces and observations that can be scored by your selected evaluators. The evaluator receives observation data plus experiment item context, such as expected output and item metadata.
-
-1. Create a dataset with test inputs and, optionally, expected outputs.
-2. Run an experiment via UI or SDK. See [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
-3. Select code evaluators to score the generated observations.
-4. Compare results across experiment runs to make data-driven decisions.
-
-**Example use case**
-
-- Compare two prompt versions on a dataset of support questions and check whether each response contains the required JSON fields
-
-</Tab>
-</Tabs>
-
-## Set up step-by-step
+## Set up step-by-step [#set-up-step-by-step]
 
 <Steps>
 
@@ -194,10 +76,7 @@ Unlike LLM-as-a-Judge, code evaluators do not have a separate variable-mapping s
 
 ### Save the evaluator
 
-After saving, you can:
-
-- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
-- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+After saving, attach a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) or use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui). See [Create, test, and reuse](/docs/evaluation/evaluation-methods/evaluators#create-test-and-reuse).
 
 </Steps>
 
@@ -468,9 +347,7 @@ function evaluate({
 
 ## Debug code evaluator executions [#debug-code-evaluator-executions]
 
-Every code evaluator execution creates a trace, giving you complete visibility into the evaluation process. This lets you inspect the selected inputs and outputs, experiment context, runtime latency, returned scores, logs, and errors.
-
-You can show code evaluator execution traces by filtering for the environment `langfuse-code-eval` in the tracing table:
+Every code evaluator execution creates a trace in the internal environment `langfuse-code-eval`. Filter the tracing table for that environment, or open the trace from the related score. See [Debug evaluator executions](/docs/evaluation/evaluation-methods/evaluators#debug-evaluator-executions) for statuses and the environments used by other evaluator types.
 
 <Frame fullWidth>
   ![Tracing table filtered to code evaluator
@@ -541,7 +418,7 @@ No. Code evaluators currently support standard libraries only. If your evaluatio
 <Details>
 <Summary>Can I create code evaluators via API or SDK?</Summary>
 
-Yes. In addition to the Langfuse UI, the stable public evaluator endpoints accept `type: "code"` to create code evaluators and reference them from evaluation rules. See the [Evaluators API reference](https://api.reference.langfuse.com/#tag/evaluators).
+Yes. In addition to the Langfuse UI, the stable public evaluator endpoints accept `type: "code"` to create code evaluators and reference them from evaluation rules. See [Programmatic setup via API](/docs/evaluation/evaluation-methods/evaluators#api) and the [Evaluators API reference](https://api.reference.langfuse.com/#tag/evaluators).
 
 If you want to run deterministic evaluation logic in your own application or CI pipeline, use [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) to ingest the resulting scores into Langfuse.
 
@@ -567,6 +444,10 @@ The only SDK requirement is OpenTelemetry-based ingestion:
 </Details>
 
 </FaqDetails>
+
+## Related resources
+
+- [Evaluators](/docs/evaluation/evaluation-methods/evaluators) covers targeting, rules, the evaluator API, and debugging shared by every managed evaluator type.
 
 ## GitHub Discussions
 
