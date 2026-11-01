@@ -53,8 +53,8 @@ Model choices apply to every gateway key in the organization. There are no per-k
 
 Requests can name a model in two ways:
 
-- **Prefixed with a credential:** `<credential>:<model>`, for example `openai-prod:gpt-4.1-mini`. This is the form `/models` returns, and it always routes to the named credential. The gateway removes the prefix before it calls the provider.
-- **Bare provider ID**, for example `gpt-4.1-mini` or `claude-sonnet-4-5`. The gateway picks the credential, see [routing](#routing). Bare IDs only work for models whose names start with `gpt-`, `codex-`, `claude-`, or `ft:` (OpenAI fine-tuned models).
+- **Prefixed with a credential:** `<credential>:<model>`, for example `openai-prod:<model>`. This is the form `/models` returns, and it always routes to the named credential. The gateway removes the prefix before it calls the provider.
+- **Bare provider ID**, the provider's own model name without a prefix. The gateway picks the credential, see [routing](#routing). Bare IDs only work for models whose names start with `gpt-`, `codex-`, `claude-`, or `ft:` (OpenAI fine-tuned models).
 
 Use the prefixed form for models with other names, for example OpenAI `o`-series models, and when your organization has several credentials for the same provider. Coding agents that discover models from `/models`, such as [GitHub Copilot](/docs/ai-gateway/coding-agents/github-copilot), use the prefixed form automatically.
 

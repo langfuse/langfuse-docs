@@ -70,7 +70,7 @@ curl -s "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models?limit=1000" \
   -H "anthropic-version: 2023-06-01" | head -c 300
 ```
 
-Each ID has the form `<credential>:<model>`, for example `openai-prod:gpt-4.1-mini`. A model list means that the key, the organization's access, and the provider credential work. See [model IDs](/docs/ai-gateway/features/models#model-ids) for which form to send.
+Each ID has the form `<credential>:<model>`, for example `openai-prod:<model>`. A model list means that the key, the organization's access, and the provider credential work. See [model IDs](/docs/ai-gateway/features/models#model-ids) for which form to send.
 
 ### Send a request [#send-a-request]
 
@@ -81,10 +81,10 @@ curl -si "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
   -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" \
   -H "Content-Type: application/json" \
   -H "langfuse-tags: first-request" \
-  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Say hello"}]}'
+  -d '{"model":"<model-id>","messages":[{"role":"user","content":"Say hello"}]}'
 ```
 
-Replace the model with one from your list. The response is OpenAI's own response. Its headers include `langfuse-trace-id`, the ID of the trace the gateway recorded. To use an SDK or the Anthropic Messages API instead, see [API formats](/docs/ai-gateway/features/api-formats).
+Replace `<model-id>` with an ID from your list. The response is OpenAI's own response. Its headers include `langfuse-trace-id`, the ID of the trace the gateway recorded. To use an SDK or the Anthropic Messages API instead, see [API formats](/docs/ai-gateway/features/api-formats).
 
 ### View the trace [#view-the-trace]
 

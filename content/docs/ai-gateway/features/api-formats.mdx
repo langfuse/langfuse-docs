@@ -39,7 +39,7 @@ curl "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
   -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" \
   -H "Content-Type: application/json" \
   -H "langfuse-tags: chat-completions" \
-  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Say hello"}]}'
+  -d '{"model":"<model-id>","messages":[{"role":"user","content":"Say hello"}]}'
 ```
 
 ```python
@@ -54,11 +54,13 @@ client = OpenAI(
 )
 
 completion = client.chat.completions.create(
-    model="gpt-4.1-mini",
+    model="<model-id>",
     messages=[{"role": "user", "content": "Say hello"}],
 )
 print(completion.choices[0].message.content)
 ```
+
+Replace `<model-id>` with an ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models).
 
 All [request headers](/docs/ai-gateway/features/request-headers) work on this route.
 

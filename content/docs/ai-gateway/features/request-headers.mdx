@@ -109,7 +109,7 @@ To see the headers, add `-i` to a `curl` call:
 curl -si "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
   -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Say hello"}]}' \
+  -d '{"model":"<model-id>","messages":[{"role":"user","content":"Say hello"}]}' \
   | grep -i '^langfuse-'
 ```
 

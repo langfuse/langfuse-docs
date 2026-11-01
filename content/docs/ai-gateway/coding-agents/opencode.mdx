@@ -20,8 +20,8 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "anthropic/claude-sonnet-4-6",
-  "small_model": "anthropic/claude-haiku-4-5-20251001",
+  "model": "anthropic/<model-id>",
+  "small_model": "anthropic/<small-model-id>",
   "providers": {
     "anthropic": {
       "settings": {
@@ -50,6 +50,7 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
 }
 ```
 
+- Replace `<model-id>` and `<small-model-id>` with model IDs from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). OpenCode uses `small_model` for titles, so a small, fast model works best.
 - The Anthropic `baseURL` **includes `/v1`**, because OpenCode appends only `/messages`. Claude Code and pi are the opposite.
 - The built-in OpenAI provider uses the Responses API. OpenAI-compatible providers that use Chat Completions are supported by the gateway but have not been verified with OpenCode.
 - To set a session per run, add `"langfuse-session-id": "{env:LF_SESSION}"`. An unset variable sends an empty value, which is ignored.
@@ -69,7 +70,7 @@ To keep your existing OpenCode account connections, configure the gateway as a s
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "langfuse/gpt-5-mini",
+  "model": "langfuse/<model-id>",
   "providers": {
     "langfuse": {
       "package": "@opencode/ai/providers/openai-compatible/responses",
@@ -83,7 +84,7 @@ To keep your existing OpenCode account connections, configure the gateway as a s
         "langfuse-environment": "local"
       },
       "models": {
-        "gpt-5-mini": {}
+        "<model-id>": {}
       }
     }
   }

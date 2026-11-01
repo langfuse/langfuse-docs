@@ -40,7 +40,7 @@ Replace the placeholders with your gateway key and email. The file is only reada
 Add a provider to `~/.codex/config.toml` (or a project's `.codex/config.toml`). `env_key` and `env_http_headers` read the variables that Codex loaded from `.env`:
 
 ```toml
-model = "gpt-5.4-mini"
+model = "<model-id>"               # an OpenAI model ID from /models
 model_provider = "langfuse"
 
 [model_providers.langfuse]
@@ -71,7 +71,7 @@ Codex sends its own turn ID, so the gateway groups all model rounds of a turn in
 
 - After changing gateway credentials, restart the Codex app-server daemon with `codex app-server daemon restart`. The daemon can keep using credentials loaded before the change until it restarts.
 - Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
-- A global `model_reasoning_effort` makes non-reasoning models (`gpt-4.1*`) fail with a `400`. Some small models (`gpt-5.4-nano`) reject Codex's `tool_search` tool.
+- A global `model_reasoning_effort` makes non-reasoning models fail with a `400`. Some small models reject Codex's `tool_search` tool.
 - Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Each retry is its own generation in the same trace.
 - Cancelled or failed Codex calls currently show inflated, estimated usage and cost. Ignore cost on `ERROR` and `WARNING` generations until the fix ships.
 - Keep websocket features off for this provider. The gateway serves HTTP server-sent events only.
