@@ -1,5 +1,5 @@
 ---
-title: Request Headers
+title: Request headers
 seoTitle: "Langfuse AI Gateway request headers (beta)"
 description: Optional langfuse-* request headers that set the user, session, tags, metadata, environment, and trace name of AI Gateway generations, and the request, trace, and observation IDs returned in response headers.
 noindex: true
@@ -39,7 +39,38 @@ langfuse-metadata: repo:langfuse-docs,branch:main
 - A static `langfuse-trace-name` renames every trace. Use it for scripted or CI runs.
 - Explicit headers take precedence over values the gateway infers from the agent. Empty values are ignored.
 - `langfuse-environment` must match the [environment format](/docs/observability/features/environments): lowercase letters, numbers, `-` and `_`, at most 40 characters, and not starting with `langfuse`. Any other value is recorded as `default`, and the request still succeeds.
-- Context headers are capped at 8 KiB in total and 1 KiB per field. Invalid values are dropped without failing the request.
+- Header values are percent-decoded. Encode a literal `%` as `%25`, and a comma inside a tag or metadata value as `%2C`.
+- Invalid values are dropped without failing the request.
+
+<Callout type="warning">
+  The gateway ignores **all** context headers of a request, including
+  `traceparent` and `baggage`, when they add up to more than 8 KiB. Each value
+  is also capped at 1 KiB. Keep metadata and tags short.
+</Callout>
+
+## Trace context and baggage [#trace-context]
+
+If your client already traces its work, for example with the [Langfuse SDK](/docs/observability/sdk/overview) or OpenTelemetry, the gateway can record its generation inside your trace instead of starting a new one:
+
+- **`traceparent`** (W3C Trace Context): the gateway uses its trace ID and nests the generation under the calling span. `tracestate` is kept. This is also how [turn grouping](/docs/ai-gateway/coding-agents/claude-code#turn-grouping) works for Claude Code.
+- **`baggage`** (W3C Baggage): the gateway reads these entries, the same keys the Langfuse SDKs propagate:
+
+| Baggage key                  | Same as                |
+| ---------------------------- | ---------------------- |
+| `langfuse_user_id`           | `langfuse-user-id`     |
+| `langfuse_session_id`        | `langfuse-session-id`  |
+| `langfuse_trace_name`        | `langfuse-trace-name`  |
+| `langfuse_environment`       | `langfuse-environment` |
+| `langfuse_tags`              | `langfuse-tags`        |
+| `langfuse_metadata_<key>`    | `langfuse-metadata`    |
+
+When both are set, the `langfuse-*` header wins over the baggage entry. User keys ignore `langfuse_user_id`, like the header.
+
+<Callout type="info">
+  Don't also trace the same model call with a provider SDK integration, such as
+  the Langfuse OpenAI integration. The call would be recorded twice: once by the
+  integration and once by the gateway.
+</Callout>
 
 ## Inferred agent context [#inferred-agent-context]
 
@@ -60,6 +91,10 @@ The gateway adds these headers to its responses:
 | `langfuse-request-id`     | Every response, including authentication failures, gateway errors, and streams (sent with the first headers) | The gateway request ID, a UUIDv7                                       |
 | `langfuse-trace-id`       | Responses to calls that produce a generation                                                                 | The generation's trace ID, after `traceparent` and agent turn grouping |
 | `langfuse-observation-id` | Responses to calls that produce a generation                                                                 | The generation's observation ID                                        |
+| `langfuse-organization-id` | After the gateway key is resolved                                                                          | Your Langfuse organization ID                                          |
+| `langfuse-project-id`      | After the gateway key is resolved, when an ingestion project is set                                        | The ingestion project ID                                               |
+| `langfuse-provider`        | After the gateway called a provider                                                                        | `openai` or `anthropic`                                                |
+| `langfuse-provider-connection-id` | After the gateway called a provider                                                                 | The ID of the provider credential that served the call                 |
 
 - Calls that produce a generation are `POST /openai/v1/responses`, `/openai/v1/responses/compact`, `/openai/v1/chat/completions`, and `/anthropic/v1/messages`. The trace and observation IDs are also set on `502` and `504` responses for provider failures, which still record a generation. Model listings, `count_tokens`, and requests rejected before they reach the provider (for example, with a `401`) omit them.
 - Recording is best-effort, so in rare cases a returned trace ID has no stored trace.
