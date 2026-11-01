@@ -11,7 +11,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-The Langfuse AI Gateway is a relay for native provider APIs. Your application or coding agent talks to Langfuse instead of OpenAI or Anthropic. The gateway forwards each request unchanged, using a provider credential that your organization stores in Langfuse, and records the call in Langfuse. You get full traces of every model call without installing an SDK or changing code: you only change the base URL and the API key.
+The Langfuse AI Gateway is a relay for native provider APIs. Your application or coding agent talks to Langfuse instead of OpenAI or Anthropic. The gateway forwards the native request body, using a provider credential that your organization stores in Langfuse, and records the call in Langfuse. It only changes what routing needs: the credential prefix on the model ID, the authentication headers, and, for streamed Chat Completions, a request for usage (see [what the gateway changes](/docs/ai-gateway/troubleshooting-and-faq#does-the-gateway-change-requests)). You get full traces of every model call without installing an SDK or changing code: you only change the base URL and the API key.
 
 Without the gateway, every developer and application needs its own provider key, and tracing depends on each client's instrumentation. With the gateway, provider keys stay in Langfuse, each person or service authenticates with a gateway API key, and every call shows up as a trace with its model, usage, and cost.
 
@@ -29,6 +29,33 @@ There are two kinds of keys:
 - **Gateway API keys** authenticate clients to the gateway. A key is either tied to a person or issued for a service account. See [API keys](/docs/ai-gateway/features/api-keys).
 
 Admins also control which provider models gateway keys can call. See [Models](/docs/ai-gateway/features/models). To track cost and usage per user, API key, and model, see [Analytics](/docs/ai-gateway/features/analytics).
+
+## What the gateway doesn't do (beta) [#limits]
+
+The gateway is a relay, not a router or a proxy cache. During the beta, it:
+
+- doesn't retry failed provider calls or fall back to another credential or model
+- doesn't cache responses
+- doesn't translate between API formats, so an OpenAI-format request can't reach a Claude model
+- has no per-key budgets, spend limits, or rate limits
+- only supports OpenAI and Anthropic, at their official API URLs
+
+See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations) for size and time limits.
+
+## Availability and pricing [#availability]
+
+The gateway is available on Langfuse Cloud in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/ai-gateway/get-started/first-request#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to OpenAI or Anthropic and processed under your agreement with them.
+
+Each generation the gateway records counts as a [billable unit](/docs/administration/billable-units), like any other observation. Your provider bills model usage to your own provider account.
+
+On self-hosted Langfuse, you deploy the gateway next to your instance. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
+
+<Callout type="warning">
+  **HIPAA region:** requests are forwarded to the provider you configure, using
+  your credentials and on your instruction. Before you send protected health
+  information (PHI) through the gateway, make sure you have a [BAA with
+  Langfuse](/security/hipaa) and a BAA with that provider.
+</Callout>
 
 ## Next steps [#next-steps]
 

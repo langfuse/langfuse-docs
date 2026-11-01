@@ -11,7 +11,7 @@ import { Book, Bot, KeyRound } from "lucide-react";
 
 <ChangelogHeader />
 
-The [Langfuse AI Gateway](/docs/ai-gateway/overview) is now in public beta. Your application or coding agent sends its OpenAI or Anthropic requests to Langfuse instead of the provider. The gateway forwards each request unchanged with a provider credential your organization stores in Langfuse, and records the call as a generation. You only change the base URL and the API key: no SDK, no code changes.
+The [Langfuse AI Gateway](/docs/ai-gateway/overview) is now in public beta. Your application or coding agent sends its OpenAI or Anthropic requests to Langfuse instead of the provider. The gateway forwards the native request with a provider credential your organization stores in Langfuse, and records the call as a generation. You only change the base URL and the API key: no SDK, no code changes.
 
 - **Give your team Claude Code or Codex without sharing provider keys.** Everyone gets their own gateway key, and the provider key never leaves Langfuse.
 - **See what your coding agents cost.** Break spend down by teammate, key, and model, and open the full trace of any session.
@@ -33,7 +33,7 @@ The gateway serves the native OpenAI Responses, OpenAI Chat Completions, and Ant
 
 ## Track spend per user, key, and model [#analytics]
 
-The [**Analytics**](/docs/ai-gateway/features/analytics) tab in the AI Gateway settings shows total cost, requests, and tokens, cost over time, and the top users, API keys, and models by cost. Filter by user or API key to find where a spike came from. Gateway traces are regular Langfuse traces, so you can also build [custom dashboards](/docs/metrics/features/custom-dashboards) on key metadata, for example cost per team or cost center.
+Owners and admins can open the [**Analytics**](/docs/ai-gateway/features/analytics) tab in the AI Gateway settings. It shows total cost, requests, and tokens, cost over time, and the top users, API keys, and models by cost. Filter by user or API key to find where a spike came from. If some calls use models without a Langfuse price, an alert says so and links to [custom model prices](/docs/observability/features/token-and-cost-tracking#custom-model-definitions). Gateway traces are regular Langfuse traces, so you can also build [custom dashboards](/docs/metrics/features/custom-dashboards) on key metadata, for example cost per team or cost center.
 
 ## Every request is a trace [#tracing]
 
@@ -56,7 +56,9 @@ Point your agent at the gateway by changing its base URL and API key. No plugin 
 
 ## Availability [#availability]
 
-The AI Gateway is available on Langfuse Cloud in the EU, US, JP, and HIPAA regions. Each region has its own gateway host, and your data stays in your organization's region. Self-hosted deployments can run the open source gateway next to Langfuse.
+The AI Gateway is available on Langfuse Cloud in the EU, US, JP, and HIPAA regions. Each region has its own [gateway host](/docs/ai-gateway/get-started/first-request#gateway-hosts). Gateway traces are stored in your organization's Langfuse region; requests are forwarded to OpenAI or Anthropic and processed under your agreement with them. On the HIPAA region, make sure you have a [BAA with Langfuse](/security/hipaa) and with your model provider before you send PHI. Self-hosted deployments can [run the open source gateway](/self-hosting/configuration/ai-gateway) next to Langfuse.
+
+Each recorded generation counts as a [billable unit](/docs/administration/billable-units), like any other observation. Your provider bills model usage to your own provider account.
 
 During the beta, the gateway supports OpenAI and Anthropic. Behavior, routes, and headers can still change. We'd love to hear how it works for you: share feedback via the chat or on [GitHub](https://github.com/orgs/langfuse/discussions).
 
