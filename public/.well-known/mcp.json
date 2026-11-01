@@ -1,4 +1,23 @@
 {
+  "version": "1.0.0",
+  "servers": [
+    {
+      "name": "langfuse-docs",
+      "url": "https://langfuse.com/api/mcp",
+      "transport": "http",
+      "authentication": "none",
+      "description": "Public MCP server for the Langfuse documentation. Search the docs, fetch individual pages, and get a high-level overview of Langfuse.",
+      "card": "https://langfuse.com/.well-known/mcp/langfuse-docs.json"
+    },
+    {
+      "name": "langfuse",
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "transport": "http",
+      "authentication": "basic",
+      "description": "Authenticated MCP server for Langfuse data (prompts, datasets, scores, observations, metrics, and more). Each API key pair is scoped to one project; send it as an HTTP Basic Authorization header (public key as username, secret key as password). This URL is Cloud EU; the other regions are https://us.cloud.langfuse.com/api/public/mcp, https://jp.cloud.langfuse.com/api/public/mcp, and https://hipaa.cloud.langfuse.com/api/public/mcp. Self-hosted deployments serve it at /api/public/mcp.",
+      "card": "https://langfuse.com/.well-known/mcp/langfuse.json"
+    }
+  ],
   "mcpServers": {
     "langfuse-docs": {
       "url": "https://langfuse.com/api/mcp",
@@ -9,6 +28,14 @@
         "getLangfuseDocsPage",
         "getLangfuseOverview"
       ]
+    },
+    "langfuse": {
+      "url": "https://cloud.langfuse.com/api/public/mcp",
+      "transport": "streamable-http",
+      "description": "Read and write Langfuse data (prompts, datasets, scores, observations, metrics, and more) for one project. Authenticate with an HTTP Basic Authorization header built from a project API key pair. Cloud EU endpoint; see https://langfuse.com/docs/api-and-data-platform/features/mcp-server for other regions and the full tool list.",
+      "headers": {
+        "Authorization": "Basic {base64(public_key:secret_key)}"
+      }
     }
   }
 }
