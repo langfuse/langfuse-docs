@@ -94,7 +94,7 @@ Add more dimensions only when they change behavior or help interpret results. Ch
 
 Choose the evaluation style before you write expected outputs. This determines what the dataset item needs to contain and how useful the first results will be.
 
-Use [reference-based evaluation](/academy/evaluate#reference-based-vs-reference-free) when each item has a known target: a correct label, expected tool call, required fact, structured output, reference answer, or expected next action. This is the best fit for regression tests and CI gates because failures are easier to inspect. The trade-off is that references take work to write and can become brittle if they over-specify wording instead of behavior.
+Use [reference-based evaluation](/academy/evaluate#reference-based-vs-reference-free) when each item has a known target: a correct label, expected tool call, required fact, structured output, reference answer, or expected next action. This is the best fit for regression tests and CI gates because failures are easier to inspect. The trade-off is that references take work to write and can become brittle if they over-specify wording instead of behavior. When that target is a regulated decision, [Generating ground truth](/academy/datasets/generating-ground-truth) covers historical cases, shadow runs, synthetic inputs, and human review.
 
 Use [reference-free evaluation](/academy/evaluate#reference-based-vs-reference-free) when there is no stable expected output, but every item can be judged against the same rule or rubric. This works for checks such as valid JSON, language match, grounding in provided context, safety, or tone. The trade-off is that the evaluator or rubric carries more weight, so ambiguous rubrics produce ambiguous results.
 
