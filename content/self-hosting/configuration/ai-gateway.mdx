@@ -260,9 +260,9 @@ The chart sets no proxy annotations by default, because they depend on your Ingr
 
 The gateway serves two unauthenticated endpoints on port `8080`, which the chart uses as Kubernetes probes:
 
-| Endpoint  | Probe     | Response                                                                                                                                                                  |
-| --------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/health` | Liveness  | `200 {"status":"ok"}` while the process serves HTTP, including during shutdown. It does not check dependencies.                                                           |
+| Endpoint  | Probe     | Response                                                                                                                                                                                            |
+| --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/health` | Liveness  | `200 {"status":"ok"}` while the process serves HTTP, including during shutdown. It does not check dependencies.                                                                                     |
 | `/ready`  | Readiness | `200 {"status":"ready"}` once the gateway is configured with a web URL and service key. `503 {"status":"unconfigured"}` without that configuration and `503 {"status":"draining"}` during shutdown. |
 
 `/ready` does not call web or the providers, so it stays `200` when they are unreachable. Those failures show up as errors on individual requests and in the gateway logs. Use `/ready` for load balancer health checks.
@@ -301,13 +301,13 @@ langfuse:
 
 Within an organization, [organization roles](/docs/administration/rbac) control what users can do:
 
-| Organization role | Gateway access                                                                                       |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Organization role | Gateway access                                                                                                 |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- |
 | Owner, Admin      | Manage the gateway setup, provider connections, models, analytics, and all gateway API keys (`gateway:manage`) |
-| Member            | Create and use their own gateway API keys (`gateway:invoke`)                                         |
-| AI Gateway        | Same as Member, with no access to projects or other organization settings                            |
-| Viewer            | View the enabled models, without gateway API keys (`gateway:read`)                                   |
-| None              | No gateway access                                                                                    |
+| Member            | Create and use their own gateway API keys (`gateway:invoke`)                                                   |
+| AI Gateway        | Same as Member, with no access to projects or other organization settings                                      |
+| Viewer            | View the enabled models, without gateway API keys (`gateway:read`)                                             |
+| None              | No gateway access                                                                                              |
 
 When a user's role changes to one without gateway access, Langfuse deletes their gateway API keys. See [roles and permissions](/docs/administration/rbac) for all scopes.
 
@@ -337,26 +337,26 @@ The chart sets these variables for you. You only need them when you deploy the g
 
 **Gateway container**
 
-| Variable                                                 | Default        | Description                                                                                                                                                             |
-| -------------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Variable                                                 | Default        | Description                                                                                                                                                                                                                    |
+| -------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `LANGFUSE_AI_GATEWAY_WEB_URL`                            | Required       | Base URL of Langfuse Web, including any [custom base path](/self-hosting/configuration/custom-base-path). Without it, `/ready` returns `503` and inference is disabled. With the chart, set it with `langfuse.gateway.webUrl`. |
-| `LANGFUSE_AI_GATEWAY_SERVICE_KEY`                        | Required       | Shared key that authenticates the gateway to web. Must match the value on web.                                                                                          |
-| `LANGFUSE_AI_GATEWAY_ALLOW_HTTP_WEB_URL`                 | `false`        | Set to `true` to accept a plain `http://` web URL. Only for private networks such as web's in-cluster Service.                                                          |
-| `LANGFUSE_AI_GATEWAY_LISTEN_ADDRESS`                     | `0.0.0.0:8080` | Address and port the gateway listens on.                                                                                                                                |
-| `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`   | `10`           | Seconds to drain in-flight requests after `SIGTERM`, from 1 to 300. The chart sets `300`.                                                                               |
-| `LANGFUSE_AI_GATEWAY_TELEMETRY_SHUTDOWN_TIMEOUT_SECONDS` | `10`           | Seconds to upload remaining generations after the drain, from 1 to 300. The chart sets `30`.                                                                            |
-| `LANGFUSE_AI_GATEWAY_MAX_REQUEST_BYTES`                  | `16777216`     | Largest accepted request body (16 MiB).                                                                                                                                 |
-| `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES`                | `1073741824`   | Memory that all in-flight requests of one pod may reserve together (1 GiB). Set the pod's memory limit to at least this value plus 512 MiB.                             |
-| `LANGFUSE_AI_GATEWAY_MAX_EXECUTION_SECONDS`              | `600`          | Longest time a request may run, at least 60. Upload tokens last 15 minutes, so generations of longer requests may be dropped.                                           |
-| `LANGFUSE_AI_GATEWAY_STALL_TIMEOUT_SECONDS`              | `120`          | Longest time a request may go without progress.                                                                                                                         |
-| `LANGFUSE_AI_GATEWAY_REQUEST_MEMORY_OVERHEAD_BYTES`      | `2097152`      | Memory every in-flight request reserves on top of its body (2 MiB), for response capture and buffers.                                                                   |
-| `LANGFUSE_AI_GATEWAY_TELEMETRY_BUFFER_BYTES`             | `67108864`     | Memory for generations waiting to be uploaded (64 MiB), from 4 MiB to 4 GiB.                                                                                           |
-| `LANGFUSE_AI_GATEWAY_SHUTDOWN_TIMEOUT_SECONDS`           |                | Deprecated name of `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`.                                                                                              |
-| `OTEL_EXPORTER_OTLP_ENDPOINT`                            |                | Optional OTLP/HTTP endpoint for the gateway's own operational traces. Unrelated to the generations it records in Langfuse.                                               |
-| `OTEL_SERVICE_NAME`                                      | `ai-gateway`   | Service name of the operational traces.                                                                                                                                 |
-| `OTEL_TRACES_SAMPLER_ARG`                                |                | Sampling ratio of the operational traces, from 0 to 1.                                                                                                                  |
-| `LANGFUSE_LOG_LEVEL`                                     | `info`         | `debug`, `info`, `warn`, `error`, or `fatal`. The gateway does not accept `trace`; the chart maps it to `debug`.                                                        |
-| `LANGFUSE_LOG_FORMAT`                                    | `text`         | `text` or `json`.                                                                                                                                                       |
+| `LANGFUSE_AI_GATEWAY_SERVICE_KEY`                        | Required       | Shared key that authenticates the gateway to web. Must match the value on web.                                                                                                                                                 |
+| `LANGFUSE_AI_GATEWAY_ALLOW_HTTP_WEB_URL`                 | `false`        | Set to `true` to accept a plain `http://` web URL. Only for private networks such as web's in-cluster Service.                                                                                                                 |
+| `LANGFUSE_AI_GATEWAY_LISTEN_ADDRESS`                     | `0.0.0.0:8080` | Address and port the gateway listens on.                                                                                                                                                                                       |
+| `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`   | `10`           | Seconds to drain in-flight requests after `SIGTERM`, from 1 to 300. The chart sets `300`.                                                                                                                                      |
+| `LANGFUSE_AI_GATEWAY_TELEMETRY_SHUTDOWN_TIMEOUT_SECONDS` | `10`           | Seconds to upload remaining generations after the drain, from 1 to 300. The chart sets `30`.                                                                                                                                   |
+| `LANGFUSE_AI_GATEWAY_MAX_REQUEST_BYTES`                  | `16777216`     | Largest accepted request body (16 MiB).                                                                                                                                                                                        |
+| `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES`                | `1073741824`   | Memory that all in-flight requests of one pod may reserve together (1 GiB). Set the pod's memory limit to at least this value plus 512 MiB.                                                                                    |
+| `LANGFUSE_AI_GATEWAY_MAX_EXECUTION_SECONDS`              | `600`          | Longest time a request may run, at least 60. Upload tokens last 15 minutes, so generations of longer requests may be dropped.                                                                                                  |
+| `LANGFUSE_AI_GATEWAY_STALL_TIMEOUT_SECONDS`              | `120`          | Longest time a request may go without progress.                                                                                                                                                                                |
+| `LANGFUSE_AI_GATEWAY_REQUEST_MEMORY_OVERHEAD_BYTES`      | `2097152`      | Memory every in-flight request reserves on top of its body (2 MiB), for response capture and buffers.                                                                                                                          |
+| `LANGFUSE_AI_GATEWAY_TELEMETRY_BUFFER_BYTES`             | `67108864`     | Memory for generations waiting to be uploaded (64 MiB), from 4 MiB to 4 GiB.                                                                                                                                                   |
+| `LANGFUSE_AI_GATEWAY_SHUTDOWN_TIMEOUT_SECONDS`           |                | Deprecated name of `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`.                                                                                                                                                     |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`                            |                | Optional OTLP/HTTP endpoint for the gateway's own operational traces. Unrelated to the generations it records in Langfuse.                                                                                                     |
+| `OTEL_SERVICE_NAME`                                      | `ai-gateway`   | Service name of the operational traces.                                                                                                                                                                                        |
+| `OTEL_TRACES_SAMPLER_ARG`                                |                | Sampling ratio of the operational traces, from 0 to 1.                                                                                                                                                                         |
+| `LANGFUSE_LOG_LEVEL`                                     | `info`         | `debug`, `info`, `warn`, `error`, or `fatal`. The gateway does not accept `trace`; the chart maps it to `debug`.                                                                                                               |
+| `LANGFUSE_LOG_FORMAT`                                    | `text`         | `text` or `json`.                                                                                                                                                                                                              |
 
 Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The global `langfuse.additionalEnv` does not apply to the gateway.
 
@@ -376,7 +376,7 @@ Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The 
 | `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`   |          | Previous JWT public key, accepted during [rotation](#rotate-keys).                                                                                  |
 | `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`       | Derived  | Optional. Key ID of the previous public key.                                                                                                        |
 | `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_ENABLED`     | `true`   | Caches key lookups for the gateway.                                                                                                                 |
-| `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_TTL_SECONDS` | `60`     | How long a cached key lookup is used. Bounds how long a role change that doesn't delete a key takes to apply.                                      |
+| `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_TTL_SECONDS` | `60`     | How long a cached key lookup is used. Bounds how long a role change that doesn't delete a key takes to apply.                                       |
 | `ENCRYPTION_KEY`                                | Required | Encrypts stored provider credentials. Changing it makes them unreadable.                                                                            |
 
 ## Troubleshooting [#troubleshooting]
