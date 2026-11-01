@@ -103,6 +103,17 @@ Build the JSON state from observation input, output, metadata, tool calls, **Exp
   Jev cannot generate text.
 </Callout>
 
+### Nace (Drex) [#connect-nace-drex]
+
+Nace serves its [Drex models](https://console.nace.ai/docs/drex/reference/models) through the System One API. Add a connection with the adapter **typesafe**, choose the **Nace (Drex)** upstream, and paste a **Nace API key**. Like the Jev upstreams, it needs no base URL or extra headers (the preset uses `https://console.nace.ai/v1`). The JSON state and backtick field references work the same way as for Jev.
+
+The connection offers `drex-max` and `drex-v2.0` as default models. Langfuse prices both models by input tokens only, since output tokens are not billed: `drex-max` at $0.03 and `drex-v2.0` at $0.06 per 1M input tokens. See [Nace pricing](https://console.nace.ai/docs/drex/reference/pricing).
+
+<Callout type="info">
+  Nace does not serve `jev-latest`, so pick a Drex model for evaluators that use
+  a Nace connection.
+</Callout>
+
 ### Other System One-compatible models [#connect-system-one-compatible]
 
 Other vendors serve decision models through TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one) (`POST <base URL>/systemone`). Add a **TypeSafe (System One)** connection, select the **Custom** upstream, enter the vendor's base URL without the `/systemone` suffix, and add the model name under **Custom models**. Langfuse authenticates with `Authorization: Bearer <API key>`; use **Extra Headers** for any additional headers the vendor requires.
