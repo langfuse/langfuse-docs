@@ -27,7 +27,7 @@ Configure the gateway in the Claude Desktop UI:
 2. If the **Developer** menu is unavailable, open **Help → Troubleshooting** and enable Developer Mode.
 3. Open **Developer → Configure Third-Party Inference**.
 4. Under **Connection**, set **Inference provider** to **Gateway**.
-5. Set **Gateway base URL** to `https://staging.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
+5. Set **Gateway base URL** to `https://gateway.cloud.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
 6. Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
 7. Under **Custom headers**, add `langfuse-user-id` with your email or handle as the value, for example `<you>@example.com`.
 8. Under **Capabilities → General restrictions**, we recommend adding `*` to **Allowed egress hosts**. Otherwise, Claude can't reach websites or services outside the gateway, such as GitHub, and it won't ask you for permission.
@@ -71,7 +71,7 @@ To make the setup persistent, use `~/.claude/settings.json`:
 ```json
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "https://staging.langfuse.com/anthropic",
+    "ANTHROPIC_BASE_URL": "https://gateway.cloud.langfuse.com/anthropic",
     "ANTHROPIC_AUTH_TOKEN": "<your-gateway-key>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
     "ANTHROPIC_CUSTOM_HEADERS": "langfuse-user-id: <you>@example.com\nlangfuse-tags: claude-code\nlangfuse-environment: local"

@@ -38,16 +38,24 @@ A key issued as your user records you as the user of every trace, and stops work
 Export the gateway host and key in your shell. The examples and most coding agent guides use these variables. [Codex](/docs/ai-gateway/coding-agents/codex#store-the-key) reads the key from `~/.codex/.env` instead, so it persists across sessions.
 
 ```sh
-export LANGFUSE_GATEWAY_HOST="https://staging.langfuse.com"   # staging host for this internal preview
+export LANGFUSE_GATEWAY_HOST="https://gateway.cloud.langfuse.com"   # EU; see the table below for other regions
 export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-<Callout type="info">
-  `https://staging.langfuse.com` is the **staging** host for this internal
-  preview, and all snippets in these docs use it. The production host will
-  differ. The gateway is path-routed: OpenAI under `/openai/v1`, Anthropic under
-  `/anthropic/v1`.
-</Callout>
+#### Gateway hosts [#gateway-hosts]
+
+Use the gateway host of the region your organization is in. A gateway key only works on its own region's host.
+
+| Region | Langfuse Cloud             | Gateway host                               |
+| ------ | -------------------------- | ------------------------------------------ |
+| EU     | `cloud.langfuse.com`       | `https://gateway.cloud.langfuse.com`       |
+| US     | `us.cloud.langfuse.com`    | `https://gateway.us.cloud.langfuse.com`    |
+| JP     | `jp.cloud.langfuse.com`    | `https://gateway.jp.cloud.langfuse.com`    |
+| HIPAA  | `hipaa.cloud.langfuse.com` | `https://gateway.hipaa.cloud.langfuse.com` |
+
+On self-hosted Langfuse, use the gateway URL your deployment configured (`LANGFUSE_AI_GATEWAY_PUBLIC_URL`, see [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway)).
+
+The gateway is path-routed: OpenAI under `/openai/v1`, Anthropic under `/anthropic/v1`. All snippets in these docs use the EU host.
 
 ### List models [#list-models]
 
