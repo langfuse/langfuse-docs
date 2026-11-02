@@ -1,10 +1,12 @@
 "use client";
 
 import NextLink from "next/link";
+import { usePathname } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { HoverCorners } from "@/components/ui/corner-box";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
+import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type BlogCloudCtaProps = {
   /** `stack` for the narrow right column. `row` for the end of the article. */
@@ -17,17 +19,20 @@ function CtaLink({
   variant,
   children,
   className,
+  onClick,
 }: {
   href: string;
   variant: "primary" | "secondary";
   children: string;
   className?: string;
+  onClick?: () => void;
 }) {
   return (
     <div className={cn("group relative flex items-center p-1", className)}>
       <HoverCorners />
       <NextLink
         href={href}
+        onClick={onClick}
         className={cn(
           buttonVariants({ variant, size: "small" }),
           "justify-center px-2 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]",
@@ -48,6 +53,10 @@ export function BlogCloudCta({
   layout = "stack",
   className,
 }: BlogCloudCtaProps) {
+  const pathname = usePathname() ?? "/";
+  const capture = usePostHogClientCapture();
+  const placement = layout === "stack" ? "sidebar" : "article";
+
   const copy = (
     <div className={layout === "row" ? "min-w-0" : undefined}>
       <Text
@@ -78,6 +87,9 @@ export function BlogCloudCta({
         href="/cloud"
         variant="primary"
         className={layout === "row" ? "w-full sm:w-[140px]" : "w-full"}
+        onClick={() =>
+          capture("blog:start_free_clicked", { placement, path: pathname })
+        }
       >
         Start free
       </CtaLink>
@@ -85,6 +97,9 @@ export function BlogCloudCta({
         href="/talk-to-us"
         variant="secondary"
         className={layout === "row" ? "w-full sm:w-[140px]" : "w-full"}
+        onClick={() =>
+          capture("blog:talk_to_us_clicked", { placement, path: pathname })
+        }
       >
         Talk to us
       </CtaLink>
@@ -108,7 +123,13 @@ export function BlogCloudCta({
   }
 
   return (
-    <section aria-label="Langfuse Cloud" className={cn("px-4 py-4", className)}>
+    <section
+      aria-label="Langfuse Cloud"
+      className={cn(
+        "bg-[color-mix(in_oklab,var(--surface-cta-primary)_28%,var(--surface-1))] px-4 py-4",
+        className,
+      )}
+    >
       {copy}
       {actions}
     </section>
