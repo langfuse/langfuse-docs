@@ -22,11 +22,11 @@ Instrument your agents with the SDKs or OpenTelemetry, or route model calls thro
 - **Langfuse** — [tracing](/docs/observability/overview), [prompts](/docs/prompt-management/overview), [evals](/docs/evaluation/overview), [datasets](/docs/evaluation/experiments/datasets), [experiments](/docs/evaluation/experiments/experiments-via-sdk), and [dashboards](/docs/metrics/features/custom-dashboards). Every feature is available via [MCP](/docs/api-and-data-platform/features/mcp-server), [CLI](/docs/api-and-data-platform/features/cli), [API](/docs/api-and-data-platform/features/public-api), and [SDKs](/docs/observability/sdk/overview). [Halo](/docs/api-and-data-platform/features/halo) debugs traces, writes evals, and iterates on prompts in Langfuse, or you can [bring your own agent](/docs/api-and-data-platform/features/agent-skill) such as Claude Code, Cursor, or Codex.
 - **Warehouse** — [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) to S3, GCS, or Azure Blob Storage, ready to load into [ClickHouse](/integrations/clickhouse/data-warehouse), Snowflake, BigQuery, or Databricks for BI, finance, and audit.
 
-## The AI engineering loop
+## Learn how the best teams build with AI
 
-Langfuse connects tracing, monitoring, datasets, experiments, and evaluation in one continuous loop. Use production signals to understand behavior, test improvements, and ship better agents with confidence.
+Langfuse is the platform. The [Langfuse Academy](/academy) is how you, and your agents, learn what to do with it: [the AI engineering loop](/academy/ai-engineering-loop) of [tracing](/academy/tracing), [monitoring](/academy/monitoring), [datasets](/academy/datasets), [experiments](/academy/experiments), and [evals](/academy/evaluate), with worked examples from real applications. Free, open, and readable as Markdown for coding agents.
 
-The [Langfuse Academy](/academy) walks through how observability, prompts, evals, experiments, and human feedback work together.
+Every step of the loop maps to a part of Langfuse. The Academy explains why each step exists, how they connect, and where to start.
 
 ## Platform features
 

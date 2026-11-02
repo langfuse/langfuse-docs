@@ -30,8 +30,8 @@ type RiveLabel = {
 };
 
 const OVERVIEW: RiveLabel = {
-  heading: "The full AI engineering loop",
-  body: "See how observability, prompts, evals, experiments, and human feedback work together.",
+  heading: "The AI engineering loop",
+  body: "Every step of the loop maps to a part of Langfuse. The Academy explains why each step exists, how they connect, and where to start.",
 };
 
 const LABELS: Record<string, RiveLabel> = {
@@ -139,21 +139,21 @@ export const RiveSection = () => {
   return (
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
-        <Heading>
+        <Heading className="text-left">
           <TextHighlight className="whitespace-nowrap">
-            Launch,&nbsp;
+            Learn how&nbsp;
           </TextHighlight>
           <TextHighlight className="whitespace-nowrap">
-            observe,&nbsp;
-          </TextHighlight>
-          <TextHighlight className="whitespace-nowrap">improve</TextHighlight> —
-          repeat.
+            the best teams
+          </TextHighlight>{" "}
+          build with AI.
         </Heading>
         <Text className="text-left max-w-[64ch]">
-          Langfuse connects tracing, monitoring, datasets, experiments, and
-          evaluation in one continuous loop. Use production signals to
-          understand behavior, test improvements, and ship better agents with
-          confidence.
+          Langfuse is the platform. The Langfuse Academy is how you, and your
+          agents, learn what to do with it: the AI engineering loop of tracing,
+          monitoring, datasets, experiments, and evals, with worked examples
+          from real applications. Free, open, and readable as Markdown for
+          coding agents.
         </Text>
       </div>
 
@@ -211,10 +211,10 @@ export const RiveSection = () => {
           variant="secondary"
           size="default"
           href="/academy"
-          aria-label="Learn in Academy"
+          aria-label="Explore the Academy"
           wrapperClassName="sm:flex-none"
         >
-          Learn in Academy
+          Explore the Academy
         </Button>
       </CornerBox>
     </HomeSection>
