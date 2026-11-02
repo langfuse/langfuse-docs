@@ -408,84 +408,177 @@ function WideDiagram() {
   );
 }
 
-function CompactConnector({ children }: { children: ReactNode }) {
+function DownArrowCell({ label }: { label?: string }) {
   return (
-    <div className="relative flex min-h-12 items-center justify-center py-2">
-      <div className="absolute inset-y-0 left-1/2" aria-hidden="true">
+    <div className="relative h-full min-h-9">
+      <div className="absolute inset-y-0 left-1/2">
         <VerticalArrow />
       </div>
-      <span className="relative bg-surface-bg px-2 py-1 text-center font-mono text-[10px] leading-snug text-text-tertiary">
-        {children}
-      </span>
+      {label && (
+        <div className="absolute left-[calc(50%+8px)] top-1/2 -translate-y-1/2">
+          <ArrowLabel>{label}</ArrowLabel>
+        </div>
+      )}
     </div>
   );
 }
 
-/** Compact flow for phones: agents, Langfuse, and warehouse, top to bottom. */
+function ModelCallsSideArrow() {
+  return (
+    <div className="flex h-full flex-col justify-center gap-1.5 px-1">
+      <span className="text-center font-mono text-[10px] leading-tight text-text-tertiary">
+        model calls
+      </span>
+      <HorizontalArrow />
+    </div>
+  );
+}
+
+/**
+ * Phones: the desktop flow rotated 90 degrees so it runs top to bottom. The
+ * inference APIs move from the top row to the right column and the direct
+ * SDK / OpenTelemetry path from the bottom row to the left column.
+ */
 function CompactDiagram() {
   return (
-    <div className="flex flex-col md:hidden">
-      <div className="flex flex-col gap-1.5 border border-line-structure bg-surface-bg p-3">
-        <span className="text-[15px] font-medium leading-tight text-text-primary">
-          Your agents and apps
-        </span>
-        <Detail>
-          <Link href={USE_CASES[0].href}>Personal agents</Link>,{" "}
-          <Link href={USE_CASES[1].href}>custom agents</Link>, and{" "}
-          <Link href={USE_CASES[2].href}>copilots and no-code tools</Link>
-        </Detail>
-        <div className="mt-0.5 flex flex-wrap gap-1.5">
-          {USE_CASES.flatMap((useCase) => useCase.icons.slice(0, 3)).map(
-            (icon) => (
-              <span
-                key={icon.alt}
-                title={icon.alt}
-                className="flex h-5 w-5 items-center justify-center border border-line-structure bg-surface-1"
+    <div
+      className="grid md:hidden"
+      style={{
+        gridTemplateColumns: "36px minmax(0,1fr) 52px 36px",
+        gridTemplateRows: "auto 40px auto 40px auto 48px auto",
+      }}
+    >
+      <Cell column="1 / 3" row={1}>
+        <div className="flex flex-col gap-2.5 border border-line-structure bg-surface-bg p-3">
+          <span className="text-[15px] font-medium leading-tight text-text-primary">
+            Your agents and apps
+          </span>
+          <ul className="flex flex-col divide-y divide-line-structure">
+            {USE_CASES.map((useCase) => (
+              <li
+                key={useCase.title}
+                className="flex flex-wrap items-center justify-between gap-1.5 py-2 first:pt-0 last:pb-0"
               >
-                <Image src={icon.src} alt={icon.alt} width={12} height={12} />
-              </span>
-            ),
-          )}
+                <Link
+                  href={useCase.href}
+                  className="w-fit text-[13px] font-medium text-text-primary"
+                >
+                  {useCase.title}
+                </Link>
+                <div className="flex gap-1">
+                  {useCase.icons.slice(0, 3).map((icon) => (
+                    <span
+                      key={icon.alt}
+                      title={icon.alt}
+                      className="flex h-5 w-5 items-center justify-center border border-line-structure bg-surface-1"
+                    >
+                      <Image
+                        src={icon.src}
+                        alt={icon.alt}
+                        width={12}
+                        height={12}
+                      />
+                    </span>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      </Cell>
+      <Cell column={3} row={1} decorative>
+        <ModelCallsSideArrow />
+      </Cell>
+      <Cell column={4} row="1 / 4">
+        <div className="flex flex-1 items-center justify-center border border-dashed border-line-divider-dash bg-surface-bg py-3">
+          <span className="whitespace-nowrap text-[13px] font-medium leading-none text-text-primary [writing-mode:vertical-rl]">
+            AI Inference APIs
+          </span>
+        </div>
+      </Cell>
 
-      <CompactConnector>
-        via{" "}
-        <Link
-          href={AI_GATEWAY_HREF}
-          className="text-text-secondary underline decoration-line-structure underline-offset-2"
-        >
-          Langfuse AI Gateway
-        </Link>
-        , or SDKs / OpenTelemetry
-      </CompactConnector>
-
-      <CornerBox className="flex flex-col gap-2 bg-surface-bg p-3">
-        <Image
-          src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-          alt="Langfuse"
-          width={86}
-          height={20}
-          className="h-5 w-auto self-start"
-        />
-        <Detail>
+      <Cell column={1} row="2 / 5" decorative>
+        <div className="relative h-full">
+          <div className="absolute inset-y-0 left-1/2">
+            <VerticalArrow />
+          </div>
+          <span className="absolute right-[calc(50%+6px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[10px] leading-none text-text-tertiary [writing-mode:vertical-rl] rotate-180">
+            direct, SDK / OpenTelemetry
+          </span>
+        </div>
+      </Cell>
+      <Cell column={2} row={2} decorative>
+        <DownArrowCell />
+      </Cell>
+      <Cell column={2} row={3}>
+        <div className="flex flex-col gap-1.5 border border-dashed border-line-cta bg-surface-bg p-3">
+          <div className="flex items-center justify-between gap-2">
+            <Image
+              src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+              alt="Langfuse"
+              width={69}
+              height={16}
+              className="h-4 w-auto"
+            />
+            <span className="rounded-[2px] border border-line-structure bg-surface-1 px-1.5 py-0.5 font-sans text-[11px] leading-none text-text-tertiary">
+              Optional
+            </span>
+          </div>
           <Link
-            href="#platform-features"
-            className="text-text-secondary underline decoration-line-structure underline-offset-2"
+            href={AI_GATEWAY_HREF}
+            className="w-fit text-[15px] font-medium leading-tight text-text-primary"
           >
-            Tracing, prompts, evals, datasets, experiments, and dashboards
+            AI Gateway
           </Link>
-        </Detail>
-      </CornerBox>
+          <Detail>Virtual keys, budgets, and governance</Detail>
+        </div>
+      </Cell>
+      <Cell column={3} row={3} decorative>
+        <ModelCallsSideArrow />
+      </Cell>
+      <Cell column={2} row={4} decorative>
+        <DownArrowCell />
+      </Cell>
 
-      <CompactConnector>export</CompactConnector>
+      <Cell column="1 / 5" row={5}>
+        <CornerBox className="flex flex-col gap-3 bg-surface-bg p-3">
+          <Image
+            src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+            alt="Langfuse"
+            width={86}
+            height={20}
+            className="h-5 w-auto self-start"
+          />
+          <ul className="grid grid-cols-3 border-l border-t border-line-structure">
+            {FEATURES.map((feature) => (
+              <li
+                key={feature.label}
+                className="border-b border-r border-line-structure"
+              >
+                <Link
+                  href={feature.href}
+                  className="block px-2 py-1.5 text-[12px] text-text-secondary hover:text-text-primary"
+                >
+                  {feature.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </CornerBox>
+      </Cell>
 
-      <div className="flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3">
-        <span className="text-[15px] font-medium leading-tight text-text-primary">
-          Your warehouse
-        </span>
-        <Detail>{WAREHOUSES.join(", ")}</Detail>
-      </div>
+      <Cell column="1 / 5" row={6} decorative>
+        <DownArrowCell label="export" />
+      </Cell>
+
+      <Cell column="1 / 5" row={7}>
+        <div className="flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3">
+          <span className="text-[15px] font-medium leading-tight text-text-primary">
+            Warehouse
+          </span>
+          <Detail>{WAREHOUSES.join(", ")}</Detail>
+        </div>
+      </Cell>
     </div>
   );
 }
