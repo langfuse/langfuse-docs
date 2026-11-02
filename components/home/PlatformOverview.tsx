@@ -33,7 +33,7 @@ const USE_CASES: {
   },
   {
     title: "Custom agents",
-    detail: "Support, voice, RAG, workflows",
+    detail: "Support, voice, RAG, workflows, any harness or framework",
     href: "/integrations",
     icons: [
       { src: "/images/integrations/langchain_icon.png", alt: "LangChain" },
