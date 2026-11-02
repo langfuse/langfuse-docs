@@ -362,10 +362,11 @@ export function HowWeWorkSection() {
       aria-labelledby="how-we-work-heading"
       // Breaks out of the 680px careers column, but never past HomeLayout's
       // rails: 240px sidebar from lg, plus a 240px aside from wide (1440px).
-      // The xl rule is capped with max-wide because Tailwind emits the custom
-      // `wide` (px) breakpoint before `xl` (rem), so overlapping ranges would
-      // let xl win at ≥1440px.
-      className="not-prose relative left-1/2 my-16 w-full -translate-x-1/2 xl:max-wide:w-[min(1200px,calc(100vw-240px-3rem))] wide:w-[min(1200px,calc(100vw-480px-3rem))]"
+      // The wide cap is 992px because #home-layout stops growing at max-w-380
+      // (1520px): 1520 − 480 rails − 3rem gutter. The xl rule is capped with
+      // max-wide because Tailwind emits the custom `wide` (px) breakpoint
+      // before `xl` (rem), so overlapping ranges would let xl win at ≥1440px.
+      className="not-prose relative left-1/2 my-16 w-full -translate-x-1/2 xl:max-wide:w-[min(1200px,calc(100vw-240px-3rem))] wide:w-[min(992px,calc(100vw-480px-3rem))]"
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-text-tertiary">
