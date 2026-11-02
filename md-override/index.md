@@ -33,6 +33,7 @@ The [Langfuse Academy](/academy) walks through how observability, prompts, evals
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.
 
 - **[Observability](/docs/observability/overview)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
+- **[AI Gateway](/docs/ai-gateway/overview)** — virtual keys, budgets, provisioning, and model access for every team. Route model calls through Langfuse without code changes, and every call is traced with usage and cost.
 - **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.

@@ -6,6 +6,7 @@ import {
   FlaskConical,
   // Globe,
   MessageSquare,
+  Network,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
@@ -72,6 +73,22 @@ export default observe(handleRequest);`,
       },
     },
     quickstartHref: "/docs/observability/get-started",
+  },
+  {
+    id: "ai-gateway",
+    icon: Network,
+    name: "AI Gateway",
+    title: "Govern every model call",
+    subtitle: "Virtual keys, budgets, and model access for every team.",
+    body: "Route OpenAI and Anthropic calls through Langfuse without code changes. Issue virtual keys, set budgets, provision access for people and services, and govern which models they can use. Every call is traced with usage and cost.",
+    docsHref: "/docs/ai-gateway/overview",
+    image: {
+      light: metricsPng, // Placeholder - needs AI Gateway screenshot
+      dark: metricsPng,
+      alt: "Langfuse AI Gateway usage and cost per user, API key, and model",
+    },
+    displayMode: "image-only",
+    quickstartHref: "/docs/ai-gateway/get-started/first-request",
   },
   {
     id: "metrics",
