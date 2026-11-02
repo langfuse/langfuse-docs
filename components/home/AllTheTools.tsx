@@ -114,7 +114,8 @@ function AiGatewayCard() {
           </div>
           <Text size="s" className={toolDescriptionClassName}>
             Swap the base URL and API key to route your AI calls through
-            Langfuse. Every call is traced with usage and cost.
+            Langfuse. Use virtual keys to set budgets. Every call is centrally
+            traced and governed.
           </Text>
         </div>
         <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden sm:mx-0 sm:-my-4 sm:h-[200px] lg:h-[220px]">
