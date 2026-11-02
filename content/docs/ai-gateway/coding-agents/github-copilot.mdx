@@ -54,7 +54,7 @@ copilot
 </Tabs>
 
 - The Anthropic base URL has **no** `/v1`. The OpenAI base URL **includes** `/v1`.
-- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/features/api-formats#chat-completions)), which has not been verified with Copilot.
+- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/sdks-and-apis/rest-api#chat-completions)), which has not been verified with Copilot.
 - If `~/.copilot/providers.json` (or the file in `COPILOT_PROVIDERS_CONFIG`) already lists providers or models, it takes precedence and these variables have no effect.
 - Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/ai-gateway/features/tracing#request-headers) such as `langfuse-tags` cannot be set. Use [key metadata](/docs/ai-gateway/features/api-keys#key-metadata) instead.
 
