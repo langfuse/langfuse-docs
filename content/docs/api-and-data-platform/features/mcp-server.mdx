@@ -417,6 +417,25 @@ The observation tools distinguish logical roots from physical parentage:
 
 For the complete tool schemas and request examples, see the [MCP Reference](https://mcp.reference.langfuse.com).
 
+## Run batch evaluations [#run-batch-evaluations]
+
+The `runBatchEvaluation` tool queues a [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation): it runs saved evaluators over existing observations that match a filter and time range. It returns the ID of the created batch action. The run is processed asynchronously.
+
+- **Permission:** requires the `evaluationRule:CUD` project permission. The in-app agent asks for approval before it runs the tool.
+- **Availability:** the tool is only available when `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN` is `true` on the instance.
+- **Cost:** the tool executes every selected evaluator on every selected observation, which may incur model or code execution cost. Preview the selection with `listObservations`, using the same filter and time range, before you run it.
+
+| Parameter       | Description                                                                                                                                                                  |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `evaluatorIds`  | IDs of the evaluators to run, as returned by `listEvaluators`. Each must be observation-scoped and not attached to a trace- or dataset-level evaluation rule.                |
+| `fromStartTime` | Optional inclusive lower bound on observation `startTime`, as an ISO 8601 timestamp with timezone.                                                                           |
+| `toStartTime`   | Optional exclusive upper bound on observation `startTime`, as an ISO 8601 timestamp with timezone.                                                                           |
+| `filter`        | Optional observation filters in the `listObservations` filter format. Call `getObservationFilterSchema` for accepted columns and operators. The `matches` operator is not supported. |
+| `sampling`      | Optional fraction of matching observations to evaluate, between 0 and 1. Defaults to 1.                                                                                      |
+| `rowLimit`      | Optional maximum number of observations to evaluate. Without it, the run is rejected when more observations match than the instance's batch evaluation limit.                |
+
+Observations older than your organization's plan data-access window are never evaluated. Each score and evaluator trace the run produces carries the batch action ID as `batch_action_id` metadata.
+
 ## Feedback
 
 We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
