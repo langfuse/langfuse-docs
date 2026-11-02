@@ -1,7 +1,7 @@
 ---
 title: REST API reference
 seoTitle: "Langfuse AI Gateway REST API: models, Responses, Chat Completions, Messages (beta)"
-description: Base URLs, authentication, and endpoints of the Langfuse AI Gateway, including the models endpoint and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages APIs.
+description: Base URLs, authentication, and endpoints of the Langfuse AI Gateway, including the models endpoints and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages APIs.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -10,35 +10,92 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-The gateway serves each provider's native API. Point your client's base URL at the gateway route for its format and use a gateway API key instead of the provider key. Request and response bodies are the provider's own: the gateway doesn't translate between formats, so an OpenAI request needs an OpenAI provider credential and an Anthropic request an Anthropic credential.
+The gateway serves an OpenAI route and an Anthropic route. Each route lists the models your key can call and relays the provider's inference APIs. To call the gateway from code, you can also use the [OpenAI SDK](/docs/ai-gateway/sdks-and-apis/openai-sdk), the [Anthropic SDK](/docs/ai-gateway/sdks-and-apis/anthropic-sdk), or the [Vercel AI SDK](/docs/ai-gateway/sdks-and-apis/vercel-ai-sdk).
 
-The examples use the `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` variables from [Send your first request](/docs/ai-gateway/get-started/first-request#export-the-key). For your region's host, see [gateway hosts](/docs/ai-gateway/get-started/first-request#gateway-hosts).
+## Base URLs [#base-urls]
 
-## Routes [#routes]
+| Route     | Base URL                                          |
+| --------- | ------------------------------------------------- |
+| OpenAI    | `https://gateway.cloud.langfuse.com/openai/v1`    |
+| Anthropic | `https://gateway.cloud.langfuse.com/anthropic/v1` |
 
-| Base URL                              | Endpoints                                                                   | Generation name           |
-| ------------------------------------- | --------------------------------------------------------------------------- | ------------------------- |
-| `$LANGFUSE_GATEWAY_HOST/openai/v1`    | `GET /models`, [`POST /responses`](#responses), `POST /responses/compact`   | `openai.responses`        |
-| `$LANGFUSE_GATEWAY_HOST/openai/v1`    | [`POST /chat/completions`](#chat-completions)                               | `openai.chat-completions` |
-| `$LANGFUSE_GATEWAY_HOST/anthropic/v1` | `GET /models`, [`POST /messages`](#messages), `POST /messages/count_tokens` | `anthropic.messages`      |
-
-[Model listings](#list-models) and `count_tokens` are proxied but not recorded. Websockets, realtime APIs, and decision model APIs (OpenAI Decisions, TypeSafe System One) are not served. Other paths return `404`.
-
-Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs. See [response headers](/docs/ai-gateway/features/tracing#response-headers). All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on every route.
+These are the EU URLs. For other regions and self-hosted Langfuse, replace the host with your [gateway host](/docs/ai-gateway/get-started/first-request#gateway-hosts). The examples on this page use the `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` variables from [Send your first request](/docs/ai-gateway/get-started/first-request#export-the-key).
 
 ## Authentication [#authentication]
 
-- The OpenAI routes read the gateway key only from `Authorization: Bearer <gateway key>`.
-- The Anthropic route accepts the key as `Authorization: Bearer` or `x-api-key`. If you send both, they must have the same value.
+Every endpoint, including the models endpoints, requires a [gateway API key](/docs/ai-gateway/features/api-keys). How you send it depends on the route.
 
-## List models [#list-models]
+**OpenAI route:** send the key as a Bearer token.
 
-Both routes serve a models endpoint that lists the models your key can call, in the provider's own response format. Use the returned `id` as the `model` of your requests. The IDs have the form `<credential>:<model>`, see [model IDs](/docs/ai-gateway/features/models#model-ids).
+```http
+Authorization: Bearer <gateway key>
+```
+
+**Anthropic route:** send the key in the `x-api-key` header, like an Anthropic API key, or as a Bearer token. If you send both headers, they must have the same value.
+
+```http
+x-api-key: <gateway key>
+```
+
+## Endpoints [#routes]
+
+| Endpoint                                                | Description                                           | Recorded as               |
+| ------------------------------------------------------- | ----------------------------------------------------- | ------------------------- |
+| [`GET /openai/v1/models`](#list-models)                 | List the models of your OpenAI credentials            | Not recorded              |
+| [`GET /anthropic/v1/models`](#list-models)              | List the models of your Anthropic credentials         | Not recorded              |
+| [`POST /openai/v1/responses`](#responses)               | Create a model response with the OpenAI Responses API | `openai.responses`        |
+| [`POST /openai/v1/responses/compact`](#responses)       | Compact a Responses API conversation                  | `openai.responses`        |
+| [`POST /openai/v1/chat/completions`](#chat-completions) | Create a chat completion                              | `openai.chat-completions` |
+| [`POST /anthropic/v1/messages`](#messages)              | Create a message with the Anthropic Messages API      | `anthropic.messages`      |
+| [`POST /anthropic/v1/messages/count_tokens`](#messages) | Count the tokens of a message                         | Not recorded              |
+
+Recorded calls become a generation with the name in the last column, see [Tracing](/docs/ai-gateway/features/tracing). Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs, see [response headers](/docs/ai-gateway/features/tracing#response-headers). All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on every endpoint.
+
+<Callout type="info">
+  Other paths return `404`, including websockets, realtime APIs, and decision
+  model APIs (OpenAI Decisions, TypeSafe System One). The gateway only accepts
+  uncompressed request bodies: a request with a `Content-Encoding` header other
+  than `identity` fails with `415`.
+</Callout>
+
+## Models [#models]
+
+### List models [#list-models]
+
+```http
+GET /openai/v1/models
+GET /anthropic/v1/models
+```
+
+Lists the models your key can call, in the provider's own list format. The OpenAI route lists the models of your organization's OpenAI credentials, and the Anthropic route those of its Anthropic credentials. Models an admin turned off are not listed, see [Model management](/docs/ai-gateway/features/models).
+
+Use the returned `id` as the `model` of your inference requests. Both endpoints return every model in one response, so you don't need pagination parameters.
+
+#### Example request [#list-models-request]
+
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
 
 ```sh
-curl -s "$LANGFUSE_GATEWAY_HOST/openai/v1/models" \
+curl "$LANGFUSE_GATEWAY_HOST/openai/v1/models" \
   -H "Authorization: Bearer $LANGFUSE_GATEWAY_KEY"
 ```
+
+</Tab>
+<Tab>
+
+```sh
+curl "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models" \
+  -H "x-api-key: $LANGFUSE_GATEWAY_KEY"
+```
+
+</Tab>
+</Tabs>
+
+#### Sample response [#list-models-response]
+
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
 
 ```json
 {
@@ -54,10 +111,8 @@ curl -s "$LANGFUSE_GATEWAY_HOST/openai/v1/models" \
 }
 ```
 
-```sh
-curl -s "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models" \
-  -H "x-api-key: $LANGFUSE_GATEWAY_KEY"
-```
+</Tab>
+<Tab>
 
 ```json
 {
@@ -75,13 +130,56 @@ curl -s "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models" \
 }
 ```
 
-- `/openai/v1/models` lists the models of OpenAI credentials, and `/anthropic/v1/models` the models of Anthropic credentials. Models an admin turned off are not listed.
-- Both endpoints return every model in one response. Pagination parameters aren't needed, and `has_more` on the Anthropic route is always `false`.
-- The response follows the provider's list models format: see the [OpenAI](https://developers.openai.com/api/reference/resources/models/methods/list) and [Anthropic](https://platform.claude.com/docs/en/api/models/list) references.
+</Tab>
+</Tabs>
 
-## Responses [#responses]
+#### Response fields [#list-models-fields]
 
-`POST /openai/v1/responses` serves the OpenAI Responses API, and `POST /openai/v1/responses/compact` compacts a conversation. Both use the request and response bodies documented in the [OpenAI Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create).
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
+
+| Field             | Type    | Description                                                                                              |
+| ----------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `object`          | string  | Always `"list"`                                                                                          |
+| `data[].id`       | string  | Model ID in the form `<credential>:<model>`, see [model IDs](/docs/ai-gateway/features/models#model-ids) |
+| `data[].object`   | string  | Always `"model"`                                                                                         |
+| `data[].created`  | integer | Unix timestamp from the provider's model listing                                                         |
+| `data[].owned_by` | string  | Always `"openai"`                                                                                        |
+
+Same format as OpenAI's [list models](https://developers.openai.com/api/reference/resources/models/methods/list) response.
+
+</Tab>
+<Tab>
+
+| Field                 | Type    | Description                                                                                              |
+| --------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| `data[].type`         | string  | Always `"model"`                                                                                         |
+| `data[].id`           | string  | Model ID in the form `<credential>:<model>`, see [model IDs](/docs/ai-gateway/features/models#model-ids) |
+| `data[].display_name` | string  | Human-readable model name                                                                                |
+| `data[].created_at`   | string  | RFC 3339 timestamp from the provider's model listing                                                     |
+| `has_more`            | boolean | Always `false`                                                                                           |
+| `first_id`            | string  | ID of the first model in `data`                                                                          |
+| `last_id`             | string  | ID of the last model in `data`                                                                           |
+
+Same format as Anthropic's [list models](https://platform.claude.com/docs/en/api/models/list) response.
+
+</Tab>
+</Tabs>
+
+## Inference [#inference]
+
+The inference endpoints relay the provider's API. The gateway only removes the model ID prefix, replaces authentication, and adds [streaming usage](#streaming-usage) to streamed Chat Completions. The gateway doesn't translate between formats, so the OpenAI endpoints need an OpenAI provider credential and the Anthropic endpoints an Anthropic credential. Replace `<model-id>` in the examples with an ID from [List models](#list-models).
+
+### Responses [#responses]
+
+```http
+POST /openai/v1/responses
+POST /openai/v1/responses/compact
+```
+
+Creates a model response with the OpenAI Responses API, or compacts a conversation. Request and response bodies are OpenAI's own, see the [OpenAI Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create) and [compact reference](https://developers.openai.com/api/reference/resources/responses/methods/compact).
+
+#### Example request [#responses-request]
 
 ```sh
 curl "$LANGFUSE_GATEWAY_HOST/openai/v1/responses" \
@@ -90,9 +188,15 @@ curl "$LANGFUSE_GATEWAY_HOST/openai/v1/responses" \
   -d '{"model":"<model-id>","input":"Say hello"}'
 ```
 
-## Chat Completions [#chat-completions]
+### Chat Completions [#chat-completions]
 
-`POST /openai/v1/chat/completions` serves the OpenAI Chat Completions API. See the [OpenAI Chat Completions reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) for the request and response bodies. Any client that speaks Chat Completions, such as the [OpenAI SDK](/docs/ai-gateway/sdks-and-apis/openai-sdk) or frameworks built on it, works by changing the base URL and the API key.
+```http
+POST /openai/v1/chat/completions
+```
+
+Creates a chat completion. Request and response bodies are OpenAI's own, see the [OpenAI Chat Completions reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).
+
+#### Example request [#chat-completions-request]
 
 ```sh
 curl "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
@@ -101,31 +205,27 @@ curl "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
   -d '{"model":"<model-id>","messages":[{"role":"user","content":"Say hello"}]}'
 ```
 
-### Streaming usage [#streaming-usage]
+#### Streaming usage [#streaming-usage]
 
-OpenAI only reports usage for a streamed Chat Completions request when the request sets `stream_options.include_usage`. So that every streamed call still gets token usage and cost, the gateway adds `"include_usage": true` to the request it sends upstream when a request has `"stream": true` and does not already set it.
-
-- The recorded input and model parameters are your original request, without the added option.
-- The response stream is relayed unchanged. Your client therefore receives OpenAI's final usage chunk even if it did not ask for usage: an extra event with an **empty `choices` array** and a `usage` object, just before `data: [DONE]`. The other chunks carry `"usage": null`.
-- Requests that already ask for usage and non-streamed requests are forwarded without this change.
+OpenAI only reports usage for a streamed Chat Completions request when the request sets `stream_options.include_usage`. So that every streamed call still gets token usage and cost, the gateway adds `"include_usage": true` to the request it sends upstream when a request has `"stream": true` and does not already set it. The recorded request is your original request, without the added option.
 
 <Callout type="warning">
-  Make sure your client tolerates a chunk without choices. The OpenAI SDKs pass
-  it through like any other chunk, so code that reads `chunk.choices[0]` on
-  every chunk needs a guard.
+  Your client receives OpenAI's final usage chunk even if it didn't ask for
+  usage: an extra event with an **empty `choices` array** and a `usage` object,
+  just before `data: [DONE]`. Code that reads `chunk.choices[0]` on every chunk
+  needs a guard.
 </Callout>
 
-### What gets recorded [#chat-completions-recording]
+### Messages [#messages]
 
-- **Model parameters:** scalar parameters such as `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `seed`, `reasoning_effort`, and `stream` are recorded in the `FULL` and `USAGE` [ingestion modes](/docs/ai-gateway/features/tracing#ingestion-modes). In `FULL` mode, `stop`, `response_format`, `tool_choice`, `stream_options`, and similar structured options are added.
-- **Input** (`FULL` mode): `messages`, `tools`, legacy `functions`, and unknown fields.
-- **Output** (`FULL` mode): the native `choices` list. Streamed choices are rebuilt from their deltas, including tool call arguments.
-- **Metadata** (`FULL` mode): `metadata`, `prompt_cache_key`, `safety_identifier`, and `user` from the request are stored under `langfuse.gateway.client.request.*`, for example `langfuse.gateway.client.request.metadata`.
-- Usage, cost, latency, and time to first token, as on the other routes.
+```http
+POST /anthropic/v1/messages
+POST /anthropic/v1/messages/count_tokens
+```
 
-## Messages [#messages]
+Creates a message with the Anthropic Messages API, or counts the tokens of a message. Request and response bodies are Anthropic's own, see the Claude API references for [Messages](https://platform.claude.com/docs/en/api/messages/create) and [token counting](https://platform.claude.com/docs/en/api/messages/count_tokens).
 
-`POST /anthropic/v1/messages` serves the Anthropic Messages API, and `POST /anthropic/v1/messages/count_tokens` counts the tokens of a message. See the Claude API references for [Messages](https://platform.claude.com/docs/en/api/messages/create) and [token counting](https://platform.claude.com/docs/en/api/messages/count_tokens).
+#### Example request [#messages-request]
 
 ```sh
 curl "$LANGFUSE_GATEWAY_HOST/anthropic/v1/messages" \
@@ -134,7 +234,3 @@ curl "$LANGFUSE_GATEWAY_HOST/anthropic/v1/messages" \
   -H "Content-Type: application/json" \
   -d '{"model":"<model-id>","max_tokens":1024,"messages":[{"role":"user","content":"Say hello"}]}'
 ```
-
-## Compressed requests [#compressed-requests]
-
-The gateway only accepts uncompressed request bodies. A request with a `Content-Encoding` header other than `identity` is rejected with `415` `Unsupported request Content-Encoding`. Turn off request compression in your client.

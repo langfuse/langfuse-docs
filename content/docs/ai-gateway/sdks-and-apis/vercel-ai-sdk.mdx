@@ -10,13 +10,18 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-Use the [AI SDK](https://ai-sdk.dev/docs/introduction) by Vercel with the gateway by pointing its OpenAI or Anthropic provider at the gateway. The AI SDK is TypeScript only. Each provider needs the matching provider credential in your organization: `OPENAI` for OpenAI models, `ANTHROPIC` for Anthropic models.
+Use the [AI SDK](https://ai-sdk.dev/docs/introduction) by Vercel with the gateway by pointing its OpenAI or Anthropic provider at the gateway. Each provider needs the matching provider credential in your organization: `OPENAI` for OpenAI models, `ANTHROPIC` for Anthropic models.
 
 Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/sdks-and-apis/rest-api#list-models).
 
-## OpenAI models [#openai]
+## Configure the provider [#configure-the-provider]
 
-Create an [OpenAI provider](https://ai-sdk.dev/providers/ai-sdk-providers/openai) with the gateway's OpenAI route, `/openai/v1`, as base URL and the gateway key as API key:
+Create the provider with the gateway's route as base URL and the gateway key as API key.
+
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
+
+Use the gateway's OpenAI route, `/openai/v1`, with the [OpenAI provider](https://ai-sdk.dev/providers/ai-sdk-providers/openai).
 
 ```bash
 npm install ai @ai-sdk/openai
@@ -40,9 +45,10 @@ console.log(text);
 
 `openai("<model-id>")` uses the Responses API. To use Chat Completions instead, use `openai.chat("<model-id>")`.
 
-## Anthropic models [#anthropic]
+</Tab>
+<Tab>
 
-Create an [Anthropic provider](https://ai-sdk.dev/providers/ai-sdk-providers/anthropic) with the gateway's Anthropic route as base URL. Unlike the Anthropic SDK, the AI SDK provider expects `/v1` in the base URL, so use `/anthropic/v1`:
+Use the gateway's Anthropic route with the [Anthropic provider](https://ai-sdk.dev/providers/ai-sdk-providers/anthropic). Unlike the Anthropic SDK, the AI SDK provider expects `/v1` in the base URL, so use `/anthropic/v1`.
 
 ```bash
 npm install ai @ai-sdk/anthropic
@@ -64,9 +70,15 @@ const { text } = await generateText({
 console.log(text);
 ```
 
+</Tab>
+</Tabs>
+
 ## Add request headers [#request-headers]
 
-Set [request headers](/docs/ai-gateway/features/tracing#request-headers) on the provider for every call, or per call for values such as a session ID. Both providers accept the same options:
+Set [request headers](/docs/ai-gateway/features/tracing#request-headers) on the provider for every call, or per call for values such as a session ID.
+
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
 
 ```ts
 import { createOpenAI } from "@ai-sdk/openai";
@@ -84,6 +96,29 @@ const { text } = await generateText({
   headers: { "langfuse-session-id": "<session-id>" },
 });
 ```
+
+</Tab>
+<Tab>
+
+```ts
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText } from "ai";
+
+const anthropic = createAnthropic({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/anthropic/v1`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+  headers: { "langfuse-tags": "checkout,production" },
+});
+
+const { text } = await generateText({
+  model: anthropic("<model-id>"),
+  prompt: "Say hello",
+  headers: { "langfuse-session-id": "<session-id>" },
+});
+```
+
+</Tab>
+</Tabs>
 
 <Callout type="info">
   The gateway already records every call. Don't also trace the same calls with
