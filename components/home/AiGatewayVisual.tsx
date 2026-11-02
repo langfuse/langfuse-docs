@@ -22,11 +22,13 @@ const clients: Chip[] = [
   { label: "Codex", x: 0, y: 88, w: 130 },
 ];
 const providers: Chip[] = [
-  { label: "OpenAI", x: 470, y: 22, w: 120 },
-  { label: "Anthropic", x: 470, y: 66, w: 120 },
+  { label: "OpenAI", x: 400, y: 0, w: 130 },
+  { label: "Anthropic", x: 400, y: 44, w: 130 },
+  { label: "OpenRouter", x: 400, y: 88, w: 130 },
 ];
-const gateway = { x: 190, y: 34, w: 220, h: 50 };
-const trace = { x: 214, y: 124, w: 172, h: 30 };
+const gateway = { x: 190, y: 34, w: 150, h: 50 };
+const trace = { x: 170, y: 124, w: 190, h: 30 };
+const CENTER = { x: 299, y: 205 };
 
 const gatewayMidY = gateway.y + gateway.h / 2;
 
@@ -105,10 +107,10 @@ export function AiGatewayVisual({ className }: { className?: string }) {
 
   return (
     <svg
-      viewBox="20 25 590 345"
+      viewBox="22 44 554 322"
       className={className}
       aria-hidden="true"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio="xMidYMid meet"
     >
       <defs>
         <pattern
@@ -124,22 +126,35 @@ export function AiGatewayVisual({ className }: { className?: string }) {
             strokeWidth={1}
           />
         </pattern>
-        <radialGradient id={fadeId} cx="50%" cy="50%" r="55%">
+        <radialGradient
+          id={fadeId}
+          gradientUnits="userSpaceOnUse"
+          cx={CENTER.x}
+          cy={CENTER.y}
+          r={320}
+          gradientTransform={`translate(${CENTER.x} ${CENTER.y}) scale(1 0.62) translate(${-CENTER.x} ${-CENTER.y})`}
+        >
           <stop offset="0%" stopColor="white" stopOpacity={0.9} />
           <stop offset="100%" stopColor="white" stopOpacity={0} />
         </radialGradient>
         <mask id={maskId} maskUnits="userSpaceOnUse">
-          <rect width={640} height={400} fill={`url(#${fadeId})`} />
+          <rect
+            x={-300}
+            y={-200}
+            width={1200}
+            height={800}
+            fill={`url(#${fadeId})`}
+          />
         </mask>
       </defs>
 
       <g mask={`url(#${maskId})`}>
         <g transform={PLANE}>
           <rect
-            x={-160}
-            y={-200}
-            width={960}
-            height={480}
+            x={-400}
+            y={-400}
+            width={1400}
+            height={900}
             fill={`url(#${gridId})`}
           />
         </g>
@@ -151,7 +166,7 @@ export function AiGatewayVisual({ className }: { className?: string }) {
           return (
             <g key={chip.label}>
               <path
-                d={`M${chip.x + chip.w} ${cy}H160V${gatewayMidY}H${g.x}`}
+                d={`M${chip.x + chip.w} ${cy}H${g.x - 30}V${gatewayMidY}H${g.x}`}
                 fill="none"
                 stroke="var(--text-disabled)"
               />
@@ -164,7 +179,7 @@ export function AiGatewayVisual({ className }: { className?: string }) {
           return (
             <g key={chip.label}>
               <path
-                d={`M${x1} ${gatewayMidY}H440V${cy}H${chip.x}`}
+                d={`M${x1} ${gatewayMidY}H${x1 + 30}V${cy}H${chip.x}`}
                 fill="none"
                 stroke="var(--text-disabled)"
               />

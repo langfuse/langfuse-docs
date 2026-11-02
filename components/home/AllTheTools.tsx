@@ -117,7 +117,7 @@ function AiGatewayCard() {
             through Langfuse. Every call is traced with usage and cost.
           </Text>
         </div>
-        <div className="pointer-events-none relative -mx-4 -mb-4 h-[180px] overflow-hidden lg:mx-0 lg:-my-4 lg:h-[220px]">
+        <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden lg:mx-0 lg:-my-4 lg:h-[220px]">
           <AiGatewayVisual className="absolute inset-0 w-full h-full" />
         </div>
       </div>
