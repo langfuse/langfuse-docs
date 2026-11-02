@@ -36,6 +36,125 @@ const languagesGroup = {
   ],
 };
 
+const gatewaysGroup = {
+  title: "Gateways",
+  items: [
+    {
+      label: "Langfuse AI Gateway",
+      href: "/docs/ai-gateway/overview",
+      icon: <Image src="/langfuse-icon.svg" alt="" width={18} height={18} />,
+    },
+    {
+      label: "LiteLLM",
+      href: "/integrations/gateways/litellm",
+      icon: (
+        <Image
+          src="/images/integrations/litellm_icon.png"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "OpenRouter",
+      href: "/integrations/gateways/openrouter",
+      icon: (
+        <Image
+          src="/images/integrations/openrouter_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Vercel AI Gateway",
+      href: "/integrations/gateways/vercel-ai-gateway",
+      icon: (
+        <Image
+          src="/images/integrations/vercel_ai_gateway_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Portkey",
+      href: "/integrations/gateways/portkey",
+      icon: (
+        <Image
+          src="/images/integrations/portkey_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Kong",
+      href: "/integrations/gateways/kong-ai-plugin",
+      icon: (
+        <Image
+          src="/images/integrations/kong-icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Helicone",
+      href: "/integrations/gateways/helicone",
+      icon: (
+        <Image
+          src="/images/integrations/helicone_icon.png"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "TrueFoundry",
+      href: "/integrations/gateways/truefoundry",
+      icon: (
+        <Image
+          src="/images/integrations/truefoundry-logo.png"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Azure API Management",
+      href: "/integrations/gateways/azure-api-management",
+      icon: (
+        <Image
+          src="/images/integrations/microsoft_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Anannas AI",
+      href: "/integrations/gateways/anannas",
+      icon: (
+        <Image
+          src="/images/integrations/anannas_icon.png"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+  ],
+};
+
 const agentFrameworksGroup = {
   title: "Agent frameworks",
   items: [
@@ -503,9 +622,12 @@ export function Integrations() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <IntegrationGroupCard
-          className="sm:col-span-2"
           title={languagesGroup.title}
           items={languagesGroup.items}
+        />
+        <IntegrationGroupCard
+          title={gatewaysGroup.title}
+          items={gatewaysGroup.items}
         />
 
         <IntegrationGroupCard
