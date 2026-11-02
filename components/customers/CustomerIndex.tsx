@@ -6,10 +6,10 @@ import { useMemo } from "react";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
-import { controlTextClassName } from "@/components/ui/button";
+import { buttonVariants, controlTextClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { CustomerStory } from "./CustomerCarousel";
-import { companyName } from "./customerStoryLabels";
+import { companyName, storyCtaLabel } from "./customerStoryLabels";
 
 export function CustomerIndex({
   stories: allStories = [],
@@ -120,13 +120,16 @@ export function CustomerIndex({
                   </p>
                 ) : null}
                 <span
-                  className={cn(
-                    "mt-auto inline-flex items-center gap-1.5 pt-4 text-text-secondary transition-colors group-hover:text-text-primary",
-                    controlTextClassName,
-                  )}
+                  className={buttonVariants({
+                    variant: "primary",
+                    size: "default",
+                    className: cn(
+                      "mt-auto w-auto self-start pl-[10px] pr-[10px]",
+                      controlTextClassName,
+                    ),
+                  })}
                 >
-                  {story.frontMatter.ctaLabel ?? "Read"}
-                  <span aria-hidden>→</span>
+                  {storyCtaLabel(story.frontMatter.ctaLabel)}
                 </span>
               </Link>
             </CornerBox>

@@ -1,11 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { CustomerStory } from "./CustomerCarousel";
-import { companyName } from "./customerStoryLabels";
-import { controlTextClassName } from "@/components/ui/button";
+import { companyName, storyCtaLabel } from "./customerStoryLabels";
+import { Button, controlTextClassName } from "@/components/ui/button";
 import { TabButton } from "@/components/ui/tab-button";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
@@ -148,21 +147,18 @@ function QuoteSlide({
         </div>
       )}
 
-      <div className="mt-auto flex justify-end pt-10">
-        <Link
+      <div className="mt-6">
+        <Button
           href={story.route}
+          variant="primary"
+          size="default"
           tabIndex={isActive ? undefined : -1}
-          aria-label={`${story.frontMatter.ctaLabel === "Watch" ? "Watch" : "Read"} ${company} customer story`}
-          className={cn(
-            "inline-flex items-center gap-1.5 text-text-secondary no-underline transition-colors after:absolute after:inset-0 after:z-10 after:cursor-pointer after:content-[''] hover:text-text-primary focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring",
-            controlTextClassName,
-          )}
+          aria-label={`${storyCtaLabel(story.frontMatter.ctaLabel)}: ${company}`}
+          className="w-auto"
+          wrapperClassName="w-fit"
         >
-          {story.frontMatter.ctaLabel === "Watch"
-            ? "Watch the talk"
-            : "Read the story"}
-          <span aria-hidden>→</span>
-        </Link>
+          {storyCtaLabel(story.frontMatter.ctaLabel)}
+        </Button>
       </div>
     </div>
   );
