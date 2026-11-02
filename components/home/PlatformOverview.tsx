@@ -49,7 +49,7 @@ const USE_CASES: {
   },
   {
     title: "Copilots & no-code",
-    detail: "Copilot Studio, n8n, Dify, Flowise",
+    detail: "Copilot Studio, n8n, Dify, Flowise, …",
     href: "/integrations",
     icons: [
       { src: "/images/integrations/microsoft_icon.svg", alt: "Copilot Studio" },
