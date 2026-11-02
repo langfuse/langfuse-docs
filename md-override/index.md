@@ -26,8 +26,6 @@ Instrument your agents with the SDKs or OpenTelemetry, or route model calls thro
 
 Langfuse is the platform. The [Langfuse Academy](/academy) is how you, and your agents, learn what to do with it: [the AI engineering loop](/academy/ai-engineering-loop) of [tracing](/academy/tracing), [monitoring](/academy/monitoring), [datasets](/academy/datasets), [experiments](/academy/experiments), and [evals](/academy/evaluate), with worked examples from real applications. Free, open, and readable as Markdown for coding agents.
 
-Every step of the loop maps to a part of Langfuse. The Academy explains why each step exists, how they connect, and where to start.
-
 ## Platform features
 
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.

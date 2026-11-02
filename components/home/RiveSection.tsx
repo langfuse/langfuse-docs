@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { HomeSection } from "@/components/home/HomeSection";
-import { Button, CornerBox, Heading, TextHighlight } from "@/components/ui";
+import { Button, Heading, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import RiveMock from "@/components/home/img/rive-mock.png";
 import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
@@ -24,55 +24,11 @@ const RIVE_IN_VIEW_ACTIVATION_DELAY_MS = 250;
  */
 const RIVE_LOAD_VIEW_MODEL_PATH = "isLoad";
 
-type RiveLabel = {
-  heading: string;
-  body: string;
-};
-
-const OVERVIEW: RiveLabel = {
-  heading: "The AI engineering loop",
-  body: "Every step of the loop maps to a part of Langfuse. The Academy explains why each step exists, how they connect, and where to start.",
-};
-
-const LABELS: Record<string, RiveLabel> = {
-  "obs-active": {
-    heading: "Observability",
-    body: "Use Observability to gain deep understanding of what happens under the hood of your application and inside the LLMs you are using. It helps you during development and when debugging in production.",
-  },
-  "prompts-active": {
-    heading: "Prompts",
-    body: "Prompt Management lets you separate prompts from code logic. This makes it much faster to build and iterate in your development process. It also allows Product Managers, domain experts, and QA to participate in writing prompts.",
-  },
-  "evals-active": {
-    heading: "Evals",
-    body: "Evals are a set of tools to monitor your application quality during development and production. Use LLM-as-a-Judge or fully custom setups via the API and SDKs to score the behavior of your application.",
-  },
-  "playground-active": {
-    heading: "Playground",
-    body: "The Playground is useful during development and in production. In development you can quickly try out different prompts and models side by side. In production it is handy to replay detailed logs of specific traces to better understand why an error occurred.",
-  },
-  "human-active": {
-    heading: "Human Annotation",
-    body: "Human Annotation workflows can be used in development or production to manually score the behavior and outputs of your application and learn how users use your service. They help you build collaborative workflows across teams.",
-  },
-  "exp-active": {
-    heading: "Experiments",
-    body: "Use Experiments during development to remove the guesswork from changes. They help you quickly test different prompt versions, models, or code variations and compare them against each other.",
-  },
-  "metrics-active": {
-    heading: "Cost & Latency",
-    body: "Cost and Latency help you monitor your application in production. Customize dashboards aggregating data from across Langfuse. Understand how cost, usage, quality, and other metrics perform over time.",
-  },
-};
-
 export const RiveSection = () => {
   const isMd = useMinWidth(MD_MIN_WIDTH_QUERY);
-  const [label, setLabel] = useState<RiveLabel>(OVERVIEW);
   const [riveSectionInView, setRiveSectionInView] = useState(false);
   const riveViewportRef = useRef<HTMLDivElement>(null);
   const inViewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastRevTimeRef = useRef<number>(0);
 
   useEffect(() => {
     const el = riveViewportRef.current;
@@ -107,35 +63,6 @@ export const RiveSection = () => {
     [riveSectionInView],
   );
 
-  const handleStateChange = useCallback((states: string[]) => {
-    if (states.some((s) => s.includes("-rev"))) {
-      lastRevTimeRef.current = Date.now();
-      return;
-    }
-
-    if (Date.now() - lastRevTimeRef.current < 250) return;
-
-    const match = states.find((s) => s in LABELS);
-    if (!match) return;
-
-    setLabel(LABELS[match]);
-  }, []);
-
-  const handlePointerLeave = useCallback(() => {
-    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
-    resetTimerRef.current = setTimeout(() => {
-      setLabel(OVERVIEW);
-      resetTimerRef.current = null;
-    }, 150);
-  }, []);
-
-  const handlePointerEnter = useCallback(() => {
-    if (resetTimerRef.current) {
-      clearTimeout(resetTimerRef.current);
-      resetTimerRef.current = null;
-    }
-  }, []);
-
   return (
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
       <div className="flex flex-col gap-4 items-start">
@@ -155,6 +82,14 @@ export const RiveSection = () => {
           from real applications. Free, open, and readable as Markdown for
           coding agents.
         </Text>
+        <Button
+          variant="secondary"
+          size="default"
+          href="/academy"
+          wrapperClassName="mt-2"
+        >
+          Explore the Academy
+        </Button>
       </div>
 
       {/* Mobile: static image + tabs (below lg) */}
@@ -175,12 +110,7 @@ export const RiveSection = () => {
           SSR/desktop height does not shift. RiveAnimation mounts only at md+
           so phones never fetch rive.wasm. */}
       <div className="hidden md:block">
-        <div
-          ref={riveViewportRef}
-          className="p-4 -mt-px h-[500px]"
-          onPointerEnter={handlePointerEnter}
-          onPointerLeave={handlePointerLeave}
-        >
+        <div ref={riveViewportRef} className="p-4 -mt-px h-[500px]">
           {isMd ? (
             <RiveAnimation
               src={RIVE_FILE}
@@ -188,35 +118,11 @@ export const RiveSection = () => {
               fit="cover"
               zoom={1.4}
               className="w-full h-full -translate-x-4 -translate-y-6"
-              onStateChange={handleStateChange}
               viewModelBooleanInputs={loadViewModelBooleans}
             />
           ) : null}
         </div>
       </div>
-
-      <CornerBox className="flex min-h-[120px] w-full flex-col justify-between gap-5 bg-surface-bg p-4 -mt-px sm:flex-row sm:items-center">
-        <div
-          key={label.heading}
-          className="rive-text-enter flex max-w-[64ch] flex-col gap-1.5"
-        >
-          <Text className="font-medium text-left text-text-primary">
-            {label.heading}
-          </Text>
-          <Text size="s" className="w-full max-w-none text-left">
-            {label.body}
-          </Text>
-        </div>
-        <Button
-          variant="secondary"
-          size="default"
-          href="/academy"
-          aria-label="Explore the Academy"
-          wrapperClassName="sm:flex-none"
-        >
-          Explore the Academy
-        </Button>
-      </CornerBox>
     </HomeSection>
   );
 };
