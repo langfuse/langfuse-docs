@@ -72,8 +72,7 @@ const visualAltTexts: Record<HowWeWorkStepId, string> = {
   build:
     "Cropped merged pull request for the evals revamp with 25 commits and about 3,400 added lines",
   ship: "Cropped Experiments changelog post next to the launch checklist",
-  offsite:
-    "Placeholder for a team photo from the Tokyo offsite, to be replaced with a real photo",
+  offsite: "Framed placeholder for a team photo from the Tokyo offsite",
 };
 
 function SkeletonLine({ className }: { className?: string }) {
@@ -227,9 +226,6 @@ function StepVisual({ id }: { id: HowWeWorkStepId }) {
           <span className="text-[10px] font-semibold text-text-primary">
             {facts.offsite.title}
           </span>
-          <span className="font-mono text-[8px] text-text-disabled">
-            {facts.offsite.note}
-          </span>
         </div>
       );
   }
@@ -314,7 +310,7 @@ function MobileCarousel() {
   }, [api]);
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <div className="relative">
         <Carousel setApi={setApi} opts={{ align: "start" }}>
           <CarouselContent viewportClassName="py-1" className="-ml-3">
@@ -330,7 +326,7 @@ function MobileCarousel() {
           className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent"
         />
       </div>
-      <div className="mt-4 flex items-center justify-center gap-1.5">
+      <div className="mt-2.5 flex items-center justify-center">
         {howWeWorkSteps.map((step, index) => (
           <button
             key={step.id}
@@ -338,13 +334,17 @@ function MobileCarousel() {
             aria-label={`Go to step ${step.number}: ${step.label}`}
             aria-current={index === current ? "true" : undefined}
             onClick={() => api?.scrollTo(index)}
-            className={cn(
-              "h-1.5 rounded-full transition-all",
-              index === current
-                ? "w-4 bg-text-primary"
-                : "w-1.5 bg-line-structure hover:bg-text-disabled",
-            )}
-          />
+            className="group flex size-6 items-center justify-center"
+          >
+            <span
+              className={cn(
+                "h-1.5 rounded-full transition-all",
+                index === current
+                  ? "w-4 bg-text-primary"
+                  : "w-1.5 bg-line-structure group-hover:bg-text-disabled",
+              )}
+            />
+          </button>
         ))}
       </div>
     </div>
@@ -354,13 +354,15 @@ function MobileCarousel() {
 /**
  * "How we work" journey on the careers page: five steps from customer call to
  * offsite, each linking to the matching handbook page. Five-across row with
- * connecting arrows at lg+, swipe carousel with snap scrolling below.
+ * connecting arrows at xl+, swipe carousel with snap scrolling below.
  */
 export function HowWeWorkSection() {
   return (
     <section
       aria-labelledby="how-we-work-heading"
-      className="not-prose relative left-1/2 my-16 w-[min(1200px,calc(100vw-2rem))] -translate-x-1/2"
+      // Breaks out of the 680px careers column, but never past HomeLayout's
+      // rails: 240px sidebar from lg, plus a 240px aside from wide (1440px).
+      className="not-prose relative left-1/2 my-16 w-full -translate-x-1/2 xl:w-[min(1200px,calc(100vw-240px-3rem))] wide:w-[min(1200px,calc(100vw-480px-3rem))]"
     >
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-3 text-center">
         <p className="font-mono text-[11px] font-medium uppercase tracking-[0.1em] text-text-tertiary">
@@ -378,7 +380,7 @@ export function HowWeWorkSection() {
       </div>
 
       <div className="mt-10">
-        <div className="hidden items-stretch lg:flex">
+        <div className="hidden items-stretch xl:flex">
           {howWeWorkSteps.map((step, index) => (
             <React.Fragment key={step.id}>
               {index > 0 && (

@@ -116,15 +116,16 @@ export const howWeWorkVisualFacts = {
     checklist: ["Changelog post", "Launch video", "Social + newsletter"],
   },
   offsite: {
+    // Placeholder frame; swap in a real team photo via next/image when
+    // one is provided (no stock, no AI-generated people).
     title: "Team photo — Tokyo offsite",
-    note: "To do: real photo, no stock",
   },
 };
 
 export const howWeWorkCtas = [
   { label: "Read the whole handbook", href: "/handbook" },
   {
-    label: "How we hire: 4 steps, about 2 weeks",
+    label: "How we hire, step by step",
     href: "/handbook/how-we-hire",
   },
 ];
