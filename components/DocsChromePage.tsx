@@ -17,8 +17,8 @@ type LoadedPage = { data: any; url?: string; path?: string };
 /**
  * Content directory (e.g. `content/academy`) a page was loaded from, inferred
  * from its URL via the single source of truth in lib/content-dir-map.js.
- * Collections nested inside another directory (academy/japan) pass
- * `contentDir` explicitly instead.
+ * Collections outside `content/` (the Japanese Academy in i18n/ja/academy)
+ * pass `contentDir` explicitly instead.
  */
 // Content directories that are not checked into this repository (see
 // .gitignore), so no "Edit this page on GitHub" link can point at them.
@@ -76,7 +76,7 @@ export async function DocsChromePage({
   bottomSuffix,
 }: {
   page: LoadedPage;
-  /** Collection directory override for collections nested in another one, e.g. `content/academy/japan`. */
+  /** Collection directory override for collections outside `content/`, e.g. `i18n/ja/academy`. */
   contentDir?: string;
   /** Extra props forwarded to `DocBodyChrome` (e.g. `versionLabel` on self-hosting). */
   bodyChromeProps?: BodyChromeProps;

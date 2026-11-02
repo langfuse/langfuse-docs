@@ -55,7 +55,9 @@ jobs:
           require-lockfile: true
 
       # Continue on the open translation branch, so pages translated in an
-      # earlier, not yet merged run are not translated again.
+      # earlier, not yet merged run are not translated again. If main no longer
+      # merges cleanly, stop before translating: resolve the conflict in the
+      # pull request (or close it and delete the branch), then rerun.
       - name: Check out the translation branch
         run: |
           git config user.name "GitHub Action"
@@ -65,8 +67,8 @@ jobs:
             git checkout -B "$BRANCH" "origin/$BRANCH"
             if ! git merge --no-edit origin/main; then
               git merge --abort
-              echo "Could not merge main into $BRANCH; starting a fresh branch from main."
-              git checkout -B "$BRANCH" origin/main
+              echo "::error::main does not merge cleanly into $BRANCH. Resolve the conflict in the translation pull request, or close it and delete the branch, then rerun."
+              exit 1
             fi
           else
             git checkout -B "$BRANCH" origin/main
@@ -99,11 +101,13 @@ jobs:
           GH_TOKEN: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
         run: |
           git add i18n
-          if git diff --staged --quiet && [ "$(git rev-list --count origin/main..HEAD)" = "0" ]; then
+          # Skip runs that translated nothing, so an open pull request does
+          # not get a merge commit and an empty report every week.
+          if git diff --staged --quiet; then
             echo "No translation changes."
             exit 0
           fi
-          git diff --staged --quiet || git commit -m "docs(i18n): update translations"
+          git commit -m "docs(i18n): update translations"
           git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
 
           {

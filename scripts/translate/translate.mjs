@@ -18,7 +18,7 @@ import {
   buildFrontmatter,
   checkPlaceholders,
   compareStructure,
-  headings,
+  headingIds,
   hidePlaceholders,
   maskBody,
   metaStrings,
@@ -348,9 +348,26 @@ async function translatePage(lang, file, source, previous) {
       `Skipped: ${masked.length} characters of prose exceed maxSourceChars (${config.maxSourceChars}).`,
     );
   }
-  const fields = translatableFrontmatter(data);
-  const englishHeadings = headings(masked);
+  const englishHeadings = headingIds(body);
   const sourceCompiles = await compiles(body);
+
+  // Keep the existing translation of front matter fields whose English value
+  // did not change, so reviewer edits survive; only changed fields go to the model.
+  const fields = translatableFrontmatter(data);
+  const keptFields = {};
+  if (previous?.english) {
+    const englishBefore = splitFrontmatter(previous.english).data ?? {};
+    const translatedBefore = splitFrontmatter(previous.translation).data ?? {};
+    for (const key of Object.keys(fields)) {
+      if (
+        englishBefore[key] === fields[key] &&
+        typeof translatedBefore[key] === "string"
+      ) {
+        keptFields[key] = translatedBefore[key];
+        delete fields[key];
+      }
+    }
+  }
 
   let previousReference = null;
   if (previous) {
@@ -383,6 +400,15 @@ async function translatePage(lang, file, source, previous) {
       } else {
         try {
           translatedFields = JSON.parse(fm[1]);
+          const missing = Object.keys(fields).filter(
+            (key) =>
+              typeof translatedFields?.[key] !== "string" ||
+              !translatedFields[key].trim(),
+          );
+          if (missing.length)
+            errors.push(
+              `The ⟦FRONTMATTER⟧ block is missing translations for: ${missing.join(", ")}.`,
+            );
         } catch {
           errors.push("The ⟦FRONTMATTER⟧ block is not valid JSON.");
         }
@@ -399,7 +425,14 @@ async function translatePage(lang, file, source, previous) {
     errors.push(...compareStructure(masked, translatedBody));
     if (errors.length) return { errors };
 
-    const pinned = pinHeadingIds(translatedBody, englishHeadings);
+    const warnings = keepTermWarnings(masked, translatedBody);
+    let pinned = pinHeadingIds(translatedBody, englishHeadings);
+    if (pinned === null) {
+      pinned = translatedBody;
+      warnings.push(
+        "Heading anchors were not pinned: the headings could not be matched to the English page.",
+      );
+    }
     const restored = unmaskBody(pinned, slots);
     if (sourceCompiles && !(await compiles(restored))) {
       errors.push(
@@ -408,19 +441,48 @@ async function translatePage(lang, file, source, previous) {
       return { errors };
     }
     const output =
-      buildFrontmatter(data, translatedFields) + restored.replace(/\n*$/, "\n");
-    return {
-      errors: [],
-      output,
-      warnings: keepTermWarnings(masked, translatedBody),
-    };
+      buildFrontmatter(data, { ...keptFields, ...translatedFields }) +
+      restored.replace(/\n*$/, "\n");
+    return { errors: [], output, warnings };
   });
 }
 
+/** Maps each English sidebar label of an earlier version to its existing translation. */
+function previousMetaLabels(previous) {
+  if (!previous?.english) return {};
+  try {
+    const english = metaStrings(JSON.parse(previous.english));
+    const translated = metaStrings(JSON.parse(previous.translation));
+    if (english.length !== translated.length) return {};
+    return Object.fromEntries(
+      english.map((label, i) => [label, translated[i]]),
+    );
+  } catch {
+    return {};
+  }
+}
+
 async function translateMetaFiles(lang, files) {
+  // Labels whose English text did not change keep their existing translation,
+  // so reviewer edits survive; only new labels go to the model.
+  const kept = {};
   const strings = {};
-  for (const { file, source } of files)
-    strings[file] = metaStrings(JSON.parse(source));
+  for (const { file, source, previous } of files) {
+    const existing = previousMetaLabels(previous);
+    kept[file] = {};
+    for (const label of metaStrings(JSON.parse(source))) {
+      if (typeof existing[label] === "string")
+        kept[file][label] = existing[label];
+      else (strings[file] ??= []).push(label);
+    }
+  }
+  const build = (parsed) =>
+    files.map(({ file, source }) => ({
+      file,
+      output: `${JSON.stringify(applyMetaStrings(JSON.parse(source), { ...kept[file], ...parsed[file] }), null, 2)}\n`,
+    }));
+  if (Object.keys(strings).length === 0) return build({});
+
   const prompt = `These are sidebar labels of documentation sections. Translate each string. Return only a JSON object with the same keys, where each value is an object that maps every source string to its translation.
 
 ${JSON.stringify(strings, null, 2)}`;
@@ -443,10 +505,7 @@ ${JSON.stringify(strings, null, 2)}`;
       return { errors: ["The response is not a valid JSON object."] };
     }
   });
-  return files.map(({ file, source }) => ({
-    file,
-    output: `${JSON.stringify(applyMetaStrings(JSON.parse(source), result.parsed[file]), null, 2)}\n`,
-  }));
+  return build(result.parsed);
 }
 
 async function pool(items, size, worker) {
@@ -515,7 +574,7 @@ async function runLanguage(lang) {
     }
     if (!args.force && entry?.source === sha && exists) continue;
     let previous = null;
-    if (exists && entry?.source !== sha && !file.endsWith(".json")) {
+    if (exists && entry?.source !== sha) {
       previous = {
         english: entry?.source ? readBlob(entry.source) : null,
         translation: fs.readFileSync(out, "utf8"),

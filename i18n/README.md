@@ -10,10 +10,11 @@ Only the Japanese Academy (`i18n/ja/academy/`, served at `/academy/japan`) is on
 - [`glossary.yaml`](./glossary.yaml) holds the required translation of each Langfuse and industry term, the terms that stay in English, and style rules per language. It is sent with every request. Native speakers review it in an internal Google Sheet, one set of columns per language; the reviewed entries are copied into `glossary.yaml`, and each language records its reviewer in `reviewedBy`.
 - [`scripts/translate/translate.mjs`](../scripts/translate/translate.mjs) translates new and changed pages:
   - Front matter, imports, code blocks, and lines with only JSX tags are replaced by placeholders, so the model never sees or changes code.
+    Text inside JSX props (for example the descriptions in `DatasetBlock` or `EvaluatorBlock`) therefore stays in English for now.
   - Only the `title`, `description`, `sidebarTitle`, `shortTitle`, and `seoTitle` front matter fields are translated.
-  - Every translated heading gets the English anchor (`[#anchor]`), so deep links work in every language.
+  - Every translated heading gets the English anchor (`[#anchor]`), computed the way Fumadocs computes heading ids, so deep links work in every language.
   - Each translation is checked for intact placeholders, headings, link targets, and inline code, and must compile as MDX. Failed checks are sent back to the model for a correction.
-  - When an English page changes, the model gets the previous English version and the existing translation, and reuses the existing translation for unchanged passages. Edits that reviewers make in a translation pull request survive later runs.
+  - When an English page changes, the model gets the previous English version and the existing translation, and reuses the existing translation for unchanged passages. Translated front matter fields and sidebar labels whose English text did not change are kept as they are. Edits that reviewers make in a translation pull request survive later runs.
 - Translations are written to `i18n/<lang>/`, mirroring `content/`, for example `i18n/ja/docs/observability/overview.mdx`. `i18n/<lang>/.translation-lock.json` records which version of each English page was translated.
 
 ## Human translations

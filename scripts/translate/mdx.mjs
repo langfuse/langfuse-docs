@@ -4,6 +4,7 @@
 // blocks, math blocks, and lines that hold only JSX/HTML tags are replaced by
 // placeholder lines before translation and restored afterwards.
 
+import { createProcessor } from "@mdx-js/mdx";
 import Slugger from "github-slugger";
 import YAML from "yaml";
 
@@ -62,16 +63,35 @@ function esmEnd(lines, start) {
   return lines.length - 1;
 }
 
-const TAG_ONLY_LINE = /^\s*<\/?[A-Za-z][\w.:-]*(\s[^<>]*)?\/?>\s*$/;
-const TAG_OPEN_START = /^\s*<[A-Za-z][\w.:-]*(\s[^<>]*)?$/;
+const TAG_START = /^\s*<\/?[A-Za-z]/;
+const MAX_TAG_LINES = 500;
 
-/** Returns the last line index of a tag that spans only whole lines, or -1. */
+/**
+ * Returns the last line index of a JSX/HTML tag that starts a line and ends a
+ * line, or -1. Scans quotes and `{...}` expressions, so props may span blank
+ * lines and contain `<`, `>`, or nested JSX.
+ */
 function tagEnd(lines, start) {
-  if (TAG_ONLY_LINE.test(lines[start])) return start;
-  if (!TAG_OPEN_START.test(lines[start])) return -1;
-  for (let i = start + 1; i < Math.min(lines.length, start + 40); i++) {
-    if (/^\s*</.test(lines[i]) || lines[i].trim() === "") return -1;
-    if (/\/?>\s*$/.test(lines[i])) return i;
+  if (!TAG_START.test(lines[start])) return -1;
+  let depth = 0;
+  let quote = null;
+  for (let i = start; i < Math.min(lines.length, start + MAX_TAG_LINES); i++) {
+    const line = lines[i];
+    const from = i === start ? line.indexOf("<") + 1 : 0;
+    for (let j = from; j < line.length; j++) {
+      const ch = line[j];
+      if (quote) {
+        if (ch === "\\") j++;
+        else if (ch === quote) quote = null;
+      } else if (ch === '"' || ch === "'" || ch === "`") {
+        // Outside braces, only attribute values are quoted.
+        if (depth > 0 || line[j - 1] === "=") quote = ch;
+      } else if (ch === "{") depth++;
+      else if (ch === "}") depth--;
+      else if (ch === ">" && depth === 0) {
+        return line.slice(j + 1).trim() === "" ? i : -1;
+      }
+    }
   }
   return -1;
 }
@@ -158,48 +178,81 @@ export function checkPlaceholders(translated, slotCount) {
 
 const HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
 const CUSTOM_ID = /\s*\[#([^\]]+?)]\s*$/;
+// Same pattern as Fumadocs' remark-heading.
+const FUMADOCS_CUSTOM_ID = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
-/** Plain-text approximation of a heading, matching what Fumadocs slugs. */
-function headingText(markdown) {
-  return markdown
-    .replace(/!?\[([^\]]*)]\([^)]*\)/g, "$1")
-    .replace(/<[^>]+>/g, "")
-    .replace(/[<>`*_~]/g, "")
-    .trim();
+/** Lists the levels of the ATX headings of a masked body (code is masked, so `#` in code is ignored). */
+export function headings(masked) {
+  return masked
+    .split("\n")
+    .map((line) => line.match(HEADING))
+    .filter(Boolean)
+    .map((match) => ({ level: match[1].length }));
 }
 
-/** Lists ATX headings of a masked body (code is already masked, so `#` in code is ignored). */
-export function headings(masked) {
-  const slugger = new Slugger();
-  const result = [];
-  for (const line of masked.split("\n")) {
-    const match = line.match(HEADING);
-    if (!match) continue;
-    const custom = match[2].match(CUSTOM_ID);
-    result.push({
-      level: match[1].length,
-      id: custom ? custom[1] : slugger.slug(headingText(match[2])),
-      hasCustomId: Boolean(custom),
-    });
+const flatten = (node) =>
+  "children" in node
+    ? node.children.map(flatten).join("")
+    : typeof node.value === "string"
+      ? node.value
+      : "";
+
+/**
+ * Heading ids of an English body, computed the way Fumadocs' remark-heading
+ * does: a `[#id]` suffix wins, otherwise github-slugger over the flattened
+ * heading text. Returns null if the body does not parse as MDX.
+ */
+export function headingIds(body) {
+  let tree;
+  try {
+    tree = createProcessor().parse(body);
+  } catch {
+    return null;
   }
-  return result;
+  const slugger = new Slugger();
+  const ids = [];
+  const walk = (node) => {
+    if (node.type === "heading") {
+      const last = node.children.at(-1);
+      const custom =
+        last?.type === "text" ? FUMADOCS_CUSTOM_ID.exec(last.value) : null;
+      ids.push({
+        level: node.depth,
+        id: custom?.[1] ?? slugger.slug(flatten(node)),
+      });
+      return;
+    }
+    node.children?.forEach(walk);
+  };
+  walk(tree);
+  return ids;
 }
 
 /**
  * Pins the English heading ids on the translation, so `#anchor` links keep
- * working: adds `[#id]` to every translated H2-H6 that has no custom id.
+ * working: every translated H2-H6 gets `[#id]` with the current English id,
+ * replacing any id the model copied from an earlier translation. Returns null
+ * when the headings cannot be matched one to one.
  */
-export function pinHeadingIds(translatedMasked, englishHeadings) {
+export function pinHeadingIds(translatedMasked, englishIds) {
+  const lines = translatedMasked.split("\n");
+  const translated = lines.filter((line) => HEADING.test(line));
+  if (
+    !englishIds ||
+    translated.length !== englishIds.length ||
+    translated.some(
+      (line, i) => line.match(HEADING)[1].length !== englishIds[i].level,
+    )
+  ) {
+    return null;
+  }
   let index = 0;
-  return translatedMasked
-    .split("\n")
+  return lines
     .map((line) => {
-      const match = line.match(HEADING);
-      if (!match) return line;
-      const english = englishHeadings[index++];
-      if (!english || english.level === 1 || CUSTOM_ID.test(match[2]))
-        return line;
-      return `${line.trimEnd()} [#${english.id}]`;
+      if (!HEADING.test(line)) return line;
+      const english = englishIds[index++];
+      if (english.level === 1) return line;
+      return `${line.trimEnd().replace(CUSTOM_ID, "")} [#${english.id}]`;
     })
     .join("\n");
 }

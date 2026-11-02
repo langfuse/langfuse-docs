@@ -7,7 +7,7 @@ import {
   buildFrontmatter,
   checkPlaceholders,
   compareStructure,
-  headings,
+  headingIds,
   maskBody,
   metaStrings,
   pinHeadingIds,
@@ -81,24 +81,59 @@ test("masking round-trips on every docs page", () => {
   }
 });
 
-test("headings ignore code and follow Fumadocs slugs", () => {
-  const { masked } = maskBody(SAMPLE);
+test("headingIds ignore code and follow Fumadocs slugs", () => {
   assert.deepEqual(
-    headings(masked).map((h) => h.id),
+    headingIds(SAMPLE).map((h) => h.id),
     ["get-started", "custom", "next-steps"],
+  );
+  // Inline code keeps its underscores and entities are decoded, as in Fumadocs.
+  assert.deepEqual(
+    headingIds("### `mask_otel_spans` behavior\n\n## Use&nbsp;it").map(
+      (h) => h.id,
+    ),
+    ["mask_otel_spans-behavior", "useit"],
   );
 });
 
-test("pinHeadingIds keeps the English anchors", () => {
+test("pinHeadingIds pins the current English anchors", () => {
   const { masked } = maskBody(SAMPLE);
   const translated = masked
     .replace("# Get started", "# はじめに")
     .replace("## Custom id [#custom]", "## カスタム ID [#custom]")
-    .replace("## Next steps", "## 次のステップ");
-  const pinned = pinHeadingIds(translated, headings(masked));
+    // An anchor copied from an earlier translation is replaced.
+    .replace("## Next steps", "## 次のステップ [#old-steps]");
+  const pinned = pinHeadingIds(translated, headingIds(SAMPLE));
   assert.match(pinned, /^# はじめに$/m);
   assert.match(pinned, /^## カスタム ID \[#custom]$/m);
   assert.match(pinned, /^## 次のステップ \[#next-steps]$/m);
+  assert.equal(
+    pinHeadingIds(
+      translated.replace(/^## 次のステップ.*$/m, ""),
+      headingIds(SAMPLE),
+    ),
+    null,
+  );
+});
+
+test("multi-line JSX tags are masked whole", () => {
+  const body = `Intro.
+
+<RolePermissionTable
+  roles={["owner", "admin"]}
+
+  scopes={[
+    "projects:read",
+    "prompts:CUD",
+  ]}
+  render={(row) => <span>{row.a > 1 ? "yes" : "no"}</span>}
+/>
+
+<Callout title="Don't panic">Inline text stays translatable.</Callout>
+`;
+  const { masked, slots } = maskBody(body);
+  assert.ok(!masked.includes("projects:read"));
+  assert.ok(masked.includes("Inline text stays translatable."));
+  assert.equal(unmaskBody(masked, slots), body);
 });
 
 test("checkPlaceholders reports missing, duplicated and inline placeholders", () => {
