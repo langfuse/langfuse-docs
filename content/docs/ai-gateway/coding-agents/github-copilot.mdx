@@ -99,5 +99,20 @@ Select a gateway model and send a prompt. If Copilot replies, it runs through th
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
-- The gateway does not infer a session or turn from Copilot requests, so every model call is its own trace without a session. In the app, set `langfuse-session-id` under **Custom headers** to group calls into one session.
-- The Anthropic route is CLI only. The app's custom endpoint speaks the OpenAI API only.
+<FaqDetails>
+
+<Details id="no-session">
+<Summary>Why does every call have its own trace without a session?</Summary>
+
+The gateway does not infer a session or turn from Copilot requests. In the app, set `langfuse-session-id` under **Custom headers** to group calls into one session.
+
+</Details>
+
+<Details id="anthropic-route">
+<Summary>Can the Copilot app use the Anthropic route?</Summary>
+
+No. The Anthropic route is CLI only. The app's custom endpoint speaks the OpenAI API only.
+
+</Details>
+
+</FaqDetails>

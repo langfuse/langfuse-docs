@@ -12,7 +12,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 The **Analytics** page shows what your organization spends on the gateway and who uses it. Use it to see which teammates or services drive cost, which API key a spike came from, or how spend splits across models.
 
-Open it under **Organization settings → AI Gateway → Analytics**. Only `OWNER` and `ADMIN` can see it.
+Open it under **Organization settings → AI Gateway → Analytics**. Only Owners and Admins can see it.
 
 ## Filters and time range [#filters]
 
@@ -26,9 +26,9 @@ The charts read the generations the gateway records in its [ingestion project](/
 If some calls used models that have no Langfuse price, the page shows a **Cost excludes unpriced usage** alert with the number of requests, tokens, and models affected. The cost charts count those calls as $0. Add the missing prices as [custom model definitions](/docs/observability/features/token-and-cost-tracking#custom-model-definitions) in the ingestion project.
 
 <Callout type="info">
-  Analytics need recorded traces. `USAGE` [capture
-  mode](/docs/ai-gateway/features/tracing#capture-modes) is enough. On
-  self-hosted Langfuse with capture mode `NONE`, the page shows "Gateway
+  Analytics need recorded traces. `USAGE` [ingestion
+  mode](/docs/ai-gateway/features/tracing#ingestion-modes) is enough. On
+  self-hosted Langfuse with ingestion mode `NONE`, the page shows "Gateway
   requests are not recorded" instead of charts. Cost is subject to the [known
   cost bugs](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
 </Callout>

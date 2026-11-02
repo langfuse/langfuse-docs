@@ -26,18 +26,24 @@ Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. 
 
 Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
 
-### Configure the gateway [#desktop-configure]
+### Connect to the gateway [#desktop-configure]
 
-1. Optional: to keep your existing claude.ai chats and sessions (gateway mode uses a separate profile), turn on **Claude.ai data import** under **Capabilities** when you configure the gateway in the steps below. After restarting, use **Settings → Import & export**. See [Import and export](https://claude.com/docs/third-party/claude-desktop/import).
-2. If the **Developer** menu is unavailable, open **Help → Troubleshooting** and enable Developer Mode.
-3. Open **Developer → Configure Third-Party Inference**.
-4. Under **Connection**, set **Inference provider** to **Gateway**.
-5. Set **Gateway base URL** to `https://gateway.cloud.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
-6. Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
-7. Under **Capabilities → General restrictions**, we recommend adding `*` to **Allowed egress hosts**. Otherwise, Claude can't reach websites or services outside the gateway, such as GitHub, and it won't ask you for permission.
-8. Select **Apply Changes**, then select **Save & Restart**. Start a new session so that the egress settings apply.
+Open **Developer → Configure Third-Party Inference**. If the **Developer** menu is unavailable, open **Help → Troubleshooting** and enable Developer Mode. Then, under **Connection**:
 
-For more information about these settings, see the [Claude Desktop third-party inference guide](https://claude.com/docs/third-party/claude-desktop/in-app-configuration).
+- Set **Inference provider** to **Gateway**.
+- Set **Gateway base URL** to `https://gateway.cloud.langfuse.com/anthropic`. Do not add `/v1`; Claude Desktop appends it.
+- Set **Credential kind** to **Static API key**, enter your Langfuse gateway key under **Gateway API key**, and select **Bearer** as the **Gateway auth scheme**.
+
+### Set capabilities [#desktop-capabilities]
+
+Under **Capabilities**:
+
+- Under **General restrictions**, we recommend adding `*` to **Allowed egress hosts**. Otherwise, Claude can't reach websites or services outside the gateway, such as GitHub, and it won't ask you for permission.
+- Optional: gateway mode uses a separate profile. To keep your existing claude.ai chats and sessions, turn on **Claude.ai data import**. After restarting, use **Settings → Import & export**. See [Import and export](https://claude.com/docs/third-party/claude-desktop/import).
+
+### Save and restart [#desktop-save]
+
+Select **Apply Changes**, then select **Save & Restart**. Start a new session so that the egress settings apply. For more information about these settings, see the [Claude Desktop third-party inference guide](https://claude.com/docs/third-party/claude-desktop/in-app-configuration).
 
 <Callout type="info">
   Use HTTPS git remotes or `gh` to push. SSH push fails in the macOS sandbox,
@@ -142,8 +148,41 @@ export OTEL_EXPORTER_OTLP_ENDPOINT="<your-otel-collector>"
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
-- When a model call fails, Claude Code retries once without streaming, so a failed prompt shows **two** `ERROR` generations.
-- Subagent calls carry `agent.id` but no link to their parent, unless you enable [turn grouping](#turn-grouping).
-- Thinking text is often empty (`thinking.display: "omitted"`), so time to first token is close to latency. Thinking tokens are counted inside output tokens.
-- A `HEAD /anthropic/api/hello` 404 at startup is Claude Code's connectivity probe. It is harmless and not recorded.
-- Long sessions can exceed the 5 MiB input capture limit. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
+<FaqDetails>
+
+<Details id="two-error-generations">
+<Summary>Why does a failed prompt show two ERROR generations?</Summary>
+
+When a model call fails, Claude Code retries once without streaming, so a failed prompt shows **two** `ERROR` generations.
+
+</Details>
+
+<Details id="subagent-parent">
+<Summary>Why aren't subagent calls linked to their parent?</Summary>
+
+Subagent calls carry `agent.id` but no link to their parent, unless you enable [turn grouping](#turn-grouping).
+
+</Details>
+
+<Details id="empty-thinking">
+<Summary>Why is the thinking text empty?</Summary>
+
+Claude Code often omits thinking text (`thinking.display: "omitted"`), so time to first token is close to latency. Thinking tokens are counted inside output tokens.
+
+</Details>
+
+<Details id="hello-404">
+<Summary>What is the HEAD /anthropic/api/hello 404 at startup?</Summary>
+
+It's Claude Code's connectivity probe. It is harmless and not recorded.
+
+</Details>
+
+<Details id="missing-input">
+<Summary>Why is the input missing on long sessions?</Summary>
+
+Long sessions can exceed the 5 MiB input capture limit. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
+
+</Details>
+
+</FaqDetails>

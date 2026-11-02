@@ -1,7 +1,7 @@
 ---
 title: Send your first request
 seoTitle: "Send your first request through the Langfuse AI Gateway (beta)"
-description: Create a personal gateway API key, call a model through the Langfuse AI Gateway, connect a coding agent, and find the trace in Langfuse.
+description: Create a personal gateway API key, call a model through the Langfuse AI Gateway, and connect a coding agent.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -10,12 +10,12 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-This page is for developers who want to call models through the gateway. You create a gateway API key, send a request, and find the trace in Langfuse. If the gateway is not set up for your organization yet, ask an admin to follow [Set up the gateway](/docs/ai-gateway/get-started/admin-setup) first.
+This page is for developers who want to call models through the gateway. You create a gateway API key and send a request. If the gateway is not set up for your organization yet, ask an admin to follow [Set up the gateway](/docs/ai-gateway/get-started/admin-setup) first.
 
 ## Before you begin [#prerequisites]
 
 - Your organization has set up the gateway and added at least one provider credential. **Organization settings → AI Gateway → Models** lists the models you can call. If it says "No active providers", ask your admin.
-- You have the `AI Gateway`, `MEMBER`, `ADMIN`, or `OWNER` organization role. `VIEWER` can't create gateway keys. See [roles](/docs/ai-gateway/get-started/admin-setup#give-your-team-access).
+- You have the AI Gateway, Member, Admin, or Owner organization role. Viewers can't create gateway keys. See [roles and permissions](/docs/administration/rbac).
 - To see traces, you need access to the organization's ingestion project.
 
 <Steps>
@@ -93,7 +93,7 @@ Replace `<model-id>` with the model ID you picked. The response is OpenAI's own 
 
 This step needs access to the organization's ingestion project. Open the ingestion project in Langfuse and go to **Tracing**. The call appears as a trace with a generation named `openai.chat-completions`, with its input, output, token usage, and cost. Filter by the `first-request` tag, or by your user: your key records your email as the trace user.
 
-What's recorded depends on the organization's [capture mode](/docs/ai-gateway/features/tracing#capture-modes).
+What's recorded depends on the organization's [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes).
 
 </Steps>
 

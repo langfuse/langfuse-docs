@@ -80,9 +80,48 @@ Codex sends its own turn ID, so the gateway groups all model rounds of a turn in
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
-- After changing gateway credentials, restart the Codex app-server daemon with `codex app-server daemon restart`. The daemon can keep using credentials loaded before the change until it restarts.
-- Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
-- A global `model_reasoning_effort` makes non-reasoning models fail with a `400`. Some small models reject Codex's `tool_search` tool.
-- Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Each retry is its own generation in the same trace.
-- Cancelled or failed Codex calls currently show inflated, estimated usage and cost. Ignore cost on `ERROR` and `WARNING` generations until the fix ships.
-- Keep websocket features off for this provider. The gateway serves HTTP server-sent events only.
+<FaqDetails>
+
+<Details id="old-credentials">
+<Summary>Codex still uses old credentials after a change</Summary>
+
+Restart the Codex app-server daemon with `codex app-server daemon restart`. The daemon can keep using credentials loaded before the change until it restarts.
+
+</Details>
+
+<Details id="missing-input">
+<Summary>Why is the input missing on long sessions?</Summary>
+
+Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
+
+</Details>
+
+<Details id="model-400">
+<Summary>A model fails with a 400 error</Summary>
+
+A global `model_reasoning_effort` makes non-reasoning models fail with a `400`. Some small models reject Codex's `tool_search` tool.
+
+</Details>
+
+<Details id="retries">
+<Summary>Why does a trace contain several generations for one call?</Summary>
+
+Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Each retry is its own generation in the same trace.
+
+</Details>
+
+<Details id="inflated-cost">
+<Summary>Why do cancelled or failed calls show high cost?</Summary>
+
+Cancelled or failed Codex calls currently show inflated, estimated usage and cost. Ignore cost on `ERROR` and `WARNING` generations until the fix ships.
+
+</Details>
+
+<Details id="websockets">
+<Summary>Can I use websocket features?</Summary>
+
+No. Keep websocket features off for this provider. The gateway serves HTTP server-sent events only.
+
+</Details>
+
+</FaqDetails>

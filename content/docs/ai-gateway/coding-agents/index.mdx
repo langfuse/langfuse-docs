@@ -24,14 +24,16 @@ To add tags, an environment, or other context to agent traces, send [request hea
 
 ## Trace shape [#trace-shape]
 
-| Agent          | Session                               | Default trace grouping                            | Turn grouping                                                                                | Trace name    | Generation name                           |
-| -------------- | ------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------- | ----------------------------------------- |
-| Claude Code    | `claude-code:<session uuid>`          | one trace per model call                          | [opt-in](/docs/ai-gateway/coding-agents/claude-code#turn-grouping) (beta telemetry env vars) | `claude-code` | `anthropic.messages`                      |
-| Codex          | `codex:<thread id>`                   | **one trace per turn** (all tool rounds together) | built in                                                                                     | `codex`       | `openai.responses`                        |
-| OpenCode       | `opencode:<ses_…>`                    | one trace per model call                          | [experimental plugin](/docs/ai-gateway/coding-agents/opencode#turn-grouping)                 | `opencode`    | `anthropic.messages` / `openai.responses` |
-| pi             | `pi:<session id>`                     | one trace per model call                          | [experimental extension](/docs/ai-gateway/coding-agents/pi#turn-grouping)                    | `pi`          | `anthropic.messages` / `openai.responses` |
-| GitHub Copilot | none (app: set `langfuse-session-id`) | one trace per model call                          | not available                                                                                | none          | `anthropic.messages` / `openai.responses` |
+The gateway groups calls into Langfuse sessions by the agent's own session ID. A **turn** is one user prompt plus every model call the agent makes until it stops. Without turn grouping, each model call is its own trace, so a prompt with four tool steps shows up as four traces. Use the **Sessions** view to follow a conversation.
 
-- A **turn** is one user prompt plus every model call the agent makes until it stops. Without turn grouping, a prompt with four tool steps shows up as four traces in the same session. **Use the Sessions view** to follow a conversation.
+| Agent          | Session ID                            | Traces                                                                                                                    |
+| -------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code    | `claude-code:<session uuid>`          | One per model call, or one per turn with [opt-in turn grouping](/docs/ai-gateway/coding-agents/claude-code#turn-grouping) |
+| Codex          | `codex:<thread id>`                   | **One per turn**, built in                                                                                                |
+| OpenCode       | `opencode:<ses_…>`                    | One per model call, or one per turn with an [experimental plugin](/docs/ai-gateway/coding-agents/opencode#turn-grouping)  |
+| pi             | `pi:<session id>`                     | One per model call, or one per turn with an [experimental extension](/docs/ai-gateway/coding-agents/pi#turn-grouping)     |
+| GitHub Copilot | none (app: set `langfuse-session-id`) | One per model call                                                                                                        |
+
+- Traces are named after the agent (`claude-code`, `codex`, …), except for GitHub Copilot. Generations are named after the API format (`anthropic.messages`, `openai.responses`).
 - Resuming or continuing (`--resume`, `-c`, `codex resume`, `--session-id`) keeps the same session.
 - Original agent IDs are kept in metadata under `agent.*`. See [inferred agent context](/docs/ai-gateway/features/tracing#inferred-agent-context).

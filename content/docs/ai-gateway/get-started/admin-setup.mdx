@@ -1,7 +1,7 @@
 ---
 title: Set up the gateway
 seoTitle: "Set up the Langfuse AI Gateway for your team (beta)"
-description: Set up the Langfuse AI Gateway for an organization. Choose the ingestion project and capture mode, add provider credentials, choose models, give your team access, and issue gateway API keys.
+description: Set up the Langfuse AI Gateway for an organization. Choose the ingestion project and ingestion mode, add provider credentials, choose models, give your team access, and issue gateway API keys.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -16,7 +16,7 @@ This page walks an organization admin through preparing the gateway for a team. 
 
 - **Langfuse Cloud:** the gateway is available to every organization, with no extra setup.
 - **Self-hosted Langfuse:** the gateway is a separate service that runs next to Langfuse. Until it is deployed, the AI Gateway settings show a notice instead of the setup page. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
-- **Role:** the setup steps need the `OWNER` or `ADMIN` organization role.
+- **Role:** the setup steps need the Owner or Admin [organization role](/docs/administration/rbac).
 
 All gateway settings are under **Organization settings → AI Gateway**.
 
@@ -29,18 +29,13 @@ All gateway settings are under **Organization settings → AI Gateway**.
 Go to **Organization settings → AI Gateway → Setup** and choose:
 
 - the **ingestion project**, where the gateway records generations
-- the [capture mode](/docs/ai-gateway/features/tracing#capture-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
+- the [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
 
 Both are set per organization, not per key. The other AI Gateway pages stay disabled until an ingestion project is set (not needed with `NONE` on self-hosted Langfuse).
 
 ### Add provider credentials [#add-provider-connections]
 
-On the same page, select **Add credential** and add an OpenAI or Anthropic API key:
-
-- an `OPENAI` credential serves the OpenAI routes (Codex, OpenAI SDKs, and the OpenAI routes of OpenCode, pi, and GitHub Copilot)
-- an `ANTHROPIC` credential serves the Anthropic route (Claude Code, Claude Desktop, and the Anthropic routes of OpenCode, pi, and GitHub Copilot)
-
-The credential's **name** becomes the prefix of its [model IDs](/docs/ai-gateway/features/models#model-ids), so renaming a credential changes them. The key is validated when you save it.
+On the same page, select **Add credential** and add an OpenAI or Anthropic API key. The key is validated when you save it. The credential's **name** becomes the prefix of its [model IDs](/docs/ai-gateway/features/models#model-ids), so renaming a credential changes them.
 
 <Callout type="warning">
   **HIPAA region:** requests are forwarded to the provider you configure, using
@@ -53,24 +48,13 @@ Provider credentials are separate from project [LLM connections](/docs/administr
 
 ### Choose models [#choose-models]
 
-By default, a credential allows every model the provider offers, including models the provider publishes later. To restrict a credential to selected models, turn models off on its models page. See [Models](/docs/ai-gateway/features/models#manage-models).
+By default, a credential allows every model the provider offers, including models the provider publishes later. To restrict a credential to selected models, turn models off on its models page. See [Model management](/docs/ai-gateway/features/models#manage-models).
 
 ### Give your team access [#give-your-team-access]
 
-Use **Notify your team** in the setup guide to email teammates. People who are not in the organization yet are invited with the `AI Gateway` role: they can call the gateway and manage their own keys, but can't open projects. This role suits people who only need to call models, for example developers who use the gateway for their coding agent.
+Use **Notify your team** in the setup guide to email teammates. People who are not in the organization yet are invited with the AI Gateway role: they can call the gateway and manage their own keys, but can't see any projects. This role suits people who only need to call models, for example developers who use the gateway for their coding agent.
 
-You can change anyone's role later in the organization's members settings, for example to let them see their traces in the ingestion project. See [roles and permissions](/docs/administration/rbac) for all roles and project access.
-
-Who can do what depends on the organization role:
-
-| Role                  | Gateway access                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
-| `OWNER`               | Everything below, plus setup, provider credentials, models, analytics, and service account keys |
-| `ADMIN`               | Same as `OWNER`                                                                                 |
-| `MEMBER`              | Sees the enabled models, creates and revokes their own gateway keys                             |
-| `AI Gateway`          | Same gateway access as `MEMBER`, with no access to projects or other organization settings      |
-| `VIEWER`              | Sees the enabled models, cannot create gateway keys or call the gateway                         |
-| `NONE` (organization) | No gateway access                                                                               |
+You can change anyone's role later in the organization's members settings, for example to let them see their traces in the ingestion project. See [roles and permissions](/docs/administration/rbac) for what each role can do.
 
 <Callout type="warning">
   To see traces, people need access to the ingestion project. Everyone with
@@ -79,10 +63,6 @@ Who can do what depends on the organization role:
 
 ### Create a gateway API key [#create-a-gateway-api-key]
 
-Developers create their own keys under **Organization settings → AI Gateway → Gateway keys**. A key created there is tied to its creator and stops working when they lose gateway access. For a shared service, CI, or an agent that should keep working when people leave, issue a **service account** key instead. Only `OWNER` and `ADMIN` can create service account keys. See [API keys](/docs/ai-gateway/features/api-keys) for both key types.
+Share [Send your first request](/docs/ai-gateway/get-started/first-request) with your developers: it shows how to create a gateway key and call a model. Gateway keys can only call the gateway and have no other permissions in Langfuse, see [API keys](/docs/ai-gateway/features/api-keys).
 
 </Steps>
-
-## Send a test request [#test]
-
-Follow [Send your first request](/docs/ai-gateway/get-started/first-request) to check the setup end to end. Share the same page with your developers as their starting guide.

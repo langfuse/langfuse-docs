@@ -74,7 +74,7 @@ OpenAI only reports usage for a streamed Chat Completions request when the reque
 
 ### What gets recorded [#chat-completions-recording]
 
-- **Model parameters:** scalar parameters such as `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `seed`, `reasoning_effort`, and `stream` are recorded in the `FULL` and `USAGE` [capture modes](/docs/ai-gateway/features/tracing#capture-modes). In `FULL` mode, `stop`, `response_format`, `tool_choice`, `stream_options`, and similar structured options are added.
+- **Model parameters:** scalar parameters such as `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `seed`, `reasoning_effort`, and `stream` are recorded in the `FULL` and `USAGE` [ingestion modes](/docs/ai-gateway/features/tracing#ingestion-modes). In `FULL` mode, `stop`, `response_format`, `tool_choice`, `stream_options`, and similar structured options are added.
 - **Input** (`FULL` mode): `messages`, `tools`, legacy `functions`, and unknown fields.
 - **Output** (`FULL` mode): the native `choices` list. Streamed choices are rebuilt from their deltas, including tool call arguments.
 - **Metadata** (`FULL` mode): `metadata`, `prompt_cache_key`, `safety_identifier`, and `user` from the request are stored under `langfuse.gateway.client.request.*`, for example `langfuse.gateway.client.request.metadata`.

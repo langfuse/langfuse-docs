@@ -1,7 +1,7 @@
 ---
 title: Tracing
 seoTitle: "Tracing with the Langfuse AI Gateway (beta)"
-description: What the Langfuse AI Gateway records for every model call, the FULL and USAGE capture modes, where gateway traces are stored, and the request headers that enrich them.
+description: What the Langfuse AI Gateway records for every model call, the FULL and USAGE ingestion modes, where gateway traces are stored, and the request headers that enrich them.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -12,15 +12,15 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 The gateway records every model call it relays as a Langfuse [generation](/docs/observability/data-model), without any instrumentation in your client. Gateway traces are regular Langfuse traces, so you can filter, evaluate, and chart them like traces from the SDKs.
 
-## Capture modes [#capture-modes]
+## Ingestion modes [#ingestion-modes]
 
-Every model call becomes a generation. What it contains depends on the capture mode, which gateway managers set for the whole organization in **Organization settings → AI Gateway → Setup**:
+Every model call becomes a generation. What it contains depends on the ingestion mode, which gateway managers set for the whole organization in **Organization settings → AI Gateway → Setup**:
 
-| Mode                      | Recorded                                                                                                                                                                                                        |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FULL`                    | Everything `USAGE` records, plus the full input (system prompt, tool definitions, messages, tool calls and results) and the streamed output (text, reasoning or thinking, and tool calls with parsed arguments) |
-| `USAGE` (default)         | The fields listed below, without input or output                                                                                                                                                                |
-| `NONE` (self-hosted only) | Nothing. The gateway only routes requests.                                                                                                                                                                      |
+| Mode                      | Recorded                                                                                                                                                                                                        | Use when                                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `FULL`                    | Everything `USAGE` records, plus the full input (system prompt, tool definitions, messages, tool calls and results) and the streamed output (text, reasoning or thinking, and tool calls with parsed arguments) | You want to debug, evaluate, or build datasets from real prompts and responses                     |
+| `USAGE` (default)         | The fields listed below, without input or output                                                                                                                                                                | You need cost, usage, and an audit trail, but prompts and responses must not be stored in Langfuse |
+| `NONE` (self-hosted only) | Nothing. The gateway only routes requests.                                                                                                                                                                      | You only want to hand out gateway keys instead of provider keys, without any traces                |
 
 In `FULL` and `USAGE` mode, every generation records:
 
@@ -56,7 +56,7 @@ To find a single call, filter on the metadata key `langfuse.gateway.request.id`,
 
 ## Request headers [#request-headers]
 
-Any client can send these optional headers to enrich the traces the gateway records. They work in both `FULL` and `USAGE` [capture modes](#capture-modes). Each [coding agent guide](/docs/ai-gateway/coding-agents) shows where to configure them.
+Any client can send these optional headers to enrich the traces the gateway records. They work in both `FULL` and `USAGE` [ingestion modes](#ingestion-modes). Each [coding agent guide](/docs/ai-gateway/coding-agents) shows where to configure them.
 
 ### Headers [#headers]
 

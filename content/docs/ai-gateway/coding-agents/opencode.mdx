@@ -140,9 +140,48 @@ export const LangfuseTurn: Plugin = async () => ({
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
-- Title calls look like agent steps (same session, trace name, and generation name). Tell them apart by the small model and zero tools. Some title calls are stored as `WARNING` "Client cancelled the response", because OpenCode aborts them.
-- Subagents (`task` tool) get their **own** session. The parent session ID is stored in `agent.parent_session_id`.
-- If a model is missing from OpenCode's catalog, OpenCode fails locally with `UnknownError: Unexpected server error` and sends nothing. Declare the model under `providers.<id>.models`.
-- Stored OpenCode account connections take precedence when you override the built-in providers. Remove the existing `anthropic` and `openai` connections, or use a separate provider ID and declare its models explicitly.
-- OpenCode's background service keeps the environment variables from when it started. After exporting or changing `LANGFUSE_GATEWAY_KEY`, run `opencode service restart` before retrying.
-- OpenCode retries OpenAI `404` errors up to six times with backoff, so a wrong model ID can show six `ERROR` generations.
+<FaqDetails>
+
+<Details id="title-calls">
+<Summary>How do I tell title calls apart from agent steps?</Summary>
+
+Title calls have the same session, trace name, and generation name as agent steps. Tell them apart by the small model and zero tools. Some title calls are stored as `WARNING` "Client cancelled the response", because OpenCode aborts them.
+
+</Details>
+
+<Details id="subagent-sessions">
+<Summary>Why do subagents get their own session?</Summary>
+
+OpenCode starts a new session for subagents (`task` tool). The parent session ID is stored in `agent.parent_session_id`.
+
+</Details>
+
+<Details id="unknown-error">
+<Summary>OpenCode fails with UnknownError: Unexpected server error</Summary>
+
+The model is missing from OpenCode's catalog, so OpenCode fails locally and sends nothing. Declare the model under `providers.<id>.models`.
+
+</Details>
+
+<Details id="stored-connections">
+<Summary>OpenCode ignores the gateway provider</Summary>
+
+Stored OpenCode account connections take precedence when you override the built-in providers. Remove the existing `anthropic` and `openai` connections, or use a separate provider ID and declare its models explicitly.
+
+</Details>
+
+<Details id="service-restart">
+<Summary>OpenCode still uses an old key</Summary>
+
+OpenCode's background service keeps the environment variables from when it started. After exporting or changing `LANGFUSE_GATEWAY_KEY`, run `opencode service restart` before retrying.
+
+</Details>
+
+<Details id="six-errors">
+<Summary>Why does a wrong model ID show six ERROR generations?</Summary>
+
+OpenCode retries OpenAI `404` errors up to six times with backoff.
+
+</Details>
+
+</FaqDetails>

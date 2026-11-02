@@ -138,6 +138,27 @@ export default function (pi: any) {
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
-- Headers are static per provider. Vary them with `$VAR`, or define several providers.
-- On Anthropic, thinking tokens are counted inside output tokens. OpenAI reasoning tokens are shown separately.
-- pi's default prompt (about 2,000 tokens) is cached on Sonnet but is below the minimum cacheable size of Haiku 4.5.
+<FaqDetails>
+
+<Details id="static-headers">
+<Summary>Can headers differ per request?</Summary>
+
+No. Headers are static per provider. Vary them with `$VAR`, or define several providers.
+
+</Details>
+
+<Details id="thinking-tokens">
+<Summary>Where are thinking tokens counted?</Summary>
+
+On Anthropic, thinking tokens are counted inside output tokens. OpenAI reasoning tokens are shown separately.
+
+</Details>
+
+<Details id="cache-miss">
+<Summary>Why isn't pi's prompt cached on small models?</Summary>
+
+pi's default prompt (about 2,000 tokens) is cached on Sonnet but is below the minimum cacheable size of Haiku 4.5.
+
+</Details>
+
+</FaqDetails>

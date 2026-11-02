@@ -12,22 +12,19 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 Clients authenticate to the gateway with a gateway API key. A gateway key can only call the gateway: it can't read or write other Langfuse data through the [public API](/docs/api-and-data-platform/features/public-api).
 
-Every key is issued in one of two ways:
-
-- **User keys** belong to the person who creates them. Use them for your own coding agent or local development.
-- **Service account keys** belong to the organization. Use them for CI, shared services, and agents that should keep working when people leave.
-
-Manage keys under **Organization settings → AI Gateway → Gateway keys**.
-
 ## User and service account keys [#key-types]
 
-|                       | User key                                                                                           | Service account key                                                                     |
-| --------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Who can create it** | Anyone who can call the gateway: `AI Gateway`, `MEMBER`, `ADMIN`, or `OWNER`                       | Gateway managers: `ADMIN` or `OWNER`                                                    |
-| **What it can do**    | Call every model the organization's [provider credentials](/docs/ai-gateway/features/models) allow | Same as a user key                                                                      |
-| **Trace user**        | Always the key owner's email. The client can't change it.                                          | The client's `langfuse-user-id`, otherwise the key name. See [trace user](#trace-user). |
-| **When it stops**     | When it is revoked or expires, or when its owner [loses gateway access](#revocation)               | When it is revoked or expires. Membership changes don't affect it.                      |
-| **In the dialog**     | **Issued as: My user**, "Stops working if you leave the organization."                             | **Issued as: Service account**, "Keeps working when people leave the organization."     |
+Every key is either a user key, which belongs to the person who creates it, or a service account key, which belongs to the organization:
+
+|                       | User key                                                                             | Service account key                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| **Use for**           | Your own coding agent or local development                                           | CI, shared services, and agents that should keep working when people leave              |
+| **Who can create it** | Anyone who can call the gateway: AI Gateway, Member, Admin, or Owner role            | Gateway managers: Admin or Owner role                                                   |
+| **Trace user**        | Always the key owner's email. The client can't change it.                            | The client's `langfuse-user-id`, otherwise the key name. See [trace user](#trace-user). |
+| **When it stops**     | When it is revoked or expires, or when its owner [loses gateway access](#revocation) | When it is revoked or expires. Membership changes don't affect it.                      |
+| **In the dialog**     | **Issued as: My user**, "Stops working if you leave the organization."               | **Issued as: Service account**, "Keeps working when people leave the organization."     |
+
+Both key types can call every model the organization's [provider credentials](/docs/ai-gateway/features/models) allow.
 
 ## Create a key [#create-a-key]
 
@@ -67,7 +64,7 @@ Each generation also records the key under `langfuse.gateway.api_key.id` and `la
 Langfuse deletes a person's user keys for an organization when they lose gateway access:
 
 - they are removed from the organization, in the members settings, through [SCIM](/docs/administration/scim-and-org-api), or through the admin API
-- their role changes to one that can't call the gateway, for example `VIEWER`
+- their role changes to one that can't call the gateway, for example Viewer
 - they delete their Langfuse account
 
 Calls with a deleted key fail with `401` right away. Service account keys aren't affected. When a role change doesn't delete a key, the new permissions reach that key within 60 seconds. Before you remove someone, check whether a shared service uses one of their user keys, and replace it with a service account key.
