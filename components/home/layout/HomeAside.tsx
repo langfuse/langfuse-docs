@@ -180,7 +180,7 @@ function TocOnThisPage({
 function CtaBand({ children }: { children: ReactNode }) {
   return (
     <div className="shrink-0 bg-line-structure pb-px">
-      <div className="overflow-hidden rounded-sm">{children}</div>
+      <div className="rounded-sm bg-surface-1">{children}</div>
     </div>
   );
 }

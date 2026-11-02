@@ -123,13 +123,7 @@ export function BlogCloudCta({
   }
 
   return (
-    <section
-      aria-label="Langfuse Cloud"
-      className={cn(
-        "bg-[color-mix(in_oklab,var(--surface-cta-primary)_28%,var(--surface-1))] px-4 py-4",
-        className,
-      )}
-    >
+    <section aria-label="Langfuse Cloud" className={cn("px-4 py-4", className)}>
       {copy}
       {actions}
     </section>
