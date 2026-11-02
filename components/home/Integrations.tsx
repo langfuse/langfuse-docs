@@ -116,42 +116,6 @@ const gatewaysGroup = {
         />
       ),
     },
-    {
-      label: "TrueFoundry",
-      href: "/integrations/gateways/truefoundry",
-      icon: (
-        <Image
-          src="/images/integrations/truefoundry-logo.png"
-          alt=""
-          width={18}
-          height={18}
-        />
-      ),
-    },
-    {
-      label: "Azure API Management",
-      href: "/integrations/gateways/azure-api-management",
-      icon: (
-        <Image
-          src="/images/integrations/microsoft_icon.svg"
-          alt=""
-          width={18}
-          height={18}
-        />
-      ),
-    },
-    {
-      label: "Anannas AI",
-      href: "/integrations/gateways/anannas",
-      icon: (
-        <Image
-          src="/images/integrations/anannas_icon.png"
-          alt=""
-          width={18}
-          height={18}
-        />
-      ),
-    },
   ],
 };
 
@@ -628,6 +592,7 @@ export function Integrations() {
         <IntegrationGroupCard
           title={gatewaysGroup.title}
           items={gatewaysGroup.items}
+          showMoreLabel
         />
 
         <IntegrationGroupCard
