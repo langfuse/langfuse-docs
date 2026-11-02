@@ -82,13 +82,37 @@ const ACCESS = [
   { label: "SDKs", href: "/docs/observability/sdk/overview" },
 ];
 
-const WAREHOUSES = [
-  "ClickHouse",
-  "Snowflake",
-  "BigQuery",
-  "Databricks",
-  "S3 / GCS / Azure",
-];
+const BLOB_STORAGE = "S3 / GCS / Azure";
+const WAREHOUSES = ["ClickHouse", "Snowflake", "BigQuery", "Databricks"];
+
+function Wordmark({
+  width,
+  height,
+  className,
+}: {
+  width: number;
+  height: number;
+  className?: string;
+}) {
+  return (
+    <>
+      <Image
+        src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+        alt="Langfuse"
+        width={width}
+        height={height}
+        className={cn("dark:hidden", className)}
+      />
+      <Image
+        src="/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.svg"
+        alt="Langfuse"
+        width={width}
+        height={height}
+        className={cn("hidden dark:block", className)}
+      />
+    </>
+  );
+}
 
 function Detail({
   className,
@@ -180,13 +204,7 @@ function GatewayNode({ className }: { className?: string }) {
         className,
       )}
     >
-      <Image
-        src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-        alt="Langfuse"
-        width={86}
-        height={20}
-        className="h-5 w-auto self-start"
-      />
+      <Wordmark width={86} height={20} className="h-5 w-auto self-start" />
       <span className="text-[17px] font-medium leading-tight text-text-primary">
         AI Gateway
       </span>
@@ -207,13 +225,7 @@ function LangfuseNode({ className }: { className?: string }) {
     <CornerBox
       className={cn("flex flex-col gap-4 bg-surface-bg p-3 sm:p-4", className)}
     >
-      <Image
-        src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-        alt="Langfuse"
-        width={103}
-        height={24}
-        className="h-6 w-auto self-start"
-      />
+      <Wordmark width={103} height={24} className="h-6 w-auto self-start" />
 
       <ul className="grid grid-cols-2 border-l border-t border-line-structure">
         {FEATURES.map((feature) => (
@@ -243,7 +255,7 @@ function LangfuseNode({ className }: { className?: string }) {
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="block bg-surface-code py-1.5 text-center font-mono text-[12px] font-medium text-text-code-secondary no-underline transition-colors hover:text-surface-bg"
+                className="block bg-surface-code py-1.5 text-center font-mono text-[12px] font-medium text-text-code-secondary no-underline transition-colors hover:text-surface-bg dark:hover:text-text-primary"
               >
                 {item.label}
               </Link>
@@ -294,7 +306,11 @@ function WarehouseNode({ className }: { className?: string }) {
       <span className="text-[17px] font-medium leading-tight text-text-primary">
         Export
       </span>
-      <ul className="flex flex-col divide-y divide-line-structure">
+      <span className="text-[13px] text-text-secondary">{BLOB_STORAGE}</span>
+      <span className="font-mono text-[10px] leading-none text-text-tertiary">
+        then load into
+      </span>
+      <ul className="-mt-1 flex flex-col divide-y divide-line-structure">
         {WAREHOUSES.map((warehouse) => (
           <li
             key={warehouse}
@@ -528,13 +544,7 @@ function CompactDiagram() {
           )}
         >
           <div className="flex items-center justify-between gap-2">
-            <Image
-              src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-              alt="Langfuse"
-              width={69}
-              height={16}
-              className="h-4 w-auto"
-            />
+            <Wordmark width={69} height={16} className="h-4 w-auto" />
             <span className="rounded-[2px] border border-line-structure bg-surface-1 px-1.5 py-0.5 font-sans text-[11px] leading-none text-text-tertiary">
               Optional
             </span>
@@ -554,13 +564,7 @@ function CompactDiagram() {
 
       <Cell column="1 / 5" row={5}>
         <CornerBox className="flex flex-col gap-3 bg-surface-bg p-3">
-          <Image
-            src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-            alt="Langfuse"
-            width={86}
-            height={20}
-            className="h-5 w-auto self-start"
-          />
+          <Wordmark width={86} height={20} className="h-5 w-auto self-start" />
           <ul className="grid grid-cols-3 border-l border-t border-line-structure">
             {FEATURES.map((feature) => (
               <li
@@ -597,7 +601,9 @@ function CompactDiagram() {
           <span className="text-[15px] font-medium leading-tight text-text-primary">
             Export
           </span>
-          <Detail>{WAREHOUSES.join(", ")}</Detail>
+          <Detail>
+            {BLOB_STORAGE}, then load into {WAREHOUSES.join(", ")}
+          </Detail>
         </NextLink>
       </Cell>
     </div>
@@ -632,8 +638,9 @@ export const PlatformOverview = () => {
           gateway such as the Langfuse AI Gateway. Calls reach Langfuse through
           the gateway or directly via SDKs and OpenTelemetry. Langfuse provides
           tracing, prompts, evals, datasets, experiments, and dashboards, all
-          available via MCP, CLI, API, and SDKs, and exports data to warehouses
-          such as ClickHouse, Snowflake, BigQuery, Databricks, and blob storage.
+          available via MCP, CLI, API, and SDKs, and exports data to blob
+          storage (S3, GCS, or Azure), ready to load into warehouses such as
+          ClickHouse, Snowflake, BigQuery, and Databricks.
         </figcaption>
       </figure>
     </HomeSection>
