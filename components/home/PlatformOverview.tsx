@@ -339,11 +339,15 @@ function ModelCallsArrow() {
   );
 }
 
-/** Horizontal flow for wide screens, mirroring the left-to-right data path. */
+/**
+ * Horizontal flow, mirroring the left-to-right data path. Between md and xl
+ * the section is a fixed 680px wide, so the 840px desktop layout is zoomed to
+ * fit; `zoom` (unlike `transform`) also shrinks the layout box.
+ */
 function WideDiagram() {
   return (
     <div
-      className="hidden xl:grid"
+      className="hidden md:grid md:max-xl:w-[840px] md:max-xl:[zoom:calc(680/840)]"
       style={{
         gridTemplateColumns: "188px 28px 152px 28px minmax(0,1fr) 40px 140px",
         gridTemplateRows: "auto 44px auto auto",
@@ -404,56 +408,84 @@ function WideDiagram() {
   );
 }
 
-function VerticalConnector({
-  label,
-  direction = "down",
-  className,
-}: {
-  label?: string;
-  direction?: "up" | "down";
-  className?: string;
-}) {
+function CompactConnector({ children }: { children: ReactNode }) {
   return (
-    <div className={cn("relative h-10", className)} aria-hidden="true">
-      <div className="absolute inset-y-0 left-1/2">
-        <VerticalArrow direction={direction} />
+    <div className="relative flex min-h-12 items-center justify-center py-2">
+      <div className="absolute inset-y-0 left-1/2" aria-hidden="true">
+        <VerticalArrow />
       </div>
-      {label && (
-        <div className="absolute left-[calc(50%+8px)] top-1/2 -translate-y-1/2">
-          <ArrowLabel>{label}</ArrowLabel>
-        </div>
-      )}
+      <span className="relative bg-surface-bg px-2 py-1 text-center font-mono text-[10px] leading-snug text-text-tertiary">
+        {children}
+      </span>
     </div>
   );
 }
 
-/** Stacked flow for narrow screens: the same nodes, top to bottom. */
-function StackedDiagram() {
+/** Compact flow for phones: agents, Langfuse, and warehouse, top to bottom. */
+function CompactDiagram() {
   return (
-    <div className="flex flex-col xl:hidden">
-      <UpstreamNode />
-      <VerticalConnector direction="up" label="model calls" />
-      <UseCasesNode />
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col">
-          <VerticalConnector />
-          <GatewayNode className="flex-1" />
-          <VerticalConnector />
-        </div>
-        <div className="relative" aria-hidden="true">
-          <div className="absolute inset-y-0 left-1/2">
-            <VerticalArrow />
-          </div>
-          <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center">
-            <span className="bg-surface-bg px-1.5 py-1 text-center">
-              <ArrowLabel>direct, SDK / OTel</ArrowLabel>
-            </span>
-          </div>
+    <div className="flex flex-col md:hidden">
+      <div className="flex flex-col gap-1.5 border border-line-structure bg-surface-bg p-3">
+        <span className="text-[15px] font-medium leading-tight text-text-primary">
+          Your agents and apps
+        </span>
+        <Detail>
+          <Link href={USE_CASES[0].href}>Personal agents</Link>,{" "}
+          <Link href={USE_CASES[1].href}>custom agents</Link>, and{" "}
+          <Link href={USE_CASES[2].href}>copilots and no-code tools</Link>
+        </Detail>
+        <div className="mt-0.5 flex flex-wrap gap-1.5">
+          {USE_CASES.flatMap((useCase) => useCase.icons.slice(0, 3)).map(
+            (icon) => (
+              <span
+                key={icon.alt}
+                title={icon.alt}
+                className="flex h-5 w-5 items-center justify-center border border-line-structure bg-surface-1"
+              >
+                <Image src={icon.src} alt={icon.alt} width={12} height={12} />
+              </span>
+            ),
+          )}
         </div>
       </div>
-      <LangfuseNode />
-      <VerticalConnector label="export" />
-      <WarehouseNode />
+
+      <CompactConnector>
+        via{" "}
+        <Link
+          href={AI_GATEWAY_HREF}
+          className="text-text-secondary underline decoration-line-structure underline-offset-2"
+        >
+          Langfuse AI Gateway
+        </Link>
+        , or SDKs / OpenTelemetry
+      </CompactConnector>
+
+      <CornerBox className="flex flex-col gap-2 bg-surface-bg p-3">
+        <Image
+          src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+          alt="Langfuse"
+          width={86}
+          height={20}
+          className="h-5 w-auto self-start"
+        />
+        <Detail>
+          <Link
+            href="#platform-features"
+            className="text-text-secondary underline decoration-line-structure underline-offset-2"
+          >
+            Tracing, prompts, evals, datasets, experiments, and dashboards
+          </Link>
+        </Detail>
+      </CornerBox>
+
+      <CompactConnector>export</CompactConnector>
+
+      <div className="flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3">
+        <span className="text-[15px] font-medium leading-tight text-text-primary">
+          Your warehouse
+        </span>
+        <Detail>{WAREHOUSES.join(", ")}</Detail>
+      </div>
     </div>
   );
 }
@@ -479,7 +511,7 @@ export const PlatformOverview = () => {
         className="not-prose text-left"
       >
         <WideDiagram />
-        <StackedDiagram />
+        <CompactDiagram />
         <figcaption className="sr-only">
           Personal agents, custom agents, and copilots call inference APIs such
           as OpenAI and Anthropic, either directly or through an optional
