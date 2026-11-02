@@ -176,11 +176,18 @@ function GatewayNode({ className }: { className?: string }) {
         className,
       )}
     >
+      <Image
+        src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+        alt="Langfuse"
+        width={86}
+        height={20}
+        className="h-5 w-auto self-start"
+      />
       <Link
         href={AI_GATEWAY_HREF}
         className="w-fit text-[17px] font-medium leading-tight text-text-primary"
       >
-        Langfuse AI Gateway
+        AI Gateway
       </Link>
       <Detail>
         Virtual keys, budgets, provisioning, and governance for every model
