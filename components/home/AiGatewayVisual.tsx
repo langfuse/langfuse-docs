@@ -27,7 +27,13 @@ const providers: Chip[] = [
   { label: "OpenRouter", x: 400, y: 88, w: 130 },
 ];
 const gateway = { x: 190, y: 34, w: 150, h: 50 };
-const trace = { x: 170, y: 124, w: 190, h: 30 };
+const ROW_H = 22;
+const checks = [
+  { label: "trace", value: "1.2s $0.0031" },
+  { label: "budget", value: "OK" },
+  { label: "guardrail", value: "OK" },
+];
+const trace = { x: 180, y: 120, w: 170, h: ROW_H * checks.length + 8 };
 const CENTER = { x: 299, y: 205 };
 
 const gatewayMidY = gateway.y + gateway.h / 2;
@@ -209,23 +215,45 @@ export function AiGatewayVisual({ className }: { className?: string }) {
           opacity={0.7}
         />
         <Bracket {...trace} />
-        <text
-          x={trace.x + 14}
-          y={trace.y + 20}
-          className="font-mono"
-          fontSize={13}
-          fill="var(--text-tertiary)"
-        >
-          trace
-          <tspan dx={10}>1.2s</tspan>
-          <tspan dx={10}>$0.0031</tspan>
-        </text>
-        <circle
-          cx={trace.x + trace.w - 16}
-          cy={trace.y + trace.h / 2}
-          r={4}
-          fill="var(--callout-success)"
-        />
+        {checks.map((check, i) => {
+          const rowY = trace.y + 4 + i * ROW_H;
+          const textY = rowY + ROW_H / 2 + 4;
+          return (
+            <g key={check.label}>
+              {i > 0 && (
+                <path
+                  d={`M${trace.x + 10} ${rowY}H${trace.x + trace.w - 10}`}
+                  stroke="var(--line-structure)"
+                />
+              )}
+              <text
+                x={trace.x + 14}
+                y={textY}
+                className="font-mono"
+                fontSize={12}
+                fill="var(--text-tertiary)"
+              >
+                {check.label}
+              </text>
+              <text
+                x={trace.x + trace.w - 28}
+                y={textY}
+                textAnchor="end"
+                className="font-mono"
+                fontSize={12}
+                fill="var(--text-secondary)"
+              >
+                {check.value}
+              </text>
+              <circle
+                cx={trace.x + trace.w - 16}
+                cy={rowY + ROW_H / 2}
+                r={3.5}
+                fill="var(--callout-success)"
+              />
+            </g>
+          );
+        })}
       </g>
 
       <polygon
