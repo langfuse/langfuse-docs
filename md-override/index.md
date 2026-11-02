@@ -33,7 +33,7 @@ Every step of the loop maps to a part of Langfuse. The Academy explains why each
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.
 
 - **[Observability](/docs/observability/overview)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
-- **[AI Gateway](/docs/ai-gateway/overview)** (new) — route OpenAI and Anthropic calls from your apps and coding agents through Langfuse by changing only the base URL and API key. Provider keys stay in Langfuse, every person or service gets its own gateway key, and every call is traced with usage and cost.
+- **[AI Gateway](/docs/ai-gateway/overview)** (new) — swap the base URL and API key to route OpenAI and Anthropic calls through Langfuse. Every call is traced with usage and cost.
 - **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.

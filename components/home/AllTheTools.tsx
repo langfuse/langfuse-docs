@@ -119,10 +119,8 @@ function AiGatewayCard() {
             </span>
           </div>
           <Text size="s" className={toolDescriptionClassName}>
-            Route OpenAI and Anthropic calls from your apps and coding agents
-            through Langfuse by changing only the base URL and API key. Provider
-            keys stay in Langfuse, every person or service gets its own gateway
-            key, and every call is traced with usage and cost.
+            Swap the base URL and API key to route OpenAI and Anthropic calls
+            through Langfuse. Every call is traced with usage and cost.
           </Text>
         </div>
         <div
