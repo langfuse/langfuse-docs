@@ -1,0 +1,139 @@
+---
+title: PagerDuty Integration with Langfuse
+sidebarTitle: PagerDuty
+description: Page your on-call team from Langfuse alerts and project notifications, and record prompt changes as PagerDuty change events.
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# PagerDuty Integration
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+Send Langfuse events to PagerDuty so your on-call team gets paged for LLM application issues in the same place as the rest of your infrastructure. PagerDuty is an action type for [automations](/docs/observability/features/alerts#automations), next to Slack, webhooks, and GitHub Actions.
+
+- **Page on-call when an [alert](/docs/observability/features/alerts) breaches**, for example when p95 latency, cost per trace, or the share of failed evaluator scores crosses a threshold. Langfuse resolves the PagerDuty alert when the Langfuse alert recovers.
+- **Open an incident when a project notification fires**, such as a failed scheduled [blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) or an evaluator that Langfuse deactivated after an unrecoverable error.
+- **Record [prompt changes](/docs/prompt-management/features/webhooks-slack-integrations) as change events** on the service, so responders can see that a new prompt version went to `production` right before an incident. Change events never page anyone.
+
+## Get started [#get-started]
+
+<Steps>
+
+### Get a routing key from PagerDuty
+
+Langfuse sends events with the PagerDuty Events API v2. You need a 32-character routing key from one of these:
+
+- **Service integration:** In PagerDuty, open the service, go to **Integrations**, add an **Events API V2** integration, and copy its **Integration Key**.
+- **Event Orchestration:** Open the orchestration under **Automation → Event Orchestration**, go to **Integrations**, and copy the routing key.
+
+Note whether your PagerDuty account is in the US or EU service region. EU accounts use a `*.eu.pagerduty.com` domain.
+
+### Create a PagerDuty automation
+
+Creating automations requires the **Admin** or **Owner** role in the project.
+
+1. Navigate to [**Automations**](https://cloud.langfuse.com/project/~/automations) and click **Create Automation**.
+2. Select the event source: **Alert** or **Prompt**.
+3. Select the action type **PagerDuty**.
+4. Paste the **Routing key** and select the **Region** of your PagerDuty account (`US` or `EU`).
+5. Give the automation a name and click **Save**.
+
+For project notifications, open **Project Settings → Notifications** and add **PagerDuty** as the notification channel with the same routing key and region fields.
+
+### Send a test event
+
+In the automation form, click **Send test event** and confirm. Langfuse triggers a `critical` test alert on the PagerDuty service, so it pages whoever is on call for that service. The button then changes to **Resolve test event**. Click it to resolve the test alert.
+
+The test event checks the routing key, region, and the trigger and resolve path. It does not reproduce the payload of a real alert.
+
+### Link alerts to the automation
+
+[Create or edit an alert](/docs/observability/features/alerts#alert-setup) and select the PagerDuty automation in the [**Automations** panel](/docs/observability/features/alerts#notification-channel). Members can link existing automations to their alerts without editing the automation.
+
+</Steps>
+
+## What Langfuse sends to PagerDuty [#events]
+
+### Alerts [#alerts]
+
+Each Langfuse alert maps to one PagerDuty alert. Langfuse uses a deduplication key per alert (`langfuse-<projectId>-<monitorId>`), so a severity change updates the open PagerDuty alert instead of opening a new one.
+
+| Langfuse severity | PagerDuty event                  |
+| ----------------- | -------------------------------- |
+| `ALERT`           | Trigger with severity `critical` |
+| `WARNING`         | Trigger with severity `warning`  |
+| `NO_DATA`         | Trigger with severity `error`    |
+| `OK`              | Resolve the alert                |
+
+When an alert moves from `WARNING` to `ALERT`, the re-triggered PagerDuty alert can raise the incident's urgency from low to high. PagerDuty does not lower urgency when an alert moves back from `ALERT` to `WARNING`.
+
+Langfuse sends an event whenever the alert notifies, so renotify and no-data settings apply as described in [Alert states](/docs/observability/features/alerts#alert-states). Each event includes links to the alert and to its data in the evaluated window, plus custom details:
+
+- `llmops`: PagerDuty's LLMOps fields, including `project_name`, `monitor_name`, `metric_description`, `metric_definition`, `metric_value`, `threshold_value`, the start and end of the evaluated window, and `model_name` when the alert filters on exactly one model.
+- `langfuse`: the Langfuse severity, the alert message, and the raw `filters` and `window`.
+
+### Project notifications [#project-notifications]
+
+Project notifications always trigger a PagerDuty alert: `ALERT` maps to `error`, `WARNING` to `warning`, and `INFO` to `info`. Langfuse deduplicates them per event type and affected resource, for example per blob storage export, so repeated failures of the same resource update one alert.
+
+### Prompt changes [#prompt-changes]
+
+Prompt version creations, label and tag updates, and deletions go to the PagerDuty Change Events API. They show up in the service's change timeline with the prompt name, version, action, labels, tags, commit message, and a link to the prompt in Langfuse.
+
+<Callout type="warn">
+  Langfuse resolves a PagerDuty alert only when its Langfuse alert recovers to
+  `OK`. Resolve the following in PagerDuty yourself, or rely on the service's
+  auto-resolve timeout:
+
+- Project notification alerts.
+- Alerts that were breaching when the Langfuse alert was paused, deleted, or started failing to evaluate. Resuming the alert does not resolve them either.
+- A test alert that you did not resolve before closing the automation form.
+
+</Callout>
+
+## Delivery and retries [#delivery]
+
+Langfuse retries rate-limited (`429`) and server-side (`5xx`) responses from PagerDuty, as well as timeouts. After 5 consecutive delivery failures, Langfuse disables the automation's trigger, like it does for the other action types. Re-enable it from the Automations page once the routing key or service is fixed.
+
+## FAQ
+
+<FaqDetails>
+
+<Details>
+<Summary>How does Langfuse store the routing key?</Summary>
+
+Langfuse encrypts the routing key at rest and only shows a masked version, such as `R0ab...9xYz`, after you save the automation. When you edit the automation, leave the routing key field empty to keep the stored key. You can change the region without re-entering the key.
+
+</Details>
+
+<Details>
+<Summary>Can I reuse one routing key across automations?</Summary>
+
+Yes. Each automation stores its own routing key, so paste the same key into every automation that should send to the same PagerDuty service or Event Orchestration.
+
+</Details>
+
+<Details>
+<Summary>Can PagerDuty send events back to Langfuse?</Summary>
+
+No. Events only flow from Langfuse to PagerDuty. Acknowledging or resolving an incident in PagerDuty does not change the Langfuse alert.
+
+</Details>
+
+<Details>
+<Summary>Does the PagerDuty integration cost extra?</Summary>
+
+No. Usage is included with your Langfuse plan. See [Langfuse Pricing](/pricing) for plan details.
+
+</Details>
+
+</FaqDetails>
