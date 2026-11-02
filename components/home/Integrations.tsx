@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 // ─── Data (paths per homepage integration spec) ─────────────────────────────
 
 const languagesGroup = {
-  title: "Languages (via OTel)",
+  title: "Languages (via OpenTelemetry)",
   items: [
     {
       label: "Python (Native SDK)",
