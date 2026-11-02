@@ -278,11 +278,14 @@ function WarehouseNode({ className }: { className?: string }) {
         className,
       )}
     >
-      <ul className="flex flex-1 flex-col divide-y divide-line-structure">
+      <span className="text-[17px] font-medium leading-tight text-text-primary">
+        Warehouse
+      </span>
+      <ul className="flex flex-col divide-y divide-line-structure">
         {WAREHOUSES.map((warehouse) => (
           <li
             key={warehouse}
-            className="flex flex-1 items-center py-1.5 text-[13px] text-text-secondary first:pt-0 last:pb-0"
+            className="py-1.5 text-[13px] text-text-secondary first:pt-0"
           >
             {warehouse}
           </li>
@@ -368,7 +371,7 @@ function WideDiagram() {
         decorative
       >
         <div className="text-center">
-          <ArrowLabel>direct · SDK / OpenTelemetry</ArrowLabel>
+          <ArrowLabel>direct, SDK / OpenTelemetry</ArrowLabel>
         </div>
         <HorizontalArrow />
       </Cell>
@@ -436,7 +439,7 @@ function StackedDiagram() {
           </div>
           <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center">
             <span className="bg-surface-bg px-1.5 py-1 text-center">
-              <ArrowLabel>direct · SDK / OTel</ArrowLabel>
+              <ArrowLabel>direct, SDK / OTel</ArrowLabel>
             </span>
           </div>
         </div>
