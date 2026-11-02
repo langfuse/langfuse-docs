@@ -99,7 +99,7 @@ function AiGatewayCard() {
       tooltip="Read more"
       className="flex flex-col items-stretch p-0 w-full min-w-0"
     >
-      <div className="grid w-full min-w-0 grid-cols-1 items-start gap-2 xl:items-center p-4 pb-0 lg:pb-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+      <div className="grid w-full min-w-0 grid-cols-1 items-start gap-2 xl:items-center p-4 pb-0 sm:pb-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-8">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <Text
@@ -117,7 +117,7 @@ function AiGatewayCard() {
             Langfuse. Every call is traced with usage and cost.
           </Text>
         </div>
-        <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden lg:mx-0 lg:-my-4 lg:h-[220px]">
+        <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden sm:mx-0 sm:-my-4 sm:h-[200px] lg:h-[220px]">
           <AiGatewayVisual className="absolute inset-0 w-full h-full" />
         </div>
       </div>
