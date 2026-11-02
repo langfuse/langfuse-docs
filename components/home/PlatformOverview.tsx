@@ -87,14 +87,6 @@ const WAREHOUSES = [
   "S3 / GCS / Azure",
 ];
 
-function Eyebrow({ index, children }: { index: string; children: ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase leading-none tracking-[0.04em] text-text-tertiary">
-      {index} · {children}
-    </span>
-  );
-}
-
 function Detail({
   className,
   children,
@@ -130,15 +122,9 @@ function UpstreamNode({ className }: { className?: string }) {
         className,
       )}
     >
-      <Eyebrow index="00">Upstream</Eyebrow>
-      <div className="flex flex-col gap-x-4 gap-y-1 sm:flex-row sm:items-baseline sm:justify-between">
-        <span className="whitespace-nowrap text-[17px] font-medium leading-tight text-text-primary">
-          Inference APIs
-        </span>
-        <Detail className="sm:text-right">
-          OpenAI, Anthropic, Bedrock, Vertex, Azure, self-hosted models
-        </Detail>
-      </div>
+      <span className="text-[17px] font-medium leading-tight text-text-primary">
+        AI Inference APIs
+      </span>
     </div>
   );
 }
@@ -151,7 +137,6 @@ function UseCasesNode({ className }: { className?: string }) {
         className,
       )}
     >
-      <Eyebrow index="01">Agents & use cases</Eyebrow>
       <ul className="flex flex-col divide-y divide-line-structure">
         {USE_CASES.map((useCase) => (
           <li
@@ -191,7 +176,6 @@ function GatewayNode({ className }: { className?: string }) {
         className,
       )}
     >
-      <Eyebrow index="02">Gateway</Eyebrow>
       <Link
         href={AI_GATEWAY_HREF}
         className="w-fit text-[17px] font-medium leading-tight text-text-primary"
@@ -199,8 +183,8 @@ function GatewayNode({ className }: { className?: string }) {
         Langfuse AI Gateway
       </Link>
       <Detail>
-        Shared provider keys, model access, usage and cost per user. No code
-        changes.
+        Virtual keys, budgets, provisioning, and governance for every model
+        call. No code changes.
       </Detail>
       <Detail>Or bring your own gateway.</Detail>
       <span className="mt-auto w-fit rounded-[2px] border border-line-structure bg-surface-1 px-1.5 py-0.5 font-sans text-[11px] leading-none text-text-tertiary">
@@ -215,16 +199,13 @@ function LangfuseNode({ className }: { className?: string }) {
     <CornerBox
       className={cn("flex flex-col gap-4 bg-surface-bg p-3 sm:p-4", className)}
     >
-      <div className="flex items-center justify-between gap-3">
-        <Image
-          src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-          alt="Langfuse"
-          width={103}
-          height={24}
-          className="h-6 w-auto"
-        />
-        <Eyebrow index="03">Observability</Eyebrow>
-      </div>
+      <Image
+        src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+        alt="Langfuse"
+        width={103}
+        height={24}
+        className="h-6 w-auto self-start"
+      />
 
       <ul className="grid grid-cols-2 border-l border-t border-line-structure">
         {FEATURES.map((feature) => (
@@ -243,7 +224,9 @@ function LangfuseNode({ className }: { className?: string }) {
       </ul>
 
       <div className="flex flex-col gap-2">
-        <Eyebrow index="↳">Agent-native, every feature via</Eyebrow>
+        <span className="font-mono text-[10px] leading-none text-text-tertiary">
+          agent-native, every feature via
+        </span>
         <ul className="grid grid-cols-4 gap-1.5">
           {ACCESS.map((item) => (
             <li key={item.label}>
@@ -295,24 +278,16 @@ function WarehouseNode({ className }: { className?: string }) {
         className,
       )}
     >
-      <Eyebrow index="04">Warehouse</Eyebrow>
-      <ul className="flex flex-col divide-y divide-line-structure">
+      <ul className="flex flex-1 flex-col divide-y divide-line-structure">
         {WAREHOUSES.map((warehouse) => (
           <li
             key={warehouse}
-            className="py-1.5 text-[13px] text-text-secondary first:pt-0"
+            className="flex flex-1 items-center py-1.5 text-[13px] text-text-secondary first:pt-0 last:pb-0"
           >
             {warehouse}
           </li>
         ))}
       </ul>
-      <Link
-        href="/docs/api-and-data-platform/features/export-to-blob-storage"
-        variant="text"
-        className="mt-auto text-left text-[12px] leading-snug text-text-tertiary"
-      >
-        Scheduled exports for BI, finance, and audit
-      </Link>
     </div>
   );
 }
@@ -412,8 +387,8 @@ function WideDiagram() {
         </div>
         <HorizontalArrow />
       </Cell>
-      <Cell column={7} row="1 / 5" className="justify-center">
-        <WarehouseNode />
+      <Cell column={7} row="1 / 5">
+        <WarehouseNode className="flex-1" />
       </Cell>
     </div>
   );
