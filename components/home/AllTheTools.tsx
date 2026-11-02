@@ -4,6 +4,7 @@ import Image, { type StaticImageData } from "next/image";
 import { HomeSection } from "./HomeSection";
 import { Heading, TextHighlight, ChipCard } from "@/components/ui";
 import { Text } from "@/components/ui/text";
+import { HorizontalArrow } from "@/components/blog/diagram-primitives";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import observabilityVisual from "./img/tools/observability.png";
 import promptManagementVisual from "./img/tools/prompt.png";
@@ -91,6 +92,77 @@ const tools: ToolEntry[] = [
   },
 ];
 
+const gatewayClients = ["Your apps", "Claude Code", "Codex"];
+const gatewayProviders = ["OpenAI", "Anthropic"];
+
+const flowChipClassName =
+  "border border-line-structure bg-surface-bg px-2 py-1 font-mono text-[11px] leading-none text-text-tertiary whitespace-nowrap";
+
+function AiGatewayCard() {
+  return (
+    <ChipCard
+      href="/docs/ai-gateway/overview"
+      tooltip="Read more"
+      className="flex flex-col items-stretch p-0 w-full min-w-0"
+    >
+      <div className="grid w-full min-w-0 grid-cols-1 items-center gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Text
+              size="m"
+              className="font-medium text-left text-text-secondary"
+            >
+              AI Gateway
+            </Text>
+            <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none uppercase tracking-wide text-text-primary">
+              New
+            </span>
+          </div>
+          <Text size="s" className={toolDescriptionClassName}>
+            Route OpenAI and Anthropic calls from your apps and coding agents
+            through Langfuse by changing only the base URL and API key. Provider
+            keys stay in Langfuse, every person or service gets its own gateway
+            key, and every call is traced with usage and cost.
+          </Text>
+        </div>
+        <div
+          aria-hidden="true"
+          className="hidden w-full max-w-[560px] items-center sm:grid sm:grid-cols-[auto_minmax(24px,1fr)_auto_minmax(24px,1fr)_auto] lg:justify-self-end"
+        >
+          <div className="flex flex-col items-end gap-1.5">
+            {gatewayClients.map((client) => (
+              <span key={client} className={flowChipClassName}>
+                {client}
+              </span>
+            ))}
+          </div>
+          <div className="px-1.5">
+            <HorizontalArrow />
+          </div>
+          <div className="flex flex-col gap-1 border border-line-cta bg-surface-bg px-3 py-2.5">
+            <span className="font-mono text-[11px] leading-none text-text-primary whitespace-nowrap">
+              Langfuse AI Gateway
+            </span>
+            <span className="font-mono text-[10px] leading-none text-text-tertiary whitespace-nowrap">
+              keys, models, traces
+            </span>
+          </div>
+          <div className="px-1.5">
+            <HorizontalArrow />
+          </div>
+          <div className="flex flex-col items-start gap-1.5">
+            {gatewayProviders.map((provider) => (
+              <span key={provider} className={flowChipClassName}>
+                {provider}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </ChipCard>
+  );
+}
+
 export function AllTheTools() {
   return (
     <HomeSection id="platform-features" className="pt-[120px]">
@@ -107,6 +179,7 @@ export function AllTheTools() {
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
+          <AiGatewayCard />
           <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
             {tools.slice(0, 3).map((tool) => (
               <ChipCard
