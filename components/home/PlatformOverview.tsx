@@ -253,7 +253,7 @@ function LangfuseNode({ className }: { className?: string }) {
           href="/docs/api-and-data-platform/features/halo"
           className="flex flex-col gap-1.5 border border-line-structure bg-surface-cta-primary p-2.5 no-underline"
         >
-          <span className="font-mono text-[10px] uppercase leading-none tracking-[0.04em] text-text-secondary">
+          <span className="font-mono text-[12px] leading-none tracking-[0.02em] [font-variant-caps:all-small-caps] text-text-secondary">
             In-app agent
           </span>
           <span className="text-[13px] leading-snug text-text-primary">
@@ -265,7 +265,7 @@ function LangfuseNode({ className }: { className?: string }) {
           href="/docs/api-and-data-platform/features/agent-skill"
           className="flex flex-col gap-1.5 border border-line-structure bg-surface-1 p-2.5 no-underline"
         >
-          <span className="font-mono text-[10px] uppercase leading-none tracking-[0.04em] text-text-tertiary">
+          <span className="font-mono text-[12px] leading-none tracking-[0.02em] [font-variant-caps:all-small-caps] text-text-tertiary">
             Bring your own
           </span>
           <span className="text-[13px] leading-snug text-text-secondary">
