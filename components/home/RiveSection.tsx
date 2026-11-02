@@ -65,7 +65,7 @@ export const RiveSection = () => {
 
   return (
     <HomeSection id="llm-engineering-loop" className="pt-[120px]">
-      <div className="flex flex-col gap-4 items-start">
+      <div className="relative z-10 flex flex-col gap-4 items-start">
         <Heading className="text-left">
           <TextHighlight className="whitespace-nowrap">
             Learn how&nbsp;
