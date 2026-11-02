@@ -1,4 +1,5 @@
 import Image from "next/image";
+import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { HomeSection } from "@/components/home/HomeSection";
 import {
@@ -10,17 +11,21 @@ import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 
 const AI_GATEWAY_HREF = "/docs/ai-gateway/overview";
+const INTEGRATIONS_HREF = "/integrations";
+const DATA_PLATFORM_HREF = "/docs/api-and-data-platform/overview";
+
+// Same hover treatment as the bento cards in `AllTheTools`.
+const CARD_HOVER =
+  "corner-box-hover-stripes transition-[background] duration-180 ease-out";
 
 const USE_CASES: {
   title: string;
   detail: string;
-  href: string;
   icons: { src: string; alt: string }[];
 }[] = [
   {
     title: "Personal agents",
     detail: "Claude Code, Codex, Cursor, …",
-    href: "/docs/ai-gateway/coding-agents",
     icons: [
       { src: "/images/integrations/claude_icon.png", alt: "Claude Code" },
       { src: "/images/integrations/openai_icon.svg", alt: "Codex" },
@@ -34,7 +39,6 @@ const USE_CASES: {
   {
     title: "Custom agents",
     detail: "Support, voice, RAG, workflows, any harness or framework",
-    href: "/integrations",
     icons: [
       { src: "/images/integrations/langchain_icon.png", alt: "LangChain" },
       {
@@ -50,7 +54,6 @@ const USE_CASES: {
   {
     title: "Copilots & no-code",
     detail: "Copilot Studio, n8n, Dify, Flowise, …",
-    href: "/integrations",
     icons: [
       { src: "/images/integrations/microsoft_icon.svg", alt: "Copilot Studio" },
       { src: "/images/integrations/n8n_icon.svg", alt: "n8n" },
@@ -131,9 +134,11 @@ function UpstreamNode({ className }: { className?: string }) {
 
 function UseCasesNode({ className }: { className?: string }) {
   return (
-    <div
+    <NextLink
+      href={INTEGRATIONS_HREF}
       className={cn(
         "flex flex-col gap-3 border border-line-structure bg-surface-bg p-3",
+        CARD_HOVER,
         className,
       )}
     >
@@ -143,12 +148,9 @@ function UseCasesNode({ className }: { className?: string }) {
             key={useCase.title}
             className="flex flex-col gap-1.5 py-2.5 first:pt-0 last:pb-0"
           >
-            <Link
-              href={useCase.href}
-              className="w-fit text-[15px] font-medium text-text-primary"
-            >
+            <span className="text-[15px] font-medium text-text-primary">
               {useCase.title}
-            </Link>
+            </span>
             <Detail>{useCase.detail}</Detail>
             <div className="mt-0.5 flex flex-wrap gap-1.5">
               {useCase.icons.map((icon) => (
@@ -164,15 +166,17 @@ function UseCasesNode({ className }: { className?: string }) {
           </li>
         ))}
       </ul>
-    </div>
+    </NextLink>
   );
 }
 
 function GatewayNode({ className }: { className?: string }) {
   return (
-    <div
+    <NextLink
+      href={AI_GATEWAY_HREF}
       className={cn(
         "flex flex-col gap-2 border border-dashed border-line-cta bg-surface-bg p-3",
+        CARD_HOVER,
         className,
       )}
     >
@@ -183,12 +187,9 @@ function GatewayNode({ className }: { className?: string }) {
         height={20}
         className="h-5 w-auto self-start"
       />
-      <Link
-        href={AI_GATEWAY_HREF}
-        className="w-fit text-[17px] font-medium leading-tight text-text-primary"
-      >
+      <span className="text-[17px] font-medium leading-tight text-text-primary">
         AI Gateway
-      </Link>
+      </span>
       <Detail>
         Virtual keys, budgets, provisioning, and governance for every model
         call. No code changes.
@@ -197,7 +198,7 @@ function GatewayNode({ className }: { className?: string }) {
       <span className="mt-auto w-fit rounded-[2px] border border-line-structure bg-surface-1 px-1.5 py-0.5 font-sans text-[11px] leading-none text-text-tertiary">
         Optional
       </span>
-    </div>
+    </NextLink>
   );
 }
 
@@ -220,12 +221,15 @@ function LangfuseNode({ className }: { className?: string }) {
             key={feature.label}
             className="border-b border-r border-line-structure"
           >
-            <Link
+            <NextLink
               href={feature.href}
-              className="block px-2.5 py-2 text-[13px] text-text-secondary hover:text-text-primary"
+              className={cn(
+                "block px-2.5 py-2 text-[13px] text-text-secondary hover:text-text-primary",
+                CARD_HOVER,
+              )}
             >
               {feature.label}
-            </Link>
+            </NextLink>
           </li>
         ))}
       </ul>
@@ -251,7 +255,7 @@ function LangfuseNode({ className }: { className?: string }) {
       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
         <Link
           href="/docs/api-and-data-platform/features/halo"
-          className="flex flex-col gap-1.5 border border-line-structure bg-surface-cta-primary p-2.5 no-underline"
+          className="flex flex-col gap-1.5 border border-line-structure bg-surface-cta-primary p-2.5 no-underline transition-colors hover:border-line-cta"
         >
           <span className="font-mono text-[10px] leading-none text-text-secondary">
             in-app agent
@@ -263,7 +267,7 @@ function LangfuseNode({ className }: { className?: string }) {
         </Link>
         <Link
           href="/docs/api-and-data-platform/features/agent-skill"
-          className="flex flex-col gap-1.5 border border-line-structure bg-surface-1 p-2.5 no-underline"
+          className="flex flex-col gap-1.5 border border-line-structure bg-surface-1 p-2.5 no-underline transition-colors hover:border-line-cta"
         >
           <span className="font-mono text-[10px] leading-none text-text-tertiary">
             bring your own
@@ -279,9 +283,11 @@ function LangfuseNode({ className }: { className?: string }) {
 
 function WarehouseNode({ className }: { className?: string }) {
   return (
-    <div
+    <NextLink
+      href={DATA_PLATFORM_HREF}
       className={cn(
         "flex flex-col gap-3 border border-dashed border-line-divider-dash bg-surface-bg p-3",
+        CARD_HOVER,
         className,
       )}
     >
@@ -298,7 +304,7 @@ function WarehouseNode({ className }: { className?: string }) {
           </li>
         ))}
       </ul>
-    </div>
+    </NextLink>
   );
 }
 
@@ -449,7 +455,13 @@ function CompactDiagram() {
       }}
     >
       <Cell column="1 / 3" row={1}>
-        <div className="flex flex-col gap-2.5 border border-line-structure bg-surface-bg p-3">
+        <NextLink
+          href={INTEGRATIONS_HREF}
+          className={cn(
+            "flex flex-col gap-2.5 border border-line-structure bg-surface-bg p-3",
+            CARD_HOVER,
+          )}
+        >
           <span className="text-[15px] font-medium leading-tight text-text-primary">
             Your agents and apps
           </span>
@@ -459,12 +471,9 @@ function CompactDiagram() {
                 key={useCase.title}
                 className="flex flex-wrap items-center justify-between gap-1.5 py-2 first:pt-0 last:pb-0"
               >
-                <Link
-                  href={useCase.href}
-                  className="w-fit text-[13px] font-medium text-text-primary"
-                >
+                <span className="text-[13px] font-medium text-text-primary">
                   {useCase.title}
-                </Link>
+                </span>
                 <div className="flex gap-1">
                   {useCase.icons.slice(0, 3).map((icon) => (
                     <span
@@ -484,7 +493,7 @@ function CompactDiagram() {
               </li>
             ))}
           </ul>
-        </div>
+        </NextLink>
       </Cell>
       <Cell column={3} row={1} decorative>
         <ModelCallsSideArrow />
@@ -511,7 +520,13 @@ function CompactDiagram() {
         <DownArrowCell />
       </Cell>
       <Cell column={2} row={3}>
-        <div className="flex flex-col gap-1.5 border border-dashed border-line-cta bg-surface-bg p-3">
+        <NextLink
+          href={AI_GATEWAY_HREF}
+          className={cn(
+            "flex flex-col gap-1.5 border border-dashed border-line-cta bg-surface-bg p-3",
+            CARD_HOVER,
+          )}
+        >
           <div className="flex items-center justify-between gap-2">
             <Image
               src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
@@ -524,14 +539,11 @@ function CompactDiagram() {
               Optional
             </span>
           </div>
-          <Link
-            href={AI_GATEWAY_HREF}
-            className="w-fit text-[15px] font-medium leading-tight text-text-primary"
-          >
+          <span className="text-[15px] font-medium leading-tight text-text-primary">
             AI Gateway
-          </Link>
+          </span>
           <Detail>Virtual keys, budgets, and governance</Detail>
-        </div>
+        </NextLink>
       </Cell>
       <Cell column={3} row={3} decorative>
         <ModelCallsSideArrow />
@@ -555,12 +567,15 @@ function CompactDiagram() {
                 key={feature.label}
                 className="border-b border-r border-line-structure"
               >
-                <Link
+                <NextLink
                   href={feature.href}
-                  className="block px-2 py-1.5 text-[12px] text-text-secondary hover:text-text-primary"
+                  className={cn(
+                    "block px-2 py-1.5 text-[12px] text-text-secondary hover:text-text-primary",
+                    CARD_HOVER,
+                  )}
                 >
                   {feature.label}
-                </Link>
+                </NextLink>
               </li>
             ))}
           </ul>
@@ -572,12 +587,18 @@ function CompactDiagram() {
       </Cell>
 
       <Cell column="1 / 5" row={7}>
-        <div className="flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3">
+        <NextLink
+          href={DATA_PLATFORM_HREF}
+          className={cn(
+            "flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3",
+            CARD_HOVER,
+          )}
+        >
           <span className="text-[15px] font-medium leading-tight text-text-primary">
             Export
           </span>
           <Detail>{WAREHOUSES.join(", ")}</Detail>
-        </div>
+        </NextLink>
       </Cell>
     </div>
   );
