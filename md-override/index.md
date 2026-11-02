@@ -131,7 +131,7 @@ Yes, you can use Langfuse purely for [tracing](/docs/observability/overview). Th
 
 ### What deployment options do exist?
 
-Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [US and EU regions](/security), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). The self-hosted version includes all product features under the [MIT license](/handbook/chapters/open-source). For teams needing additional support and compliance, there is a [self-hosted Enterprise plan](/pricing-self-host).
+Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [global regions](/security/data-regions), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). The self-hosted version includes all product features under the [MIT license](/handbook/chapters/open-source). For teams needing additional support and compliance, there is a [self-hosted Enterprise plan](/pricing-self-host).
 
 ### Is self-hosting actually free?
 
