@@ -123,7 +123,7 @@ Langfuse is an [open-source](/why) AI engineering platform for tracing, evaluati
 
 ### What deployment options do exist?
 
-Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [global regions](/security/data-regions), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). Self-hosting is free under the [MIT license](/handbook/chapters/open-source) and includes all core features, such as observability, evaluation, prompt management, and datasets, with unlimited usage. You only pay for your own infrastructure. The [self-hosted Enterprise plan](/pricing-self-host) adds project-level RBAC, audit logs, data retention policies, management APIs, and dedicated support with SLAs.
+Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) in [global regions](/security/data-regions), or you can [self-host](/self-hosting) it on your own infrastructure using [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), or Terraform templates for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure). Self-hosting is free under the [MIT license](/handbook/chapters/open-source) and includes all core features, such as observability, evaluation, prompt management, and datasets, with unlimited usage. The [AI Gateway](/docs/ai-gateway/overview) is fully available when self-hosting as well. You only pay for your own infrastructure. The [self-hosted Enterprise plan](/pricing-self-host) adds project-level RBAC, audit logs, data retention policies, management APIs, and dedicated support with SLAs.
 
 ### Do I need the AI Gateway to use Langfuse?
 
@@ -131,7 +131,7 @@ No. The [AI Gateway](/docs/ai-gateway/overview) is optional and currently in bet
 
 ### What's the latency impact?
 
-Tracing with the SDKs and OpenTelemetry is async and doesn't block your application. Data is sent in the background with [automatic batching and queuing](/docs/observability/features/queuing-batching). With the [AI Gateway](/docs/ai-gateway/overview), requests and responses pass through Langfuse on their way between your application and the provider. Prompts are [cached client-side in the SDKs](/docs/prompt-management/features/caching), so there's no latency impact after the first fetch, and [guaranteed availability](/docs/prompt-management/features/guaranteed-availability) keeps your application working even if Langfuse is unreachable.
+Tracing with the SDKs and OpenTelemetry is async and doesn't block your application. Data is sent in the background with [automatic batching and queuing](/docs/observability/features/queuing-batching). The [AI Gateway](/docs/ai-gateway/overview) sits in the request path between your application and the provider, and is built in Rust and optimized for low latency. Prompts are [cached client-side in the SDKs](/docs/prompt-management/features/caching), so there's no latency impact after the first fetch, and [guaranteed availability](/docs/prompt-management/features/guaranteed-availability) keeps your application working even if Langfuse is unreachable.
 
 ### Is Langfuse secure and compliant?
 
@@ -139,6 +139,6 @@ Yes. Langfuse Cloud is [SOC 2 Type II](/security/soc2) certified, [ISO 27001](/s
 
 ### How does pricing work?
 
-Langfuse Cloud has a [free Hobby plan](/pricing) with no credit card required. Paid plans use usage-based [graduated pricing](/pricing) based on [billable units](/docs/administration/billable-units), which are the traces, observations, and scores you send to the platform. Each generation recorded by the [AI Gateway](/docs/ai-gateway/overview#availability) counts as an observation, and your provider bills model usage to your own account. Volume discounts apply automatically as you scale. You can also [self-host](/self-hosting) Langfuse for free under the MIT license. See the [pricing page](/pricing) for the full calculator and plan comparison.
+Langfuse Cloud has a [free Hobby plan](/pricing) with no credit card required. Paid plans use usage-based [graduated pricing](/pricing) based on [billable units](/docs/administration/billable-units), which are the traces, observations, and scores you send to the platform. Volume discounts apply automatically as you scale. You can also [self-host](/self-hosting) Langfuse for free under the MIT license. See the [pricing page](/pricing) for the full calculator and plan comparison.
 
 [Ask anything else](/docs/ask-ai)
