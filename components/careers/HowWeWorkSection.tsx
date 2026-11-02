@@ -67,11 +67,11 @@ const stepAccents: Record<
 
 const visualAltTexts: Record<HowWeWorkStepId, string> = {
   customer:
-    "Cropped GitHub discussion where users shaped the evals revamp, with 29 upvotes and 8 comments",
+    "Cropped GitHub discussion on extracting the last user message for evaluation, with 4 comments",
   rfc: "Cropped RFC document for the evals revamp, open for comments with threads from the team",
   build:
-    "Cropped merged pull request for the evals revamp with 25 commits and about 3,400 added lines",
-  ship: "Cropped Experiments changelog post next to the launch checklist",
+    "Cropped merged pull request for the new evaluation UX with 103 commits and over 52,000 added lines",
+  ship: "Cropped changelog post on setting up production evaluations, next to the launch checklist",
   offsite: "Framed placeholder for a team photo from the Tokyo offsite",
 };
 
@@ -144,18 +144,19 @@ function StepVisual({ id }: { id: HowWeWorkStepId }) {
             </span>
           </div>
           <div className="mt-2 space-y-1.5">
-            <div className="rounded bg-surface-bg px-1.5 py-1">
-              <span className="text-[8px] font-semibold text-text-secondary">
-                Marc
-              </span>
-              <SkeletonLine className="mt-1 w-5/6" />
-            </div>
-            <div className="rounded bg-surface-bg px-1.5 py-1">
-              <span className="text-[8px] font-semibold text-text-secondary">
-                Clemens
-              </span>
-              <SkeletonLine className="mt-1 w-2/3" />
-            </div>
+            {facts.rfc.threads.map((thread) => (
+              <div
+                key={thread.author}
+                className="rounded bg-surface-bg px-1.5 py-1"
+              >
+                <span className="text-[8px] font-semibold text-text-secondary">
+                  {thread.author}
+                </span>
+                <span className="mt-0.5 block text-[8px] leading-tight text-text-tertiary">
+                  {thread.text}
+                </span>
+              </div>
+            ))}
           </div>
         </BrowserFrame>
       );

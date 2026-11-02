@@ -44,7 +44,7 @@ export const howWeWorkSteps: HowWeWorkStep[] = [
       "We discuss features with customers before we build them — the evals revamp started in a public GitHub discussion.",
     href: "/handbook/chapters/customers",
     artifactLabel: "GitHub discussion",
-    artifactUrl: "https://github.com/orgs/langfuse/discussions/5855",
+    artifactUrl: "https://github.com/orgs/langfuse/discussions/11023",
   },
   {
     id: "rfc",
@@ -63,7 +63,7 @@ export const howWeWorkSteps: HowWeWorkStep[] = [
     description: "Then you code — whatever the feature needs.",
     href: "/handbook/product-engineering/how-we-work/how-we-ship",
     artifactLabel: "merged PR",
-    artifactUrl: "https://github.com/langfuse/langfuse/pull/17944",
+    artifactUrl: "https://github.com/langfuse/langfuse/pull/15906",
   },
   {
     id: "ship",
@@ -74,7 +74,7 @@ export const howWeWorkSteps: HowWeWorkStep[] = [
       "You ship it with the GTM team: launch prep, changelog post, marketing materials.",
     href: "/handbook/product-engineering/playbooks/releases",
     artifactLabel: "changelog post",
-    artifactUrl: "/changelog/2026-10-19-experiments",
+    artifactUrl: "/changelog/2026-08-22-reusable-evaluators-and-rules",
   },
   {
     id: "offsite",
@@ -91,28 +91,33 @@ export const howWeWorkSteps: HowWeWorkStep[] = [
 export const howWeWorkVisualFacts = {
   discussion: {
     title:
-      "feat(prompt-experiments): support repetitions to generate more precise estimate of system performance",
+      'How to extract dynamic "last user message" from chat history for Evaluation?',
     source: "github.com/orgs/langfuse",
-    upvotes: 29,
-    comments: 8,
+    upvotes: 1,
+    comments: 4,
   },
   rfc: {
     title: "RFC: Evals revamp",
     source: "RFC · async review",
     status: "Open for comments",
+    // Neutral roles, not names; representative comment text.
+    threads: [
+      { author: "Engineer", text: "Can evaluators be reused across runs?" },
+      { author: "Designer", text: "Show pass rate before going live." },
+    ],
   },
   pullRequest: {
-    title: "feat(experiments): unify per-experiment filter targeting",
+    title: "feat(evals): new evaluation UX",
     source: "github.com/langfuse/langfuse",
-    number: 17944,
-    additions: "+3,411",
-    deletions: "−869",
-    commits: 25,
+    number: 15906,
+    additions: "+52,651",
+    deletions: "−11,684",
+    commits: 103,
   },
   changelog: {
-    title: "Experiments show which metric moved, and why",
+    title: "Set up production evaluations with ease",
     source: "langfuse.com/changelog",
-    date: "Oct 19, 2026",
+    date: "Aug 22, 2026",
     checklist: ["Changelog post", "Launch video", "Social + newsletter"],
   },
   offsite: {
