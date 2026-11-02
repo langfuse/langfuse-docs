@@ -8,7 +8,7 @@ import { formatCompanyCount } from "@/lib/usage-stats";
 const faqs: FAQItem[] = [
   {
     question: "What is Langfuse?",
-    answer: `Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview), plus an optional [AI Gateway](/docs/ai-gateway/overview) that traces every OpenAI and Anthropic call with usage and cost once you swap the base URL and API key. Many teams start with tracing alone and adopt other features as they need them. Langfuse is used by ${formatCompanyCount()} companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud).`,
+    answer: `Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview), plus an optional [AI Gateway](/docs/ai-gateway/overview) that routes your AI calls through Langfuse and traces each one with usage and cost. Many teams start with tracing alone and adopt other features as they need them. Langfuse is used by ${formatCompanyCount()} companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud).`,
   },
   {
     question:
@@ -24,7 +24,7 @@ const faqs: FAQItem[] = [
   {
     question: "Do I need the AI Gateway to use Langfuse?",
     answer:
-      "No. The [AI Gateway](/docs/ai-gateway/overview) is optional and currently in beta. To use it, swap your OpenAI or Anthropic base URL and API key for the gateway's, and every call is traced without an SDK. Otherwise, the [SDKs](/docs/observability/sdk/overview) and [OpenTelemetry integrations](/integrations/native/opentelemetry) work as before. You can also [combine both](/docs/ai-gateway/troubleshooting-and-faq#sdk), so gateway calls show up inside your existing traces.",
+      "No. The [AI Gateway](/docs/ai-gateway/overview) is optional. To use it, swap the base URL and API key in your AI calls for the gateway's, and every call is traced without an SDK. Otherwise, the [SDKs](/docs/observability/sdk/overview) and [OpenTelemetry integrations](/integrations/native/opentelemetry) work as before. You can also [combine both](/docs/ai-gateway/troubleshooting-and-faq#sdk), so gateway calls show up inside your existing traces.",
   },
   {
     question: "What's the latency impact?",

@@ -31,7 +31,7 @@ Langfuse is the platform. The [Langfuse Academy](/academy) is how you, and your 
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.
 
 - **[Observability](/docs/observability/overview)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
-- **[AI Gateway](/docs/ai-gateway/overview)** (new) — swap the base URL and API key to route OpenAI and Anthropic calls through Langfuse. Every call is traced with usage and cost.
+- **[AI Gateway](/docs/ai-gateway/overview)** (new) — swap the base URL and API key to route your AI calls through Langfuse. Every call is traced with usage and cost.
 - **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.
@@ -115,7 +115,7 @@ Need help? [Talk to sales](/talk-to-us) or [reach out to support](/support).
 
 ### What is Langfuse?
 
-Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview), plus an optional [AI Gateway](/docs/ai-gateway/overview) that traces every OpenAI and Anthropic call with usage and cost once you swap the base URL and API key. Many teams start with tracing alone and adopt other features as they need them. Langfuse is used by 50,000+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud).
+Langfuse is an [open-source](https://github.com/langfuse/langfuse) AI engineering platform that helps teams build, monitor, and improve their LLM applications. It covers the full development lifecycle with [tracing](/docs/observability/overview), [prompt management](/docs/prompt-management/overview), [evaluations](/docs/evaluation/overview), and [analytics dashboards](/docs/metrics/overview), plus an optional [AI Gateway](/docs/ai-gateway/overview) that routes your AI calls through Langfuse and traces each one with usage and cost. Many teams start with tracing alone and adopt other features as they need them. Langfuse is used by 50,000+ companies and processes billions of observations per month. You can try it instantly with the [public demo project](/docs/demo) or [sign up for free](/cloud).
 
 ### How does Langfuse compare to LangSmith, Braintrust, Arize, Galileo, and Datadog?
 
@@ -127,7 +127,7 @@ Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) i
 
 ### Do I need the AI Gateway to use Langfuse?
 
-No. The [AI Gateway](/docs/ai-gateway/overview) is optional and currently in beta. To use it, swap your OpenAI or Anthropic base URL and API key for the gateway's, and every call is traced without an SDK. Otherwise, the [SDKs](/docs/observability/sdk/overview) and [OpenTelemetry integrations](/integrations/native/opentelemetry) work as before. You can also [combine both](/docs/ai-gateway/troubleshooting-and-faq#sdk), so gateway calls show up inside your existing traces.
+No. The [AI Gateway](/docs/ai-gateway/overview) is optional. To use it, swap the base URL and API key in your AI calls for the gateway's, and every call is traced without an SDK. Otherwise, the [SDKs](/docs/observability/sdk/overview) and [OpenTelemetry integrations](/integrations/native/opentelemetry) work as before. You can also [combine both](/docs/ai-gateway/troubleshooting-and-faq#sdk), so gateway calls show up inside your existing traces.
 
 ### What's the latency impact?
 

@@ -113,8 +113,8 @@ function AiGatewayCard() {
             </span>
           </div>
           <Text size="s" className={toolDescriptionClassName}>
-            Swap the base URL and API key to route OpenAI and Anthropic calls
-            through Langfuse. Every call is traced with usage and cost.
+            Swap the base URL and API key to route your AI calls through
+            Langfuse. Every call is traced with usage and cost.
           </Text>
         </div>
         <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden lg:mx-0 lg:-my-4 lg:h-[220px]">
