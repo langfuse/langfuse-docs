@@ -99,7 +99,7 @@ function AiGatewayCard() {
       tooltip="Read more"
       className="flex flex-col items-stretch p-0 w-full min-w-0"
     >
-      <div className="grid w-full min-w-0 grid-cols-1 items-center gap-2 p-4 pb-0 lg:pb-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+      <div className="grid w-full min-w-0 grid-cols-1 items-start gap-2 xl:items-center p-4 pb-0 lg:pb-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <Text
