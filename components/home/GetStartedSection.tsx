@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { HomeSection } from "@/components/home/HomeSection";
-import { CornerBox, HoverCorners } from "@/components/ui/corner-box";
+import { CornerBox } from "@/components/ui/corner-box";
+import { TabButton } from "@/components/ui/tab-button";
 import { TextHighlight } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -315,29 +316,16 @@ export function GetStartedSection() {
           {/* Tab buttons — outside the content box, right-aligned, equal width */}
           <div className="flex sm:flex-col sm:items-end sm:justify-between shrink-0 gap-2 self-stretch">
             <div className="flex sm:flex-col sm:items-end gap-1 md:gap-2">
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id;
-                return (
-                  <div
-                    key={tab.id}
-                    className="relative flex items-center p-1 -m-1 group button-wrapper overflow-visible"
-                  >
-                    <HoverCorners />
-                    <button
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        "inline-flex items-center justify-center w-full h-[26px] px-[10px] rounded-[2px] border text-left transition-colors whitespace-nowrap",
-                        "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]",
-                        isActive
-                          ? "border-line-structure bg-surface-bg text-text-primary [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]"
-                          : "border-transparent bg-transparent text-text-tertiary hover:text-text-primary hover:bg-surface-bg hover:border-line-structure hover:[box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)]",
-                      )}
-                    >
-                      {tab.label}
-                    </button>
-                  </div>
-                );
-              })}
+              {tabs.map((tab) => (
+                <TabButton
+                  key={tab.id}
+                  active={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  wrapperClassName="-m-1"
+                >
+                  {tab.label}
+                </TabButton>
+              ))}
             </div>
           </div>
 
