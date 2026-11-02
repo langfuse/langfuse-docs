@@ -1,7 +1,7 @@
 ---
 title: OpenLLMetry Integration via OpenTelemetry
 sidebarTitle: OpenLLMetry
-logo: /images/integrations/opentelemetry_icon.svg
+logo: /images/integrations/openllmetry_icon.png
 description: Example cookbook for the OpenLLMetry Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
