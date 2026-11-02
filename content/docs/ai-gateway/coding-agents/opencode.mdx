@@ -14,6 +14,20 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 ## Setup [#setup]
 
+<Steps>
+
+### Create a gateway API key [#create-a-key]
+
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
+
+Export it in the shell you start OpenCode from:
+
+```sh
+export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+```
+
+### Configure the providers [#configure-the-providers]
+
 Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
 
 ```json
@@ -28,7 +42,6 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
         "apiKey": "{env:LANGFUSE_GATEWAY_KEY}"
       },
       "headers": {
-        "langfuse-user-id": "{env:LF_USER_ID}",
         "langfuse-tags": "opencode,<team>",
         "langfuse-environment": "local",
         "langfuse-metadata": "repo:<repo>"
@@ -40,7 +53,6 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
         "apiKey": "{env:LANGFUSE_GATEWAY_KEY}"
       },
       "headers": {
-        "langfuse-user-id": "{env:LF_USER_ID}",
         "langfuse-tags": "opencode,<team>",
         "langfuse-environment": "local"
       }
@@ -62,7 +74,7 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
   ID as shown below.
 </Callout>
 
-### Keep existing account connections [#keep-existing-account-connections]
+#### Keep existing account connections [#keep-existing-account-connections]
 
 To keep your existing OpenCode account connections, configure the gateway as a separate provider and declare each model manually. For example:
 
@@ -78,7 +90,6 @@ To keep your existing OpenCode account connections, configure the gateway as a s
         "apiKey": "{env:LANGFUSE_GATEWAY_KEY}"
       },
       "headers": {
-        "langfuse-user-id": "{env:LF_USER_ID}",
         "langfuse-tags": "opencode,<team>",
         "langfuse-environment": "local"
       },
@@ -92,10 +103,17 @@ To keep your existing OpenCode account connections, configure the gateway as a s
 
 Add every model you want to use to `models`, then select it as `langfuse/<model-id>`.
 
-## Verify [#verify]
+### Verify [#verify]
 
-1. Run `opencode run --format json "Reply with exactly: pong" | grep -o '"sessionID":"[^"]*"' | head -1`.
-2. In Langfuse, go to **Sessions** and open `opencode:<sessionID>`. You should see **two** generations, each in its own trace: a title call on `small_model` (0 tools) and the answer on `model` (10 tools on Anthropic, 9 on OpenAI).
+Run a prompt:
+
+```sh
+opencode run "Reply with exactly: pong"
+```
+
+If OpenCode replies, it runs through the gateway.
+
+</Steps>
 
 ## Turn grouping (experimental, optional) [#turn-grouping]
 
@@ -120,7 +138,7 @@ export const LangfuseTurn: Plugin = async () => ({
 - Subagents (`task` tool) get their own trace, because they have their own session and user message.
 - Auto-compaction and a message typed while the agent is busy start a new trace.
 
-## Gotchas [#gotchas]
+## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
 - Title calls look like agent steps (same session, trace name, and generation name). Tell them apart by the small model and zero tools. Some title calls are stored as `WARNING` "Client cancelled the response", because OpenCode aborts them.
 - Subagents (`task` tool) get their **own** session. The parent session ID is stored in `agent.parent_session_id`.
