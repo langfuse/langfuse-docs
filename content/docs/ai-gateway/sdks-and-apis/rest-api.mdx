@@ -25,31 +25,40 @@ These are the EU URLs. For other regions and self-hosted Langfuse, replace the h
 
 Every endpoint, including the models endpoints, requires a [gateway API key](/docs/ai-gateway/features/api-keys). How you send it depends on the route.
 
-**OpenAI route:** send the key as a Bearer token.
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
+
+Send the key as a Bearer token.
 
 ```http
 Authorization: Bearer <gateway key>
 ```
 
-**Anthropic route:** send the key in the `x-api-key` header, like an Anthropic API key, or as a Bearer token. If you send both headers, they must have the same value.
+</Tab>
+<Tab>
+
+Send the key in the `x-api-key` header, like an Anthropic API key, or as a Bearer token. If you send both headers, they must have the same value.
 
 ```http
 x-api-key: <gateway key>
 ```
 
+</Tab>
+</Tabs>
+
 ## Endpoints [#routes]
 
-| Endpoint                                                | Description                                           | Recorded as               |
-| ------------------------------------------------------- | ----------------------------------------------------- | ------------------------- |
-| [`GET /openai/v1/models`](#list-models)                 | List the models of your OpenAI credentials            | Not recorded              |
-| [`GET /anthropic/v1/models`](#list-models)              | List the models of your Anthropic credentials         | Not recorded              |
-| [`POST /openai/v1/responses`](#responses)               | Create a model response with the OpenAI Responses API | `openai.responses`        |
-| [`POST /openai/v1/responses/compact`](#responses)       | Compact a Responses API conversation                  | `openai.responses`        |
-| [`POST /openai/v1/chat/completions`](#chat-completions) | Create a chat completion                              | `openai.chat-completions` |
-| [`POST /anthropic/v1/messages`](#messages)              | Create a message with the Anthropic Messages API      | `anthropic.messages`      |
-| [`POST /anthropic/v1/messages/count_tokens`](#messages) | Count the tokens of a message                         | Not recorded              |
+| Endpoint                                                | Description                                           |
+| ------------------------------------------------------- | ----------------------------------------------------- |
+| [`GET /openai/v1/models`](#list-models)                 | List the models of your OpenAI credentials            |
+| [`GET /anthropic/v1/models`](#list-models)              | List the models of your Anthropic credentials         |
+| [`POST /openai/v1/responses`](#responses)               | Create a model response with the OpenAI Responses API |
+| [`POST /openai/v1/responses/compact`](#responses)       | Compact a Responses API conversation                  |
+| [`POST /openai/v1/chat/completions`](#chat-completions) | Create a chat completion                              |
+| [`POST /anthropic/v1/messages`](#messages)              | Create a message with the Anthropic Messages API      |
+| [`POST /anthropic/v1/messages/count_tokens`](#messages) | Count the tokens of a message                         |
 
-Recorded calls become a generation with the name in the last column, see [Tracing](/docs/ai-gateway/features/tracing). Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs, see [response headers](/docs/ai-gateway/features/tracing#response-headers). All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on every endpoint.
+The gateway records each Responses, Chat Completions, and Messages call as a generation, see [Tracing](/docs/ai-gateway/features/tracing). Calls to the models and token counting endpoints are not recorded. Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs, see [response headers](/docs/ai-gateway/features/tracing#response-headers). All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on every endpoint.
 
 <Callout type="info">
   Other paths return `404`, including websockets, realtime APIs, and decision
@@ -71,7 +80,7 @@ Lists the models your key can call, in the provider's own list format. The OpenA
 
 Use the returned `id` as the `model` of your inference requests. Both endpoints return every model in one response, so you don't need pagination parameters.
 
-#### Example request [#list-models-request]
+**Example request**
 
 <Tabs items={["OpenAI", "Anthropic"]}>
 <Tab>
@@ -92,7 +101,7 @@ curl "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models" \
 </Tab>
 </Tabs>
 
-#### Sample response [#list-models-response]
+**Sample response**
 
 <Tabs items={["OpenAI", "Anthropic"]}>
 <Tab>
@@ -133,7 +142,7 @@ curl "$LANGFUSE_GATEWAY_HOST/anthropic/v1/models" \
 </Tab>
 </Tabs>
 
-#### Response fields [#list-models-fields]
+**Response fields**
 
 <Tabs items={["OpenAI", "Anthropic"]}>
 <Tab>
@@ -179,7 +188,7 @@ POST /openai/v1/responses/compact
 
 Creates a model response with the OpenAI Responses API, or compacts a conversation. Request and response bodies are OpenAI's own, see the [OpenAI Responses API reference](https://developers.openai.com/api/reference/resources/responses/methods/create) and [compact reference](https://developers.openai.com/api/reference/resources/responses/methods/compact).
 
-#### Example request [#responses-request]
+**Example request**
 
 ```sh
 curl "$LANGFUSE_GATEWAY_HOST/openai/v1/responses" \
@@ -196,7 +205,7 @@ POST /openai/v1/chat/completions
 
 Creates a chat completion. Request and response bodies are OpenAI's own, see the [OpenAI Chat Completions reference](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create).
 
-#### Example request [#chat-completions-request]
+**Example request**
 
 ```sh
 curl "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
@@ -225,7 +234,7 @@ POST /anthropic/v1/messages/count_tokens
 
 Creates a message with the Anthropic Messages API, or counts the tokens of a message. Request and response bodies are Anthropic's own, see the Claude API references for [Messages](https://platform.claude.com/docs/en/api/messages/create) and [token counting](https://platform.claude.com/docs/en/api/messages/count_tokens).
 
-#### Example request [#messages-request]
+**Example request**
 
 ```sh
 curl "$LANGFUSE_GATEWAY_HOST/anthropic/v1/messages" \
