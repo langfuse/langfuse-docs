@@ -8,6 +8,7 @@ import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
 import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { Button } from "@/components/ui/button";
 import {
   workflowAutomationInsights,
   workflowAutomationQuoteRoutes,
@@ -34,18 +35,8 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
         continuously include human expertise to improve your system.
       </p>
       <div className="mt-6 flex flex-wrap items-center gap-2">
-        <a
-          href="/cloud"
-          className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
-        >
-          Start free
-        </a>
-        <a
-          href="/talk-to-us"
-          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
-        >
-          Talk to sales
-        </a>
+        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+        <Button href="/talk-to-us" variant="secondary" size="default" shortcutKey="t" className="w-auto" wrapperClassName="w-fit">Talk to sales</Button>
         <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Tracing quickstart →</a>
       </div>
     </div>

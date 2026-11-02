@@ -7,7 +7,7 @@ description: Observe and evaluate AI agents that handle patient data, on Langfus
 
 Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-ready cloud region or your own infrastructure. For healthcare and life sciences teams.
 
-[Get started](/cloud)
+[Start free](/cloud)
 
 - **HIPAA-ready cloud region with a self-serve BAA:** Sign the ClickHouse BAA, then send PHI only to the dedicated US region.
 - **Self-host so patient data never leaves your network:** Run Langfuse in your VPC or in an air-gapped environment.
