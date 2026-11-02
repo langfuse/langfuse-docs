@@ -53,7 +53,7 @@ env_http_headers = { "langfuse-user-id" = "LF_USER_ID" }   # header value read f
 
 Then start Codex as usual with `codex`. No `export` is needed.
 
-Use `env_http_headers` for any header you want to vary per run, for example `"langfuse-session-id" = "LF_SESSION"`, and set that variable per run (`LF_SESSION=<id> codex`). Keep per-run variables such as `LF_SESSION` out of `.env`: a value there overrides the shell and would merge all your sessions into one. See [request headers](/docs/ai-gateway/features/request-headers).
+Use `env_http_headers` for any header you want to vary per run, for example `"langfuse-session-id" = "LF_SESSION"`, and set that variable per run (`LF_SESSION=<id> codex`). Keep per-run variables such as `LF_SESSION` out of `.env`: a value there overrides the shell and would merge all your sessions into one. See [request headers](/docs/ai-gateway/features/tracing#request-headers).
 
 ## Verify [#verify]
 

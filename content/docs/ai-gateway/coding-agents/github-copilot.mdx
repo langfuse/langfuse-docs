@@ -48,7 +48,7 @@ copilot
 - The Anthropic base URL has **no** `/v1`. The OpenAI base URL **includes** `/v1`.
 - Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/features/api-formats#chat-completions)), which has not been verified with Copilot.
 - If `~/.copilot/providers.json` (or the file in `COPILOT_PROVIDERS_CONFIG`) already lists providers or models, it takes precedence and these variables have no effect.
-- Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/ai-gateway/features/request-headers) such as `langfuse-user-id` cannot be set.
+- Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/ai-gateway/features/tracing#request-headers) such as `langfuse-user-id` cannot be set.
 
 ## GitHub Copilot app [#app]
 
@@ -59,7 +59,7 @@ See GitHub's [guide to adding models to the Copilot app](https://docs.github.com
 3. Set **Base URL** to `$LANGFUSE_GATEWAY_HOST/openai/v1`, with your gateway host filled in.
 4. Set **Wire API** to `responses`. With `completions`, requests to OpenAI's GPT-5 models fail.
 5. Paste your gateway key as **API key**. The app stores it in your OS keychain.
-6. Optional: add [request headers](/docs/ai-gateway/features/request-headers) under **Custom headers**, for example:
+6. Optional: add [request headers](/docs/ai-gateway/features/tracing#request-headers) under **Custom headers**, for example:
 
    ```json
    {

@@ -20,7 +20,7 @@ Before you start, create a gateway key as in [Send your first request](/docs/ai-
 - [pi](/docs/ai-gateway/coding-agents/pi) (Anthropic and OpenAI routes)
 - [GitHub Copilot CLI and app](/docs/ai-gateway/coding-agents/github-copilot) (CLI: Anthropic and OpenAI routes; app: OpenAI route)
 
-To add tags, an environment, or other context to agent traces, see [request headers](/docs/ai-gateway/features/request-headers).
+To add tags, an environment, or other context to agent traces, see [request headers](/docs/ai-gateway/features/tracing#request-headers).
 
 ## Trace shape [#trace-shape]
 
@@ -34,4 +34,4 @@ To add tags, an environment, or other context to agent traces, see [request head
 
 - A **turn** is one user prompt plus every model call the agent makes until it stops. Without turn grouping, a prompt with four tool steps shows up as four traces in the same session. **Use the Sessions view** to follow a conversation.
 - Resuming or continuing (`--resume`, `-c`, `codex resume`, `--session-id`) keeps the same session.
-- Original agent IDs are kept in metadata under `agent.*`. See [inferred agent context](/docs/ai-gateway/features/request-headers#inferred-agent-context).
+- Original agent IDs are kept in metadata under `agent.*`. See [inferred agent context](/docs/ai-gateway/features/tracing#inferred-agent-context).

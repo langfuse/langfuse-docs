@@ -22,7 +22,7 @@ The gateway serves each provider's native API. Point your client's base URL at t
 
 Both namespaces also serve `GET /models`, which lists the [models](/docs/ai-gateway/features/models#available-models) your key can call. Model listings and `count_tokens` are proxied but not recorded. Websockets, realtime APIs, and decision model APIs (OpenAI Decisions, TypeSafe System One) are not served. Other paths return `404`.
 
-Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs. See [response headers](/docs/ai-gateway/features/request-headers#response-headers).
+Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs. See [response headers](/docs/ai-gateway/features/tracing#response-headers).
 
 ## Authentication [#authentication]
 
@@ -61,7 +61,7 @@ print(completion.choices[0].message.content)
 
 Replace `<model-id>` with an ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models).
 
-All [request headers](/docs/ai-gateway/features/request-headers) work on this route.
+All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on this route.
 
 ### Streaming usage [#streaming-usage]
 
@@ -72,10 +72,6 @@ OpenAI only reports usage for a streamed Chat Completions request when the reque
 - Make sure your client tolerates a chunk without choices. The OpenAI SDKs pass it through like any other chunk, so code that reads `chunk.choices[0]` on every chunk needs a guard.
 - Requests that already ask for usage and non-streamed requests are forwarded without this change.
 
-### Compressed requests [#compressed-requests]
-
-The gateway only accepts uncompressed request bodies. A request with a `Content-Encoding` header other than `identity` is rejected with `415` `Unsupported request Content-Encoding`. Turn off request compression in your client.
-
 ### What gets recorded [#chat-completions-recording]
 
 - **Model parameters:** scalar parameters such as `temperature`, `top_p`, `max_tokens`, `max_completion_tokens`, `seed`, `reasoning_effort`, and `stream` are recorded in the `FULL` and `USAGE` [capture modes](/docs/ai-gateway/features/tracing#capture-modes). In `FULL` mode, `stop`, `response_format`, `tool_choice`, `stream_options`, and similar structured options are added.
@@ -84,10 +80,6 @@ The gateway only accepts uncompressed request bodies. A request with a `Content-
 - **Metadata** (`FULL` mode): `metadata`, `prompt_cache_key`, `safety_identifier`, and `user` from the request are stored under `langfuse.gateway.client.request.*`, for example `langfuse.gateway.client.request.metadata`.
 - Usage, cost, latency, and time to first token, as on the other routes.
 
-<Callout type="info">
-  The [coding agent guides](/docs/ai-gateway/coding-agents) use the Responses
-  API, which is the verified path for Codex, OpenCode, and pi. The gateway also
-  serves their Chat Completions modes (`@ai-sdk/openai-compatible` providers in
-  OpenCode, `"api": "openai-completions"` in pi), but these have not been
-  verified with the agents yet, including session detection.
-</Callout>
+## Compressed requests [#compressed-requests]
+
+The gateway only accepts uncompressed request bodies. A request with a `Content-Encoding` header other than `identity` is rejected with `415` `Unsupported request Content-Encoding`. Turn off request compression in your client.

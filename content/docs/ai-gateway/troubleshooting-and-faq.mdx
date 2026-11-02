@@ -48,7 +48,7 @@ Quote the **gateway request ID** when you report a problem. It identifies one ca
 - If a generation was recorded, include the `langfuse-trace-id` header too, or the trace URL.
 - In Langfuse, the same ID is stored on the generation as the metadata key `langfuse.gateway.request.id`.
 
-Most coding agents don't show response headers. To get the request ID for an agent's call, open the generation in Langfuse and copy `langfuse.gateway.request.id` from its metadata, or reproduce the call with `curl`. See [response headers](/docs/ai-gateway/features/request-headers#response-headers).
+Most coding agents don't show response headers. To get the request ID for an agent's call, open the generation in Langfuse and copy `langfuse.gateway.request.id` from its metadata, or reproduce the call with `curl`. See [response headers](/docs/ai-gateway/features/tracing#response-headers).
 
 ## Known limitations [#known-limitations]
 
@@ -87,11 +87,11 @@ The response is relayed unchanged. The gateway reads the request and response to
 
 ### Can I use the gateway in USAGE mode and still set users and tags? [#usage-mode-headers]
 
-Yes. [Request headers](/docs/ai-gateway/features/request-headers) work in both `FULL` and `USAGE` capture modes.
+Yes. [Request headers](/docs/ai-gateway/features/tracing#request-headers) work in both `FULL` and `USAGE` capture modes.
 
 ### Can I use the gateway together with the Langfuse SDK? [#sdk]
 
-Yes. Send the W3C `traceparent` header of your current span with the request, and the gateway records its generation inside your trace. If your app uses OpenTelemetry, which the Langfuse SDKs are built on, an HTTP client instrumentation can inject the header for you. See [trace context and baggage](/docs/ai-gateway/features/request-headers#trace-context).
+Yes. Send the W3C `traceparent` header of your current span with the request, and the gateway records its generation inside your trace. If your app uses OpenTelemetry, which the Langfuse SDKs are built on, an HTTP client instrumentation can inject the header for you. See [trace context and baggage](/docs/ai-gateway/features/tracing#trace-context).
 
 Don't also trace the same call with a provider SDK integration, such as the Langfuse OpenAI integration, or the call is recorded twice.
 
