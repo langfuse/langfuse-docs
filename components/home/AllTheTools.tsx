@@ -4,7 +4,7 @@ import Image, { type StaticImageData } from "next/image";
 import { HomeSection } from "./HomeSection";
 import { Heading, TextHighlight, ChipCard } from "@/components/ui";
 import { Text } from "@/components/ui/text";
-import { HorizontalArrow } from "@/components/blog/diagram-primitives";
+import { AiGatewayVisual } from "./AiGatewayVisual";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import observabilityVisual from "./img/tools/observability.png";
 import promptManagementVisual from "./img/tools/prompt.png";
@@ -92,12 +92,6 @@ const tools: ToolEntry[] = [
   },
 ];
 
-const gatewayClients = ["Your apps", "Claude Code", "Codex"];
-const gatewayProviders = ["OpenAI", "Anthropic"];
-
-const flowChipClassName =
-  "border border-line-structure bg-surface-bg px-2 py-1 font-mono text-[11px] leading-none text-text-tertiary whitespace-nowrap";
-
 function AiGatewayCard() {
   return (
     <ChipCard
@@ -105,7 +99,7 @@ function AiGatewayCard() {
       tooltip="Read more"
       className="flex flex-col items-stretch p-0 w-full min-w-0"
     >
-      <div className="grid w-full min-w-0 grid-cols-1 items-center gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+      <div className="grid w-full min-w-0 grid-cols-1 items-center gap-2 p-4 pb-0 lg:pb-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <Text
@@ -123,38 +117,8 @@ function AiGatewayCard() {
             through Langfuse. Every call is traced with usage and cost.
           </Text>
         </div>
-        <div
-          aria-hidden="true"
-          className="hidden w-full max-w-[560px] items-center sm:grid sm:grid-cols-[auto_minmax(24px,1fr)_auto_minmax(24px,1fr)_auto] lg:justify-self-end"
-        >
-          <div className="flex flex-col items-end gap-1.5">
-            {gatewayClients.map((client) => (
-              <span key={client} className={flowChipClassName}>
-                {client}
-              </span>
-            ))}
-          </div>
-          <div className="px-1.5">
-            <HorizontalArrow />
-          </div>
-          <div className="flex flex-col gap-1 border border-line-cta bg-surface-bg px-3 py-2.5">
-            <span className="font-mono text-[11px] leading-none text-text-primary whitespace-nowrap">
-              Langfuse AI Gateway
-            </span>
-            <span className="font-mono text-[10px] leading-none text-text-tertiary whitespace-nowrap">
-              keys, models, traces
-            </span>
-          </div>
-          <div className="px-1.5">
-            <HorizontalArrow />
-          </div>
-          <div className="flex flex-col items-start gap-1.5">
-            {gatewayProviders.map((provider) => (
-              <span key={provider} className={flowChipClassName}>
-                {provider}
-              </span>
-            ))}
-          </div>
+        <div className="pointer-events-none relative -mx-4 -mb-4 h-[180px] overflow-hidden lg:mx-0 lg:-my-4 lg:h-[220px]">
+          <AiGatewayVisual className="absolute inset-0 w-full h-full" />
         </div>
       </div>
     </ChipCard>
