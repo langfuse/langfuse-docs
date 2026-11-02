@@ -106,7 +106,7 @@ export function Card({
           {source ? (
             <Text
               size="s"
-              className="my-0! mt-auto pt-1 text-left text-text-tertiary"
+              className="mb-0! mt-auto! pt-1 text-left text-text-tertiary"
             >
               {source}
             </Text>
