@@ -286,7 +286,7 @@ function WarehouseNode({ className }: { className?: string }) {
       )}
     >
       <span className="text-[17px] font-medium leading-tight text-text-primary">
-        Warehouse
+        Export
       </span>
       <ul className="flex flex-col divide-y divide-line-structure">
         {WAREHOUSES.map((warehouse) => (
@@ -574,7 +574,7 @@ function CompactDiagram() {
       <Cell column="1 / 5" row={7}>
         <div className="flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3">
           <span className="text-[15px] font-medium leading-tight text-text-primary">
-            Warehouse
+            Export
           </span>
           <Detail>{WAREHOUSES.join(", ")}</Detail>
         </div>
