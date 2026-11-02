@@ -19,7 +19,7 @@ const USE_CASES: {
 }[] = [
   {
     title: "Personal agents",
-    detail: "Claude Code, Codex, Cursor",
+    detail: "Claude Code, Codex, Cursor, …",
     href: "/docs/ai-gateway/coding-agents",
     icons: [
       { src: "/images/integrations/claude_icon.png", alt: "Claude Code" },
