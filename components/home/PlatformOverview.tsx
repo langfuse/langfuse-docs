@@ -253,8 +253,8 @@ function LangfuseNode({ className }: { className?: string }) {
           href="/docs/api-and-data-platform/features/halo"
           className="flex flex-col gap-1.5 border border-line-structure bg-surface-cta-primary p-2.5 no-underline"
         >
-          <span className="font-mono text-[12px] leading-none tracking-[0.02em] [font-variant-caps:all-small-caps] text-text-secondary">
-            In-app agent
+          <span className="font-mono text-[10px] leading-none text-text-secondary">
+            in-app agent
           </span>
           <span className="text-[13px] leading-snug text-text-primary">
             Halo debugs traces, writes evals, and iterates on prompts in
@@ -265,8 +265,8 @@ function LangfuseNode({ className }: { className?: string }) {
           href="/docs/api-and-data-platform/features/agent-skill"
           className="flex flex-col gap-1.5 border border-line-structure bg-surface-1 p-2.5 no-underline"
         >
-          <span className="font-mono text-[12px] leading-none tracking-[0.02em] [font-variant-caps:all-small-caps] text-text-tertiary">
-            Bring your own
+          <span className="font-mono text-[10px] leading-none text-text-tertiary">
+            bring your own
           </span>
           <span className="text-[13px] leading-snug text-text-secondary">
             Claude Code, Cursor, Codex, or internal agents
