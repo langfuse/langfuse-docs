@@ -58,6 +58,8 @@ x-api-key: <gateway key>
 | [`POST /anthropic/v1/messages`](#messages)              | Create a message with the Anthropic Messages API      |
 | [`POST /anthropic/v1/messages/count_tokens`](#messages) | Count the tokens of a message                         |
 
+The Responses, Chat Completions, and Messages endpoints relay the provider's API. The gateway only removes the model ID prefix, replaces authentication, and adds [streaming usage](#streaming-usage) to streamed Chat Completions. The gateway doesn't translate between formats, so the OpenAI endpoints need an OpenAI provider credential and the Anthropic endpoints an Anthropic credential. Replace `<model-id>` in the examples with an ID from [List models](#list-models).
+
 The gateway records each Responses, Chat Completions, and Messages call as a generation, see [Tracing](/docs/ai-gateway/features/tracing). Calls to the models and token counting endpoints are not recorded. Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs, see [response headers](/docs/ai-gateway/features/tracing#response-headers). All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on every endpoint.
 
 <Callout type="info">
@@ -67,9 +69,7 @@ The gateway records each Responses, Chat Completions, and Messages call as a gen
   than `identity` fails with `415`.
 </Callout>
 
-## Models [#models]
-
-### List models [#list-models]
+## List models [#list-models]
 
 ```http
 GET /openai/v1/models
@@ -175,11 +175,7 @@ Same format as Anthropic's [list models](https://platform.claude.com/docs/en/api
 </Tab>
 </Tabs>
 
-## Inference [#inference]
-
-The inference endpoints relay the provider's API. The gateway only removes the model ID prefix, replaces authentication, and adds [streaming usage](#streaming-usage) to streamed Chat Completions. The gateway doesn't translate between formats, so the OpenAI endpoints need an OpenAI provider credential and the Anthropic endpoints an Anthropic credential. Replace `<model-id>` in the examples with an ID from [List models](#list-models).
-
-### Responses [#responses]
+## OpenAI Responses [#responses]
 
 ```http
 POST /openai/v1/responses
@@ -197,7 +193,7 @@ curl "$LANGFUSE_GATEWAY_HOST/openai/v1/responses" \
   -d '{"model":"<model-id>","input":"Say hello"}'
 ```
 
-### Chat Completions [#chat-completions]
+## OpenAI Chat Completions [#chat-completions]
 
 ```http
 POST /openai/v1/chat/completions
@@ -214,7 +210,7 @@ curl "$LANGFUSE_GATEWAY_HOST/openai/v1/chat/completions" \
   -d '{"model":"<model-id>","messages":[{"role":"user","content":"Say hello"}]}'
 ```
 
-#### Streaming usage [#streaming-usage]
+### Streaming usage [#streaming-usage]
 
 OpenAI only reports usage for a streamed Chat Completions request when the request sets `stream_options.include_usage`. So that every streamed call still gets token usage and cost, the gateway adds `"include_usage": true` to the request it sends upstream when a request has `"stream": true` and does not already set it. The recorded request is your original request, without the added option.
 
@@ -225,7 +221,7 @@ OpenAI only reports usage for a streamed Chat Completions request when the reque
   needs a guard.
 </Callout>
 
-### Messages [#messages]
+## Anthropic Messages [#messages]
 
 ```http
 POST /anthropic/v1/messages
