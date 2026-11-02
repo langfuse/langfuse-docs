@@ -1,7 +1,7 @@
 ---
 title: Overview
 seoTitle: "Langfuse AI Gateway (beta)"
-description: The Langfuse AI Gateway relays native OpenAI and Anthropic API calls through Langfuse and records every model call as a generation, with no SDK or code changes.
+description: Send OpenAI and Anthropic API calls through Langfuse to trace every model call, keep provider keys in one place, and track cost, with no SDK or code changes.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -10,11 +10,15 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-The Langfuse AI Gateway is a relay for native provider APIs. Your application or coding agent talks to Langfuse instead of OpenAI or Anthropic. The gateway forwards the native request body, using a provider credential that your organization stores in Langfuse, and records the call in Langfuse. It only changes what routing needs: the credential prefix on the model ID, the authentication headers, and, for streamed Chat Completions, a request for usage (see [what the gateway changes](/docs/ai-gateway/troubleshooting-and-faq#does-the-gateway-change-requests)). You get full traces of every model call without installing an SDK or changing code: you only change the base URL and the API key.
+The Langfuse AI Gateway sits between your apps or coding agents and OpenAI or Anthropic. You point your client at Langfuse instead of the provider, and every model call shows up in Langfuse. You don't need an SDK or code changes: you only change the base URL and the API key.
 
-Without the gateway, every developer and application needs its own provider key, and tracing depends on each client's instrumentation. With the gateway, provider keys stay in Langfuse, each person or service authenticates with a gateway API key, and every call shows up as a trace with its model, usage, and cost.
+What you get:
 
-The gateway is an optional component of the Langfuse platform. It uses the same organizations, projects, [roles](/docs/administration/rbac), and [traces](/docs/observability/overview) as the rest of Langfuse, so gateway traces work with [evaluations](/docs/evaluation/overview), [dashboards](/docs/metrics/overview), and the [public API](/docs/api-and-data-platform/features/public-api) like any other trace.
+- **A trace for every call**, with the model, token usage, and cost.
+- **No shared provider keys:** your OpenAI and Anthropic keys stay in Langfuse. Each person or service uses its own [gateway API key](/docs/ai-gateway/features/api-keys).
+- **Control over models:** admins choose which models gateway keys can call. See [Model management](/docs/ai-gateway/features/models).
+- **Cost tracking:** see spend and usage per user, API key, and model. See [Analytics](/docs/ai-gateway/features/analytics).
+- **The rest of Langfuse:** gateway traces work with [evaluations](/docs/evaluation/overview), [dashboards](/docs/metrics/overview), and the [public API](/docs/api-and-data-platform/features/public-api) like any other trace.
 
 ## Choose a request format [#request-formats]
 
@@ -31,7 +35,7 @@ Admins also control which provider models gateway keys can call. See [Model mana
 
 ## What the gateway doesn't do (beta) [#limits]
 
-The gateway is a relay, not a router or a proxy cache. During the beta, it:
+During the beta, the gateway:
 
 - doesn't retry failed provider calls or fall back to another credential or model
 - doesn't cache responses
