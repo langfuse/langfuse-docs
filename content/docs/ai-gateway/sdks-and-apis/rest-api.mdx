@@ -58,7 +58,7 @@ x-api-key: <gateway key>
 | [`POST /anthropic/v1/messages`](#messages)              | Create a message with the Anthropic Messages API      |
 | [`POST /anthropic/v1/messages/count_tokens`](#messages) | Count the tokens of a message                         |
 
-The Responses, Chat Completions, and Messages endpoints relay the provider's API. The gateway only removes the model ID prefix, replaces authentication, and adds [streaming usage](#streaming-usage) to streamed Chat Completions. The gateway doesn't translate between formats, so the OpenAI endpoints need an OpenAI provider credential and the Anthropic endpoints an Anthropic credential. Replace `<model-id>` in the examples with an ID from [List models](#list-models).
+The Responses, Chat Completions, and Messages endpoints relay the provider's API. The gateway doesn't translate between formats, so the OpenAI endpoints need an OpenAI provider credential and the Anthropic endpoints an Anthropic credential. Replace `<model-id>` in the examples with an ID from [List models](#list-models).
 
 The gateway records each Responses, Chat Completions, and Messages call as a generation, see [Tracing](/docs/ai-gateway/features/tracing). Calls to the models and token counting endpoints are not recorded. Every response carries a `langfuse-request-id` header, and recorded calls also return the trace and observation IDs, see [response headers](/docs/ai-gateway/features/tracing#response-headers). All [request headers](/docs/ai-gateway/features/tracing#request-headers) work on every endpoint.
 
