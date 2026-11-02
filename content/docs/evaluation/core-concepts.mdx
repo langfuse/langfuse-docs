@@ -144,11 +144,11 @@ To use an LLM-as-a-Judge evaluator for batch evaluation, enable the [Langfuse v4
 
 The resulting scores are attached to the matching observations in each selected trace.
 
-Langfuse records the batch action ID as `batch_action_id` in the execution metadata of every evaluator execution trace and score that a manual batch evaluation run produces. Use it to group or query all outputs of one run together.
+Batch evaluation only includes observations within your organization's plan data-access window, for example on the Hobby or Core plan. Langfuse enforces this on the server, so older observations are excluded even if your filters match them.
 
-Batch evaluation only selects observations inside your organization plan's data-access window. Langfuse enforces this on the server by adding a `startTime >= ` filter for the earliest date your plan allows, so observations older than your retention window are not evaluated. This applies to batch evaluations started from the UI and through the MCP server.
+The execution traces and scores that a batch evaluation run produces carry the batch action ID as `batch_action_id` in their metadata. Filter on `batch_action_id` to find all outputs of a single run together.
 
-Agents can also start a batch evaluation with the `runBatchEvaluation` MCP tool. It queues saved evaluators over the observations that match a filter and time range, and returns the batch action ID. The tool requires the `evaluationRule:CUD` permission, and the in-app agent asks for your approval before running it. It does not support the full-text `matches` filter operator.
+AI agents can start a batch evaluation with the `runBatchEvaluation` tool of the [MCP server](/docs/api-and-data-platform/features/mcp-server#run-batch-evaluations).
 
 ## Experiments [#experiments]
 
