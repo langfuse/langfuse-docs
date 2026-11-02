@@ -27,6 +27,10 @@ export type CardProps = Omit<FumadocsCardProps, "title"> & {
   contentWrapperClassName?: string;
   /** Trailing chevron signalling that a linked card is clickable. Defaults to true for titled cards. */
   arrow?: boolean;
+  /** Source line under the description, for example "ClickHouse blog". */
+  source?: string;
+  /** Render children as a full-bleed cover above the title. */
+  cover?: boolean;
 };
 
 export function Card({
@@ -37,6 +41,8 @@ export function Card({
   children,
   contentClassName,
   contentWrapperClassName,
+  source,
+  cover = false,
   ...props
 }: CardProps) {
   const E = props.href ? Link : "div";
@@ -45,15 +51,26 @@ export function Card({
     <E
       {...props}
       data-card
-      className={cn("block @max-lg:col-span-full", props.className)}
+      className={cn(
+        "block @max-lg:col-span-full",
+        cover && "h-full",
+        props.className,
+      )}
     >
       <CornerBox
         hoverStripes={!!props.href}
         className={cn(
-          "flex flex-row items-center p-2 sm:p-3 gap-2.5 text-text-primary w-full h-full",
+          cover
+            ? "flex h-full flex-col items-stretch gap-0 overflow-hidden p-0 text-text-primary"
+            : "flex h-full w-full flex-row items-center gap-2.5 p-2 text-text-primary sm:p-3",
           contentClassName,
         )}
       >
+        {cover && children ? (
+          <div className="not-prose relative aspect-[1200/630] w-full shrink-0 overflow-hidden">
+            {children}
+          </div>
+        ) : null}
         {icon ? (
           <div className="not-prose shrink-0 [&_svg]:size-5 [&_img]:size-5">
             {icon}
@@ -61,7 +78,8 @@ export function Card({
         ) : null}
         <div
           className={cn(
-            "flex flex-1 min-w-0 flex-col gap-1",
+            "flex min-w-0 flex-1 flex-col gap-1",
+            cover && "p-3",
             contentWrapperClassName,
           )}
         >
@@ -85,9 +103,19 @@ export function Card({
               {description}
             </Text>
           ) : null}
-          <div className="text-sm text-text-primary prose-no-margin empty:hidden">
-            {children}
-          </div>
+          {source ? (
+            <Text
+              size="s"
+              className="my-0! mt-auto pt-1 text-left text-text-tertiary"
+            >
+              {source}
+            </Text>
+          ) : null}
+          {cover ? null : (
+            <div className="prose-no-margin text-sm text-text-primary empty:hidden">
+              {children}
+            </div>
+          )}
         </div>
       </CornerBox>
     </E>
