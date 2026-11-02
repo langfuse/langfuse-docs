@@ -83,9 +83,10 @@ export default observe(handleRequest);`,
     body: "Route OpenAI and Anthropic calls through Langfuse without code changes. Issue virtual keys, set budgets, provision access for people and services, and govern which models they can use. Every call is traced with usage and cost.",
     docsHref: "/docs/ai-gateway/overview",
     image: {
-      light: metricsPng, // Placeholder - needs AI Gateway screenshot
+      light: metricsPng,
       dark: metricsPng,
       alt: "Langfuse AI Gateway usage and cost per user, API key, and model",
+      placeholder: true,
     },
     displayMode: "image-only",
     quickstartHref: "/docs/ai-gateway/get-started/first-request",
