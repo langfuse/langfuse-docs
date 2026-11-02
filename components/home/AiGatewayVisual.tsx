@@ -246,13 +246,14 @@ export function AiGatewayVisual({ className }: { className?: string }) {
           strokeWidth={1.5}
         />
         <text
-          x={g.x + 18}
+          x={g.x + g.w / 2}
           y={g.y + 31}
+          textAnchor="middle"
           className="font-mono"
           fontSize={16}
           fill="var(--text-primary)"
         >
-          Langfuse AI Gateway
+          AI Gateway
         </text>
       </g>
     </svg>
