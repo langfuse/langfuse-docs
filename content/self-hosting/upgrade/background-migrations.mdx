@@ -12,6 +12,10 @@ These may include the addition and backfilling of new columns or the migration o
 Background migrations are executed on startup of the worker container and run in the background until completion or failure.
 
 Next to background migrations, fast migrations are applied directly to the database on startup of the web container.
+New background migrations are registered by these migrations, so they are added when the web container starts.
+The worker only looks for pending background migrations on its own startup and works through them one after another.
+If a migration stays queued after an upgrade, for example because the worker started before the web container had applied its migrations, or after you retried a failed migration, restart the worker container.
+Migrations whose args contain an `envGate` are the exception: they stay queued by design until the environment variable they name is set to `true` on the worker (see the [v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-2-prerequisites)).
 
 ## Monitoring
 
