@@ -41,7 +41,7 @@ The gateway calls the provider with your own credentials, so the provider bills 
 
 An organization can add several provider credentials, including more than one per provider.
 
-**The URL path decides the API format.** Clients call the gateway with the same API they would use with the provider directly:
+**The URL path decides which API format the gateway expects.** Requests look exactly like requests to the provider. Only the base URL and the key change:
 
 - `/openai/v1/responses` uses the OpenAI Responses API.
 - `/openai/v1/chat/completions` uses the OpenAI Chat Completions API.
