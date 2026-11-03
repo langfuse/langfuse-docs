@@ -13,14 +13,7 @@ sidebarTitle: "AI Gateway"
 
 </Callout>
 
-The [Langfuse AI Gateway](/docs/ai-gateway/overview) relays model requests from your applications and coding agents to your LLM providers and records every call as a generation in Langfuse. Clients only change their base URL and API key. For admins, the gateway puts LLM access behind one control point:
-
-- **Provider access in one place:** provider API keys are stored once per organization. Developers and agents never see them, and admins choose which models are available.
-- **API keys in one place:** admins see and revoke every gateway key, and a person's keys stop working when they leave the organization.
-- **Spend tracking:** [gateway analytics](/docs/ai-gateway/features/analytics) show cost and usage per user, key, and model.
-- **Tracing without instrumentation:** every call is [traced](/docs/ai-gateway/features/tracing) in Langfuse, with no SDK in the client.
-
-This guide covers how to deploy and operate the gateway on a self-hosted Langfuse instance. Once it runs, set it up for your organization with [Set up the gateway](/docs/ai-gateway/get-started/admin-setup).
+The [Langfuse AI Gateway](/docs/ai-gateway/overview) sends model requests from your applications and coding agents to your LLM providers and records every call as a generation in Langfuse. This guide covers how to deploy and operate the gateway on a self-hosted Langfuse instance. Once it runs, follow [Set up Gateway as an admin](/docs/ai-gateway/get-started/admin-setup) to connect your providers and create API keys.
 
 ## Requirements [#requirements]
 
@@ -40,11 +33,11 @@ import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 <ArchitectureDiagram />
 
 1. A client sends a request to the gateway's public URL, for example `https://gateway.langfuse.example.com/anthropic/v1/messages`, with a gateway API key.
-2. The gateway asks Langfuse Web to resolve the key. Web checks the key and returns the organization's provider connection, including the provider API key.
+2. The gateway asks Langfuse Web to resolve the key. Web checks the key and returns the organization's provider credential.
 3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/faq/all/ai-gateway-request-changes).
 4. The gateway uploads the generation to Langfuse Web, which ingests it like any other trace.
 
-Organization admins then set up provider connections and gateway API keys in the Langfuse UI.
+Organization admins then add provider credentials and gateway API keys in the Langfuse UI. For how clients, keys, and providers fit together, see [Concepts](/docs/ai-gateway/concepts).
 
 ## Deploy with Helm [#helm]
 
@@ -402,7 +395,7 @@ The chart pulls `docker.langfuse.com/langfuse/ai-gateway`. If your cluster can't
 <Details id="requests-fail-401">
 <Summary>Requests fail with `401`</Summary>
 
-Check that the client sends a gateway API key, not a Langfuse project API key, and that the key has not been revoked.
+Check that the client sends a gateway API key, not a Langfuse project API key, and that the key has not been revoked. For client-side causes, see [AI Gateway errors](/faq/all/ai-gateway-error-codes).
 
 </Details>
 
