@@ -1,18 +1,16 @@
 import Image from "next/image";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
+import { Bot } from "lucide-react";
 import { HomeSection } from "@/components/home/HomeSection";
-import {
-  HorizontalArrow,
-  VerticalArrow,
-} from "@/components/blog/diagram-primitives";
+import { Head, VerticalArrow } from "@/components/blog/diagram-primitives";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 
 const AI_GATEWAY_HREF = "/docs/ai-gateway/overview";
 const INTEGRATIONS_HREF = "/integrations";
-const DATA_PLATFORM_HREF = "/docs/api-and-data-platform/overview";
+const SDK_HREF = "/docs/observability/get-started";
 
 // Same hover treatment as the bento cards in `AllTheTools`.
 const CARD_HOVER =
@@ -25,7 +23,7 @@ const USE_CASES: {
 }[] = [
   {
     title: "Personal agents",
-    detail: "Claude Code, Codex, Cursor, …",
+    detail: "Coding and desktop assistants",
     icons: [
       { src: "/images/integrations/claude_icon.png", alt: "Claude Code" },
       { src: "/images/integrations/openai_icon.svg", alt: "Codex" },
@@ -38,11 +36,11 @@ const USE_CASES: {
   },
   {
     title: "Custom agents",
-    detail: "Support, voice, RAG, workflows, any harness or framework",
+    detail: "Support, voice, RAG, workflows",
     icons: [
-      { src: "/images/integrations/langchain_icon.png", alt: "LangChain" },
+      { src: "/images/integrations/langchain_icon.svg", alt: "LangChain" },
       {
-        src: "/images/integrations/vercel_ai_sdk_icon.png",
+        src: "/images/integrations/vercel_ai_sdk_icon.svg",
         alt: "Vercel AI SDK",
       },
       { src: "/images/integrations/livekit_icon.svg", alt: "LiveKit" },
@@ -53,7 +51,7 @@ const USE_CASES: {
   },
   {
     title: "Copilots & no-code",
-    detail: "Copilot Studio, n8n, Dify, Flowise, …",
+    detail: "Low-code and workflow builders",
     icons: [
       { src: "/images/integrations/microsoft_icon.svg", alt: "Copilot Studio" },
       { src: "/images/integrations/n8n_icon.svg", alt: "n8n" },
@@ -63,16 +61,39 @@ const USE_CASES: {
   },
 ];
 
-const FEATURES = [
-  { label: "Tracing", href: "/docs/observability/overview" },
-  { label: "Prompts", href: "/docs/prompt-management/overview" },
-  { label: "Evals", href: "/docs/evaluation/overview" },
-  { label: "Datasets", href: "/docs/evaluation/experiments/datasets" },
+const FEATURE_GROUPS: {
+  title: string;
+  features: { label: string; href: string }[];
+}[] = [
   {
-    label: "Experiments",
-    href: "/docs/evaluation/experiments/experiments-via-sdk",
+    title: "Observe",
+    features: [
+      { label: "Tracing", href: "/docs/observability/overview" },
+      {
+        label: "Dashboards",
+        href: "/docs/metrics/features/custom-dashboards",
+      },
+      { label: "Alerts", href: "/docs/observability/features/alerts" },
+    ],
   },
-  { label: "Dashboards", href: "/docs/metrics/features/custom-dashboards" },
+  {
+    title: "Manage",
+    features: [
+      { label: "Prompts", href: "/docs/prompt-management/overview" },
+      { label: "Skills", href: "/docs/skill-management/overview" },
+    ],
+  },
+  {
+    title: "Evaluate",
+    features: [
+      { label: "Evals", href: "/docs/evaluation/overview" },
+      { label: "Datasets", href: "/docs/evaluation/experiments/datasets" },
+      {
+        label: "Experiments",
+        href: "/docs/evaluation/experiments/experiments-via-sdk",
+      },
+    ],
+  },
 ];
 
 const ACCESS = [
@@ -81,9 +102,6 @@ const ACCESS = [
   { label: "API", href: "/docs/api-and-data-platform/features/public-api" },
   { label: "SDKs", href: "/docs/observability/sdk/overview" },
 ];
-
-const BLOB_STORAGE = "S3 / GCS / Azure";
-const WAREHOUSES = ["ClickHouse", "Snowflake", "BigQuery", "Databricks"];
 
 function Wordmark({
   width,
@@ -114,142 +132,171 @@ function Wordmark({
   );
 }
 
-function Detail({
-  className,
-  children,
-}: {
-  className?: string;
-  children: ReactNode;
-}) {
+function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <p
-      className={cn(
-        "text-left text-[13px] leading-snug tracking-[-0.2px] text-text-tertiary",
-        className,
-      )}
-    >
-      {children}
-    </p>
-  );
-}
-
-function ArrowLabel({ children }: { children: ReactNode }) {
-  return (
-    <span className="whitespace-nowrap font-mono text-[10px] leading-none text-text-tertiary">
+    <span className="font-mono text-[10px] uppercase leading-none tracking-wide text-text-tertiary">
       {children}
     </span>
   );
 }
 
-function UpstreamNode({ className }: { className?: string }) {
+function Title({ children }: { children: ReactNode }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-2 border border-dashed border-line-divider-dash bg-surface-bg p-3",
-        className,
-      )}
-    >
-      <span className="text-[17px] font-medium leading-tight text-text-primary">
-        AI Inference APIs
-      </span>
-    </div>
+    <span className="text-[15px] font-medium leading-tight text-text-primary">
+      {children}
+    </span>
   );
 }
 
-function UseCasesNode({ className }: { className?: string }) {
+function Detail({ children }: { children: ReactNode }) {
   return (
-    <NextLink
-      href={INTEGRATIONS_HREF}
-      className={cn(
-        "flex flex-col gap-3 border border-line-structure bg-surface-bg p-3",
-        CARD_HOVER,
-        className,
-      )}
-    >
-      <ul className="flex flex-col divide-y divide-line-structure">
-        {USE_CASES.map((useCase) => (
-          <li
-            key={useCase.title}
-            className="flex flex-col gap-1.5 py-2.5 first:pt-0 last:pb-0"
-          >
-            <span className="text-[15px] font-medium text-text-primary">
-              {useCase.title}
-            </span>
-            <Detail>{useCase.detail}</Detail>
-            <div className="mt-0.5 flex flex-wrap gap-1.5">
-              {useCase.icons.map((icon) => (
-                <span
-                  key={icon.alt}
-                  title={icon.alt}
-                  className="flex h-5 w-5 items-center justify-center border border-line-structure bg-surface-1"
-                >
-                  <Image src={icon.src} alt={icon.alt} width={12} height={12} />
-                </span>
-              ))}
-            </div>
-          </li>
-        ))}
-      </ul>
+    <p className="text-left text-[13px] leading-snug tracking-[-0.2px] text-text-tertiary">
+      {children}
+    </p>
+  );
+}
+
+function AgentsNode({ className }: { className?: string }) {
+  return (
+    <NextLink href={INTEGRATIONS_HREF} className={cn("flex", className)}>
+      <CornerBox hoverStripes className="flex flex-1 flex-col gap-4 p-4">
+        <Eyebrow>Your agents</Eyebrow>
+        <ul className="flex flex-1 flex-col justify-between divide-y divide-line-structure">
+          {USE_CASES.map((useCase) => (
+            <li
+              key={useCase.title}
+              className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0"
+            >
+              <Title>{useCase.title}</Title>
+              <Detail>{useCase.detail}</Detail>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {useCase.icons.map((icon) => (
+                  <span
+                    key={icon.alt}
+                    title={icon.alt}
+                    className="flex h-6 w-6 items-center justify-center border border-line-structure bg-surface-1"
+                  >
+                    <Image
+                      src={icon.src}
+                      alt={icon.alt}
+                      width={14}
+                      height={14}
+                    />
+                  </span>
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </CornerBox>
+    </NextLink>
+  );
+}
+
+function SdkNode({ className }: { className?: string }) {
+  return (
+    <NextLink href={SDK_HREF} className={cn("flex", className)}>
+      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-4">
+        <Eyebrow>Direct</Eyebrow>
+        <Title>SDKs / OpenTelemetry</Title>
+        <Detail>
+          Instrument your agents with the Langfuse SDKs or any OpenTelemetry
+          exporter.
+        </Detail>
+      </CornerBox>
     </NextLink>
   );
 }
 
 function GatewayNode({ className }: { className?: string }) {
   return (
-    <NextLink
-      href={AI_GATEWAY_HREF}
-      className={cn(
-        "flex flex-col gap-2 border border-dashed border-line-cta bg-surface-bg p-3",
-        CARD_HOVER,
-        className,
-      )}
-    >
-      <Wordmark width={86} height={20} className="h-5 w-auto self-start" />
-      <span className="text-[17px] font-medium leading-tight text-text-primary">
-        AI Gateway
-      </span>
-      <Detail>
-        Virtual keys, budgets, provisioning, and governance for every model
-        call. No code changes.
-      </Detail>
-      <Detail>Or bring your own gateway.</Detail>
-      <span className="mt-auto w-fit rounded-[2px] border border-line-structure bg-surface-1 px-1.5 py-0.5 font-sans text-[11px] leading-none text-text-tertiary">
-        Optional
-      </span>
+    <NextLink href={AI_GATEWAY_HREF} className={cn("flex", className)}>
+      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <Wordmark width={69} height={16} className="h-4 w-auto" />
+          <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none tracking-wide text-text-primary">
+            New
+          </span>
+        </div>
+        <Title>AI Gateway</Title>
+        <Detail>
+          Virtual keys, spend visibility, and tracing for every model call. No
+          code changes. Or bring your own gateway.
+        </Detail>
+      </CornerBox>
     </NextLink>
+  );
+}
+
+function LangfuseSection({
+  title,
+  className,
+  children,
+}: {
+  title: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={cn("flex flex-col gap-2", className)}>
+      <Eyebrow>{title}</Eyebrow>
+      {children}
+    </div>
   );
 }
 
 function LangfuseNode({ className }: { className?: string }) {
   return (
     <CornerBox
-      className={cn("flex flex-col gap-4 bg-surface-bg p-3 sm:p-4", className)}
+      className={cn(
+        "flex flex-col divide-y divide-line-structure bg-surface-bg",
+        className,
+      )}
     >
-      <Wordmark width={103} height={24} className="h-6 w-auto self-start" />
-
-      <ul className="grid grid-cols-2 border-l border-t border-line-structure">
-        {FEATURES.map((feature) => (
-          <li
-            key={feature.label}
-            className="border-b border-r border-line-structure"
-          >
-            <NextLink
-              href={feature.href}
-              className={cn(
-                "block px-2.5 py-2 text-[13px] text-text-secondary hover:text-text-primary",
-                CARD_HOVER,
-              )}
-            >
-              {feature.label}
-            </NextLink>
-          </li>
+      <div className="flex flex-1 flex-col gap-3.5 p-4">
+        <Wordmark width={86} height={20} className="h-5 w-auto self-start" />
+        {FEATURE_GROUPS.map((group) => (
+          <LangfuseSection key={group.title} title={group.title}>
+            <ul className="flex flex-wrap gap-1.5">
+              {group.features.map((feature) => (
+                <li key={feature.label}>
+                  <NextLink
+                    href={feature.href}
+                    className={cn(
+                      "block border border-line-structure px-2 py-1 text-[13px] leading-none text-text-secondary hover:text-text-primary",
+                      CARD_HOVER,
+                    )}
+                  >
+                    {feature.label}
+                  </NextLink>
+                </li>
+              ))}
+            </ul>
+          </LangfuseSection>
         ))}
-      </ul>
+      </div>
 
-      <div className="flex flex-col gap-2">
-        <span className="font-mono text-[10px] leading-none text-text-tertiary">
-          agent-native, every feature via
-        </span>
+      <LangfuseSection title="In-app agent" className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+          <Link
+            href="/docs/api-and-data-platform/features/halo"
+            className="flex items-center gap-2 text-[14px] font-medium text-text-primary no-underline hover:text-text-secondary"
+          >
+            <span className="flex h-6 w-6 items-center justify-center border border-line-structure bg-surface-cta-primary">
+              <Bot className="h-3.5 w-3.5" aria-hidden="true" />
+            </span>
+            Halo
+          </Link>
+          <Link
+            href="/docs/api-and-data-platform/features/agent-skill"
+            className="text-[13px] text-text-tertiary no-underline hover:text-text-primary"
+          >
+            or bring your own agent
+          </Link>
+        </div>
+      </LangfuseSection>
+
+      <LangfuseSection title="Every feature via" className="p-4">
         <ul className="grid grid-cols-4 gap-1.5">
           {ACCESS.map((item) => (
             <li key={item.label}>
@@ -262,350 +309,117 @@ function LangfuseNode({ className }: { className?: string }) {
             </li>
           ))}
         </ul>
-      </div>
-
-      <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-        <Link
-          href="/docs/api-and-data-platform/features/halo"
-          className="flex flex-col gap-1.5 border border-line-structure bg-surface-cta-primary p-2.5 no-underline transition-colors hover:border-line-cta"
-        >
-          <span className="font-mono text-[10px] leading-none text-text-secondary">
-            in-app agent
-          </span>
-          <span className="text-[13px] leading-snug text-text-primary">
-            Halo debugs traces, writes evals, and iterates on prompts in
-            Langfuse
-          </span>
-        </Link>
-        <Link
-          href="/docs/api-and-data-platform/features/agent-skill"
-          className="flex flex-col gap-1.5 border border-line-structure bg-surface-1 p-2.5 no-underline transition-colors hover:border-line-cta"
-        >
-          <span className="font-mono text-[10px] leading-none text-text-tertiary">
-            bring your own
-          </span>
-          <span className="text-[13px] leading-snug text-text-secondary">
-            Claude Code, Cursor, Codex, or internal agents
-          </span>
-        </Link>
-      </div>
+      </LangfuseSection>
     </CornerBox>
   );
 }
 
-function WarehouseNode({ className }: { className?: string }) {
+/**
+ * Curved connectors between a single node and the two stacked middle nodes.
+ * The middle column is two equal rows with a 16px gap, so each middle node's
+ * center sits at 25% - 4px and 75% + 4px. Each curve is a stretched SVG with
+ * a non-scaling stroke so it bends to any height without distorting the line.
+ */
+function Curve({ rising, className }: { rising: boolean; className: string }) {
   return (
-    <NextLink
-      href={DATA_PLATFORM_HREF}
-      className={cn(
-        "flex flex-col gap-3 border border-dashed border-line-divider-dash bg-surface-bg p-3",
-        CARD_HOVER,
-        className,
-      )}
-    >
-      <span className="text-[17px] font-medium leading-tight text-text-primary">
-        Export
-      </span>
-      <span className="text-[13px] text-text-secondary">{BLOB_STORAGE}</span>
-      <span className="font-mono text-[10px] leading-none text-text-tertiary">
-        then load into
-      </span>
-      <ul className="-mt-1 flex flex-col divide-y divide-line-structure">
-        {WAREHOUSES.map((warehouse) => (
-          <li
-            key={warehouse}
-            className="py-1.5 text-[13px] text-text-secondary first:pt-0"
-          >
-            {warehouse}
-          </li>
-        ))}
-      </ul>
-    </NextLink>
-  );
-}
-
-function Cell({
-  column,
-  row,
-  className,
-  decorative,
-  children,
-}: {
-  column: string | number;
-  row: string | number;
-  className?: string;
-  decorative?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <div
-      className={cn("flex min-w-0 flex-col", className)}
-      style={{ gridColumn: column, gridRow: row }}
-      aria-hidden={decorative || undefined}
-    >
-      {children}
+    <div className={cn("absolute inset-x-0", className)}>
+      <svg
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        overflow="visible"
+        className="block h-full w-full"
+      >
+        <path
+          d={rising ? "M0 100C50 100 50 0 100 0" : "M0 0C50 0 50 100 100 100"}
+          fill="none"
+          stroke="var(--line-cta)"
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
     </div>
   );
 }
 
-function ModelCallsArrow() {
+function Junction({ side }: { side: "left" | "right" }) {
   return (
-    <div className="relative h-full">
-      <div className="absolute inset-y-0 left-1/2">
-        <VerticalArrow direction="up" />
-      </div>
-      <div className="absolute left-[calc(50%+8px)] top-1/2 -translate-y-1/2">
-        <ArrowLabel>model calls</ArrowLabel>
-      </div>
+    <span
+      aria-hidden="true"
+      className={cn(
+        "absolute top-1/2 h-[5px] w-[5px] -translate-y-1/2 bg-line-cta",
+        side === "left" ? "-left-[2.5px]" : "-right-[2.5px]",
+      )}
+    />
+  );
+}
+
+function SplitConnector() {
+  return (
+    <div className="relative h-full" aria-hidden="true">
+      <Junction side="left" />
+      <Curve rising className="top-[calc(25%-4px)] bottom-1/2" />
+      <Curve rising={false} className="top-1/2 bottom-[calc(25%-4px)]" />
+      <Head className="right-0 top-[calc(25%-8.5px)]" />
+      <Head className="bottom-[calc(25%-8.5px)] right-0" />
+    </div>
+  );
+}
+
+function MergeConnector() {
+  return (
+    <div className="relative h-full" aria-hidden="true">
+      <Curve rising={false} className="top-[calc(25%-4px)] bottom-1/2" />
+      <Curve rising className="top-1/2 bottom-[calc(25%-4px)]" />
+      <Head className="right-0 top-[calc(50%-4.5px)]" />
     </div>
   );
 }
 
 /**
- * Horizontal flow, mirroring the left-to-right data path. Between md and xl
- * the section is a fixed 680px wide, so the 840px desktop layout is zoomed to
- * fit; `zoom` (unlike `transform`) also shrinks the layout box.
+ * Between md and xl the section is a fixed 680px wide, so the 840px desktop
+ * layout is zoomed to fit; `zoom` (unlike `transform`) also shrinks the
+ * layout box.
  */
 function WideDiagram() {
   return (
-    <div
-      className="hidden md:grid md:max-xl:w-[840px] md:max-xl:[zoom:calc(680/840)]"
-      style={{
-        gridTemplateColumns: "188px 28px 152px 28px minmax(0,1fr) 40px 140px",
-        gridTemplateRows: "auto 44px auto auto",
-      }}
-    >
-      <Cell column="1 / 4" row={1}>
-        <UpstreamNode />
-      </Cell>
-      <Cell column={1} row={2} decorative>
-        <ModelCallsArrow />
-      </Cell>
-      <Cell column={3} row={2} decorative>
-        <ModelCallsArrow />
-      </Cell>
-
-      <Cell column={1} row="3 / 5">
-        <UseCasesNode className="flex-1" />
-      </Cell>
-      <Cell column={2} row={3} className="justify-center" decorative>
-        <HorizontalArrow />
-      </Cell>
-      <Cell column={3} row={3}>
-        <GatewayNode className="flex-1" />
-      </Cell>
-      <Cell column={4} row={3} className="justify-center" decorative>
-        <HorizontalArrow />
-      </Cell>
-      <Cell
-        column="2 / 5"
-        row={4}
-        className="justify-end gap-1.5 pb-8 pt-6"
-        decorative
-      >
-        <div className="text-center">
-          <ArrowLabel>direct, SDK / OpenTelemetry</ArrowLabel>
-        </div>
-        <HorizontalArrow />
-      </Cell>
-
-      <Cell column={5} row="1 / 5">
-        <LangfuseNode className="flex-1 justify-between" />
-      </Cell>
-      <Cell
-        column={6}
-        row="1 / 5"
-        className="justify-center gap-1.5"
-        decorative
-      >
-        <div className="text-center">
-          <ArrowLabel>export</ArrowLabel>
-        </div>
-        <HorizontalArrow />
-      </Cell>
-      <Cell column={7} row="1 / 5">
-        <WarehouseNode className="flex-1" />
-      </Cell>
-    </div>
-  );
-}
-
-function DownArrowCell({ label }: { label?: string }) {
-  return (
-    <div className="relative h-full min-h-9">
-      <div className="absolute inset-y-0 left-1/2">
-        <VerticalArrow />
+    <div className="hidden grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)_44px_minmax(0,1.2fr)] md:grid md:max-xl:w-[840px] md:max-xl:[zoom:calc(680/840)]">
+      <AgentsNode />
+      <SplitConnector />
+      <div className="grid grid-rows-2 gap-4">
+        <SdkNode />
+        <GatewayNode />
       </div>
-      {label && (
-        <div className="absolute left-[calc(50%+8px)] top-1/2 -translate-y-1/2">
-          <ArrowLabel>{label}</ArrowLabel>
-        </div>
-      )}
+      <MergeConnector />
+      <LangfuseNode />
     </div>
   );
 }
 
-function ModelCallsSideArrow() {
+function DownArrow() {
   return (
-    <div className="flex h-full flex-col justify-center gap-1.5 px-1">
-      <span className="text-center font-mono text-[10px] leading-tight text-text-tertiary">
-        model calls
-      </span>
-      <HorizontalArrow />
+    <div className="flex h-8 justify-center" aria-hidden="true">
+      <VerticalArrow />
     </div>
   );
 }
 
-/**
- * Phones: the desktop flow rotated 90 degrees so it runs top to bottom. The
- * inference APIs move from the top row to the right column and the direct
- * SDK / OpenTelemetry path from the bottom row to the left column.
- */
 function CompactDiagram() {
   return (
-    <div
-      className="grid md:hidden"
-      style={{
-        gridTemplateColumns: "36px minmax(0,1fr) 52px 36px",
-        gridTemplateRows: "auto 40px auto 40px auto 48px auto",
-      }}
-    >
-      <Cell column="1 / 3" row={1}>
-        <NextLink
-          href={INTEGRATIONS_HREF}
-          className={cn(
-            "flex flex-col gap-2.5 border border-line-structure bg-surface-bg p-3",
-            CARD_HOVER,
-          )}
+    <div className="flex flex-col md:hidden">
+      <AgentsNode />
+      <DownArrow />
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <SdkNode />
+        <span
+          className="text-center font-mono text-[10px] uppercase leading-none tracking-wide text-text-tertiary sm:hidden"
+          aria-hidden="true"
         >
-          <span className="text-[15px] font-medium leading-tight text-text-primary">
-            Your agents and apps
-          </span>
-          <ul className="flex flex-col divide-y divide-line-structure">
-            {USE_CASES.map((useCase) => (
-              <li
-                key={useCase.title}
-                className="flex flex-wrap items-center justify-between gap-1.5 py-2 first:pt-0 last:pb-0"
-              >
-                <span className="text-[13px] font-medium text-text-primary">
-                  {useCase.title}
-                </span>
-                <div className="flex gap-1">
-                  {useCase.icons.slice(0, 3).map((icon) => (
-                    <span
-                      key={icon.alt}
-                      title={icon.alt}
-                      className="flex h-5 w-5 items-center justify-center border border-line-structure bg-surface-1"
-                    >
-                      <Image
-                        src={icon.src}
-                        alt={icon.alt}
-                        width={12}
-                        height={12}
-                      />
-                    </span>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </NextLink>
-      </Cell>
-      <Cell column={3} row={1} decorative>
-        <ModelCallsSideArrow />
-      </Cell>
-      <Cell column={4} row="1 / 4">
-        <div className="flex flex-1 items-center justify-center border border-dashed border-line-divider-dash bg-surface-bg py-3">
-          <span className="whitespace-nowrap text-[13px] font-medium leading-none text-text-primary [writing-mode:vertical-rl]">
-            AI Inference APIs
-          </span>
-        </div>
-      </Cell>
-
-      <Cell column={1} row="2 / 5" decorative>
-        <div className="relative h-full">
-          <div className="absolute inset-y-0 left-1/2">
-            <VerticalArrow />
-          </div>
-          <span className="absolute right-[calc(50%+6px)] top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[10px] leading-none text-text-tertiary [writing-mode:vertical-rl] rotate-180">
-            direct, SDK / OpenTelemetry
-          </span>
-        </div>
-      </Cell>
-      <Cell column={2} row={2} decorative>
-        <DownArrowCell />
-      </Cell>
-      <Cell column={2} row={3}>
-        <NextLink
-          href={AI_GATEWAY_HREF}
-          className={cn(
-            "flex flex-col gap-1.5 border border-dashed border-line-cta bg-surface-bg p-3",
-            CARD_HOVER,
-          )}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <Wordmark width={69} height={16} className="h-4 w-auto" />
-            <span className="rounded-[2px] border border-line-structure bg-surface-1 px-1.5 py-0.5 font-sans text-[11px] leading-none text-text-tertiary">
-              Optional
-            </span>
-          </div>
-          <span className="text-[15px] font-medium leading-tight text-text-primary">
-            AI Gateway
-          </span>
-          <Detail>Virtual keys, budgets, and governance</Detail>
-        </NextLink>
-      </Cell>
-      <Cell column={3} row={3} decorative>
-        <ModelCallsSideArrow />
-      </Cell>
-      <Cell column={2} row={4} decorative>
-        <DownArrowCell />
-      </Cell>
-
-      <Cell column="1 / 5" row={5}>
-        <CornerBox className="flex flex-col gap-3 bg-surface-bg p-3">
-          <Wordmark width={86} height={20} className="h-5 w-auto self-start" />
-          <ul className="grid grid-cols-3 border-l border-t border-line-structure">
-            {FEATURES.map((feature) => (
-              <li
-                key={feature.label}
-                className="border-b border-r border-line-structure"
-              >
-                <NextLink
-                  href={feature.href}
-                  className={cn(
-                    "block px-2 py-1.5 text-[12px] text-text-secondary hover:text-text-primary",
-                    CARD_HOVER,
-                  )}
-                >
-                  {feature.label}
-                </NextLink>
-              </li>
-            ))}
-          </ul>
-        </CornerBox>
-      </Cell>
-
-      <Cell column="1 / 5" row={6} decorative>
-        <DownArrowCell label="export" />
-      </Cell>
-
-      <Cell column="1 / 5" row={7}>
-        <NextLink
-          href={DATA_PLATFORM_HREF}
-          className={cn(
-            "flex flex-col gap-1.5 border border-dashed border-line-divider-dash bg-surface-bg p-3",
-            CARD_HOVER,
-          )}
-        >
-          <span className="text-[15px] font-medium leading-tight text-text-primary">
-            Export
-          </span>
-          <Detail>
-            {BLOB_STORAGE}, then load into {WAREHOUSES.join(", ")}
-          </Detail>
-        </NextLink>
-      </Cell>
+          or
+        </span>
+        <GatewayNode />
+      </div>
+      <DownArrow />
+      <LangfuseNode />
     </div>
   );
 }
@@ -633,14 +447,13 @@ export const PlatformOverview = () => {
         <WideDiagram />
         <CompactDiagram />
         <figcaption className="sr-only">
-          Personal agents, custom agents, and copilots call inference APIs such
-          as OpenAI and Anthropic, either directly or through an optional
-          gateway such as the Langfuse AI Gateway. Calls reach Langfuse through
-          the gateway or directly via SDKs and OpenTelemetry. Langfuse provides
-          tracing, prompts, evals, datasets, experiments, and dashboards, all
-          available via MCP, CLI, API, and SDKs, and exports data to blob
-          storage (S3, GCS, or Azure), ready to load into warehouses such as
-          ClickHouse, Snowflake, BigQuery, and Databricks.
+          Personal agents, custom agents, and copilots reach Langfuse either
+          directly, instrumented with the Langfuse SDKs or any OpenTelemetry
+          exporter, or through the Langfuse AI Gateway or your own gateway. In
+          Langfuse you observe with tracing, dashboards, and alerts, manage
+          prompts and skills, and evaluate with evals, datasets, and
+          experiments. The in-app agent Halo, or your own agent, works with this
+          data, and every feature is available via MCP, CLI, API, and SDKs.
         </figcaption>
       </figure>
     </HomeSection>
