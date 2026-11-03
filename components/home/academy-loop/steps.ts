@@ -1,4 +1,4 @@
-// Step names, phases, and one-liners mirror /academy/ai-engineering-loop.
+// Step names and phases mirror /academy/ai-engineering-loop.
 // Keep them in sync with `components/academy/LoopDiagram.tsx`.
 
 export type LoopStepId =
@@ -17,17 +17,12 @@ export type LoopStep = {
   href: string;
 };
 
-export const LOOP_PHASES: Record<
-  LoopPhaseId,
-  { label: string; title: string }
-> = {
+export const LOOP_PHASES: Record<LoopPhaseId, { label: string }> = {
   production: {
     label: "Production",
-    title: "Understand what's happening in production",
   },
   development: {
     label: "Development",
-    title: "Improve systematically during development",
   },
 };
 

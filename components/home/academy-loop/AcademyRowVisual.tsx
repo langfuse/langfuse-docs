@@ -123,12 +123,9 @@ function PhaseBracket({
   const p = LOOP_PHASES[phase];
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <div className="flex flex-col gap-0.5 px-1">
-        <span className="text-[13px] font-medium text-text-primary">
-          <Highlight>{p.label}</Highlight>
-        </span>
-        <MonoLabel>{p.title.toLowerCase()}</MonoLabel>
-      </div>
+      <span className="px-1 text-[13px] font-medium text-text-primary">
+        <Highlight>{p.label}</Highlight>
+      </span>
       <div
         className="h-2 border-x border-t border-line-structure"
         aria-hidden
