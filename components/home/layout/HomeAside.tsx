@@ -16,10 +16,16 @@ type TocItem = { id: string; title: string; depth: number; url: string };
 // ─── Static section list for the homepage ────────────────────────────────────
 
 const HOME_SECTIONS: TocItem[] = [
+  {
+    id: "every-ai-call",
+    title: "Every AI call",
+    depth: 2,
+    url: "#every-ai-call",
+  },
   { id: "overview", title: "Overview", depth: 2, url: "#overview" },
   {
     id: "llm-engineering-loop",
-    title: "AI engineering loop",
+    title: "Academy",
     depth: 2,
     url: "#llm-engineering-loop",
   },

@@ -257,37 +257,27 @@ export function GetStartedSection() {
   return (
     <HomeSection id="get-started" className="pt-[120px]">
       <div className="flex flex-col gap-2.5">
-        <Text className="text-left hidden md:block">
-          Get Started <span className="text-text-tertiary mx-1">—</span>{" "}
-          <span className="text-text-tertiary">
-            Free tier:{" "}
-            <span className="text-primary">50k observations/month</span>. No
-            credit card required.
-          </span>
-        </Text>
-
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-6">
-          <Heading className="text-primary text-left" size="large">
-            <TextHighlight
-              highlightClassName="mix-blend-multiply"
-              className="max-md:pr-1.5 xl:pr-3"
-            >
-              Start improving
-            </TextHighlight>
-            <TextHighlight highlightClassName="mix-blend-multiply">
-              your agents
-            </TextHighlight>
-            <br />
-            in under 5 minutes.
-          </Heading>
-          <Text className="text-left md:hidden">
-            Get Started <span className="text-text-tertiary mx-1">—</span>{" "}
-            <span className="text-text-tertiary">
+          <div className="flex flex-col gap-4">
+            <Heading className="text-primary text-left" size="large">
+              <TextHighlight
+                highlightClassName="mix-blend-multiply"
+                className="max-md:pr-1.5 xl:pr-3"
+              >
+                Start improving
+              </TextHighlight>
+              <TextHighlight highlightClassName="mix-blend-multiply">
+                your agents
+              </TextHighlight>
+              <br />
+              in under 5 minutes.
+            </Heading>
+            <Text className="text-left">
               Free tier:{" "}
               <span className="text-primary">50k observations/month</span>. No
               credit card required.
-            </span>
-          </Text>
+            </Text>
+          </div>
           <div className="flex md:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px] mt-2">
             <Button
               variant="primary"
