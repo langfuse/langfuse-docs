@@ -94,7 +94,7 @@ export const Author = (props: { author: string; hideLastName?: boolean }) => {
             src={author.image}
             width={40}
             height={40}
-            className="rounded-full"
+            className="size-10 shrink-0 rounded-full object-cover"
             alt={`Picture ${author.name}`}
           />
           <span
@@ -127,7 +127,7 @@ export const AuthorAvatar = (props: { author: string }) => {
             src={author.image}
             width={40}
             height={40}
-            className="rounded-full border-2 border-background"
+            className="size-10 rounded-full border-2 border-background object-cover"
             alt={`Picture ${author.name}`}
           />
         </div>
@@ -154,7 +154,7 @@ export const AuthorHoverCardContent = ({
             src={author.image}
             width={32}
             height={32}
-            className="rounded-full border border-line-structure shrink-0 my-0"
+            className="size-8 rounded-full border border-line-structure shrink-0 my-0 object-cover"
             alt={`Picture ${author.name}`}
           />
           <div className="flex flex-col gap-0.5 min-w-0">
