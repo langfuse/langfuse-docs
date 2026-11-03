@@ -26,8 +26,11 @@ Export the key and your region's gateway host in your shell. The setup for each 
 
 ```sh
 export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
-export LANGFUSE_GATEWAY_HOST="https://gateway.cloud.langfuse.com" # 🇪🇺 EU region
-# Other regions: 🇺🇸 US: https://gateway.us.cloud.langfuse.com, 🇯🇵 Japan: https://gateway.jp.cloud.langfuse.com, ⚕️ HIPAA: https://gateway.hipaa.cloud.langfuse.com
+# 🇪🇺 EU region
+export LANGFUSE_GATEWAY_HOST="https://gateway.cloud.langfuse.com"
+# 🇺🇸 US region: https://gateway.us.cloud.langfuse.com
+# 🇯🇵 Japan region: https://gateway.jp.cloud.langfuse.com
+# ⚕️ HIPAA region: https://gateway.hipaa.cloud.langfuse.com
 # Self-hosted: the gateway URL of your deployment
 ```
 
@@ -488,9 +491,9 @@ The response is OpenAI's own response. Its headers include `langfuse-trace-id`, 
 
 Replace `<model-id>` with the model ID you picked in the previous step.
 
-### See your trace in Langfuse [#view-the-trace]
+### See your trace in Langfuse (optional) [#view-the-trace]
 
-This step needs access to the organization's ingestion project. Open the ingestion project in Langfuse and go to **Tracing**.
+Only owners, admins, and members who were added to the organization's ingestion project can see gateway traces. If you have access, open the ingestion project in Langfuse and go to **Tracing**.
 
 What's recorded depends on the organization's [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes).
 

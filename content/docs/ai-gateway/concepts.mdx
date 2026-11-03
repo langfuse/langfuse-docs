@@ -1,7 +1,7 @@
 ---
 title: Concepts
 seoTitle: "How the Langfuse AI Gateway works (beta)"
-description: How the Langfuse AI Gateway relays model calls, which keys and credentials are involved, how a request reaches a model, and how each call becomes a Langfuse trace.
+description: How the Langfuse AI Gateway routes model calls, which keys and credentials are involved, how a request reaches a model, and how each call becomes a Langfuse trace.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -27,11 +27,11 @@ On self-hosted Langfuse, the gateway is a separate service that you deploy next 
 
 The gateway uses three types of keys. Clients hold user keys or service account keys, and only the gateway holds the provider credentials:
 
-| Key type                                                                                 | Origin         | Scope                                                                    | Provided by                        |
-| ---------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------ | ---------------------------------- |
-| [Provider credential](/docs/ai-gateway/get-started/admin-setup#add-provider-connections) | Model provider | Scoped to organization.                                                  | Owner/admin, once per organization |
-| [User key](/docs/ai-gateway/features/api-keys#key-types)                                 | AI Gateway     | Scoped to one user. Stops working when the user leaves the organization. | User                               |
-| [Service account key](/docs/ai-gateway/features/api-keys#key-types)                      | AI Gateway     | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin                        |
+| Key type                                                                                 | Origin                                          | Scope                                                                    | Provided by |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ | ----------- |
+| [Provider credential](/docs/ai-gateway/get-started/admin-setup#add-provider-connections) | Model provider, for example OpenAI or Anthropic | Held only by the gateway. Clients never see it.                          | Owner/admin |
+| [User key](/docs/ai-gateway/features/api-keys#key-types)                                 | AI Gateway                                      | Scoped to one user. Stops working when the user leaves the organization. | User        |
+| [Service account key](/docs/ai-gateway/features/api-keys#key-types)                      | AI Gateway                                      | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin |
 
 Because clients only hold gateway keys, you can rotate a provider key without changing any client, and revoke one person's access without affecting anyone else.
 
@@ -39,9 +39,13 @@ The gateway calls the provider with your own credentials, so the provider bills 
 
 ### Model and key routing [#routing]
 
-An organization can add several provider credentials, for example an OpenAI key for production, a second OpenAI key for testing, and an Anthropic key.
+An organization can add several provider credentials, including more than one per provider.
 
-**The URL path decides the provider.** Clients call the gateway with the same API they would use with the provider directly. Requests to `/openai/v1` use the OpenAI Responses or Chat Completions API. Requests to `/anthropic/v1` use the Anthropic Messages API.
+**The URL path decides the API format.** Clients call the gateway with the same API they would use with the provider directly:
+
+- `/openai/v1/responses` uses the OpenAI Responses API.
+- `/openai/v1/chat/completions` uses the OpenAI Chat Completions API.
+- `/anthropic/v1/messages` uses the Anthropic Messages API.
 
 <Callout type="info">
   The gateway doesn't convert one API format into the other, so a client that
