@@ -17,7 +17,27 @@ This is a deep dive into ClickHouse configuration. Follow one of the [deployment
 It is optimized for high write throughput and fast analytical queries.
 This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when (optionally) bringing your own ClickHouse.
 
-Langfuse v3 supports ClickHouse versions >= 24.3. Langfuse v4 requires ClickHouse >= 25.12 (26.4 recommended) for lightweight updates, the JSON type, and full-text search — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
+## Supported versions [#supported-versions]
+
+Each Langfuse major release sets a minimum ClickHouse version and stays compatible with it for the whole major release.
+Minor and patch releases never raise the minimum, so you can upgrade Langfuse within a major release without upgrading ClickHouse.
+
+| Langfuse major release | Minimum ClickHouse version |
+| ---------------------- | -------------------------- |
+| v4                     | 25.12                      |
+| v3                     | 24.3                       |
+
+Langfuse v4 needs ClickHouse 25.12 for lightweight updates, the JSON type, and full-text search. The [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1) explains when to upgrade ClickHouse.
+
+Compatibility means that Langfuse works correctly on the minimum version and does not rely on ClickHouse features or settings introduced later.
+Newer ClickHouse versions can perform better, and some optional features require a newer version; their docs name the version they need.
+
+<Callout type="warning">
+
+**The minimum version is a compatibility guarantee, not a security recommendation.** ClickHouse ships security patches only for its most recent releases, so the minimum version of a Langfuse major release can stop receiving patches while that major release is still current.
+You are responsible for the ClickHouse version you run. We strongly recommend a version that the [ClickHouse security policy](https://github.com/ClickHouse/ClickHouse/security/policy) lists as supported, such as the latest LTS release.
+
+</Callout>
 
 ## Official and Community Support [#support]
 
