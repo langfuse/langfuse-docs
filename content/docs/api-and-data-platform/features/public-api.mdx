@@ -424,6 +424,12 @@ Instead of offset-based page numbers, the v2 API paginates with a cursor for con
 3. Pass this cursor via the `cursor` parameter in your next request to continue where you left off.
 4. Repeat until no `cursor` is returned (or `meta.cursor` is `null`) — you've reached the end.
 
+<Callout type="info">
+  `limit` is a maximum. A page may contain fewer observations, including none,
+  while `meta.cursor` is present. Continue using the cursor even when `data` is
+  empty; the page length does not indicate completion.
+</Callout>
+
 Results are always sorted by `startTime` descending (newest first).
 
 On Langfuse Cloud, requests count toward the general per-organization API rate limit (see the [API limits FAQ](/faq/all/api-limits)). Self-hosted instances have no enforced rate limits.

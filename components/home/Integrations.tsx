@@ -127,7 +127,7 @@ const agentFrameworksGroup = {
       href: "/integrations/frameworks/langchain",
       icon: (
         <Image
-          src="/images/integrations/langchain_icon.png"
+          src="/images/integrations/langchain_icon.svg"
           alt=""
           width={18}
           height={18}
@@ -139,7 +139,7 @@ const agentFrameworksGroup = {
       href: "/integrations/frameworks/vercel-ai-sdk",
       icon: (
         <Image
-          src="/images/integrations/vercel_ai_sdk_icon.png"
+          src="/images/integrations/vercel_ai_sdk_icon.svg"
           alt=""
           width={18}
           height={18}
@@ -151,7 +151,7 @@ const agentFrameworksGroup = {
       href: "/integrations/frameworks/litellm-sdk",
       icon: (
         <Image
-          src="/images/integrations/litellm_icon.png"
+          src="/images/integrations/litellm_icon.svg"
           alt=""
           width={18}
           height={18}
@@ -188,6 +188,7 @@ const agentFrameworksGroup = {
       icon: (
         <Image
           src="/images/integrations/crewai_icon.svg"
+          className="dark:brightness-0 dark:invert"
           alt=""
           width={18}
           height={18}
@@ -218,6 +219,7 @@ const modelProvidersGroup = {
       icon: (
         <Image
           src="/images/integrations/openai_icon.svg"
+          className="dark:brightness-0 dark:invert"
           alt=""
           width={18}
           height={18}
@@ -241,7 +243,7 @@ const modelProvidersGroup = {
       href: "/integrations/model-providers/amazon-bedrock",
       icon: (
         <Image
-          src="/images/integrations/bedrock_icon.png"
+          src="/images/integrations/bedrock_icon.svg"
           alt=""
           width={18}
           height={18}
@@ -313,7 +315,7 @@ const modelProvidersGroup = {
       href: "/integrations/model-providers/groq",
       icon: (
         <Image
-          src="/images/integrations/groq_icon.png"
+          src="/images/integrations/groq_icon.svg"
           alt=""
           width={18}
           height={18}
@@ -330,12 +332,12 @@ const marqueeRow1: MarqueeItem[] = [
   {
     label: "Claude Code",
     href: "/integrations/developer-tools/claude-code",
-    icon: "/images/integrations/anthropic_icon.png",
+    icon: "/images/integrations/claude_icon.png",
   },
   {
     label: "LiteLLM (Proxy/Gateway)",
     href: "/integrations/gateways/litellm",
-    icon: "/images/integrations/litellm_icon.png",
+    icon: "/images/integrations/litellm_icon.svg",
   },
   {
     label: "OpenClaw",
@@ -350,7 +352,7 @@ const marqueeRow1: MarqueeItem[] = [
   {
     label: "LangChain DeepAgents",
     href: "/integrations/frameworks/langchain-deepagents",
-    icon: "/images/integrations/langchain_icon.png",
+    icon: "/images/integrations/deepagents_icon.svg",
   },
   {
     label: "OpenWebUI",
@@ -413,7 +415,7 @@ const marqueeRow2: MarqueeItem[] = [
   {
     label: "Amazon AgentCore",
     href: "/integrations/frameworks/amazon-agentcore",
-    icon: "/images/integrations/bedrock_icon.png",
+    icon: "/images/integrations/amazon_agentcore_icon.svg",
   },
   {
     label: "Strands",
@@ -428,7 +430,7 @@ const marqueeRow2: MarqueeItem[] = [
   {
     label: "Agno Agents",
     href: "/integrations/frameworks/agno-agents",
-    icon: "/images/integrations/agno_icon.jpg",
+    icon: "/images/integrations/agno_icon.svg",
   },
   {
     label: "Temporal",
@@ -443,12 +445,12 @@ const marqueeRow2: MarqueeItem[] = [
   {
     label: "Mastra",
     href: "/integrations/frameworks/mastra",
-    icon: "/images/integrations/mastra_icon.png",
+    icon: "/images/integrations/mastra_icon.svg",
   },
   {
     label: "Claude Agent SDK (JS)",
     href: "/integrations/frameworks/claude-agent-sdk-js",
-    icon: "/images/integrations/anthropic_icon.png",
+    icon: "/images/integrations/claude_icon.png",
   },
   {
     label: "Promptfoo",
@@ -458,7 +460,7 @@ const marqueeRow2: MarqueeItem[] = [
   {
     label: "Microsoft Agent Framework",
     href: "/integrations/frameworks/microsoft-agent-framework",
-    icon: "/images/integrations/microsoft_icon.svg",
+    icon: "/images/integrations/microsoft_agent_framework_icon.svg",
   },
   {
     label: "Google Vertex AI",
@@ -557,7 +559,21 @@ function MarqueeRow({
           <IntegrationLabel
             key={`${item.label}-${i}`}
             href={item.href}
-            icon={<Image src={item.icon} alt="" width={18} height={18} />}
+            icon={
+              <Image
+                src={item.icon}
+                alt=""
+                width={18}
+                height={18}
+                className={cn(
+                  "object-contain",
+                  [
+                    "/images/integrations/openrouter_icon.svg",
+                    "/images/integrations/openai_icon.svg",
+                  ].includes(item.icon) && "dark:brightness-0 dark:invert",
+                )}
+              />
+            }
             label={item.label}
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}

@@ -21,8 +21,22 @@ tags: [ai-gateway]
 - **Generic names.** Generations are named after the API format (`anthropic.messages`, `openai.responses`), and trace names default to the agent name.
 - **Duplicate metadata.** `attributes.user.id`, `attributes.session.id`, and `attributes.langfuse.trace.*` appear in metadata next to the canonical fields.
 - **OpenCode:** title calls can't be told apart from agent steps, and subagents get a separate session.
-- **Limits:** 16 MiB request body, 600 seconds per call, and 120 seconds without progress. There is no per-key or per-organization rate limit. Self-hosted deployments can change these limits, see [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway#configuration).
+- **Limits:** 16 MiB request body, 600 seconds per call, and 120 seconds without progress. On Langfuse Cloud, requests are also [rate limited per organization](#rate-limits-on-langfuse-cloud). Self-hosted deployments can change the request limits and have no rate limits, see [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway#configuration).
 - **No retries, fallbacks, or caching.**
 - **Not served:** websockets and realtime APIs.
 - **Decision models aren't supported.** The gateway doesn't serve the OpenAI Decisions API (`/v1/decisions`) or TypeSafe's System One API, and it has no TypeSafe provider credential. Requests to these endpoints return `404`. [Decision model evaluators](/docs/evaluation/evaluation-methods/decision-models) keep using their own [LLM connection](/docs/administration/llm-connection). Structured outputs (`response_format`, JSON schemas) on Chat Completions and Responses are passed through as usual.
 - **Untested:** Anthropic server tools (web search and fetch) and interactive Codex `/compact`.
+
+## Rate limits on Langfuse Cloud [#rate-limits-on-langfuse-cloud]
+
+During the beta, each organization has two per-minute limits on Langfuse Cloud: the number of requests, and the total size of request bodies. They apply across all keys and projects of the organization.
+
+| Plan                  | Requests per minute | Request bodies per minute |
+| --------------------- | ------------------- | ------------------------- |
+| Hobby                 | 100                 | 64 MiB                    |
+| Core                  | 500                 | 256 MiB                   |
+| Pro, Team, Enterprise | 3,000               | 2 GiB                     |
+
+Over a limit, the gateway returns `429` with a `Retry-After` header, in the provider's usual error format, so SDKs and coding agents back off as they do for provider rate limits. The error message says the limit comes from Langfuse.
+
+These limits are subject to change during the beta. If you need higher limits, [contact us](/support).

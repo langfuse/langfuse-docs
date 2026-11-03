@@ -24,7 +24,7 @@ description: Set threshold-based alerts on your LLM application metrics and rout
 
 Alerts allow you to catch cost and quality issues before they impact your users.
 
-You can receive notifications over Slack, trigger GitHub Actions, or call your own Webhooks.
+You can receive notifications over Slack, page your on-call team in [PagerDuty](/integrations/other/pagerduty), trigger GitHub Actions, or call your own Webhooks.
 
 <Frame fullWidth>
   <Image
@@ -94,7 +94,7 @@ Choose special handling for edge cases when data is missing or when an alert sta
 
 ### Select a notification channel [#notification-channel]
 
-Select one or more automations from the **Automations** panel. When an alert fires, Langfuse publishes the event to each selected automation, which dispatches your configured actions (Slack message, webhook, etc.).
+Select one or more automations from the **Automations** panel. When an alert fires, Langfuse publishes the event to each selected automation, which dispatches your configured actions (Slack message, PagerDuty alert, webhook, etc.).
 
 Members can select existing alert automations in this project. If you need a new notification channel, an Admin or Owner must [create an alert automation](#automation-setup) before you can link it here.
 
@@ -134,13 +134,14 @@ To permanently remove an alert, open its detail page, click the trash icon, and 
 
 Automations route alert notifications to external systems. Each automation pairs a **trigger** (an alert severity change) with an **action** (a notification sent to an external system).
 
-Three notification channels are available:
+Four notification channels are available:
 
-| Action             | What it does                                                |
-| ------------------ | ----------------------------------------------------------- |
-| **Slack**          | Posts a formatted alert message to a Slack channel          |
-| **Webhook**        | HTTP POST to your endpoint with an HMAC-signed JSON payload |
-| **GitHub Actions** | Fires a `workflow_dispatch` event on a GitHub repository    |
+| Action             | What it does                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| **Slack**          | Posts a formatted alert message to a Slack channel                                                |
+| **PagerDuty**      | Triggers a [PagerDuty](/integrations/other/pagerduty) alert on breach and resolves it on recovery |
+| **Webhook**        | HTTP POST to your endpoint with an HMAC-signed JSON payload                                       |
+| **GitHub Actions** | Fires a `workflow_dispatch` event on a GitHub repository                                          |
 
 If you would like to see another channel added, please add to the [GitHub discussions](#gh-discussion).
 
@@ -150,8 +151,8 @@ Requires the **Admin** or **Owner** role in the project.
 
 1. Navigate to [**Automations**](https://cloud.langfuse.com/project/~/automations) and click **Create Automation**.
 2. Select event source **Alert**.
-3. Select an action type (**Slack**, **Webhook**, or **GitHub Actions**).
-4. Configure the action: provide a Slack channel, a webhook endpoint URL, or a GitHub repository dispatch URL, event type, and personal access token.
+3. Select an action type (**Slack**, **PagerDuty**, **Webhook**, or **GitHub Actions**).
+4. Configure the action: provide a Slack channel, a PagerDuty routing key and region, a webhook endpoint URL, or a GitHub repository dispatch URL, event type, and personal access token.
 5. Give the automation a name and click **Save**. It will appear in the [**Automations** panel](#notification-channel) when you create or edit alerts.
 
 ### Link an alert to an automation

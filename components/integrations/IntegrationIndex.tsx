@@ -51,7 +51,7 @@ const categoryConfig: Record<
         route: "/integrations/frameworks/langchain",
         frontMatter: {
           title: "LangChain & LangGraph",
-          logo: "/images/integrations/langchain_icon.png",
+          logo: "/images/integrations/langchain_icon.svg",
         },
         title: "LangChain & LangGraph",
       },
@@ -68,7 +68,7 @@ const categoryConfig: Record<
         route: "/integrations/frameworks/vercel-ai-sdk",
         frontMatter: {
           title: "Vercel AI SDK",
-          logo: "/images/integrations/vercel_ai_sdk_icon.png",
+          logo: "/images/integrations/vercel_ai_sdk_icon.svg",
           logoAppearance: "multicolor",
         },
         title: "Vercel AI SDK",
