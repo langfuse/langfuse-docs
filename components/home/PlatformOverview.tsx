@@ -197,7 +197,6 @@ function SdkNode({ className }: { className?: string }) {
   return (
     <NextLink href={SDK_HREF} className={cn("flex", className)}>
       <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-        <Eyebrow>Direct</Eyebrow>
         <Title>SDKs / OpenTelemetry</Title>
         <Detail>
           Instrument your agents with the Langfuse SDKs or any OpenTelemetry
