@@ -102,6 +102,10 @@ Once production tracing is in place, we check for two things:
   ![Running evaluator scores for the docs chatbot including disagreement, relevance, cursing, and user intent](/images/blog/2026-07-16-steal-our-eval-setup/running-evaluator-scores.png)
 </Frame>
 
+<Callout type="info">
+  This monitoring process is now also supported by [Jev-based evaluators](/docs/evaluation/evaluation-methods/decision-models) (decision model evaluators in Langfuse). Use the [User Conversation Signal](/blog/2026-09-23-catching-conversation-signals-in-langfuse) template in the [evaluator gallery](https://cloud.langfuse.com/project/~/evals). For how these production signals show you which traces to review, see [signal detection](/academy/monitoring#metrics-and-signals) in the Langfuse Academy.
+</Callout>
+
 ### What counts as interesting?
 
 Instead of reviewing every conversation by hand, we're monitoring traces for user signals that tell us to take a closer look. A few things reliably mark a chatbot conversation as worth a closer look:

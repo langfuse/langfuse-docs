@@ -425,9 +425,6 @@ while processed < TOTAL_TRACES:
         to_start_time=five_am_today,
     )
     traces_batch = response.data
-    if not traces_batch:
-        break
-
     cursor = getattr(response.meta, "cursor", None)
 
     for trace in traces_batch:

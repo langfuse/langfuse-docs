@@ -1,0 +1,54 @@
+---
+date: 2026-11-03
+title: Continue observations queries that would otherwise time out
+description: Short or empty pages can include a continuation cursor so expensive observations queries can make progress across requests.
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're improving Observations API v2 reliability so the small percentage of queries that currently time out can make progress across multiple requests.
+
+A page may contain fewer observations than `limit`, including none, while `meta.cursor` is present. Keep requesting pages until `meta.cursor` is absent.
+
+With the [Python SDK](/docs/observability/sdk/overview) configured for your project, this fetches generation observations from the last seven days:
+
+```python
+from datetime import datetime, timedelta, timezone
+from langfuse import get_client
+
+langfuse = get_client()
+end_time = datetime.now(timezone.utc)
+start_time = end_time - timedelta(days=7)
+cursor = None
+
+while True:
+    page = langfuse.api.observations.get_many(
+        type="GENERATION",
+        from_start_time=start_time,
+        to_start_time=end_time,
+        limit=100,
+        cursor=cursor,
+    )
+    for observation in page.data:
+        print(observation.id)
+
+    cursor = getattr(page.meta, "cursor", None)
+    if not cursor:
+        break
+```
+
+<Callout type="warning">
+Some of our documentation examples incorrectly stopped pagination when a page was empty. If you copied one of those examples, update your loop to check `meta.cursor` instead of the number of returned observations. Otherwise, it may stop before retrieving all results.
+</Callout>
+
+Updated examples:
+
+- Data migration: [English](/guides/cookbook/example_data_migration) and [Japanese](/guides/cookbook/example_data_migration-jp).
+- Evaluation workflows: [external pipelines](/guides/cookbook/example_external_evaluation_pipelines), [RAGAS](/resources/engineering/evaluation-of-rag-with-ragas), and [golden datasets](/resources/engineering/golden-dataset-evaluation).
+- Intent classification: [pipeline cookbook](/guides/cookbook/example_intent_classification_pipeline) and [chatbot analytics](/resources/engineering/chatbot-intent-analytics).
+- [Deleting a session's traces](/docs/administration/data-deletion#delete-session-traces).
+
+See the [cursor pagination guide](/docs/api-and-data-platform/features/public-api#observations-pagination) for the response contract.
