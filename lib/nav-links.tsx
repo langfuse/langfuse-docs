@@ -30,7 +30,7 @@ export type NavPanelLink = {
 export const productLinks: NavPanelLink[] = [
   { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
-    name: "LLM Observability",
+    name: "AI Observability",
     href: "/docs/observability/overview",
     icon: Activity,
   },
