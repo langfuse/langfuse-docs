@@ -24,22 +24,21 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
 
-### Export the key [#export-the-key]
+### Export the gateway key [#export-the-key]
 
-Add the gateway key to your shell profile, for example `~/.zshrc` or `~/.bashrc`:
+Codex reads the key from this variable when it starts:
 
 ```sh
-export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+ export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-Then reload your shell, for example with `source ~/.zshrc`.
+The leading space keeps the key out of your shell history in most shells. To keep the key across sessions, add the line to your shell profile, for example `~/.zshrc` or `~/.bashrc`.
 
 ### Add the gateway provider [#add-the-provider]
 
-Add a provider to `~/.codex/config.toml`:
+Add this to the top of `~/.codex/config.toml`, before any `[table]` section, so `model_provider` stays a top-level key:
 
 ```toml filename="~/.codex/config.toml"
-model = "<model-id>"               # an OpenAI model ID from /models
 model_provider = "langfuse"
 
 [model_providers.langfuse]
@@ -47,20 +46,17 @@ name = "Langfuse AI Gateway"
 base_url = "https://gateway.cloud.langfuse.com/openai/v1"
 env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
 wire_api = "responses"
-http_headers = { "langfuse-tags" = "codex,<team>", "langfuse-environment" = "local" }   # optional
 ```
 
-Pick the model ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). For optional headers, see [request headers](/docs/ai-gateway/features/tracing#request-headers).
+To pick a model, set `model` to an ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). To add tags or other headers, use `http_headers`. See [request headers](/docs/ai-gateway/features/tracing#request-headers).
 
-### Verify [#verify]
-
-Run a prompt:
+### Start Codex [#start-codex]
 
 ```sh
-codex exec "Reply with exactly: PONG"
+codex
 ```
 
-If Codex replies, it runs through the gateway.
+Each turn appears in Langfuse as one trace.
 
 </Steps>
 
