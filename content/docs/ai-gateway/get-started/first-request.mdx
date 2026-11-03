@@ -140,15 +140,13 @@ _This example uses the EU host. If your organization is in another region, use y
 
 _**Requires** Codex CLI 0.157 or later and an `OPENAI` provider credential._
 
-Store the gateway key in `~/.codex/.env` (`$CODEX_HOME/.env` if you set `CODEX_HOME`). Codex loads this file every time it starts, so you don't need to export the key in every shell:
+Export the gateway key:
 
 ```sh
-mkdir -p -m 700 ~/.codex
-touch ~/.codex/.env && chmod 600 ~/.codex/.env
-echo "LANGFUSE_GATEWAY_KEY=<your-gateway-key>" >> ~/.codex/.env
+ export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-Add the gateway as a provider in `~/.codex/config.toml`. `env_key` reads the key that Codex loaded from `.env`:
+Add this to `~/.codex/config.toml` (`$CODEX_HOME/config.toml` if you set `CODEX_HOME`). Put `model` and `model_provider` next to your other top-level keys, before any `[table]` section, and the `[model_providers.langfuse]` table after them:
 
 ```toml filename="~/.codex/config.toml"
 model = "<model-id>"               # an OpenAI model ID
