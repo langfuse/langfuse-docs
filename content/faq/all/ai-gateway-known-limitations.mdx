@@ -17,7 +17,7 @@ tags: [ai-gateway]
   - Failed and cancelled calls on the OpenAI route get estimated usage and cost. Long cancelled Codex calls showed about $6 each.
   - OpenAI `cache_write_tokens` are priced at $0.
   - Anthropic 1-hour cache writes are priced at the 5-minute rate, 37.5% too low.
-- **One trace per model call by default** for Claude Code, OpenCode, and Pi. Only Codex groups a turn into one trace out of the box. Use the Sessions view, or set up turn grouping for [Claude Code](/docs/ai-gateway/integrations/claude-code#turn-grouping), [OpenCode](/docs/ai-gateway/integrations/opencode#turn-grouping), or [Pi](/docs/ai-gateway/integrations/pi#turn-grouping).
+- **One trace per model call by default** for Claude Code, OpenCode, and Pi. Only Codex groups a turn into one trace out of the box. Use the Sessions view, or set up turn grouping for [Claude Code](/integrations/developer-tools/claude-code-gateway#turn-grouping), [OpenCode](/integrations/developer-tools/opencode-gateway#turn-grouping), or [Pi](/integrations/developer-tools/pi-agent-gateway#turn-grouping).
 - **Generic names.** Generations are named after the API format (`anthropic.messages`, `openai.responses`), and trace names default to the agent name.
 - **Duplicate metadata.** `attributes.user.id`, `attributes.session.id`, and `attributes.langfuse.trace.*` appear in metadata next to the canonical fields.
 - **OpenCode:** title calls can't be told apart from agent steps, and subagents get a separate session.
