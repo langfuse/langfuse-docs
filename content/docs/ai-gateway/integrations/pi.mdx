@@ -1,19 +1,19 @@
 ---
-title: pi
-seoTitle: "Trace the pi coding agent with the Langfuse AI Gateway (beta)"
-description: Route the pi coding agent through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
+title: Pi
+seoTitle: "Trace the Pi coding agent with the Langfuse AI Gateway (beta)"
+description: Route the Pi coding agent through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
-# pi
+# Pi
 
 <AiGatewayBetaCallout />
 
-**Requires** pi 1.5.0 or later and an `ANTHROPIC` and/or `OPENAI` provider credential.
+**Requires** Pi 1.5.0 or later and an `ANTHROPIC` and/or `OPENAI` provider credential.
 
 <Callout type="info">
-  For tracing pi without the gateway, see the [Pi Agent integration](/integrations/developer-tools/pi-agent).
+  For tracing Pi without the gateway, see the [Pi Agent integration](/integrations/developer-tools/pi-agent).
 </Callout>
 
 ## Setup [#setup]
@@ -24,15 +24,15 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
 
-Export it in the shell you start pi from:
+Export it in the shell you start Pi from:
 
 ```sh
 export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-### Install pi [#install]
+### Install Pi [#install]
 
-Install pi from the `@earendil-works/pi-coding-agent` package. The older `@mariozechner/…` package is deprecated.
+Install Pi from the `@earendil-works/pi-coding-agent` package. The older `@mariozechner/…` package is deprecated.
 
 ```sh
 npm install -g @earendil-works/pi-coding-agent
@@ -91,11 +91,11 @@ pi --provider langfuse-anthropic --model <anthropic-model-id>
 pi -p --provider langfuse-openai --model <openai-model-id> "Summarize README.md"
 ```
 
-- **Sessions on the Anthropic route require `"compat": { "sendSessionAffinityHeaders": true }`.** Without it, pi sends no session ID to Anthropic and the generations have no session. The OpenAI route always sends the session ID.
+- **Sessions on the Anthropic route require `"compat": { "sendSessionAffinityHeaders": true }`.** Without it, Pi sends no session ID to Anthropic and the generations have no session. The OpenAI route always sends the session ID.
 - The Anthropic `baseUrl` has **no** `/v1`. The OpenAI `baseUrl` **includes** `/v1`.
 - Use `"api": "openai-responses"`. `openai-completions` uses [Chat Completions](/docs/ai-gateway/features/rest-api#routes), which the gateway serves but which has not been verified with pi.
 - Replace the model IDs with IDs from [`/models`](/docs/ai-gateway/get-started/first-request#list-models), and set `reasoning`, `contextWindow`, and `maxTokens` to the values of that model.
-- List every model you use under `models`. Otherwise, pi warns "Using custom model id" and guesses the context window and reasoning support.
+- List every model you use under `models`. Otherwise, Pi warns "Using custom model id" and guesses the context window and reasoning support.
 
 ### Verify [#verify]
 
@@ -105,7 +105,7 @@ Run a prompt:
 pi -p --provider langfuse-anthropic --model <anthropic-model-id> "Reply with exactly: pong"
 ```
 
-If pi replies, it runs through the gateway.
+If Pi replies, it runs through the gateway.
 
 </Steps>
 
@@ -116,7 +116,7 @@ If pi replies, it runs through the gateway.
   official, published package yet. A dedicated turn header is planned.
 </Callout>
 
-pi sends no turn ID, so every model call is its own trace. A small [extension](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md) can send a W3C `traceparent` with a new trace ID per prompt, which the gateway adopts. Save it as `~/.pi/agent/extensions/langfuse-turn.ts` (or `.pi/extensions/` in a project), or load it for one run with `pi -e ./langfuse-turn.ts`:
+Pi sends no turn ID, so every model call is its own trace. A small [extension](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md) can send a W3C `traceparent` with a new trace ID per prompt, which the gateway adopts. Save it as `~/.pi/agent/extensions/langfuse-turn.ts` (or `.pi/extensions/` in a project), or load it for one run with `pi -e ./langfuse-turn.ts`:
 
 ```ts
 import { randomBytes } from "node:crypto";
@@ -159,9 +159,9 @@ On Anthropic, thinking tokens are counted inside output tokens. OpenAI reasoning
 </Details>
 
 <Details id="cache-miss">
-<Summary>Why isn't pi's prompt cached on small models?</Summary>
+<Summary>Why isn't Pi's prompt cached on small models?</Summary>
 
-pi's default prompt (about 2,000 tokens) is cached on Sonnet but is below the minimum cacheable size of Haiku 4.5.
+Pi's default prompt (about 2,000 tokens) is cached on Sonnet but is below the minimum cacheable size of Haiku 4.5.
 
 </Details>
 
