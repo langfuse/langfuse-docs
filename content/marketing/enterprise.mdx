@@ -70,13 +70,17 @@ import { CustomerCarouselWrapper } from "@/components/customers/CustomerCarousel
 
 Ready to get started with Langfuse Enterprise? We're here to help you find the right solution for your team.
 
-import Link from "next/link";
-
 export function TalkToUsButton() {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 mt-6 not-prose">
-      <Button size="lg" asChild>
-        <Link href="/talk-to-us">Talk to Enterprise team</Link>
+    <div className="mt-6 not-prose">
+      <Button
+        href="/talk-to-us"
+        size="default"
+        shortcutKey="t"
+        className="w-auto"
+        wrapperClassName="w-fit"
+      >
+        Talk to Enterprise team
       </Button>
     </div>
   );
