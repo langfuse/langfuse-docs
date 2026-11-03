@@ -471,31 +471,73 @@ Track progress on the background migrations page in the UI; see [background migr
 
 **What the v4 schema migrations change.** Besides creating the new `events` tables, the v4 migrations drop tables that were superseded during v3 and whose live copies moved to ClickHouse back then: `traces`, `observations`, `scores`, and `dataset_run_items` in PostgreSQL, plus `event_log`, `project_environments`, and the legacy `dataset_run_items` table in ClickHouse. Provided the [prerequisites](#step-2-prerequisites) are met, these drops only remove data that already exists elsewhere. The ClickHouse `traces`, `observations`, and `scores` tables — the tables that serve all v3 reads — are kept, and keep receiving all incoming data while you run the `legacy` or `dual` write mode. The historic backfill never modifies them; it only reads from them.
 
-**Rolling back to v3 is possible before the cutover, but not by re-deploying a v3 image alone.** Once the v4 schema migrations have been applied, a plain image swap does not work: the v3 web container exits on startup because the ClickHouse schema version is newer than the migrations the image ships (`no migration found for version 46`), while the worker container starts normally. To return to v3, rewind the ClickHouse schema first (see below) — or restore both databases from the [backup taken before the upgrade](#step-2-prerequisites), losing the data ingested since.
+**Rolling back to v3 is possible before the cutover, but not by re-deploying a v3 image alone.** Once the v4 schema migrations have been applied, a plain image swap does not work: the v3 web container exits on startup because the ClickHouse schema version is newer than the migrations the image ships (`no migration found for version N`), while the worker container starts normally. N is the newest ClickHouse migration of the v4 release you ran, for example 46 on v4.0.0 and 53 on v4.72.0; any version above 37 means the schema is ahead of v3. To return to v3, rewind the ClickHouse schema first (see below) — or restore both databases from the [backup taken before the upgrade](#step-2-prerequisites), losing the data ingested since.
 
 **Prefer rolling forward.** While you run the `legacy` or `dual` write mode, all incoming data keeps landing in the old ClickHouse tables and every v3 surface (SDKs, APIs, evaluators, exports) keeps working on the v4 release. If you hit issues after the server upgrade, staying on v4 in `legacy` mode while you debug retains the complete v3 behavior without a rollback.
 
 ### Rolling back without a restore [#rollback-without-restore]
 
-While you run the `legacy` or `dual` write mode, a rollback to v3 loses no data: the tables that the v4 migrations dropped are not used by the latest v3 releases at runtime (they were superseded during v3, which is why v4 drops them), and everything written to the new `events` tables is also present in the old tables. The only blocker is the ClickHouse schema version, and you can rewind it with the `migrate` binary and migration files that ship in the v4 web image:
+While you run the `legacy` or `dual` write mode, a rollback to v3 loses none of the data that v3 uses: the tables that the v4 migrations dropped are not used by the latest v3 releases at runtime (they were superseded during v3, which is why v4 drops them), and everything written to the new `events` tables is also present in the old tables. The only blocker is the ClickHouse schema version, and you can rewind it with the `migrate` binary and migration files that ship in the v4 web image.
+
+Pick the command by the `CLICKHOUSE_CLUSTER_ENABLED` value your web container runs with. If the variable is unset, Langfuse runs in clustered mode, also on a single ClickHouse node. The Langfuse Helm chart enables it by default (`clickhouse.cluster.enabled: true`), including for the bundled ClickHouse with a single replica; the Docker Compose file sets it to `false`. To confirm, check the engine of the table in which the migrations record the schema version:
+
+```sql
+SELECT database, engine FROM system.tables WHERE name = 'schema_migrations';
+-- ReplicatedMergeTree: clustered, MergeTree: unclustered.
+-- ClickHouse Cloud reports SharedMergeTree in both modes; rely on the variable.
+```
 
 ```bash
 # Run inside a v4 web container of the SAME version that is deployed,
 # so the migration files match the recorded schema version:
 cd /app/packages/shared
 
-# Single-node ClickHouse (CLICKHOUSE_CLUSTER_ENABLED=false):
+# Unclustered ClickHouse (CLICKHOUSE_CLUSTER_ENABLED=false):
 migrate -source file://clickhouse/migrations/unclustered \
   -database "${CLICKHOUSE_MIGRATION_URL}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&database=${CLICKHOUSE_DB:-default}&x-multi-statement=true&x-migrations-table-engine=MergeTree" \
   goto 37
 
-# Clustered ClickHouse:
+# Clustered ClickHouse (CLICKHOUSE_CLUSTER_ENABLED=true or unset) with the
+# default cluster name (CLICKHOUSE_CLUSTER_NAME unset or "default"):
 migrate -source file://clickhouse/migrations/clustered \
-  -database "${CLICKHOUSE_MIGRATION_URL}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&database=${CLICKHOUSE_DB:-default}&x-multi-statement=true&x-cluster-name=${CLICKHOUSE_CLUSTER_NAME:-default}&x-migrations-table-engine=ReplicatedMergeTree" \
+  -database "${CLICKHOUSE_MIGRATION_URL}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&database=${CLICKHOUSE_DB:-default}&x-multi-statement=true&x-cluster-name=default&x-migrations-table-engine=ReplicatedMergeTree" \
   goto 37
+
+# Clustered ClickHouse with a custom CLICKHOUSE_CLUSTER_NAME: the files in
+# clustered/ run ON CLUSTER default, so render them for your cluster first:
+MIGRATIONS_DIR=$(node clickhouse/scripts/prepare-migrations.mjs render clickhouse/migrations/canonical clustered "$CLICKHOUSE_CLUSTER_NAME")
+CLUSTER_NAME=$(node clickhouse/scripts/prepare-migrations.mjs encode-cluster-name "$CLICKHOUSE_CLUSTER_NAME")
+migrate -source "file://${MIGRATIONS_DIR}" \
+  -database "${CLICKHOUSE_MIGRATION_URL}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&database=${CLICKHOUSE_DB:-default}&x-multi-statement=true&x-cluster-name=${CLUSTER_NAME}&x-migrations-table-engine=ReplicatedMergeTree" \
+  goto 37
+rm -rf "$MIGRATIONS_DIR"
 ```
 
-Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICKHOUSE_MIGRATION_SSL=true`. Version `37` is the schema version of the latest v3 releases. The rewind removes the `events` tables and recreates the tables that v4 dropped. PostgreSQL needs no changes: the latest v3 releases run against the v4 Postgres schema, and the v4 backfill entries stay dormant on v3 as long as `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` is not set to `true`. Afterwards, deploy the **latest** v3 images.
+Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICKHOUSE_MIGRATION_SSL=true`. Version `37` is the schema version of the latest v3 releases. The render script ships with v4.28.1 and later; earlier v4 releases applied the `clustered/` files regardless of `CLICKHOUSE_CLUSTER_NAME`, so rewind them with the default-cluster command.
+
+The rewind drops the `events_full`, `events_core`, and `observations_batch_staging` tables, and recreates the legacy ClickHouse tables that v4 dropped, without their data (v3 does not read them). In the `legacy` and `dual` write modes, the old `traces` and `observations` tables hold everything that was in the dropped `events` tables, so no data is lost: when you upgrade to v4 again, the [historic backfill](#historic-backfill) repopulates the new tables from the old ones, provided you reset it as described below. With the retention-based rollover, the retention window starts over once `dual` is active again. Data that only v4 features write to ClickHouse, such as topics or the evaluator references on scores, is dropped by the rewind and not restored.
+
+PostgreSQL needs no changes: the latest v3 releases run against the v4 Postgres schema, and the v4 backfill entries stay dormant on v3 as long as `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` is not set to `true`. Afterwards, deploy the **latest** v3 images.
+
+**Reset the historic backfill before you upgrade again.** The backfill records its progress in PostgreSQL (the `state` and `finished_at` columns of `background_migrations`), which the rewind does not touch. If the backfill ran before the rollback, completely or partly, then after the re-upgrade it skips the work it had recorded as done, and that data stays missing from the new tables for good. While still on v3, drop the backfill scratch table in ClickHouse and reset the backfill entries in PostgreSQL. This is safe even if the backfill never ran:
+
+```sql
+-- ClickHouse:
+DROP TABLE IF EXISTS observations_pid_tid_sorting SYNC;
+
+-- On clustered ClickHouse deployments (use your cluster name if it is not default):
+DROP TABLE IF EXISTS observations_pid_tid_sorting ON CLUSTER default SYNC;
+```
+
+```sql
+-- PostgreSQL:
+UPDATE background_migrations
+SET state = '{}', finished_at = NULL, failed_at = NULL, failed_reason = NULL,
+    worker_id = NULL, locked_at = NULL
+WHERE name LIKE '20260701_v4_step_%';
+```
+
+Drop the scratch table, do not only reset the entries: the rewind keeps it, the backfill freezes its merges after copying, and re-running the copy into it would duplicate every observation. The backfill creates the table again when it runs.
 
 **The cutover is the point of commitment.** Once you complete the [cutover](#cutover) to `events_only`, new data lands only in the new tables. Rolling back to a v3 read path from that point would miss the data written since the switch.
 
