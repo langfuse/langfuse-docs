@@ -1,11 +1,9 @@
 ---
 title: What are the Skill Management limits and how do I troubleshoot issues?
-seoTitle: Skill Management beta limits and troubleshooting
+seoTitle: Skill Management limits and troubleshooting
 description: Current file limits, naming rules, and common setup issues for Skill Management.
 tags: [skill-management]
 ---
-
-import { Details, Summary } from "@/components/Details";
 
 # What are the Skill Management limits and how do I troubleshoot issues?
 
@@ -13,36 +11,7 @@ Check these limits before uploading a skill. Your agent framework may have addit
 
 ## Current limits [#limits]
 
-| Resource                       | Limit or requirement                                                                                                                   |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Files per version              | Up to 200, including the root `SKILL.md`                                                                                               |
-| Total file content per version | Up to 1,000,000 UTF-8 bytes                                                                                                            |
-| File paths                     | Relative POSIX paths, up to 512 characters; no duplicates, absolute paths, backslashes, or `.` / `..` segments                         |
-| File types                     | Supported text extensions, including `.md`, `.txt`, `.json`, `.yaml`, `.py`, and `.sh`; binary and extensionless files are unsupported |
-| Skill name                     | 1–64 characters: lowercase letters, digits, and single hyphens; no leading, trailing, or consecutive hyphens                           |
-| Description                    | 1–1024 characters                                                                                                                      |
-| Tags                           | Up to 50 per skill, 1–100 characters each                                                                                              |
-| Local ZIP import               | Up to 3 MB per ZIP before extraction; imported skill files must fit the limits above                                                   |
-| Content fetch                  | 1–50 content hashes per request                                                                                                        |
-
-The [Agent Skills format](https://agentskills.io/specification) allows additional file types, including binary assets. Langfuse currently accepts supported text files only.
-
-<Details>
-<Summary>All supported file extensions</Summary>
-
-Extensions are matched without regard to case:
-
-```text
-.md .markdown .mdx .txt .rst .adoc .json .jsonc .jsonl .ndjson
-.yaml .yml .toml .xml .csv .tsv .ini .cfg .conf .properties
-.log .html .htm .css .scss .sass .less .js .jsx .mjs
-.cjs .ts .tsx .py .pyi .sh .bash .zsh .fish .ps1
-.rb .go .rs .java .c .h .cc .cpp .hpp .cs
-.swift .kt .kts .lua .r .pl .php .sql .graphql .gql
-.tex
-```
-
-</Details>
+See the [Skill Management limits](/docs/skill-management/overview#limits) for file, naming, import, and content-fetch requirements.
 
 ## I cannot open Skills [#beta-access]
 
@@ -56,7 +25,7 @@ Check that your API keys belong to the project containing the skill. Then check 
 
 ## An upload is rejected [#upload-rejected]
 
-Include a root `SKILL.md` with valid YAML frontmatter containing `name` and `description`. Check the [file and path limits](#limits). Submit every file the version should contain.
+Include a root `SKILL.md` with valid YAML frontmatter containing `name` and `description`. Check the [file and path limits](/docs/skill-management/overview#limits). Submit every file the version should contain.
 
 ## Files are installed but the agent does not use them [#agent-loading]
 
