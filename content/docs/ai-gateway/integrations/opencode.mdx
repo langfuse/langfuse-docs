@@ -66,7 +66,7 @@ Use `opencode.json` in the project root or `~/.config/opencode/opencode.json`:
 ```
 
 - Replace `<model-id>` and `<small-model-id>` with model IDs from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). OpenCode uses `small_model` for titles, so a small, fast model works best.
-- The Anthropic `baseURL` **includes `/v1`**, because OpenCode appends only `/messages`. Claude Code and pi are the opposite.
+- The Anthropic `baseURL` **includes `/v1`**, because OpenCode appends only `/messages`. Claude Code and Pi are the opposite.
 - The built-in OpenAI provider uses the Responses API. OpenAI-compatible providers that use Chat Completions are supported by the gateway but have not been verified with OpenCode.
 - To set a session per run, add `"langfuse-session-id": "{env:LF_SESSION}"`. An unset variable sends an empty value, which is ignored.
 - Headers apply to every call from that provider, including title generation and subagents. See [request headers](/docs/ai-gateway/features/tracing#request-headers).

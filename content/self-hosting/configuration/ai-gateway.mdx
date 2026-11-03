@@ -297,13 +297,7 @@ Streams that run longer than `connectionDrainTimeoutSeconds` are cut on every de
 
 </Callout>
 
-### Access and roles [#roles]
-
-[Organization roles](/docs/administration/rbac) control who can set up the gateway and who can call it.
-
-On self-hosted deployments, admins can also choose the ingestion mode `NONE`, which routes requests without recording them. It isn't available on Langfuse Cloud. See [ingestion modes](/docs/ai-gateway/features/tracing#ingestion-modes).
-
-### Rotate keys [#rotate-keys]
+### Rotating keys [#rotate-keys]
 
 Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three deployments so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm).
 
@@ -402,7 +396,7 @@ Check that the client sends a gateway API key, not a Langfuse project API key, a
 <Details id="requests-fail-ready-200">
 <Summary>Every request fails while `/ready` returns `200`</Summary>
 
-`/ready` does not check web. Check the gateway logs for failed calls to web: either the gateway cannot reach `LANGFUSE_AI_GATEWAY_WEB_URL`, or the service key differs between web and the gateway. To change the service key without failing requests, follow [Rotate keys](#rotate-keys).
+`/ready` does not check web. Check the gateway logs for failed calls to web: either the gateway cannot reach `LANGFUSE_AI_GATEWAY_WEB_URL`, or the service key differs between web and the gateway. To change the service key without failing requests, follow [Rotating keys](#rotate-keys).
 
 </Details>
 

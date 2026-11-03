@@ -138,6 +138,12 @@ response = client.responses.create(
     input="Say hello",
     extra_headers={"langfuse-session-id": "<session-id>"},
 )
+
+completion = client.chat.completions.create(
+    model="<model-id>",
+    messages=[{"role": "user", "content": "Say hello"}],
+    extra_headers={"langfuse-session-id": "<session-id>"},
+)
 ```
 
 </Tab>
@@ -152,6 +158,14 @@ const client = new OpenAI({
 
 const response = await client.responses.create(
   { model: "<model-id>", input: "Say hello" },
+  { headers: { "langfuse-session-id": "<session-id>" } },
+);
+
+const completion = await client.chat.completions.create(
+  {
+    model: "<model-id>",
+    messages: [{ role: "user", content: "Say hello" }],
+  },
   { headers: { "langfuse-session-id": "<session-id>" } },
 );
 ```
