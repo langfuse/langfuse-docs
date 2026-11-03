@@ -515,17 +515,17 @@ rm -rf "$MIGRATIONS_DIR"
 
 Append `&secure=true&skip_verify=true` to the URL if your deployment sets `CLICKHOUSE_MIGRATION_SSL=true`. Version `37` is the schema version of the latest v3 releases. The render script ships with v4.28.1 and later; earlier v4 releases applied the `clustered/` files regardless of `CLICKHOUSE_CLUSTER_NAME`, so rewind them with the default-cluster command.
 
-The rewind drops the `events_full`, `events_core`, and `observations_batch_staging` tables, and recreates the legacy ClickHouse tables that v4 dropped, without their data (v3 does not read them). In the `legacy` and `dual` write modes, the old `traces` and `observations` tables hold everything that was in the dropped `events` tables, so no data is lost: when you upgrade to v4 again, the [historic backfill](#historic-backfill) repopulates the new tables from the old ones, provided you reset it as described below. With the retention-based rollover, the retention window starts over once `dual` is active again. Data that only v4 features write to ClickHouse, such as topics or the evaluator references on scores, is dropped by the rewind and not restored.
+The rewind drops the `events_full`, `events_core`, and `observations_batch_staging` tables, and recreates the legacy ClickHouse tables that v4 dropped, without their data (v3 does not read them). In the `legacy` and `dual` write modes, the old `traces` and `observations` tables hold everything that was in the dropped `events` tables, so no data is lost: when you upgrade to v4 again, the [historic backfill](#historic-backfill) repopulates the new tables from the old ones, provided you reset it as described below. With the retention-based rollover, the retention window starts over once `dual` is active again. Data that only v4 writes to ClickHouse, such as the evaluator references on scores (`evaluator_id`, `evaluation_rule_id`), is dropped by the rewind and not restored.
 
 PostgreSQL needs no changes: the latest v3 releases run against the v4 Postgres schema, and the v4 backfill entries stay dormant on v3 as long as `LANGFUSE_BACKGROUND_MIGRATION_V4_ENABLE_HISTORIC_BACKFILL` is not set to `true`. Afterwards, deploy the **latest** v3 images.
 
 **Reset the historic backfill before you upgrade again.** The backfill records its progress in PostgreSQL (the `state` and `finished_at` columns of `background_migrations`), which the rewind does not touch. If the backfill ran before the rollback, completely or partly, then after the re-upgrade it skips the work it had recorded as done, and that data stays missing from the new tables for good. While still on v3, drop the backfill scratch table in ClickHouse and reset the backfill entries in PostgreSQL. This is safe even if the backfill never ran:
 
 ```sql
--- ClickHouse:
+-- ClickHouse, unclustered (CLICKHOUSE_CLUSTER_ENABLED=false):
 DROP TABLE IF EXISTS observations_pid_tid_sorting SYNC;
 
--- On clustered ClickHouse deployments (use your cluster name if it is not default):
+-- ClickHouse, clustered (use your cluster name if it is not default):
 DROP TABLE IF EXISTS observations_pid_tid_sorting ON CLUSTER default SYNC;
 ```
 
