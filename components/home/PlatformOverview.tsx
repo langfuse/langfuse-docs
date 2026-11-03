@@ -196,7 +196,7 @@ function AgentsNode({ className }: { className?: string }) {
 function SdkNode({ className }: { className?: string }) {
   return (
     <NextLink href={SDK_HREF} className={cn("flex", className)}>
-      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-4">
+      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <Eyebrow>Direct</Eyebrow>
         <Title>SDKs / OpenTelemetry</Title>
         <Detail>
@@ -211,7 +211,7 @@ function SdkNode({ className }: { className?: string }) {
 function GatewayNode({ className }: { className?: string }) {
   return (
     <NextLink href={AI_GATEWAY_HREF} className={cn("flex", className)}>
-      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-4">
+      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2">
           <Wordmark width={69} height={16} className="h-4 w-auto" />
           <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none tracking-wide text-text-primary">
@@ -403,22 +403,25 @@ function DownArrow() {
   );
 }
 
+function PairedDownArrows() {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <DownArrow />
+      <DownArrow />
+    </div>
+  );
+}
+
 function CompactDiagram() {
   return (
     <div className="flex flex-col md:hidden">
       <AgentsNode />
-      <DownArrow />
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <PairedDownArrows />
+      <div className="grid grid-cols-2 gap-2">
         <SdkNode />
-        <span
-          className="text-center font-mono text-[10px] uppercase leading-none tracking-wide text-text-tertiary sm:hidden"
-          aria-hidden="true"
-        >
-          or
-        </span>
         <GatewayNode />
       </div>
-      <DownArrow />
+      <PairedDownArrows />
       <LangfuseNode />
     </div>
   );
