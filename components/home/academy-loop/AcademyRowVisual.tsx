@@ -139,7 +139,8 @@ function PhaseBracket({
 
 // Five cards with 24px arrow gutters: card width is (100% - 96px) / 5.
 const CARD_W = "((100% - 96px) / 5)";
-const center = (i: number) => `calc(${CARD_W} * ${i + 0.5} + ${i * 24}px)`;
+const center = (i: number, nudge = 0) =>
+  `calc(${CARD_W} * ${i + 0.5} + ${i * 24 + nudge}px)`;
 const fromRight = (i: number, nudge = 0) =>
   `calc(${CARD_W} * ${4 - i + 0.5} + ${(4 - i) * 24 + nudge}px)`;
 
@@ -172,13 +173,19 @@ function WideRow({ active }: { active: LoopStepId }) {
 
       <div className="relative h-[84px]">
         <ReturnPath
+          left={center(0, 10)}
+          right={fromRight(1)}
+          depth={26}
+          label="iterate"
+        />
+        <ReturnPath
           left={center(2)}
           right={fromRight(4, 10)}
           depth={26}
           label="iterate"
         />
         <ReturnPath
-          left={center(0)}
+          left={center(0, -10)}
           right={fromRight(4, -10)}
           depth={64}
           label="deploy"
@@ -199,11 +206,16 @@ function CompactColumn({ active }: { active: LoopStepId }) {
     to: number,
     width: number,
     label: string,
+    nudge = 0,
   ) => (
     <div
       aria-hidden
       className="absolute left-0"
-      style={{ top: mCenter(to), bottom: total - mCenter(from), width }}
+      style={{
+        top: mCenter(to) + nudge,
+        bottom: total - mCenter(from) - nudge,
+        width,
+      }}
     >
       <div
         className="absolute -inset-y-[2px] left-0 -right-[2px] border-y-[5px] border-r-[5px]"
@@ -240,7 +252,8 @@ function CompactColumn({ active }: { active: LoopStepId }) {
         ))}
       </div>
       <div className="absolute inset-y-0 right-3 w-11">
-        {sideReturn(4, 2, 18, "iterate")}
+        {sideReturn(1, 0, 18, "iterate", 10)}
+        {sideReturn(4, 2, 18, "iterate", -10)}
         {sideReturn(4, 0, 40, "deploy")}
       </div>
     </div>
@@ -257,9 +270,10 @@ export function AcademyRowVisual() {
       <WideRow active={active} />
       <CompactColumn active={active} />
       <figcaption className="sr-only">
-        In production, trace and monitor your application. During development,
-        build datasets, experiment, and evaluate, iterating until a change is
-        good enough. Deploy it, and the loop starts again with new traces.
+        In production, trace and monitor your application, and iterate directly
+        on what monitoring surfaces. During development, build datasets,
+        experiment, and evaluate, iterating until a change is good enough.
+        Deploy it, and the loop starts again with new traces.
       </figcaption>
     </figure>
   );
