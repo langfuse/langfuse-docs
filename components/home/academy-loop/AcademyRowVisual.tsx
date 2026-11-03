@@ -179,7 +179,7 @@ function WideRow({ active }: { active: LoopStepId }) {
           label="iterate"
         />
         <ReturnPath
-          left={center(2)}
+          left={center(3)}
           right={fromRight(4, 10)}
           depth={26}
           label="iterate"
@@ -253,7 +253,7 @@ function CompactColumn({ active }: { active: LoopStepId }) {
       </div>
       <div className="absolute inset-y-0 right-3 w-11">
         {sideReturn(1, 0, 18, "iterate", 10)}
-        {sideReturn(4, 2, 18, "iterate", -10)}
+        {sideReturn(4, 3, 18, "iterate", -10)}
         {sideReturn(4, 0, 40, "deploy")}
       </div>
     </div>
@@ -271,9 +271,9 @@ export function AcademyRowVisual() {
       <CompactColumn active={active} />
       <figcaption className="sr-only">
         In production, trace and monitor your application, and iterate directly
-        on what monitoring surfaces. During development, build datasets,
-        experiment, and evaluate, iterating until a change is good enough.
-        Deploy it, and the loop starts again with new traces.
+        on what monitoring surfaces. During development, build datasets, then
+        experiment and evaluate, iterating until a change is good enough. Deploy
+        it, and the loop starts again with new traces.
       </figcaption>
     </figure>
   );
