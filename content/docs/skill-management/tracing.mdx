@@ -219,13 +219,13 @@ Flush or shut down your tracing exporter before exiting a one-off script. The tr
 
 ## Inspect a trace [#inspect-a-trace]
 
-Select a **generation** and open **Preview → Available skills** to see the reported skills and links to their versions:
+Select a **generation** and open **Preview → Skills**. Expand the available skill list to see version links. **Requested** and **Not requested** distinguish skills requested by the generation's tool calls; inspect the tool result to confirm a successful load:
 
-![A generation with four available skills and version links.](/images/changelog/2026-10-22-skill-management-generation.jpg)
+![A generation reporting four available skills and a request for refund-policy v1.](/images/changelog/2026-11-03-skill-management-generation.png)
 
-Select a successful **loadSkill** tool call and open **Preview → Loaded skill**. A single loaded skill shows its files directly. If the tool loaded multiple skills, expand a skill under **Loaded skills** to see its files:
+Select a successful **loadSkill** tool call and open **Preview → Skills**. Expand the loaded skill list, then a skill's file count to see the loaded paths:
 
-![A skill-loading tool showing refund-policy version 1 and its loaded SKILL.md resource.](/images/changelog/2026-10-22-skill-management-tool-load.jpg)
+![A skill-loading tool showing refund-policy version 1 and its loaded SKILL.md resource.](/images/changelog/2026-11-03-skill-management-tool-load.png)
 
 ## Inspect usage across runs [#skill-usage]
 
@@ -233,6 +233,6 @@ Open a skill version's **Usage** tab to see **Available** and **Loaded** observa
 
 Use **Any**, **Available**, or **Loaded** to filter observations. Click a file under **File usage** to show calls that loaded it; clear the **File** filter to remove that restriction.
 
-![The refund-policy Usage tab showing available and loaded counts, per-file loads, and linked observations.](/images/changelog/2026-10-22-skill-management-usage.jpg)
+![The refund-policy Usage tab showing available and loaded counts, per-file loads, and linked observations.](/images/changelog/2026-11-03-skill-management-usage.png)
 
 If skills or loaded files are missing, see [troubleshooting](/faq/all/skill-management-limits-and-troubleshooting#missing-trace-skills).
