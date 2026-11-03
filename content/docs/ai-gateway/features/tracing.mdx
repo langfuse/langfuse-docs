@@ -90,7 +90,7 @@ langfuse-metadata: repo:langfuse-docs,branch:main
 
 If your client already traces its work, for example with the [Langfuse SDK](/docs/observability/sdk/overview) or OpenTelemetry, the gateway can record its generation inside your trace instead of starting a new one:
 
-- **`traceparent`** (W3C Trace Context): the gateway uses its trace ID and nests the generation under the calling span. `tracestate` is kept. This is also how [turn grouping](/integrations/developer-tools/claude-code-gateway#turn-grouping) works for Claude Code.
+- **`traceparent`** (W3C Trace Context): the gateway uses its trace ID and nests the generation under the calling span. `tracestate` is kept. This is also how [turn grouping](/docs/ai-gateway/integrations/claude-code#turn-grouping) works for Claude Code.
 - **`baggage`** (W3C Baggage): the gateway reads these entries, the same keys the Langfuse SDKs propagate:
 
 | Baggage key               | Same as                |
