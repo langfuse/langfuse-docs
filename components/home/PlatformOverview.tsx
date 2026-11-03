@@ -1,7 +1,7 @@
 import Image from "next/image";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
-import { Bot } from "lucide-react";
+import { ArrowRight, Bot } from "lucide-react";
 import { HomeSection } from "@/components/home/HomeSection";
 import { Head, VerticalArrow } from "@/components/blog/diagram-primitives";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
@@ -159,9 +159,8 @@ function Detail({ children }: { children: ReactNode }) {
 function AgentsNode({ className }: { className?: string }) {
   return (
     <NextLink href={INTEGRATIONS_HREF} className={cn("flex", className)}>
-      <CornerBox hoverStripes className="flex flex-1 flex-col gap-4 p-4">
-        <Eyebrow>Your agents</Eyebrow>
-        <ul className="flex flex-1 flex-col justify-between divide-y divide-line-structure">
+      <CornerBox hoverStripes className="flex flex-1 flex-col">
+        <ul className="flex flex-1 flex-col justify-between divide-y divide-line-structure p-4">
           {USE_CASES.map((useCase) => (
             <li
               key={useCase.title}
@@ -188,6 +187,10 @@ function AgentsNode({ className }: { className?: string }) {
             </li>
           ))}
         </ul>
+        <div className="flex items-center justify-between gap-2 border-t border-line-structure px-4 py-3 text-text-tertiary">
+          <Eyebrow>100+ integrations</Eyebrow>
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </div>
       </CornerBox>
     </NextLink>
   );
