@@ -11,10 +11,40 @@ There are a host of potential safety risks involved with LLM-based applications.
 <Video
   src="https://static.langfuse.com/docs-videos/security-langfuse.mp4"
   title="LLM Security Monitoring with Langfuse"
+  description="Narrated walkthrough of the LLM security cookbook. LLM Guard's BanTopics scanner blocks a violent story topic and logs an input-violence score; Anonymize and Deanonymize redact names in a court transcript before the OpenAI call and restore them in the summary; LLM Guard's PromptInjection scanner misses a role-play jailbreak that Lakera Guard blocks. Each example is shown as a trace in Langfuse."
   aspectRatio={16 / 9}
   className="mt-6"
   posterStartTime={112}
 />
+
+<details>
+<summary>Video transcript</summary>
+
+**0:00** Hi everybody, my name is Lydia, and I'm excited to be speaking on behalf of the Langfuse team about security in Langfuse today.
+
+**0:10** So why is security important? For production-ready LLM-based applications, there are a lot of security risks, such as prompt injection, leakage of personally identifiable information, and harmful topics, and you also need to ensure that the output is correct and not inappropriate.
+
+**0:34** Today we'll see how to handle that with an open-source security tool called LLM Guard. There are a bunch of great open-source and paid or closed-source security libraries available, such as Prompt Armor, Microsoft Azure, or Lakera Guard. Today we'll be using LLM Guard and see how you can use Langfuse to trace and monitor how this security library works.
+
+**1:05** After we install the packages and set our API keys, we'll look at the first example, which is about banned topics. Let's say you are building a kid-friendly storytelling application: you put in any topic you want and it generates a story for you. Without security, you can put in something like "war crimes", and it will generate a quite inappropriate and violent story about war crimes.
+
+**1:36** So let's say you want to add some security to this. We use LLM Guard to add a scanner that scans the prompt for the topic of violence. If it detects violence, it does not send the prompt to the model. Here the scanner is in place, and it gives us the output "This is not child safe, please request another topic." The scanner has blocked the topic before it reached the model, and we don't get the inappropriate output.
+
+**2:07** We can see this trace in the Langfuse dashboard as well. The input is "war crimes", the output is "This is not child safe", and we also log a score for input violence, so that later on we can pinpoint areas we want to protect against, or sort traces by their risk scores.
+
+**2:35** The next example, a quite robust one, is about anonymize and deanonymize. This is really helpful when you handle sensitive information that could potentially be identifiable, for example if you want to redact court case transcripts or handle medical documents, and it helps you protect your clients and remain GDPR and HIPAA compliant. Anonymize scans the prompt for identifiable information such as names, credit card numbers, or phone numbers, and sanitizes the prompt before it is sent to the model. After the model responds, deanonymize adds the names back into the output.
+
+**3:26** Here we summarize a court transcript, and we get a summary: "Ms. Hyman, a legal professional with vast experience representing plaintiffs…" and so on. In the trace in the Langfuse dashboard, we see the token count, the cost, and the latency of the generation, and we see that the anonymize function redacted the sensitive information before it was sent to the model, and that it was unredacted again in the output.
+
+**4:06** You can also stack multiple scanners and scan outputs. You can see all of this in our cookbook.
+
+**4:18** Another example is prompt injection. Here we use the infamous grandma trick, which tricks ChatGPT into outputting sensitive information by asking it to role-play as the user's grandmother. This one asks for the recipe for napalm. LLM Guard doesn't catch it here: the grandma trick works, and ChatGPT gives the inappropriate response. You can trace this in the Langfuse dashboard as well.
+
+**4:58** So we use another tool, Lakera Guard. Lakera Guard detects the prompt injection and blocks it from reaching the model, and you can trace all of this in the Langfuse dashboard.
+
+**5:19** So today we've seen that we can observe and monitor traces, identify security risks and the places where they can occur, so that we can build better tools for them, and also identify where the security tools fail. That comes on top of everything Langfuse already does, such as monitoring and tracking latency, token usage, and cost. Thank you so much for watching. This is a very brief overview, so check out the [cookbook](/guides/cookbook/example_llm_security_monitoring) if you want to learn more.
+
+</details>
 
 ## What is LLM Security?
 
@@ -161,7 +191,6 @@ In this trace ([public link](https://cloud.langfuse.com/project/cloramnkj0002jz0
 
 <Video
   src="https://static.langfuse.com/docs-videos/security-pii-redaction.mp4"
-  title="LLM Security Monitoring with Langfuse"
   aspectRatio={16 / 9}
   className="mt-6"
   gifStyle
