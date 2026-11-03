@@ -31,7 +31,6 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/pricing-self-host(\/|$)/,
   /^\/careers(\/|$)/,
   // Legal
-  /^\/imprint(\/|$)/,
   /^\/privacy(\/|$)/,
   /^\/terms(\/|$)/,
   /^\/cookie-policy(\/|$)/,
