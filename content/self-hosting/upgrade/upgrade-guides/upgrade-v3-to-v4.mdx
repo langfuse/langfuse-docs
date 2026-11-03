@@ -243,7 +243,7 @@ WHERE finished_at IS NULL
   AND NOT (args ? 'envGate');
 ```
 
-The latest v3 release already ships the five [historic backfill](#historic-backfill) entries (`20260701_v4_step_*`). They carry an `envGate` in their args and stay dormant until their gate variable is set to `true`, which v4 does by default for the backfill. In the UI they show as queued and keep the status indicator next to the version tag from clearing; ignore them. The query above excludes them, and every other entry must show as finished.
+The latest v3 release already ships the five [historic backfill](#historic-backfill) entries (`20260701_v4_step_*`). They carry an `envGate` in their args and stay dormant until their gate variable is set to `true`, which v4 does by default for the backfill. In the UI they can show as queued; ignore them. The query above excludes them, and every other entry must show as finished.
 
 If any other entry stays queued after you upgraded to the latest v3 release, or after you retried a failed one, restart the worker container. The web container inserts new background migrations when it applies its database migrations on startup, but the worker only looks for pending background migrations when it starts; a worker that started before the web container finished does not pick them up.
 
