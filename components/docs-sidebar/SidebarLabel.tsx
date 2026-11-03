@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { controlTextClassName } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,8 +20,14 @@ export function SidebarLabel({ name }: { name: ReactNode }) {
       <span
         className={cn(
           controlTextClassName,
-          "shrink-0 rounded-[2px] border border-line-structure px-1.5 py-0 text-[11px] leading-[18px] text-text-tertiary",
+          "bg-stripe-pattern shrink-0 rounded-[2px] border border-line-structure px-1.5 py-0 text-[11px] leading-[18px] text-text-secondary",
         )}
+        style={
+          {
+            "--stripe-color": "var(--callout-info)",
+            "--stripe-mix": "60%",
+          } as CSSProperties
+        }
       >
         Beta
       </span>
