@@ -1,7 +1,7 @@
 ---
 date: 2026-11-02
 title: Send Langfuse alerts to PagerDuty
-description: Page your on-call team from Langfuse alerts and project notifications, and record prompt changes as PagerDuty change events.
+description: Page your on-call team from Langfuse. Receive alerts, project notifications, and prompt changes as PagerDuty events.
 author: Mark Salpeter
 ---
 
@@ -10,15 +10,15 @@ import { Bell, Book } from "lucide-react";
 
 <ChangelogHeader />
 
-PagerDuty is now an automation action in Langfuse. Paste the routing key from a PagerDuty service or Event Orchestration into an automation, and Langfuse pages whoever is on call when your LLM application misbehaves:
+PagerDuty can receive alert, project notification, or prompt change events from the automation configuration page in Langfuse.
+
+Paste the routing key from a PagerDuty service and Langfuse pages whoever is on call when your LLM application misbehaves:
 
 - Trigger a `critical` PagerDuty alert when an [alert](/docs/observability/features/alerts) on p95 latency, cost, or evaluator scores crosses its threshold. The PagerDuty alert resolves on its own when the Langfuse alert recovers.
 - Open an incident when a scheduled blob storage export fails or Langfuse deactivates an evaluator, by adding PagerDuty under **Project Settings → Notifications**.
-- See prompt releases in the service's change timeline: prompt version changes are sent as change events, which never page anyone.
+- View prompt releases in your service's change timeline.
 
-Each Langfuse alert maps to a single PagerDuty alert. `WARNING` triggers at `warning` severity, and escalating to `ALERT` re-triggers the same alert at `critical`. Events include PagerDuty's LLMOps custom details, such as the metric, its value, the breached threshold, and the model, plus links back to the alert and its data in Langfuse.
-
-Both US and EU PagerDuty accounts are supported. Use **Send test event** in the automation form to check your routing key before you rely on it.
+Both US and EU PagerDuty accounts are supported.
 
 <Cards num={2}>
   <Card
