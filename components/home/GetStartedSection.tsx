@@ -29,6 +29,11 @@ const AGENT_PROMPTS = [
     prompt:
       "Install the Langfuse Agent Skill from github.com/langfuse/skills and use it to migrate the prompts in this codebase to Langfuse.",
   },
+  {
+    label: "Gateway:",
+    prompt:
+      "Install the Langfuse Agent Skill from github.com/langfuse/skills and help me integrate the Langfuse AI Gateway into this application.",
+  },
 ];
 
 const MANUAL_SNIPPETS = {
