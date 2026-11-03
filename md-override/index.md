@@ -107,7 +107,7 @@ The free tier includes 50k observations per month, with no credit card required.
 - [Evaluation overview](/docs/evaluation/overview)
 - [Public demo project](/docs/demo)
 
-To set Langfuse up with a coding agent, install the [Langfuse Agent Skill](https://github.com/langfuse/skills) and ask it to add tracing, set up evals, or migrate your prompts.
+To set Langfuse up with a coding agent, install the [Langfuse Agent Skill](https://github.com/langfuse/skills) and ask it to add tracing, set up evals, migrate your prompts, or integrate the [AI Gateway](/docs/ai-gateway/overview).
 
 Need help? [Talk to sales](/talk-to-us) or [reach out to support](/support).
 
