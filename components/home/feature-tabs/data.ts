@@ -80,7 +80,7 @@ export default observe(handleRequest);`,
     name: "AI Gateway",
     title: "Govern every model call",
     subtitle: "Virtual keys, budgets, and model access for every team.",
-    body: "Route your AI calls through Langfuse without code changes. Issue virtual keys, set budgets, provision access for people and services, and govern which models they can use. Every call is traced with usage and cost.",
+    body: "Route your AI calls through Langfuse without code changes. Issue virtual keys, monitor budgets, provision access for people and services, and govern which models they can use. Every call is traced with usage and cost.",
     docsHref: "/docs/ai-gateway/overview",
     image: {
       light: metricsPng,
