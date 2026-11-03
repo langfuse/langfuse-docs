@@ -6,7 +6,7 @@ Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fum
 
 > ### 🧑‍💻 We're hiring
 >
-> Langfuse is growing fast (we doubled the team in the last 6 months) - since January 2026 we're part of ClickHouse, we're hiring engineers across Europe, in Canada, and in the United States on U.S. Eastern hours. Marketing and all other roles hire in Europe and all of the United States.
+> Langfuse is growing fast (we doubled the team in the last 6 months) - since January 2026 we're part of ClickHouse, we're hiring engineers across Europe and in US-East time zones. Marketing and all other roles hire in Europe and all of the United States.
 > We hire engineers who love open source and great developer experiences.
 > **[See open roles →](https://langfuse.com/careers?utm_source=github&utm_medium=readme&utm_campaign=hiring&utm_content=langfuse-docs)**
 
