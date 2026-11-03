@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { HomeSection } from "@/components/home/HomeSection";
@@ -8,6 +8,10 @@ import { Button, Heading, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import RiveMock from "@/components/home/img/rive-mock.png";
 import { MD_MIN_WIDTH_QUERY, useMinWidth } from "@/lib/use-min-width";
+import { TabButton } from "@/components/ui/tab-button";
+import { NestedLoopsVisual } from "@/components/home/academy-loop/NestedLoopsVisual";
+import { AcademyRowVisual } from "@/components/home/academy-loop/AcademyRowVisual";
+import { InfinityLoopVisual } from "@/components/home/academy-loop/InfinityLoopVisual";
 
 const RiveAnimation = dynamic(
   () => import("@/components/rive/RiveAnimation").then((m) => m.RiveAnimation),
@@ -25,6 +29,41 @@ const RIVE_IN_VIEW_ACTIVATION_DELAY_MS = 250;
 const RIVE_LOAD_VIEW_MODEL_PATH = "isLoad";
 
 export const RiveSection = () => {
+  return (
+    <HomeSection id="llm-engineering-loop" className="pt-[120px]">
+      <div className="relative z-10 flex flex-col gap-4 items-start">
+        <Heading className="text-left">
+          <TextHighlight className="whitespace-nowrap">
+            Learn how&nbsp;
+          </TextHighlight>
+          <TextHighlight className="whitespace-nowrap">
+            the best teams
+          </TextHighlight>{" "}
+          build with AI.
+        </Heading>
+        <Text className="text-left max-w-[64ch]">
+          Langfuse is the platform. The Langfuse Academy is how you, and your
+          agents, learn what to do with it: the AI engineering loop of tracing,
+          monitoring, datasets, experiments, and evals, with worked examples
+          from real applications. Free, open, and readable as Markdown for
+          coding agents.
+        </Text>
+        <Button
+          variant="secondary"
+          size="default"
+          href="/academy"
+          wrapperClassName="mt-2"
+        >
+          Explore the Academy
+        </Button>
+      </div>
+
+      <LoopVisualSwitcher />
+    </HomeSection>
+  );
+};
+
+const RiveLoopVisual = () => {
   const isMd = useMinWidth(MD_MIN_WIDTH_QUERY);
   const [riveSectionInView, setRiveSectionInView] = useState(false);
   const riveViewportRef = useRef<HTMLDivElement>(null);
@@ -64,34 +103,7 @@ export const RiveSection = () => {
   );
 
   return (
-    <HomeSection id="llm-engineering-loop" className="pt-[120px]">
-      <div className="relative z-10 flex flex-col gap-4 items-start">
-        <Heading className="text-left">
-          <TextHighlight className="whitespace-nowrap">
-            Learn how&nbsp;
-          </TextHighlight>
-          <TextHighlight className="whitespace-nowrap">
-            the best teams
-          </TextHighlight>{" "}
-          build with AI.
-        </Heading>
-        <Text className="text-left max-w-[64ch]">
-          Langfuse is the platform. The Langfuse Academy is how you, and your
-          agents, learn what to do with it: the AI engineering loop of tracing,
-          monitoring, datasets, experiments, and evals, with worked examples
-          from real applications. Free, open, and readable as Markdown for
-          coding agents.
-        </Text>
-        <Button
-          variant="secondary"
-          size="default"
-          href="/academy"
-          wrapperClassName="mt-2"
-        >
-          Explore the Academy
-        </Button>
-      </div>
-
+    <>
       {/* Mobile: static image + tabs (below lg) */}
       <div className="flex flex-col -mt-20 pointer-events-none md:hidden -z-1">
         <div className="overflow-hidden relative w-full aspect-4/3">
@@ -123,6 +135,63 @@ export const RiveSection = () => {
           ) : null}
         </div>
       </div>
-    </HomeSection>
+    </>
   );
 };
+
+// Temporary review switcher: flip between loop visuals before picking one.
+// Deep link a variant with `?loop=current|1|2|3`.
+const LOOP_VISUALS: { id: string; label: string; render: () => ReactNode }[] = [
+  { id: "1", label: "Inner & outer loop", render: () => <NestedLoopsVisual /> },
+  { id: "2", label: "Academy loop", render: () => <AcademyRowVisual /> },
+  { id: "3", label: "Figure eight", render: () => <InfinityLoopVisual /> },
+  { id: "current", label: "Current", render: () => <RiveLoopVisual /> },
+];
+
+function LoopVisualSwitcher() {
+  const [selected, setSelected] = useState(LOOP_VISUALS[0].id);
+
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("loop");
+    if (fromUrl && LOOP_VISUALS.some((v) => v.id === fromUrl)) {
+      setSelected(fromUrl);
+    }
+  }, []);
+
+  const select = (id: string) => {
+    setSelected(id);
+    const url = new URL(window.location.href);
+    url.searchParams.set("loop", id);
+    window.history.replaceState(null, "", url);
+  };
+
+  const visual = LOOP_VISUALS.find((v) => v.id === selected) ?? LOOP_VISUALS[0];
+  const isRive = visual.id === "current";
+
+  return (
+    <>
+      <div
+        role="tablist"
+        aria-label="Loop visual options"
+        className="relative z-10 mt-8 flex flex-wrap items-center gap-x-1 gap-y-0 border border-dashed border-line-divider-dash px-1"
+      >
+        <span className="px-2 font-mono text-[10px] text-text-tertiary">
+          review
+        </span>
+        {LOOP_VISUALS.map((v, i) => (
+          <TabButton
+            key={v.id}
+            role="tab"
+            aria-selected={v.id === selected}
+            active={v.id === selected}
+            onClick={() => select(v.id)}
+            wrapperClassName="w-auto"
+          >
+            {v.id === "current" ? v.label : `${i + 1}. ${v.label}`}
+          </TabButton>
+        ))}
+      </div>
+      <div className={isRive ? "" : "mt-10"}>{visual.render()}</div>
+    </>
+  );
+}
