@@ -1,0 +1,122 @@
+---
+title: GitHub Copilot
+seoTitle: "Trace GitHub Copilot CLI and the GitHub Copilot app with the Langfuse AI Gateway (beta)"
+description: Route GitHub Copilot CLI and the GitHub Copilot app through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# GitHub Copilot
+
+<AiGatewayBetaCallout />
+
+Both Copilot surfaces support bring-your-own-key (BYOK) model providers. Only those models go through the gateway. GitHub-hosted models in the same picker are not traced.
+
+<Callout type="info">
+  For tracing GitHub Copilot without the gateway, see the [GitHub Copilot integration](/integrations/developer-tools/github-copilot).
+</Callout>
+
+- [Copilot CLI](#cli): `ANTHROPIC` or `OPENAI` provider credential.
+- [GitHub Copilot app](#app): `OPENAI` provider credential. BYOK in the app is in public preview.
+
+## Copilot CLI [#cli]
+
+<Steps>
+
+### Create a gateway API key [#cli-create-a-key]
+
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
+
+### Point Copilot CLI at the gateway [#cli-configure]
+
+Copilot CLI reads its BYOK provider from environment variables. See GitHub's [BYOK guide](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/use-byok-models).
+
+<Tabs items={["Anthropic route", "OpenAI route"]}>
+<Tab>
+
+```sh
+export COPILOT_PROVIDER_BASE_URL="https://gateway.cloud.langfuse.com/anthropic"
+export COPILOT_PROVIDER_TYPE="anthropic"
+export COPILOT_PROVIDER_API_KEY="<your-gateway-key>"
+export COPILOT_MODEL="<model-id>"   # an Anthropic model ID from /models
+copilot
+```
+
+</Tab>
+<Tab>
+
+```sh
+export COPILOT_PROVIDER_BASE_URL="https://gateway.cloud.langfuse.com/openai/v1"
+export COPILOT_PROVIDER_TYPE="openai"
+export COPILOT_PROVIDER_WIRE_API="responses"
+export COPILOT_PROVIDER_API_KEY="<your-gateway-key>"
+export COPILOT_MODEL="<model-id>"   # an OpenAI model ID from /models
+copilot
+```
+
+</Tab>
+</Tabs>
+
+- The Anthropic base URL has **no** `/v1`. The OpenAI base URL **includes** `/v1`.
+- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/features/rest-api#routes)), which has not been verified with Copilot.
+- If `~/.copilot/providers.json` (or the file in `COPILOT_PROVIDERS_CONFIG`) already lists providers or models, it takes precedence and these variables have no effect.
+- Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/ai-gateway/features/tracing#request-headers) such as `langfuse-tags` cannot be set. Use [key metadata](/docs/ai-gateway/features/api-keys#key-metadata) instead.
+
+### Verify [#cli-verify]
+
+Send a prompt in `copilot`. If Copilot replies, it runs through the gateway.
+
+</Steps>
+
+## GitHub Copilot app [#app]
+
+<Steps>
+
+### Create a gateway API key [#app-create-a-key]
+
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
+
+### Add the gateway as a model provider [#app-configure]
+
+See GitHub's [guide to adding models to the Copilot app](https://docs.github.com/en/copilot/how-tos/github-copilot-app/add-llm-models).
+
+1. Open **Settings → Model providers**, select **Add provider**, then choose **Custom endpoint**.
+2. Set **Display name** to `Langfuse`.
+3. Set **Base URL** to `https://gateway.cloud.langfuse.com/openai/v1`.
+4. Set **Wire API** to `responses`. With `completions`, requests to OpenAI's GPT-5 models fail.
+5. Paste your gateway key as **API key**. The app stores it in your OS keychain.
+6. Optional: add [request headers](/docs/ai-gateway/features/tracing#request-headers) under **Custom headers**, for example:
+
+   ```json
+   {
+     "langfuse-tags": "github-copilot,<team>"
+   }
+   ```
+
+7. Select **Add provider**. The models of your `OPENAI` provider credential appear in the model picker alongside the GitHub-hosted models. Select one to start a session.
+
+### Verify [#app-verify]
+
+Select a gateway model and send a prompt. If Copilot replies, it runs through the gateway.
+
+</Steps>
+
+## Troubleshooting and FAQ [#troubleshooting-and-faq]
+
+<FaqDetails>
+
+<Details id="no-session">
+<Summary>Why does every call have its own trace without a session?</Summary>
+
+The gateway does not infer a session or turn from Copilot requests. In the app, set `langfuse-session-id` under **Custom headers** to group calls into one session.
+
+</Details>
+
+<Details id="anthropic-route">
+<Summary>Can the Copilot app use the Anthropic route?</Summary>
+
+No. The Anthropic route is CLI only. The app's custom endpoint speaks the OpenAI API only.
+
+</Details>
+
+</FaqDetails>

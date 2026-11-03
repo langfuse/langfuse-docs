@@ -42,21 +42,21 @@ On Langfuse Cloud, the gateway records every request as a generation, so you alw
 - **Full:** input, output, model parameters, usage, and cost.
 - **Usage:** usage, cost, and model parameters, without prompts or outputs.
 
-Each generation carries the model, token usage including cached and reasoning tokens, cost, latency, time to first token, the trace user, and the gateway key. Coding agent sessions are grouped automatically, and you can add tags, an environment, or a session with optional [request headers](/docs/ai-gateway/features/request-headers). See [tracing](/docs/ai-gateway/features/tracing) for details.
+Each generation carries the model, token usage including cached and reasoning tokens, cost, latency, time to first token, the trace user, and the gateway key. Coding agent sessions are grouped automatically, and you can add tags, an environment, or a session with optional [request headers](/docs/ai-gateway/features/tracing#request-headers). See [tracing](/docs/ai-gateway/features/tracing) for details.
 
 ## Connect your coding agent [#coding-agents]
 
 Point your agent at the gateway by changing its base URL and API key. No plugin or hook required:
 
-- [Claude Code and Claude Desktop](/docs/ai-gateway/coding-agents/claude-code)
-- [Codex](/docs/ai-gateway/coding-agents/codex)
-- [GitHub Copilot CLI and app](/docs/ai-gateway/coding-agents/github-copilot)
-- [OpenCode](/docs/ai-gateway/coding-agents/opencode)
-- [pi](/docs/ai-gateway/coding-agents/pi)
+- [Claude Code and Claude Desktop](/docs/ai-gateway/integrations/claude-code)
+- [Codex](/docs/ai-gateway/integrations/codex)
+- [GitHub Copilot CLI and app](/docs/ai-gateway/integrations/github-copilot)
+- [OpenCode](/docs/ai-gateway/integrations/opencode)
+- [pi](/docs/ai-gateway/integrations/pi)
 
 ## Availability [#availability]
 
-The AI Gateway is available on Langfuse Cloud in the EU, US, JP, and HIPAA regions. Each region has its own [gateway host](/docs/ai-gateway/get-started/first-request#gateway-hosts). Gateway traces are stored in your organization's Langfuse region; requests are forwarded to OpenAI or Anthropic and processed under your agreement with them. On the HIPAA region, make sure you have a [BAA with Langfuse](/security/hipaa) and with your model provider before you send PHI. Self-hosted deployments can [run the open source gateway](/self-hosting/configuration/ai-gateway) next to Langfuse.
+The AI Gateway is available on Langfuse Cloud in the EU, US, JP, and HIPAA regions. Each region has its own [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts). Gateway traces are stored in your organization's Langfuse region; requests are forwarded to OpenAI or Anthropic and processed under your agreement with them. On the HIPAA region, make sure you have a [BAA with Langfuse](/security/hipaa) and with your model provider before you send PHI. Self-hosted deployments can [run the open source gateway](/self-hosting/configuration/ai-gateway) next to Langfuse.
 
 Each recorded generation counts as a [billable unit](/docs/administration/billable-units), like any other observation. Your provider bills model usage to your own provider account.
 
@@ -77,7 +77,7 @@ During the beta, the gateway supports OpenAI and Anthropic. Behavior, routes, an
   />
   <Card
     title="Coding agents"
-    href="/docs/ai-gateway/coding-agents"
+    href="/integrations#developer-tools"
     icon={<Bot />}
     arrow
   />

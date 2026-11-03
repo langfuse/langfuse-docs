@@ -1,19 +1,26 @@
 ---
 title: AI Gateway (self-hosted)
-description: Deploy the Langfuse AI Gateway next to your self-hosted Langfuse with the Helm chart, and configure its public URL, TLS, health checks, and graceful shutdown.
+description: Deploy the Langfuse AI Gateway next to your self-hosted Langfuse with the Helm chart, and configure its public URL, TLS, scaling, health checks, and graceful shutdown.
 label: "Version: v4"
 sidebarTitle: "AI Gateway"
 ---
 
 # AI Gateway
 
-The Langfuse AI Gateway relays model requests from your applications and coding agents to your LLM providers and records every call as a generation in Langfuse. Clients only change their base URL and API key. This guide covers how to deploy and operate the gateway on a self-hosted Langfuse instance.
-
 <Callout type="warning">
 
 **Beta.** The AI Gateway is in beta on self-hosted deployments. Its configuration, including the `langfuse.gateway.*` Helm values, is not covered by SemVer and may change in minor releases. [Subscribe to Langfuse OSS updates](/self-hosting/oss-newsletter) to hear when it leaves beta.
 
 </Callout>
+
+The [Langfuse AI Gateway](/docs/ai-gateway/overview) relays model requests from your applications and coding agents to your LLM providers and records every call as a generation in Langfuse. Clients only change their base URL and API key. For admins, the gateway puts LLM access behind one control point:
+
+- **Provider access in one place:** provider API keys are stored once per organization. Developers and agents never see them, and admins choose which models are available.
+- **API keys in one place:** admins see and revoke every gateway key, and a person's keys stop working when they leave the organization.
+- **Spend tracking:** [gateway analytics](/docs/ai-gateway/features/analytics) show cost and usage per user, key, and model.
+- **Tracing without instrumentation:** every call is [traced](/docs/ai-gateway/features/tracing) in Langfuse, with no SDK in the client.
+
+This guide covers how to deploy and operate the gateway on a self-hosted Langfuse instance. Once it runs, set it up for your organization with [Set up the gateway](/docs/ai-gateway/get-started/admin-setup).
 
 ## Requirements [#requirements]
 
@@ -26,7 +33,7 @@ The Langfuse AI Gateway relays model requests from your applications and coding 
 
 ## How it works [#architecture]
 
-The gateway is a separate, stateless container (`ghcr.io/langfuse/ai-gateway`) on its own host. It has no database, Redis, ClickHouse, or S3 credentials; it only talks to Langfuse Web and your LLM providers.
+The gateway is a separate, stateless container ([`langfuse/ai-gateway`](https://hub.docker.com/r/langfuse/ai-gateway)) on its own host. It has no database, Redis, ClickHouse, or S3 credentials; it only talks to Langfuse Web and your LLM providers.
 
 import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 
@@ -34,7 +41,7 @@ import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 
 1. A client sends a request to the gateway's public URL, for example `https://gateway.langfuse.example.com/anthropic/v1/messages`, with a gateway API key.
 2. The gateway asks Langfuse Web to resolve the key. Web checks the key and returns the organization's provider connection, including the provider API key.
-3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/docs/ai-gateway/troubleshooting-and-faq#does-the-gateway-change-requests).
+3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/faq/all/ai-gateway-request-changes).
 4. The gateway uploads the generation to Langfuse Web, which ingests it like any other trace.
 
 Organization admins then set up provider connections and gateway API keys in the Langfuse UI.
@@ -49,8 +56,6 @@ langfuse:
     url: https://langfuse.example.com
   gateway:
     enabled: true
-    image:
-      repository: ghcr.io/langfuse/ai-gateway
     ingress:
       enabled: true
       className: nginx
@@ -60,6 +65,7 @@ langfuse:
         enabled: true
         secretName: langfuse-gateway-tls
       annotations:
+        # Optional: let cert-manager issue the certificate, see TLS below.
         cert-manager.io/cluster-issuer: letsencrypt
         # Streams can run for up to 600 s and stay quiet for up to 120 s.
         nginx.ingress.kubernetes.io/proxy-read-timeout: "620"
@@ -76,7 +82,7 @@ langfuse:
         memory: 2Gi
 ```
 
-Set `image.repository` to `ghcr.io/langfuse/ai-gateway`, where the gateway image is published. The image tag follows `langfuse.image.tag` and the chart's `appVersion`, like web. If your chart's `appVersion` is older than `4.72.0`, set `langfuse.image.tag` to a newer release.
+The chart pulls the gateway image [`langfuse/ai-gateway`](https://hub.docker.com/r/langfuse/ai-gateway) from Docker Hub through `docker.langfuse.com`, like the [web and worker images](/self-hosting/deployment/infrastructure/containers#container-images). The image tag follows `langfuse.image.tag` and the chart's `appVersion`, like web. If your chart's `appVersion` is older than `4.72.0`, set `langfuse.image.tag` to a newer release.
 
 Then apply it with `helm upgrade` and check that the gateway pods become ready:
 
@@ -118,7 +124,7 @@ langfuse:
 
 </Callout>
 
-For the full list of values, see the [chart README](/self-hosting/deployment/kubernetes-helm#readme). To turn the gateway on only for some organizations, see [Access and roles](#roles).
+For the full list of values, see the [chart README](/self-hosting/deployment/kubernetes-helm#readme).
 
 ### Public URL [#public-url]
 
@@ -130,14 +136,14 @@ Langfuse shows the gateway's public URL in the UI and in the setup snippets for 
 
 Set `publicUrl` explicitly when you expose the gateway in another way, such as your own Ingress, the Gateway API, or a `LoadBalancer` Service. The value must be an origin without a path, such as `https://llm.example.com`.
 
-## TLS [#tls]
+### TLS [#tls]
 
 We strongly recommend serving the gateway over HTTPS:
 
 - Every request carries a gateway API key, and request and response bodies contain full prompts and model outputs.
 - Coding clients such as Claude Desktop expect an `https://` gateway URL.
 
-Like Langfuse Web, the gateway does not terminate TLS itself. Terminate TLS in front of it, at the Ingress controller or at a load balancer. The gateway's host needs its own DNS record and a certificate that covers it.
+Like Langfuse Web, the gateway does not terminate TLS itself. Terminate TLS in front of it, at the Ingress controller or at a load balancer. The gateway's host needs its own DNS record and a certificate that covers it. The chart doesn't need cert-manager for the gateway: use it only if you already issue certificates with it, otherwise bring your own certificate or terminate TLS at a load balancer.
 
 <Tabs items={["cert-manager", "Your own certificate", "TLS at a load balancer"]}>
 
@@ -246,7 +252,7 @@ Never use a plain `http://` web URL across a public network. Web's responses con
 
 </Callout>
 
-## Proxy timeouts and buffering [#timeouts]
+### Proxy timeouts and buffering [#timeouts]
 
 Model responses are streamed and can take minutes. The gateway ends a request after 600 seconds (`LANGFUSE_AI_GATEWAY_MAX_EXECUTION_SECONDS`) or after 120 seconds without progress (`LANGFUSE_AI_GATEWAY_STALL_TIMEOUT_SECONDS`). Everything between the client and the gateway must allow this:
 
@@ -256,7 +262,21 @@ Model responses are streamed and can take minutes. The gateway ends a request af
 
 The chart sets no proxy annotations by default, because they depend on your Ingress controller. See the examples in [Deploy with Helm](#helm) for ingress-nginx and in [TLS](#tls) for the AWS Load Balancer Controller.
 
-## Health checks [#health-checks]
+## Operations [#operations]
+
+### Scaling [#scaling]
+
+The gateway is stateless, so scale it horizontally by adding pods. On Langfuse Cloud, we run several gateway instances per region and scale them on CPU utilization.
+
+- **Run at least two replicas in production**, so that restarting a pod or a node doesn't interrupt all traffic. The chart keeps all but one pod running during node maintenance.
+- **Enable the HorizontalPodAutoscaler** with `langfuse.gateway.hpa.enabled: true` and scale on CPU. The chart defaults (`minReplicas: 1`, `maxReplicas: 2`) are a starting point; raise them for production traffic.
+- **Size memory with the memory budget.** Each pod reserves memory for every running request from `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES` (1 GiB by default), and returns `503` right away when the budget is used up. Set the pod's memory limit to at least the budget plus 512 MiB. To serve more concurrent or larger requests per pod, raise the budget and the limit together, or add pods.
+- **Remove replicas slowly when scaling down**, so long-running streaming requests aren't cut off. By default, Kubernetes waits 5 minutes of lower load before it removes replicas; don't shorten that. Requests still running on a stopping pod get up to 5 minutes to finish, see [Graceful shutdown](#graceful-shutdown).
+- **Scale Langfuse too.** Every request makes web resolve the gateway key (cached for 60 seconds), and every generation is ingested like other traces. Plan web and worker capacity for the added trace volume, see [Scaling](/self-hosting/configuration/scaling).
+
+To watch the gateway, set `OTEL_EXPORTER_OTLP_ENDPOINT` on it. It then exports operational traces and metrics, including `gateway.memory.reserved.peak` and `gateway.admission.rejected`, to your OpenTelemetry collector.
+
+### Health checks [#health-checks]
 
 The gateway serves two unauthenticated endpoints on port `8080`, which the chart uses as Kubernetes probes:
 
@@ -267,67 +287,44 @@ The gateway serves two unauthenticated endpoints on port `8080`, which the chart
 
 `/ready` does not call web or the providers, so it stays `200` when they are unreachable. Those failures show up as errors on individual requests and in the gateway logs. Use `/ready` for load balancer health checks.
 
-## Graceful shutdown [#graceful-shutdown]
+### Graceful shutdown [#graceful-shutdown]
 
-Rollouts and scale-in stop gateway pods while clients may still be streaming. The chart configures the pod so that in-flight streams can finish:
+Deployments and scaling down stop gateway pods while clients may still be streaming. The chart configures the pod so that running streams can finish:
 
 1. **`preStopSleepSeconds` (10 s):** the pod keeps serving while Kubernetes removes it from the Service and Ingress, so no new requests arrive.
-2. **`connectionDrainTimeoutSeconds` (300 s):** after `SIGTERM`, the gateway rejects new requests, reports `503` on `/ready`, and lets in-flight requests finish.
-3. **`telemetryShutdownTimeoutSeconds` (30 s):** after the drain, the gateway uploads the remaining generations to Langfuse.
+2. **`connectionDrainTimeoutSeconds` (300 s):** after `SIGTERM`, the gateway rejects new requests, reports `503` on `/ready`, and lets requests that are still running finish.
+3. **`telemetryShutdownTimeoutSeconds` (30 s):** after that, the gateway uploads the remaining generations to Langfuse.
 4. **`terminationGracePeriodSeconds` (350 s):** Kubernetes kills the pod after this time. It must be greater than the sum of the three steps above; the chart rejects values that are not.
 
 All four are set under `langfuse.gateway`.
 
 <Callout type="info">
 
-Streams that run longer than the drain timeout are cut on every rollout and scale-in. The drain timeout is capped at 300 seconds, while requests can run for up to 600 seconds, so the longest streams can still be cut.
+Streams that run longer than `connectionDrainTimeoutSeconds` are cut on every deployment and when scaling down. This timeout is capped at 300 seconds, while requests can run for up to 600 seconds, so the longest streams can still be cut.
 
 </Callout>
 
-## Access and roles [#roles]
+### Access and roles [#roles]
 
-When the gateway is deployed, it is available to every organization on the instance. To limit it to some organizations, set these variables on web through `langfuse.web.pod.additionalEnv`:
+[Organization roles](/docs/administration/rbac) control who can set up the gateway and who can call it.
 
-```yaml filename="values.yaml"
-langfuse:
-  web:
-    pod:
-      additionalEnv:
-        - name: LANGFUSE_AI_GATEWAY_ENABLED
-          value: "false"
-        - name: LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST
-          value: "<org-id-1>,<org-id-2>"
-```
+On self-hosted deployments, admins can also choose the ingestion mode `NONE`, which routes requests without recording them. It isn't available on Langfuse Cloud. See [ingestion modes](/docs/ai-gateway/features/tracing#ingestion-modes).
 
-Within an organization, [organization roles](/docs/administration/rbac) control what users can do:
+### Rotate keys [#rotate-keys]
 
-| Organization role | Gateway access                                                                                                 |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| Owner, Admin      | Manage the gateway setup, provider connections, models, analytics, and all gateway API keys (`gateway:manage`) |
-| Member            | Create and use their own gateway API keys (`gateway:invoke`)                                                   |
-| AI Gateway        | Same as Member, with no access to projects or other organization settings                                      |
-| Viewer            | View the enabled models, without gateway API keys (`gateway:read`)                                             |
-| None              | No gateway access                                                                                              |
-
-When a user's role changes to one without gateway access, Langfuse deletes their gateway API keys. See [roles and permissions](/docs/administration/rbac) for all scopes.
-
-On self-hosted deployments, admins can also choose the capture mode `NONE`, which routes requests without recording them. It isn't available on Langfuse Cloud. See [capture modes](/docs/ai-gateway/features/tracing#capture-modes).
-
-## Rotate keys [#rotate-keys]
-
-Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three rollouts so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm).
+Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three deployments so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm).
 
 **Service key**, shared by web and the gateway:
 
-1. On web, set the **new** key as `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` and roll out web. Web now accepts both keys.
-2. Switch `langfuse.gateway.serviceKey` to the new key, which changes it on web and the gateway, and in the same rollout set `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` to the **old** key.
-3. Remove `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` and roll out web.
+1. On web, set the **new** key as `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` and redeploy web. Web now accepts both keys.
+2. Switch `langfuse.gateway.serviceKey` to the new key, which changes it on web and the gateway, and in the same deployment set `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` to the **old** key.
+3. Remove `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` and redeploy web.
 
 **JWT signing key**, used only by web:
 
-1. On web, set the **new** public key as `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY` and roll out web. Derive a public key with `openssl ec -in private-key.pem -pubout`.
-2. Switch `langfuse.gateway.jwt.privateKey` to the new private key, and in the same rollout set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY` to the **old** public key.
-3. Wait at least 15 minutes, the lifetime of upload tokens signed with the old key. Then remove the previous public key and roll out web.
+1. On web, set the **new** public key as `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY` and redeploy web. Derive a public key with `openssl ec -in private-key.pem -pubout`.
+2. Switch `langfuse.gateway.jwt.privateKey` to the new private key, and in the same deployment set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY` to the **old** public key.
+3. Wait at least 15 minutes, the lifetime of upload tokens signed with the old key. Then remove the previous public key and redeploy web.
 
 Key IDs are derived from the public keys. Set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID` only if you set `LANGFUSE_AI_GATEWAY_JWT_KEY_ID` explicitly.
 
@@ -343,16 +340,16 @@ The chart sets these variables for you. You only need them when you deploy the g
 | `LANGFUSE_AI_GATEWAY_SERVICE_KEY`                        | Required       | Shared key that authenticates the gateway to web. Must match the value on web.                                                                                                                                                 |
 | `LANGFUSE_AI_GATEWAY_ALLOW_HTTP_WEB_URL`                 | `false`        | Set to `true` to accept a plain `http://` web URL. Only for private networks such as web's in-cluster Service.                                                                                                                 |
 | `LANGFUSE_AI_GATEWAY_LISTEN_ADDRESS`                     | `0.0.0.0:8080` | Address and port the gateway listens on.                                                                                                                                                                                       |
-| `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`   | `10`           | Seconds to drain in-flight requests after `SIGTERM`, from 1 to 300. The chart sets `300`.                                                                                                                                      |
+| `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`   | `10`           | Seconds to drain running requests after `SIGTERM`, from 1 to 300. The chart sets `300`.                                                                                                                                        |
 | `LANGFUSE_AI_GATEWAY_TELEMETRY_SHUTDOWN_TIMEOUT_SECONDS` | `10`           | Seconds to upload remaining generations after the drain, from 1 to 300. The chart sets `30`.                                                                                                                                   |
 | `LANGFUSE_AI_GATEWAY_MAX_REQUEST_BYTES`                  | `16777216`     | Largest accepted request body (16 MiB).                                                                                                                                                                                        |
-| `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES`                | `1073741824`   | Memory that all in-flight requests of one pod may reserve together (1 GiB). Set the pod's memory limit to at least this value plus 512 MiB.                                                                                    |
+| `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES`                | `1073741824`   | Memory that all running requests of one pod may reserve together (1 GiB). Set the pod's memory limit to at least this value plus 512 MiB.                                                                                      |
 | `LANGFUSE_AI_GATEWAY_MAX_EXECUTION_SECONDS`              | `600`          | Longest time a request may run, at least 60. Upload tokens last 15 minutes, so generations of longer requests may be dropped.                                                                                                  |
 | `LANGFUSE_AI_GATEWAY_STALL_TIMEOUT_SECONDS`              | `120`          | Longest time a request may go without progress.                                                                                                                                                                                |
-| `LANGFUSE_AI_GATEWAY_REQUEST_MEMORY_OVERHEAD_BYTES`      | `2097152`      | Memory every in-flight request reserves on top of its body (2 MiB), for response capture and buffers.                                                                                                                          |
+| `LANGFUSE_AI_GATEWAY_REQUEST_MEMORY_OVERHEAD_BYTES`      | `2097152`      | Memory every running request reserves on top of its body (2 MiB), for response capture and buffers.                                                                                                                            |
 | `LANGFUSE_AI_GATEWAY_TELEMETRY_BUFFER_BYTES`             | `67108864`     | Memory for generations waiting to be uploaded (64 MiB), from 4 MiB to 4 GiB.                                                                                                                                                   |
 | `LANGFUSE_AI_GATEWAY_SHUTDOWN_TIMEOUT_SECONDS`           |                | Deprecated name of `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`.                                                                                                                                                     |
-| `OTEL_EXPORTER_OTLP_ENDPOINT`                            |                | Optional OTLP/HTTP endpoint for the gateway's own operational traces. Unrelated to the generations it records in Langfuse.                                                                                                     |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`                            |                | Optional OTLP/HTTP endpoint for the gateway's own operational traces and metrics. Unrelated to the generations it records in Langfuse.                                                                                         |
 | `OTEL_SERVICE_NAME`                                      | `ai-gateway`   | Service name of the operational traces.                                                                                                                                                                                        |
 | `OTEL_TRACES_SAMPLER_ARG`                                |                | Sampling ratio of the operational traces, from 0 to 1.                                                                                                                                                                         |
 | `LANGFUSE_LOG_LEVEL`                                     | `info`         | `debug`, `info`, `warn`, `error`, or `fatal`. The gateway does not accept `trace`; the chart maps it to `debug`.                                                                                                               |
@@ -365,8 +362,6 @@ Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The 
 | Variable                                        | Default  | Description                                                                                                                                         |
 | ----------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_AI_GATEWAY_DEPLOYED`                  | `false`  | Set to `true` when a gateway runs next to web. While `false`, the UI shows that the gateway is not deployed.                                        |
-| `LANGFUSE_AI_GATEWAY_ENABLED`                   | `true`   | Set to `false` to allow only organizations in `LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST`.                                                      |
-| `LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST` |          | Comma-separated organization IDs that can use the gateway when `LANGFUSE_AI_GATEWAY_ENABLED=false`.                                                 |
 | `LANGFUSE_AI_GATEWAY_PUBLIC_URL`                | Derived  | Gateway URL shown in the UI and setup snippets. See [Public URL](#public-url).                                                                      |
 | `LANGFUSE_AI_GATEWAY_SERVICE_KEY`               | Required | Same value as on the gateway.                                                                                                                       |
 | `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`           | Required | ES256 (P-256) private key in PEM format that signs the gateway's upload tokens. Generate it with `openssl ecparam -name prime256v1 -genkey -noout`. |
@@ -381,26 +376,92 @@ Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The 
 
 ## Troubleshooting [#troubleshooting]
 
-**The UI says the AI Gateway isn't deployed.** Web does not have `LANGFUSE_AI_GATEWAY_DEPLOYED=true`. Check that `langfuse.gateway.enabled` is `true` and that web runs `v4.72.0` or later. If the gateway pages are still missing, check that `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy` and, when `LANGFUSE_AI_GATEWAY_ENABLED=false`, that your organization is on the allowlist.
+<FaqDetails>
 
-**Gateway pods are not ready.** `/ready` returns `503` until the gateway has a web URL and service key. Check the pod logs: invalid configuration fails at startup with the name of the offending variable.
+<Details id="ui-not-deployed">
+<Summary>The UI says the AI Gateway isn't deployed</Summary>
 
-**Requests fail with `401`.** Check that the client sends a gateway API key, not a Langfuse project API key, and that the key has not been revoked.
+Web does not have `LANGFUSE_AI_GATEWAY_DEPLOYED=true`. Check that `langfuse.gateway.enabled` is `true` and that web runs `v4.72.0` or later. If the gateway pages are still missing, check that `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy`.
 
-**Every request fails while `/ready` returns `200`.** `/ready` does not check web. Check the gateway logs for failed calls to web: either the gateway cannot reach `LANGFUSE_AI_GATEWAY_WEB_URL`, or the service key differs between web and the gateway. To change the service key without failing requests, follow [Rotate keys](#rotate-keys).
+</Details>
 
-**Long responses stop after 60 seconds or arrive all at once.** A proxy in front of the gateway has a short timeout or buffers responses. See [Proxy timeouts and buffering](#timeouts).
+<Details id="pods-not-ready">
+<Summary>Gateway pods are not ready</Summary>
 
-**Large requests fail with `413`.** Raise the body size limit of your Ingress controller, for example `nginx.ingress.kubernetes.io/proxy-body-size: "17m"`.
+`/ready` returns `503` until the gateway has a web URL and service key. Check the pod logs: invalid configuration fails at startup with the name of the offending variable.
 
-**Streams break during deployments.** Streams longer than `connectionDrainTimeoutSeconds` are cut when a pod stops. Check the values in [Graceful shutdown](#graceful-shutdown) and that `terminationGracePeriodSeconds` is greater than their sum.
+</Details>
 
-**Requests succeed but no generations appear in Langfuse.** The gateway uploads generations to web after each request. Check the gateway logs for upload errors, and check that web runs the v4 data model, not the `legacy` write mode.
+<Details id="image-pull-fails">
+<Summary>The gateway image can't be pulled</Summary>
 
-**Image pull fails with `401` or `unauthorized`.** Pull the gateway image from `ghcr.io/langfuse/ai-gateway` by setting `langfuse.gateway.image.repository`.
+The chart pulls `docker.langfuse.com/langfuse/ai-gateway`. If your cluster can't reach `docker.langfuse.com`, set `langfuse.gateway.image.repository` to `langfuse/ai-gateway` to pull from Docker Hub directly, or mirror the image to your own registry.
 
-**Provider calls fail with TLS errors after you set `SSL_CERT_FILE`.** The bundle replaces the trust store, so it must also contain the public root certificates. See [Gateway to Langfuse Web](#gateway-to-web).
+</Details>
 
-**Clients report certificate errors.** The certificate must cover the gateway host and include the full chain. Test with `curl -v https://<gateway-host>/health`.
+<Details id="requests-fail-401">
+<Summary>Requests fail with `401`</Summary>
 
-When you report a problem, include the `langfuse-request-id` response header of the failing request.
+Check that the client sends a gateway API key, not a Langfuse project API key, and that the key has not been revoked.
+
+</Details>
+
+<Details id="requests-fail-ready-200">
+<Summary>Every request fails while `/ready` returns `200`</Summary>
+
+`/ready` does not check web. Check the gateway logs for failed calls to web: either the gateway cannot reach `LANGFUSE_AI_GATEWAY_WEB_URL`, or the service key differs between web and the gateway. To change the service key without failing requests, follow [Rotate keys](#rotate-keys).
+
+</Details>
+
+<Details id="requests-fail-503">
+<Summary>Requests fail with `503` under load</Summary>
+
+The pod's [memory budget](#scaling) is used up by running requests. Add replicas, or raise `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES` together with the pod's memory limit.
+
+</Details>
+
+<Details id="streams-stop">
+<Summary>Long responses stop after 60 seconds or arrive all at once</Summary>
+
+A proxy in front of the gateway has a short timeout or buffers responses. See [Proxy timeouts and buffering](#timeouts).
+
+</Details>
+
+<Details id="requests-fail-413">
+<Summary>Large requests fail with `413`</Summary>
+
+Raise the body size limit of your Ingress controller, for example `nginx.ingress.kubernetes.io/proxy-body-size: "17m"`.
+
+</Details>
+
+<Details id="streams-break-deploy">
+<Summary>Streams break during deployments</Summary>
+
+Streams longer than `connectionDrainTimeoutSeconds` are cut when a pod stops. Check the values in [Graceful shutdown](#graceful-shutdown) and that `terminationGracePeriodSeconds` is greater than their sum.
+
+</Details>
+
+<Details id="no-generations">
+<Summary>Requests succeed but no generations appear in Langfuse</Summary>
+
+The gateway uploads generations to web after each request. Check the gateway logs for upload errors, and check that web runs the v4 data model, not the `legacy` write mode.
+
+</Details>
+
+<Details id="tls-errors-ssl-cert-file">
+<Summary>Provider calls fail with TLS errors after you set `SSL_CERT_FILE`</Summary>
+
+The bundle replaces the trust store, so it must also contain the public root certificates. See [Gateway to Langfuse Web](#gateway-to-web).
+
+</Details>
+
+<Details id="certificate-errors">
+<Summary>Clients report certificate errors</Summary>
+
+The certificate must cover the gateway host and include the full chain. Test with `curl -v https://<gateway-host>/health`.
+
+</Details>
+
+</FaqDetails>
+
+When you report a problem, include the `langfuse-request-id` response header of the failing request. For problems with the gateway in your organization's setup, see the [AI Gateway troubleshooting](/faq/all/ai-gateway-error-codes).

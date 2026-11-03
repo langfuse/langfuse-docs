@@ -1,0 +1,28 @@
+---
+title: What are the known limitations of the AI Gateway beta?
+description: Request, response, tracing, cost, API, and provider limitations that apply during the Langfuse AI Gateway beta.
+tags: [ai-gateway]
+---
+
+# What are the known limitations of the AI Gateway beta?
+
+<Callout type="warning">
+  These limits and known issues apply during the beta. Check them before you
+  rely on gateway traces for audits or cost reporting.
+</Callout>
+
+- **Input over 5 MiB is not recorded.** When a request body exceeds 5 MiB, the generation has no input, and the metadata key `langfuse.gateway.request.input_omitted` says why (`size_limit`, with the limit in `langfuse.gateway.request.input_limit_bytes`). Output, usage, cost, and session are still recorded. Very long Codex and Claude Code sessions can hit this.
+- **Output over 1 MiB is recorded partially.** The response still reaches the client in full, but the recorded output is cut and marked incomplete.
+- **Cost bugs, fixes in progress:**
+  - Failed and cancelled calls on the OpenAI route get estimated usage and cost. Long cancelled Codex calls showed about $6 each.
+  - OpenAI `cache_write_tokens` are priced at $0.
+  - Anthropic 1-hour cache writes are priced at the 5-minute rate, 37.5% too low.
+- **One trace per model call by default** for Claude Code, OpenCode, and pi. Only Codex groups a turn into one trace out of the box. Use the Sessions view, or set up turn grouping for [Claude Code](/docs/ai-gateway/integrations/claude-code#turn-grouping), [OpenCode](/docs/ai-gateway/integrations/opencode#turn-grouping), or [pi](/docs/ai-gateway/integrations/pi#turn-grouping).
+- **Generic names.** Generations are named after the API format (`anthropic.messages`, `openai.responses`), and trace names default to the agent name.
+- **Duplicate metadata.** `attributes.user.id`, `attributes.session.id`, and `attributes.langfuse.trace.*` appear in metadata next to the canonical fields.
+- **OpenCode:** title calls can't be told apart from agent steps, and subagents get a separate session.
+- **Limits:** 16 MiB request body, 600 seconds per call, and 120 seconds without progress. There is no per-key or per-organization rate limit. Self-hosted deployments can change these limits, see [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway#configuration).
+- **No retries, fallbacks, or caching.**
+- **Not served:** websockets and realtime APIs.
+- **Decision models aren't supported.** The gateway doesn't serve the OpenAI Decisions API (`/v1/decisions`) or TypeSafe's System One API, and it has no TypeSafe provider credential. Requests to these endpoints return `404`. [Decision model evaluators](/docs/evaluation/evaluation-methods/decision-models) keep using their own [LLM connection](/docs/administration/llm-connection). Structured outputs (`response_format`, JSON schemas) on Chat Completions and Responses are passed through as usual.
+- **Untested:** Anthropic server tools (web search and fetch) and interactive Codex `/compact`.
