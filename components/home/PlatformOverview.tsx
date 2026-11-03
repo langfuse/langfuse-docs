@@ -66,7 +66,7 @@ const FEATURE_GROUPS: {
   features: { label: string; href: string }[];
 }[] = [
   {
-    title: "Observe",
+    title: "observe",
     features: [
       { label: "Tracing", href: "/docs/observability/overview" },
       {
@@ -77,14 +77,14 @@ const FEATURE_GROUPS: {
     ],
   },
   {
-    title: "Manage",
+    title: "manage",
     features: [
       { label: "Prompts", href: "/docs/prompt-management/overview" },
       { label: "Skills", href: "/docs/skill-management/overview" },
     ],
   },
   {
-    title: "Evaluate",
+    title: "evaluate",
     features: [
       { label: "Evals", href: "/docs/evaluation/overview" },
       { label: "Datasets", href: "/docs/evaluation/experiments/datasets" },
@@ -134,7 +134,7 @@ function Wordmark({
 
 function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <span className="font-mono text-[10px] uppercase leading-none tracking-wide text-text-tertiary">
+    <span className="font-mono text-[10px] leading-none text-text-tertiary">
       {children}
     </span>
   );
@@ -216,8 +216,8 @@ function GatewayNode({ className }: { className?: string }) {
       <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2">
           <Wordmark width={69} height={16} className="h-4 w-auto" />
-          <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none tracking-wide text-text-primary">
-            New
+          <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
+            new
           </span>
         </div>
         <Title>AI Gateway</Title>
@@ -278,7 +278,7 @@ function LangfuseNode({ className }: { className?: string }) {
         ))}
       </div>
 
-      <LangfuseSection title="In-app agent" className="p-4">
+      <LangfuseSection title="in-app agent" className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <Link
             href="/docs/api-and-data-platform/features/halo"
@@ -298,7 +298,7 @@ function LangfuseNode({ className }: { className?: string }) {
         </div>
       </LangfuseSection>
 
-      <LangfuseSection title="Every feature via" className="p-4">
+      <LangfuseSection title="every feature via" className="p-4">
         <ul className="grid grid-cols-4 gap-1.5">
           {ACCESS.map((item) => (
             <li key={item.label}>
