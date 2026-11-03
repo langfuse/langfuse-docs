@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen } from "lucide-react";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { TextHighlight } from "@/components/ui/text-highlight";
@@ -509,59 +510,20 @@ export function CompareLanding() {
         </div>
       </div>
 
-      <section
-        className="border-t border-line-structure bg-surface-cta-primary"
-        aria-labelledby="compare-cta"
-      >
-        <div
-          className={cn(
-            container,
-            "flex flex-col items-center gap-5 py-12 text-center lg:py-20",
-          )}
-        >
-          <h2
-            id="compare-cta"
-            className={cn(
-              heading,
-              "max-w-[640px] text-balance text-[32px] leading-[1.04] sm:text-[40px]",
-            )}
-          >
-            {content.headings.cta}
-          </h2>
-          <p className="max-w-[520px] text-[15px] text-text-secondary">
-            {content.copy.cta}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <Button
-              href="https://cloud.langfuse.com"
-              aria-label="Start free"
-              size="default"
-              className="h-9 px-3.5"
-            >
-              Start free
-            </Button>
-            <Button
-              href="#migrate"
-              aria-label="Migration guides"
-              variant="secondary"
-              size="default"
-              className="h-9 bg-transparent px-3.5"
-            >
-              Migration guides
-            </Button>
-            <span className="text-[13px] text-text-secondary">
-              or{" "}
-              <Link
-                href="/talk-to-us"
-                className="text-text-primary underline underline-offset-2"
-              >
-                Talk to us
-              </Link>
-            </span>
-          </div>
-          <p className="font-mono text-[11px] text-text-tertiary">
-            {content.copy.ctaNote}
-          </p>
+      <section className="border-t border-line-structure bg-surface-1">
+        <div className={cn(container, "py-10 sm:py-12")}>
+          <CustomerStoryCTA
+            className="mt-0"
+            headingAs="h2"
+            titleId="compare-cta"
+            title={content.headings.cta}
+            description={content.copy.cta}
+            primaryCtaHref="https://cloud.langfuse.com"
+            secondaryCtaLabel="Migration guides"
+            secondaryCtaHref="#migrate"
+            contactLabel="Talk to us"
+            footnote={content.copy.ctaNote}
+          />
         </div>
       </section>
     </div>
