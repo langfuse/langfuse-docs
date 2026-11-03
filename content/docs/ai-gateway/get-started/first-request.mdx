@@ -146,9 +146,10 @@ Export the gateway key:
  export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-Add this to the top of `~/.codex/config.toml` (`$CODEX_HOME/config.toml` if you set `CODEX_HOME`), before any `[table]` section:
+Add this to `~/.codex/config.toml` (`$CODEX_HOME/config.toml` if you set `CODEX_HOME`). Put `model` and `model_provider` next to your other top-level keys, before any `[table]` section, and the `[model_providers.langfuse]` table after them:
 
 ```toml filename="~/.codex/config.toml"
+model = "<model-id>"               # an OpenAI model ID
 model_provider = "langfuse"
 
 [model_providers.langfuse]

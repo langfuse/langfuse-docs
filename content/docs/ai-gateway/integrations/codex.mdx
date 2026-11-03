@@ -32,11 +32,11 @@ Codex reads the key from this variable when it starts:
  export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-The leading space keeps the key out of your shell history in most shells. To keep the setup across sessions, add the `export` lines to `~/.zshrc`.
+The leading space keeps the key out of shell history if your shell ignores commands that start with a space. To keep the setup across sessions, add the `export` lines to `~/.zshrc`.
 
 ### Add the gateway provider [#add-the-provider]
 
-Add this to the top of `~/.codex/config.toml` (`$CODEX_HOME/config.toml` if you set `CODEX_HOME`), before any `[table]` section, so `model_provider` stays a top-level key:
+Add this to `~/.codex/config.toml` (`$CODEX_HOME/config.toml` if you set `CODEX_HOME`). Put `model_provider` next to your other top-level keys, before any `[table]` section, and the `[model_providers.langfuse]` table after them:
 
 ```toml filename="~/.codex/config.toml"
 model_provider = "langfuse"
@@ -48,7 +48,7 @@ env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
 wire_api = "responses"
 ```
 
-To pick a model, set `model` to an ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). To add tags or other headers, use `http_headers`. See [request headers](/docs/ai-gateway/features/tracing#request-headers).
+To pick a model, add `model = "<model-id>"` next to `model_provider`, using an ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). To add tags or other headers, use `http_headers`. See [request headers](/docs/ai-gateway/features/tracing#request-headers).
 
 ### Start Codex [#start-codex]
 
