@@ -23,10 +23,12 @@ import {
 const CARD_HOVER =
   "corner-box-hover-stripes transition-[background,border-color] duration-180 ease-out";
 
-const YELLOW_BAND: CSSProperties = {
-  borderColor:
-    "color-mix(in oklab, var(--surface-cta-primary) 85%, transparent)",
-};
+const YELLOW =
+  "color-mix(in oklab, var(--surface-cta-primary) 85%, transparent)";
+// Highlighter is wider than the dark line. The head's base has to cover it,
+// and the stroke stops there so the yellow cap does not stick out past the tip.
+const BAND = 5;
+const RETURN_ARROW = 12;
 
 function StepCard({
   id,
@@ -100,12 +102,52 @@ function ReturnPath({
       aria-hidden
     >
       <div
-        className="absolute -inset-x-[2px] top-0 border-x-[5px] border-b-[5px]"
-        style={{ ...YELLOW_BAND, height: depth + 2 }}
+        className="absolute"
+        style={{
+          background: YELLOW,
+          left: -2,
+          width: BAND,
+          top: RETURN_ARROW - 1,
+          bottom: -2,
+        }}
       />
-      <div className="absolute inset-0 border-x border-b border-text-primary" />
-      <div className="absolute left-0 top-0 -translate-x-1/2">
-        <ArrowHead direction="up" dark />
+      <div
+        className="absolute"
+        style={{
+          background: YELLOW,
+          right: -2,
+          width: BAND,
+          top: 0,
+          bottom: -2,
+        }}
+      />
+      <div
+        className="absolute"
+        style={{
+          background: YELLOW,
+          left: -2,
+          right: -2,
+          height: BAND,
+          bottom: -2,
+        }}
+      />
+      <div
+        className="absolute bg-text-primary"
+        style={{ left: 0, width: 1, top: RETURN_ARROW - 1, bottom: 0 }}
+      />
+      <div
+        className="absolute bg-text-primary"
+        style={{ right: 0, width: 1, top: 0, bottom: 0 }}
+      />
+      <div
+        className="absolute bg-text-primary"
+        style={{ left: 0, right: 0, height: 1, bottom: 0 }}
+      />
+      <div
+        className="absolute z-10 -translate-x-1/2"
+        style={{ left: 0.5, top: 0 }}
+      >
+        <ArrowHead direction="up" dark size={RETURN_ARROW} />
       </div>
       <span
         className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-2 py-0.5"
@@ -219,12 +261,52 @@ function CompactColumn({ active }: { active: LoopStepId }) {
       }}
     >
       <div
-        className="absolute -inset-y-[2px] left-0 -right-[2px] border-y-[5px] border-r-[5px]"
-        style={YELLOW_BAND}
+        className="absolute"
+        style={{
+          background: YELLOW,
+          left: RETURN_ARROW - 1,
+          right: -2,
+          top: -2,
+          height: BAND,
+        }}
       />
-      <div className="absolute inset-0 border-y border-r border-text-primary" />
-      <div className="absolute left-0 top-0 -translate-y-1/2">
-        <ArrowHead direction="left" dark />
+      <div
+        className="absolute"
+        style={{
+          background: YELLOW,
+          left: 0,
+          right: -2,
+          bottom: -2,
+          height: BAND,
+        }}
+      />
+      <div
+        className="absolute"
+        style={{
+          background: YELLOW,
+          right: -2,
+          width: BAND,
+          top: -2,
+          bottom: -2,
+        }}
+      />
+      <div
+        className="absolute bg-text-primary"
+        style={{ left: RETURN_ARROW - 1, right: 0, top: 0, height: 1 }}
+      />
+      <div
+        className="absolute bg-text-primary"
+        style={{ left: 0, right: 0, bottom: 0, height: 1 }}
+      />
+      <div
+        className="absolute bg-text-primary"
+        style={{ right: 0, width: 1, top: 0, bottom: 0 }}
+      />
+      <div
+        className="absolute z-10 -translate-y-1/2"
+        style={{ left: 0, top: 0.5 }}
+      >
+        <ArrowHead direction="left" dark size={RETURN_ARROW} />
       </div>
       <span className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-0.5 py-2 [writing-mode:vertical-rl]">
         <MonoLabel className="text-text-secondary">{label}</MonoLabel>
@@ -259,7 +341,7 @@ function CompactColumn({ active }: { active: LoopStepId }) {
       <div className="absolute inset-y-0 right-3 w-11">
         {sideReturn(1, 0, 18, "iterate", 10)}
         {sideReturn(4, 3, 18, "iterate", -10)}
-        {sideReturn(4, 0, 40, "deploy")}
+        {sideReturn(4, 0, 40, "deploy", -10)}
       </div>
     </div>
   );

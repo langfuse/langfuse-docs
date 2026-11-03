@@ -90,33 +90,36 @@ export function PulseDot({ active }: { active: boolean }) {
 
 type Direction = "left" | "right" | "up" | "down";
 
-const ROTATION: Record<Direction, number> = {
-  right: 0,
-  down: 90,
-  left: 180,
-  up: 270,
+// Drawn per direction so the tip stays crisp. Rotating one triangle blurs
+// these small heads and lets the stroke show through the edges.
+const ARROW_PATH: Record<Direction, string> = {
+  right: "M 0 0 L 10 5 L 0 10 Z",
+  down: "M 0 0 L 10 0 L 5 10 Z",
+  left: "M 10 0 L 0 5 L 10 10 Z",
+  up: "M 0 10 L 10 10 L 5 0 Z",
 };
 
 export function ArrowHead({
   direction,
   className,
   dark,
+  size = 8,
 }: {
   direction: Direction;
   className?: string;
   dark?: boolean;
+  size?: number;
 }) {
   return (
     <svg
       aria-hidden
-      width="8"
-      height="8"
+      width={size}
+      height={size}
       viewBox="0 0 10 10"
       className={cn("shrink-0", className)}
-      style={{ transform: `rotate(${ROTATION[direction]}deg)` }}
     >
       <path
-        d="M 0 0 L 10 5 L 0 10 z"
+        d={ARROW_PATH[direction]}
         fill={dark ? "var(--text-primary)" : "var(--text-secondary)"}
       />
     </svg>
