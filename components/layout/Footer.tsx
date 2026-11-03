@@ -48,10 +48,6 @@ const menuColumns: FooterSection[][] = [
       items: [
         // "Documentation" is already listed under Developers.
         ...toFooterLinks(productLinks.filter((link) => link.href !== "/docs")),
-        {
-          name: "Playground",
-          href: "/docs/prompt-management/features/playground",
-        },
         { name: "Pricing", href: "/pricing" },
         { name: "Enterprise", href: "/enterprise" },
       ],
