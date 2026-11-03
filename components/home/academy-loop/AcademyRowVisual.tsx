@@ -74,9 +74,13 @@ function StepCard({
   );
 }
 
+// Space between a box edge and the return-path stroke / arrow tip.
+const ARROW_CLEARANCE = 8;
+
 /**
  * U-shaped return path drawn under the row. `left`/`right` are CSS insets
- * that land on card centers; the arrow points up into the left end.
+ * that land on card centers. The path starts below the cards so the arrow
+ * points up at the left box without crossing its border.
  */
 function ReturnPath({
   left,
@@ -91,8 +95,8 @@ function ReturnPath({
 }) {
   return (
     <div
-      className="absolute top-0"
-      style={{ left, right, height: depth }}
+      className="absolute"
+      style={{ left, right, top: ARROW_CLEARANCE, height: depth }}
       aria-hidden
     >
       <div
@@ -100,7 +104,7 @@ function ReturnPath({
         style={{ ...YELLOW_BAND, height: depth + 2 }}
       />
       <div className="absolute inset-0 border-x border-b border-text-primary" />
-      <div className="absolute left-0 top-0 -translate-x-1/2 -translate-y-[3px]">
+      <div className="absolute left-0 top-0 -translate-x-1/2">
         <ArrowHead direction="up" dark />
       </div>
       <span
@@ -168,7 +172,7 @@ function WideRow({ active }: { active: LoopStepId }) {
         ))}
       </div>
 
-      <div className="relative h-[84px]">
+      <div className="relative" style={{ height: 84 + ARROW_CLEARANCE }}>
         <ReturnPath
           left={center(0, 10)}
           right={fromRight(1)}
@@ -219,7 +223,7 @@ function CompactColumn({ active }: { active: LoopStepId }) {
         style={YELLOW_BAND}
       />
       <div className="absolute inset-0 border-y border-r border-text-primary" />
-      <div className="absolute left-0 top-0 -translate-x-[5px] -translate-y-1/2">
+      <div className="absolute left-0 top-0 -translate-y-1/2">
         <ArrowHead direction="left" dark />
       </div>
       <span className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-0.5 py-2 [writing-mode:vertical-rl]">
@@ -228,8 +232,12 @@ function CompactColumn({ active }: { active: LoopStepId }) {
     </div>
   );
 
+  // 56px is the return rail (right-3 + w-11). Clearance keeps the tips off the cards.
   return (
-    <div className="relative pr-14 md:hidden" style={{ height: total }}>
+    <div
+      className="relative md:hidden"
+      style={{ height: total, paddingRight: 56 + ARROW_CLEARANCE }}
+    >
       <div className="flex flex-col">
         {LOOP_ORDER.map((id, i) => (
           <div key={id} className="flex flex-col">
