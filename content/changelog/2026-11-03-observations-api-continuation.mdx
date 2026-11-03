@@ -13,7 +13,23 @@ You can now continue expensive Observations API v2 queries across requests when 
 
 A page may contain fewer observations than `limit`, including none, while `meta.cursor` is present. Keep requesting pages until `meta.cursor` is absent.
 
-For example, an export with `limit=100` might receive an empty page with a cursor, then 70 observations with another cursor, then 30 with no cursor. It should collect all 100 observations and stop after the third page.
+For example, with the [Python SDK](/docs/observability/sdk/overview) configured for your project:
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+cursor = None
+
+while True:
+    page = langfuse.api.observations.get_many(limit=100, cursor=cursor)
+    for observation in page.data:
+        print(observation.id)
+
+    cursor = getattr(page.meta, "cursor", None)
+    if not cursor:
+        break
+```
 
 <Callout type="warning">
 Some of our documentation examples incorrectly stopped pagination when a page was empty. If you copied one of those examples, update your loop to check `meta.cursor` instead of the number of returned observations. Otherwise, it may stop before retrieving all results.
