@@ -83,19 +83,62 @@ function contentsUrl(repoPath) {
   return `${API_CONTENTS_URL}/${encodeRepoPath(repoPath)}?ref=${REF}`;
 }
 
-async function fetchGitHub(repoPath, accept) {
-  const response = await fetch(contentsUrl(repoPath), {
-    headers: githubHeaders(accept),
-  });
+const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const MAX_FETCH_ATTEMPTS = 5;
 
-  if (!response.ok) {
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function retryDelayMs(attempt, response) {
+  const header = response?.headers?.get("retry-after");
+  const seconds = header == null ? Number.NaN : Number(header);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.min(seconds * 1000, 20_000);
+  }
+  const backoff = 400 * 2 ** (attempt - 1);
+  return backoff + Math.floor(Math.random() * 250);
+}
+
+async function fetchGitHub(repoPath, accept) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
+    let response;
+    try {
+      response = await fetch(contentsUrl(repoPath), {
+        headers: githubHeaders(accept),
+      });
+    } catch (error) {
+      lastError = error;
+      if (attempt === MAX_FETCH_ATTEMPTS) throw error;
+      console.warn(
+        `Retrying ${repoPath} after a network error (attempt ${attempt}/${MAX_FETCH_ATTEMPTS})`,
+      );
+      await delay(retryDelayMs(attempt));
+      continue;
+    }
+
+    if (response.ok) return response;
+
     const body = await response.text();
-    throw new Error(
+    lastError = new Error(
       `Failed to fetch ${repoPath} from ${REPO_SLUG}@${REF}: ${response.status} ${response.statusText}\n${body}`,
     );
+    if (
+      !RETRYABLE_STATUSES.has(response.status) ||
+      attempt === MAX_FETCH_ATTEMPTS
+    ) {
+      throw lastError;
+    }
+
+    console.warn(
+      `Retrying ${repoPath} after ${response.status} (attempt ${attempt}/${MAX_FETCH_ATTEMPTS})`,
+    );
+    await delay(retryDelayMs(attempt, response));
   }
 
-  return response;
+  throw lastError;
 }
 
 async function fetchJson(repoPath) {
