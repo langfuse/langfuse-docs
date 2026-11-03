@@ -72,48 +72,6 @@ For work inside Langfuse, use Halo for the same investigation and resource-manag
   ]}
 />
 
-<details>
-<summary>Transcript: Create a dashboard</summary>
-
-**0:00** Today I want to show you an example of how you can use Halo to create dashboards. In this example project, I just ask Halo: "Help me create a useful dashboard to track metrics relevant to my application." In the background, Halo goes through the project's traces to understand what the project is about and which metrics would be relevant. I already have scores attached to these traces because I set up evaluators with Halo before, so it will likely use these too to determine what's important and what I would like to track.
-
-**0:31** It creates multiple widgets for my dashboard. The first time it creates a widget, it asks me whether I want to approve creating widgets. I click **Always approve**, so for the rest of this conversation it won't ask me for permission to create widgets again. It goes off, creates these widgets, and then adds them to a dashboard.
-
-**0:49** Once it's done, Halo shows **Open dashboards**, and I can look at what Halo has created for me. You see the LLM cost and conversations over time, for example, and the answer category: sometimes there was no question, the question was answered, or the agent declined to answer. Errors by step, because there are multiple steps and it's important to know what to fix. And which tools are used most: here, the get booking tool is used the most. These give me insight into where I would have the biggest impact if I want to improve something.
-
-**1:22** In this case, I gave Halo a very open-ended task: I just asked it to help me create a dashboard that would be useful for tracking my application. Most of the time you already have some metrics in mind. You can ask Halo to create those specifically, and that is much faster than configuring the widgets yourself.
-
-</details>
-
-<details>
-<summary>Transcript: Investigate and fix a regression</summary>
-
-**0:00** Hi all, and welcome back. Today I'll be introducing you to Halo, Langfuse's in-app AI assistant, and today it will help us solve a business problem. I've brought this timer to show you how long the solution actually took, because I'll be speeding up certain sections of the video so you don't have to wait for AI answers. So let's get cracking.
-
-**0:21** Our business has told us that we're getting reports from customers who are dissatisfied with our AI application process because they're getting rejected. So let's figure out what's actually happening. Looking at the usage in our Langfuse dashboard, everything looks okay. But if we go down to scores, we can see that user disagreement is on the rise, and we want to find out why.
-
-**0:49** So let's ask our AI assistant. I open Halo and ask it: "Halo, we see that user disagreement is on the rise. Can you figure out why users are being dissatisfied with our solution at the moment?"
-
-_The video speeds up while Halo works._
-
-**1:15** All right, Halo has come back with an answer. It found the time period when the dissatisfaction started, and that it correlates with a government subsidy that helps people buy electric vehicles. Customers are getting rejected because the current production prompt version is stale.
-
-**1:37** Let's check whether that's actually the case. In our loan application form, we enter the vehicle price and the pre-approved credit line of 32,000. With the €6,000 subsidy, we should be just within the margin. We submit this to our application and see what we get back: we've been declined. So this is actually the case, and I can understand why people are dissatisfied.
-
-**2:03** Let's have a look at what Halo suggested as a fix. Halo found that we already have a version 2 of the prompt prepared. It's currently in development and testing, and it should fix the problem. So I'd like Halo to figure out whether it actually solves it: "Halo, can you have a look at prompt version 2 and test it against a couple of these failed traces that we've seen? And if that successfully solves the problem, can you set it to production for me?"
-
-_The video speeds up while Halo tests the prompt. Halo asks for approval before it changes the prompt labels, and the presenter approves._
-
-**2:49** All right, Halo has been working for a while. It tells us that it tested version 2 against the disputed traces from the past, and that the ones that were originally rejected would now be approved. It then set version 2 of the prompt to production so our customers use it from now on.
-
-**3:21** Let's see how this looks on the front end now. We go back to our loan application and use the exact same numbers: 38,000 for the vehicle price and 32,000 for the pre-approved credit line. We submit this, and we can see that Halo has fixed our problem: the application is approved.
-
-**3:41** So what happened? Halo looked at all of our observations and traces and found the actual problem. Then it looked at the other assets in Langfuse and figured out that there is already a prompt version that fixes it. It tested whether that version actually fixes the problem, and whether it would regress the cases where nothing should change. After it found that this would work well in production, it promoted the prompt, and now our users can apply for electric vehicle loans without any problems.
-
-**4:18** This is the power of Halo. I'd be really happy to learn whether you've used it and what your experience was. Solving this entire problem took roughly seven minutes, without touching anything in Langfuse except our little chat assistant window. Thanks very much, and see you next time.
-
-</details>
-
 ## How it works [#how-it-works]
 
 Halo uses the same [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) project tools that external agents can connect to, together with documentation search and sandboxed code execution. The in-app experience adds your current UI context (the trace, observation, session, or dashboard you are viewing, plus your name, browser language, and timezone), background execution, notifications, and approvals in Langfuse.
