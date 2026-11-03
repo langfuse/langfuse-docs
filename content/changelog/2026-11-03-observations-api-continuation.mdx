@@ -13,16 +13,25 @@ We're improving Observations API v2 reliability so the small percentage of queri
 
 A page may contain fewer observations than `limit`, including none, while `meta.cursor` is present. Keep requesting pages until `meta.cursor` is absent.
 
-For example, with the [Python SDK](/docs/observability/sdk/overview) configured for your project:
+With the [Python SDK](/docs/observability/sdk/overview) configured for your project, this fetches generation observations from the last seven days:
 
 ```python
+from datetime import datetime, timedelta, timezone
 from langfuse import get_client
 
 langfuse = get_client()
+end_time = datetime.now(timezone.utc)
+start_time = end_time - timedelta(days=7)
 cursor = None
 
 while True:
-    page = langfuse.api.observations.get_many(limit=100, cursor=cursor)
+    page = langfuse.api.observations.get_many(
+        type="GENERATION",
+        from_start_time=start_time,
+        to_start_time=end_time,
+        limit=100,
+        cursor=cursor,
+    )
     for observation in page.data:
         print(observation.id)
 
