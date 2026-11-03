@@ -451,11 +451,8 @@ for _ in range(PAGES_TO_FETCH):
         fields="core,basic,io,trace_context",
         is_root_observation=True,
     )
-    if not response.data:
-        break
-
-    root_observations.extend(response.data)
     cursor = getattr(response.meta, "cursor", None)
+    root_observations.extend(response.data)
     if not cursor:
         break
 ```

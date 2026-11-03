@@ -1,0 +1,20 @@
+---
+date: 2026-11-03
+title: Continue observations queries that would otherwise time out
+description: Short or empty pages can include a continuation cursor so expensive observations queries can make progress across requests.
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+We're updating the Observations API v2 to give the small percentage of requests that currently time out a way to succeed.
+
+A page may contain fewer observations than `limit`, including none, while `meta.cursor` is present. Keep requesting pages until `meta.cursor` is absent.
+
+<Callout type="warning">
+Some of our documentation examples incorrectly stopped pagination when a page was empty. If you copied one of those examples, update your loop to check `meta.cursor` instead of the number of returned observations. Otherwise, it may stop before retrieving all results.
+</Callout>
+
+See the [cursor pagination guide](/docs/api-and-data-platform/features/public-api#observations-pagination) for the response contract.
