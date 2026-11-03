@@ -24,30 +24,21 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
 
-### Store the key in Codex's `.env` [#store-the-key]
+### Export the key [#export-the-key]
 
-Codex loads `$CODEX_HOME/.env` (`~/.codex/.env` when `CODEX_HOME` is not set) every time it starts, in the TUI and in `codex exec`. Store the gateway key there once instead of exporting it in every shell:
+Add the gateway key to your shell profile, for example `~/.zshrc` or `~/.bashrc`:
 
 ```sh
-CODEX_DIR="${CODEX_HOME:-$HOME/.codex}"
-mkdir -p -m 700 "$CODEX_DIR"
-touch "$CODEX_DIR/.env" && chmod 600 "$CODEX_DIR/.env"
-cat >> "$CODEX_DIR/.env" <<'EOF'
-LANGFUSE_GATEWAY_KEY=<your-gateway-key>
-EOF
+export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 ```
 
-Replace the placeholder with your gateway key. The file is only readable by you (`chmod 600`). Never commit it or copy it into a project.
-
-- Values in this file **override** variables with the same name exported in your shell.
-- Codex ignores keys in this file that start with `CODEX_`, so `CODEX_HOME` itself must be set in your shell profile. If it is set, it must point to an existing directory.
-- Only Codex reads this file. To [list models](/docs/ai-gateway/get-started/first-request#list-models) with `curl`, export the key in that shell as well.
+Then reload your shell, for example with `source ~/.zshrc`.
 
 ### Add the gateway provider [#add-the-provider]
 
-Add a provider to `~/.codex/config.toml` (or a project's `.codex/config.toml`). `env_key` reads the key that Codex loaded from `.env`:
+Add a provider to `~/.codex/config.toml`:
 
-```toml
+```toml filename="~/.codex/config.toml"
 model = "<model-id>"               # an OpenAI model ID from /models
 model_provider = "langfuse"
 
@@ -55,13 +46,11 @@ model_provider = "langfuse"
 name = "Langfuse AI Gateway"
 base_url = "https://gateway.cloud.langfuse.com/openai/v1"
 env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
-wire_api = "responses"             # the verified wire API
-http_headers = { "langfuse-tags" = "codex,<team>", "langfuse-environment" = "local", "langfuse-metadata" = "repo:<repo>" }
+wire_api = "responses"
+http_headers = { "langfuse-tags" = "codex,<team>", "langfuse-environment" = "local" }   # optional
 ```
 
-Then start Codex as usual with `codex`. No `export` is needed.
-
-Use `env_http_headers` for any header you want to vary per run, for example `"langfuse-session-id" = "LF_SESSION"`, and set that variable per run (`LF_SESSION=<id> codex`). Keep per-run variables such as `LF_SESSION` out of `.env`: a value there overrides the shell and would merge all your sessions into one. See [request headers](/docs/ai-gateway/features/tracing#request-headers).
+Pick the model ID from [`/models`](/docs/ai-gateway/get-started/first-request#list-models). For optional headers, see [request headers](/docs/ai-gateway/features/tracing#request-headers).
 
 ### Verify [#verify]
 
