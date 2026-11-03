@@ -1,0 +1,70 @@
+---
+title: REST API
+seoTitle: "Langfuse AI Gateway REST API: models, Responses, Chat Completions, Messages (beta)"
+description: Base URLs, authentication, and endpoints of the Langfuse AI Gateway, including the models endpoints and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages APIs.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# REST API
+
+<AiGatewayBetaCallout />
+
+You can call the gateway directly over HTTP, for example from a language without an SDK or from a script. Request and response bodies are the model provider's own, so for parameters and fields, see the provider's API reference linked in the [endpoints](#routes) table. This page covers what's specific to the gateway: base URLs, authentication, and endpoints.
+
+## Base URLs [#base-urls]
+
+| Route     | Base URL                                          |
+| --------- | ------------------------------------------------- |
+| OpenAI    | `https://gateway.cloud.langfuse.com/openai/v1`    |
+| Anthropic | `https://gateway.cloud.langfuse.com/anthropic/v1` |
+
+These are the EU URLs. For other regions, replace the host with your [gateway host](#gateway-hosts).
+
+### Gateway hosts [#gateway-hosts]
+
+| Region | Gateway host                               |
+| ------ | ------------------------------------------ |
+| EU     | `https://gateway.cloud.langfuse.com`       |
+| US     | `https://gateway.us.cloud.langfuse.com`    |
+| JP     | `https://gateway.jp.cloud.langfuse.com`    |
+| HIPAA  | `https://gateway.hipaa.cloud.langfuse.com` |
+
+A gateway key only works on its own region's host. On self-hosted Langfuse, use the gateway URL your deployment configured (`LANGFUSE_AI_GATEWAY_PUBLIC_URL`, see [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway)).
+
+## Authentication [#authentication]
+
+Every endpoint requires a [gateway API key](/docs/ai-gateway/features/api-keys):
+
+- **OpenAI route:** `Authorization: Bearer <gateway key>`
+- **Anthropic route:** `x-api-key: <gateway key>`, or a Bearer token. If you send both, they must have the same value.
+
+## Endpoints [#routes]
+
+| Endpoint                                   | Provider reference                                                                                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /openai/v1/models`                    | [List models](https://developers.openai.com/api/reference/resources/models/methods/list)                                       |
+| `GET /anthropic/v1/models`                 | [List models](https://platform.claude.com/docs/en/api/models/list)                                                             |
+| `POST /openai/v1/responses`                | [Create a response](https://developers.openai.com/api/reference/resources/responses/methods/create)                            |
+| `POST /openai/v1/responses/compact`        | [Compact a response](https://developers.openai.com/api/reference/resources/responses/methods/compact)                          |
+| `POST /openai/v1/chat/completions`         | [Create a chat completion](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) |
+| `POST /anthropic/v1/messages`              | [Create a message](https://platform.claude.com/docs/en/api/messages/create)                                                    |
+| `POST /anthropic/v1/messages/count_tokens` | [Count tokens](https://platform.claude.com/docs/en/api/messages/count_tokens)                                                  |
+
+The models endpoints return the models your key can call, with IDs in the form `<credential>:<model>` (see [model IDs](/docs/ai-gateway/features/models#model-ids)). The gateway doesn't translate between formats, so the OpenAI endpoints need an OpenAI provider credential and the Anthropic endpoints an Anthropic credential.
+
+<Callout type="info">
+  Other paths return `404`, including websockets and realtime APIs. Request
+  bodies must be uncompressed: a `Content-Encoding` other than `identity` fails
+  with `415`.
+</Callout>
+
+## Streaming usage [#streaming-usage]
+
+On streamed Chat Completions requests, the gateway sets `stream_options.include_usage` so that every call gets token usage and cost.
+
+<Callout type="warning">
+  Your client receives a final chunk with an **empty `choices` array** and a
+  `usage` object, just before `data: [DONE]`. Code that reads
+  `chunk.choices[0]` on every chunk needs a guard.
+</Callout>

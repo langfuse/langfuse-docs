@@ -1,18 +1,26 @@
 ---
-title: Vercel AI SDK
+title: "Vercel AI SDK with the Langfuse AI Gateway"
+sidebarTitle: Vercel AI SDK (gateway)
 seoTitle: "Use the Vercel AI SDK with the Langfuse AI Gateway (beta)"
 description: Call OpenAI and Anthropic models through the Langfuse AI Gateway with the Vercel AI SDK by pointing its OpenAI and Anthropic providers at the gateway.
+logo: /images/integrations/vercel_ai_sdk_icon.png
+logoAppearance: multicolor
+category: Integrations
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
-# Vercel AI SDK
+# Vercel AI SDK with the Langfuse AI Gateway
 
 <AiGatewayBetaCallout />
 
 Use the [AI SDK](https://ai-sdk.dev/docs/introduction) by Vercel with the gateway by pointing its OpenAI or Anthropic provider at the gateway. Each provider needs the matching provider credential in your organization: `OPENAI` for OpenAI models, `ANTHROPIC` for Anthropic models.
 
-Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/sdks-and-apis/rest-api#list-models).
+<Callout type="info">
+  For tracing the Vercel AI SDK without the gateway, see the [Vercel AI SDK integration](/integrations/frameworks/vercel-ai-sdk).
+</Callout>
+
+Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/features/rest-api#routes).
 
 ## Configure the provider [#configure-the-provider]
 

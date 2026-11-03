@@ -1,18 +1,26 @@
 ---
-title: Anthropic SDK
+title: "Anthropic SDK with the Langfuse AI Gateway"
+sidebarTitle: Anthropic SDK (gateway)
 seoTitle: "Use the Anthropic SDK with the Langfuse AI Gateway (beta)"
 description: Call Claude models through the Langfuse AI Gateway with the official Anthropic client SDKs for Python and TypeScript, using the Messages API.
+logo: /images/integrations/anthropic_icon.png
+logoAppearance: dark
+category: Integrations
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
-# Anthropic SDK
+# Anthropic SDK with the Langfuse AI Gateway
 
 <AiGatewayBetaCallout />
 
 Use Anthropic's official [client SDKs](https://platform.claude.com/docs/en/cli-sdks-libraries/overview) for Python and TypeScript with the gateway by changing the base URL and the API key. Requests need an `ANTHROPIC` provider credential in your organization.
 
-Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/sdks-and-apis/rest-api#list-models).
+<Callout type="info">
+  For tracing the Anthropic SDK without the gateway, see the [Anthropic (Python)](/integrations/model-providers/anthropic) and [Anthropic (JS/TS)](/integrations/model-providers/anthropic-js) integrations.
+</Callout>
+
+Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/features/rest-api#routes).
 
 ## Configure the client [#configure-the-client]
 
@@ -161,4 +169,4 @@ const message = await client.messages.create(
 
 ## Claude Agent SDK [#claude-agent-sdk]
 
-The [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) runs Claude Code under the hood, so it is configured with the same environment variables as Claude Code, not with a client base URL. Set `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` in the environment of the agent process, as described in the [Claude Code guide](/docs/ai-gateway/coding-agents/claude-code#setup).
+The [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) runs Claude Code under the hood, so it is configured with the same environment variables as Claude Code, not with a client base URL. Set `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` in the environment of the agent process, as described in the [Claude Code guide](/integrations/developer-tools/claude-code-gateway#setup).

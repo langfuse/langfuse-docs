@@ -1,16 +1,24 @@
 ---
-title: GitHub Copilot
+title: "GitHub Copilot with the Langfuse AI Gateway"
+sidebarTitle: GitHub Copilot (gateway)
 seoTitle: "Trace GitHub Copilot CLI and the GitHub Copilot app with the Langfuse AI Gateway (beta)"
 description: Route GitHub Copilot CLI and the GitHub Copilot app through the Langfuse AI Gateway to trace every model call, tool call, token, and cost.
+logo: /images/integrations/github_copilot_icon.svg
+logoAppearance: dark
+category: Integrations
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
-# GitHub Copilot
+# GitHub Copilot with the Langfuse AI Gateway
 
 <AiGatewayBetaCallout />
 
 Both Copilot surfaces support bring-your-own-key (BYOK) model providers. Only those models go through the gateway. GitHub-hosted models in the same picker are not traced.
+
+<Callout type="info">
+  For tracing GitHub Copilot without the gateway, see the [GitHub Copilot integration](/integrations/developer-tools/github-copilot).
+</Callout>
 
 - [Copilot CLI](#cli): `ANTHROPIC` or `OPENAI` provider credential.
 - [GitHub Copilot app](#app): `OPENAI` provider credential. BYOK in the app is in public preview.
@@ -54,7 +62,7 @@ copilot
 </Tabs>
 
 - The Anthropic base URL has **no** `/v1`. The OpenAI base URL **includes** `/v1`.
-- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/sdks-and-apis/rest-api#chat-completions)), which has not been verified with Copilot.
+- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/features/rest-api#routes)), which has not been verified with Copilot.
 - If `~/.copilot/providers.json` (or the file in `COPILOT_PROVIDERS_CONFIG`) already lists providers or models, it takes precedence and these variables have no effect.
 - Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/ai-gateway/features/tracing#request-headers) such as `langfuse-tags` cannot be set. Use [key metadata](/docs/ai-gateway/features/api-keys#key-metadata) instead.
 

@@ -1,41 +1,24 @@
 ---
-title: Set up the gateway
+title: Set up Gateway as an admin
 seoTitle: "Set up the Langfuse AI Gateway for your team (beta)"
 description: Set up the Langfuse AI Gateway for an organization. Choose the ingestion project and ingestion mode, add provider credentials, choose models, give your team access, and issue gateway API keys.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+import { FaqPreview } from "@/components/faq/FaqPreview";
+import { TextHighlight } from "@/components/ui/text-highlight";
 
-# Set up the gateway
+# Set up Gateway as an admin
 
 <AiGatewayBetaCallout />
 
-This page walks an organization admin through preparing the gateway for a team. Complete the steps in order. Each step links to the page that covers its topic in full. If you only want to call the gateway, go to [Send your first request](/docs/ai-gateway/get-started/first-request).
+This page walks through how to set up the AI Gateway for your organization. Read [Core concepts](/docs/ai-gateway/concepts) first to understand how the gateway works. If you want to use the gateway with your coding agent/AI app as a user, go to [Send your first request](/docs/ai-gateway/get-started/first-request).
 
-## Before you begin [#prerequisites]
-
-- **Langfuse Cloud:** the gateway is available to every organization, with no extra setup.
-- **Self-hosted Langfuse:** the gateway is a separate service that runs next to Langfuse. Until it is deployed, the AI Gateway settings show a notice instead of the setup page. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
-- **Role:** the setup steps need the Owner or Admin [organization role](/docs/administration/rbac).
-
-All gateway settings are under **Organization settings → AI Gateway**.
+_**Self-hosting Langfuse?** The gateway is a separate service that runs next to Langfuse. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway)._
 
 ## Setup steps [#setup-steps]
 
-<Steps>
-
-### Configure the gateway [#configure-the-gateway]
-
-Go to **Organization settings → AI Gateway → Setup** and choose:
-
-- the **ingestion project**, where the gateway records generations
-- the [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
-
-Both are set per organization, not per key. The other AI Gateway pages stay disabled until an ingestion project is set (not needed with `NONE` on self-hosted Langfuse).
-
-### Add provider credentials [#add-provider-connections]
-
-On the same page, select **Add credential** and add an OpenAI or Anthropic API key. The key is validated when you save it. The credential's **name** becomes the prefix of its [model IDs](/docs/ai-gateway/features/models#model-ids), so renaming a credential changes them.
+This guide helps you set up Langfuse Gateway as an admin.
 
 <Callout type="warning">
   **HIPAA region:** requests are forwarded to the provider you configure, using
@@ -44,25 +27,53 @@ On the same page, select **Add credential** and add an OpenAI or Anthropic API k
   Langfuse](/security/hipaa) and a BAA with that provider.
 </Callout>
 
-Provider credentials are separate from project [LLM connections](/docs/administration/llm-connection), which power the Playground and LLM-as-a-Judge.
+<Steps>
 
-### Choose models [#choose-models]
+### Configure the gateway [#configure-the-gateway]
+
+Go to **Organization settings → AI Gateway → Setup** and choose:
+
+- the **project**, where the gateway records generations
+- the [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
+
+<TextHighlight className="italic">
+  TODO: add a screen recording for this step.
+</TextHighlight>
+
+### Add provider credentials [#add-provider-connections]
+
+On the same page, select **Add credential** and add [API keys](/docs/ai-gateway/concepts#credential-types) for model providers you’d like to use. The credential's **name** becomes the prefix of its [model IDs](/docs/ai-gateway/features/models#model-ids).
+
+<TextHighlight className="italic">
+  TODO: add a screen recording for this step.
+</TextHighlight>
+
+<Callout type="info">
+  Provider credentials are separate from project [LLM
+  connections](/docs/administration/llm-connection), which power the Playground
+  and LLM-as-a-Judge.
+</Callout>
+
+### Configure allowed models (optional) [#choose-models]
 
 By default, a credential allows every model the provider offers, including models the provider publishes later. To restrict a credential to selected models, turn models off on its models page. See [Model management](/docs/ai-gateway/features/models#manage-models).
 
 ### Give your team access [#give-your-team-access]
 
-Use **Notify your team** in the setup guide to email teammates. People who are not in the organization yet are invited with the AI Gateway role: they can call the gateway and manage their own keys, but can't see any projects. This role suits people who only need to call models, for example developers who use the gateway for their coding agent.
+Use **Notify your team** to email teammates. People who are not in the organization yet are invited with the AI Gateway role: they can call the gateway and manage their own keys, but can't see any projects. This role suits people who only need to call models, for example developers who use the gateway for their coding agent.
 
-You can change anyone's role later in the organization's members settings, for example to let them see their traces in the ingestion project. See [roles and permissions](/docs/administration/rbac) for what each role can do.
-
-<Callout type="warning">
-  To see traces, people need access to the ingestion project. Everyone with
-  access to that project sees every gateway trace in it, not only their own.
+<Callout type="info">
+  You can change anyone's role later in the organization's members settings,
+  for example to let them see their traces in the ingestion project. See [roles
+  and permissions](/docs/administration/rbac) for what each role can do.
 </Callout>
 
-### Create a gateway API key [#create-a-gateway-api-key]
-
-Share [Send your first request](/docs/ai-gateway/get-started/first-request) with your developers: it shows how to create a gateway key and call a model. Gateway keys can only call the gateway and have no other permissions in Langfuse, see [API keys](/docs/ai-gateway/features/api-keys).
-
 </Steps>
+
+## Not seeing what you expected? [#not-seeing-what-you-expected]
+
+<FaqPreview tags={["ai-gateway-get-started"]} />
+
+## Next steps [#next-steps]
+
+- [Enable users to start using Gateway](/docs/ai-gateway/get-started/first-request)

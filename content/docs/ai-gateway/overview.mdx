@@ -5,65 +5,36 @@ description: Send OpenAI and Anthropic API calls through Langfuse to trace every
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+import { TextHighlight } from "@/components/ui/text-highlight";
+import { SignupCTA } from "@/components/SignupCTA";
 
 # AI Gateway
 
 <AiGatewayBetaCallout />
 
-The Langfuse AI Gateway sits between your apps or coding agents and OpenAI or Anthropic. You point your client at Langfuse instead of the provider, and every model call shows up in Langfuse. You don't need an SDK or code changes: you only change the base URL and the API key.
+AI is being used in many different areas of a company, with engineers using coding agents, often dozens of AI apps running in production, internally or externally. With AI usage on the rise, a company needs a way to answer questions like **"Who in our organization uses which models, for what, and what does it cost?"**
 
-What you get:
+An AI Gateway enables companies to enforce AI traffic to go through one unified system, and companies get an observability platform to analyze and make decisions based on AI usage data.
 
-- **A trace for every call**, with the model, token usage, and cost.
-- **No shared provider keys:** your OpenAI and Anthropic keys stay in Langfuse. Each person or service uses its own [gateway API key](/docs/ai-gateway/features/api-keys).
-- **Control over models:** admins choose which models gateway keys can call. See [Model management](/docs/ai-gateway/features/models).
-- **Cost tracking:** see spend and usage per user, API key, and model. See [Analytics](/docs/ai-gateway/features/analytics).
-- **The rest of Langfuse:** gateway traces work with [evaluations](/docs/evaluation/overview), [dashboards](/docs/metrics/overview), and the [public API](/docs/api-and-data-platform/features/public-api) like any other trace.
+<TextHighlight>TODO: add an image here. do we have something?</TextHighlight>
 
-## Choose a request format [#request-formats]
+## What you can do with gateway
 
-The gateway serves the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages APIs. It does not translate between them: an OpenAI request goes to an OpenAI credential, an Anthropic request to an Anthropic credential. Keep the format your client already uses. See [SDKs & APIs](/docs/ai-gateway/sdks-and-apis/rest-api) for endpoints, authentication, and SDK examples.
+The benefit of letting all AI traffic flow through the same entity is that you can now have a central place to observe, track and control AI usage.
 
-## How credentials work [#credentials]
+You can do several things with this:
 
-There are two kinds of keys:
+- Look into gateway data with [Analytics](/docs/ai-gateway/features/analytics)
+- Pre-define a list of [available models](/docs/ai-gateway/features/models) that Gateway users are allowed to use
+- Track and manage [cost](/docs/ai-gateway/features/analytics) of AI usage across your organization
 
-- **Provider credentials** are your OpenAI and Anthropic API keys. An admin adds them once per organization, and the gateway uses them to call the provider. Clients never see them.
-- **Gateway API keys** authenticate clients to the gateway. A key is either tied to a person or issued for a service account. See [API keys](/docs/ai-gateway/features/api-keys).
+## Getting Started [#getting-started]
 
-Admins also control which provider models gateway keys can call. See [Model management](/docs/ai-gateway/features/models). To track cost and usage per user, API key, and model, see [Analytics](/docs/ai-gateway/features/analytics).
+Depending on your role, you're likely looking to:
 
-## What the gateway doesn't do (beta) [#limits]
+- [set up the gateway for your organization](/docs/ai-gateway/get-started/admin-setup) (admin)
+- [start using your organization's gateway to send your LLM calls](/docs/ai-gateway/get-started/first-request) (user)
 
-During the beta, the gateway:
+For more information on how the gateway, keys, and model routing fit together, read [Core Concepts](/docs/ai-gateway/concepts).
 
-- doesn't retry failed provider calls or fall back to another credential or model
-- doesn't cache responses
-- doesn't translate between API formats, so an OpenAI-format request can't reach a Claude model
-- has no per-key budgets, spend limits, or rate limits
-- only supports OpenAI and Anthropic, at their official API URLs
-
-See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations) for size and time limits.
-
-## Availability and pricing [#availability]
-
-The gateway is available on Langfuse Cloud in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/ai-gateway/get-started/first-request#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to OpenAI or Anthropic and processed under your agreement with them.
-
-Each generation the gateway records counts as a [billable unit](/docs/administration/billable-units), like any other observation. Your provider bills model usage to your own provider account.
-
-On self-hosted Langfuse, you deploy the gateway next to your instance. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
-
-<Callout type="warning">
-  **HIPAA region:** requests are forwarded to the provider you configure, using
-  your credentials and on your instruction. Before you send protected health
-  information (PHI) through the gateway, make sure you have a [BAA with
-  Langfuse](/security/hipaa) and a BAA with that provider.
-</Callout>
-
-## Next steps [#next-steps]
-
-Start with the guide for your role:
-
-- [Set up the gateway](/docs/ai-gateway/get-started/admin-setup): for admins. Configure where traces go, add provider credentials, choose models, and give your team access.
-- [Send your first request](/docs/ai-gateway/get-started/first-request): for developers. Create a gateway key, call a model, and find the trace.
-- [Coding agents](/docs/ai-gateway/coding-agents): route Claude Code, Codex, OpenCode, pi, or GitHub Copilot through the gateway.
+<SignupCTA className="my-6" />

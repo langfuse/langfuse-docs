@@ -1,16 +1,24 @@
 ---
-title: Codex
+title: "Codex with the Langfuse AI Gateway"
+sidebarTitle: Codex (gateway)
 seoTitle: "Trace OpenAI Codex with the Langfuse AI Gateway (beta)"
 description: Route the OpenAI Codex CLI through the Langfuse AI Gateway to trace every turn, model round, tool call, token, and cost.
+logo: /images/integrations/openai_icon.svg
+logoAppearance: dark
+category: Integrations
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
-# Codex
+# Codex with the Langfuse AI Gateway
 
 <AiGatewayBetaCallout />
 
 **Requires** Codex CLI 0.157 or later and an `OPENAI` provider credential. Verified with Codex 0.157.0.
+
+<Callout type="info">
+  For tracing Codex without the gateway, see the [Codex integration](/integrations/developer-tools/codex).
+</Callout>
 
 ## Setup [#setup]
 
@@ -92,7 +100,7 @@ Restart the Codex app-server daemon with `codex app-server daemon restart`. The 
 <Details id="missing-input">
 <Summary>Why is the input missing on long sessions?</Summary>
 
-Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/docs/ai-gateway/troubleshooting-and-faq#known-limitations).
+Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/faq/all/ai-gateway-known-limitations).
 
 </Details>
 

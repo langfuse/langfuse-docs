@@ -1,0 +1,22 @@
+---
+title: Why don't I see Gateway pages like Models, Keys, and Analytics?
+seoTitle: "AI Gateway Models, Gateway keys, or Analytics missing? How to fix it"
+description: The Models, Gateway keys, and Analytics tabs of the Langfuse AI Gateway stay disabled until a project is set. On self-hosted Langfuse with the NONE ingestion mode, Analytics has no data to show.
+tags: [ai-gateway, ai-gateway-get-started]
+---
+
+# Why don't I see Gateway pages like Models, Keys, and Analytics?
+
+Under **Organization settings → AI Gateway**, the gateway has a **Setup** tab and the **Models**, **Gateway keys**, and **Analytics** tabs. If those tabs are disabled or empty, check the following.
+
+## Is a project set? [#no-project]
+
+The gateway records every call in one project of your organization. Until an admin chooses that project, the **Models**, **Gateway keys**, and **Analytics** tabs stay disabled.
+
+To fix this, go to **Organization settings → AI Gateway → Setup** and choose a project. See [Set up Gateway as an admin](/docs/ai-gateway/get-started/admin-setup#configure-the-gateway).
+
+## Are you self-hosting with the `NONE` ingestion mode? [#none-mode]
+
+On self-hosted Langfuse, the `NONE` ingestion mode routes requests without recording them. You don't need a project in this mode, but **Analytics** shows "Gateway requests are not recorded" instead of charts, because there is no data to chart.
+
+To see analytics, switch to the `USAGE` or `FULL` [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes) and choose a project.

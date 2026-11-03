@@ -81,7 +81,7 @@ export const codingAgentsGatewayIntegrationGroups: IntegrationGroup[] = [
       { label: "OpenRouter", href: "/integrations/gateways/openrouter" },
       {
         label: "Langfuse AI Gateway (beta)",
-        href: "/docs/ai-gateway/coding-agents",
+        href: "/docs/ai-gateway/overview",
       },
     ],
   },

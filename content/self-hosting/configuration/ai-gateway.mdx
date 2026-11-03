@@ -41,7 +41,7 @@ import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 
 1. A client sends a request to the gateway's public URL, for example `https://gateway.langfuse.example.com/anthropic/v1/messages`, with a gateway API key.
 2. The gateway asks Langfuse Web to resolve the key. Web checks the key and returns the organization's provider connection, including the provider API key.
-3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/docs/ai-gateway/troubleshooting-and-faq#does-the-gateway-change-requests).
+3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/faq/all/ai-gateway-request-changes).
 4. The gateway uploads the generation to Langfuse Web, which ingests it like any other trace.
 
 Organization admins then set up provider connections and gateway API keys in the Langfuse UI.
@@ -464,4 +464,4 @@ The certificate must cover the gateway host and include the full chain. Test wit
 
 </FaqDetails>
 
-When you report a problem, include the `langfuse-request-id` response header of the failing request. For problems with the gateway in your organization's setup, see the [AI Gateway troubleshooting](/docs/ai-gateway/troubleshooting-and-faq#troubleshooting).
+When you report a problem, include the `langfuse-request-id` response header of the failing request. For problems with the gateway in your organization's setup, see the [AI Gateway troubleshooting](/faq/all/ai-gateway-error-codes).

@@ -1,0 +1,78 @@
+---
+title: Concepts
+seoTitle: "How the Langfuse AI Gateway works (beta)"
+description: How the Langfuse AI Gateway relays model calls, which keys and credentials are involved, how a request reaches a model, and how each call becomes a Langfuse trace.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+import { AiGatewayArchitectureDiagram } from "@/components/AiGatewayArchitectureDiagram";
+
+# Core concepts
+
+<AiGatewayBetaCallout />
+
+This page explains how the gateway works: what happens to a request, which keys and settings are involved, and how a model call becomes a trace. To start using it, see [Set up the gateway](/docs/ai-gateway/get-started/admin-setup) for admins or [Send your first request](/docs/ai-gateway/get-started/first-request) for developers.
+
+## Components, architecture and request flow [#architecture]
+
+The gateway serves as a layer between the user's AI requests and the model providers. Users authenticate with the AI gateway and pass on request content. The AI gateway routes the request to the correct model provider, executes the API call, and returns the result back to the user.
+
+<AiGatewayArchitectureDiagram />
+
+On Langfuse Cloud, Langfuse runs the gateway in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to OpenAI or Anthropic and processed under your agreement with them.
+
+On self-hosted Langfuse, the gateway is a separate service that you deploy next to your instance. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
+
+### Credential types [#credential-types]
+
+The gateway uses three types of keys. Clients hold user keys or service account keys, and only the gateway holds the provider credentials:
+
+| Key type                                                                                 | Origin         | Scope                                                                    | Provided by                        |
+| ---------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------ | ---------------------------------- |
+| [Provider credential](/docs/ai-gateway/get-started/admin-setup#add-provider-connections) | Model provider | Scoped to organization.                                                  | Owner/admin, once per organization |
+| [User key](/docs/ai-gateway/features/api-keys#key-types)                                 | AI Gateway     | Scoped to one user. Stops working when the user leaves the organization. | User                               |
+| [Service account key](/docs/ai-gateway/features/api-keys#key-types)                      | AI Gateway     | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin                        |
+
+Because clients only hold gateway keys, you can rotate a provider key without changing any client, and revoke one person's access without affecting anyone else.
+
+The gateway calls the provider with your own credentials, so the provider bills model usage to your provider account. Langfuse counts each recorded generation as a [billable unit](/docs/administration/billable-units).
+
+### Model and key routing [#routing]
+
+An organization can add several provider credentials, for example an OpenAI key for production, a second OpenAI key for testing, and an Anthropic key.
+
+**The URL path decides the provider.** Clients call the gateway with the same API they would use with the provider directly. Requests to `/openai/v1` use the OpenAI Responses or Chat Completions API. Requests to `/anthropic/v1` use the Anthropic Messages API.
+
+<Callout type="info">
+  The gateway doesn't convert one API format into the other, so a client that
+  uses the OpenAI API can only call OpenAI models.
+</Callout>
+
+**The model ID decides the credential.** Each model ID starts with the name of a credential, in the form `<credential>:<model>`. For example, `openai-prod:<model>` calls `<model>` with the credential named `openai-prod`.
+
+<Callout type="info">
+  Some coding agents send the provider's model names without a prefix, which
+  also works. See [model IDs](/docs/ai-gateway/features/models#model-ids).
+</Callout>
+
+<Callout type="info">
+  By default, a credential allows every model the provider offers. Admins can
+  turn models off per credential, see [Model
+  management](/docs/ai-gateway/features/models).
+</Callout>
+
+## Tracing [#tracing]
+
+You can enable tracing of the LLM calls in a couple of different tiers (see [Tracing](/docs/ai-gateway/features/tracing) for more details):
+
+| Mode                      | Recorded                                                                                                                                                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FULL`                    | Everything `USAGE` records, plus the full input (system prompt, tool definitions, messages, tool calls and results) and the streamed output (text, reasoning or thinking, and tool calls with parsed arguments) |
+| `USAGE` (default)         | The model, token usage, cost, and latency, without input or output                                                                                                                                              |
+| `NONE` (self-hosted only) | Nothing. The gateway only routes requests.                                                                                                                                                                      |
+
+After the response, the gateway records the call as a generation in Langfuse asynchronously. See [how Langfuse captures data](/docs/observability/data-model#how-langfuse-captures-data) for more.
+
+### Tracing context around the LLM call [#tracing-context]
+
+The gateway only sees model calls. It doesn't see what your app does around them, for example retrieval or tool execution. To trace those steps, instrument your app with the [Langfuse SDK](/docs/observability/sdk/overview). To combine both, send the `traceparent` header of your current span with the request, and the gateway records its generation inside your trace. See [trace context and baggage](/docs/ai-gateway/features/tracing#trace-context).
