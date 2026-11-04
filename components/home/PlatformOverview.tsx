@@ -222,8 +222,8 @@ function GatewayNode({ className }: { className?: string }) {
         </div>
         <Title>AI Gateway</Title>
         <Detail>
-          Virtual keys, spend visibility, and tracing for every model call. No
-          code changes. Or bring your own gateway.
+          Gateway keys, model access, and cost per user for OpenAI and Anthropic
+          calls, all traced automatically. Or bring your own gateway.
         </Detail>
       </CornerBox>
     </NextLink>

@@ -18,7 +18,7 @@ Instrument your agents with the SDKs or OpenTelemetry, or route model calls thro
 
 - **Your agents** — personal agents (coding and desktop assistants such as Claude Code, Codex, Cursor, and GitHub Copilot), custom agents (support, voice, RAG, workflows), and copilots and no-code tools (low-code and workflow builders such as Copilot Studio, n8n, Dify, and Flowise). See all [integrations](/integrations).
 - **SDKs / OpenTelemetry** — instrument your agents with the [Langfuse SDKs](/docs/observability/sdk/overview) or any [OpenTelemetry](/integrations/native/opentelemetry) exporter.
-- **[Langfuse AI Gateway](/docs/ai-gateway/overview) (new)** — virtual keys, spend visibility, and tracing for every model call, with no code changes. You can also bring your own gateway.
+- **[Langfuse AI Gateway](/docs/ai-gateway/overview) (new)** — gateway keys, model access, and cost per user for OpenAI and Anthropic calls, all traced automatically. You can also bring your own gateway.
 - **Langfuse** — observe with [tracing](/docs/observability/overview), [dashboards](/docs/metrics/features/custom-dashboards), and [alerts](/docs/observability/features/alerts); manage [prompts](/docs/prompt-management/overview) and [skills](/docs/skill-management/overview); evaluate with [evals](/docs/evaluation/overview), [datasets](/docs/evaluation/experiments/datasets), and [experiments](/docs/evaluation/experiments/experiments-via-sdk). The in-app agent [Halo](/docs/api-and-data-platform/features/halo) works with your Langfuse data, or you can [bring your own agent](/docs/api-and-data-platform/features/agent-skill). Every feature is available via [MCP](/docs/api-and-data-platform/features/mcp-server), [CLI](/docs/api-and-data-platform/features/cli), [API](/docs/api-and-data-platform/features/public-api), and [SDKs](/docs/observability/sdk/overview).
 
 ## Learn how the best teams build with AI
@@ -30,7 +30,7 @@ Langfuse is the platform. The [Langfuse Academy](/academy) is how you, and your 
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.
 
 - **[Observability](/docs/observability/overview)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
-- **[AI Gateway](/docs/ai-gateway/overview)** (new) — swap the base URL and API key to route your AI calls through Langfuse. Use virtual keys to monitor budgets. Every call is centrally traced and governed.
+- **[AI Gateway](/docs/ai-gateway/overview)** (new) — swap the base URL and API key to route your OpenAI and Anthropic calls through Langfuse. Gateway keys show cost per user and key, and every call is traced automatically.
 - **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.
