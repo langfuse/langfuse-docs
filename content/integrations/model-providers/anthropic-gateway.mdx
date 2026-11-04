@@ -1,0 +1,172 @@
+---
+title: "Anthropic SDK with the Langfuse AI Gateway"
+sidebarTitle: Anthropic SDK (gateway)
+seoTitle: "Use the Anthropic SDK with the Langfuse AI Gateway (beta)"
+description: Call Claude models through the Langfuse AI Gateway with the official Anthropic client SDKs for Python and TypeScript, using the Messages API.
+logo: /images/integrations/anthropic_icon.png
+logoAppearance: dark
+category: Integrations
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Anthropic SDK with the Langfuse AI Gateway
+
+<AiGatewayBetaCallout />
+
+Use Anthropic's official [client SDKs](https://platform.claude.com/docs/en/cli-sdks-libraries/overview) for Python and TypeScript with the gateway by changing the base URL and the API key. Requests need an `ANTHROPIC` provider credential in your organization.
+
+<Callout type="info">
+  For tracing the Anthropic SDK without the gateway, see the [Anthropic (Python)](/integrations/model-providers/anthropic) and [Anthropic (JS/TS)](/integrations/model-providers/anthropic-js) integrations.
+</Callout>
+
+Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/features/rest-api#routes).
+
+## Configure the client [#configure-the-client]
+
+Set the base URL to the gateway's Anthropic route, `/anthropic`, without `/v1`: the SDK appends `/v1/messages` itself. Pass the gateway key as the API key. The SDK sends it as `x-api-key`.
+
+<LangTabs items={["Python", "TypeScript"]}>
+<Tab>
+
+```bash
+pip install anthropic
+```
+
+```python
+import os
+
+from anthropic import Anthropic
+
+client = Anthropic(
+    base_url=os.environ["LANGFUSE_GATEWAY_HOST"] + "/anthropic",
+    api_key=os.environ["LANGFUSE_GATEWAY_KEY"],
+)
+```
+
+</Tab>
+<Tab>
+
+```bash
+npm install @anthropic-ai/sdk
+```
+
+```ts
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/anthropic`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+});
+```
+
+</Tab>
+</LangTabs>
+
+## Messages API [#messages]
+
+<LangTabs items={["Python", "TypeScript"]}>
+<Tab>
+
+```python
+message = client.messages.create(
+    model="<model-id>",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Say hello"}],
+)
+print(message.content[0].text)
+```
+
+To stream the response:
+
+```python
+with client.messages.stream(
+    model="<model-id>",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Say hello"}],
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+```
+
+</Tab>
+<Tab>
+
+```ts
+const message = await client.messages.create({
+  model: "<model-id>",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Say hello" }],
+});
+console.log(message.content);
+```
+
+To stream the response:
+
+```ts
+const stream = client.messages.stream({
+  model: "<model-id>",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Say hello" }],
+});
+stream.on("text", (text) => process.stdout.write(text));
+await stream.finalMessage();
+```
+
+</Tab>
+</LangTabs>
+
+## Add request headers [#request-headers]
+
+Set [request headers](/docs/ai-gateway/features/tracing#request-headers) on the client for every call, or per call for values such as a session ID.
+
+<LangTabs items={["Python", "TypeScript"]}>
+<Tab>
+
+```python
+client = Anthropic(
+    base_url=os.environ["LANGFUSE_GATEWAY_HOST"] + "/anthropic",
+    api_key=os.environ["LANGFUSE_GATEWAY_KEY"],
+    default_headers={"langfuse-tags": "checkout,production"},
+)
+
+message = client.messages.create(
+    model="<model-id>",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Say hello"}],
+    extra_headers={"langfuse-session-id": "<session-id>"},
+)
+```
+
+</Tab>
+<Tab>
+
+```ts
+const client = new Anthropic({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/anthropic`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+  defaultHeaders: { "langfuse-tags": "checkout,production" },
+});
+
+const message = await client.messages.create(
+  {
+    model: "<model-id>",
+    max_tokens: 1024,
+    messages: [{ role: "user", content: "Say hello" }],
+  },
+  { headers: { "langfuse-session-id": "<session-id>" } },
+);
+```
+
+</Tab>
+</LangTabs>
+
+<Callout type="info">
+  The gateway already records every call. Don't also trace the same client with
+  the [Langfuse Anthropic integration](/integrations/model-providers/anthropic),
+  or each call is recorded twice.
+</Callout>
+
+## Claude Agent SDK [#claude-agent-sdk]
+
+The [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) runs Claude Code under the hood, so it is configured with the same environment variables as Claude Code, not with a client base URL. Set `ANTHROPIC_BASE_URL` and `ANTHROPIC_AUTH_TOKEN` in the environment of the agent process, as described in the [Claude Code guide](/integrations/developer-tools/claude-code-gateway#setup).

@@ -1,0 +1,84 @@
+---
+title: Authentication
+seoTitle: "Langfuse AI Gateway API keys: user and service account keys (beta)"
+description: Gateway API keys authenticate clients to the Langfuse AI Gateway. Learn the difference between user keys and service account keys, who can create them, when they stop working, and how they set the trace user.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Authentication
+
+<AiGatewayBetaCallout />
+
+Clients authenticate with the Langfuse AI Gateway by using API keys. The gateway then maps the user and its request content to organization settings, model provider API keys, and request routes. See the [Concepts page](/docs/ai-gateway/concepts#architecture) for more detail.
+
+## User and service account keys [#key-types]
+
+Every key is either a user key, which belongs to the person who creates it, or a service account key, which belongs to the organization:
+
+|                       | User key                                                              | Service account key                                                                     |
+| --------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Use for**           | Coding agents, local development                                      | CI, shared services                                                                     |
+| **Who can create it** | Any gateway user                                                      | Admins/owners                                                                           |
+| **Trace user**        | The key owner's email                                                 | The client's `langfuse-user-id`, otherwise the key name. See [trace user](#trace-user). |
+| **When it stops**     | When it is revoked or expires, or when its owner loses gateway access | When it is revoked or expires. Membership changes don't affect it.                      |
+
+Both key types can call every model the organization's [provider credentials](/docs/ai-gateway/features/models) allow.
+
+## Create a key [#create-a-key]
+
+1. Go to **Organization settings → AI Gateway → Gateway keys** and select **Create key**.
+2. Admins and owners choose **Issued as**: **My user** or **Service account**. Other users don't see this option and always create a user key.
+3. Enter a **name** that describes what uses the key, for example `Checkout agent` or `CI release pipeline`. The name is shown in the key list, and service account keys use it as the [trace user](#trace-user).
+4. Optionally set an **expiration**.
+5. Optionally add [**metadata**](#key-metadata) as key-value pairs.
+6. Select **Create key** and copy the secret key. It's shown only once.
+
+<Frame>
+  ![Create gateway key dialog with the Issued as choice, name, expiration, and metadata fields](/images/docs/ai-gateway/create-key.png)
+</Frame>
+
+Creating and revoking a key are recorded in the [audit log](/docs/administration/audit-logs).
+
+## Key metadata [#key-metadata]
+
+Metadata on a key lets you segment and attribute gateway traffic. Add key-value pairs such as:
+
+- `team: platform`
+- `cost_center: 4711`
+- `environment: production`
+
+The gateway attaches them to every generation recorded with the key, under `langfuse.gateway.api_key.metadata.<key>`. Filter traces, observations, and [custom dashboard](/docs/metrics/features/custom-dashboards) charts on these keys to see usage and cost for one team, cost center, or service.
+
+<Callout type="info">
+  Metadata can only be set when you create a key. To change it, issue a new key
+  and revoke the old one.
+</Callout>
+
+## User ID [#trace-user]
+
+The gateway sets the [trace user ID](/docs/observability/features/users) depending on the key type:
+
+| Key type            | User ID                                                                                                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| User key            | Always the owner's email, or their Langfuse user ID if the email is unknown. Clients can't override it, so a trace from a user key always shows who made the call.                                                                                                       |
+| Service account key | The `langfuse-user-id` [header](/docs/ai-gateway/features/tracing#headers) or baggage entry, so you can forward the end user's ID. Without one, the gateway uses the key name, unless the call runs inside your own trace, where the user on your spans stays in effect. |
+
+Each generation also records these user-related metadata fields:
+
+| Field                                    | Value                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
+| `langfuse.gateway.user_id_source`        | Where the user ID came from: `api_key_owner`, `client`, or `api_key_name` |
+| `langfuse.gateway.api_key.id`            | The gateway key's ID                                                      |
+| `langfuse.gateway.api_key.name`          | The gateway key's name                                                    |
+| `langfuse.gateway.api_key.owner.user_id` | The key owner's Langfuse user ID (user keys only)                         |
+| `langfuse.gateway.api_key.owner.name`    | The key owner's name (user keys only)                                     |
+
+To attribute traces by team or cost center as well, add [key metadata](#key-metadata).
+
+<Callout type="info">
+  A user key stops working as soon as its owner loses gateway access: they
+  leave the organization, their role changes to one that can't call the gateway
+  (for example Viewer), or they delete their Langfuse account. Service account
+  keys aren't affected, so use one for shared services.
+</Callout>

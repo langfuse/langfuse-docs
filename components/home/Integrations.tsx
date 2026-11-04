@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 // ─── Data (paths per homepage integration spec) ─────────────────────────────
 
 const languagesGroup = {
-  title: "Languages (via OTel)",
+  title: "Languages (via OpenTelemetry)",
   items: [
     {
       label: "Python (Native SDK)",
@@ -33,6 +33,89 @@ const languagesGroup = {
     { label: "Ruby", href: "/integrations/native/opentelemetry" },
     { label: "PHP", href: "/integrations/native/opentelemetry" },
     { label: "Swift", href: "/integrations/native/opentelemetry" },
+  ],
+};
+
+const gatewaysGroup = {
+  title: "Gateways",
+  items: [
+    {
+      label: "Langfuse AI Gateway",
+      href: "/docs/ai-gateway/overview",
+      icon: <Image src="/langfuse-icon.svg" alt="" width={18} height={18} />,
+    },
+    {
+      label: "LiteLLM",
+      href: "/integrations/gateways/litellm",
+      icon: (
+        <Image
+          src="/images/integrations/litellm_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "OpenRouter",
+      href: "/integrations/gateways/openrouter",
+      icon: (
+        <Image
+          src="/images/integrations/openrouter_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Vercel AI Gateway",
+      href: "/integrations/gateways/vercel-ai-gateway",
+      icon: (
+        <Image
+          src="/images/integrations/vercel_ai_gateway_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Portkey",
+      href: "/integrations/gateways/portkey",
+      icon: (
+        <Image
+          src="/images/integrations/portkey_icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Kong",
+      href: "/integrations/gateways/kong-ai-plugin",
+      icon: (
+        <Image
+          src="/images/integrations/kong-icon.svg"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
+    {
+      label: "Helicone",
+      href: "/integrations/gateways/helicone",
+      icon: (
+        <Image
+          src="/images/integrations/helicone_icon.png"
+          alt=""
+          width={18}
+          height={18}
+        />
+      ),
+    },
   ],
 };
 
@@ -519,9 +602,13 @@ export function Integrations() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <IntegrationGroupCard
-          className="sm:col-span-2"
           title={languagesGroup.title}
           items={languagesGroup.items}
+        />
+        <IntegrationGroupCard
+          title={gatewaysGroup.title}
+          items={gatewaysGroup.items}
+          showMoreLabel
         />
 
         <IntegrationGroupCard

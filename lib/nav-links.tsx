@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   Map,
   MessageSquare,
+  Network,
   Newspaper,
   Presentation,
   ScrollText,
@@ -29,7 +30,7 @@ export type NavPanelLink = {
 export const productLinks: NavPanelLink[] = [
   { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
-    name: "LLM Observability",
+    name: "AI Observability",
     href: "/docs/observability/overview",
     icon: Activity,
   },
@@ -40,6 +41,7 @@ export const productLinks: NavPanelLink[] = [
   },
   { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
   { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
+  { name: "AI Gateway", href: "/docs/ai-gateway/overview", icon: Network },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [
