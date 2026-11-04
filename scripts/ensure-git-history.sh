@@ -6,10 +6,19 @@
 # A blobless history fetch takes about a second, while a full clone
 # (VERCEL_DEEP_CLONE) downloads ~1 GB of image history on every build.
 #
-# Fails the build if the fetch fails, so a deployment never ships lastmod dates
-# that silently fell back to file mtimes.
+# Fails the build if the fetch fails. In a shallow clone, git reports the
+# boundary commit as adding every file, so a deployment would silently give
+# every page that commit's date.
+#
+# Only runs on Vercel and CI: it rewrites .git/config (diff.renames, promisor
+# remote), which is fine for throwaway build checkouts but not for a
+# developer's clone.
 
 set -uo pipefail
+
+if [[ -z "${VERCEL:-}" && -z "${CI:-}" ]]; then
+  exit 0
+fi
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "[ensure-git-history] Not a git checkout; skipping."
