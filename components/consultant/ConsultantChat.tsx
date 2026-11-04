@@ -2,7 +2,14 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { Mic } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -165,21 +172,165 @@ function ThinkingDots() {
   );
 }
 
+const MAX_RECORDING_MS = 60_000;
+
+function recordingMime() {
+  if (typeof MediaRecorder === "undefined") return "";
+  if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+    return "audio/webm;codecs=opus";
+  }
+  if (MediaRecorder.isTypeSupported("audio/webm")) return "audio/webm";
+  if (MediaRecorder.isTypeSupported("audio/mp4")) return "audio/mp4";
+  return "";
+}
+
 function ConsultantThread({ onNewChat }: { onNewChat: () => void }) {
   const [draft, setDraft] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [dictationError, setDictationError] = useState("");
   const { messages, sendMessage, status, error, stop } = useChat({
     transport,
   });
+  const draftEpoch = useRef(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const discardRef = useRef(false);
   const busy = status === "submitted" || status === "streaming";
   const visible = messages.filter(
     (message) => message.role === "user" || message.role === "assistant",
   );
 
+  function releaseMicrophone() {
+    recorderRef.current = null;
+    streamRef.current?.getTracks().forEach((track) => track.stop());
+    streamRef.current = null;
+  }
+
+  useEffect(() => {
+    return () => {
+      discardRef.current = true;
+      abortRef.current?.abort();
+      if (recorderRef.current?.state === "recording")
+        recorderRef.current.stop();
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  async function transcribe(blob: Blob, epoch: number) {
+    const controller = new AbortController();
+    abortRef.current?.abort();
+    abortRef.current = controller;
+    setTranscribing(true);
+    try {
+      const body = new FormData();
+      const extension = blob.type.startsWith("audio/mp4") ? "m4a" : "webm";
+      body.append("audio", blob, `turn.${extension}`);
+      const response = await fetch("/api/consultant/transcribe", {
+        method: "POST",
+        body,
+        signal: controller.signal,
+      });
+      const payload = (await response.json()) as {
+        text?: string;
+        error?: string;
+      };
+      if (epoch !== draftEpoch.current) return;
+      if (
+        !response.ok ||
+        typeof payload.text !== "string" ||
+        !payload.text.trim()
+      ) {
+        setDictationError(
+          payload.error?.trim() ||
+            "Dictation is unavailable right now. Try again in a moment.",
+        );
+        return;
+      }
+      setDraft((current) => {
+        const spoken = payload.text!.trim();
+        const next = current.trim()
+          ? `${current.replace(/\s+$/, "")} ${spoken}`
+          : spoken;
+        return next.slice(0, 4000);
+      });
+    } catch (caught) {
+      if (epoch !== draftEpoch.current) return;
+      if (caught instanceof DOMException && caught.name === "AbortError")
+        return;
+      setDictationError(
+        "Dictation is unavailable right now. Try again in a moment.",
+      );
+    } finally {
+      if (abortRef.current === controller) abortRef.current = null;
+      if (epoch === draftEpoch.current) setTranscribing(false);
+    }
+  }
+
+  async function toggleDictation() {
+    if (transcribing) return;
+    if (recording) {
+      recorderRef.current?.stop();
+      return;
+    }
+    if (
+      typeof navigator === "undefined" ||
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
+      setDictationError("This browser cannot use the microphone.");
+      return;
+    }
+    setDictationError("");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = recordingMime();
+      const recorder = new MediaRecorder(
+        stream,
+        mime ? { mimeType: mime } : undefined,
+      );
+      const chunks: Blob[] = [];
+      const epoch = draftEpoch.current;
+      recorder.addEventListener("dataavailable", (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      });
+      recorder.addEventListener("stop", () => {
+        const blob = new Blob(chunks, {
+          type: recorder.mimeType || mime || "audio/webm",
+        });
+        releaseMicrophone();
+        if (discardRef.current) return;
+        setRecording(false);
+        void transcribe(blob, epoch);
+      });
+      recorderRef.current = recorder;
+      streamRef.current = stream;
+      recorder.start();
+      setRecording(true);
+      window.setTimeout(() => {
+        if (
+          recorderRef.current === recorder &&
+          recorder.state === "recording"
+        ) {
+          recorder.stop();
+        }
+      }, MAX_RECORDING_MS);
+    } catch {
+      releaseMicrophone();
+      setRecording(false);
+      setDictationError("Allow the microphone to dictate.");
+    }
+  }
+
   function submit(event: FormEvent) {
     event.preventDefault();
     const text = draft.trim();
-    if (!text || busy) return;
+    if (!text || busy || recording || transcribing) return;
+    draftEpoch.current += 1;
+    abortRef.current?.abort();
     setDraft("");
+    setDictationError("");
     void sendMessage({ text });
   }
 
@@ -315,38 +466,65 @@ function ConsultantThread({ onNewChat }: { onNewChat: () => void }) {
                   </Button>
                 )}
                 <span className="hidden min-w-0 truncate font-mono text-[11px] text-text-disabled sm:inline">
-                  Enter to send · Shift + Enter for new line
+                  {recording
+                    ? "Listening… click the microphone to stop"
+                    : transcribing
+                      ? "Transcribing…"
+                      : "Enter to send · Shift + Enter for new line"}
                 </span>
               </div>
-              {busy ? (
+              <div className="flex shrink-0 items-center gap-2">
                 <Button
                   type="button"
                   variant="secondary"
                   size="default"
-                  aria-label="Stop"
+                  icon={<Mic className="size-3.5" />}
+                  aria-label={recording ? "Stop dictation" : "Dictate"}
+                  aria-pressed={recording}
+                  disabled={transcribing}
                   wrapperClassName="p-0"
-                  onClick={() => void stop()}
-                >
-                  Stop
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  variant="secondary"
-                  size="default"
-                  aria-label="Send"
-                  disabled={!draft.trim()}
-                  wrapperClassName="p-0"
-                  className="h-8 w-auto gap-2 border-line-cta bg-surface-cta-primary pl-3 pr-2 text-[14px] font-medium text-text-primary shadow-none hover:bg-surface-cta-primary"
-                >
-                  Send
-                  <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[2px] border border-line-cta px-1 font-mono text-[10px] leading-none">
-                    ↵
-                  </span>
-                </Button>
-              )}
+                  className={
+                    recording
+                      ? "border-line-cta bg-surface-cta-primary text-text-primary"
+                      : undefined
+                  }
+                  onClick={() => void toggleDictation()}
+                />
+                {busy ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="default"
+                    aria-label="Stop"
+                    wrapperClassName="p-0"
+                    onClick={() => void stop()}
+                  >
+                    Stop
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="default"
+                    aria-label="Send"
+                    disabled={!draft.trim() || recording || transcribing}
+                    wrapperClassName="p-0"
+                    className="h-8 w-auto gap-2 border-line-cta bg-surface-cta-primary pl-3 pr-2 text-[14px] font-medium text-text-primary shadow-none hover:bg-surface-cta-primary"
+                  >
+                    Send
+                    <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[2px] border border-line-cta px-1 font-mono text-[10px] leading-none">
+                      ↵
+                    </span>
+                  </Button>
+                )}
+              </div>
             </div>
           </CornerBox>
+          {dictationError && (
+            <Text size="s" className="mt-2 text-left" role="alert">
+              {dictationError}
+            </Text>
+          )}
         </form>
       </div>
     </div>
