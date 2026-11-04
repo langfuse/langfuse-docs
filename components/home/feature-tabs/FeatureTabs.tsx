@@ -484,7 +484,7 @@ export const FeatureTabs = ({
                     {feature.name}
                   </button>
                   {index < features.length - 1 && (
-                    <span aria-hidden className="px-2 text-text-tertiary">
+                    <span aria-hidden className="px-1.5 text-text-tertiary">
                       ·
                     </span>
                   )}

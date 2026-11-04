@@ -6,10 +6,12 @@ import {
   FlaskConical,
   // Globe,
   MessageSquare,
+  Network,
 } from "lucide-react";
 import type { FeatureTabData } from "./types";
 
 import observabilityPng from "@/components/home/feature-tabs/img/observability-ui.png";
+import aiGatewayPng from "@/components/home/feature-tabs/img/ai-gateway-ui.png";
 import metricsPng from "@/components/home/feature-tabs/img/cost-ui.png";
 import PromptPng from "@/components/home/feature-tabs/img/prompts-ui.png";
 import EvalsPng from "@/components/home/feature-tabs/img/evals-ui.png";
@@ -72,6 +74,22 @@ export default observe(handleRequest);`,
       },
     },
     quickstartHref: "/docs/observability/get-started",
+  },
+  {
+    id: "ai-gateway",
+    icon: Network,
+    name: "AI Gateway",
+    title: "Route and trace every model call",
+    subtitle: "Gateway keys, model access, and cost per user and key.",
+    body: "Route your OpenAI and Anthropic calls through Langfuse by swapping the base URL and API key. Hand out gateway keys to people and services instead of provider keys, choose which models they can call, and see cost and usage per user and key. Every call is traced automatically.",
+    docsHref: "/docs/ai-gateway/overview",
+    image: {
+      light: aiGatewayPng,
+      dark: aiGatewayPng,
+      alt: "Langfuse AI Gateway analytics showing cost, requests, and tokens by user, gateway key, and model",
+    },
+    displayMode: "image-only",
+    quickstartHref: "/docs/ai-gateway/get-started/first-request",
   },
   {
     id: "metrics",

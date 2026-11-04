@@ -95,7 +95,7 @@ Lens investigations take a time window, a sample percentage, and a description o
 
 ## Using Langfuse and LiteLLM together [#coexistence]
 
-LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. A [Langfuse Gateway](/docs/roadmap#roadmap) is on the public roadmap; until it ships, routing stays with LiteLLM or another gateway.
+LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. The [Langfuse AI Gateway](/docs/ai-gateway/overview) (beta) relays OpenAI and Anthropic calls with built-in tracing, but has no budgets, fallbacks, or other providers yet, so multi-provider routing stays with LiteLLM or another gateway.
 
 If you trial Lens beside Langfuse, decide which store holds datasets and human labels before both accumulate a partial copy; running two investigators over the same traffic doubles analysis-model spend.
 
