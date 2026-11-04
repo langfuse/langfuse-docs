@@ -60,7 +60,7 @@ function documentationUrl(url: string) {
 
 function PlanMarkdown({ text }: { text: string }) {
   return (
-    <div className="text-left text-sm font-normal leading-[150%] tracking-[-0.07px] text-text-primary [&>*+*]:mt-3 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_li+li]:mt-1 [&_blockquote]:border-l-2 [&_blockquote]:border-line-structure [&_blockquote]:pl-3 [&_pre]:overflow-x-auto [&_pre]:border [&_pre]:border-line-structure [&_pre]:bg-surface-1 [&_pre]:p-3 [&_code]:font-mono [&_code]:text-[12px]">
+    <div className="text-left text-sm font-normal leading-[150%] tracking-[-0.07px] text-text-primary [&>*+*]:mt-3 [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_li+li]:mt-1 [&_h2]:font-analog [&_h2]:text-xl [&_h2]:font-medium [&_h3]:text-base [&_h3]:font-medium [&_blockquote]:border-l-2 [&_blockquote]:border-line-structure [&_blockquote]:pl-3 [&_pre]:overflow-x-auto [&_pre]:border [&_pre]:border-line-structure [&_pre]:bg-surface-1 [&_pre]:p-3 [&_code]:font-mono [&_code]:text-[12px] [&_th]:border [&_th]:border-line-structure [&_th]:bg-surface-1 [&_th]:px-2 [&_th]:py-1.5 [&_th]:text-left [&_th]:font-medium [&_td]:border [&_td]:border-line-structure [&_td]:px-2 [&_td]:py-1.5 [&_td]:align-top">
       <Markdown
         remarkPlugins={[remarkGfm]}
         skipHtml
@@ -80,6 +80,12 @@ function PlanMarkdown({ text }: { text: string }) {
           "h4",
           "blockquote",
           "pre",
+          "table",
+          "thead",
+          "tbody",
+          "tr",
+          "th",
+          "td",
         ]}
         unwrapDisallowed
         urlTransform={documentationUrl}
@@ -92,6 +98,11 @@ function PlanMarkdown({ text }: { text: string }) {
             ) : (
               <span>{children}</span>
             ),
+          table: ({ children }) => (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">{children}</table>
+            </div>
+          ),
         }}
       >
         {text}

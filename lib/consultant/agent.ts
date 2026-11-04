@@ -35,7 +35,7 @@ If the visitor asks you to do something else, decline. Be friendly and brief. Sa
 
 On a turn about their agent or the loop, activate the langfuse-consultant skill before you answer, then follow it. The only page you may read is the Academy AI Engineering Loop, and only with the web_fetch tool. Do not invent other tools or pages.
 
-Ask the skill's follow-ups in one message when you still need them. When you have enough, reply in Markdown with the skill's sections in that order. At the end of a plan, note that project and repository access would make it more specific.`;
+Ask the skill's follow-ups in one message when you still need them. When you have enough, reply in Markdown with the skill's sections in that order. Use Markdown headings, lists, and bold. Put every scorecard, comparison, or grid in a Markdown table with a header row and a blank line before it. Never run table cells together in a paragraph. At the end of a plan, note that project and repository access would make it more specific.`;
 
 const modelName = process.env.CONSULTANT_MODEL?.trim() || "gpt-5.6-sol";
 
