@@ -117,4 +117,18 @@ No. Keep websocket features off for this provider. The gateway serves HTTP serve
 
 </Details>
 
+<Details id="image-generation">
+<Summary>Why can't Codex generate images through the gateway?</Summary>
+
+Codex offers its built-in `image_gen` tool only when the model provider is OpenAI itself, so it hides the tool for the gateway provider. Codex may then suggest the `imagegen` skill's CLI fallback instead. Support for custom providers in Codex is tracked in [openai/codex#24465](https://github.com/openai/codex/issues/24465).
+
+<Callout type="warning">
+  The `imagegen` CLI fallback calls OpenAI directly with `OPENAI_API_KEY`, so
+  those calls bypass the gateway and are not traced in Langfuse. The gateway
+  does not serve the OpenAI Images API (`/images/generations`, `/images/edits`)
+  yet either; see [supported endpoints](/docs/gateway/features/rest-api#routes).
+</Callout>
+
+</Details>
+
 </FaqDetails>
