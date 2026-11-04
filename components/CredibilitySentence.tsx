@@ -6,22 +6,15 @@ import {
   formatCompanyCount,
   formatSdkInstallsPerMonth,
 } from "./home/Usage";
-import {
-  formatIntegrations,
-  formatObservationsPerMonth,
-} from "@/lib/usage-stats";
 
 export const CredibilitySentence = ({
   bold = true,
   className = "mt-6",
   style = "paragraph",
-  extended = false,
 }: {
   bold?: boolean;
   className?: string;
   style?: "paragraph" | "list";
-  /** List style only: also show observations per month and integrations. */
-  extended?: boolean;
 }) => {
   const Metric = bold ? "strong" : "span";
   const metricClassName = bold ? "font-semibold" : "";
@@ -36,14 +29,6 @@ export const CredibilitySentence = ({
             <Metric className={metricClassName}>{formatCompanyCount()}</Metric>{" "}
             companies
           </li>
-          {extended && (
-            <li>
-              <Metric className={metricClassName}>
-                {formatObservationsPerMonth()}
-              </Metric>{" "}
-              observations per month
-            </li>
-          )}
           <li>
             <Metric className={metricClassName}>
               {getGitHubStars().toLocaleString()}
@@ -62,14 +47,6 @@ export const CredibilitySentence = ({
             </Metric>{" "}
             Docker pulls
           </li>
-          {extended && (
-            <li>
-              <Metric className={metricClassName}>
-                {formatIntegrations()}
-              </Metric>{" "}
-              integrations
-            </li>
-          )}
           <li>
             Trusted by <strong>{FORTUNE_50_COMPANIES} of the Fortune 50</strong>{" "}
             and <strong>{FORTUNE_500_COMPANIES} of the Fortune 500</strong>

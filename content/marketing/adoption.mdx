@@ -4,7 +4,9 @@ seoTitle: "Langfuse adoption: the most used open-source LLM engineering platform
 description: Live SDK download, GitHub star, and enterprise adoption metrics comparing Langfuse with other LLM observability and evaluation platforms.
 ---
 
-import { CredibilitySentence } from "@/components/CredibilitySentence";
+import { AdoptionStatsBar } from "@/components/adoption/AdoptionStatsBar";
+import { EnterpriseLogos } from "@/components/EnterpriseLogos";
+import { CustomerCarouselWrapper } from "@/components/customers/CustomerCarouselWrapper";
 import PublicMetricsDashboard from "@/components-mdx/public-metrics-dashboard.mdx";
 import TopDependents from "@/components-mdx/dependents/top.md";
 
@@ -12,7 +14,9 @@ import TopDependents from "@/components-mdx/dependents/top.md";
 
 Teams use [Langfuse](/) for [observability](/docs/observability/overview), [evaluation](/docs/evaluation/overview), and [prompt management](/docs/prompt-management/overview) of LLM applications and agents. This page collects the public metrics behind the claim. Most numbers below are live and refresh automatically.
 
-<CredibilitySentence style="list" extended />
+<AdoptionStatsBar className="mt-8" />
+
+<EnterpriseLogos />
 
 ## SDK downloads [#sdk-downloads]
 
@@ -41,6 +45,31 @@ _Updated every 6 hours from [star-history.com](https://star-history.com/#langfus
 
 _LangSmith and Braintrust are not listed because their platforms are not open source._
 
+## Customers [#customers]
+
+Teams at [Canva](/users/canva), [Khan Academy](/users/khan-academy), [Merck](/users/merckgroup), and [many more](/users) run Langfuse in production.
+
+<div className="not-prose">
+  <CustomerCarouselWrapper showDots={true} loop={true} className="mt-6" />
+</div>
+
+## How Langfuse compares [#compare]
+
+Head-to-head comparisons on features, self-hosting, and pricing.
+
+<Cards num={3}>
+  <Cards.Card href="/compare/langsmith" title="Langfuse vs. LangSmith" arrow />
+  <Cards.Card href="/compare/braintrust" title="Langfuse vs. Braintrust" arrow />
+  <Cards.Card
+    href="/compare/arize-phoenix"
+    title="Langfuse vs. Arize AX / Phoenix"
+    arrow
+  />
+  <Cards.Card href="/compare/mlflow" title="Langfuse vs. MLflow" arrow />
+  <Cards.Card href="/compare/logfire" title="Langfuse vs. Pydantic Logfire" arrow />
+  <Cards.Card href="/compare" title="All comparisons" arrow />
+</Cards>
+
 ## Public metrics dashboard [#public-metrics]
 
 We share our core usage metrics publicly with customers, the community, partners, and future [colleagues](/careers).
@@ -54,8 +83,6 @@ The 25 most-starred open-source projects that depend on the Langfuse Python or J
 <div className="[&_img]:inline [&_img[alt=avatar]]:size-5">
   <TopDependents />
 </div>
-
-For side-by-side feature comparisons, see [Compare Langfuse](/compare).
 
 <Callout type="info">
   **Something out of date?** [Open a pull
