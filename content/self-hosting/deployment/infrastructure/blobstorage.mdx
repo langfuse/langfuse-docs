@@ -608,6 +608,12 @@ Set these on both the Langfuse Web and Worker containers if your internal blob s
 | `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                                                                                                                           |
 | `LANGFUSE_BLOB_STORAGE_ENDPOINT_ALLOWED_HOSTS`           |                    | Available from `>=v4.69.0`. Comma-separated list of exact lowercase hostnames (no scheme or port). When set, **only** these hosts are allowed and all others, including public ones, are rejected. Example: `minio.internal`. |
 
+<Callout type="warning">
+
+Without **Force Path Style**, S3 connects to the bucket as a subdomain of the endpoint (`{bucket}.{host}`). That name passes `LANGFUSE_BLOB_STORAGE_ENDPOINT_ALLOWED_HOSTS`, but Langfuse still blocks it if it resolves to a private address. For a private MinIO at `minio.internal`, turn on Force Path Style or add the address to `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS` or `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS`.
+
+</Callout>
+
 These mirror the existing `LANGFUSE_LLM_CONNECTION_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
 
 <Callout type="info">
