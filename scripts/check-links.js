@@ -20,6 +20,7 @@ const DEFAULT_SCAN_DIRS = [
   "components",
   "components-mdx",
   "content",
+  "i18n",
   "lib",
   "scripts",
 ];
