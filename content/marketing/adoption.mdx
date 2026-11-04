@@ -19,7 +19,7 @@ Teams use [Langfuse](/) for [observability](/docs/observability/overview), [eval
 
 ## SDK downloads [#sdk-downloads]
 
-Langfuse has the most downloaded SDKs among LLM observability and evaluation platforms on both PyPI and npm.
+Langfuse has the most downloaded SDKs among LLM observability and evaluation platforms on both PyPI and npm, apart from LangSmith, whose SDK ships with every LangChain install.
 
 |                  | PyPI downloads / month                                                                                                                                                                 | npm downloads / month                                                                                                                                                                              |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -29,8 +29,13 @@ Langfuse has the most downloaded SDKs among LLM observability and evaluation pla
 | Braintrust       | [![Braintrust PyPI downloads](https://img.shields.io/pypi/dm/braintrust?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/braintrust/)              | [![Braintrust npm downloads](https://img.shields.io/npm/dm/braintrust?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/braintrust)                        |
 | Opik (Comet)     | [![Opik PyPI downloads](https://img.shields.io/pypi/dm/opik?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/opik/)                                | [![Opik npm downloads](https://img.shields.io/npm/dm/opik?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/opik)                                          |
 | Arize Phoenix    | [![Phoenix PyPI downloads](https://img.shields.io/pypi/dm/arize-phoenix-otel?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/arize-phoenix-otel/) | [![Phoenix npm downloads](https://img.shields.io/npm/dm/%40arizeai%2Fphoenix-otel?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/@arizeai/phoenix-otel) |
+| LangSmith\*      | [![LangSmith PyPI downloads](https://img.shields.io/pypi/dm/langsmith?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://pypi.org/project/langsmith/)                 | [![LangSmith npm downloads](https://img.shields.io/npm/dm/langsmith?style=for-the-badge&label=%20&labelColor=black&color=grey)](https://www.npmjs.com/package/langsmith)                           |
 
-_Live via [shields.io](https://shields.io). Packages: `langfuse` and `@langfuse/tracing`, `mlflow` and `mlflow-tracing`, `logfire`, `braintrust`, `opik`, `arize-phoenix-otel` and `@arizeai/phoenix-otel`._
+_Live via [shields.io](https://shields.io). Packages: `langfuse` and `@langfuse/tracing`, `mlflow` and `mlflow-tracing`, `logfire`, `braintrust`, `opik`, `arize-phoenix-otel` and `@arizeai/phoenix-otel`, `langsmith`._
+
+<Callout type="info">
+  **\*Why LangSmith's numbers are skewed:** [`langchain-core`](https://pypi.org/project/langchain-core/) on PyPI and [`@langchain/core`](https://www.npmjs.com/package/@langchain/core) on npm both list `langsmith` as a required dependency. Every LangChain install downloads the LangSmith SDK, whether or not the team ever sends a trace, so the count measures LangChain's reach more than LangSmith adoption. Langfuse is not a LangChain dependency, so its downloads come from teams that install it on purpose. [Soba Labs' ranking of LLM eval and tracing tools](https://sobalabs.ai/blog/most-used-llm-eval-and-tracing-tools/) makes the same point.
+</Callout>
 
 ## GitHub stars [#github-stars]
 
