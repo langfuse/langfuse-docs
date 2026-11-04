@@ -49,7 +49,7 @@ const gatewaysGroup = {
       href: "/integrations/gateways/litellm",
       icon: (
         <Image
-          src="/images/integrations/litellm_icon.png"
+          src="/images/integrations/litellm_icon.svg"
           alt=""
           width={18}
           height={18}
