@@ -10,15 +10,8 @@ import {
   type LoopPhaseId,
   type LoopStepId,
 } from "./steps";
-import {
-  ArrowHead,
-  HArrow,
-  Highlight,
-  MonoLabel,
-  PulseDot,
-  VArrow,
-  useLoopTick,
-} from "./shared";
+import { ARROW_HEAD, ArrowHead, HArrow, VArrow } from "../diagram-arrows";
+import { Highlight, MonoLabel, PulseDot, useLoopTick } from "./shared";
 
 const CARD_HOVER =
   "corner-box-hover-stripes transition-[background,border-color] duration-180 ease-out";
@@ -28,7 +21,6 @@ const YELLOW =
 // Highlighter is wider than the dark line. The head's base has to cover it,
 // and the stroke stops there so the yellow cap does not stick out past the tip.
 const BAND = 5;
-const RETURN_ARROW = 12;
 
 function StepCard({
   id,
@@ -48,7 +40,7 @@ function StepCard({
     <NextLink
       href={step.href}
       className={cn(
-        "relative flex flex-col border bg-surface-bg p-3",
+        "corner-box-corners relative flex flex-col border bg-surface-bg p-3",
         active ? "border-line-cta" : "border-line-structure",
         CARD_HOVER,
         className,
@@ -76,13 +68,10 @@ function StepCard({
   );
 }
 
-// Space between a box edge and the return-path stroke / arrow tip.
-const ARROW_CLEARANCE = 8;
-
 /**
  * U-shaped return path drawn under the row. `left`/`right` are CSS insets
- * that land on card centers. The path starts below the cards so the arrow
- * points up at the left box without crossing its border.
+ * that land on card centers. The path starts at the bottom edge of the right
+ * card and its arrow tip touches the bottom edge of the left card.
  */
 function ReturnPath({
   left,
@@ -98,7 +87,7 @@ function ReturnPath({
   return (
     <div
       className="absolute"
-      style={{ left, right, top: ARROW_CLEARANCE, height: depth }}
+      style={{ left, right, top: 0, height: depth }}
       aria-hidden
     >
       <div
@@ -107,7 +96,7 @@ function ReturnPath({
           background: YELLOW,
           left: -2,
           width: BAND,
-          top: RETURN_ARROW - 1,
+          top: ARROW_HEAD - 1,
           bottom: -2,
         }}
       />
@@ -132,25 +121,25 @@ function ReturnPath({
         }}
       />
       <div
-        className="absolute bg-text-primary"
-        style={{ left: 0, width: 1, top: RETURN_ARROW - 1, bottom: 0 }}
+        className="absolute bg-line-cta"
+        style={{ left: 0, width: 1, top: ARROW_HEAD - 1, bottom: 0 }}
       />
       <div
-        className="absolute bg-text-primary"
+        className="absolute bg-line-cta"
         style={{ right: 0, width: 1, top: 0, bottom: 0 }}
       />
       <div
-        className="absolute bg-text-primary"
+        className="absolute bg-line-cta"
         style={{ left: 0, right: 0, height: 1, bottom: 0 }}
       />
       <div
         className="absolute z-10 -translate-x-1/2"
         style={{ left: 0.5, top: 0 }}
       >
-        <ArrowHead direction="up" dark size={RETURN_ARROW} />
+        <ArrowHead direction="up" />
       </div>
       <span
-        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-2 py-0.5"
+        className="absolute left-1/2 flex -translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-2 py-1"
         style={{ top: depth }}
       >
         <MonoLabel className="text-text-secondary">{label}</MonoLabel>
@@ -206,7 +195,7 @@ function WideRow({ active }: { active: LoopStepId }) {
           <div key={id} className="contents">
             <StepCard id={id} active={active === id} className="h-[150px]" />
             {i < LOOP_ORDER.length - 1 ? (
-              <div className="flex items-center px-1">
+              <div className="flex items-center">
                 <HArrow />
               </div>
             ) : null}
@@ -214,7 +203,7 @@ function WideRow({ active }: { active: LoopStepId }) {
         ))}
       </div>
 
-      <div className="relative" style={{ height: 84 + ARROW_CLEARANCE }}>
+      <div className="relative" style={{ height: 84 }}>
         <ReturnPath
           left={center(0, 10)}
           right={fromRight(1)}
@@ -264,7 +253,7 @@ function CompactColumn({ active }: { active: LoopStepId }) {
         className="absolute"
         style={{
           background: YELLOW,
-          left: RETURN_ARROW - 1,
+          left: ARROW_HEAD - 1,
           right: -2,
           top: -2,
           height: BAND,
@@ -291,34 +280,34 @@ function CompactColumn({ active }: { active: LoopStepId }) {
         }}
       />
       <div
-        className="absolute bg-text-primary"
-        style={{ left: RETURN_ARROW - 1, right: 0, top: 0, height: 1 }}
+        className="absolute bg-line-cta"
+        style={{ left: ARROW_HEAD - 1, right: 0, top: 0, height: 1 }}
       />
       <div
-        className="absolute bg-text-primary"
+        className="absolute bg-line-cta"
         style={{ left: 0, right: 0, bottom: 0, height: 1 }}
       />
       <div
-        className="absolute bg-text-primary"
+        className="absolute bg-line-cta"
         style={{ right: 0, width: 1, top: 0, bottom: 0 }}
       />
       <div
         className="absolute z-10 -translate-y-1/2"
         style={{ left: 0, top: 0.5 }}
       >
-        <ArrowHead direction="left" dark size={RETURN_ARROW} />
+        <ArrowHead direction="left" />
       </div>
-      <span className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-0.5 py-2 [writing-mode:vertical-rl]">
+      <span className="absolute right-0 top-1/2 flex translate-x-1/2 -translate-y-1/2 border border-line-structure bg-surface-bg px-1 py-2 [writing-mode:vertical-rl]">
         <MonoLabel className="text-text-secondary">{label}</MonoLabel>
       </span>
     </div>
   );
 
-  // 56px is the return rail (right-3 + w-11). Clearance keeps the tips off the cards.
+  // 56px is the return rail (right-3 + w-11), so the arrow tips touch the cards.
   return (
     <div
       className="relative md:hidden"
-      style={{ height: total, paddingRight: 56 + ARROW_CLEARANCE }}
+      style={{ height: total, paddingRight: 56 }}
     >
       <div className="flex flex-col">
         {LOOP_ORDER.map((id, i) => (

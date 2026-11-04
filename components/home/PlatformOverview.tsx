@@ -3,7 +3,11 @@ import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, Bot } from "lucide-react";
 import { HomeSection } from "@/components/home/HomeSection";
-import { Head, VerticalArrow } from "@/components/blog/diagram-primitives";
+import {
+  ArrowHead,
+  ARROW_COLOR,
+  VArrow,
+} from "@/components/home/diagram-arrows";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
@@ -334,7 +338,7 @@ function Curve({ rising, className }: { rising: boolean; className: string }) {
         <path
           d={rising ? "M0 100C50 100 50 0 100 0" : "M0 0C50 0 50 100 100 100"}
           fill="none"
-          stroke="var(--line-cta)"
+          stroke={ARROW_COLOR}
           strokeWidth={1}
           vectorEffect="non-scaling-stroke"
         />
@@ -355,14 +359,22 @@ function Junction({ side }: { side: "left" | "right" }) {
   );
 }
 
+function CurveHead({ className }: { className: string }) {
+  return (
+    <span className={cn("absolute right-0", className)}>
+      <ArrowHead direction="right" />
+    </span>
+  );
+}
+
 function SplitConnector() {
   return (
     <div className="relative h-full" aria-hidden="true">
       <Junction side="left" />
       <Curve rising className="top-[calc(25%-4px)] bottom-1/2" />
       <Curve rising={false} className="top-1/2 bottom-[calc(25%-4px)]" />
-      <Head className="right-0 top-[calc(25%-8.5px)]" />
-      <Head className="bottom-[calc(25%-8.5px)] right-0" />
+      <CurveHead className="top-[calc(25%-8px)]" />
+      <CurveHead className="bottom-[calc(25%-8px)]" />
     </div>
   );
 }
@@ -372,7 +384,7 @@ function MergeConnector() {
     <div className="relative h-full" aria-hidden="true">
       <Curve rising={false} className="top-[calc(25%-4px)] bottom-1/2" />
       <Curve rising className="top-1/2 bottom-[calc(25%-4px)]" />
-      <Head className="right-0 top-[calc(50%-4.5px)]" />
+      <CurveHead className="top-[calc(50%-4px)]" />
     </div>
   );
 }
@@ -416,7 +428,7 @@ function WideDiagram() {
 function DownArrow() {
   return (
     <div className="flex h-8 justify-center" aria-hidden="true">
-      <VerticalArrow />
+      <VArrow />
     </div>
   );
 }
