@@ -46,7 +46,7 @@ export const healthcareFeaturedStory = {
   role: "Chief Data & AI Officer at Merck",
   stats: [
     { value: "Weeks to days", label: "shorter development cycles" },
-    { value: "80+", label: "use cases across the company" },
+    { value: "80+", label: "use cases on Langfuse" },
     {
       value: "200+",
       label: "users, engineers, PMs and domain experts",
@@ -251,7 +251,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Voice agents",
     icon: "mic",
     description:
-      "See where a voice conversation failed and correct it, so more calls finish without a handoff to staff.",
+      "Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.",
     proof: "Evolve · Rest sleep coach",
     href: "/users/evolve",
     featured: true,
@@ -262,7 +262,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     icon: "users",
     description:
       "Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.",
-    proof: "Merck Group · 80+ use cases",
+    proof: "Merck Group · 80+ use cases on Langfuse",
     href: "/users/merckgroup",
     featured: true,
   },

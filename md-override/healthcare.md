@@ -5,7 +5,7 @@ description: Bring reliable healthcare AI faster into production, with less manu
 
 # Bring reliable healthcare AI faster into production
 
-For healthcare and life sciences teams: go live faster, spend less time on manual review, and keep costs in view as you scale. [Merck Group](/users/merckgroup) reduced development cycles from weeks to days and runs 80+ use cases across the company.
+For healthcare and life sciences teams: go live faster, spend less time on manual review, and keep costs in view as you scale. [Merck Group](/users/merckgroup) reduced development cycles from weeks to days and runs 80+ use cases on Langfuse.
 
 [Start free](/cloud) · [Documentation](/docs)
 
@@ -30,7 +30,7 @@ Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** 
 > Walid Mehanna, Chief Data & AI Officer at Merck
 
 - **Weeks to days** shorter development cycles
-- **80+** use cases across the company
+- **80+** use cases on Langfuse
 - **200+** users, engineers, PMs and domain experts
 
 ## Run Langfuse where patient data is allowed to live
@@ -114,7 +114,7 @@ Catch failing claim steps early, before they become manual rework, and keep a tr
 
 ### [Voice agents](/users/evolve)
 
-See where a voice conversation failed and correct it, so more calls finish without a handoff to staff.
+Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.
 
 Evolve · Rest sleep coach
 
@@ -122,7 +122,7 @@ Evolve · Rest sleep coach
 
 Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.
 
-Merck Group · 80+ use cases
+Merck Group · 80+ use cases on Langfuse
 
 ## Learn how to ship reliable agents in healthcare and life sciences
 
