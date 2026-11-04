@@ -53,7 +53,7 @@ flowchart TB
     ship --> I["Run the AI engineering loop"]
 ```
 
-## Step 1: Set up tracing [#trace-offline]
+### 1. Set up tracing [#trace-offline]
 
 Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Traces provide you insight into what happened during a run and provide you with a way of showing evidence of what the agent did. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. Decide where to mask sensitive fields before they are stored. The SDKs support [client-side masking](/docs/observability/features/masking), so account numbers or patient identifiers can be redacted at the source.
 
@@ -65,7 +65,7 @@ Add [tracing](/docs/observability/get-started) before anyone outside the team us
   Decide early where the traces will live. Many banks and insurers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched, and [Trade Republic](/users/trade-republic) runs Langfuse self-hosted as well. Where self-hosting is not required, teams use Langfuse Cloud, including a [HIPAA-ready region](/security/hipaa) for healthcare. See [Langfuse for financial services](/financial-services) for deployment options and compliance documentation.
 </Callout>
 
-## Step 2: Run example inputs through the agent [#example-inputs]
+### 2. Run example inputs through the agent [#example-inputs]
 
 Next, run a set of examples through the agent that roughly matches what you expect to hit your system in production. Each run produces a trace you can learn from. At this point, you do not need expected answers yet. Good sources for cases are:
 
@@ -73,7 +73,7 @@ Next, run a set of examples through the agent that roughly matches what you expe
 - **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims.
 - **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything. This gives you traces from live data without bringing the agent into customer contact.
 
-## Step 3: Find failure modes with error analysis [#error-analysis]
+### 3. Find failure modes with error analysis [#error-analysis]
 
 Now have your domain experts read those traces. For each one, they note the first thing that went wrong, then group the notes into failure modes. This process is called [error analysis](/academy/monitoring/error-analysis).
 
@@ -88,7 +88,7 @@ At DKB, customer service specialists work in Langfuse directly, review conversat
   company="DKB"
 />
 
-## Step 4: Define what to evaluate, including compliance [#what-to-evaluate]
+### 4. Define what to evaluate, including compliance [#what-to-evaluate]
 
 What you evaluate comes from two places:
 
@@ -101,15 +101,13 @@ A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a r
   The Langfuse Academy covers both steps in detail. [Error analysis](/academy/monitoring/error-analysis) walks through reading traces and building a failure taxonomy, and [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to turn those failures and your compliance rules into a small set of metrics.
 </Callout>
 
-## Step 5: Build a ground truth dataset [#ground-truth]
+### 5. Build a ground truth dataset [#ground-truth]
 
 With the evaluation criteria in place, build a ground truth [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. It should contain your typical inputs, the cases that could go wrong, and cases that should trigger each compliance limit, along with how the agent should handle each one.
 
 <Callout type="info">
   Want to go deeper on scoping a dataset? The Langfuse Academy guide on [designing datasets](/academy/datasets/designing-great-datasets) covers how to set the goal, choose the input distribution, and decide how each item will be evaluated.
 </Callout>
-
-### Check the ground truth [#check-the-ground-truth]
 
 Experts disagree more often than teams expect. To get to a reliable ground truth dataset, let your experts review each other's work. Ideally, bring the experts into one room to talk through those cases, agree on the right handling, and write the missing rule into your guidelines.
 
@@ -119,7 +117,7 @@ Experts disagree more often than teams expect. To get to a reliable ground truth
 
 In Langfuse, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) let several experts label the same items. [Score analytics](/docs/evaluation/scores/score-analytics) then calculates percent agreement and Cohen's kappa between them, so you can see which cases need a discussion.
 
-## Step 6: Iterate until the agent meets the quality bar [#iterate]
+### 6. Iterate until the agent meets the quality bar [#iterate]
 
 Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) and record the scores as your baseline. Then review failed cases and improve the agent by changing its context, tool calls, or prompts, rerun the experiment, and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments).
 
@@ -131,19 +129,17 @@ Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-
   Mature setups often keep a held-out test dataset to make sure the system is not being overfitted during improvement efforts.
 </Callout>
 
-## Step 7: Set up production monitors [#monitors]
+### 7. Set up production monitors [#monitors]
 
 Once you are happy with the results, decide which evaluators should also run in production with [online evaluation](/docs/evaluation/get-started/online). Compliance evaluators belong on every trace. Add the quality evaluators you want to keep watching live, for example whether answers are phrased the way your guidelines require.
 
 For chat agents, also track [explicit feedback](/docs/observability/features/user-feedback) and [signs of trouble](/academy/monitoring/capturing-signals), such as a user asking for a person or correcting the agent.
 
-## Step 8: Go live and run the AI engineering loop [#go-live]
+### 8. Go live and run the AI engineering loop [#go-live]
 
 Now go live, depending on the risk profile with a partial or complete human in the loop setup. From here on, you are in the regular AI engineering loop: trace production, watch the monitors, turn interesting traces into new dataset items, and rerun the dataset before every release.
 
-### Keep humans on a subset (or everything at first) [#humans-on-a-subset]
-
-At launch, let the agent escalate a little too often to a human. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more. The amount of human review shrinks as the evidence grows. A common pattern, described by [Coinbase at AI Engineer NYC](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md), has three steps:
+**Keep humans on a subset, or on everything at first.** At launch, let the agent escalate a little too often to a human. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more. The amount of human review shrinks as the evidence grows. A common pattern, described by [Coinbase at AI Engineer NYC](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md), has three steps:
 
 1. **Supervised.** Reviewers check every output.
 2. **Sampled.** Once measured quality passes a threshold set by policy, reviewers check a sample.
@@ -151,9 +147,7 @@ At launch, let the agent escalate a little too often to a human. A reply like "I
 
 Match the review rate to the risk. Guidance from the [Joint Commission and CHAI](https://assets.ctfassets.net/7s4afyr9pmov/5RX4XUbRg0l1JG0gwXGkTM/bea3c1949d6d8cdd8ec2ae2f82f737ad/JC-CHAI_RUAIH_Guidance.pdf) recommends checking tools that inform clinical decisions more often than tools that help with administrative tasks. The same logic applies in a bank: a credit decision deserves more review than a branch-hours question.
 
-### Automate the slices that work [#automate-slices]
-
-Asking a person to approve everything does not scale, and reviewers who approve hundreds of routine cases a day stop looking closely. Classify incoming requests by category, let the agent handle categories that score well in your dataset and in production, such as a password reset, and keep sending the rest to a person.
+**Automate the slices that work.** Asking a person to approve everything does not scale, and reviewers who approve hundreds of routine cases a day stop looking closely. Classify incoming requests by category, let the agent handle categories that score well in your dataset and in production, such as a password reset, and keep sending the rest to a person.
 
 ## How Langfuse supports each step [#in-langfuse]
 
