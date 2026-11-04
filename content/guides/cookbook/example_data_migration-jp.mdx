@@ -40,7 +40,7 @@ Langfuse の公開APIでは現在、次のリソースをプログラムから�
 
 
 ```python
-%pip install --quiet "langfuse>=4.8.1" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
+%pip install --quiet "langfuse>=4.8.1,<5" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
 ```
 
 
@@ -687,9 +687,7 @@ while True:
         to_start_time=TO_TS,
         is_root_observation=True,
     ))
-    if not listing.data:
-        break
-
+    cursor = getattr(listing.meta, "cursor", None)
     for t in listing.data:
         try:
             obs_count = migrate_one_trace(t)
@@ -707,7 +705,6 @@ while True:
             print(f"  トレース {source_trace_id} の移行に失敗: {exc}")
             failures += 1
 
-    cursor = getattr(listing.meta, "cursor", None)
     print(
         f"  バッチ完了 — 累計: traces={total}, observations={total_obs}, failed={failures}"
     )

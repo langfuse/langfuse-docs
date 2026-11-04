@@ -59,6 +59,19 @@ export const TabContent = ({ feature, priority = false }: TabContentProps) => {
         priority={priority}
         onError={handleImageError}
       />
+
+      {feature.image.placeholder && (
+        <div className="flex absolute inset-0 justify-center items-center backdrop-blur-[2px] bg-surface-bg/60">
+          <div className="flex flex-col gap-1 items-center px-4 py-3 text-center border border-dashed border-line-cta bg-surface-bg">
+            <span className="px-1.5 py-0.5 font-mono text-[11px] leading-none tracking-wide uppercase bg-surface-cta-primary text-text-primary">
+              Placeholder
+            </span>
+            <span className="text-sm text-text-secondary">
+              {feature.name} screenshot still needs to be added
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

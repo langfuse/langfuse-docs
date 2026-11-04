@@ -111,7 +111,8 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-scores = langfuse.api.scores_v3.get_many_v3(
+# Python SDK v4: langfuse.api.scores_v3.get_many_v3(...)
+scores = langfuse.api.scores.get_many(
     name="user-feedback",
     from_timestamp=datetime.now(timezone.utc) - timedelta(days=1),
     fields="subject",  # what the score is attached to: trace, observation, session, or experiment
@@ -124,12 +125,20 @@ for score in scores.data:
         continue
 
     # A trace carries no input of its own; read it from the trace's root observation.
-    root_observations = langfuse.api.observations.get_many(
-        trace_id=score.subject.id,
-        is_root_observation=True,
-        fields="core,basic,io",
-        limit=1,
-    ).data
+    root_observations = []
+    cursor = None
+    while True:
+        response = langfuse.api.observations.get_many(
+            trace_id=score.subject.id,
+            is_root_observation=True,
+            fields="core,basic,io",
+            limit=1,
+            cursor=cursor,
+        )
+        root_observations = response.data
+        cursor = getattr(response.meta, "cursor", None)
+        if root_observations or not cursor:
+            break
     if not root_observations:
         continue
 

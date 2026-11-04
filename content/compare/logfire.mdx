@@ -1,0 +1,278 @@
+---
+title: Langfuse vs. Pydantic Logfire
+shortTitle: Logfire
+seoTitle: "Logfire Alternative: Langfuse vs. Pydantic Logfire"
+description: Langfuse is the open-source alternative to Pydantic Logfire. October 2026 comparison of self-hosting, retention, unit vs record pricing, evals, and prompt versions.
+tags: [comparison]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+import { Cloud, MessageSquare } from "lucide-react";
+import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-datastore.mdx";
+
+# Langfuse vs. Pydantic Logfire
+
+This guide outlines the key differences between **[Langfuse](/)** and **[Pydantic Logfire](https://pydantic.dev/pricing)** to help engineering teams choose the right AI engineering platform. All Logfire facts were checked against public Pydantic pages in October 2026.
+
+## TL;DR
+
+- **Open-source core, free to self-host.** Langfuse's core tracing, evaluation, prompt management, and APIs are [MIT-licensed](#open-source-and-deployment) and available on Cloud or self-hosted; additional Enterprise features require a license. Self-hosting is free on every tier, with Enterprise SSO and organization RBAC included. Logfire's SDK is MIT, but the Logfire platform is commercial, and self-hosting is an Enterprise deployment.
+- **Works across frameworks and model providers.** Langfuse ingests [OpenTelemetry and native integrations](#integrations), Pydantic AI and LiteLLM included, and judges run on your own model connections. Logfire is the Pydantic team's first-party backend; its gateway supports bring-your-own provider credentials with no markup, and built-in providers add 5% on Personal and Team and 3% on Growth.
+- **3 years of history and unlimited users on a published plan.** Langfuse Pro keeps 3 years with [no seat fee](#pricing); Logfire keeps 30 days on Personal and Team and up to 90 days on Growth, longer retention is an Enterprise conversation, and Team caps seats at 12. For a 10-person team that needs 90 days, [Langfuse Core is a quarter of the Logfire Growth price](#worked-example) at 500k units a month.
+- **Data through APIs and exports, or SQL when self-hosting.** Langfuse runs on ClickHouse, [open source since 2016](#storage), with observation and metrics endpoints, scheduled exports to your bucket on Pro with the Teams add-on, Enterprise, and self-hosted, and SQL on your own ClickHouse. Logfire exposes SQL querying with plan-specific daily allowances, and its public API starts on Growth.
+- **The improvement loop inside the platform.** Langfuse runs [judges and code evaluators on live observations, prompt and model experiments in the UI, annotation queues on every plan, and prompt versions that carry model and tool config](#evaluation); complete applications run through SDK experiments with results compared in Langfuse. On Logfire, experiments and online evaluators run from your code, annotation queues are Design Partner early access, and a prompt version freezes the template text only.
+- **Same-day switch.** [Repoint the OpenTelemetry exporter or the Pydantic AI integration](#switching-from-logfire); datasets import via SDK or API. Most teams see first traces in Langfuse the same day.
+
+**Choose Langfuse** if you want an open-source core and the improvement loop inside the platform: evaluators that run on live traffic, prompt experiments from the UI and application experiments through the SDK, annotation queues on every plan, prompt versions that carry model and tool config, 3 years of history and unlimited users on Pro, on ClickHouse you can query and export. Proven at 21 of the Fortune 50. You accept that host metrics, logs, and service maps stay in the APM you already run.
+
+**Choose Logfire** if you want application performance and AI traces on one record meter, $0 scores, and a 10-million-record free allowance. You accept a commercial platform with self-hosting on Enterprise, 30 or 90 days of history below Enterprise, seat caps on Team, daily query allowances, experiments and online evaluators that run from your code, and prompt versions that freeze only the template.
+
+---
+
+## Open source and deployment [#open-source-and-deployment]
+
+Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed and available on Cloud or self-hosted; additional Enterprise features require a license. [Self-hosting](/self-hosting) runs the UI, login, and data in your environment on every tier, including [air-gapped operation](/self-hosting/security/networking), and Enterprise SSO and organization-level RBAC ship in the [free distribution](/pricing-self-host). Langfuse Cloud is covered by [SOC 2 Type II and ISO 27001 audits, is GDPR compliant](/security), and signs a BAA from the Pro plan in the [HIPAA region](/security/hipaa). Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise).
+
+The [Logfire SDK](https://github.com/pydantic/logfire) is MIT, and the pricing FAQ says the Pydantic library stays MIT. Logfire, the platform, is a commercial product. Enterprise Self-hosted runs an open-sourced Helm chart on your Kubernetes cluster, with Postgres and any S3-compatible backend. Retention on that deployment is customer-determined. SSO, SCIM, and custom roles start on Enterprise.
+
+|                            | Langfuse                                                                                                                                                                            | Pydantic Logfire                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| License                    | **[MIT](https://github.com/langfuse/langfuse)** core: tracing, evaluation, prompts, APIs; Enterprise features licensed separately                                                   | SDK is MIT; the Logfire platform is commercial                                                           |
+| GitHub stars               | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | SDK only; platform not on GitHub                                                                         |
+| Self-hosting               | **[Every tier, including free](/pricing-self-host)**                                                                                                                                | [Enterprise Self-hosted](https://pydantic.dev/pricing): open-sourced Helm chart, Postgres, S3-compatible |
+| Enterprise SSO (self-host) | **Included in free OSS** ([self-hosted pricing](/pricing-self-host)); Cloud via the [Teams add-on](/pricing)                                                                        | Enterprise (Okta, Entra ID, Keycloak, SAML)                                                              |
+| Org-level RBAC (self-host) | **Included in free OSS**                                                                                                                                                            | Custom roles on Enterprise                                                                               |
+| Air-gapped operation       | Supported                                                                                                                                                                           | On-prem on Enterprise Self-hosted                                                                        |
+| Data regions               | Cloud EU, US, Japan; [HIPAA region](/security/hipaa); any region via self-hosting                                                                                                   | EU or US on Cloud plans; any GCP region on Dedicated; on-prem on Self-hosted                             |
+| BAA                        | **From Pro** in the [HIPAA region](/security/hipaa)                                                                                                                                 | Boilerplate BAA on Growth; custom BAAs on Enterprise                                                     |
+| Published Cloud Enterprise | **[$2,499/month](/pricing)**                                                                                                                                                        | Custom, sales-gated                                                                                      |
+
+---
+
+## Storage and data access [#storage]
+
+<CompareClickhouseDatastore />
+
+Langfuse works directly with ClickHouse's core team as [part of ClickHouse](/blog/joining-clickhouse). Every LLM call, tool execution, and agent step is written once to a wide, immutable observations table ([details](/blog/2026-03-10-simplify-langfuse-for-scale)). High-volume reads go through the [Observations](/docs/api-and-data-platform/features/public-api#v2) and [Metrics](/docs/metrics/features/metrics-api#v2) APIs, [scheduled exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Pro with the Teams add-on, Enterprise, and self-hosted) land JSONL or Parquet in your own S3, GCS, or Azure bucket, and self-hosters query ClickHouse in SQL.
+
+Logfire exposes a SQL Workbench in the UI and a [SQL query API](https://pydantic.dev/docs/logfire/manage/query-api/) that returns JSON, Arrow, or CSV. The [pricing page](https://pydantic.dev/pricing) meters that API by plan: up to 500 requests a day on Personal and Team and up to 5,000 a day on Growth, and the public API is a Growth feature. Enterprise Self-hosted documents Postgres and S3-compatible storage under the Helm chart.
+
+The two APIs differ in shape. Langfuse exposes observation and metrics endpoints with separate plan-specific limits; Logfire exposes SQL querying with plan-specific daily allowances. One SQL query is not one paginated API request, so compare returned data, pagination, export volume, and the queries your workflow needs rather than request counts.
+
+|                       | Langfuse                                                                                                                                                                                                                                                                                                                               | Pydantic Logfire                                                                                                                 |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Data store            | **ClickHouse**, [launched 2016 (OSS)](https://clickhouse.com/blog/open-source-10), Apache 2.0                                                                                                                                                                                                                                          | Vendor-operated on Cloud; Postgres and S3-compatible storage on Enterprise Self-hosted                                           |
+| Cloud and self-hosted | Same ClickHouse engine and observations-first data model ([v4](/docs/v4))                                                                                                                                                                                                                                                              | Self-hosting is an Enterprise deployment                                                                                         |
+| Getting data out      | SQL on ClickHouse when self-hosting; [Observations and Metrics endpoints](/docs/api-and-data-platform/features/public-api) with plan-specific limits ([details](/faq/all/api-limits)); [scheduled export](/docs/api-and-data-platform/features/export-to-blob-storage) to your bucket (Pro with Teams add-on, Enterprise, self-hosted) | SQL Workbench in the UI; SQL query API with daily allowances (500 on Personal and Team, 5,000 on Growth); public API from Growth |
+| Retention             | 30 days Hobby, 90 days Core, **3 years** Pro and Enterprise                                                                                                                                                                                                                                                                            | 30 days Personal and Team; up to 90 days Growth; custom on Enterprise                                                            |
+
+---
+
+## Integrations and framework coverage [#integrations]
+
+Langfuse works across frameworks and model providers, including [Pydantic AI](/integrations/frameworks/pydantic-ai) and [LiteLLM](/integrations/gateways/litellm), through [native integrations](/integrations) and the [OTLP endpoint](/integrations/native/opentelemetry) for any language. Judges run on [your own model connections](/docs/administration/llm-connection), and routing stays with whichever [gateway](/resources/engineering/llm-gateway) you already use.
+
+Logfire is the Pydantic team's [OpenTelemetry backend](https://ai.pydantic.dev/logfire/) and the first-party path for Pydantic AI, with [documented integrations](https://pydantic.dev/docs/logfire/integrations/) for OpenAI, Anthropic, LangChain, LlamaIndex, LiteLLM, CrewAI, and other frameworks on top of any OpenTelemetry instrumentation; its pricing page covers agents, services, and hosts on the same record meter. Its gateway supports bring-your-own provider credentials with no markup, up to 3 on Personal and Team and unlimited on Growth; built-in providers add 5% on Personal and Team and 3% on Growth, and the Enterprise gateway is an add-on.
+
+| Feature     | Langfuse                                                                                                                                                                                          | Pydantic Logfire                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| SDKs        | [Python and JS/TS SDKs](/docs/observability/sdk/overview) built on OpenTelemetry; other languages via the [OTLP endpoint](/integrations/native/opentelemetry)                                     | Python SDK (MIT) and a JS/TS SDK; any OpenTelemetry SDK; first-party Pydantic AI path                                                  |
+| Frameworks  | [Native integrations](/integrations), including [Pydantic AI](/integrations/frameworks/pydantic-ai) and LiteLLM; any OTel instrumentation                                                         | Documented integrations for Pydantic AI, OpenAI, Anthropic, LangChain, LlamaIndex, LiteLLM, CrewAI, and more; any OTel instrumentation |
+| Gateway     | Bring your own; judge calls use your model keys                                                                                                                                                   | BYO credentials, no markup; built-in providers 5% (Personal, Team) or 3% (Growth); Enterprise gateway is an add-on                     |
+| Portability | OTel-native SDKs and OTLP ingestion; [exports to your bucket](/docs/api-and-data-platform/features/export-to-blob-storage) (Pro with Teams add-on, Enterprise, self-hosted); SQL when self-hosted | OTel ingestion; the SDK can send to any OTel backend; SQL query API with daily allowances                                              |
+
+---
+
+## Pricing [#pricing]
+
+Logfire includes **10 million records** on Personal, Team, and Growth, then **$2 per million** on Team and Growth. A record is a span, a log, or a metric. The pricing page lists **$0 per 1,000 scores** on Team and Growth. Personal hard-caps at 10 million records and pauses ingestion. Team and Growth can set a spending cap.
+
+Langfuse bills [units](/docs/administration/billable-units) at $8 per 100,000 after the included 100,000, then $7 per 100,000 from 1 million to 10 million. A trace, an observation, and a score each count as one unit. There is no separate seat fee on Core and above.
+
+|            | Langfuse                                                                                                       | Pydantic Logfire                                                                                                                                               |
+| ---------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Free tier  | 50,000 units, 2 users, 30 days                                                                                 | **Personal:** 10M records, 1 seat, 2 read-only guests, 3 projects, 30 days, hard cap                                                                           |
+| Paid entry | **Core $29/month**, 100k units, unlimited users, 90 days                                                       | **Team $49/month**, 10M records, 5 seats then $25/seat up to 12, 30 days                                                                                       |
+| Scale plan | **Pro $199/month**, 100k units, 3 years                                                                        | **Growth $249/month**, 10M records, unlimited seats and projects, up to 90 days                                                                                |
+| Usage      | $8/100k, then $7/100k (1M–10M), $6.50 (10M–50M), $6 (50M+)                                                     | $2 per million records after 10M                                                                                                                               |
+| Scores     | One unit each                                                                                                  | **$0 / 1,000** on Team and Growth                                                                                                                              |
+| API access | [Observation and metrics endpoints](/docs/api-and-data-platform/features/public-api) with plan-specific limits | SQL query API: 500 requests/day (Personal, Team), 5,000/day (Growth); public API from Growth                                                                   |
+| Gateway    | Use any [gateway](/resources/engineering/llm-gateway); judge calls use your model keys                         | BYO credentials with no markup (3 on Personal and Team, unlimited on Growth); built-in providers +5% (Personal, Team), +3% (Growth); Enterprise gateway add-on |
+
+### Worked example [#worked-example]
+
+**A 10-person team that needs 90 days of history.** 50,000 traces a month, each with 8 observations and one trace-level score (a judge verdict or user feedback on the final output). In Langfuse that is 1 trace + 8 observations + 1 score = 10 units per trace, 500,000 units a month. Scoring every observation instead would make it 17 units per trace. In Logfire the 8 observations are 8 spans, 400,000 records; the trace itself is not a record and scores carry no per-score charge. Logs, metrics, and extra spans would add records, and the month stays inside the 10 million allowance either way. Public list prices.
+
+|                    | Base    | Seats                   | Usage  | Retention on this plan | **Total/month** |
+| ------------------ | ------- | ----------------------- | ------ | ---------------------- | --------------- |
+| **Langfuse Core**  | $29.00  | $0.00 (unlimited users) | $32.00 | 90 days                | **$61.00**      |
+| **Langfuse Pro**   | $199.00 | $0.00 (unlimited users) | $32.00 | 3 years                | **$231.00**     |
+| **Logfire Team**   | $49.00  | $125.00 (5 extra × $25) | $0.00  | 30 days                | **$174.00**     |
+| **Logfire Growth** | $249.00 | $0.00 (unlimited seats) | $0.00  | Up to 90 days          | **$249.00**     |
+
+Langfuse usage is 400,000 billable units at $8/100k. Core is a quarter of Logfire Growth, the plan that matches its 90 days and unlimited users, and Pro with 3 years still comes in under Growth. Team is the cheaper Logfire plan but needs five $25 seats for this team, caps at 12, and keeps 30 days.
+
+**Where the meters cross.** With 90 days on both sides, Langfuse Core stays below Logfire Growth up to roughly 3.1 million units a month, and below a fully seated 12-person Team ($49 + 7 × $25 = $224) up to roughly 2.75 million. Langfuse Pro with 3 years stays below Growth up to roughly 725,000 units. Above those volumes, Logfire's $2 per million record price is the lower bill regardless of retention.
+
+Each total is software subscription plus seats plus telemetry usage. Model inference is a separate invoice on both products: Langfuse judges use your model connection, and Logfire gateway calls carry no markup on your own credentials and 5% or 3% on built-in providers. Optional add-ons stay outside the table: Langfuse's $300/month Teams add-on for scheduled bucket exports and Cloud SSO, and Logfire's Enterprise gateway. A score-heavy loop widens Langfuse's bill, because each score is a unit; Logfire lists scores at $0 per 1,000 on Team and Growth.
+
+See [Langfuse pricing](/pricing) or [talk to us](/talk-to-us) for a workload that also needs multi-year retention.
+
+---
+
+## Evaluation and human review [#evaluation]
+
+Logfire's [evaluation workspace](https://pydantic.dev/docs/logfire/evaluate/datasets-and-experiments/) stores hosted datasets or reads cases from code. Experiments run through [Pydantic Evals](https://pydantic.dev/docs/ai/evals/evals/), a code-first library. The web UI prepares cases and compares a candidate to a baseline. The docs state that the UI does not execute the task under test. Online evaluation follows the same pattern: the [Live Evaluations](https://pydantic.dev/docs/logfire/evaluate/live-evals/) page monitors results that evaluators emit from your application through Pydantic Evals' `@evaluate` decorator or the `OnlineEvaluation` capability, and the docs point to the Pydantic AI guide to add an evaluator.
+
+[Run annotations](https://pydantic.dev/docs/logfire/evaluate/human-review/) record a pass, neutral, or fail on one agent run, with a comment and tags. They are in beta, and the human-review page says they are available in every project. They do not roll into experiment or live-evaluation aggregates. Annotation queues are a Design Partner feature, in an early-access program. The pricing page lists human annotations on Team and above, so the contracted plan is the one to confirm.
+
+Langfuse runs [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) inside the platform, on live observations and in experiments, with no evaluator code deployed in your application. [Prompt and model experiments](/docs/evaluation/experiments/experiments-via-ui) execute directly in the UI; complete applications and agents run through [SDK experiments](/docs/evaluation/experiments/experiments-via-sdk) or your own execution environment, with results compared in Langfuse. [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) are part of the shipped product; Pro includes unlimited queues. [Score analytics](/docs/evaluation/scores/score-analytics) compares judge scores with human labels.
+
+| Feature               | Langfuse                                                                                                                                                     | Pydantic Logfire                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Where experiments run | Prompt/model experiments execute in the Langfuse UI; full applications run through [SDK-based experiments](/docs/evaluation/experiments/experiments-via-sdk) | Tasks and online evaluators execute in application or test code; datasets and results are managed in its UI                  |
+| Datasets              | Hosted, versioned, filled from production traces in the UI                                                                                                   | Hosted in Logfire or defined in code; production traces can be added                                                         |
+| Online scores         | Judges and code evaluators run inside Langfuse on live observations; scores billed as units                                                                  | Live Evaluations monitors evaluators that run in your application via Pydantic Evals; scores are $0/1,000 on Team and Growth |
+| Human review          | Annotation queues on the shipped product                                                                                                                     | Run annotations in beta; queues are Design Partner early access                                                              |
+| Baseline comparison   | [Row-level regressions](/docs/evaluation/experiments/compare-experiments)                                                                                    | Choose a baseline run in the experiment review                                                                               |
+| CI                    | [GitHub Action](/docs/evaluation/experiments/experiments-ci-cd)                                                                                              | Pydantic Evals is code-first and runs wherever your code runs, including CI                                                  |
+
+---
+
+## Prompt management [#prompt-management]
+
+Both products version prompt text and promote a label such as `production`.
+
+Logfire's [prompt UI](https://pydantic.dev/docs/logfire/prompt-management/ui/) authors a template, tests it against scenarios, and saves a version. The docs are specific about the boundary: a version freezes the template text. It does not freeze scenario messages, model settings, tool definitions, managed-variable fragments, or rollout rules. Promotion happens on the backing managed variable. Tool definitions in prompt settings affect runs in the UI; the application still configures its own tools.
+
+Langfuse stores [model, temperature, tool definitions, and JSON schemas](/docs/prompt-management/features/config) on the prompt version, promotes that version with [labels](/docs/prompt-management/features/prompt-version-control), and can [reference other prompts](/docs/prompt-management/features/composability) so shared instructions live in one place. The running app fetches the labeled version and can [link it to the trace](/docs/prompt-management/features/link-to-traces).
+
+The difference shows when a change touches more than text. When you change model, temperature, tool definitions, and prompt text together, Langfuse can version that configuration with the prompt, so a rollback restores all of it; Logfire's prompt version freezes the template text, and the other settings are managed separately. In both products the application must read and apply what it fetches: storing tool configuration on a Langfuse prompt does not change application behavior until your code uses that config.
+
+|                         | Langfuse                                                                                           | Pydantic Logfire                                                             |
+| ----------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| What a version contains | Template plus [config](/docs/prompt-management/features/config) your application reads and applies | Template text; model settings and tools are managed separately               |
+| Promotion               | Labels on the prompt, fetched at runtime                                                           | Labels on the backing managed variable, including canary and targeting rules |
+| Composition             | Prompt references another prompt                                                                   | `@{...}@` references to managed variables and other prompts                  |
+| Playground              | [Playground](/docs/prompt-management/features/playground) on your model connection                 | Scenario preview and run inside prompt management                            |
+
+---
+
+## Application context [#application-context]
+
+Logfire's pricing page covers agents, services, and hosts: Kubernetes, databases, logs, and service maps on the same record meter. That is the reason a platform team picks one tool for the request path and the agent.
+
+Langfuse records the [AI trace](/docs/observability/data-model): generations, tools, retrieval, [sessions](/docs/observability/features/sessions), [agent graphs](/docs/observability/features/agent-graphs), and cost. Host metrics and APM stay in the observability platform you already run. The two products can sit side by side: Logfire for the service, Langfuse for the evaluation and prompt workflow. [Pydantic AI](/integrations/frameworks/pydantic-ai) emits OpenTelemetry that any OTel backend, Langfuse included, accepts.
+
+---
+
+## Which should you choose [#which-should-you-choose]
+
+Choose **Langfuse** if you want **an open-source platform that works across your stack**: OpenTelemetry instrumentation for any framework, free self-hosting with SSO and organization RBAC included on every tier, judges and code evaluators that run inside the platform, prompt experiments from the UI and application experiments through the SDK, annotation queues and prompt versions that carry model and tool config, data in ClickHouse you can query and export, and 3 years of history with unlimited users on Pro.
+
+Choose **Logfire** if the decision is **one OpenTelemetry backend for services and agents**: a low record price, $0 scores, and host, database, and service telemetry on the same meter, with up to 90 days of history on Growth.
+
+Run **both** when Logfire remains the application monitor and Langfuse holds datasets, reviews, and prompt releases.
+
+---
+
+## Why teams move away from Logfire [#why-teams-move-away]
+
+The same reasons recur in migration conversations.
+
+- **Self-hosting routes through Enterprise.** The Logfire platform is commercial, and the open-sourced artifact is a Helm chart that ships with the [Enterprise Self-hosted](#open-source-and-deployment) deployment. Langfuse self-hosts its open-source core, UI, login, and data, on every tier, with SSO and organization RBAC in the free distribution, and the same core runs on Cloud when teams move later.
+- **History below Enterprise stops at 90 days.** Logfire Growth retains data for [up to 90 days](#pricing); Personal and Team retain 30, and unlimited retention is an Enterprise feature per the pricing FAQ. Langfuse Pro includes 3 years on the published plan, so the failure from last quarter is still there to replay or turn into a dataset item.
+- **Experiments and online evaluators run in your code.** Logfire's UI prepares datasets and reads results; the docs say it [does not execute the task](#evaluation), and Live Evaluations monitors evaluators that your application runs through Pydantic Evals. Langfuse runs judges and code evaluators inside the platform on live observations, runs [prompt experiments from the UI](/docs/evaluation/experiments/experiments-via-ui) and full applications through the SDK, compares rows to a baseline, and gates CI on the result.
+- **A prompt version is the template.** Model settings and tool definitions are [not frozen with the Logfire version](#prompt-management). Langfuse versions that config with the text and promotes it with a label, so a rollback restores the whole configuration once the application re-reads it.
+- **Annotation queues are an early-access program.** Logfire's direct run annotations are in beta, and queues are [Design Partner early access](#evaluation). Langfuse annotation queues ship in the product, unlimited on Pro.
+- **Programmatic access differs in shape and allowance.** Logfire exposes SQL querying with 500 requests a day on Personal and Team and 5,000 on Growth, and the public API starts on Growth. Langfuse exposes [observation and metrics endpoints](#storage) with their own plan-specific limits, scheduled exports on Pro with the Teams add-on, Enterprise, and self-hosted, and SQL for self-hosters. Compare the data returned and the queries you need, not request counts alone.
+
+---
+
+## Why teams choose Langfuse [#customers]
+
+A pattern repeats across production adopters: start where governance requires, often self-hosted, then grow into the platform.
+
+- **[Canva](/users/canva)** instruments Java through OpenTelemetry and Python through the Langfuse SDK, then scores both with LLM-as-a-judge evaluators across **15–20** metrics. Non-engineers build evaluators. They self-hosted first, then moved to Cloud.
+- **[Merck](/users/merckgroup)** self-hosts about **80** GenAI use cases for **200+** people, provisioned via API, for data sovereignty.
+- **[Khan Academy](/users/khan-academy)** built a custom Go client on the open API, with **100+** users across 7 product and 4 infrastructure teams.
+
+---
+
+## Switching from Logfire [#switching-from-logfire]
+
+Repoint telemetry and recreate the assets the other system will own. History stays in Logfire for that plan's retention window. Most teams see first traces in Langfuse the **same day**.
+
+- **Instrumentation:** point the OpenTelemetry exporter at Langfuse, or use the [Pydantic AI integration](/integrations/frameworks/pydantic-ai). Both backends can receive spans during the overlap.
+- **Datasets and prompts:** fetch cases with the [Logfire Datasets SDK](https://pydantic.dev/docs/logfire/evaluate/datasets-and-experiments/) and import them through the [Langfuse SDK or API](/docs/evaluation/experiments/datasets). Recreate prompt templates in [prompt management](/docs/prompt-management/get-started), put model and tool settings into the version config if they lived outside the Logfire template, and make sure the application reads and applies that config.
+- **Evaluators:** Pydantic Evals stays in your repository for code-defined experiments. Langfuse code evaluators and judges are the in-platform equivalents for online scoring and prompt experiments, so the `@evaluate` and `OnlineEvaluation` hooks can come out of the application.
+
+[Talk to us](/talk-to-us) if you want help planning the overlap.
+
+---
+
+## Start free: Cloud or self-host [#get-started]
+
+[Langfuse Cloud](https://cloud.langfuse.com) Hobby includes 50k units/month, no credit card. Or [self-host](/self-hosting) the MIT stack. The [example project](/docs/demo) is populated before you instrument anything.
+
+<Cards num={2}>
+  <Card title="Get started free" href="https://cloud.langfuse.com" icon={<Cloud />} />
+  <Card title="Talk to us" href="/talk-to-us" icon={<MessageSquare />} />
+</Cards>
+
+---
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="is-langfuse-a-logfire-alternative">
+<Summary>Is Langfuse a Logfire alternative?</Summary>
+
+Yes, if you want an open-source core for traces, datasets, experiments, annotation, and prompts on Cloud or self-hosted, with 3 years of history and unlimited users on Pro. Logfire remains the closer fit when you also want service and host telemetry on a $2-per-million record meter. See [Which should you choose](#which-should-you-choose).
+
+</Details>
+
+<Details id="is-logfire-cheaper-than-langfuse">
+<Summary>Is Logfire cheaper than Langfuse?</Summary>
+
+It depends on volume, seats, and retention. The [worked example](#worked-example) shows a 10-person team that needs 90 days of history paying $61 on Langfuse Core against $249 on Logfire Growth at 500,000 units a month, subscription plus usage with model inference and add-ons excluded, and where the meters cross as volume grows, with each plan's retention next to the total.
+
+</Details>
+
+<Details id="does-logfire-have-evals-and-prompts">
+<Summary>Does Logfire have evals and prompts?</Summary>
+
+Yes. Logfire documents hosted datasets, experiments executed from code, a Live Evaluations view for evaluators that run in your application, human annotations, and a prompt UI. Annotation queues are Design Partner early access. A prompt version stores the template; model settings and tools are separate. See [Evaluation](#evaluation) and [Prompt management](#prompt-management).
+
+</Details>
+
+<Details id="can-i-self-host-logfire">
+<Summary>Can I self-host Logfire?</Summary>
+
+Yes, on Enterprise. Pydantic documents a self-hosted deployment with an open-sourced Helm chart, Postgres, and S3-compatible storage. The Logfire SDK is MIT; the platform is commercial. Langfuse self-hosts its open-source core on the free distribution. See [Open source and deployment](#open-source-and-deployment).
+
+</Details>
+
+<Details id="does-pydantic-ai-require-logfire">
+<Summary>Does Pydantic AI require Logfire?</Summary>
+
+No. Pydantic AI's docs say its instrumentation works with [any OpenTelemetry backend](https://ai.pydantic.dev/logfire/); Logfire is the first-party one. Langfuse has a [Pydantic AI integration](/integrations/frameworks/pydantic-ai). Test the current versions against the traces you need to keep.
+
+</Details>
+
+<Details id="how-long-does-logfire-keep-data">
+<Summary>How long does Logfire keep data?</Summary>
+
+30 days on Personal and Team, up to 90 days on Growth, and custom retention on Enterprise. The pricing FAQ says unlimited retention is available on Enterprise. Langfuse Pro includes 3 years. See [Pricing](#pricing).
+
+</Details>
+
+</FaqDetails>
+
+<Callout type="info">
+  This comparison is out of date? Please [raise a pull request](https://github.com/langfuse/langfuse-docs/blob/main/content/compare/logfire.mdx) with up-to-date information.
+</Callout>
+
+<SignupCTA className="my-6" />

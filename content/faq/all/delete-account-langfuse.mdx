@@ -6,16 +6,16 @@ tags: [platform, auth, administration]
 
 # How to delete a Langfuse Account?
 
-## Langfuse Cloud
+You can delete your account from the Account Settings page. Navigate to Account Settings from the user menu, then select **Delete Account** in the Danger Zone. This works the same on Langfuse Cloud and self-hosted Langfuse (v3.117.0 and later).
 
-You can delete your account from the Account Settings page. Navigate to Account Settings from the user menu.
-
-If you are the sole owner of an organization, first transfer ownership to another user or delete the organization ([docs](/docs/administration/data-deletion#deleting-an-organization)).
+If you are the sole owner of an organization, first add another owner or delete the organization ([docs](/docs/administration/data-deletion#deleting-an-organization)).
 
 <Frame className="my-10">
   ![Delete user account](/images/docs/delete-account-settings.png)
 </Frame>
 
+Deleting your account removes your user, memberships, and sessions. It does not delete organizations, projects, or the data in them. See [Data Deletion](/docs/administration/data-deletion#deleting-a-user-account) for details.
+
 ## Self-hosted Langfuse
 
-If you are using a self-hosted Langfuse instance, you will need to delete any data associated with your projects manually from your database.
+On self-hosted Langfuse older than v3.117.0, or to remove a user who can no longer sign in, an administrator can delete the user record directly from the Postgres `users` table. See [Data Deletion](/docs/administration/data-deletion#deleting-a-user-account) for the steps and caveats.

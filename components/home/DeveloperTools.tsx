@@ -5,10 +5,10 @@ import { HomeSection } from "@/components/home/HomeSection";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 
-const ASSISTANT_VIDEO_SRC =
+const HALO_VIDEO_SRC =
   "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
 
-const ASSISTANT_HREF = "/docs/langfuse-assistant";
+const HALO_HREF = "/docs/api-and-data-platform/features/halo";
 
 type ToolItem = {
   title: string;
@@ -45,7 +45,7 @@ const TOOL_ITEMS: ToolItem[] = [
   },
 ];
 
-const ASSISTANT_USE_CASES = [
+const HALO_USE_CASES = [
   {
     title: "Debug traces",
     detail: "Find failed generations and traces with high latency",
@@ -60,28 +60,24 @@ const ASSISTANT_USE_CASES = [
   },
 ];
 
-function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
+function ToolCard({ tool }: { tool: ToolItem }) {
   return (
     <CornerBox
       hoverStripes
       className="flex h-full min-h-[180px] flex-col gap-4 p-4 sm:p-5"
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] tracking-[-0.2px] text-text-tertiary">
-          0{index + 1}
-        </span>
-        <span className="rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
-          {tool.eyebrow}
-        </span>
-      </div>
-
       <div className="flex flex-col gap-1.5">
-        <Link
-          href={tool.href}
-          className="text-left text-[17px] font-medium text-text-primary"
-        >
-          {tool.title}
-        </Link>
+        <div className="flex items-start justify-between gap-3">
+          <Link
+            href={tool.href}
+            className="text-left text-[17px] font-medium text-text-primary"
+          >
+            {tool.title}
+          </Link>
+          <span className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
+            {tool.eyebrow}
+          </span>
+        </div>
         <Text size="s" className="max-w-[38ch] text-left">
           {tool.description}
         </Text>
@@ -97,7 +93,7 @@ function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
   );
 }
 
-function AssistantVideo() {
+function HaloVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -124,35 +120,31 @@ function AssistantVideo() {
   return (
     <video
       ref={videoRef}
-      src={ASSISTANT_VIDEO_SRC}
+      src={HALO_VIDEO_SRC}
       preload="none"
       muted
       loop
       playsInline
-      aria-label="The Langfuse Assistant investigating project data in the Langfuse app"
+      aria-label="Halo investigating project data in the Langfuse app"
       className="aspect-video h-auto w-full rounded-[2px] border border-line-structure object-cover shadow-sm"
     />
   );
 }
 
-function AssistantFeature() {
+function HaloFeature() {
   return (
     <CornerBox className="flex flex-col overflow-hidden">
       <div className="flex flex-col gap-5 p-4 sm:p-6">
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-[10px] tracking-[-0.2px] text-text-tertiary">
-            00
-          </span>
-          <span className="rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
-            In-app
-          </span>
-        </div>
-
-        <div className="flex max-w-[58ch] flex-col gap-3">
-          <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
-            Langfuse Assistant
-          </h3>
-          <Text className="text-left">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
+              <Link href={HALO_HREF}>Halo</Link>, the Langfuse Assistant
+            </h3>
+            <span className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
+              In-app
+            </span>
+          </div>
+          <Text className="max-w-[58ch] text-left">
             Automate the AI engineering loop: investigate production data,
             understand what happened, and turn findings into approved actions
             without leaving Langfuse.
@@ -160,7 +152,7 @@ function AssistantFeature() {
         </div>
 
         <div className="grid border-y border-line-structure sm:grid-cols-3 sm:divide-x sm:divide-line-structure">
-          {ASSISTANT_USE_CASES.map((useCase) => (
+          {HALO_USE_CASES.map((useCase) => (
             <div
               key={useCase.title}
               className="flex flex-col gap-1 border-b border-line-structure py-3 last:border-b-0 sm:block sm:border-b-0 sm:px-4 sm:first:pl-0 sm:last:pr-0"
@@ -180,7 +172,7 @@ function AssistantFeature() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={ASSISTANT_HREF}
+            href={HALO_HREF}
             className="inline-flex w-fit items-center gap-1 font-sans text-[12px] font-medium text-text-secondary no-underline transition-colors hover:text-text-primary"
           >
             View documentation <span aria-hidden>→</span>
@@ -189,7 +181,7 @@ function AssistantFeature() {
       </div>
 
       <div className="border-t border-line-structure bg-surface-1 p-3 sm:p-4">
-        <AssistantVideo />
+        <HaloVideo />
       </div>
     </CornerBox>
   );
@@ -211,15 +203,15 @@ export const DeveloperTools = () => {
             </span>
           </Heading>
           <Text className="max-w-[56ch] text-left">
-            Work in the app or from your IDE. The Assistant investigates
-            production and takes approved actions; SKILL.md, CLI, and MCP
-            connect coding agents to Langfuse.
+            Work in the app or from your IDE. <Link href={HALO_HREF}>Halo</Link>
+            , the Langfuse assistant, investigates production and takes approved
+            actions; SKILL.md, CLI, and MCP connect coding agents to Langfuse.
           </Text>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <AssistantFeature />
+            <HaloFeature />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 lg:col-span-4 lg:grid-cols-1 lg:grid-rows-3">
             {TOOL_ITEMS.map((tool, index) => (
@@ -231,7 +223,7 @@ export const DeveloperTools = () => {
                     : "-mt-px sm:-ml-px lg:-ml-px"
                 }
               >
-                <ToolCard tool={tool} index={index} />
+                <ToolCard tool={tool} />
               </div>
             ))}
           </div>

@@ -6,7 +6,6 @@ import {
   getActiveTraceId,
   observe,
   propagateAttributes,
-  setActiveTraceIO,
   startActiveObservation,
 } from "@langfuse/tracing";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp";
@@ -90,7 +89,6 @@ export async function POST(req: Request) {
           async () => {
             const traceInput = page ? { question, url: page.url } : question;
             observation.update({ input: traceInput });
-            setActiveTraceIO({ input: traceInput });
             let client: Awaited<ReturnType<typeof createMCPClient>> | undefined;
             let finished = false;
             let resolveFinished!: () => void;
@@ -112,7 +110,6 @@ export async function POST(req: Request) {
                     ? { level: "ERROR" as const, statusMessage: output }
                     : {}),
                 });
-                setActiveTraceIO({ output });
                 await client?.close();
               } catch {
                 console.warn("FAQ-bot: MCP cleanup failed");

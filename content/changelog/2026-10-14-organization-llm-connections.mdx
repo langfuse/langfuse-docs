@@ -1,0 +1,21 @@
+---
+date: 2026-10-14
+title: Share LLM connections across projects
+description: Configure LLM credentials once at the organization level while allowing projects to override them when needed.
+author: Tobias Wochinger
+canonical: /docs/administration/llm-connection#organization-and-project-connections
+ogImage: /images/changelog/2026-10-14-organization-llm-connections.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now configure LLM connections at the organization level and automatically share them with every project in the organization. This makes it easier to use centrally managed credentials for the Playground, evaluations, and experiments without repeating the same setup in each project.
+
+- **Manage credentials centrally** in **Organization Settings > LLM Connections**.
+- **Use different credentials in one project** by creating a project connection with the same name. The project connection takes precedence.
+
+Organization owners and admins can manage shared connections in the UI. On Enterprise Cloud and self-hosted Enterprise Edition, they can also manage them through the public API with an [organization-scoped API key](/docs/administration/scim-and-org-api).
+
+Learn more about [organization and project LLM connections](/docs/administration/llm-connection#organization-and-project-connections).

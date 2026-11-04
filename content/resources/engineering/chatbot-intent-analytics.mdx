@@ -112,8 +112,7 @@ while True:
         cursor=cursor,
         limit=50,
     )
-    if not response.data:
-        break
+    cursor = getattr(response.meta, "cursor", None)
     for observation in response.data:
         # Adjust extraction to your observation input structure
         message = (
@@ -131,7 +130,6 @@ while True:
             data_type="CATEGORICAL",
             score_id=f"intent-{trace_id}",  # idempotency key, same-day reruns overwrite
         )
-    cursor = getattr(response.meta, "cursor", None)
     if not cursor:
         break
 

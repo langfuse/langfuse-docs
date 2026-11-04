@@ -7,3 +7,5 @@ uv run --with github-dependents-info github-dependents-info --repo langfuse/lang
 sed -i '' 's/# Dependents/### Dependents/' ./components-mdx/dependents/js.md
 sed -i '' 's/<img class="avatar mr-2" src="/![avatar](/g' ./components-mdx/dependents/js.md
 sed -i '' 's/" width="20" height="20" alt="">/)/g' ./components-mdx/dependents/js.md
+
+node scripts/generate-top-dependents.js

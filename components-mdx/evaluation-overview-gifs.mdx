@@ -4,20 +4,24 @@
 Plot evaluation results in the Langfuse Dashboard.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/scores-dashboard.mp4"
+  src="https://static.langfuse.com/docs-videos/score-analytics.mp4"
   aspectRatio={16 / 9}
   gifStyle
+  title="Analyze scores"
+  description="Scores > “Analytics”. Pick helpfulness as the first score to see its statistics, trend over time and distribution, then pick faithfulness as the second score to compare both: means, matched pairs, correlation and a side-by-side distribution."
 />
 
 </Tab>
 <Tab>
 
-Collect feedback from your users. Can be captured in the frontend via our Browser SDK, server-side via the SDKs or API. Video includes example application.
+Collect feedback from your users. Can be captured in the frontend via our Browser SDK, server-side via the SDKs or API.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/scores-user-feedback.mp4"
+  src="https://static.langfuse.com/docs-videos/user-feedback-scores.mp4"
   aspectRatio={16 / 9}
   gifStyle
+  title="Review user feedback scores"
+  description="Scores page. Search name:user-feedback value:<0.5 to list the thumbs-down feedback the chat widget sent through the API, with the customer's comment such as “Still charged twice.” Click a row's trace to open the conversation in a side panel."
 />
 
 </Tab>
@@ -26,9 +30,11 @@ Collect feedback from your users. Can be captured in the frontend via our Browse
 Run fully managed LLM-as-a-judge evaluations on production or development traces. Can be applied to any step within your application for step-wise evaluations.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/scores-llm-as-a-judge.mp4%20MOVED%20TO%20R2.mp4"
+  src="https://static.langfuse.com/docs-videos/2026-08-21-evaluator-llmaaj-setup.mp4"
   aspectRatio={16 / 9}
   gifStyle
+  title="Set up an LLM-as-a-judge evaluator"
+  description="Evaluators > “New evaluator” > template “Classify Input Topic” (LLM-as-a-judge). Filter the sample observations to the support chatbot, map the {{input}} variable to payload.message under “Map variables to data”, run the judge on one sample to see its score and reasoning, then click “Create evaluator” and confirm the rule in the “Evaluator saved” dialog."
 />
 
 </Tab>
@@ -40,6 +46,8 @@ Evaluate prompts and models on datasets directly in the user interface. No custo
   src="https://static.langfuse.com/docs-videos/prompt-experiments.mp4"
   aspectRatio={16 / 9}
   gifStyle
+  title="Run a prompt experiment from the UI"
+  description="Datasets > capital-cities > “Run experiment” > “via User Interface” > Configure. Select prompt answer-question, version 3, and model gpt-4.1, keep the dataset capital-cities, skip evaluators, name the run and click “Run Experiment”. A toast confirms the experiment was triggered."
 />
 
 </Tab>
@@ -49,9 +57,11 @@ Evaluate prompts and models on datasets directly in the user interface. No custo
 Baseline your evaluation workflow with human annotations via Annotation Queues.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/scores-annotation-queue.mp4"
+  src="https://static.langfuse.com/docs-videos/2025-12-19-annotation-queues.mp4"
   aspectRatio={16 / 9}
   gifStyle
+  title="Create and work an annotation queue"
+  description="Human Annotation > “New queue”: name it “Error Analysis”, add the “First Pass” score config and click “Create queue”. In Tracing, select three traces, choose “Add to Annotation Queue” in the selection bar and pick “Error Analysis”. Open the queue with “Process queue” and annotate the first item in the Annotate panel."
 />
 
 </Tab>
@@ -66,7 +76,11 @@ POST /api/public/scores
 Add scores via Python or JS SDK.
 
 ```python filename="Example (Python)"
-langfuse.score(
+from langfuse import get_client
+
+langfuse = get_client()
+
+langfuse.create_score(
   trace_id="123",
   name="my_custom_evaluator",
   value=0.5,

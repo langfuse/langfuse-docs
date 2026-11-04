@@ -1,6 +1,7 @@
 import { Hero } from "./Hero";
+import { PlatformOverview } from "./PlatformOverview";
 import { FeatureTabsSection } from "./FeatureTabsSection";
-import { RiveSection } from "./RiveSection";
+import { AcademyLoopSection } from "./AcademyLoopSection";
 import { AllTheTools } from "./AllTheTools";
 import { Integrations } from "./Integrations";
 import { OpenSource } from "./OpenSource";
@@ -21,8 +22,9 @@ export const Home = () => (
     />
     <main className="overflow-hidden relative w-full hero-bg xl:px-5 2xl:px-10">
       <Hero />
+      <PlatformOverview />
       <FeatureTabsSection />
-      <RiveSection />
+      <AcademyLoopSection />
       <AllTheTools />
       <Integrations />
       <OpenSource />

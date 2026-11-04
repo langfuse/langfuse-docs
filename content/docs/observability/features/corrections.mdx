@@ -39,9 +39,13 @@ Navigate to any trace or observation detail page:
 4. Toggle between **JSON validation mode** and **plain text mode** to match your data format
 5. View the **diff** to compare original vs corrected output
 
-<Frame fullWidth>
-  ![Adding a correction in the UI](/images/docs/corrections-add-ui.png)
-</Frame>
+<Video
+  src="https://static.langfuse.com/docs-videos/corrections.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+  title="Correct an output"
+  description="Trace view of a support reply that used the customer's old address. Click the pencil next to Output to open Corrected Output, prefilled with the original. Replace “your original address” with the new address; the correction saves as you type. Click the diff button to compare original and corrected output."
+/>
 
 The editor auto-saves as you type and provides real-time validation feedback in JSON mode.
 
@@ -112,13 +116,15 @@ langfuse.score.create({
 curl -X POST https://cloud.langfuse.com/api/public/scores \
   -H "Content-Type: application/json" \
   -H "Authorization: Basic <base64_encoded_credentials>" \
-  -d '{
-    "traceId": "trace-123",
-    "observationId": "obs-456",
-    "name": "output",
-    "value": "The corrected output text here",
-    "dataType": "CORRECTION"
-  }'
+  -d '[
+    {
+      "traceId": "trace-123",
+      "observationId": "obs-456",
+      "name": "output",
+      "value": "The corrected output text here",
+      "dataType": "CORRECTION"
+    }
+  ]'
 ```
 
 </Tab>
@@ -140,7 +146,8 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-corrections = langfuse.api.scores_v3.get_many_v3(
+# Python SDK v4: langfuse.api.scores_v3.get_many_v3(...)
+corrections = langfuse.api.scores.get_many(
     data_type="CORRECTION",
     fields="subject,details",
 )
@@ -154,7 +161,8 @@ import { LangfuseClient } from "@langfuse/client";
 
 const langfuse = new LangfuseClient();
 
-const corrections = await langfuse.api.scoresV3.getManyV3({
+// JS/TS SDK v5: langfuse.api.scoresV3.getManyV3(...)
+const corrections = await langfuse.api.scores.getMany({
   dataType: "CORRECTION",
   fields: "subject,details",
 });

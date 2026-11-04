@@ -157,11 +157,6 @@ export const security = defineDocs({
   docs: { schema: sidebarFrontmatterSchema },
 });
 
-export const library = defineDocs({
-  dir: "content/library",
-  docs: { schema: sidebarFrontmatterSchema },
-});
-
 export const customers = defineDocs({
   dir: "content/customers",
   docs: {

@@ -4,6 +4,7 @@ import Image, { type StaticImageData } from "next/image";
 import { HomeSection } from "./HomeSection";
 import { Heading, TextHighlight, ChipCard } from "@/components/ui";
 import { Text } from "@/components/ui/text";
+import { AiGatewayVisual } from "./AiGatewayVisual";
 import { FeaturedCustomers } from "./FeaturedCustomers";
 import observabilityVisual from "./img/tools/observability.png";
 import promptManagementVisual from "./img/tools/prompt.png";
@@ -91,6 +92,40 @@ const tools: ToolEntry[] = [
   },
 ];
 
+function AiGatewayCard() {
+  return (
+    <ChipCard
+      href="/docs/gateway/overview"
+      tooltip="Read more"
+      className="flex flex-col items-stretch p-0 w-full min-w-0"
+    >
+      <div className="grid w-full min-w-0 grid-cols-1 items-start gap-2 xl:items-center p-4 pb-0 sm:pb-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] sm:gap-8">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Text
+              size="m"
+              className="font-medium text-left text-text-secondary"
+            >
+              AI Gateway
+            </Text>
+            <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none uppercase tracking-wide text-text-primary">
+              New
+            </span>
+          </div>
+          <Text size="s" className={toolDescriptionClassName}>
+            Swap the base URL and API key to route your OpenAI and Anthropic
+            calls through Langfuse. Gateway keys show cost per user and key, and
+            every call is traced automatically.
+          </Text>
+        </div>
+        <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden sm:mx-0 sm:-my-4 sm:h-[200px] lg:h-[220px]">
+          <AiGatewayVisual className="absolute inset-0 w-full h-full" />
+        </div>
+      </div>
+    </ChipCard>
+  );
+}
+
 export function AllTheTools() {
   return (
     <HomeSection id="platform-features" className="pt-[120px]">
@@ -107,6 +142,7 @@ export function AllTheTools() {
       </div>
       <div className="flex flex-col gap-2">
         <div className="flex flex-col gap-2">
+          <AiGatewayCard />
           <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
             {tools.slice(0, 3).map((tool) => (
               <ChipCard

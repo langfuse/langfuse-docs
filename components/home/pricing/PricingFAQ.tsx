@@ -38,6 +38,11 @@ const faqs: FAQItem[] = [
       "Our graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for units 100k–1M, $7/100k for 1M–10M units, $6.5/100k for 10M–50M units, and $6/100k for 50M+ units. This ensures you get better rates as you scale up your usage. Use the pricing calculator to estimate your bill.",
   },
   {
+    question: "What is the difference between data access and data retention?",
+    answer:
+      "Data access is set by your plan and determines how many days of historic data you can view (Hobby: 30 days, Core: 90 days, Pro and Enterprise: 3 years). Older data is still stored and becomes accessible again when you upgrade. [Data retention](/docs/administration/data-retention) is a separate, opt-in feature on Pro and Enterprise that permanently deletes data after a custom period. See [data access vs. data retention](/faq/all/data-access-vs-data-retention).",
+  },
+  {
     question: "How can I reduce my Langfuse Cloud bill?",
     answer:
       "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable units that you ingest. We have summarized how this can be done [here](/faq/all/cutting-costs). Additionally, with our new graduated pricing model, you automatically get lower rates per 100k units as your volume increases.",

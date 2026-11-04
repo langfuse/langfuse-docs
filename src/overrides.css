@@ -942,7 +942,6 @@ ul[data-gh-discussions-list] {
   border-radius: 4px;
   background: var(--surface-2);
   color: var(--text-primary);
-  font-variant-numeric: ordinal;
   font-variant-ligatures: none;
   font-feature-settings:
     "liga" 0,
@@ -1268,6 +1267,40 @@ svg .edgeLabel {
  */
 #home-main-area > div:has(> [data-content-width="docs"]) > footer {
   max-width: 42.5rem; /* 680px */
+}
+
+/*
+ * content-width-type: full — the footer spans the page and uses the same
+ * inline padding as the content (`contentWidthClasses.full`).
+ */
+#home-main-area > div:has(> [data-content-width="full"]) > footer {
+  max-width: none;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  #home-main-area > div:has(> [data-content-width="full"]) > footer {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 768px) {
+  #home-main-area > div:has(> [data-content-width="full"]) > footer {
+    padding-inline: 2rem;
+  }
+}
+
+/*
+ * Flush pages (no page padding, sections pad themselves with px-5 sm:px-10):
+ * inset the feedback row and footer to the same section gutter.
+ */
+[data-flush] #docs-feedback,
+#home-main-area > div:has(> [data-flush]) > footer {
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  [data-flush] #docs-feedback,
+  #home-main-area > div:has(> [data-flush]) > footer {
+    padding-inline: 2.5rem;
+  }
 }
 
 /* Inkeep override */

@@ -14,6 +14,7 @@ const availabilities: {
     id: "ee",
     label: "Enterprise Edition",
   },
+  { id: "gov", label: "Government Edition" },
   {
     id: "team-add-on",
     label: "Teams Add-on required",

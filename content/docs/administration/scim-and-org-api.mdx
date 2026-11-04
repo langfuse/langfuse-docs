@@ -67,7 +67,13 @@ To create a new user within Langfuse, you can use the SCIM-style endpoints and `
 This will create a new user if the email does not exist yet.
 Then it will add the user to the organization with role `NONE` (unless a `roles` attribute is provided, see [Okta guide below](#okta)).
 
-Afterward, the role can be updated using the membership endpoints either on an organization or a project level (see above).
+To change a user's organization role later, send `PUT /Users/{id}` with `active: true` and the new role in `roles`, for example `"roles": ["ADMIN"]`.
+This is how Okta pushes role changes, see [Update a user's role in Okta](#okta-update-roles).
+
+- Only the first value of `roles` is used.
+- If `roles` is missing or empty, the user's current role is left unchanged. A periodic IdP sync that does not send roles therefore cannot downgrade anyone.
+- Granting or removing `OWNER` requires an organization API key with full access. The last owner of an organization cannot be demoted or removed.
+- SCIM sets the organization role only. Project-level roles are managed with the project membership endpoints (see above).
 
 <Callout type="warn">
   When SCIM deprovisions and re-provisions a user (e.g. during initial SCIM setup or IdP sync), the user's organization role may be overwritten with the role configured in the SCIM `roles` attribute (defaulting to `NONE`).
@@ -94,6 +100,8 @@ The following SCIM endpoints are available:
 - `GET /Users`
 - `POST /Users`
 - `GET /Users/{id}`
+- `PUT /Users/{id}` (provision, deprovision, or change the organization role)
+- `PATCH /Users/{id}` (only `replace` of `active`, to provision or deprovision)
 - `DELETE /Users/{id}`
 
 ### SCIM Vendor Guides [#scim-vendor-guides]
@@ -166,7 +174,21 @@ After your OIDC SSO app is in place, create a second Okta application for SCIM:
    - Click **Done** and then **Save**.
    - Users should appear as Member within your Langfuse Organization.
 
+##### Update a user's role [#okta-update-roles]
+
+Once a user is provisioned, Okta keeps their Langfuse organization role in sync with the `roles` attribute:
+
+1. In the Langfuse SCIM application, open the **Assignments** tab.
+2. Click the edit (pencil) icon next to the user.
+3. Change **Langfuse Roles** to the new role and click **Save**.
+
+Okta sends the change to Langfuse as a `PUT /Users/{id}` request, and Langfuse updates the user's organization role.
+This requires **Push Profile Updates** (step 2) and **Update User Attributes** (step 3) to be enabled.
+
+Okta is the source of truth for roles it manages: if you change a user's role in the Langfuse UI, Okta overwrites it the next time it pushes that user's profile.
+
 ##### Troubleshooting
 
 - **Users are provisioned with NONE/VIEWER permissions instead of their intended `role`**: This usually happens if the `roles` attribute has an attribute type `Group` instead of `Personal`.
 - **User lost their role after enabling SCIM**: During initial SCIM setup, if a user is deprovisioned and re-provisioned, their organization role is overwritten with the value from the SCIM `roles` attribute. If no role is configured in the IdP, the default is `NONE`. To fix this, ensure the correct role (including `OWNER` for organization owners) is set in the IdP profile before provisioning.
+- **A role change in Okta does not show up in Langfuse**: Check that **Update User Attributes** is enabled and that the `roles` attribute type is `Personal`. Failed pushes are listed in the Okta admin console under **Dashboard** > **Tasks**. A push that grants or removes `OWNER` fails with `403` unless the organization API key used for SCIM has full access.

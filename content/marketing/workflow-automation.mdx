@@ -8,6 +8,7 @@ import { CustomerQuoteGrid } from "@/components/chat-agents/CustomerQuoteGrid";
 import { RelevantIntegrations } from "@/components/chat-agents/RelevantIntegrations";
 import { ValueInsightsAccordion } from "@/components/chat-agents/ValueInsightsAccordion";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { Button } from "@/components/ui/button";
 import {
   workflowAutomationInsights,
   workflowAutomationQuoteRoutes,
@@ -21,10 +22,7 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
   <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[1.2fr_0.8fr]">
     <div className="min-w-0 border-b border-line-structure px-6 py-7 sm:px-10 sm:py-8 lg:border-b-0 lg:border-r">
-      <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
-        Use case / workflow automation
-      </p>
-      <h2 className="mt-2 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+      <h2 className="text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
         <span className="block">Build</span>
         <span className="block">reliable</span>
         <span className="mt-1 inline-block bg-surface-cta-primary px-1.5 whitespace-nowrap">
@@ -32,24 +30,14 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
         </span>
       </h2>
       <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
-        Workflow automation includes dozens of steps across systems and
-        frameworks. Trace the full execution, track cost at every step, and
-        continuously include human expertise to improve your system.
+        {
+          "Workflow automation includes dozens of steps across systems and frameworks. Trace the full execution, track cost at every step, and continuously include human expertise to improve your system."
+        }
       </p>
-      <div className="mt-6 flex flex-wrap items-center gap-2">
-        <a
-          href="/cloud"
-          className="border border-line-cta bg-text-primary px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-surface-bg transition-opacity hover:opacity-90"
-        >
-          Start free
-        </a>
-        <a
-          href="/talk-to-us"
-          className="border border-line-structure bg-surface-bg px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-text-secondary transition-colors hover:border-line-cta hover:text-text-primary"
-        >
-          Talk to sales
-        </a>
-        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-2">Tracing quickstart →</a>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+        <Button href="/talk-to-us" variant="secondary" size="default" shortcutKey="t" className="w-auto" wrapperClassName="w-fit">Talk to sales</Button>
+        <a href="/docs/observability/get-started" data-use-case-action="quickstart" className="inline-flex items-center py-1.5 text-[12px] text-text-tertiary underline decoration-line-structure underline-offset-4 transition-colors hover:text-text-primary hover:decoration-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:ml-1">Tracing quickstart →</a>
       </div>
     </div>
 
@@ -95,8 +83,9 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
       Learn from real automation examples
     </h2>
     <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
-      Start tracing a full application, evaluate structured extraction, and
-      study patterns for multi-step LLM systems.
+      {
+        "Start tracing a full application, evaluate structured extraction, and study patterns for multi-step LLM systems."
+      }
     </p>
     <div className="mx-auto mt-8 max-w-4xl">
       <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
@@ -129,12 +118,11 @@ import { BookOpen, Rocket, Workflow } from "lucide-react";
   </section>
 
   <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
-    <div className="mx-auto max-w-5xl">
-      <CustomerStoryCTA
-        title="Ready to build reliable automation agents?"
-        description="Use traces, cost analytics, and human review to observe and improve every workflow run with Langfuse."
-        contactLabel="Talk to sales"
-      />
-    </div>
+    <CustomerStoryCTA
+      className="mt-0"
+      title="Ready to build reliable automation agents?"
+      description="Use traces, cost analytics, and human review to observe and improve every workflow run with Langfuse."
+      contactLabel="Talk to sales"
+    />
   </section>
 </div>

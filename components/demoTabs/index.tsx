@@ -12,6 +12,7 @@ import {
   HandIcon,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { CinemaMode } from "./CinemaMode";
 
 // Lazy-load all tab content so their heavy deps (katex, livekit, AI SDKs) are NOT
 // pulled into the catch-all [section]/[[...slug]] bundle that serves every docs page.
@@ -71,75 +72,72 @@ export const DemoTabs = ({ className, ...props }: DemoTabsProps) => {
 
   return (
     <div className={cn("not-prose", className)} {...props}>
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="w-full">
-          <TabsTrigger value="chatbot" className="gap-1.5">
-            <MessageSquareIcon className="size-4" />
-            <span className="hidden sm:inline">Q&A Chatbot</span>
-            <span className="sm:hidden">Chat</span>
-          </TabsTrigger>
-          <TabsTrigger value="voice" className="gap-1.5">
-            <MicIcon className="size-4" />
-            <span className="hidden sm:inline">Voice Agent</span>
-            <span className="sm:hidden">Voice</span>
-          </TabsTrigger>
-          <TabsTrigger value="image" className="gap-1.5">
-            <ImageIcon className="size-4" />
-            <span className="hidden sm:inline">Image Generator</span>
-            <span className="sm:hidden">Image</span>
-          </TabsTrigger>
-          <TabsTrigger value="sentiment" className="gap-1.5">
-            <BarChart3Icon className="size-4" />
-            <span className="hidden sm:inline">Sentiment Classifier</span>
-            <span className="sm:hidden">Sentiment</span>
-          </TabsTrigger>
-          <TabsTrigger value="rps" className="gap-1.5">
-            <HandIcon className="size-4" />
-            <span className="hidden sm:inline">Rock Paper Scissors</span>
-            <span className="sm:hidden">RPS</span>
-          </TabsTrigger>
-        </TabsList>
+      <CinemaMode>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className="w-full flex-wrap">
+            <TabsTrigger value="chatbot" className="gap-1.5">
+              <MessageSquareIcon className="size-4" />
+              <span>Q&A chatbot</span>
+            </TabsTrigger>
+            <TabsTrigger value="voice" className="gap-1.5">
+              <MicIcon className="size-4" />
+              <span>Voice agent</span>
+            </TabsTrigger>
+            <TabsTrigger value="image" className="gap-1.5">
+              <ImageIcon className="size-4" />
+              <span>Image generator</span>
+            </TabsTrigger>
+            <TabsTrigger value="sentiment" className="gap-1.5">
+              <BarChart3Icon className="size-4" />
+              <span>Sentiment</span>
+            </TabsTrigger>
+            <TabsTrigger value="rps" className="gap-1.5">
+              <HandIcon className="size-4" />
+              <span>Rock paper scissors</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent
-          value="chatbot"
-          forceMount
-          className={activeTab !== "chatbot" ? "hidden" : undefined}
-        >
-          <Chat />
-        </TabsContent>
+          <TabsContent
+            value="chatbot"
+            forceMount
+            className={activeTab !== "chatbot" ? "hidden" : undefined}
+          >
+            <Chat className="group-data-[cinema=true]/cinema:h-[calc(100dvh-12rem)] group-data-[cinema=true]/cinema:min-h-96" />
+          </TabsContent>
 
-        <TabsContent
-          value="voice"
-          forceMount
-          className={activeTab !== "voice" ? "hidden" : undefined}
-        >
-          <VoiceAgent />
-        </TabsContent>
+          <TabsContent
+            value="voice"
+            forceMount
+            className={activeTab !== "voice" ? "hidden" : undefined}
+          >
+            <VoiceAgent className="group-data-[cinema=true]/cinema:h-[calc(100dvh-12rem)] group-data-[cinema=true]/cinema:min-h-96" />
+          </TabsContent>
 
-        <TabsContent
-          value="image"
-          forceMount
-          className={activeTab !== "image" ? "hidden" : undefined}
-        >
-          <ImageGenerator />
-        </TabsContent>
+          <TabsContent
+            value="image"
+            forceMount
+            className={activeTab !== "image" ? "hidden" : undefined}
+          >
+            <ImageGenerator />
+          </TabsContent>
 
-        <TabsContent
-          value="sentiment"
-          forceMount
-          className={activeTab !== "sentiment" ? "hidden" : undefined}
-        >
-          <SentimentClassifier />
-        </TabsContent>
+          <TabsContent
+            value="sentiment"
+            forceMount
+            className={activeTab !== "sentiment" ? "hidden" : undefined}
+          >
+            <SentimentClassifier />
+          </TabsContent>
 
-        <TabsContent
-          value="rps"
-          forceMount
-          className={activeTab !== "rps" ? "hidden" : undefined}
-        >
-          <RockPaperScissors />
-        </TabsContent>
-      </Tabs>
+          <TabsContent
+            value="rps"
+            forceMount
+            className={activeTab !== "rps" ? "hidden" : undefined}
+          >
+            <RockPaperScissors />
+          </TabsContent>
+        </Tabs>
+      </CinemaMode>
     </div>
   );
 };
