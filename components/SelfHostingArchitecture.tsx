@@ -6,7 +6,6 @@ import {
   HardDrive,
   Layers,
   ListOrdered,
-  LockKeyhole,
   Server,
   Sparkles,
   Waypoints,
@@ -247,18 +246,7 @@ function DesktopDiagram() {
         rx="12"
         className={styles.boundary}
       />
-      <LockKeyhole
-        x={RIGHT}
-        y={124}
-        width={14}
-        height={14}
-        className={styles.icon}
-        aria-hidden="true"
-      />
-      <text x="582" y="136" className={styles.label}>
-        YOUR INFRASTRUCTURE
-      </text>
-      <text x="582" y="152" className={styles.detail}>
+      <text x="760" y="136" textAnchor="end" className={styles.detail}>
         VPC / on-premises
       </text>
       <Client x={LEFT} y={24} name="UI, API & SDKs" icon={Globe} />
@@ -312,9 +300,6 @@ function DesktopDiagram() {
       </text>
       <text x="48" y="96" className={styles.detail}>
         Requests
-      </text>
-      <text x="660" y="308" textAnchor="middle" className={styles.label}>
-        BACKGROUND PROCESSING
       </text>
       <text x="154" y="620" className={styles.detail}>
         Playground
@@ -406,15 +391,6 @@ function MobileDiagram() {
       <MobileConnector label="Into your infrastructure" kind="optional" />
       <div className={styles.mobileBoundary}>
         <div className={styles.mobileInfra}>
-          <span className={styles.mobileInfraTitle}>
-            <LockKeyhole
-              width={14}
-              height={14}
-              className={styles.mobileIcon}
-              aria-hidden="true"
-            />
-            Your infrastructure
-          </span>
           <span className={styles.mobileInfraDetail}>VPC / on-premises</span>
         </div>
         <MobileCard
