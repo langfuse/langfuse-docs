@@ -31,7 +31,7 @@ There are different ingestion modes, which gateway managers set for the whole or
 
 - the model (the dated response model when the provider returns one), matched to [model prices](/docs/observability/features/token-and-cost-tracking), and scalar model parameters such as `temperature` (`FULL` also records structured options such as `response_format`)
 - token usage, including cached and reasoning tokens, plus cost, latency, and time to first token
-- level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations
+- status `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations
 - sessions, grouped automatically from each coding agent's own session ID
 - the [trace user](/docs/gateway/features/api-keys#trace-user), which depends on the key type
 - the gateway key, its [key metadata](/docs/gateway/features/api-keys#key-metadata), and the provider credential in metadata, under `langfuse.gateway.api_key.*` and `langfuse.gateway.connection.*`
