@@ -4,10 +4,10 @@ import NextLink from "next/link";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import {
-  LOOP_COPY,
   LOOP_ORDER,
-  LOOP_STEP_PHASE,
-  type LoopCopy,
+  LOOP_PHASES,
+  LOOP_STEPS,
+  type LoopPhaseId,
   type LoopStepId,
 } from "./steps";
 import { ARROW_HEAD, ArrowHead, HArrow, VArrow } from "../diagram-arrows";
@@ -17,21 +17,19 @@ const CARD_HOVER =
   "corner-box-hover-stripes transition-[background,border-color] duration-180 ease-out";
 
 function StepCard({
-  copy,
   id,
   active,
   showPhase,
   className,
   style,
 }: {
-  copy: LoopCopy;
   id: LoopStepId;
   active: boolean;
   showPhase?: boolean;
   className?: string;
   style?: CSSProperties;
 }) {
-  const step = copy.steps[id];
+  const step = LOOP_STEPS[id];
   return (
     <NextLink
       href={step.href}
@@ -46,23 +44,19 @@ function StepCard({
       <PulseDot active={active} />
       {showPhase ? (
         <MonoLabel className="text-text-secondary">
-          <Highlight>
-            {copy.phases[LOOP_STEP_PHASE[id]].toLowerCase()}
-          </Highlight>
+          <Highlight>{LOOP_PHASES[step.phase].label.toLowerCase()}</Highlight>
         </MonoLabel>
       ) : null}
       <span
         className={cn(
-          "flex flex-1 items-center whitespace-pre-line font-analog font-medium leading-[1.05] text-text-primary break-keep",
-          showPhase
-            ? "mt-1 text-[19px]"
-            : "text-[20px] @3xl:text-[23px] [&:lang(ja)]:text-[14px]",
+          "flex flex-1 items-center font-analog font-medium leading-[1.05] text-text-primary",
+          showPhase ? "mt-1 text-[19px]" : "text-[20px] xl:text-[23px]",
         )}
       >
-        {showPhase ? step.title.replace("\n", "") : step.title}
+        {step.title}
       </span>
-      <MonoLabel className="mt-2 leading-[1.5] break-keep">
-        {step.meta.join("\u00a0· ")}
+      <MonoLabel className="mt-2 leading-[1.5]">
+        {step.meta.join(" · ")}
       </MonoLabel>
     </NextLink>
   );
@@ -119,16 +113,17 @@ function ReturnPath({
 }
 
 function PhaseBracket({
-  label,
+  phase,
   className,
 }: {
-  label: string;
+  phase: LoopPhaseId;
   className?: string;
 }) {
+  const p = LOOP_PHASES[phase];
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       <span className="px-1 text-[13px] font-medium text-text-primary">
-        <Highlight>{label}</Highlight>
+        <Highlight>{p.label}</Highlight>
       </span>
       <div
         className="h-2 border-x border-t border-line-structure"
@@ -145,31 +140,24 @@ const center = (i: number, nudge = 0) =>
 const fromRight = (i: number, nudge = 0) =>
   `calc(${CARD_W} * ${4 - i + 0.5} + ${(4 - i) * 24 + nudge}px)`;
 
-type RowProps = { copy: LoopCopy; active: LoopStepId };
-
-function WideRow({ copy, active }: RowProps) {
+function WideRow({ active }: { active: LoopStepId }) {
   return (
-    <div className="hidden @2xl:block">
+    <div className="hidden md:block">
       <div
         className="mb-3 grid"
         style={{
           gridTemplateColumns: `calc(${CARD_W} * 2 + 24px) 24px minmax(0,1fr)`,
         }}
       >
-        <PhaseBracket label={copy.phases.production} />
+        <PhaseBracket phase="production" />
         <div />
-        <PhaseBracket label={copy.phases.development} />
+        <PhaseBracket phase="development" />
       </div>
 
       <div className="grid grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)_24px_minmax(0,1fr)]">
         {LOOP_ORDER.map((id, i) => (
           <div key={id} className="contents">
-            <StepCard
-              copy={copy}
-              id={id}
-              active={active === id}
-              className="h-[150px]"
-            />
+            <StepCard id={id} active={active === id} className="h-[150px]" />
             {i < LOOP_ORDER.length - 1 ? (
               <div className="flex items-center">
                 <HArrow />
@@ -184,19 +172,19 @@ function WideRow({ copy, active }: RowProps) {
           left={center(0, 10)}
           right={fromRight(1)}
           depth={26}
-          label={copy.iterate}
+          label="iterate"
         />
         <ReturnPath
           left={center(3)}
           right={fromRight(4, 10)}
           depth={26}
-          label={copy.iterate}
+          label="iterate"
         />
         <ReturnPath
           left={center(0, -10)}
           right={fromRight(4, -10)}
           depth={64}
-          label={copy.deploy}
+          label="deploy"
         />
       </div>
     </div>
@@ -207,7 +195,7 @@ const M_CARD_H = 84;
 const M_GAP = 28;
 const mCenter = (i: number) => i * (M_CARD_H + M_GAP) + M_CARD_H / 2;
 
-function CompactColumn({ copy, active }: RowProps) {
+function CompactColumn({ active }: { active: LoopStepId }) {
   const total = LOOP_ORDER.length * M_CARD_H + (LOOP_ORDER.length - 1) * M_GAP;
   const sideReturn = (
     from: number,
@@ -252,14 +240,13 @@ function CompactColumn({ copy, active }: RowProps) {
   // 56px is the return rail (right-3 + w-11), so the arrow tips touch the cards.
   return (
     <div
-      className="relative @2xl:hidden"
+      className="relative md:hidden"
       style={{ height: total, paddingRight: 56 }}
     >
       <div className="flex flex-col">
         {LOOP_ORDER.map((id, i) => (
           <div key={id} className="flex flex-col">
             <StepCard
-              copy={copy}
               id={id}
               active={active === id}
               showPhase
@@ -275,38 +262,29 @@ function CompactColumn({ copy, active }: RowProps) {
         ))}
       </div>
       <div className="absolute inset-y-0 right-3 w-11">
-        {sideReturn(1, 0, 18, copy.iterate, 10)}
-        {sideReturn(4, 3, 18, copy.iterate, -10)}
-        {sideReturn(4, 0, 40, copy.deploy, -10)}
+        {sideReturn(1, 0, 18, "iterate", 10)}
+        {sideReturn(4, 3, 18, "iterate", -10)}
+        {sideReturn(4, 0, 40, "deploy", -10)}
       </div>
     </div>
   );
 }
 
-/**
- * Breakpoints are container queries, so the row also fits the narrower docs
- * column. Passing `highlight` pins that step instead of cycling.
- */
-export function AcademyRowVisual({
-  copy = LOOP_COPY,
-  highlight,
-  className,
-}: {
-  copy?: LoopCopy;
-  highlight?: LoopStepId;
-  className?: string;
-}) {
-  const tick = useLoopTick(LOOP_ORDER.length, highlight !== undefined);
-  const active = highlight ?? LOOP_ORDER[tick];
+export function AcademyRowVisual() {
+  const active = LOOP_ORDER[useLoopTick(LOOP_ORDER.length)];
   return (
     <figure
-      lang={copy.lang}
-      aria-label={copy.ariaLabel}
-      className={cn("not-prose @container text-left", className)}
+      aria-label="The AI engineering loop from the Langfuse Academy"
+      className="not-prose text-left"
     >
-      <WideRow copy={copy} active={active} />
-      <CompactColumn copy={copy} active={active} />
-      <figcaption className="sr-only">{copy.caption}</figcaption>
+      <WideRow active={active} />
+      <CompactColumn active={active} />
+      <figcaption className="sr-only">
+        In production, trace and monitor your application, and iterate directly
+        on what monitoring surfaces. During development, build datasets, then
+        experiment and evaluate, iterating until a change is good enough. Deploy
+        it, and the loop starts again with new traces.
+      </figcaption>
     </figure>
   );
 }
