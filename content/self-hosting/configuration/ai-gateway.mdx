@@ -158,7 +158,7 @@ langfuse:
         cert-manager.io/cluster-issuer: letsencrypt
 ```
 
-Use a `langfuse.gateway.ingress.tls.secretName` that differs from web's `langfuse.ingress.tls.secretName`, so the two certificates do not overwrite each other. With an HTTP-01 issuer, the gateway host must be reachable from the internet; for internal hosts, use a DNS-01 issuer.
+Set `langfuse.gateway.ingress.tls.secretName` to a different Secret name than web's `langfuse.ingress.tls.secretName`, so the two certificates do not overwrite each other. With an HTTP-01 issuer, the gateway host must be reachable from the internet; for internal hosts, use a DNS-01 issuer.
 
 </Tab>
 
