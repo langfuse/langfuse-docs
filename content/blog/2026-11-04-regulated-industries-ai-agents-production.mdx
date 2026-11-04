@@ -60,6 +60,10 @@ Add [tracing](/docs/observability/get-started) before anyone outside the team us
   ![Trace of a synthetic small-business credit review in Langfuse, with the credit policy fetch, model calls, and tool calls as nested observations next to the agent's recommendation](/images/blog/2026-11-04-regulated-industries-ai-agents-production/credit-review-trace.png)
 </Frame>
 
+<Callout type="info">
+  Decide early where the traces will live. Many banks and insurers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched, and [Trade Republic](/users/trade-republic) runs Langfuse self-hosted as well. Where self-hosting is not required, teams use Langfuse Cloud, including a [HIPAA-ready region](/security/hipaa) for healthcare. See [Langfuse for financial services](/financial-services) for deployment options and compliance documentation.
+</Callout>
+
 ## Step 2: Run example inputs through the agent [#example-inputs]
 
 Next, run a set of examples through the agent that roughly matches what you expect to hit your system in production. Each run produces a trace you can learn from. At this point, you do not need expected answers yet. Good sources for cases are:
