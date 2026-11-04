@@ -11,7 +11,7 @@ import { AiGatewayArchitectureDiagram } from "@/components/AiGatewayArchitecture
 
 <AiGatewayBetaCallout />
 
-This page explains how the gateway works: what happens to a request, which keys and settings are involved, and how a model call becomes a trace. To start using it, see [Set up the gateway](/docs/ai-gateway/get-started/admin-setup) for admins or [Send your first request](/docs/ai-gateway/get-started/first-request) for developers.
+This page explains how the gateway works: what happens to a request, which keys and settings are involved, and how a model call becomes a trace. To start using it, see [Set up the gateway](/docs/gateway/get-started/admin-setup) for admins or [Send your first request](/docs/gateway/get-started/first-request) for developers.
 
 ## Components, architecture and request flow [#architecture]
 
@@ -19,7 +19,7 @@ The gateway serves as a layer between the user's AI requests and the model provi
 
 <AiGatewayArchitectureDiagram />
 
-On Langfuse Cloud, Langfuse runs the gateway in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to OpenAI or Anthropic and processed under your agreement with them.
+On Langfuse Cloud, Langfuse runs the gateway in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/gateway/features/rest-api#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to OpenAI or Anthropic and processed under your agreement with them.
 
 On self-hosted Langfuse, the gateway is a separate service that you deploy next to your instance. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
 
@@ -27,11 +27,11 @@ On self-hosted Langfuse, the gateway is a separate service that you deploy next 
 
 The gateway uses three types of keys. Clients hold user keys or service account keys, and only the gateway holds the provider credentials:
 
-| Key type                                                                                 | Origin                                          | Scope                                                                    | Provided by |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ | ----------- |
-| [Provider credential](/docs/ai-gateway/get-started/admin-setup#add-provider-connections) | Model provider, for example OpenAI or Anthropic | Held only by the gateway. Clients never see it.                          | Owner/admin |
-| [User key](/docs/ai-gateway/features/api-keys#key-types)                                 | AI Gateway                                      | Scoped to one user. Stops working when the user leaves the organization. | User        |
-| [Service account key](/docs/ai-gateway/features/api-keys#key-types)                      | AI Gateway                                      | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin |
+| Key type                                                                              | Origin                                          | Scope                                                                    | Provided by |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ | ----------- |
+| [Provider credential](/docs/gateway/get-started/admin-setup#add-provider-connections) | Model provider, for example OpenAI or Anthropic | Held only by the gateway. Clients never see it.                          | Owner/admin |
+| [User key](/docs/gateway/features/api-keys#key-types)                                 | AI Gateway                                      | Scoped to one user. Stops working when the user leaves the organization. | User        |
+| [Service account key](/docs/gateway/features/api-keys#key-types)                      | AI Gateway                                      | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin |
 
 Because clients only hold gateway keys, you can rotate a provider key without changing any client, and revoke one person's access without affecting anyone else.
 
@@ -56,18 +56,18 @@ An organization can add several provider credentials, including more than one pe
 
 <Callout type="info">
   Some coding agents send the provider's model names without a prefix, which
-  also works. See [model IDs](/docs/ai-gateway/features/models#model-ids).
+  also works. See [model IDs](/docs/gateway/features/models#model-ids).
 </Callout>
 
 <Callout type="info">
   By default, a credential allows every model the provider offers. Admins can
   turn models off per credential, see [Model
-  management](/docs/ai-gateway/features/models).
+  management](/docs/gateway/features/models).
 </Callout>
 
 ## Tracing [#tracing]
 
-You can enable tracing of the LLM calls in a couple of different tiers (see [Tracing](/docs/ai-gateway/features/tracing) for more details):
+You can enable tracing of the LLM calls in a couple of different tiers (see [Tracing](/docs/gateway/features/tracing) for more details):
 
 | Mode                      | Recorded                                                                                                                                                                                                        |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -79,4 +79,4 @@ After the response, the gateway records the call as a generation in Langfuse asy
 
 ### Tracing context around the LLM call [#tracing-context]
 
-The gateway only sees model calls. It doesn't see what your app does around them, for example retrieval or tool execution. To trace those steps, instrument your app with the [Langfuse SDK](/docs/observability/sdk/overview). To combine both, send the `traceparent` header of your current span with the request, and the gateway records its generation inside your trace. See [trace context and baggage](/docs/ai-gateway/features/tracing#trace-context).
+The gateway only sees model calls. It doesn't see what your app does around them, for example retrieval or tool execution. To trace those steps, instrument your app with the [Langfuse SDK](/docs/observability/sdk/overview). To combine both, send the `traceparent` header of your current span with the request, and the gateway records its generation inside your trace. See [trace context and baggage](/docs/gateway/features/tracing#trace-context).

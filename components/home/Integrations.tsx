@@ -41,7 +41,7 @@ const gatewaysGroup = {
   items: [
     {
       label: "Langfuse AI Gateway",
-      href: "/docs/ai-gateway/overview",
+      href: "/docs/gateway/overview",
       icon: <Image src="/langfuse-icon.svg" alt="" width={18} height={18} />,
     },
     {

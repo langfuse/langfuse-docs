@@ -41,7 +41,7 @@ export const productLinks: NavPanelLink[] = [
   },
   { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
   { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
-  { name: "AI Gateway", href: "/docs/ai-gateway/overview", icon: Network },
+  { name: "AI Gateway", href: "/docs/gateway/overview", icon: Network },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [

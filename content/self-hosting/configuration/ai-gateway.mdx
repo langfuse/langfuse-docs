@@ -13,7 +13,7 @@ sidebarTitle: "AI Gateway"
 
 </Callout>
 
-The [Langfuse AI Gateway](/docs/ai-gateway/overview) sends model requests from your applications and coding agents to your LLM providers and records every call as a generation in Langfuse. This guide covers how to deploy and operate the gateway on a self-hosted Langfuse instance. Once it runs, follow [Set up Gateway as an admin](/docs/ai-gateway/get-started/admin-setup) to connect your providers and create API keys.
+The [Langfuse AI Gateway](/docs/gateway/overview) sends model requests from your applications and coding agents to your LLM providers and records every call as a generation in Langfuse. This guide covers how to deploy and operate the gateway on a self-hosted Langfuse instance. Once it runs, follow [Set up Gateway as an admin](/docs/gateway/get-started/admin-setup) to connect your providers and create API keys.
 
 ## Requirements [#requirements]
 
@@ -37,7 +37,7 @@ import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/faq/all/ai-gateway-request-changes).
 4. The gateway uploads the generation to Langfuse Web, which ingests it like any other trace.
 
-Organization admins then add provider credentials and gateway API keys in the Langfuse UI. For how clients, keys, and providers fit together, see [Concepts](/docs/ai-gateway/concepts).
+Organization admins then add provider credentials and gateway API keys in the Langfuse UI. For how clients, keys, and providers fit together, see [Concepts](/docs/gateway/concepts).
 
 ## Deploy with Helm [#helm]
 

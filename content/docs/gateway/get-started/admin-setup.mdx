@@ -11,7 +11,7 @@ import { FaqPreview } from "@/components/faq/FaqPreview";
 
 <AiGatewayBetaCallout />
 
-This page walks through how to set up the AI Gateway for your organization. Read [Core concepts](/docs/ai-gateway/concepts) first to understand how the gateway works. If you want to use the gateway with your coding agent/AI app as a user, go to [Send your first request](/docs/ai-gateway/get-started/first-request).
+This page walks through how to set up the AI Gateway for your organization. Read [Core concepts](/docs/gateway/concepts) first to understand how the gateway works. If you want to use the gateway with your coding agent/AI app as a user, go to [Send your first request](/docs/gateway/get-started/first-request).
 
 _**Self-hosting Langfuse?** The gateway is a separate service that runs next to Langfuse. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway)._
 
@@ -33,18 +33,18 @@ This guide helps you set up Langfuse Gateway as an admin.
 Go to **Organization settings → AI Gateway → Setup** and choose:
 
 - the **project**, where the gateway records generations
-- the [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
+- the [ingestion mode](/docs/gateway/features/tracing#ingestion-modes): `FULL` (input and output) or `USAGE` (usage and cost only, the default). Self-hosted deployments also offer `NONE` (route without recording).
 
 <Frame>
-  ![Gateway setup page with the first step, choosing between the Full and Usage ingestion modes and the project to record in](/images/docs/ai-gateway/setup-ingestion-mode.png)
+  ![Gateway setup page with the first step, choosing between the Full and Usage ingestion modes and the project to record in](/images/docs/gateway/setup-ingestion-mode.png)
 </Frame>
 
 ### Add provider credentials [#add-provider-connections]
 
-On the same page, select **Add credential** and add [API keys](/docs/ai-gateway/concepts#credential-types) for model providers you’d like to use. The credential's **name** becomes the prefix of its [model IDs](/docs/ai-gateway/features/models#model-ids).
+On the same page, select **Add credential** and add [API keys](/docs/gateway/concepts#credential-types) for model providers you’d like to use. The credential's **name** becomes the prefix of its [model IDs](/docs/gateway/features/models#model-ids).
 
 <Frame>
-  ![Add provider credential dialog with the provider, name, and secret key fields](/images/docs/ai-gateway/setup-add-provider-credential.png)
+  ![Add provider credential dialog with the provider, name, and secret key fields](/images/docs/gateway/setup-add-provider-credential.png)
 </Frame>
 
 <Callout type="info">
@@ -55,11 +55,11 @@ On the same page, select **Add credential** and add [API keys](/docs/ai-gateway/
 
 ### Configure allowed models (optional) [#choose-models]
 
-By default, a credential allows every model the provider offers, including models the provider publishes later. To restrict a credential to selected models, turn models off on its models page. See [Model management](/docs/ai-gateway/features/models#manage-models).
+By default, a credential allows every model the provider offers, including models the provider publishes later. To restrict a credential to selected models, turn models off on its models page. See [Model management](/docs/gateway/features/models#manage-models).
 
 ### Give your team access [#give-your-team-access]
 
-Use **Notify your team** to email teammates. People who are not in the organization yet are invited with the AI Gateway role: they can call the gateway, manage their own keys, and see [analytics](/docs/ai-gateway/features/analytics) of their own usage, but can't see any projects. This role suits people who only need to call models, for example developers who use the gateway for their coding agent.
+Use **Notify your team** to email teammates. People who are not in the organization yet are invited with the AI Gateway role: they can call the gateway, manage their own keys, and see [analytics](/docs/gateway/features/analytics) of their own usage, but can't see any projects. This role suits people who only need to call models, for example developers who use the gateway for their coding agent.
 
 <Callout type="info">
   You can change anyone's role later in the organization's members settings,
@@ -75,4 +75,4 @@ Use **Notify your team** to email teammates. People who are not in the organizat
 
 ## Next steps [#next-steps]
 
-- [Enable users to start using Gateway](/docs/ai-gateway/get-started/first-request)
+- [Enable users to start using Gateway](/docs/gateway/get-started/first-request)

@@ -49,7 +49,7 @@ Use traces to find repeated context, failed tool loops, and prompts that should 
 
 Route coding-agent traffic through the Langfuse AI Gateway (beta), LiteLLM, or OpenRouter. The Langfuse AI Gateway has gateway keys, access control, and tracing built in.
 
-**LLM gateways:** [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), [Langfuse AI Gateway (beta)](/docs/ai-gateway/overview)
+**LLM gateways:** [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), [Langfuse AI Gateway (beta)](/docs/gateway/overview)
 
 ## Dive deep into session details
 

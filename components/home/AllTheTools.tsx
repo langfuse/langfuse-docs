@@ -95,7 +95,7 @@ const tools: ToolEntry[] = [
 function AiGatewayCard() {
   return (
     <ChipCard
-      href="/docs/ai-gateway/overview"
+      href="/docs/gateway/overview"
       tooltip="Read more"
       className="flex flex-col items-stretch p-0 w-full min-w-0"
     >

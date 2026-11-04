@@ -20,7 +20,7 @@ Use the official [OpenAI SDKs](https://developers.openai.com/api/docs/libraries)
   For tracing the OpenAI SDK without the gateway, see the [OpenAI (Python)](/integrations/model-providers/openai-py) and [OpenAI (JS/TS)](/integrations/model-providers/openai-js) integrations.
 </Callout>
 
-Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/ai-gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/ai-gateway/features/rest-api#routes).
+Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/gateway/features/rest-api#routes).
 
 ## Configure the client [#configure-the-client]
 
@@ -120,12 +120,12 @@ console.log(completion.choices[0].message.content);
 <Callout type="warning">
   Streamed Chat Completions end with a usage chunk whose `choices` array is
   empty, even if you didn't ask for usage. Skip chunks without choices. See
-  [streaming usage](/docs/ai-gateway/features/rest-api#streaming-usage).
+  [streaming usage](/docs/gateway/features/rest-api#streaming-usage).
 </Callout>
 
 ## Add request headers [#request-headers]
 
-Set [request headers](/docs/ai-gateway/features/tracing#request-headers) on the client for every call, or per call for values such as a session ID.
+Set [request headers](/docs/gateway/features/tracing#request-headers) on the client for every call, or per call for values such as a session ID.
 
 <LangTabs items={["Python", "TypeScript"]}>
 <Tab>
