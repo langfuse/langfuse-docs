@@ -1,7 +1,7 @@
 ---
 title: How Teams in Regulated Industries Get AI Agents into Production
 description: How banks, insurers, and healthcare teams take an AI agent from an offline prototype to production, with evidence, compliance checks, and human oversight at every step.
-date: 2026/10/22
+date: 2026/11/04
 tag: guide
 author: Annabell
 ---
@@ -12,7 +12,7 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
 <BlogHeader
   title="How Teams in Regulated Industries Get AI Agents into Production"
   description="Banks, insurers, and healthcare teams face stricter requirements to take an AI agent from an offline prototype to production. Learn how they use evidence, compliance checks, and human oversight at every step."
-  date="October 22, 2026"
+  date="November 4, 2026"
   authors={["annabellschafer"]}
 />
 
@@ -27,7 +27,7 @@ We will show you how teams in regulated industries bring agents to production, f
 AI development teams in regulated industries usually face three requirements for their projects.
 
 <Frame fullWidth>
-  ![Three requirements for AI agents in regulated industries: evidence before launch, oversight after launch, and control over data](/images/blog/2026-10-22-regulated-industries-ai-agents-production/three-requirements.png)
+  ![Three requirements for AI agents in regulated industries: evidence before launch, oversight after launch, and control over data](/images/blog/2026-11-04-regulated-industries-ai-agents-production/three-requirements.png)
 </Frame>
 
 **Evidence before launch.** Banks already run risk processes that ask for test results, review sign-offs, and documentation before an application reaches production ([deployment gates for LLMs in financial services](/blog/2026-07-15-llm-certification-financial-services)). The review board will want to see how the agent behaves in realistic cases.
@@ -59,7 +59,7 @@ flowchart TB
 Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Traces provide you insight into what happened during a run and provide you with a way of showing evidence of what the agent did. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. Decide where to mask sensitive fields before they are stored. The SDKs support [client-side masking](/docs/observability/features/masking), so account numbers or patient identifiers can be redacted at the source.
 
 <Frame fullWidth>
-  ![Trace of a synthetic small-business credit review in Langfuse, with the credit policy fetch, model calls, and tool calls as nested observations next to the agent's recommendation](/images/blog/2026-10-22-regulated-industries-ai-agents-production/credit-review-trace.png)
+  ![Trace of a synthetic small-business credit review in Langfuse, with the credit policy fetch, model calls, and tool calls as nested observations next to the agent's recommendation](/images/blog/2026-11-04-regulated-industries-ai-agents-production/credit-review-trace.png)
 </Frame>
 
 ## Step 2: Run example inputs through the agent [#example-inputs]
@@ -121,7 +121,7 @@ In Langfuse, [annotation queues](/docs/evaluation/evaluation-methods/annotation-
 Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) and record the scores as your baseline. Then review failed cases and improve the agent by changing its context, tool calls, or prompts, rerun the experiment, and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments).
 
 <Frame fullWidth>
-  ![Experiments list in Langfuse with several versions of a synthetic credit review agent, their scores improving across versions, and error counts per run](/images/blog/2026-10-22-regulated-industries-ai-agents-production/credit-review-experiments.png)
+  ![Experiments list in Langfuse with several versions of a synthetic credit review agent, their scores improving across versions, and error counts per run](/images/blog/2026-11-04-regulated-industries-ai-agents-production/credit-review-experiments.png)
 </Frame>
 
 <Callout type="info">
