@@ -113,9 +113,9 @@ function AiGatewayCard() {
             </span>
           </div>
           <Text size="s" className={toolDescriptionClassName}>
-            Swap the base URL and API key to route your AI calls through
-            Langfuse. Use virtual keys to set budgets. Every call is centrally
-            traced and governed.
+            Swap the base URL and API key to route your OpenAI and Anthropic
+            calls through Langfuse. Gateway keys show cost per user and key, and
+            every call is traced automatically.
           </Text>
         </div>
         <div className="pointer-events-none relative -mx-4 h-[180px] overflow-hidden sm:mx-0 sm:-my-4 sm:h-[200px] lg:h-[220px]">

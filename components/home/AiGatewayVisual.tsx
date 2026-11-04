@@ -24,15 +24,10 @@ const clients: Chip[] = [
 const providers: Chip[] = [
   { label: "OpenAI", x: 400, y: 0, w: 130 },
   { label: "Anthropic", x: 400, y: 44, w: 130 },
-  { label: "OpenRouter", x: 400, y: 88, w: 130 },
 ];
 const gateway = { x: 190, y: 34, w: 150, h: 50 };
 const ROW_H = 22;
-const checks = [
-  { label: "trace", value: "1.2s $0.0031" },
-  { label: "budget", value: "OK" },
-  { label: "guardrail", value: "OK" },
-];
+const checks = [{ label: "trace", value: "1.2s $0.0031" }];
 const trace = { x: 180, y: 120, w: 170, h: ROW_H * checks.length + 8 };
 const CENTER = { x: 299, y: 205 };
 
