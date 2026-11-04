@@ -210,10 +210,27 @@ function SdkNode({ className }: { className?: string }) {
   );
 }
 
-function GatewayNode({ className }: { className?: string }) {
+function GatewayNode({
+  className,
+  highlighted = false,
+}: {
+  className?: string;
+  highlighted?: boolean;
+}) {
   return (
-    <NextLink href={AI_GATEWAY_HREF} className={cn("flex", className)}>
-      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+    <NextLink
+      href={AI_GATEWAY_HREF}
+      aria-current={highlighted ? "page" : undefined}
+      className={cn("flex", highlighted && "relative z-10", className)}
+    >
+      <CornerBox
+        hoverStripes
+        className={cn(
+          "flex flex-1 flex-col gap-2 p-3 sm:p-4",
+          highlighted &&
+            "border-line-cta bg-[color-mix(in_oklab,var(--surface-cta-primary)_45%,var(--surface-bg))] shadow-[0_0_0_3px_var(--line-cta)]",
+        )}
+      >
         <div className="flex items-center justify-between gap-2">
           <Wordmark width={69} height={16} className="h-4 w-auto" />
           <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
@@ -377,22 +394,68 @@ function MergeConnector() {
   );
 }
 
+const DIAGRAM_GRID =
+  "grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)_44px_minmax(0,1.2fr)]";
+
+function DiagramColumns({
+  highlightGateway = false,
+}: {
+  highlightGateway?: boolean;
+}) {
+  return (
+    <>
+      <AgentsNode />
+      <SplitConnector />
+      <div className="grid grid-rows-2 gap-4">
+        <SdkNode />
+        <GatewayNode highlighted={highlightGateway} />
+      </div>
+      <MergeConnector />
+      <LangfuseNode />
+    </>
+  );
+}
+
 /**
  * Between md and xl the section is a fixed 680px wide, so the 840px desktop
  * layout is zoomed to fit; `zoom` (unlike `transform`) also shrinks the
  * layout box.
  */
-function WideDiagram() {
+function WideDiagram({
+  highlightGateway = false,
+}: {
+  highlightGateway?: boolean;
+}) {
   return (
-    <div className="hidden grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)_44px_minmax(0,1.2fr)] md:grid md:max-xl:w-[840px] md:max-xl:[zoom:calc(680/840)]">
-      <AgentsNode />
-      <SplitConnector />
-      <div className="grid grid-rows-2 gap-4">
-        <SdkNode />
-        <GatewayNode />
+    <div
+      className={cn(
+        "hidden md:grid md:max-xl:w-[840px] md:max-xl:[zoom:calc(680/840)]",
+        DIAGRAM_GRID,
+      )}
+    >
+      <DiagramColumns highlightGateway={highlightGateway} />
+    </div>
+  );
+}
+
+/**
+ * Docs column is 680px at every desktop width, so the 840px layout is always
+ * zoomed to the container. `zoom` shrinks the layout box; `100cqw` follows the
+ * actual column if it is narrower than 680px.
+ */
+function FittedWideDiagram({
+  highlightGateway = false,
+}: {
+  highlightGateway?: boolean;
+}) {
+  return (
+    <div className="@container hidden w-full min-w-0 md:block">
+      <div
+        className={cn("grid w-[840px]", DIAGRAM_GRID)}
+        style={{ zoom: "calc(100cqw / 840px)" }}
+      >
+        <DiagramColumns highlightGateway={highlightGateway} />
       </div>
-      <MergeConnector />
-      <LangfuseNode />
     </div>
   );
 }
@@ -414,18 +477,42 @@ function PairedDownArrows() {
   );
 }
 
-function CompactDiagram() {
+const DIAGRAM_CAPTION =
+  "Personal agents, custom agents, and copilots reach Langfuse either directly, instrumented with the Langfuse SDKs or any OpenTelemetry exporter, or through the Langfuse AI Gateway or your own gateway. In Langfuse you observe with tracing, dashboards, and alerts, manage prompts and skills, and evaluate with evals, datasets, and experiments. The in-app agent Halo, or your own agent, works with this data, and every feature is available via MCP, CLI, API, and SDKs.";
+
+function CompactDiagram({
+  highlightGateway = false,
+}: {
+  highlightGateway?: boolean;
+}) {
   return (
     <div className="flex flex-col md:hidden">
       <AgentsNode />
       <PairedDownArrows />
       <div className="grid grid-cols-2 gap-2">
         <SdkNode />
-        <GatewayNode />
+        <GatewayNode highlighted={highlightGateway} />
       </div>
       <PairedDownArrows />
       <LangfuseNode />
     </div>
+  );
+}
+
+export function PlatformOverviewDiagram({
+  highlightGateway = false,
+}: {
+  highlightGateway?: boolean;
+}) {
+  return (
+    <figure
+      aria-label="How AI calls flow through Langfuse"
+      className="not-prose my-8 w-full min-w-0 text-left"
+    >
+      <FittedWideDiagram highlightGateway={highlightGateway} />
+      <CompactDiagram highlightGateway={highlightGateway} />
+      <figcaption className="sr-only">{DIAGRAM_CAPTION}</figcaption>
+    </figure>
   );
 }
 
@@ -451,15 +538,7 @@ export const PlatformOverview = () => {
       >
         <WideDiagram />
         <CompactDiagram />
-        <figcaption className="sr-only">
-          Personal agents, custom agents, and copilots reach Langfuse either
-          directly, instrumented with the Langfuse SDKs or any OpenTelemetry
-          exporter, or through the Langfuse AI Gateway or your own gateway. In
-          Langfuse you observe with tracing, dashboards, and alerts, manage
-          prompts and skills, and evaluate with evals, datasets, and
-          experiments. The in-app agent Halo, or your own agent, works with this
-          data, and every feature is available via MCP, CLI, API, and SDKs.
-        </figcaption>
+        <figcaption className="sr-only">{DIAGRAM_CAPTION}</figcaption>
       </figure>
     </HomeSection>
   );
