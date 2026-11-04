@@ -20,7 +20,7 @@ import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
 import { FAQAccordion } from "@/components/shared/FAQAccordion";
 import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import { BookOpen, Play, Radar } from "lucide-react";
+import { BookOpen, Play, Radar, ShieldCheck } from "lucide-react";
 
 <h1 className="sr-only">Langfuse for Financial Services</h1>
 
@@ -131,11 +131,19 @@ import { BookOpen, Play, Radar } from "lucide-react";
     </h2>
     <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
       {
-        "Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production."
+        "Start with the steps from prototype to production, then see how teams like Trade Republic run Langfuse in production."
       }
     </p>
     <div className="mx-auto mt-8 max-w-4xl">
       <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Getting AI agents into production"
+          href="/blog/2026-11-04-regulated-industries-ai-agents-production"
+          icon={<ShieldCheck />}
+          description="Eight steps regulated teams follow, from tracing and error analysis to production monitors and human review."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
         <Card
           title="Building deployment gates for LLMs"
           href="/blog/2026-07-15-llm-certification-financial-services"
