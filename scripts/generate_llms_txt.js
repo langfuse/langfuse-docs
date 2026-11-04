@@ -82,11 +82,6 @@ const SECTION_CONFIG = {
     heading: "Workshop",
     subFileHeading: "Langfuse Workshop",
   },
-  library: {
-    file: "llms-library.txt",
-    heading: "Library",
-    subFileHeading: "Langfuse Library",
-  },
   users: {
     file: "llms-users.txt",
     heading: "Customer stories",
@@ -120,7 +115,6 @@ const IGNORED_SECTION_PATHS = new Set([
   "demo",
   "careers",
   "about",
-  "imprint",
   "terms",
   "privacy",
   "brand",

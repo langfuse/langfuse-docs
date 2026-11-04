@@ -1950,6 +1950,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     {...(isCloudAppHref(tier.href)
                       ? { "data-launch-app-cta": "" }
                       : {})}
+                    wrapperClassName="w-full"
                     className={cn(
                       "justify-center!",
                       !tier.featured &&

@@ -620,7 +620,8 @@
 .link-box:hover,
 .box-custom-hover:after,
 .card-hover-stripes:after,
-.corner-box-hover-stripes:hover {
+.corner-box-hover-stripes:hover,
+.button-wrapper:hover > .corner-box-hover-stripes {
   --stripe-mix: 20%;
   --stripe-base: var(--color-surface-bg);
   --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
@@ -649,7 +650,8 @@
 /* Richer stripe tint from theme border + base (OK Lab); falls back to rgba above. */
 @supports (color: color-mix(in lab, red, red)) {
   .bg-stripe-pattern,
-  .corner-box-hover-stripes:hover {
+  .corner-box-hover-stripes:hover,
+  .button-wrapper:hover > .corner-box-hover-stripes {
     --stripe-line: color-mix(
       in oklab,
       var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),

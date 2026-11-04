@@ -57,3 +57,13 @@ curl "https://langfuse.com/api/search-docs?query=Langfuse+Docs+MCP+Server"
 ```
 
 Use this endpoint directly when you need lightweight semantic search outside of MCP.
+
+## WebMCP [#webmcp]
+
+langfuse.com also registers the read-only docs tools (`searchLangfuseDocs`, `getLangfuseDocsPage`, `getLangfuseOverview`) with [WebMCP](https://github.com/webmachinelearning/webmcp). Browser agents can call them on any page of the site without connecting to the MCP endpoint. `submitFeedback` is only available through the MCP server.
+
+<Callout type="info">
+
+WebMCP is an early web standard. Only browsers and agents that implement it see the tools; see the [implementation status](https://github.com/webmachinelearning/webmcp/blob/main/implementation-status.md).
+
+</Callout>

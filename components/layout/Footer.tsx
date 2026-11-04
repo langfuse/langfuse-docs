@@ -36,7 +36,10 @@ const menuItems: {
     heading: "Product",
     items: [
       { name: "Observability", href: "/docs/observability/overview" },
-      { name: "Prompt Management", href: "/docs/prompt-management/overview" },
+      {
+        name: "Prompt & Skill Management",
+        href: "/docs/prompt-and-skill-management/overview",
+      },
       { name: "Evaluations", href: "/docs/evaluation/overview" },
       { name: "Metrics", href: "/docs/metrics/overview" },
       { name: "Langfuse for Agents", href: "/agents" },
@@ -75,7 +78,7 @@ const menuItems: {
       { name: "Interactive Demo", href: "/docs/demo" },
       { name: "Customers", href: "/users" },
       { name: "Compare", href: "/compare" },
-      { name: "AI Engineering Library", href: "/library" },
+      { name: "AI Engineering Library", href: "/academy/library" },
       { name: "Workshop", href: "/workshop" },
       { name: "Guides & Cookbooks", href: "/guides" },
     ],
@@ -98,7 +101,10 @@ const menuItems: {
 const bottomLinks = [
   { name: "Terms", href: "/terms" },
   { name: "Privacy", href: "/privacy" },
-  { name: "Imprint", href: "/imprint" },
+  {
+    name: "Imprint",
+    href: "https://clickhouse.com/legal/agreements/imprint-Impressum",
+  },
   { name: "Cookie Policy", href: "/cookie-policy" },
 ];
 
@@ -186,14 +192,9 @@ export function Footer({ className }: { className?: string }) {
         </div>
       </CornerBox>
       <CornerBox className="flex flex-col gap-y-4 sm:flex-row justify-between sm:items-center px-4 py-2.5 -mt-px bg-transparent">
-        <div className="flex flex-col md:flex-row">
-          <Text size="s" className={footerMutedTextClassName}>
-            &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
-          </Text>{" "}
-          <Text size="s" className={footerMutedTextClassName}>
-            / Finto Technologies Inc.
-          </Text>
-        </div>
+        <Text size="s" className={footerMutedTextClassName}>
+          &copy; 2022&ndash;{new Date().getFullYear()} ClickHouse, Inc.
+        </Text>
         <Text size="s" className={footerMutedTextClassName}>
           Design by{" "}
           <Link

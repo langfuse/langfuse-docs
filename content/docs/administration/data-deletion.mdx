@@ -92,7 +92,7 @@ See [reference](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/
 
 To delete a session's traces, retrieve their IDs and pass them to the existing batch deletion endpoint:
 
-1. Starting with the current month, query [`GET /api/public/v2/observations`](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) with `sessionId` and one-month time windows until a full calendar month contains no matching observations. This read-only pass fixes the stopping boundary before any traces are deleted.
+1. Starting with the current month, query [`GET /api/public/v2/observations`](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations) with `sessionId` and one-month time windows until a full calendar month contains no matching observations after following all continuation cursors. This read-only pass fixes the stopping boundary before any traces are deleted.
 2. Query the complete resulting time range with `limit=100`, then follow `meta.cursor` until no cursor is returned.
 3. Collect unique `traceId` values across pages. Use these trace IDs, not the observation IDs.
 4. As soon as 1,000 unique trace IDs have accumulated, send them to [`DELETE /api/public/traces`](https://api.reference.langfuse.com/#tag/trace/DELETE/api/public/traces) with a JSON body of `{"traceIds": [...]}`, then continue reading. Delete any remaining IDs after the final page.
@@ -139,6 +139,30 @@ def delete_batch(client, trace_ids):
     response.raise_for_status()
 
 
+def has_observations(client, window_start, window_end):
+    params = {
+        "sessionId": session_id,
+        "fromStartTime": window_start.isoformat(),
+        "toStartTime": window_end.isoformat(),
+        "fields": "core",
+        "limit": 1,
+    }
+    while True:
+        response = client.get(
+            f"{base_url}/api/public/v2/observations",
+            params=params,
+            timeout=60,
+        )
+        response.raise_for_status()
+        page = response.json()
+        if page["data"]:
+            return True
+        cursor = page["meta"].get("cursor")
+        if not cursor:
+            return False
+        params["cursor"] = cursor
+
+
 with requests.Session() as client:
     client.auth = (
         os.environ["LANGFUSE_PUBLIC_KEY"],
@@ -149,19 +173,8 @@ with requests.Session() as client:
     window_end = scan_end
     while True:
         window_start, current_window_end, full_month = previous_window(window_end)
-        response = client.get(
-            f"{base_url}/api/public/v2/observations",
-            params={
-                "sessionId": session_id,
-                "fromStartTime": window_start.isoformat(),
-                "toStartTime": current_window_end.isoformat(),
-                "fields": "core",
-                "limit": 1,
-            },
-            timeout=60,
-        )
-        response.raise_for_status()
-        if not response.json()["data"] and full_month:
+        has_matches = has_observations(client, window_start, current_window_end)
+        if not has_matches and full_month:
             scan_start = current_window_end
             break
         window_end = window_start
