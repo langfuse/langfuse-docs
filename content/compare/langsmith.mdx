@@ -151,7 +151,7 @@ LangSmith pairs its evals with two separately metered services. [Tuned Evaluator
 
 Both platforms cover trace inspection in the UI and threshold-based alerting on production metrics.
 
-Langfuse records [cost](/docs/observability/features/token-and-cost-tracking) on generations, groups conversations into [sessions](/docs/observability/features/sessions), and renders [agent graphs](/docs/observability/features/agent-graphs) from the trace. [Custom dashboards](/docs/metrics/features/custom-dashboards) and [Pulse](/changelog/2026-07-28-langfuse-pulse) sit on the same observations table. [Alerts](/docs/observability/features/alerts) watch metrics over observations and scores (for example observation counts, average cost, p95 latency, or an evaluation score), support separate warning and alert thresholds plus no-data handling, and route notifications to Slack, webhooks, or GitHub Actions. Alerts are available on Langfuse Cloud and self-hosted v4+.
+Langfuse records [cost](/docs/observability/features/token-and-cost-tracking) on generations, groups conversations into [sessions](/docs/observability/features/sessions), and renders [agent graphs](/docs/observability/features/agent-graphs) from the trace. [Custom dashboards](/docs/metrics/features/custom-dashboards) and [Pulse](/changelog/2026-07-28-langfuse-pulse) sit on the same observations table. [Alerts](/docs/observability/features/alerts) watch metrics over observations and scores (for example observation counts, average cost, p95 latency, or an evaluation score), support separate warning and alert thresholds plus no-data handling, and route notifications to Slack, webhooks, GitHub Actions, or [PagerDuty](/integrations/other/pagerduty). Alerts are available on Langfuse Cloud and self-hosted v4+.
 
 LangSmith [Alerts](https://docs.langchain.com/langsmith/alerts) fire on run count, error rate, run latency, feedback score, or cost over 5- or 15-minute aggregation windows and route to Slack (native integration, Cloud only), PagerDuty, Dynatrace, or any webhook.
 
@@ -163,7 +163,7 @@ LangSmith [Alerts](https://docs.langchain.com/langsmith/alerts) fire on run coun
 | Production insights | [Dashboards](/docs/metrics/features/custom-dashboards), [Pulse](/changelog/2026-07-28-langfuse-pulse), [filter search bar](/docs/observability/features/filter-search-bar) | Trace UI filters; [Insights](https://www.langchain.com/blog/interrupt-2026-overview) (Plus and Enterprise) |
 | Alert metrics       | Any observation or score metric with filters and aggregations                                                                                                              | Run count, error rate, latency, feedback score, cost                                                       |
 | Alert thresholds    | Alert plus optional warning severity; no-data handling                                                                                                                     | Threshold over a 5- or 15-minute window                                                                    |
-| Alert destinations  | Slack, webhooks, GitHub Actions                                                                                                                                            | Slack (Cloud), PagerDuty, Dynatrace, webhooks                                                              |
+| Alert destinations  | Slack, webhooks, GitHub Actions, [PagerDuty](/integrations/other/pagerduty)                                                                                                | Slack (Cloud), PagerDuty, Dynatrace, webhooks                                                              |
 | Alert scope         | Cloud and self-host v4+; configured per project                                                                                                                            | Configured per project                                                                                     |
 
 ---
@@ -283,7 +283,7 @@ LangSmith Plus is $39/seat/month with 10,000 base traces included, plus per-trac
 <Details id="does-langfuse-have-alerting">
 <Summary>Does Langfuse have production alerting?</Summary>
 
-Yes. [Langfuse Alerts](/docs/observability/features/alerts) watch any observation or score metric with filters and aggregations, support separate warning and alert thresholds with no-data handling, and deliver to Slack, webhooks, or GitHub Actions. They are available on Langfuse Cloud and self-hosted v4+. Third-party comparisons claiming Langfuse has no alerting are out of date.
+Yes. [Langfuse Alerts](/docs/observability/features/alerts) watch any observation or score metric with filters and aggregations, support separate warning and alert thresholds with no-data handling, and deliver to Slack, webhooks, GitHub Actions, or [PagerDuty](/integrations/other/pagerduty). They are available on Langfuse Cloud and self-hosted v4+. Third-party comparisons claiming Langfuse has no alerting are out of date.
 
 </Details>
 
