@@ -15,7 +15,7 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
   date="October 22, 2026"
   authors={["annabellschafer"]}
 />
-
+.
 Many teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
 
 Often these requirements are met with a fully human-in-the-loop approach. However, the full potential of AI systems is only unlocked if agents handle cases autonomously.
@@ -26,17 +26,19 @@ We will show you how teams in regulated industries bring agents to production, f
 
 AI development teams in regulated industries usually face three requirements for their projects.
 
+<Frame fullWidth>
+  ![Three requirements for AI agents in regulated industries: evidence before launch, oversight after launch, and control over data](/images/blog/2026-10-22-regulated-industries-ai-agents-production/three-requirements.png)
+</Frame>
+
 **Evidence before launch.** Banks already run risk processes that ask for test results, review sign-offs, and documentation before an application reaches production ([deployment gates for LLMs in financial services](/blog/2026-07-15-llm-certification-financial-services)). The review board will want to see how the agent behaves in realistic cases.
 
 **Oversight after launch.** Regulators expect companies to stay in control. FINRA's [2026 oversight report](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai) asks firms to define where humans review agent actions, how they track agent decisions, and how agent behavior is checked for compliance. [Article 14 of the EU AI Act](https://artificialintelligenceact.eu/article/14/) requires that people can effectively oversee high-risk AI systems.
 
 **Control over data.** Conversations contain account details, transactions, and health information. Teams need to know where that data is stored, what gets redacted, and who can see it. In healthcare, a [business associate agreement](/security/hipaa) has to be in place before any protected health information is processed.
 
-Teams still ship agents under these rules. They just need to take a different approach to successfully running the AI engineering loop.
-
 ## The approach: start the loop offline [#the-approach]
 
-The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. And then repeat this process. Regulated teams need to evaluate and improve their application before going to production. They set up tracing, learn how the agent fails, define what to evaluate together with compliance, build a ground truth dataset, and iterate until the agent passes. Only then do they set up production monitors and go live.
+The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. And then repeat this process. Regulated teams run most of this loop before going to production.
 
 ```mermaid
 flowchart TB
@@ -56,8 +58,8 @@ flowchart TB
 
 Add [tracing](/docs/observability/get-started) before anyone outside the team uses the agent. Traces provide you insight into what happened during a run and provide you with a way of showing evidence of what the agent did. Record the prompt version, model, tool calls, retrieved context, and any human approval on every run. Decide where to mask sensitive fields before they are stored. The SDKs support [client-side masking](/docs/observability/features/masking), so account numbers or patient identifiers can be redacted at the source.
 
-<Frame className="max-w-lg">
-  ![Trace tree of an agent run in Langfuse with the prompt fetch, model calls, and tool calls as nested observations](/images/docs/faq/good-trace-tree.png)
+<Frame fullWidth>
+  ![Trace of a synthetic small-business credit review in Langfuse, with the credit policy fetch, model calls, and tool calls as nested observations next to the agent's recommendation](/images/blog/2026-10-22-regulated-industries-ai-agents-production/credit-review-trace.png)
 </Frame>
 
 <Callout type="info">
@@ -68,13 +70,13 @@ Add [tracing](/docs/observability/get-started) before anyone outside the team us
 
 Next, run a set of examples through the agent that roughly matches what you expect to hit your system in production. Each run produces a trace you can learn from. At this point, you do not need expected answers yet. Good sources for cases are:
 
-- **Synthetic examples.** Generate inputs that cover typical requests and their variations. Domain experts can add cases they know from experience are hard to handle. In a bank, that might be a compliance officer or a senior support agent. In a hospital, it is a clinician.
-- **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims, and compare the agent's output with the human decision. Clinical teams call this retrospective back-testing.
-- **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything. This gives you traces from live data without bringing the agent into customer contact. Healthcare calls this silent evaluation, and the [Coalition for Health AI](https://assets.ctfassets.net/7s4afyr9pmov/6e7PrdrsNTQ5FjZ4uyRjTW/c4070131c523d4e1db26105aa51f087d/CHAI_Responsible-AI-Guide.pdf) recommends it before any AI output reaches clinical staff.
+- **Synthetic examples.** Generate inputs that cover typical requests and their variations. Domain experts can add cases they know from experience.
+- **Historical data.** Run the agent on cases your team has already decided, such as resolved support tickets or reviewed claims.
+- **Shadow runs.** Let the agent process live cases next to the current workflow without acting on anything. This gives you traces from live data without bringing the agent into customer contact.
 
 ## Step 3: Find failure modes with error analysis [#error-analysis]
 
-Now have your domain experts read those traces. For each one, they note the first thing that went wrong, then group the notes into named failure modes. This process is called [error analysis](/academy/monitoring/error-analysis).
+Now have your domain experts read those traces. For each one, they note the first thing that went wrong, then group the notes into failure modes. This process is called [error analysis](/academy/monitoring/error-analysis).
 
 Some failures show that the agent needs more specification, such as a missing rule in the prompt, and you can fix them right away. Others keep coming back and need systematic evaluation.
 
@@ -92,9 +94,9 @@ At DKB, customer service specialists work in Langfuse directly, review conversat
 What you evaluate comes from two places:
 
 - **Failure modes.** The recurring failures from error analysis become quality evaluators. Generic metrics such as helpfulness rarely match how your agent fails, and they can skew your view on quality.
-- **Compliance requirements.** Agree with compliance on what the agent must never do. For a bank, that could be giving investment advice, quoting a rate that is not on the price list, or sending a customer message without approval. These hard limits get evaluators from day one, even before you have seen them break, and a single failure blocks the release.
+- **Compliance requirements.** Agree with compliance on what the agent must never do. For a bank, that could be giving investment advice, quoting a rate that is not on the price list, or sending a customer message without approval. Turn them into evaluators.
 
-A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a regex for a missing disclaimer, is often enough. Use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for anything that needs judgment, such as a response that sounds like investment advice.
+A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a regex for a missing disclaimer, is the preferred choice. Use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for anything that needs judgment, such as a response that sounds like investment advice.
 
 <Callout type="info">
   The Langfuse Academy covers both steps in detail. [Error analysis](/academy/monitoring/error-analysis) walks through reading traces and building a failure taxonomy, and [choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) shows how to turn those failures and your compliance rules into a small set of metrics.
@@ -102,7 +104,7 @@ A [code check](/docs/evaluation/evaluation-methods/code-evaluators), such as a r
 
 ## Step 5: Build a ground truth dataset [#ground-truth]
 
-With the evaluation criteria in place, build a ground truth [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. It should contain your typical inputs, the cases that could go wrong, and cases that should trigger each compliance limit, along with how the agent should handle each one. This 'Golden Dataset' lets you show that the agent handles common cases the way your experts would, and that adversarial and edge cases are handled gracefully. Include normal cases that should pass the compliance checks as well.
+With the evaluation criteria in place, build a ground truth [dataset](/docs/evaluation/experiments/datasets) together with your domain experts. It should contain your typical inputs, the cases that could go wrong, and cases that should trigger each compliance limit, along with how the agent should handle each one.
 
 <Callout type="info">
   Want to go deeper on scoping a dataset? The Langfuse Academy guide on [designing datasets](/academy/datasets/designing-great-datasets) covers how to set the goal, choose the input distribution, and decide how each item will be evaluated.
@@ -110,7 +112,7 @@ With the evaluation criteria in place, build a ground truth [dataset](/docs/eval
 
 ### Check the ground truth [#check-the-ground-truth]
 
-Experts disagree more often than teams expect. To get to a reliable ground truth dataset, let your experts review each other's work. Have parts of the dataset labeled independently by several experts and look at where they disagree. Ideally, bring the experts into one room to talk through those cases, agree on the right handling, and write the missing rule into your guidelines. Tejas Kumar from IBM described the pattern at AI Engineer World's Fair 2026: "When we don't agree, it's just usually because there's a knowledge gap." ([talk](https://www.youtube.com/watch?v=NdrSPm6NCdk))
+Experts disagree more often than teams expect. To get to a reliable ground truth dataset, let your experts review each other's work. Have parts of the dataset labeled independently by several experts and look at where they disagree. Ideally, bring the experts into one room to talk through those cases, agree on the right handling, and write the missing rule into your guidelines.
 
 <Callout type="info">
   The more humans disagree on a case, the harder it is for an agent to handle it. Research has a name for this: inter-rater reliability, the extent to which different raters assign the same score to the same item. It comes from qualitative and clinical research, and applies equally in the context of AI agents ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)).
@@ -128,15 +130,17 @@ Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-
 
 ## Step 7: Set up production monitors [#monitors]
 
-Once you are happy with the results, decide which evaluators should also run in production with [online evaluation](/docs/evaluation/get-started/online). Compliance evaluators belong on every trace. Add the quality evaluators you want to keep watching live, for example whether answers are phrased the way your guidelines require. Turn the monitors on during shadow runs first, so you know what normal looks like, and set [alerts](/docs/observability/features/alerts) for when the share of flagged traces rises.
+Once you are happy with the results, decide which evaluators should also run in production with [online evaluation](/docs/evaluation/get-started/online). Compliance evaluators belong on every trace. Add the quality evaluators you want to keep watching live, for example whether answers are phrased the way your guidelines require.
 
-For chat agents, also track [explicit feedback](/docs/observability/features/user-feedback) and signs of trouble, such as a user asking for a person or correcting the agent. The Academy page on [capturing signals](/academy/monitoring/capturing-signals) lists the most useful ones. At launch, let the agent escalate a little too often. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more.
+For chat agents, also track [explicit feedback](/docs/observability/features/user-feedback) and [signs of trouble](/academy/monitoring/capturing-signals), such as a user asking for a person or correcting the agent.
+
+At launch, let the agent escalate a little too often. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more.
 
 ## Step 8: Go live and run the AI engineering loop [#go-live]
 
 Now go live. From here on, you are in the regular AI engineering loop: trace production, watch the monitors, turn interesting traces into new dataset items, and rerun the dataset before every release.
 
-### Keep humans on a subset [#humans-on-a-subset]
+### Keep humans on a subset (or everything at first) [#humans-on-a-subset]
 
 People stay in the process after launch, and the amount they review shrinks as the evidence grows. A common pattern, described by [Coinbase at AI Engineer NYC](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md), has three steps:
 
@@ -162,21 +166,6 @@ Asking a person to approve everything does not scale, and reviewers who approve 
 | 6. Iterate                  | [Experiments](/docs/evaluation/experiments/experiments-via-sdk), [compare experiments](/docs/evaluation/experiments/compare-experiments)                                                  |
 | 7. Production monitors      | [Online evaluation](/docs/evaluation/get-started/online), [user feedback](/docs/observability/features/user-feedback), [alerts](/docs/observability/features/alerts)                      |
 | 8. Go live and run the loop | [Annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd)                                        |
-
-On the infrastructure side, regulated teams usually choose between two setups:
-
-- **Self-hosted.** Run Langfuse in your own infrastructure with the [self-hosting guide](/self-hosting).
-- **Langfuse Cloud.** Healthcare teams can use the [HIPAA-ready cloud region](/security/hipaa) after signing a business associate agreement. Other regulated companies opt for the cloud version whenever self-hosting is not a must-have.
-
-The same need for visibility applies in life sciences. [Merck](/users/merckgroup) serves more than 80 AI project teams on Langfuse and uses it to keep an audit trail of every AI interaction.
-
-<CustomerQuote
-  quote="Generative AI will only earn enterprise trust when we can see what's happening under the hood. Langfuse enables us to track every prompt, response, cost, and latency in real time, turning black-box models into auditable, optimizable assets."
-  name="Walid Mehanna"
-  role="Chief Data & AI Officer"
-  company="Merck"
-  image="/images/customers/merck/walid.jpeg"
-/>
 
 ## Further reading [#further-reading]
 
