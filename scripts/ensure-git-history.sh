@@ -6,8 +6,8 @@
 # A blobless history fetch takes about a second, while a full clone
 # (VERCEL_DEEP_CLONE) downloads ~1 GB of image history on every build.
 #
-# Never fails the build: if the fetch fails, the scripts that read git history
-# already fall back to file mtimes and warn.
+# Fails the build if the fetch fails, so a deployment never ships lastmod dates
+# that silently fell back to file mtimes.
 
 set -uo pipefail
 
@@ -42,8 +42,8 @@ if git remote get-url origin >/dev/null 2>&1 && fetch_history origin; then
 elif { git remote add history "$public_url" 2>/dev/null || git remote set-url history "$public_url"; } && fetch_history history; then
   :
 else
-  echo "[ensure-git-history] WARNING: could not fetch git history; lastmod dates may fall back to file mtimes." >&2
-  exit 0
+  echo "[ensure-git-history] ERROR: could not fetch git history from origin or ${public_url}." >&2
+  exit 1
 fi
 echo "[ensure-git-history] Fetched full commit history (blobless) in $(($(date +%s) - start))s."
 exit 0
