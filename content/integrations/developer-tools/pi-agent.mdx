@@ -26,7 +26,7 @@ The plugin listens to Pi's core lifecycle events and sends every user prompt to 
 
 - **Agent turns**: one trace per user prompt, with all turns of a Pi session grouped under one session ID. Turn numbering survives a Pi restart.
 - **Model generations**: every model request with inputs, outputs, cost, time to first token, and token usage including cache-read and reasoning splits.
-- **Tool calls**: each tool Pi invokes, with input, output, and an `ERROR` level when the call fails.
+- **Tool calls**: each tool Pi invokes, with input, output, and an `ERROR` status when the call fails.
 - **Images**: images you add to a prompt are uploaded as Langfuse media and render inside the trace.
 - **Subagents**: Pi processes spawned by other extensions nest under the turn that started them.
 
@@ -134,7 +134,7 @@ Open your Langfuse project to see the captured traces. The structure mirrors how
 
 - **Turn trace**: one trace per user prompt, named `Pi - Turn 1 (...)`, with a `Conversational Turn` span that holds the whole turn.
 - **Generations**: one `LLM Call` per model request, with its input, output, cost, time to first token, and token usage including the cache-read and reasoning splits.
-- **Tool spans**: a `Tool: ...` observation for every tool pi invokes, with its input, its output, and an `ERROR` level when the call fails.
+- **Tool spans**: a `Tool: ...` observation for every tool pi invokes, with its input, its output, and an `ERROR` status when the call fails.
 - **Sessions**: all turns of one pi session share a [`session_id`](/docs/observability/features/sessions), so you can replay the session in order. Turn numbering continues across a pi restart.
 - **Environment and user**: traces are labeled with the configured [`environment`](/docs/observability/features/environments) and [`userId`](/docs/observability/features/users), so you can filter your own sessions or separate dev from CI.
 

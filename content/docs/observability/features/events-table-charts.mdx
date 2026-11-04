@@ -48,7 +48,7 @@ Changing the metric resets the aggregation to one it supports.
 
 ### Breakdown
 
-The dimension to split the chart by. Each value of the breakdown becomes its own series, for example its own line or slice. The options are **Total (no breakdown)**, **Model**, **Name**, **Level**, **Type**, and **Environment**.
+The dimension to split the chart by. Each value of the breakdown becomes its own series, for example its own line or slice. The options are **Total (no breakdown)**, **Model**, **Name**, **Status**, **Type**, and **Environment**.
 
 For example, chart type **Line**, metric **Latency**, aggregation **p95**, breakdown **Model** gives you "p95 latency by model over time". Switch the metric to **Count** for "count of events by model over time" over the exact same filtered rows.
 
@@ -56,7 +56,7 @@ Time buckets are chosen automatically from the selected time range. A very short
 
 ## Filters the chart cannot apply [#filter-compatibility]
 
-The chart reuses the table's filters. Most of them carry over unchanged: environment, type, name, level, model, trace name, user, session, version, prompt name, tags, tool names, and the experiment fields all apply to the chart exactly as they do to the table.
+The chart reuses the table's filters. Most of them carry over unchanged: environment, type, name, status, model, trace name, user, session, version, prompt name, tags, tool names, and the experiment fields all apply to the chart exactly as they do to the table.
 
 A few filters do not translate to an aggregated time series. Instead of silently dropping them or hiding the chart, Langfuse keeps the chart visible and deactivates those filters in place: the matching sidebar facet is dimmed, and the matching search-bar token is dimmed and struck through. Hovering either one explains that the filter still applies to the table, even though the chart cannot use it. You always see the chart, and you always know exactly which of your active filters it reflects.
 

@@ -111,7 +111,8 @@ One event per observation, covering every observation type.
 | `langfuse_release`             | Release information of the trace attached with the observation.                                                                       |
 | `langfuse_version`             | The versioning info about the observation.                                                                                            |
 | `langfuse_model`               | The model used (for LLM calls).                                                                                                       |
-| `langfuse_level`               | The level associated with the observation.                                                                                            |
+| `langfuse_status`              | The status of the observation: `DEBUG`, `DEFAULT`, `WARNING`, or `ERROR`.                                                             |
+| `langfuse_level`               | Compatibility property containing the same value as `langfuse_status`.                                                                |
 | `langfuse_tags`                | Any tags attached to the trace of the observation.                                                                                    |
 | `langfuse_environment`         | The environment associated with the observation.                                                                                      |
 | `langfuse_event_version`       | The integration version with Langfuse.                                                                                                |
@@ -249,7 +250,8 @@ Sent only by the legacy export sources. Only covers observations of type generat
 | `langfuse_release`             | Release information of the trace attached with the generation.                                                                 |
 | `langfuse_version`             | The versioning info about the generation.                                                                                      |
 | `langfuse_model`               | The model used during this generation's process.                                                                               |
-| `langfuse_level`               | The level associated with the generation.                                                                                      |
+| `langfuse_status`              | The status of the generation: `DEBUG`, `DEFAULT`, `WARNING`, or `ERROR`.                                                       |
+| `langfuse_level`               | Compatibility property containing the same value as `langfuse_status`.                                                         |
 | `langfuse_tags`                | Any tags attached to the trace of the generation.                                                                              |
 | `langfuse_environment`         | The environment associated with the generation.                                                                                |
 | `langfuse_event_version`       | The integration version with Langfuse.                                                                                         |

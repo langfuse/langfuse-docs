@@ -89,6 +89,7 @@ There is no v2 single-observation getter; filter `get_many` / `getMany` by ID an
 
 ### Semantic differences
 
+- `status` is available alongside `level`, with the same values: `DEBUG`, `DEFAULT`, `WARNING`, and `ERROR`. Existing `level` filters remain supported; you can also filter by `status`.
 - Responses include only the requested `fields` groups; fields from groups you did not request are **absent**, not `null`. One exception: `modelId`, `inputPrice`, `outputPrice`, and `totalPrice` are always present but `null` unless the `model` field group is requested.
 - `input`/`output` are returned as raw strings; parse them in your pipeline when you need JSON (v1 parsed them automatically). The `parseIoAsJson` parameter is deprecated: omit it or set it to `false`; setting it to `true` returns a `400` error.
 - Pagination is cursor-based: pass `meta.cursor` from the previous response until no cursor is returned. Results are always sorted by `startTime` descending.
@@ -691,7 +692,8 @@ The v1 Metrics API provides access to several data views, each with its own set 
 | `parentObservationId` | string | ID of parent observation                |
 | `type`                | string | Observation type                        |
 | `name`                | string | Observation name                        |
-| `level`               | string | Log level                               |
+| `status`              | string | Observation status                      |
+| `level`               | string | Compatibility alias for `status`        |
 | `version`             | string | Version                                 |
 | `providedModelName`   | string | Model name                              |
 | `promptName`          | string | Prompt name                             |
