@@ -100,11 +100,9 @@ Answer patient questions and complete intake in less time. Clinicians and domain
 
 Book and change appointments with fewer failed or wrong bookings for staff to fix. Test representative cases before the agent goes live.
 
-### [Medical information](/users/merckgroup)
+### Medical information
 
-Turn around inquiries from healthcare professionals in less time. Merck Group drafts those answers with Generative Medical Insights.
-
-Merck Group · Generative Medical Insights
+Turn around inquiries from healthcare professionals in less time.
 
 ### Clinical documentation
 

@@ -231,9 +231,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Medical information",
     icon: "file-text",
     description:
-      "Turn around inquiries from healthcare professionals in less time. Merck Group drafts those answers with Generative Medical Insights.",
-    proof: "Merck Group · Generative Medical Insights",
-    href: "/users/merckgroup",
+      "Turn around inquiries from healthcare professionals in less time.",
   },
   {
     // TODO(healthcare-review): (b) Legal review of the name "clinical documentation" before publish.
