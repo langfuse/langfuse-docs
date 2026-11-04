@@ -107,6 +107,16 @@ const categoryConfig: Record<
   gateways: {
     title: "Gateways",
     description: "Connect through API gateways and proxies",
+    featuredLinks: [
+      {
+        route: "/docs/ai-gateway/overview",
+        frontMatter: {
+          title: "Langfuse AI Gateway",
+          logo: "/langfuse-icon.svg",
+        },
+        title: "Langfuse AI Gateway",
+      },
+    ],
   },
   "no-code": {
     title: "No-Code",
