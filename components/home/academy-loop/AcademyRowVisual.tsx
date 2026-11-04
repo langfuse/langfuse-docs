@@ -16,12 +16,6 @@ import { Highlight, MonoLabel, PulseDot, useLoopTick } from "./shared";
 const CARD_HOVER =
   "corner-box-hover-stripes transition-[background,border-color] duration-180 ease-out";
 
-const YELLOW =
-  "color-mix(in oklab, var(--surface-cta-primary) 85%, transparent)";
-// Highlighter is wider than the dark line. The head's base has to cover it,
-// and the stroke stops there so the yellow cap does not stick out past the tip.
-const BAND = 5;
-
 function StepCard({
   id,
   active,
@@ -90,36 +84,6 @@ function ReturnPath({
       style={{ left, right, top: 0, height: depth }}
       aria-hidden
     >
-      <div
-        className="absolute"
-        style={{
-          background: YELLOW,
-          left: -2,
-          width: BAND,
-          top: ARROW_HEAD - 1,
-          bottom: -2,
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          background: YELLOW,
-          right: -2,
-          width: BAND,
-          top: 0,
-          bottom: -2,
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          background: YELLOW,
-          left: -2,
-          right: -2,
-          height: BAND,
-          bottom: -2,
-        }}
-      />
       <div
         className="absolute bg-line-cta"
         style={{ left: 0, width: 1, top: ARROW_HEAD - 1, bottom: 0 }}
@@ -249,36 +213,6 @@ function CompactColumn({ active }: { active: LoopStepId }) {
         width,
       }}
     >
-      <div
-        className="absolute"
-        style={{
-          background: YELLOW,
-          left: ARROW_HEAD - 1,
-          right: -2,
-          top: -2,
-          height: BAND,
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          background: YELLOW,
-          left: 0,
-          right: -2,
-          bottom: -2,
-          height: BAND,
-        }}
-      />
-      <div
-        className="absolute"
-        style={{
-          background: YELLOW,
-          right: -2,
-          width: BAND,
-          top: -2,
-          bottom: -2,
-        }}
-      />
       <div
         className="absolute bg-line-cta"
         style={{ left: ARROW_HEAD - 1, right: 0, top: 0, height: 1 }}
