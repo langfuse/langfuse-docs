@@ -46,12 +46,12 @@ export const healthcareFeaturedStory = {
   author: "Walid Mehanna",
   role: "Chief Data & AI Officer at Merck",
   stats: [
+    { value: "Weeks to days", label: "shorter development cycles" },
+    { value: "80+", label: "use cases across the company" },
     {
       value: "200+",
       label: "users, engineers, PMs and domain experts",
     },
-    { value: "80+", label: "use cases built on Langfuse" },
-    { value: "1", label: "central platform team" },
   ],
 } as const;
 
@@ -216,14 +216,14 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Patient support and intake",
     icon: "messages-square",
     description:
-      "Write, trace, and monitor agents that answer patient questions and collect intake data. Score answers and review cases. Clinicians and domain experts review cases to build ground truth.",
+      "Answer patient questions and complete intake in less time. Clinicians and domain experts review the cases that need a person.",
   },
   {
     area: "Access",
     title: "Appointment booking",
     icon: "calendar",
     description:
-      "Observe agents that book and change appointments. Catch failed tool calls and wrong bookings, and test them on representative cases before they go live.",
+      "Book and change appointments with fewer failed or wrong bookings for staff to fix. Test representative cases before the agent goes live.",
   },
   {
     // TODO(healthcare-review): (b) Legal review of the name "medical information" before publish.
@@ -231,7 +231,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Medical information",
     icon: "file-text",
     description:
-      "Companies like Merck Group build agents that use medical insights to draft answers, and trace them on Langfuse. Merck Group does this with Generative Medical Insights.",
+      "Turn around inquiries from healthcare professionals in less time. Merck Group drafts those answers with Generative Medical Insights.",
     proof: "Merck Group · Generative Medical Insights",
     href: "/users/merckgroup",
   },
@@ -241,21 +241,21 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Clinical documentation",
     icon: "clipboard-pen",
     description:
-      "Observe and improve agents that draft clinical notes from visits and conversations.",
+      "Draft clinical notes from visits and conversations, with less rework on the drafts clinicians review.",
   },
   {
     area: "Payers",
     title: "Payer and claims workflows",
     icon: "receipt",
     description:
-      "Catch failing executions in production and evaluate changes before they go live. Keep traces for audit.",
+      "Catch failing claim steps early, before they become manual rework, and keep a trace for audit.",
   },
   {
     area: "Voice",
     title: "Voice agents",
     icon: "mic",
     description:
-      "Trace and evaluate voice agents across speech, transcripts, and model calls. Companies like Evolve trace assistive agents such as Rest, and improve them in annotation queues.",
+      "See where a voice conversation failed and correct it, so more calls finish without a handoff to staff.",
     proof: "Evolve · Rest sleep coach",
     href: "/users/evolve",
     featured: true,
@@ -265,7 +265,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     title: "Internal platform teams",
     icon: "users",
     description:
-      "Companies like Merck Group give AI teams one platform for traces, prompts, and evaluations. Merck Group's platform team serves 80+ use cases on Langfuse.",
+      "Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.",
     proof: "Merck Group · 80+ use cases",
     href: "/users/merckgroup",
     featured: true,
