@@ -10,6 +10,7 @@ import {
   SITE_DEFAULT_OG_DESCRIPTION,
 } from "@/lib/og-url";
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
+import { WebMcpDocsTools } from "@/components/WebMcpDocsTools";
 import { AISearch } from "@/components/inkeep/search";
 import { Hubspot } from "@/components/analytics/hubspot";
 import { GoogleAds } from "@/components/analytics/google-ads";
@@ -87,6 +88,7 @@ export default function RootLayout({
           <DevAriaHiddenConsoleFilter />
         )}
         <PostHogProvider>
+          <WebMcpDocsTools />
           <AppRootProvider i18n={{ locale: "en" }}>
             <AISearch>{children}</AISearch>
           </AppRootProvider>

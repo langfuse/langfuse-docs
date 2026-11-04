@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils";
 import { useSidebar } from "fumadocs-ui/components/sidebar/base";
 import { useTreePath } from "fumadocs-ui/contexts/tree";
 import IconBook from "@/components/icons/book";
-import IconBookBookmark from "@/components/icons/book-bookmark";
 import IconDesktopTower from "@/components/icons/desktop-tower";
 import IconCompass from "@/components/icons/compass";
 
@@ -25,7 +24,6 @@ const SECTIONS = [
   { title: "Academy", path: "/academy", Icon: GraduationCap },
   { title: "Workshop", path: "/workshop", Icon: Presentation },
   { title: "Guides", path: "/guides", Icon: IconCompass },
-  { title: "AI Engineering Library", path: "/library", Icon: IconBookBookmark },
 ] as const;
 
 /** Derive a human-readable page name from the last pathname segment. */

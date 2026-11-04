@@ -310,6 +310,21 @@ const nextConfig = {
       },
     ];
 
+    // WebMCP (components/WebMcpDocsTools.tsx) is behind an origin trial in
+    // Chrome and Edge. Without a token, the tools only show up in browsers
+    // that enable the API themselves (e.g. via a flag).
+    if (process.env.WEBMCP_ORIGIN_TRIAL_TOKEN) {
+      headers.push({
+        source: "/:path*",
+        headers: [
+          {
+            key: "Origin-Trial",
+            value: process.env.WEBMCP_ORIGIN_TRIAL_TOKEN,
+          },
+        ],
+      });
+    }
+
     // Do not index Vercel preview deployments
     if (process.env.NEXT_PUBLIC_VERCEL_ENV === "preview") {
       headers.push({

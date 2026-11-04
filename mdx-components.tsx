@@ -72,6 +72,12 @@ const Video = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
 ) as typeof import("@/components/Video").Video;
 
+const VideoCarousel = dynamic(() =>
+  import("@/components/docs/VideoCarousel").then((m) => ({
+    default: m.VideoCarousel,
+  })),
+) as typeof import("@/components/docs/VideoCarousel").VideoCarousel;
+
 const BLOCK_TAGS = new Set([
   "div",
   "details",
@@ -113,6 +119,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     p: MdxParagraph,
     Frame,
     Video,
+    VideoCarousel,
     LangTabs,
     Callout,
     Tabs: LangTabsWithTab,

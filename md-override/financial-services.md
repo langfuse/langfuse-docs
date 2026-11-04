@@ -7,7 +7,7 @@ description: Observe and evaluate AI agents across banks, brokers, and fintechs.
 
 Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
-[Get started](/cloud)
+[Start free](/cloud) · [Documentation](/docs)
 
 - **Standardize observability and evals across teams:** Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.
 - **Ship reliable agents with clear deployment quality gates:** evaluate model and agent changes against datasets before release.
@@ -143,6 +143,7 @@ Start with the steps from prototype to production, then see how teams like Trade
 
 - [Getting AI agents into production](/blog/2026-11-04-regulated-industries-ai-agents-production): Eight steps regulated teams follow, from tracing and error analysis to production monitors and human review.
 - [Building deployment gates for LLMs](/blog/2026-07-15-llm-certification-financial-services): Evaluate model and prompt changes against datasets and policy evals before release.
+- [Evals for High-Stakes AI Agents](/guides/videos/evals-for-high-stakes-ai-agents): Trace a banking assistant with PII masking, offline evals, and a CI gate on a candidate prompt label.
 - [Academy: customer support chatbot](/academy/examples/customer-support-chatbot): Trace, score and iterate on a support agent to raise its autonomy rate safely.
 - [Trade Republic customer story](/users/trade-republic): How a European neobroker runs self-hosted Langfuse in production. Read or watch on YouTube.
 

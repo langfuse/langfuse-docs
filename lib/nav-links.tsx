@@ -15,6 +15,7 @@ import {
   Presentation,
   ScrollText,
   Workflow,
+  HeartPulse,
   Landmark,
   type LucideIcon,
 } from "lucide-react";
@@ -33,8 +34,8 @@ export const productLinks: NavPanelLink[] = [
     icon: Activity,
   },
   {
-    name: "Prompt Management",
-    href: "/docs/prompt-management/overview",
+    name: "Prompt & Skill Management",
+    href: "/docs/prompt-and-skill-management/overview",
     icon: MessageSquare,
   },
   { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
@@ -60,9 +61,14 @@ export const useCaseLinks: NavPanelLink[] = [
 
 export const industryLinks: NavPanelLink[] = [
   {
-    name: "Financial Services Industry",
+    name: "Financial Services",
     href: "/financial-services",
     icon: Landmark,
+  },
+  {
+    name: "Healthcare and life sciences",
+    href: "/healthcare",
+    icon: HeartPulse,
   },
 ];
 
