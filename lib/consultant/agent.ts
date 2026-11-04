@@ -6,6 +6,7 @@ import { createSkill } from "@mastra/core/skills";
 import { LangfuseExporter } from "@mastra/langfuse";
 import { Observability } from "@mastra/observability";
 import { webFetchTool } from "@/lib/consultant/academy-loop";
+import { consultantLangfuseProject } from "@/lib/consultant/langfuse-project.mjs";
 import { CONSULTANT_SKILL_PIN } from "@/lib/consultant/pin.mjs";
 import {
   consultantSkillPin,
@@ -48,27 +49,38 @@ const consultantAgent = new Agent({
   tools: { web_fetch: webFetchTool },
 });
 
-const langfuseBaseUrl = process.env.NEXT_PUBLIC_EU_LANGFUSE_BASE_URL?.trim();
+const consultantLangfuse = consultantLangfuseProject();
+if (!consultantLangfuse.ok) {
+  console.warn(
+    consultantLangfuse.reason === "demo"
+      ? "consultant: Langfuse tracing is off because the consultant keys match a demo project."
+      : "consultant: Langfuse tracing is off until CONSULTANT_LANGFUSE_PUBLIC_KEY, CONSULTANT_LANGFUSE_SECRET_KEY, and CONSULTANT_LANGFUSE_BASE_URL are set for a dedicated project.",
+  );
+}
 
 export const consultantMastra = new Mastra({
   agents: { consultant: consultantAgent },
-  observability: new Observability({
-    configs: {
-      default: {
-        serviceName: "langfuse-docs-consultant",
-        exporters: [
-          new LangfuseExporter({
-            publicKey: process.env.NEXT_PUBLIC_EU_LANGFUSE_PUBLIC_KEY,
-            secretKey: process.env.EU_LANGFUSE_SECRET_KEY,
-            ...(langfuseBaseUrl ? { baseUrl: langfuseBaseUrl } : {}),
-            additionalHeaders: { "x-langfuse-ingestion-version": "4" },
-            realtime: true,
-            environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV,
-          }),
-        ],
-      },
-    },
-  }),
+  ...(consultantLangfuse.ok
+    ? {
+        observability: new Observability({
+          configs: {
+            default: {
+              serviceName: "langfuse-docs-consultant",
+              exporters: [
+                new LangfuseExporter({
+                  publicKey: consultantLangfuse.publicKey,
+                  secretKey: consultantLangfuse.secretKey,
+                  baseUrl: consultantLangfuse.baseUrl,
+                  additionalHeaders: { "x-langfuse-ingestion-version": "4" },
+                  realtime: true,
+                  environment: process.env.VERCEL_ENV ?? process.env.NODE_ENV,
+                }),
+              ],
+            },
+          },
+        }),
+      }
+    : {}),
 });
 
 export function getConsultantAgent() {
