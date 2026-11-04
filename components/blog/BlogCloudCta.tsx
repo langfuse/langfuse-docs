@@ -45,9 +45,9 @@ function CtaLink({
 }
 
 /**
- * Signup and sales actions for blog posts. The stack layout sits under the
- * table of contents. The row layout is the same offer at the end of the
- * article, where the right column is hidden.
+ * Signup action for blog posts. The stack layout sits under the table of
+ * contents. The row layout is the same offer at the end of the article,
+ * where the right column is hidden.
  */
 export function BlogCloudCta({
   layout = "stack",
@@ -63,69 +63,56 @@ export function BlogCloudCta({
         size="s"
         className="mb-1 font-[430] text-left text-[13px] text-text-primary"
       >
-        Langfuse Cloud
+        Get started today
       </Text>
       <Text
         size="s"
-        className="text-left text-[13px] text-text-tertiary leading-snug"
+        className="text-left text-[13px] leading-snug text-text-tertiary"
       >
-        50k observations a month. No credit card.
+        Interested in tracing and improving your AI agents? Get started with
+        Langfuse in minutes.
       </Text>
     </div>
   );
 
-  const actions = (
-    <div
-      className={cn(
-        "flex",
-        layout === "row"
-          ? "mt-3 flex-col sm:mt-0 sm:shrink-0 sm:flex-row"
-          : "mt-3 flex-col",
-      )}
+  const action = (
+    <CtaLink
+      href="/cloud"
+      variant="primary"
+      className={
+        layout === "row" ? "mt-3 w-full sm:mt-0 sm:w-[140px]" : "mt-3 w-full"
+      }
+      onClick={() =>
+        capture("blog:sign_up_clicked", { placement, path: pathname })
+      }
     >
-      <CtaLink
-        href="/cloud"
-        variant="primary"
-        className={layout === "row" ? "w-full sm:w-[140px]" : "w-full"}
-        onClick={() =>
-          capture("blog:start_free_clicked", { placement, path: pathname })
-        }
-      >
-        Start free
-      </CtaLink>
-      <CtaLink
-        href="/talk-to-us"
-        variant="secondary"
-        className={layout === "row" ? "w-full sm:w-[140px]" : "w-full"}
-        onClick={() =>
-          capture("blog:talk_to_us_clicked", { placement, path: pathname })
-        }
-      >
-        Talk to us
-      </CtaLink>
-    </div>
+      Sign up
+    </CtaLink>
   );
 
   if (layout === "row") {
     return (
       <section
         id="blog-cloud-cta"
-        aria-label="Langfuse Cloud"
+        aria-label="Get started today"
         className={cn(
-          "not-prose flex flex-col gap-3 border border-line-structure bg-surface-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
+          "not-prose flex flex-col border border-line-structure bg-surface-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
           className,
         )}
       >
         {copy}
-        {actions}
+        {action}
       </section>
     );
   }
 
   return (
-    <section aria-label="Langfuse Cloud" className={cn("px-4 py-4", className)}>
+    <section
+      aria-label="Get started today"
+      className={cn("px-4 py-4", className)}
+    >
       {copy}
-      {actions}
+      {action}
     </section>
   );
 }

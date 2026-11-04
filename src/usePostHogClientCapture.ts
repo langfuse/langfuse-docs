@@ -50,11 +50,7 @@ interface EventDefinitions {
     source: "home_feature_tabs";
     path: string;
   };
-  "blog:start_free_clicked": {
-    placement: "sidebar" | "article";
-    path: string;
-  };
-  "blog:talk_to_us_clicked": {
+  "blog:sign_up_clicked": {
     placement: "sidebar" | "article";
     path: string;
   };
