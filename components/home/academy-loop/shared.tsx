@@ -4,19 +4,19 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LOOP_TICK_MS } from "./steps";
 
-/** Cycles 0..length-1 while the user has not asked for reduced motion. */
-export function useLoopTick(length: number) {
+/** Cycles 0..length-1 unless paused or the user asked for reduced motion. */
+export function useLoopTick(length: number, paused = false) {
   const [active, setActive] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || paused) return;
     const id = setInterval(
       () => setActive((p) => (p + 1) % length),
       LOOP_TICK_MS,
     );
     return () => clearInterval(id);
-  }, [length, reducedMotion]);
+  }, [length, reducedMotion, paused]);
 
   return active;
 }
