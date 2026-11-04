@@ -3,7 +3,7 @@ title: Langfuse for financial services
 description: Observe and evaluate AI agents across banks, brokers, and fintechs. Deployment gates, production traces, audit trails, and self-hosting for regulated teams.
 ---
 
-# Bring reliable financial services AI faster into production
+# Run compliant financial services AI in production
 
 Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
