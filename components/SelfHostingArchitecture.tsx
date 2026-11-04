@@ -261,13 +261,13 @@ function DesktopDiagram() {
       <text x="582" y="152" className={styles.detail}>
         VPC / on-premises
       </text>
-      <Client x={LEFT} y={24} name="Apps & agents" icon={Bot} />
-      <Client x={STORE_X} y={24} name="UI, API & SDKs" icon={Globe} />
+      <Client x={LEFT} y={24} name="UI, API & SDKs" icon={Globe} />
+      <Client x={STORE_X} y={24} name="Apps & agents" icon={Bot} />
       {/* Explicit arrowheads avoid shared SVG marker IDs. */}
       <g className={styles.optionalPaths}>
-        <path d={`M 140 78 V ${GATEWAY_Y}`} />
+        <path d={`M 400 78 V 140 H 140 V ${GATEWAY_Y}`} />
         <path d={`M 140 ${GATEWAY_Y + 126} V ${WEB_Y}`} />
-        <path d={`M ${LEFT} 231 H 28 V 692 H 280`} />
+        <path d={`M ${LEFT} 231 H 8 V 692 H 280`} />
         <path
           d={`M 140 ${WEB_Y + 126} V 636 Q 140 ${LLM_Y} 156 ${LLM_Y} H 280`}
         />
@@ -276,7 +276,7 @@ function DesktopDiagram() {
         />
       </g>
       <g className={styles.webPaths}>
-        <path d={`M 400 78 V 96 H 252 V ${WEB_Y}`} />
+        <path d={`M ${LEFT} 51 H 16 V 397 H ${LEFT}`} />
         <path d="M 240 348 C 270 348 270 208 300 208" />
         <path d="M 240 372 C 270 372 270 312 300 312" />
         <path d="M 240 396 C 270 396 270 416 300 416" />
@@ -300,17 +300,17 @@ function DesktopDiagram() {
       <g className={styles.arrows}>
         <path d={`m 136 ${GATEWAY_Y - 6} 4 6 4 -6`} />
         <path d={`m 136 ${WEB_Y - 6} 4 6 4 -6`} />
-        <path d={`m 248 ${WEB_Y - 6} 4 6 4 -6`} />
+        <path d="m 34 393 6 4 -6 4" />
         <path d="m 274 688 6 4 -6 4" />
         <path d="m 526 688 -6 4 6 4" />
       </g>
-      <text x="154" y="128" className={styles.detail}>
+      <text x="154" y="136" className={styles.detail}>
         Model requests
       </text>
       <text x="154" y="318" className={styles.detail}>
         Resolve · traces
       </text>
-      <text x="260" y="220" className={styles.detail}>
+      <text x="48" y="96" className={styles.detail}>
         Requests
       </text>
       <text x="660" y="308" textAnchor="middle" className={styles.label}>
