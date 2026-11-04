@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Deepen a shallow clone to full commit history without downloading file
+# contents, so the git-based lastmod dates (sitemap, fumadocs lastModified,
+# contributors) stay accurate on Vercel's default shallow clone.
+#
+# A blobless history fetch takes about a second, while a full clone
+# (VERCEL_DEEP_CLONE) downloads ~1 GB of image history on every build.
+#
+# Never fails the build: if the fetch fails, the scripts that read git history
+# already fall back to file mtimes and warn.
+
+set -uo pipefail
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "[ensure-git-history] Not a git checkout; skipping."
+  exit 0
+fi
+
+if [[ "$(git rev-parse --is-shallow-repository)" != "true" ]]; then
+  exit 0
+fi
+
+public_url="https://github.com/${VERCEL_GIT_REPO_OWNER:-langfuse}/${VERCEL_GIT_REPO_SLUG:-langfuse-docs}.git"
+
+# Blob-less history cannot run rename detection without lazily fetching blobs
+# one by one, which turns every `git log --name-only` into thousands of requests.
+git config diff.renames false
+
+fetch_history() {
+  local remote="$1"
+  # A filtered fetch requires the remote to be marked as a promisor.
+  git config "remote.${remote}.promisor" true
+  git config "remote.${remote}.partialclonefilter" blob:none
+  git fetch --quiet --filter=blob:none --unshallow "$remote" "$commit"
+}
+
+commit="$(git rev-parse HEAD)"
+
+start=$(date +%s)
+if git remote get-url origin >/dev/null 2>&1 && fetch_history origin; then
+  :
+elif { git remote add history "$public_url" 2>/dev/null || git remote set-url history "$public_url"; } && fetch_history history; then
+  :
+else
+  echo "[ensure-git-history] WARNING: could not fetch git history; lastmod dates may fall back to file mtimes." >&2
+  exit 0
+fi
+echo "[ensure-git-history] Fetched full commit history (blobless) in $(($(date +%s) - start))s."
+exit 0
