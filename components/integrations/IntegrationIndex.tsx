@@ -111,7 +111,7 @@ const categoryConfig: Record<
     description: "Connect through API gateways and proxies",
     pinnedLinks: [
       {
-        route: "/docs/ai-gateway/overview",
+        route: "/docs/gateway/overview",
         frontMatter: {
           title: "Langfuse AI Gateway",
           logo: "/langfuse-icon.svg",
