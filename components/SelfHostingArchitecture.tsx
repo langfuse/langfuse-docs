@@ -21,30 +21,60 @@ const stores = [
     detail: "Transactional data",
     path: "postgres",
     icon: Database,
-    y: 164,
+    y: 168,
   },
   {
     name: "Redis / Valkey",
     detail: "Cache & job queue",
     path: "cache",
     icon: ListOrdered,
-    y: 268,
+    y: 272,
   },
   {
     name: "ClickHouse",
     detail: "Observability data",
     path: "clickhouse",
     icon: Layers,
-    y: 372,
+    y: 376,
   },
   {
     name: "S3 / Blob storage",
     detail: "Events & attachments",
     path: "blobstorage",
     icon: HardDrive,
-    y: 476,
+    y: 480,
   },
 ];
+
+function Client({
+  x,
+  y,
+  name,
+  icon: Icon,
+}: {
+  x: number;
+  y: number;
+  name: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <g transform={`translate(${x} ${y})`}>
+      <rect width="200" height="54" rx="8" className={styles.card} />
+      <Icon
+        x={16}
+        y={17}
+        width={20}
+        height={20}
+        strokeWidth={1.5}
+        className={styles.icon}
+        aria-hidden="true"
+      />
+      <text x="46" y="33" className={styles.name}>
+        {name}
+      </text>
+    </g>
+  );
+}
 
 function Service({
   x,
@@ -176,16 +206,23 @@ function MobileConnector({
   );
 }
 
-// Connections mirror the original Mermaid diagram. Storage sits between the
-// containers so their fan-out paths never cross one another. The AI gateway
-// column on the left is drawn in absolute coordinates; everything else is
-// shifted right by GATEWAY_COLUMN.
-const GATEWAY_COLUMN = 280;
+// Three columns: Gateway stacked above Web on the left, storage in the
+// middle, Worker on the right. Stacking those two containers drops the extra
+// gateway column so the diagram stays readable at docs content widths.
+const WIDTH = 800;
+const HEIGHT = 760;
+const LEFT = 40;
+const STORE_X = 300;
+const RIGHT = 560;
+const GATEWAY_Y = 168;
+const WEB_Y = 334;
+const WORKER_Y = 334;
+const LLM_Y = 656;
 
 function DesktopDiagram() {
   return (
     <svg
-      viewBox={`0 0 ${800 + GATEWAY_COLUMN} 704`}
+      viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
       className={styles.diagram}
       role="group"
       aria-label="Web and worker containers connected to four shared storage services, with an optional AI gateway"
@@ -205,51 +242,92 @@ function DesktopDiagram() {
       <rect
         x="20"
         y="104"
-        width={760 + GATEWAY_COLUMN}
-        height="480"
+        width="760"
+        height="528"
         rx="12"
         className={styles.boundary}
       />
-      <g transform="translate(40 24)">
-        <rect width="200" height="54" rx="8" className={styles.card} />
-        <Bot
-          x={16}
-          y={17}
-          width={20}
-          height={20}
-          strokeWidth={1.5}
-          className={styles.icon}
-          aria-hidden="true"
-        />
-        <text x="46" y="33" className={styles.name}>
-          Apps & agents
-        </text>
-      </g>
+      <LockKeyhole
+        x={STORE_X}
+        y={124}
+        width={14}
+        height={14}
+        className={styles.icon}
+        aria-hidden="true"
+      />
+      <text x="322" y="136" className={styles.label}>
+        YOUR INFRASTRUCTURE
+      </text>
+      <text x="760" y="136" textAnchor="end" className={styles.detail}>
+        VPC / on-premises
+      </text>
+      <Client x={LEFT} y={24} name="Apps & agents" icon={Bot} />
+      <Client x={RIGHT} y={24} name="UI, API & SDKs" icon={Globe} />
+      {/* Explicit arrowheads avoid shared SVG marker IDs. */}
       <g className={styles.optionalPaths}>
-        <path d="M 140 78 V 294" />
-        <path d="M 240 357 H 320" />
-        <path d="M 140 420 V 648 Q 140 664 156 664 H 560" />
+        <path d={`M 140 78 V ${GATEWAY_Y}`} />
+        <path d={`M 140 ${GATEWAY_Y + 126} V ${WEB_Y}`} />
+        <path d={`M ${LEFT} 231 H 28 V 692 H 280`} />
+        <path
+          d={`M 140 ${WEB_Y + 126} V 636 Q 140 ${LLM_Y} 156 ${LLM_Y} H 280`}
+        />
+        <path
+          d={`M 660 ${WORKER_Y + 126} V 636 Q 660 ${LLM_Y} 644 ${LLM_Y} H 520`}
+        />
+      </g>
+      <g className={styles.webPaths}>
+        <path d="M 660 78 V 96 H 528 V 397 H 240" />
+        <path d="M 240 348 C 270 348 270 208 300 208" />
+        <path d="M 240 372 C 270 372 270 312 300 312" />
+        <path d="M 240 396 C 270 396 270 416 300 416" />
+        <path d="M 240 420 C 270 420 270 520 300 520" />
+        {stores.map(({ path, y }) => (
+          <path key={path} d={`m 294 ${y + 36} 6 4 -6 4`} />
+        ))}
+      </g>
+      <g className={styles.workerPaths}>
+        <path d="M 560 348 C 530 348 530 208 500 208" />
+        <path d="M 500 312 C 530 312 530 372 560 372" />
+        <path d="m 554 368 6 4 -6 4" />
+        <path d="M 560 396 C 530 396 530 416 500 416" />
+        <path d="M 560 420 C 530 420 530 520 500 520" />
+        {stores
+          .filter(({ path }) => path !== "cache")
+          .map(({ path, y }) => (
+            <path key={path} d={`m 506 ${y + 36} -6 4 6 4`} />
+          ))}
       </g>
       <g className={styles.arrows}>
-        <path d="m 136 288 4 6 4 -6" />
-        <path d="m 314 353 6 4 -6 4" />
-        <path d="m 554 660 6 4 -6 4" />
+        <path d={`m 136 ${GATEWAY_Y - 6} 4 6 4 -6`} />
+        <path d={`m 136 ${WEB_Y - 6} 4 6 4 -6`} />
+        <path d="m 246 393 -6 4 6 4" />
+        <path d="m 274 688 6 4 -6 4" />
+        <path d="m 526 688 -6 4 6 4" />
       </g>
-      <text x="154" y="223" className={styles.detail}>
+      <text x="154" y="128" className={styles.detail}>
         Model requests
       </text>
-      <text x="280" y="347" textAnchor="middle" className={styles.detail}>
-        Resolve
+      <text x="154" y="318" className={styles.detail}>
+        Resolve · traces
       </text>
-      <text x="280" y="377" textAnchor="middle" className={styles.detail}>
-        Traces
+      <text x="536" y="220" className={styles.detail}>
+        Requests
       </text>
-      <text x="154" y="612" className={styles.detail}>
+      <text x="660" y="308" textAnchor="middle" className={styles.label}>
+        BACKGROUND PROCESSING
+      </text>
+      <text x="154" y="620" className={styles.detail}>
+        Playground
+      </text>
+      <text x="646" y="620" textAnchor="end" className={styles.detail}>
+        Evaluations
+      </text>
+      <text x="36" y="500" className={styles.detail}>
         Relay
       </text>
       <Service
-        x={40}
-        y={294}
+        x={LEFT}
+        y={GATEWAY_Y}
         name="AI Gateway"
         detail="Optional · beta"
         image="langfuse/ai-gateway"
@@ -258,133 +336,58 @@ function DesktopDiagram() {
         href="/self-hosting/configuration/ai-gateway"
         accent="gateway"
       />
-      <g transform={`translate(${GATEWAY_COLUMN} 0)`}>
-        <LockKeyhole
-          x={300}
-          y={124}
-          width={14}
-          height={14}
+      <Service
+        x={LEFT}
+        y={WEB_Y}
+        name="Langfuse Web"
+        detail="UI & API server"
+        image="langfuse/langfuse"
+        icon={Server}
+        path="containers"
+        accent="web"
+      />
+      <Service
+        x={RIGHT}
+        y={WORKER_Y}
+        name="Langfuse Worker"
+        detail="Async event processing"
+        image="langfuse/worker"
+        icon={Blocks}
+        path="containers"
+        accent="worker"
+      />
+      {stores.map((store) => (
+        <Service key={store.path} x={STORE_X} {...store} />
+      ))}
+      <a
+        href={`${infrastructure}/llm-api`}
+        className={styles.service}
+        aria-label="Optional LLM providers. View documentation."
+      >
+        <rect
+          x="280"
+          y={LLM_Y}
+          width="240"
+          height="72"
+          rx="8"
+          className={styles.card}
+        />
+        <Sparkles
+          x={298}
+          y={LLM_Y + 15}
+          width={18}
+          height={18}
+          strokeWidth={1.5}
           className={styles.icon}
           aria-hidden="true"
         />
-        <text x="322" y="136" className={styles.label}>
-          YOUR INFRASTRUCTURE
+        <text x="327" y={LLM_Y + 30} className={styles.name}>
+          LLM providers
         </text>
-        <text x="758" y="136" textAnchor="end" className={styles.detail}>
-          VPC / on-premises
+        <text x="298" y={LLM_Y + 52} className={styles.detail}>
+          Optional · bring your own
         </text>
-        <g transform="translate(40 24)">
-          <rect width="200" height="54" rx="8" className={styles.card} />
-          <Globe
-            x={16}
-            y={17}
-            width={20}
-            height={20}
-            strokeWidth={1.5}
-            className={styles.icon}
-            aria-hidden="true"
-          />
-          <text x="46" y="33" className={styles.name}>
-            UI, API & SDKs
-          </text>
-        </g>
-        {/* Explicit arrowheads avoid shared SVG marker IDs. */}
-        <g className={styles.webPaths}>
-          <path d="M 140 78 V 294" />
-          <path d="m 136 288 4 6 4 -6" />
-          <path d="M 240 319 C 270 319 270 204 300 204" />
-          <path d="M 240 341 C 270 341 270 308 300 308" />
-          <path d="M 240 363 C 270 363 270 412 300 412" />
-          <path d="M 240 385 C 270 385 270 516 300 516" />
-          {stores.map(({ path, y }) => (
-            <path key={path} d={`m 294 ${y + 36} 6 4 -6 4`} />
-          ))}
-        </g>
-        <g className={styles.workerPaths}>
-          <path d="M 560 319 C 530 319 530 204 500 204" />
-          <path d="M 500 308 C 530 308 530 341 560 341" />
-          <path d="m 554 337 6 4 -6 4" />
-          <path d="M 560 363 C 530 363 530 412 500 412" />
-          <path d="M 560 385 C 530 385 530 516 500 516" />
-          {stores
-            .filter(({ path }) => path !== "cache")
-            .map(({ path, y }) => (
-              <path key={path} d={`m 506 ${y + 36} -6 4 6 4`} />
-            ))}
-        </g>
-        <text x="154" y="223" className={styles.detail}>
-          Requests
-        </text>
-        <text x="660" y="268" textAnchor="middle" className={styles.label}>
-          BACKGROUND PROCESSING
-        </text>
-        <Service
-          x={40}
-          y={294}
-          name="Langfuse Web"
-          detail="UI & API server"
-          image="langfuse/langfuse"
-          icon={Server}
-          path="containers"
-          accent="web"
-        />
-        <Service
-          x={560}
-          y={294}
-          name="Langfuse Worker"
-          detail="Async event processing"
-          image="langfuse/worker"
-          icon={Blocks}
-          path="containers"
-          accent="worker"
-        />
-        {stores.map((store) => (
-          <Service key={store.path} x={300} {...store} />
-        ))}
-        <g className={styles.optionalPaths}>
-          <path d="M 140 420 V 628 Q 140 644 156 644 H 280" />
-          <path d="M 660 420 V 628 Q 660 644 644 644 H 520" />
-        </g>
-        <g className={styles.arrows}>
-          <path d="m 274 640 6 4 -6 4" />
-          <path d="m 526 640 -6 4 6 4" />
-        </g>
-        <text x="154" y="612" className={styles.detail}>
-          Playground
-        </text>
-        <text x="646" y="612" textAnchor="end" className={styles.detail}>
-          Evaluations
-        </text>
-        <a
-          href={`${infrastructure}/llm-api`}
-          className={styles.service}
-          aria-label="Optional LLM providers. View documentation."
-        >
-          <rect
-            x="280"
-            y="608"
-            width="240"
-            height="72"
-            rx="8"
-            className={styles.card}
-          />
-          <Sparkles
-            x={298}
-            y={623}
-            width={18}
-            height={18}
-            strokeWidth={1.5}
-            className={styles.icon}
-            aria-hidden="true"
-          />
-          <text x="327" y="638" className={styles.name}>
-            LLM providers
-          </text>
-          <text x="298" y="660" className={styles.detail}>
-            Optional · bring your own
-          </text>
-        </a>
-      </g>
+      </a>
     </svg>
   );
 }
