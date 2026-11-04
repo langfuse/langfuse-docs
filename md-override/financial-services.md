@@ -139,8 +139,9 @@ Trace Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot — no proxy requ
 
 ## Learn how to ship reliable agents in financial services
 
-Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production.
+Start with the steps from prototype to production, then see how teams like Trade Republic run Langfuse in production.
 
+- [Getting AI agents into production](/blog/2026-11-04-regulated-industries-ai-agents-production): Eight steps regulated teams follow, from tracing and error analysis to production monitors and human review.
 - [Building deployment gates for LLMs](/blog/2026-07-15-llm-certification-financial-services): Evaluate model and prompt changes against datasets and policy evals before release.
 - [Evals for High-Stakes AI Agents](/guides/videos/evals-for-high-stakes-ai-agents): Trace a banking assistant with PII masking, offline evals, and a CI gate on a candidate prompt label.
 - [Academy: customer support chatbot](/academy/examples/customer-support-chatbot): Trace, score and iterate on a support agent to raise its autonomy rate safely.
