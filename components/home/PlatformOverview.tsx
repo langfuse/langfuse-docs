@@ -413,24 +413,6 @@ function WideDiagram() {
   );
 }
 
-/**
- * Docs column is 680px at every desktop width, so the 840px layout is always
- * zoomed to the container. `zoom` shrinks the layout box; `100cqw` follows the
- * actual column if it is narrower than 680px.
- */
-function FittedWideDiagram() {
-  return (
-    <div className="@container hidden w-full min-w-0 md:block">
-      <div
-        className={cn("grid w-[840px]", DIAGRAM_GRID)}
-        style={{ zoom: "calc(100cqw / 840px)" }}
-      >
-        <DiagramColumns />
-      </div>
-    </div>
-  );
-}
-
 function DownArrow() {
   return (
     <div className="flex h-8 justify-center" aria-hidden="true">
@@ -463,19 +445,6 @@ function CompactDiagram() {
       <PairedDownArrows />
       <LangfuseNode />
     </div>
-  );
-}
-
-export function PlatformOverviewDiagram() {
-  return (
-    <figure
-      aria-label="How AI calls flow through Langfuse"
-      className="not-prose my-8 w-full min-w-0 text-left"
-    >
-      <FittedWideDiagram />
-      <CompactDiagram />
-      <figcaption className="sr-only">{DIAGRAM_CAPTION}</figcaption>
-    </figure>
   );
 }
 
