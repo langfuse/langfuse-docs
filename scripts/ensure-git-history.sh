@@ -29,6 +29,8 @@ if [[ "$(git rev-parse --is-shallow-repository)" != "true" ]]; then
   exit 0
 fi
 
+# Vercel's checkout has no usable origin remote, so on Vercel the history
+# always comes from the public repository URL.
 public_url="https://github.com/${VERCEL_GIT_REPO_OWNER:-langfuse}/${VERCEL_GIT_REPO_SLUG:-langfuse-docs}.git"
 
 # Blob-less history cannot run rename detection without lazily fetching blobs
