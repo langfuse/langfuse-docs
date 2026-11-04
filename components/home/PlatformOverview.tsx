@@ -8,7 +8,7 @@ import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 
-const AI_GATEWAY_HREF = "/docs/ai-gateway/overview";
+const AI_GATEWAY_HREF = "/docs/gateway/overview";
 const INTEGRATIONS_HREF = "/integrations";
 const SDK_HREF = "/docs/observability/get-started";
 

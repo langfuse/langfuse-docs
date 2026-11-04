@@ -29,7 +29,7 @@ Both Copilot surfaces support bring-your-own-key (BYOK) model providers. Only th
 
 ### Create a gateway API key [#cli-create-a-key]
 
-Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/gateway/features/api-keys#create-a-key).
 
 ### Point Copilot CLI at the gateway [#cli-configure]
 
@@ -64,9 +64,9 @@ copilot
 To keep the setup across sessions, add the `export` lines to `~/.zshrc`.
 
 - The Anthropic base URL has **no** `/v1`. The OpenAI base URL **includes** `/v1`.
-- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/ai-gateway/features/rest-api#routes)), which has not been verified with Copilot.
+- Set `COPILOT_PROVIDER_WIRE_API="responses"` on the OpenAI route. Copilot defaults to `completions` ([Chat Completions](/docs/gateway/features/rest-api#routes)), which has not been verified with Copilot.
 - If `~/.copilot/providers.json` (or the file in `COPILOT_PROVIDERS_CONFIG`) already lists providers or models, it takes precedence and these variables have no effect.
-- Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/ai-gateway/features/tracing#request-headers) such as `langfuse-tags` cannot be set. Use [key metadata](/docs/ai-gateway/features/api-keys#key-metadata) instead.
+- Copilot CLI cannot send custom headers to a BYOK provider, so [request headers](/docs/gateway/features/tracing#request-headers) such as `langfuse-tags` cannot be set. Use [key metadata](/docs/gateway/features/api-keys#key-metadata) instead.
 
 ### Verify [#cli-verify]
 
@@ -80,7 +80,7 @@ Send a prompt in `copilot`. If Copilot replies, it runs through the gateway.
 
 ### Create a gateway API key [#app-create-a-key]
 
-Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/gateway/features/api-keys#create-a-key).
 
 ### Add the gateway as a model provider [#app-configure]
 
@@ -91,7 +91,7 @@ See GitHub's [guide to adding models to the Copilot app](https://docs.github.com
 3. Set **Base URL** to `https://gateway.cloud.langfuse.com/openai/v1`.
 4. Set **Wire API** to `responses`. With `completions`, requests to OpenAI's GPT-5 models fail.
 5. Paste your gateway key as **API key**. The app stores it in your OS keychain.
-6. Optional: add [request headers](/docs/ai-gateway/features/tracing#request-headers) under **Custom headers**, for example:
+6. Optional: add [request headers](/docs/gateway/features/tracing#request-headers) under **Custom headers**, for example:
 
    ```json
    {

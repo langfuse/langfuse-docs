@@ -33,8 +33,8 @@ There are different ingestion modes, which gateway managers set for the whole or
 - token usage, including cached and reasoning tokens, plus cost, latency, and time to first token
 - level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations
 - sessions, grouped automatically from each coding agent's own session ID
-- the [trace user](/docs/ai-gateway/features/api-keys#trace-user), which depends on the key type
-- the gateway key, its [key metadata](/docs/ai-gateway/features/api-keys#key-metadata), and the provider credential in metadata, under `langfuse.gateway.api_key.*` and `langfuse.gateway.connection.*`
+- the [trace user](/docs/gateway/features/api-keys#trace-user), which depends on the key type
+- the gateway key, its [key metadata](/docs/gateway/features/api-keys#key-metadata), and the provider credential in metadata, under `langfuse.gateway.api_key.*` and `langfuse.gateway.connection.*`
 
 </Details>
 
@@ -53,14 +53,14 @@ Any client can send these optional headers to enrich the traces the gateway reco
 
 ### Headers [#headers]
 
-| Header                 | Format                      | Effect                                                                                                                                                                                                                                                      |
-| ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse-user-id`     | string                      | Trace [user](/docs/observability/features/users). Only used with service account keys: user keys always record the key owner. See [trace user](/docs/ai-gateway/features/api-keys#trace-user).                                                              |
-| `langfuse-session-id`  | string                      | Overrides the agent's own [session](/docs/observability/features/sessions).                                                                                                                                                                                 |
-| `langfuse-environment` | string                      | [Environment](/docs/observability/features/environments) of the trace. Invalid values fall back to `default`.                                                                                                                                               |
-| `langfuse-tags`        | comma-separated             | [Tags](/docs/observability/features/tags), trimmed and deduplicated.                                                                                                                                                                                        |
-| `langfuse-metadata`    | comma-separated `key:value` | Top-level [metadata](/docs/observability/features/metadata). Splits at the first colon, values stay strings. Percent-encode literal commas (`%2C`). For metadata clients can't change, use [key metadata](/docs/ai-gateway/features/api-keys#key-metadata). |
-| `langfuse-trace-name`  | string                      | Overrides the default trace name (the agent name).                                                                                                                                                                                                          |
+| Header                 | Format                      | Effect                                                                                                                                                                                                                                                   |
+| ---------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse-user-id`     | string                      | Trace [user](/docs/observability/features/users). Only used with service account keys: user keys always record the key owner. See [trace user](/docs/gateway/features/api-keys#trace-user).                                                              |
+| `langfuse-session-id`  | string                      | Overrides the agent's own [session](/docs/observability/features/sessions).                                                                                                                                                                              |
+| `langfuse-environment` | string                      | [Environment](/docs/observability/features/environments) of the trace. Invalid values fall back to `default`.                                                                                                                                            |
+| `langfuse-tags`        | comma-separated             | [Tags](/docs/observability/features/tags), trimmed and deduplicated.                                                                                                                                                                                     |
+| `langfuse-metadata`    | comma-separated `key:value` | Top-level [metadata](/docs/observability/features/metadata). Splits at the first colon, values stay strings. Percent-encode literal commas (`%2C`). For metadata clients can't change, use [key metadata](/docs/gateway/features/api-keys#key-metadata). |
+| `langfuse-trace-name`  | string                      | Overrides the default trace name (the agent name).                                                                                                                                                                                                       |
 
 Example:
 

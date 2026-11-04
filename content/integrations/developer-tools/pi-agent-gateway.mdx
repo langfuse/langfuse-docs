@@ -25,7 +25,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 ### Create a gateway API key [#create-a-key]
 
-Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/ai-gateway/features/api-keys#create-a-key).
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/gateway/features/api-keys#create-a-key).
 
 Export it in the shell you start Pi from:
 
@@ -98,8 +98,8 @@ pi -p --provider langfuse-openai --model <openai-model-id> "Summarize README.md"
 
 - **Sessions on the Anthropic route require `"compat": { "sendSessionAffinityHeaders": true }`.** Without it, Pi sends no session ID to Anthropic and the generations have no session. The OpenAI route always sends the session ID.
 - The Anthropic `baseUrl` has **no** `/v1`. The OpenAI `baseUrl` **includes** `/v1`.
-- Use `"api": "openai-responses"`. `openai-completions` uses [Chat Completions](/docs/ai-gateway/features/rest-api#routes), which the gateway serves but which has not been verified with pi.
-- Replace the model IDs with IDs from [`/models`](/docs/ai-gateway/get-started/first-request#list-models), and set `reasoning`, `contextWindow`, and `maxTokens` to the values of that model.
+- Use `"api": "openai-responses"`. `openai-completions` uses [Chat Completions](/docs/gateway/features/rest-api#routes), which the gateway serves but which has not been verified with pi.
+- Replace the model IDs with IDs from [`/models`](/docs/gateway/get-started/first-request#list-models), and set `reasoning`, `contextWindow`, and `maxTokens` to the values of that model.
 - List every model you use under `models`. Otherwise, Pi warns "Using custom model id" and guesses the context window and reasoning support.
 
 ### Verify [#verify]

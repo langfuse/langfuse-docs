@@ -23,11 +23,11 @@ You can find it under **Organization settings → AI Gateway → Analytics**. Wh
 
 ## Charts are only using gateway data [#data-source]
 
-The charts read the generations the gateway records in its [ingestion project](/docs/ai-gateway/get-started/admin-setup#configure-the-gateway). Only calls made with a gateway key are considered. SDK traces sent to the same project don't impact gateway analytics numbers.
+The charts read the generations the gateway records in its [ingestion project](/docs/gateway/get-started/admin-setup#configure-the-gateway). Only calls made with a gateway key are considered. SDK traces sent to the same project don't impact gateway analytics numbers.
 
 <Callout type="info">
   Analytics need recorded traces. `USAGE` [ingestion
-  mode](/docs/ai-gateway/features/tracing#ingestion-modes) is enough. On
+  mode](/docs/gateway/features/tracing#ingestion-modes) is enough. On
   self-hosted Langfuse with ingestion mode `NONE`, the page shows "Gateway
   requests are not recorded" instead of charts. Cost is subject to the [known
   cost bugs](/faq/all/ai-gateway-known-limitations).
@@ -38,4 +38,4 @@ The charts read the generations the gateway records in its [ingestion project](/
 Gateway traces are regular Langfuse traces, so admins and owners can build their own [custom dashboards](/docs/metrics/features/custom-dashboards) in the ingestion project:
 
 - To limit a chart to gateway traffic, filter on the metadata key `langfuse.gateway.api_key.id`.
-- To chart a single team or cost center, add [key metadata](/docs/ai-gateway/features/api-keys#key-metadata) when you create keys and filter on `langfuse.gateway.api_key.metadata.<key>`.
+- To chart a single team or cost center, add [key metadata](/docs/gateway/features/api-keys#key-metadata) when you create keys and filter on `langfuse.gateway.api_key.metadata.<key>`.

@@ -11,7 +11,7 @@ import { BookOpen } from "lucide-react";
 
 <AiGatewayBetaCallout />
 
-This page walks you through how to send your first request through the Gateway. If the gateway is not set up for your organization yet, ask an admin to follow [Set up the gateway](/docs/ai-gateway/get-started/admin-setup) first.
+This page walks you through how to send your first request through the Gateway. If the gateway is not set up for your organization yet, ask an admin to follow [Set up the gateway](/docs/gateway/get-started/admin-setup) first.
 
 ## Setup steps [#setup-steps]
 
@@ -41,12 +41,12 @@ export LANGFUSE_GATEWAY_HOST="https://gateway.cloud.langfuse.com"
 
 <Callout type="info">
   For CI or a shared service, ask an admin for a service account key. See [API
-  keys](/docs/ai-gateway/features/api-keys).
+  keys](/docs/gateway/features/api-keys).
 </Callout>
 
 ### Pick a model [#list-models]
 
-Copy the ID of a model you can call. Each ID has the form `<credential>:<model>`, for example `openai-prod:<model>`. See [model IDs](/docs/ai-gateway/features/models#model-ids) for which form to send.
+Copy the ID of a model you can call. Each ID has the form `<credential>:<model>`, for example `openai-prod:<model>`. See [model IDs](/docs/gateway/features/models#model-ids) for which form to send.
 
 <LangTabs items={["Langfuse UI", "API"]}>
 
@@ -122,7 +122,7 @@ _**Requires** an `ANTHROPIC` provider credential._
 3. Under **Capabilities → General restrictions**, add `*` to **Allowed egress hosts**. Otherwise, Claude can't reach services outside the gateway, such as GitHub.
 4. Select **Apply Changes**, then **Save & Restart**, and send a message in a new session.
 
-_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts)._
+_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts)._
 
 <Cards num={1}>
   <Card
@@ -159,7 +159,7 @@ env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
 wire_api = "responses"
 ```
 
-_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts)._
+_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts)._
 
 Then run a prompt:
 
@@ -201,7 +201,7 @@ Point OpenCode's Anthropic provider at the gateway in `opencode.json` (project r
 }
 ```
 
-_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts)._
+_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts)._
 
 Then run a prompt:
 
@@ -255,7 +255,7 @@ Add the gateway's Anthropic route as a provider in `~/.pi/agent/models.json`. Se
 }
 ```
 
-_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/ai-gateway/features/rest-api#gateway-hosts)._
+_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts)._
 
 Then run a prompt:
 
@@ -477,7 +477,7 @@ The response is OpenAI's own response. Its headers include `langfuse-trace-id`, 
   <Card
     icon={<BookOpen />}
     title="REST API"
-    href="/docs/ai-gateway/features/rest-api"
+    href="/docs/gateway/features/rest-api"
     arrow
   />
 </Cards>
@@ -490,7 +490,7 @@ Replace `<model-id>` with the model ID you picked in the previous step.
 
 ### See your trace in Langfuse (optional) [#view-the-trace]
 
-Open the organization's ingestion project in Langfuse and go to **Tracing** to see your request. What's recorded depends on the organization's [ingestion mode](/docs/ai-gateway/features/tracing#ingestion-modes).
+Open the organization's ingestion project in Langfuse and go to **Tracing** to see your request. What's recorded depends on the organization's [ingestion mode](/docs/gateway/features/tracing#ingestion-modes).
 
 <Callout type="info">
   You need Viewer access or above to the ingestion project to see gateway
