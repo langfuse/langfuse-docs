@@ -5,6 +5,8 @@ import { loadPage, buildSectionMetadata } from "@/lib/mdx-page";
 import { getMDXComponents } from "@/mdx-components";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
+import { BlogCloudCta } from "@/components/blog/BlogCloudCta";
+import { HomeAside } from "@/components/home/layout/HomeAside";
 import { ContentColumns } from "@/components/layout";
 
 type PageProps = {
@@ -18,13 +20,23 @@ export default async function UserStoryPage(props: PageProps) {
   const { MDX } = result;
 
   return (
-    <ContentColumns footerClassName="xl:max-w-[680px]">
+    <ContentColumns
+      rightSidebar={
+        <HomeAside cta={<BlogCloudCta surface="customer_story" />} />
+      }
+      footerClassName="xl:max-w-[680px]"
+    >
       <div className="mx-auto w-full max-w-[680px] px-4 py-6 md:px-0">
         <MainContentWrapper>
           <DocBodyChrome>
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
         </MainContentWrapper>
+        <BlogCloudCta
+          surface="customer_story"
+          layout="row"
+          className="my-10 wide:hidden"
+        />
       </div>
     </ContentColumns>
   );

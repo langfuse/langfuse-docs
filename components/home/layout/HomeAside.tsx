@@ -190,7 +190,7 @@ export function HomeAside({
   cta,
 }: {
   toc?: TocItem[];
-  /** Blog posts pass a signup / sales block. Other pages leave this empty. */
+  /** Blog posts and customer stories pass a signup block. Other pages leave this empty. */
   cta?: ReactNode;
 } = {}) {
   const pathname = usePathname();
