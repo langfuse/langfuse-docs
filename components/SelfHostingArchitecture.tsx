@@ -248,21 +248,21 @@ function DesktopDiagram() {
         className={styles.boundary}
       />
       <LockKeyhole
-        x={STORE_X}
+        x={RIGHT}
         y={124}
         width={14}
         height={14}
         className={styles.icon}
         aria-hidden="true"
       />
-      <text x="322" y="136" className={styles.label}>
+      <text x="582" y="136" className={styles.label}>
         YOUR INFRASTRUCTURE
       </text>
-      <text x="760" y="136" textAnchor="end" className={styles.detail}>
+      <text x="582" y="152" className={styles.detail}>
         VPC / on-premises
       </text>
       <Client x={LEFT} y={24} name="Apps & agents" icon={Bot} />
-      <Client x={RIGHT} y={24} name="UI, API & SDKs" icon={Globe} />
+      <Client x={STORE_X} y={24} name="UI, API & SDKs" icon={Globe} />
       {/* Explicit arrowheads avoid shared SVG marker IDs. */}
       <g className={styles.optionalPaths}>
         <path d={`M 140 78 V ${GATEWAY_Y}`} />
@@ -276,7 +276,7 @@ function DesktopDiagram() {
         />
       </g>
       <g className={styles.webPaths}>
-        <path d="M 660 78 V 96 H 528 V 397 H 240" />
+        <path d={`M 400 78 V 96 H 252 V ${WEB_Y}`} />
         <path d="M 240 348 C 270 348 270 208 300 208" />
         <path d="M 240 372 C 270 372 270 312 300 312" />
         <path d="M 240 396 C 270 396 270 416 300 416" />
@@ -300,7 +300,7 @@ function DesktopDiagram() {
       <g className={styles.arrows}>
         <path d={`m 136 ${GATEWAY_Y - 6} 4 6 4 -6`} />
         <path d={`m 136 ${WEB_Y - 6} 4 6 4 -6`} />
-        <path d="m 246 393 -6 4 6 4" />
+        <path d={`m 248 ${WEB_Y - 6} 4 6 4 -6`} />
         <path d="m 274 688 6 4 -6 4" />
         <path d="m 526 688 -6 4 6 4" />
       </g>
@@ -310,7 +310,7 @@ function DesktopDiagram() {
       <text x="154" y="318" className={styles.detail}>
         Resolve · traces
       </text>
-      <text x="536" y="220" className={styles.detail}>
+      <text x="260" y="220" className={styles.detail}>
         Requests
       </text>
       <text x="660" y="308" textAnchor="middle" className={styles.label}>
