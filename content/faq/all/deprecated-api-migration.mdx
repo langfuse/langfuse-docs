@@ -11,7 +11,7 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 This page maps every deprecated Langfuse REST endpoint and the Python and JS/TS SDK methods that call it to their supported replacements. It includes parameter mappings, semantic differences, and before/after examples. Many of these changes follow from the [observations-first data model](/docs/v4): traces and observations are no longer separate entities, and reads are consolidated onto fewer, faster endpoints.
 
-If you access these endpoints through a Langfuse SDK, each section includes the methods in Python SDK v4 and JS/TS SDK v5 that call them. Deprecated Public API methods remain callable in these SDK majors, so replacing them is separate from upgrading the SDK itself. If you still need to upgrade, first follow [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), then return here to replace deprecated API methods.
+If you access these endpoints through a Langfuse SDK, each section includes the methods in Python SDK v4 and JS/TS SDK v5 that call them. Deprecated Public API methods remain callable in these SDK majors, so replacing them is separate from upgrading the SDK itself. If you still need to upgrade, first follow [Python v3 to v4](/docs/observability/sdk/upgrade-path/python-v3-to-v4) or [JS/TS v4 to v5](/docs/observability/sdk/upgrade-path/js-v4-to-v5), then return here to replace deprecated API methods. Python SDK v5 and JS/TS SDK v6 remove these methods; see [Upgrade your SDK](#upgrade-sdk).
 
 Still need the deprecated endpoints? They are documented in the [reference section below](#endpoints).
 
@@ -21,24 +21,38 @@ This page is also served as plain markdown at `https://langfuse.com/faq/all/depr
 
 </Callout>
 
+## Upgrade your SDK [#upgrade-sdk]
+
+Python SDK v5 and JS/TS SDK v6 use only the supported APIs: reads go through the replacements on this page, traces and observations export via OpenTelemetry, and scores are written to `POST /scores`. They remove the deprecated methods listed here, so replace those calls as part of the upgrade. Both require Langfuse Cloud or self-hosted Langfuse v4.59.0 or later; on older self-hosted versions, stay on Python SDK v4 or JS/TS SDK v5.
+
+| Upgrade        | Install                                                               | Guide                                                                                                                                                          |
+| -------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Python v4 → v5 | `pip install --upgrade "langfuse>=5"`                                 | [Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5) ([checklist](/docs/observability/sdk/upgrade-path/python-v4-to-v5#migration-checklist)) |
+| JS/TS v5 → v6  | `npm install @langfuse/client@6 @langfuse/tracing@6 @langfuse/otel@6` | [JS/TS v5 → v6](/docs/observability/sdk/upgrade-path/js-v5-to-v6) ([checklist](/docs/observability/sdk/upgrade-path/js-v5-to-v6#migration-checklist))          |
+
+The SDK method tables below name the Python v4 and JS/TS v5 callers. Their replacements are the same in v5 and v6, except for two score changes:
+
+- Score reads: `api.scores_v3.get_many_v3(...)` / `api.scoresV3.getManyV3(...)` → `api.scores.get_many(...)` / `api.scores.getMany(...)`, with the same arguments.
+- Direct score writes: `api.legacy.score_v1.*` / `api.legacy.scoreV1.*` → `api.scores.create(...)`, which takes a list of scores, and `api.scores.delete(...)`. The `create_score()` and `langfuse.score.*` helpers are unchanged.
+
 ## Quick reference [#quick-reference]
 
-| Deprecated endpoint                                                                                                             | Replacement                                                                | Details                       |
-| ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------- |
-| `GET /observations`, `GET /observations/{id}`                                                                                   | `GET /v2/observations`                                                     | [Observations](#observations) |
-| `GET /traces`, `GET /traces/{id}`                                                                                               | `GET /v2/observations`, filtered by `traceId`                              | [Traces](#traces)             |
-| `GET /sessions`, `GET /sessions/{id}`                                                                                           | `GET /v2/observations`, filtered by `sessionId`                            | [Sessions](#sessions)         |
-| `GET /metrics`, `GET /metrics/daily`                                                                                            | `GET /v2/metrics`                                                          | [Metrics](#metrics)           |
-| `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`                                                      | `GET /v3/scores`                                                           | [Scores](#scores)             |
-| `GET /datasets/{name}/runs`, `GET /datasets/{name}/runs/{runName}`                                                              | `GET /experiments`, then `GET /experiment-items`                           | [Dataset runs](#dataset-runs) |
-| `GET /dataset-run-items`                                                                                                        | `GET /experiment-items`                                                    | [Dataset runs](#dataset-runs) |
-| `DELETE /datasets/{name}/runs/{runName}`                                                                                        | No direct replacement; `DELETE /traces` removes the underlying trace data  | [Dataset runs](#dataset-runs) |
-| `POST /dataset-run-items`                                                                                                       | Experiment runner SDK or `POST /otel/v1/traces` with experiment attributes | [Dataset runs](#dataset-runs) |
-| Trace and observation events sent to `POST /ingestion`, plus `POST /traces`, `POST /spans`, `POST /generations`, `POST /events` | `POST /otel/v1/traces` (OTLP/HTTP)                                         | [Ingestion](#ingestion)       |
+| Deprecated endpoint                                                                                                                                                   | Replacement                                                                | Details                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------- |
+| `GET /observations`, `GET /observations/{id}`                                                                                                                         | `GET /v2/observations`                                                     | [Observations](#observations) |
+| `GET /traces`, `GET /traces/{id}`                                                                                                                                     | `GET /v2/observations`, filtered by `traceId`                              | [Traces](#traces)             |
+| `GET /sessions`, `GET /sessions/{id}`                                                                                                                                 | `GET /v2/observations`, filtered by `sessionId`                            | [Sessions](#sessions)         |
+| `GET /metrics`, `GET /metrics/daily`                                                                                                                                  | `GET /v2/metrics`                                                          | [Metrics](#metrics)           |
+| `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`                                                                                            | `GET /v3/scores`                                                           | [Scores](#scores)             |
+| `GET /datasets/{name}/runs`, `GET /datasets/{name}/runs/{runName}`                                                                                                    | `GET /experiments`, then `GET /experiment-items`                           | [Dataset runs](#dataset-runs) |
+| `GET /dataset-run-items`                                                                                                                                              | `GET /experiment-items`                                                    | [Dataset runs](#dataset-runs) |
+| `DELETE /datasets/{name}/runs/{runName}`                                                                                                                              | No direct replacement; `DELETE /traces` removes the underlying trace data  | [Dataset runs](#dataset-runs) |
+| `POST /dataset-run-items`                                                                                                                                             | Experiment runner SDK or `POST /otel/v1/traces` with experiment attributes | [Dataset runs](#dataset-runs) |
+| Trace and observation events sent to `POST /ingestion`, plus `POST /traces`, `POST /spans`, `PATCH /spans`, `POST /generations`, `PATCH /generations`, `POST /events` | `POST /otel/v1/traces` (OTLP/HTTP)                                         | [Ingestion](#ingestion)       |
 
 All paths are relative to `/api/public`.
 
-`score-create` events sent to `POST /ingestion` by the current SDKs are not deprecated. They remain supported after the v4 cutover.
+`score-create` events sent to `POST /ingestion` by older SDKs (Python v4, JS/TS v5) are not deprecated. They remain supported after the v4 cutover. Python SDK v5 and JS/TS SDK v6 write scores through `POST /scores`.
 
 If you access the public API from shell scripts or coding agents, the [Langfuse CLI](/docs/api-and-data-platform/features/cli) provides commands for all supported endpoints.
 Use at least `@langfuse/cli` version `v1.1.0` to benefit from the new endpoints.
@@ -53,7 +67,7 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 | [Traces](#traces-sdk-methods)                   | `client.api.trace.list(...)` / `.get(...)` → `client.api.observations.get_many(...)`                                                                                                                                                                                          | `client.api.trace.list(...)` / `.get(...)` and `client.fetchTraces(...)` / `.fetchTrace(...)` → `client.api.observations.getMany(...)`                                                                                                                                                                |
 | [Sessions](#sessions-sdk-methods)               | `client.api.sessions.list(...)` / `.get(...)` → `client.api.observations.get_many(...)`                                                                                                                                                                                       | `client.api.sessions.list(...)` / `.get(...)` and `client.fetchSessions(...)` → `client.api.observations.getMany(...)`                                                                                                                                                                                |
 | [Metrics](#metrics-sdk-methods)                 | `client.api.legacy.metrics_v1.metrics(...)` → `client.api.metrics.metrics(...)`. No Python v4 method calls `GET /metrics/daily`.                                                                                                                                              | `client.api.legacy.metricsV1.metrics(...)` → `client.api.metrics.metrics(...)`. No JS/TS v5 method calls `GET /metrics/daily`.                                                                                                                                                                        |
-| [Scores](#scores-sdk-methods)                   | `client.api.scores.get_many(...)` / `.get_by_id(...)` → `client.api.scores_v3.get_many_v3(...)`. No Python v4 method reads Scores API v1.                                                                                                                                     | `client.api.scores.getMany(...)` / `.getById(...)` → `client.api.scoresV3.getManyV3(...)`. No JS/TS v5 method reads Scores API v1.                                                                                                                                                                    |
+| [Scores](#scores-sdk-methods)                   | `client.api.scores.get_many(...)` / `.get_by_id(...)` → `client.api.scores_v3.get_many_v3(...)`; in v5, `client.api.scores.get_many(...)`. No Python v4 method reads Scores API v1.                                                                                           | `client.api.scores.getMany(...)` / `.getById(...)` → `client.api.scoresV3.getManyV3(...)`; in v6, `client.api.scores.getMany(...)`. No JS/TS v5 method reads Scores API v1.                                                                                                                           |
 | [Dataset reads](#dataset-read-sdk-methods)      | `client.api.dataset_run_items.list(...)`, `client.api.datasets.get_runs(...)` / `.get_run(...)`, and `client.get_dataset_runs(...)` / `.get_dataset_run(...)` → `client.api.experiments.list(...)` / `.list_items(...)`                                                       | `client.api.datasetRunItems.list(...)`, `client.api.datasets.getRuns(...)` / `.getRun(...)`, and `client.getDatasetRuns(...)` / `.getDatasetRun(...)` → `client.api.experiments.list(...)` / `.listItems(...)`                                                                                        |
 | [Dataset writes](#dataset-write-sdk-methods)    | Direct `client.api.dataset_run_items.create(...)` callers should use the experiment runner. Dataset-backed `client.run_experiment(...)`, `dataset.run_experiment(...)`, and `context.run_experiment(...)` currently originate this call inside the SDK; keep the SDK updated. | Direct `client.api.datasetRunItems.create(...)` and `datasetItem.link(...)` callers should use the experiment runner. Dataset-backed `client.experiment.run(...)`, `dataset.runExperiment(...)`, and `context.runExperiment(...)` currently originate this call inside the SDK; keep the SDK updated. |
 | [Dataset deletion](#dataset-delete-sdk-methods) | `client.api.datasets.delete_run(...)` and `client.delete_dataset_run(...)` → list experiment items with `client.api.experiments.list_items(...)`, then delete their traces with `client.api.trace.delete_multiple(...)`.                                                      | `client.api.datasets.deleteRun(...)` → list experiment items with `client.api.experiments.listItems(...)`, then delete their traces with `client.api.trace.deleteMultiple(...)`.                                                                                                                      |
@@ -63,7 +77,7 @@ These mappings cover the latest Python SDK v4 and JS/TS SDK v5 method surfaces. 
 
 **Deprecated:** `GET /observations`, `GET /observations/{observationId}`. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
 
-**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/public-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)).
+**Replacement:** [`GET /v2/observations`](/docs/api-and-data-platform/features/public-api#v2) ([reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)).
 
 ### SDK methods [#observations-sdk-methods]
 
@@ -224,7 +238,7 @@ curl -G \
 
 **Deprecated:** `GET /metrics` (v1) and `GET /metrics/daily`. Langfuse Cloud serves this endpoint until <V4CutoverDate />; migrate to v4 before this date.
 
-**Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api#v2) ([reference](https://api.reference.langfuse.com/#tag/metricsv2/GET/api/public/v2/metrics)).
+**Replacement:** [`GET /v2/metrics`](/docs/metrics/features/metrics-api#v2) ([reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics)).
 
 ### SDK methods [#metrics-sdk-methods]
 
@@ -290,7 +304,7 @@ The deprecated endpoint's filters map to v2 `filters` entries: `traceName` and `
 
 **Replacement:** [`GET /v3/scores`](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores). See the [Scores API v3 announcement](/changelog/2026-06-10-scores-v3-api) for background.
 
-This migration applies only to score reads. Score writes remain supported through `POST /scores` and the current SDK score helpers. The SDKs batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept those events after the cutover. This also covers evaluations created by the experiment runner and third-party integrations that use the current SDK score helpers. No client update or direct REST workaround is required for these score writes.
+This migration applies only to score reads. Score writes remain supported through `POST /scores` and the SDK score helpers. Python SDK v5 and JS/TS SDK v6 send score writes to `POST /scores`; older SDKs (Python v4, JS/TS v5) batch them as `score-create` events through `POST /ingestion`, and Langfuse v4 continues to accept those events after the cutover. This also covers evaluations created by the experiment runner and third-party integrations that use the current SDK score helpers. No client update or direct REST workaround is required for these score writes.
 
 ### SDK methods [#scores-sdk-methods]
 
@@ -303,7 +317,14 @@ This migration applies only to score reads. Score writes remain supported throug
 
 Scores v3 requires Python SDK `4.8.1+` or JS/TS SDK `5.5.0+`. It always returns a list response, including when filtering by ID.
 
-Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `GET /scores/{id}` endpoints. Calls to those routes come from direct REST usage or an older SDK. Do not migrate current score-creation helpers merely because they send supported `score-create` events through `/ingestion`.
+In Python SDK v5 and JS/TS SDK v6, Scores API v3 reads move into the `scores` namespace next to score creation and deletion. `client.api.scores.get_many(...)` / `client.api.scores.getMany(...)` read `GET /v3/scores` and take the v3 parameters. `client.api.scores_v3` / `client.api.scoresV3` are removed:
+
+| SDK       | Removed                                 | Use instead                       |
+| --------- | --------------------------------------- | --------------------------------- |
+| Python v5 | `client.api.scores_v3.get_many_v3(...)` | `client.api.scores.get_many(...)` |
+| JS/TS v6  | `client.api.scoresV3.getManyV3(...)`    | `client.api.scores.getMany(...)`  |
+
+Python v4 and JS/TS v5 do not expose read wrappers for the v1 `GET /scores` or `GET /scores/{id}` endpoints. Calls to those routes come from direct REST usage or an older SDK. Do not migrate Python v4 or JS/TS v5 score-creation helpers merely because they send supported `score-create` events through `/ingestion`.
 
 ### Parameter mapping
 
@@ -392,7 +413,7 @@ If you already know both the dataset ID and experiment name, `list_items` / `lis
 | JS/TS v5  | `datasetItem.link(...)`                                                                                      | Use `client.experiment.run(...)` or `dataset.runExperiment(...)`                                                                                  |
 | JS/TS v5  | Dataset-backed `client.experiment.run(...)`, `dataset.runExperiment(...)`, or `context.runExperiment(...)`   | No user-side code change currently removes this call; the SDK creates the legacy link internally. Keep using the runner and keep the SDK updated. |
 
-The experiment runner is the supported abstraction for creating experiment data. Current runners still call `POST /dataset-run-items` internally for Langfuse dataset items; moving direct callers to the runner makes the application inherit the SDK-side migration when it becomes available.
+The experiment runner is the supported abstraction for creating experiment data. Runners in Python SDK v4 and JS/TS SDK v5 still call `POST /dataset-run-items` internally for Langfuse dataset items. Runners in Python SDK v5 and JS/TS SDK v6 record experiments through OpenTelemetry attributes instead, so moving direct callers to the runner lets the application inherit this migration by upgrading the SDK.
 
 #### Delete methods [#dataset-delete-sdk-methods]
 
@@ -405,7 +426,7 @@ There is no experiment-delete API. Follow cursor pagination through every experi
 
 ### Read experiment data
 
-Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) to list experiments or find one by its dataset ID and name. Use `GET /experiment-items?experimentId=<id>` to retrieve the items belonging to an experiment.
+Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments/GET/api/public/experiments) to list experiments or find one by its dataset ID and name. Use `GET /experiment-items?experimentId=<id>` to retrieve the items belonging to an experiment.
 
 ### Parameter mapping
 
@@ -427,7 +448,7 @@ Use [`GET /experiments`](https://api.reference.langfuse.com/#tag/experiments) to
 
 For Python and JS/TS, use the [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk). It applies the required experiment semantics automatically and is the recommended replacement for `POST /dataset-run-items`.
 
-The experiment runner's `Evaluation` results use the supported SDK score-write path. Although the SDK batches them as `score-create` events through `POST /ingestion`, those events remain accepted after the v4 cutover; the legacy ingestion deprecation applies only to trace and observation events.
+The experiment runner's `Evaluation` results use the supported SDK score-write path. Python SDK v5 and JS/TS SDK v6 send them to `POST /scores`. Older SDKs batch them as `score-create` events through `POST /ingestion`, and those events remain accepted after the v4 cutover; the legacy ingestion deprecation applies only to trace and observation events.
 
 For other languages, send experiment traces to [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) and apply the [required experiment attributes](/integrations/native/opentelemetry/experiments).
 
@@ -461,7 +482,7 @@ curl \
 
 ## Ingestion [#ingestion]
 
-**Deprecated for trace and observation ingestion:** trace and observation event types sent to `POST /ingestion`, and the older synchronous endpoints `POST /traces`, `POST /spans`, `POST /generations`, `POST /events`. Langfuse Cloud serves these trace-ingestion paths until <V4CutoverDate />; migrate to v4 before this date.
+**Deprecated for trace and observation ingestion:** trace and observation event types sent to `POST /ingestion`, and the older synchronous endpoints `POST /traces`, `POST /spans`, `PATCH /spans`, `POST /generations`, `PATCH /generations`, `POST /events`. Langfuse Cloud serves these trace-ingestion paths until <V4CutoverDate />; migrate to v4 before this date.
 
 **Replacement:** the OpenTelemetry endpoint [`POST /otel/v1/traces`](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) (OTLP/HTTP), or an upgraded SDK ([Python v4.7.0+](/docs/observability/sdk/upgrade-path/python-v3-to-v4), [JS/TS v5.4.0+](/docs/observability/sdk/upgrade-path/js-v4-to-v5)). Set the `x-langfuse-ingestion-version: 4` header on your OTEL span exporter and propagate trace attributes to all observations; see the [OpenTelemetry integration guide](/integrations/native/opentelemetry).
 
@@ -472,27 +493,29 @@ curl \
 | Python v4 | `client.api.ingestion.batch(...)` with trace or observation events | Python SDK `4.7.0+` tracing and instrumentation, which export through OpenTelemetry |
 | JS/TS v5  | `client.api.ingestion.batch(...)` with trace or observation events | JS/TS SDK `5.4.0+` tracing and instrumentation, which export through OpenTelemetry  |
 
-Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Current Python and JS/TS SDKs intentionally batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />. No SDK release that reroutes score writes to `POST /scores` is required for compatibility.
+Python SDK v5 and JS/TS SDK v6 remove `api.ingestion`. Use the SDK's OpenTelemetry tracing for traces and observations, and `api.scores.create` for scores.
+
+Score writes are unaffected. Direct REST clients can continue using `POST /scores`. Python SDK v5 and JS/TS SDK v6 send score writes to `POST /scores`. Older SDKs (Python v4, JS/TS v5) batch score writes as `score-create` events through `POST /ingestion`; Langfuse v4 continues to accept that event type after <V4CutoverDate />, so upgrading is not required for score compatibility.
 
 ## Deprecated endpoints [#endpoints]
 
 These endpoints are deprecated and receive security patches only, no other fixes or new functionality. Langfuse Cloud serves these endpoints until <V4CutoverDate />; migrate to v4 before this date.
 All paths are relative to `/api/public`.
 
-| Deprecated endpoint(s)                                         | Parameters                                                                                                | Replacement                                                                                                                                                                                                                              |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET /traces`, `/traces/{id}`                                  | [API reference](https://api.reference.langfuse.com/#tag/trace/GET/api/public/traces)                      | [Observations API v2, filtered by `traceId`](#traces)                                                                                                                                                                                    |
-| `GET /observations`, `/observations/{id}`                      | [API reference](https://api.reference.langfuse.com/#tag/legacyobservationsv1/GET/api/public/observations) | [Observations API v2](#observations)                                                                                                                                                                                                     |
-| `GET /sessions`, `/sessions/{id}`                              | [API reference](https://api.reference.langfuse.com/#tag/sessions/GET/api/public/sessions)                 | [Observations API v2, filtered by `sessionId`](#sessions)                                                                                                                                                                                |
-| `GET /scores`, `/v2/scores` (+ `/{id}`)                        | [API reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v2/scores)                  | [Scores API v3](#scores)                                                                                                                                                                                                                 |
-| `GET /metrics`                                                 | [Documented below](#metrics-v1)                                                                           | [Metrics API v2](#metrics)                                                                                                                                                                                                               |
-| `GET /metrics/daily`                                           | [Documented below](#daily-metrics)                                                                        | [Metrics API v2](#daily-metrics-migration)                                                                                                                                                                                               |
-| `GET /datasets/{name}/runs`, `/datasets/{name}/runs/{runName}` | [API reference](https://api.reference.langfuse.com/#tag/datasets)                                         | [`GET /experiments`, then `GET /experiment-items`](#dataset-runs)                                                                                                                                                                        |
-| `GET /dataset-run-items`                                       | [API reference](https://api.reference.langfuse.com/#tag/dataset-run-items)                                | [`GET /experiment-items`](#dataset-runs)                                                                                                                                                                                                 |
-| `DELETE /datasets/{name}/runs/{runName}`                       | [API reference](https://api.reference.langfuse.com/#tag/datasets)                                         | [No direct replacement; optionally list the experiment items and delete their traces](#dataset-runs)                                                                                                                                     |
-| `POST /dataset-run-items`                                      | [API reference](https://api.reference.langfuse.com/#tag/dataset-run-items)                                | [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) (recommended for Python and JS/TS), or [`POST /otel/v1/traces` with experiment attributes](/integrations/native/opentelemetry/experiments) for other languages |
-| Trace and observation events sent to `POST /ingestion`         | [API reference](https://api.reference.langfuse.com/#tag/ingestion/POST/api/public/ingestion)              | [OpenTelemetry ingestion](#ingestion); `score-create` and `sdk-log` events remain supported                                                                                                                                              |
-| `POST /traces`, `/spans`, `/generations`, `/events`            | Not in the API reference                                                                                  | [OpenTelemetry ingestion](#ingestion)                                                                                                                                                                                                    |
+| Deprecated endpoint(s)                                                              | Replacement                                                                                                                                                                                                                              | Replacement reference                                                                             |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `GET /traces`, `/traces/{id}`                                                       | [Observations API v2, filtered by `traceId`](#traces)                                                                                                                                                                                    | [Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)  |
+| `GET /observations`, `/observations/{id}`                                           | [Observations API v2](#observations)                                                                                                                                                                                                     | [Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)  |
+| `GET /sessions`, `/sessions/{id}`                                                   | [Observations API v2, filtered by `sessionId`](#sessions)                                                                                                                                                                                | [Reference](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations)  |
+| `GET /scores`, `/v2/scores` (+ `/{id}`)                                             | [Scores API v3](#scores)                                                                                                                                                                                                                 | [Reference](https://api.reference.langfuse.com/#tag/scores/GET/api/public/v3/scores)              |
+| `GET /metrics`                                                                      | [Metrics API v2](#metrics)                                                                                                                                                                                                               | [Reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics)            |
+| `GET /metrics/daily`                                                                | [Metrics API v2](#daily-metrics-migration)                                                                                                                                                                                               | [Reference](https://api.reference.langfuse.com/#tag/metrics/GET/api/public/v2/metrics)            |
+| `GET /datasets/{name}/runs`, `/datasets/{name}/runs/{runName}`                      | [`GET /experiments`, then `GET /experiment-items`](#dataset-runs)                                                                                                                                                                        | [Reference](https://api.reference.langfuse.com/#tag/experiments/GET/api/public/experiments)       |
+| `GET /dataset-run-items`                                                            | [`GET /experiment-items`](#dataset-runs)                                                                                                                                                                                                 | [Reference](https://api.reference.langfuse.com/#tag/experiments/GET/api/public/experiment-items)  |
+| `DELETE /datasets/{name}/runs/{runName}`                                            | [No direct replacement; optionally list the experiment items and delete their traces](#dataset-runs)                                                                                                                                     | No replacement                                                                                    |
+| `POST /dataset-run-items`                                                           | [Experiment runner SDK](/docs/evaluation/experiments/experiments-via-sdk) (recommended for Python and JS/TS), or [`POST /otel/v1/traces` with experiment attributes](/integrations/native/opentelemetry/experiments) for other languages | [Reference](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) |
+| Trace and observation events sent to `POST /ingestion`                              | [OpenTelemetry ingestion](#ingestion); only `score-create` events remain supported                                                                                                                                                       | [Reference](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) |
+| `POST /traces`, `/spans`, `/generations`, `/events`; `PATCH /spans`, `/generations` | [OpenTelemetry ingestion](#ingestion)                                                                                                                                                                                                    | [Reference](https://api.reference.langfuse.com/#tag/opentelemetry/POST/api/public/otel/v1/traces) |
 
 ## Metrics API v1 [#metrics-v1]
 
@@ -622,6 +645,7 @@ query = """
 }
 """
 
+# Python SDK v4 only; removed in v5
 langfuse.api.legacy.metrics_v1.metrics(query = query)
 ```
 

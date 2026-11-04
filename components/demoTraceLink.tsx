@@ -51,7 +51,7 @@ export const DemoTraceLink = ({
         aria-hidden="true"
         className="size-4 shrink-0"
       />
-      Open trace ↗
+      View your trace ↗
     </a>
   );
 };

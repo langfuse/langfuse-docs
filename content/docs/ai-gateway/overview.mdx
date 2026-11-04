@@ -1,0 +1,52 @@
+---
+title: Overview
+seoTitle: "Langfuse AI Gateway (beta)"
+description: Send OpenAI and Anthropic API calls through Langfuse to trace every model call, keep provider keys in one place, and track cost, with no SDK or code changes.
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# AI Gateway
+
+<Callout type="info">
+  **Beta.** The **Langfuse AI Gateway** is in public beta and can still change.
+</Callout>
+
+AI is being used in many different areas of a company, with engineers using coding agents, often dozens of AI apps running in production, internally or externally. Companies need to keep visibility and control over rising AI usage, answering questions like:
+
+- Who in our organization uses which models?
+- What do we use it for?
+- What does it cost?
+- Is it secure?
+- How can we optimize it?
+
+The **Langfuse AI Gateway** is a central chokepoint to govern all AI traffic, easy to host, adopt, and enforce. It can log all requests natively in Langfuse to analyze and make decisions based on AI usage.
+
+If you have feedback, questions, or feature requests, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/19686).
+
+<Frame fullWidth>
+  ![Gateway analytics page showing total cost, requests, tokens, cost over time, and cost and requests per user](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## What the Langfuse AI Gateway can do
+
+Most gateways tell you what AI costs. Because every call through the **Langfuse AI Gateway** becomes a full Langfuse trace, it's more powerful than that.
+
+- **See your spend.** Cost and usage for every call land in one [AI spend dashboard](/docs/ai-gateway/features/analytics), by model and provider.
+- **Know who spends it.** Every [key](/docs/ai-gateway/features/api-keys) belongs to a person or service and can carry a team or cost center, so AI spend breaks down the way your company is organized.
+- **Understand what it's spent on.** Each call can be logged as a [complete trace](/docs/ai-gateway/features/tracing). You can see what an application or a team actually did with a model, and use the same search, evaluations, and annotation you already use in Langfuse. Or simply ask [Halo](/docs/api-and-data-platform/features/halo): "What does this team use Claude Code for?"
+- **Control model usage.** [Approve models](/docs/ai-gateway/features/models) centrally, so expensive or unvetted ones don't creep in unnoticed.
+- **Incrementally adopt deeper tracing.** Enforce logging every model call by mandating the gateway, and allow teams to incrementally add more detail (for example, tool call executions of complex agents) to AI traces in Langfuse via [OpenTelemetry](/integrations/native/opentelemetry) or one of our 50+ [integrations](/integrations). OpenTelemetry distributed tracing merges these traces within Langfuse.
+- **Use Langfuse as memory for agents.** All data in Langfuse is available via [MCP](/docs/api-and-data-platform/features/mcp-server) and the [CLI](/docs/api-and-data-platform/features/cli), so you can give agents access to search all AI requests they made in the past, which is the foundation for self-improvement loops.
+- **Export metrics and raw logs to a [data lake](/docs/api-and-data-platform/features/export-to-blob-storage).** This enables any custom downstream process in finance and data teams.
+
+## Getting Started [#getting-started]
+
+Depending on your role, you're likely looking to:
+
+- [set up the gateway for your organization](/docs/ai-gateway/get-started/admin-setup) (admin)
+- [start using your organization's gateway to send your LLM calls](/docs/ai-gateway/get-started/first-request) (user)
+
+For more information on how the gateway, keys, and model routing fit together, read [Core Concepts](/docs/ai-gateway/concepts).
+
+<SignupCTA className="my-6" />

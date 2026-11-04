@@ -20,17 +20,14 @@ import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
 import { FAQAccordion } from "@/components/shared/FAQAccordion";
 import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import { BookOpen, Play, Radar } from "lucide-react";
+import { BookOpen, Play, Radar, ShieldCheck } from "lucide-react";
 
 <h1 className="sr-only">Langfuse for Financial Services</h1>
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
   <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[2fr_1fr]">
     <div className="min-w-0 border-b border-line-structure px-6 pb-7 pt-10 sm:px-10 sm:pb-8 sm:pt-12 lg:border-b-0 lg:border-r">
-      <p className="font-mono text-[11px] uppercase tracking-[0.09em] text-text-tertiary">
-        {"Industries · Financial services"}
-      </p>
-      <h2 className="mt-3 text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+      <h2 className="text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
         <span className="block">{"Langfuse for"}</span>
         <TextHighlight highlightClassName="bg-surface-cta-primary" className="mt-1">
           {"Financial Services"}
@@ -41,10 +38,9 @@ import { BookOpen, Play, Radar } from "lucide-react";
           "Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure."
         }
       </p>
-      <div className="mt-6">
-        <Button href="/cloud" className="w-auto" wrapperClassName="w-fit">
-          Get started
-        </Button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+        <Button href="/docs" variant="secondary" size="default" shortcutKey="d" className="w-auto" wrapperClassName="w-fit">Documentation</Button>
       </div>
       <HeroReasons />
       <div className="mt-5">
@@ -116,7 +112,7 @@ import { BookOpen, Play, Radar } from "lucide-react";
   </section>
 
   <section data-use-case-section="use_cases" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
-    <p className="font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+    <p className="text-[12px] leading-[150%] text-text-tertiary">
       {"Use cases"}
     </p>
     <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
@@ -131,16 +127,32 @@ import { BookOpen, Play, Radar } from "lucide-react";
     </h2>
     <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
       {
-        "Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production."
+        "Start with the steps from prototype to production, then see how teams like Trade Republic run Langfuse in production."
       }
     </p>
     <div className="mx-auto mt-8 max-w-4xl">
       <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
         <Card
+          title="Getting AI agents into production"
+          href="/blog/2026-11-04-regulated-industries-ai-agents-production"
+          icon={<ShieldCheck />}
+          description="Eight steps regulated teams follow, from tracing and error analysis to production monitors and human review."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
           title="Building deployment gates for LLMs"
           href="/blog/2026-07-15-llm-certification-financial-services"
           icon={<Radar />}
           description="Evaluate model and prompt changes against datasets and policy evals before release."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
+        <Card
+          title="Evals for High-Stakes AI Agents"
+          href="/guides/videos/evals-for-high-stakes-ai-agents"
+          icon={<Play />}
+          description="Trace a banking assistant with PII masking, offline evals, and a CI gate on a candidate prompt label."
           contentClassName="items-start p-4 sm:p-5"
           contentWrapperClassName="gap-2"
         />
@@ -178,12 +190,11 @@ import { BookOpen, Play, Radar } from "lucide-react";
   </section>
 
   <section data-use-case-section="closing_cta" className="border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
-    <div className="mx-auto max-w-5xl">
-      <CustomerStoryCTA
-        title="Working on AI in banking, insurance or capital markets?"
-        description="Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production."
-        contactLabel="Talk to an expert"
-      />
-    </div>
+    <CustomerStoryCTA
+      className="mt-0"
+      title="Working on AI in banking, insurance or capital markets?"
+      description="Talk through deployment options, compliance needs, and how teams like Trade Republic use Langfuse in production."
+      contactLabel="Talk to an expert"
+    />
   </section>
 </div>

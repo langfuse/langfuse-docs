@@ -31,7 +31,7 @@ const LogoContextMenu: React.FC<{
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer">
             <a
-              href="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.png"
+              href="/brand-assets/wordmark/light/langfuse-by-clickhouse.png"
               download
             >
               <Download size={14} className="shrink-0" />
@@ -40,7 +40,7 @@ const LogoContextMenu: React.FC<{
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="cursor-pointer">
             <a
-              href="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
+              href="/brand-assets/wordmark/light/langfuse-by-clickhouse.svg"
               download
             >
               <Download size={14} className="shrink-0" />

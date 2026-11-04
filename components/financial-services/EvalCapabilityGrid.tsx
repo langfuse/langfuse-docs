@@ -1,10 +1,29 @@
 import { Plus } from "lucide-react";
 import { financialServicesEvalColumns } from "./content";
 
-export function EvalCapabilityGrid() {
+type EvalLink = { href: string; label: string };
+
+type EvalColumn = {
+  title: string;
+  summary: string;
+  items: readonly {
+    title: string;
+    body: string;
+    href: string;
+    links?: readonly EvalLink[];
+  }[];
+};
+
+export function EvalCapabilityGrid({
+  columns = financialServicesEvalColumns,
+}: {
+  columns?: readonly EvalColumn[];
+} = {}) {
+  const columnClass = columns.length > 2 ? "lg:grid-cols-3" : "lg:grid-cols-2";
+
   return (
-    <div className="mt-10 grid gap-10 lg:grid-cols-3 lg:gap-8">
-      {financialServicesEvalColumns.map((column) => (
+    <div className={`mt-10 grid gap-10 lg:gap-8 ${columnClass}`}>
+      {columns.map((column) => (
         <div key={column.title} className="min-w-0">
           <h3 className="text-[22px] leading-[1.15] text-text-primary sm:text-[24px]">
             {column.title}
@@ -30,12 +49,24 @@ export function EvalCapabilityGrid() {
                   <p className="m-0 text-[13px] leading-[1.45] text-text-secondary">
                     {item.body}
                   </p>
-                  <a
-                    href={item.href}
-                    className="inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
-                  >
-                    {"Docs →"}
-                  </a>
+                  {item.links && item.links.length > 0 ? (
+                    item.links.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        className="mr-4 inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+                      >
+                        {link.label}
+                      </a>
+                    ))
+                  ) : (
+                    <a
+                      href={item.href}
+                      className="inline-block text-[13px] text-text-primary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+                    >
+                      {"Docs →"}
+                    </a>
+                  )}
                 </div>
               </details>
             ))}

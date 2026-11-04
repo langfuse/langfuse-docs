@@ -1,0 +1,11 @@
+---
+title: Can I use the gateway together with the Langfuse SDK?
+description: Combine AI Gateway generations with application traces by propagating W3C trace context from the Langfuse SDK.
+tags: [ai-gateway]
+---
+
+# Can I use the gateway together with the Langfuse SDK?
+
+Yes. Send the W3C `traceparent` header of your current span with the request, and the gateway records its generation inside your trace. If your app uses OpenTelemetry, which the Langfuse SDKs are built on, an HTTP client instrumentation can inject the header for you. See [trace context and baggage](/docs/ai-gateway/features/tracing#trace-context).
+
+Don't also trace the same call with a provider SDK integration, such as the Langfuse OpenAI integration, or the call is recorded twice.

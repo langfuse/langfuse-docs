@@ -7,6 +7,8 @@ import {
 } from "fumadocs-ui/components/sidebar/base";
 import type * as PageTree from "fumadocs-core/page-tree";
 
+import { SidebarLabel } from "./SidebarLabel";
+
 /**
  * Custom sidebar Item renderer used with `sidebar.components` in DocsLayout.
  *
@@ -46,7 +48,7 @@ export function SidebarItem({
         paddingInlineStart: `calc(${2 * depth} * var(--spacing) + 6px)`,
       }}
     >
-      {item.name}
+      <SidebarLabel name={item.name} />
     </SidebarItemBase>
   );
 }

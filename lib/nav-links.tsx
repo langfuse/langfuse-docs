@@ -11,10 +11,12 @@ import {
   LayoutGrid,
   Map,
   MessageSquare,
+  Network,
   Newspaper,
   Presentation,
   ScrollText,
   Workflow,
+  HeartPulse,
   Landmark,
   type LucideIcon,
 } from "lucide-react";
@@ -28,17 +30,18 @@ export type NavPanelLink = {
 export const productLinks: NavPanelLink[] = [
   { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
-    name: "LLM Observability",
+    name: "AI Observability",
     href: "/docs/observability/overview",
     icon: Activity,
   },
   {
-    name: "Prompt Management",
-    href: "/docs/prompt-management/overview",
+    name: "Prompt & Skill Management",
+    href: "/docs/prompt-and-skill-management/overview",
     icon: MessageSquare,
   },
   { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
   { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
+  { name: "AI Gateway", href: "/docs/ai-gateway/overview", icon: Network },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [
@@ -60,9 +63,14 @@ export const useCaseLinks: NavPanelLink[] = [
 
 export const industryLinks: NavPanelLink[] = [
   {
-    name: "Financial Services Industry",
+    name: "Financial Services",
     href: "/financial-services",
     icon: Landmark,
+  },
+  {
+    name: "Healthcare and life sciences",
+    href: "/healthcare",
+    icon: HeartPulse,
   },
 ];
 

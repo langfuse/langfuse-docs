@@ -41,7 +41,7 @@ This notebook needs Python SDK 4.8.1 or newer — earlier 4.x releases do not in
 
 
 ```python
-%pip install --quiet "langfuse>=4.8.1" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
+%pip install --quiet "langfuse>=4.8.1,<5" "opentelemetry-sdk>=1.25.0" "opentelemetry-exporter-otlp-proto-http>=1.25.0"
 ```
 
 
@@ -697,9 +697,7 @@ while True:
         to_start_time=TO_TS,
         is_root_observation=True,
     ))
-    if not listing.data:
-        break
-
+    cursor = getattr(listing.meta, "cursor", None)
     for t in listing.data:
         try:
             obs_count = migrate_one_trace(t)
@@ -717,7 +715,6 @@ while True:
             print(f"  failed trace {source_trace_id}: {exc}")
             failures += 1
 
-    cursor = getattr(listing.meta, "cursor", None)
     print(
         f"  batch complete — cumulative: traces={total}, observations={total_obs}, failed={failures}"
     )

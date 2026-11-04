@@ -17,7 +17,27 @@ This is a deep dive into ClickHouse configuration. Follow one of the [deployment
 It is optimized for high write throughput and fast analytical queries.
 This guide covers how to configure ClickHouse within Langfuse and what to keep in mind when (optionally) bringing your own ClickHouse.
 
-Langfuse v3 supports ClickHouse versions >= 24.3. Langfuse v4 requires ClickHouse >= 25.12 (26.4 recommended) for lightweight updates, the JSON type, and full-text search — see the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1).
+## Supported versions [#supported-versions]
+
+Each Langfuse major release sets a minimum ClickHouse version and stays compatible with it for the whole major release.
+Minor and patch releases never raise the minimum, so you can upgrade Langfuse within a major release without upgrading ClickHouse.
+
+| Langfuse major release | Minimum ClickHouse version |
+| ---------------------- | -------------------------- |
+| v4                     | 25.12                      |
+| v3                     | 24.3                       |
+
+Langfuse v4 needs ClickHouse 25.12 for lightweight updates, the JSON type, and full-text search. The [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-1) goes into more detail on this.
+
+Compatibility means that Langfuse works correctly on the minimum version and does not rely on ClickHouse features or settings introduced later.
+Newer ClickHouse versions often come with better performance and we may limit some features to specific minimum versions.
+
+<Callout type="warning">
+
+**The minimum version is a compatibility guarantee, not a security recommendation.** ClickHouse ships security patches only for its most recent releases, so the minimum version of a Langfuse major release can stop receiving patches while that major release is still current.
+You are responsible for the ClickHouse version you run. We strongly recommend a version that the [ClickHouse security policy](https://github.com/ClickHouse/ClickHouse/security/policy) lists as supported, such as the latest LTS release.
+
+</Callout>
 
 ## Official and Community Support [#support]
 
@@ -146,13 +166,29 @@ GRANT ON CLUSTER default SELECT ON system.query_log* TO 'user';
 
 ### Historic backfill scratch table [#user-permissions-backfill]
 
-The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data:
+The [v4 historic backfill](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#historic-backfill) freezes merges on its intermediate table while it copies data.
+The grants it needs depend on the table engine:
+
+| Deployment                                       | Table engine        | Grants used                                              |
+| ------------------------------------------------ | ------------------- | -------------------------------------------------------- |
+| Self-managed, `CLICKHOUSE_CLUSTER_ENABLED=false` | MergeTree           | `SYSTEM MERGES`                                          |
+| Self-managed, `CLICKHOUSE_CLUSTER_ENABLED=true`  | ReplicatedMergeTree | `SYSTEM MERGES`, `ALTER SETTINGS`, `SYSTEM SYNC REPLICA` |
+| [ClickHouse Cloud or BYOC](#cloudbyoc)           | SharedMergeTree     | `ALTER SETTINGS`                                         |
+
+On self-managed ClickHouse, grant all three:
 
 ```sql
 GRANT SYSTEM SYNC REPLICA, SYSTEM MERGES, ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
 ```
 
-Which of the three is used depends on the table engine — `SYSTEM MERGES` on self-managed MergeTree, `ALTER SETTINGS` on replicated and SharedMergeTree engines, `SYSTEM SYNC REPLICA` on replicated engines — so granting all three keeps the backfill working on any deployment.
+On ClickHouse Cloud and BYOC, grant only `ALTER SETTINGS`:
+
+```sql
+GRANT ALTER SETTINGS ON default.observations_pid_tid_sorting TO 'user';
+```
+
+ClickHouse Cloud does not support `SYSTEM MERGES`. If you include it, the grant fails with `Not enough privileges` and asks for `SYSTEM MERGES ... WITH GRANT OPTION`. Re-run the statement without this grant.
+
 The grants can be created before the table exists, i.e. before the backfill starts.
 
 ### Lightweight updates [#user-permissions-lightweight-updates]

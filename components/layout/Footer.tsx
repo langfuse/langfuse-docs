@@ -7,6 +7,12 @@ import IconX from "@/components/icons/x";
 import IconYoutube from "@/components/icons/youtube";
 import IconLinkedin from "@/components/icons/linkedin";
 import { cn } from "@/lib/utils";
+import {
+  industryLinks,
+  productLinks,
+  useCaseLinks,
+  type NavPanelLink,
+} from "@/lib/nav-links";
 
 const socialLinks = [
   {
@@ -28,76 +34,89 @@ const socialLinks = [
   },
 ];
 
-const menuItems: {
-  heading: string;
-  items: { name: string; href: string }[];
-}[] = [
-  {
-    heading: "Product",
-    items: [
-      { name: "Observability", href: "/docs/observability/overview" },
-      { name: "Prompt Management", href: "/docs/prompt-management/overview" },
-      { name: "Evaluations", href: "/docs/evaluation/overview" },
-      { name: "Metrics", href: "/docs/metrics/overview" },
-      { name: "Langfuse for Agents", href: "/agents" },
-      { name: "Chat agents", href: "/chat-agents" },
-      { name: "Coding agents", href: "/coding-agents" },
-      { name: "Workflow automation", href: "/workflow-automation" },
-      { name: "Financial Services Industry", href: "/financial-services" },
-      {
-        name: "Playground",
-        href: "/docs/prompt-management/features/playground",
-      },
-      { name: "Pricing", href: "/pricing" },
-      { name: "Enterprise", href: "/enterprise" },
-    ],
-  },
-  {
-    heading: "Developers",
-    items: [
-      { name: "Documentation", href: "/docs" },
-      { name: "Self-Hosting", href: "/self-hosting" },
-      { name: "SDKs", href: "/docs/observability/sdk/overview" },
-      { name: "Integrations", href: "/integrations" },
-      { name: "API Reference", href: "/docs/api-and-data-platform/overview" },
-      { name: "Status", href: "https://status.langfuse.com" },
-      { name: "Talk to Us", href: "/talk-to-us" },
-    ],
-  },
-  {
-    heading: "Resources",
-    items: [
-      { name: "Blog", href: "/blog" },
-      { name: "Changelog", href: "/changelog" },
-      { name: "Events", href: "/events" },
-      { name: "Roadmap", href: "/docs/roadmap" },
-      { name: "Interactive Demo", href: "/docs/demo" },
-      { name: "Customers", href: "/users" },
-      { name: "Compare", href: "/compare" },
-      { name: "AI Engineering Library", href: "/library" },
-      { name: "Workshop", href: "/workshop" },
-      { name: "Guides & Cookbooks", href: "/guides" },
-    ],
-  },
-  {
-    heading: "Company",
-    items: [
-      { name: "About Us", href: "/about" },
-      { name: "Partners", href: "/partners" },
-      { name: "Careers", href: "/careers" },
-      { name: "Handbook", href: "/handbook" },
-      { name: "Press", href: "/press" },
-      { name: "Security", href: "/security" },
-      { name: "Support", href: "/support" },
-      { name: "Open source", href: "/handbook/chapters/open-source" },
-    ],
-  },
+type FooterLink = { name: string; href: string };
+type FooterSection = { heading: string; items: FooterLink[] };
+
+const toFooterLinks = (links: NavPanelLink[]): FooterLink[] =>
+  links.map(({ name, href }) => ({ name, href }));
+
+// Product and Solutions derive from the main navigation so new entries appear in both.
+const menuColumns: FooterSection[][] = [
+  [
+    {
+      heading: "Product",
+      items: [
+        // "Documentation" is already listed under Developers.
+        ...toFooterLinks(productLinks.filter((link) => link.href !== "/docs")),
+        { name: "Pricing", href: "/pricing" },
+        { name: "Enterprise", href: "/enterprise" },
+      ],
+    },
+    {
+      heading: "Solutions",
+      items: [
+        { name: "Langfuse for Agents", href: "/agents" },
+        ...toFooterLinks(useCaseLinks),
+        ...toFooterLinks(industryLinks),
+      ],
+    },
+  ],
+  [
+    {
+      heading: "Developers",
+      items: [
+        { name: "Documentation", href: "/docs" },
+        { name: "Self-Hosting", href: "/self-hosting" },
+        { name: "SDKs", href: "/docs/observability/sdk/overview" },
+        { name: "Integrations", href: "/integrations" },
+        { name: "API Reference", href: "/docs/api-and-data-platform/overview" },
+        { name: "Status", href: "https://status.langfuse.com" },
+        { name: "Talk to Us", href: "/talk-to-us" },
+      ],
+    },
+  ],
+  [
+    {
+      heading: "Resources",
+      items: [
+        { name: "Academy", href: "/academy" },
+        { name: "Blog", href: "/blog" },
+        { name: "Changelog", href: "/changelog" },
+        { name: "Events", href: "/events" },
+        { name: "Roadmap", href: "/docs/roadmap" },
+        { name: "Example Project", href: "/docs/demo" },
+        { name: "Customers", href: "/users" },
+        { name: "Compare", href: "/compare" },
+        { name: "AI Engineering Library", href: "/academy/library" },
+        { name: "Workshop", href: "/workshop" },
+        { name: "Walkthroughs", href: "/guides" },
+      ],
+    },
+  ],
+  [
+    {
+      heading: "Company",
+      items: [
+        { name: "About Us", href: "/about" },
+        { name: "Partners", href: "/partners" },
+        { name: "Careers", href: "/careers" },
+        { name: "Handbook", href: "/handbook" },
+        { name: "Press", href: "/press" },
+        { name: "Security", href: "/security" },
+        { name: "Support", href: "/support" },
+        { name: "Open source", href: "/handbook/chapters/open-source" },
+      ],
+    },
+  ],
 ];
 
 const bottomLinks = [
   { name: "Terms", href: "/terms" },
   { name: "Privacy", href: "/privacy" },
-  { name: "Imprint", href: "/imprint" },
+  {
+    name: "Imprint",
+    href: "https://clickhouse.com/legal/agreements/imprint-Impressum",
+  },
   { name: "Cookie Policy", href: "/cookie-policy" },
 ];
 
@@ -150,22 +169,26 @@ export function Footer({ className }: { className?: string }) {
       <CornerBox className="flex flex-col bg-transparent">
         {/* Link columns */}
         <div className="grid grid-cols-2 gap-8 justify-between items-stretch p-4 md:flex md:flex-row">
-          {menuItems.map((col) => (
-            <div key={col.heading} className="flex flex-col gap-4">
-              <Text size="s" className={footerMutedTextClassName}>
-                {col.heading}
-              </Text>
-              <ul className="flex flex-col gap-3">
-                {col.items.map((item) => (
-                  <li key={item.name}>
-                    <Link href={item.href} className={linkClassName}>
-                      <Text size="s" className={footerLinkTextClassName}>
-                        {item.name}
-                      </Text>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          {menuColumns.map((sections) => (
+            <div key={sections[0].heading} className="flex flex-col gap-8">
+              {sections.map((section) => (
+                <div key={section.heading} className="flex flex-col gap-4">
+                  <Text size="s" className={footerMutedTextClassName}>
+                    {section.heading}
+                  </Text>
+                  <ul className="flex flex-col gap-3">
+                    {section.items.map((item) => (
+                      <li key={item.href}>
+                        <Link href={item.href} className={linkClassName}>
+                          <Text size="s" className={footerLinkTextClassName}>
+                            {item.name}
+                          </Text>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           ))}
         </div>
@@ -185,14 +208,9 @@ export function Footer({ className }: { className?: string }) {
         </div>
       </CornerBox>
       <CornerBox className="flex flex-col gap-y-4 sm:flex-row justify-between sm:items-center px-4 py-2.5 -mt-px bg-transparent">
-        <div className="flex flex-col md:flex-row">
-          <Text size="s" className={footerMutedTextClassName}>
-            &copy; 2022&ndash;{new Date().getFullYear()} Langfuse GmbH
-          </Text>{" "}
-          <Text size="s" className={footerMutedTextClassName}>
-            / Finto Technologies Inc.
-          </Text>
-        </div>
+        <Text size="s" className={footerMutedTextClassName}>
+          &copy; 2022&ndash;{new Date().getFullYear()} ClickHouse, Inc.
+        </Text>
         <Text size="s" className={footerMutedTextClassName}>
           Design by{" "}
           <Link

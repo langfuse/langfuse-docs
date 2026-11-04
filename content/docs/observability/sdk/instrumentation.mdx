@@ -594,19 +594,17 @@ await startActiveObservation("api-request", async () => {
 
 ## Update trace [#trace-inputoutput-behavior]
 
-By default, trace input/output mirror whatever you set on the **root observation**, the first observation in your trace. You can customize the trace level information if you need to for LLM-as-a-Judge, AB-tests, or UI clarity.
+Trace input/output mirror whatever you set on the **root observation**, the first observation in your trace. To change the trace input or output, update the root observation.
 
 <Callout type="info">
-[LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) workflows in Langfuse might rely on trace-level inputs/outputs. Make sure to set them deliberately rather than relying on the root observation if your evaluation payload differs.
+[LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run on observations. If your evaluation payload differs from what your application returns, set the input/output of the observation you evaluate deliberately. Trace-level evaluators are deprecated; see the [LLM-as-a-Judge migration guide](/faq/all/llm-as-a-judge-migration).
 </Callout>
 
 <LangTabs items={["Python SDK", "JS/TS SDK"]}>
 <Tab title="Python SDK">
 
-**Default Behavior**
-
 ```python
-from langfuse import get_client
+from langfuse import get_client, observe
 
 langfuse = get_client()
 
@@ -628,41 +626,14 @@ with langfuse.start_as_current_observation(
         # LLM generation input/output are separate from trace input/output
 
     root_span.update(output={"answer": "Paris"})  # This becomes the trace output
-```
-
-**Override Default Behavior**
-
-Use [`observation.set_trace_io()`](https://python.reference.langfuse.com/langfuse#LangfuseEvent.set_trace_io) or [`langfuse.set_current_trace_io()`](https://python.reference.langfuse.com/langfuse#Langfuse.set_current_trace_io) if you need different trace inputs/outputs than the root observation:
-
-<Callout type="warning">
-`set_trace_io()` and `set_current_trace_io()` are deprecated and exist only for backward compatibility with trace-level LLM-as-a-judge evaluators that rely on trace input/output. For new code, set input/output on the root observation directly. See the [Python v3 → v4 migration guide](/docs/observability/sdk/upgrade-path/python-v3-to-v4).
-</Callout>
-
-```python /set_current_trace_io/ /set_trace_io/
-from langfuse import get_client
-
-langfuse = get_client()
-
-with langfuse.start_as_current_observation(as_type="span", name="complex-pipeline") as root_span:
-    # Root observation has its own input/output
-    root_span.update(input="Step 1 data", output="Step 1 result")
-
-    # But trace should have different input/output (e.g., for LLM-as-a-judge)
-    root_span.set_trace_io(
-        input={"original_query": "User's actual question"},
-        output={"final_answer": "Complete response", "confidence": 0.95}
-    )
-
-    # Now trace input/output are independent of root observation input/output
 
 # Using the observe decorator
 @observe()
 def process_user_query(user_question: str):
-    # LLM processing...
     answer = call_llm(user_question)
 
-    # Explicitly set trace input/output for evaluation features
-    langfuse.set_current_trace_io(
+    # Updates the current (root) observation, and therefore the trace input/output
+    langfuse.update_current_span(
         input={"question": user_question},
         output={"answer": answer}
     )
@@ -672,13 +643,9 @@ def process_user_query(user_question: str):
 
 </Tab>
 <Tab title="JS/TS SDK">
-Use [`propagateAttributes`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.propagateAttributes.html) to set correlating trace attributes, and [`setTraceIO`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#settraceio) for trace-level input/output.
+Use [`propagateAttributes`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.propagateAttributes.html) to set correlating trace attributes, and update the root observation to set the trace input/output.
 
-<Callout type="warning">
-`.setTraceIO()` is deprecated and exists only for backward compatibility with trace-level LLM-as-a-judge evaluators. See the [JS/TS v4 → v5 migration guide](/docs/observability/sdk/upgrade-path/js-v4-to-v5).
-</Callout>
-
-```ts /propagateAttributes/ /setTraceIO/
+```ts /propagateAttributes/ /rootSpan.update/
 import { propagateAttributes, startObservation } from "@langfuse/tracing";
 
 const userId = "user-123";
@@ -692,7 +659,9 @@ propagateAttributes(
     metadata: { plan: "premium" },
   },
   () => {
-    const rootSpan = startObservation("data-processing");
+    const rootSpan = startObservation("data-processing", {
+      input: { query: "What is the capital of France?" }, // This becomes the trace input
+    });
 
     const generation = rootSpan.startObservation(
       "llm-call",
@@ -702,6 +671,7 @@ propagateAttributes(
 
     generation.end();
 
+    rootSpan.update({ output: { answer: "Paris" } }); // This becomes the trace output
     rootSpan.end();
   }
 );

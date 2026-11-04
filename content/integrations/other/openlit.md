@@ -1,7 +1,7 @@
 ---
 title: OpenLIT Integration via OpenTelemetry
 sidebarTitle: OpenLIT
-logo: /images/integrations/opentelemetry_icon.svg
+logo: /images/integrations/openlit_icon.png
 description: Example cookbook for the OpenLIT Langfuse integration using OpenTelemetry.
 category: Integrations
 ---

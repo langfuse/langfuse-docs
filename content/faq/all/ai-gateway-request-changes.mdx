@@ -1,0 +1,15 @@
+---
+title: Does the gateway change my requests?
+description: How the Langfuse AI Gateway adjusts model IDs, authentication headers, and streamed Chat Completions requests before forwarding them.
+tags: [ai-gateway]
+---
+
+# Does the gateway change my requests?
+
+Only where it has to. The gateway forwards the native provider request body with these changes:
+
+- It removes the `<credential>:` prefix from `model`.
+- It replaces the authentication headers with your organization's provider credential, and doesn't forward `langfuse-*` headers or your `x-request-id`.
+- On streamed Chat Completions requests, it asks the provider for usage. See [streaming usage](/docs/ai-gateway/features/rest-api#streaming-usage).
+
+The response is relayed unchanged. The gateway reads the request and response to record the generation.

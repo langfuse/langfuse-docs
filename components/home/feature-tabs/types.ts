@@ -30,6 +30,8 @@ export interface FeatureTabData {
     light: StaticImageData;
     dark: StaticImageData;
     alt: string;
+    /** Marks a stand-in screenshot so the homepage shows a "needs update" overlay. */
+    placeholder?: boolean;
   };
   code?: {
     snippets: CodeSnippets;

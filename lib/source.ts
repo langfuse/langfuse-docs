@@ -9,7 +9,6 @@ import {
   faq,
   integrations,
   security,
-  library,
   customers,
   handbook,
   marketing,
@@ -126,12 +125,6 @@ export const securitySource = loader({
   baseUrl: baseUrl("security"),
   source: security.toFumadocsSource(),
   pageTree: { transformers: [shortTitleTransformer] },
-});
-
-export const librarySource = loader({
-  baseUrl: baseUrl("library"),
-  source: library.toFumadocsSource(),
-  pageTree: { idPrefix: "library", transformers: [shortTitleTransformer] },
 });
 
 export const usersSource = loader({
