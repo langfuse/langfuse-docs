@@ -18,7 +18,7 @@ The [Langfuse AI Gateway](/docs/ai-gateway/overview) sends model requests from y
 ## Requirements [#requirements]
 
 - **Kubernetes with the [Helm chart](/self-hosting/deployment/kubernetes-helm)**, in a release after `2.2.0` that includes the `langfuse.gateway` values. The chart deploys and configures the gateway. The chart is the supported deployment path during the beta: the Docker Compose setup does not include the gateway. To run it another way, run the gateway image with the [gateway variables](#configuration) and set the web variables on Langfuse Web.
-- **Langfuse `v4.72.0` or later** for web and the gateway image, and the same version for both. Use the latest release: newer gateway features, such as the AI Gateway organization role, ship after `v4.72.0`. Image tags have no `v` prefix, for example `4.72.0`.
+- **Langfuse `v4.75.0` or later** for web and the gateway image, and the same version for both. Image tags have no `v` prefix, for example `4.75.0`.
 - **The v4 data model.** The gateway is unavailable while `LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy`, because gateway generations are only stored in the v4 tables. `events_only` (the default) and `dual` work. See the [v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-2).
 - **A DNS name for the gateway**, such as `gateway.langfuse.example.com`, with a TLS certificate that covers it. See [TLS](#tls).
 - **Direct outbound HTTPS from the gateway pods and from web to your LLM providers**, `api.openai.com` and `api.anthropic.com`. Web calls the providers too, to validate credentials and discover models. The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy settings, and it always calls the providers' official API URLs, so Azure OpenAI, Amazon Bedrock, and internal LLM proxies aren't supported.
@@ -75,7 +75,7 @@ langfuse:
         memory: 2Gi
 ```
 
-The chart pulls the gateway image [`langfuse/ai-gateway`](https://hub.docker.com/r/langfuse/ai-gateway) from Docker Hub through `docker.langfuse.com`, like the [web and worker images](/self-hosting/deployment/infrastructure/containers#container-images). The image tag follows `langfuse.image.tag` and the chart's `appVersion`, like web. If your chart's `appVersion` is older than `4.72.0`, set `langfuse.image.tag` to a newer release.
+The chart pulls the gateway image [`langfuse/ai-gateway`](https://hub.docker.com/r/langfuse/ai-gateway) from Docker Hub through `docker.langfuse.com`, like the [web and worker images](/self-hosting/deployment/infrastructure/containers#container-images). The image tag follows `langfuse.image.tag` and the chart's `appVersion`, like web. If your chart's `appVersion` is older than `4.75.0`, set `langfuse.image.tag` to a newer release.
 
 Then apply it with `helm upgrade` and check that the gateway pods become ready:
 
@@ -366,7 +366,7 @@ Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The 
 <Details id="ui-not-deployed">
 <Summary>The UI says the AI Gateway isn't deployed</Summary>
 
-Web does not have `LANGFUSE_AI_GATEWAY_DEPLOYED=true`. Check that `langfuse.gateway.enabled` is `true` and that web runs `v4.72.0` or later. If the gateway pages are still missing, check that `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy`.
+Web does not have `LANGFUSE_AI_GATEWAY_DEPLOYED=true`. Check that `langfuse.gateway.enabled` is `true` and that web runs `v4.75.0` or later. If the gateway pages are still missing, check that `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy`.
 
 </Details>
 
