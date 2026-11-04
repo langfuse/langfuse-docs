@@ -49,7 +49,7 @@ const security = [
   { label: "EU & US Data Regions", href: "/security/data-regions" },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
   {
-    label: "Hardening for Gov (soon)",
+    label: "FIPS 140-3 & NIST hardening for Gov",
     href: "/self-hosting/configuration/hardening#hardening-for-government",
   },
   { label: "GDPR", href: "/security/gdpr" },
