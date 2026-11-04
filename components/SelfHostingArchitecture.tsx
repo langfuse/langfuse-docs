@@ -289,8 +289,9 @@ function DesktopDiagram() {
         <path d={`m 136 ${GATEWAY_Y - 6} 4 6 4 -6`} />
         <path d={`m 136 ${WEB_Y - 6} 4 6 4 -6`} />
         <path d="m 34 393 6 4 -6 4" />
+        <path d="m 274 652 6 4 -6 4" />
         <path d="m 274 688 6 4 -6 4" />
-        <path d="m 526 688 -6 4 6 4" />
+        <path d="m 526 652 -6 4 6 4" />
       </g>
       <text x="154" y="136" className={styles.detail}>
         Model requests
@@ -388,7 +389,8 @@ function MobileDiagram() {
         <MobileCard name="Apps & agents" icon={Bot} />
         <MobileCard name="UI, API & SDKs" icon={Globe} />
       </div>
-      <MobileConnector label="Into your infrastructure" kind="optional" />
+      <MobileConnector label="Model requests → AI Gateway" kind="optional" />
+      <MobileConnector label="Requests → Langfuse Web" kind="web" />
       <div className={styles.mobileBoundary}>
         <div className={styles.mobileInfra}>
           <span className={styles.mobileInfraDetail}>VPC / on-premises</span>
