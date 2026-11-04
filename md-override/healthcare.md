@@ -1,9 +1,9 @@
 ---
 title: Langfuse for healthcare and life sciences
-description: Bring reliable healthcare AI into production faster, with less manual review and costs in view as you scale. HIPAA-ready region or self-hosted.
+description: Bring reliable healthcare AI faster into production, with less manual review and costs in view as you scale. HIPAA-ready region or self-hosted.
 ---
 
-# Bring reliable healthcare AI into production faster
+# Bring reliable healthcare AI faster into production
 
 For healthcare and life sciences teams: go live faster, spend less time on manual review, and keep costs in view as you scale. [Merck Group](/users/merckgroup) reduced development cycles from weeks to days and runs 80+ use cases across the company.
 
