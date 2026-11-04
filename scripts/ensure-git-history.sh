@@ -45,14 +45,14 @@ fetch_history() {
 
 commit="$(git rev-parse HEAD)"
 
-start=$(date +%s)
+start=$(date +%s%N)
 if git remote get-url origin >/dev/null 2>&1 && fetch_history origin; then
-  :
+  source="origin"
 elif { git remote add history "$public_url" 2>/dev/null || git remote set-url history "$public_url"; } && fetch_history history; then
-  :
+  source="$public_url"
 else
   echo "[ensure-git-history] ERROR: could not fetch git history from origin or ${public_url}." >&2
   exit 1
 fi
-echo "[ensure-git-history] Fetched full commit history (blobless) in $(($(date +%s) - start))s."
+echo "[ensure-git-history] Fetched full commit history (blobless) from ${source} in $((($(date +%s%N) - start) / 1000000))ms."
 exit 0
