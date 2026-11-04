@@ -117,14 +117,33 @@ export function CinemaMode({ children }: { children: ReactNode }) {
     }
     exitRef.current?.focus({ preventScroll: true });
 
+    const onKeyDown = (event: KeyboardEvent) => {
+      // Docs shortcuts must stay inactive even when a background click blurs the stage.
+      event.stopPropagation();
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+
+      const dialog =
+        event.target instanceof Element
+          ? event.target.closest('[role="dialog"], [role="alertdialog"]')
+          : null;
+      if (dialog && dialog !== stageRef.current) return;
+
+      event.preventDefault();
+      setInlineHeight(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+
     return () => {
+      document.removeEventListener("keydown", onKeyDown);
       observer.disconnect();
       restore.forEach((reset) => reset());
       document.documentElement.style.overflow = overflow;
-      triggerRef.current?.focus({ preventScroll: true });
-      window.scrollTo({ left: scrollX, top: scrollY, behavior: "instant" });
+      if (containerRef.current?.isConnected) {
+        triggerRef.current?.focus({ preventScroll: true });
+        window.scrollTo({ left: scrollX, top: scrollY, behavior: "instant" });
+      }
     };
-  }, [isActive, containerRef, triggerRef]);
+  }, [isActive, containerRef, triggerRef, setInlineHeight]);
 
   return (
     <div ref={containerRef} style={{ minHeight: inlineHeight ?? undefined }}>
@@ -140,20 +159,6 @@ export function CinemaMode({ children }: { children: ReactNode }) {
           isActive &&
             "fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-surface-bg p-4 text-text-primary sm:p-8",
         )}
-        onKeyDown={(event) => {
-          if (!isActive) return;
-          // Docs-level shortcuts must not navigate away during a presentation.
-          event.stopPropagation();
-          if (
-            event.key === "Escape" &&
-            !event.defaultPrevented &&
-            event.target instanceof Element &&
-            event.target.closest('[role="dialog"]') === stageRef.current
-          ) {
-            event.preventDefault();
-            setInlineHeight(null);
-          }
-        }}
       >
         <div className={cn(isActive && "mx-auto w-full max-w-5xl")}>
           {isActive && (
