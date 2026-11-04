@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Fragment, useEffect, useState } from "react";
+import { IterateReturn } from "@/components/academy/LoopSubset";
 
 const STATION_DATA = {
   trace: {
@@ -68,7 +69,13 @@ function Arrow() {
   );
 }
 
-function StationRow({ ids }: { ids: StationId[] }) {
+function StationRow({
+  ids,
+  iterate,
+}: {
+  ids: StationId[];
+  iterate?: { from: number; to: number };
+}) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -192,14 +199,28 @@ function StationRow({ ids }: { ids: StationId[] }) {
           );
         })}
       </div>
+      {iterate ? (
+        <IterateReturn
+          from={iterate.from}
+          to={iterate.to}
+          count={ids.length}
+          label="反復"
+          labelFontSize={14}
+        />
+      ) : null}
     </div>
   );
 }
 
 export function OnlineLoop() {
-  return <StationRow ids={["trace", "monitor"]} />;
+  return <StationRow ids={["trace", "monitor"]} iterate={{ from: 1, to: 0 }} />;
 }
 
 export function OfflineLoop() {
-  return <StationRow ids={["dataset", "change", "eval"]} />;
+  return (
+    <StationRow
+      ids={["dataset", "change", "eval"]}
+      iterate={{ from: 2, to: 1 }}
+    />
+  );
 }

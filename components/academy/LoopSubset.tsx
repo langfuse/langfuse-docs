@@ -68,7 +68,103 @@ function Arrow() {
   );
 }
 
-function StationRow({ ids }: { ids: StationId[] }) {
+// Matches the Arrow above: 24px icon plus 8px padding on each side.
+const ARROW_GUTTER = 40;
+const RETURN_DEPTH = 42;
+const BAND_W = 11;
+const LINE_W = 1.25;
+
+function cardCenter(i: number, count: number) {
+  return `calc((100% - ${(count - 1) * ARROW_GUTTER}px) / ${count} * ${i + 0.5} + ${i * ARROW_GUTTER}px)`;
+}
+
+/**
+ * Return path under a StationRow, from the bottom of card `from` back to card
+ * `to`, styled like the Iterate loops in LoopDiagram.
+ */
+export function IterateReturn({
+  from,
+  to,
+  count,
+  label,
+  labelFontSize = 11,
+}: {
+  from: number;
+  to: number;
+  count: number;
+  label: string;
+  labelFontSize?: number;
+}) {
+  const left = cardCenter(to, count);
+  const width = `calc(${cardCenter(from, count)} - ${left})`;
+  const leg = (strokeW: number, color: string) => (
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: `calc(${left} - ${strokeW / 2}px)`,
+        width: `calc(${width} + ${strokeW}px)`,
+        height: RETURN_DEPTH + strokeW / 2,
+        boxSizing: "border-box",
+        borderStyle: "solid",
+        borderColor: color,
+        borderWidth: `0 ${strokeW}px ${strokeW}px`,
+      }}
+    />
+  );
+
+  return (
+    <div
+      aria-hidden
+      style={{ position: "relative", height: RETURN_DEPTH + 24 }}
+    >
+      {leg(BAND_W, "var(--surface-cta-primary)")}
+      {leg(LINE_W, "var(--text-primary)")}
+      <svg
+        width="9"
+        height="9"
+        viewBox="0 0 10 10"
+        style={{
+          position: "absolute",
+          top: 0,
+          left,
+          transform: "translateX(-50%)",
+        }}
+      >
+        <path d="M 0 10 L 5 0 L 10 10 z" fill="var(--text-primary)" />
+      </svg>
+      <div
+        style={{
+          position: "absolute",
+          top: RETURN_DEPTH,
+          left: `calc(${left} + ${width} / 2)`,
+          transform: "translate(-50%, -50%)",
+          background: "var(--surface-bg)",
+          padding: "4px 12px",
+          fontFamily: "var(--font-mono)",
+          fontSize: labelFontSize,
+          color: "var(--text-secondary)",
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          border: "1px solid var(--line-structure)",
+          borderRadius: 2,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function StationRow({
+  ids,
+  iterate,
+}: {
+  ids: StationId[];
+  /** Indexes into `ids` for an Iterate return path drawn under the row. */
+  iterate?: { from: number; to: number };
+}) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -188,14 +284,27 @@ function StationRow({ ids }: { ids: StationId[] }) {
           );
         })}
       </div>
+      {iterate ? (
+        <IterateReturn
+          from={iterate.from}
+          to={iterate.to}
+          count={ids.length}
+          label="Iterate"
+        />
+      ) : null}
     </div>
   );
 }
 
 export function OnlineLoop() {
-  return <StationRow ids={["trace", "monitor"]} />;
+  return <StationRow ids={["trace", "monitor"]} iterate={{ from: 1, to: 0 }} />;
 }
 
 export function OfflineLoop() {
-  return <StationRow ids={["dataset", "change", "eval"]} />;
+  return (
+    <StationRow
+      ids={["dataset", "change", "eval"]}
+      iterate={{ from: 2, to: 1 }}
+    />
+  );
 }
