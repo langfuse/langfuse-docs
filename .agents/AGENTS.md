@@ -90,6 +90,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 - Use existing **shadcn/ui** patterns and components where possible.
 - Use **Tailwind semantic tokens** (avoid hard-coded color values).
 - Build mobile-first responsive layouts.
+- Diagrams must fit the page. Never use horizontal "scroll to explore" for diagrams. Scale the diagram to the available width, and switch to a stacked mobile layout when the scaled version would become unreadable.
 
 ## Key config files
 
@@ -147,6 +148,7 @@ Please check the following:
 - Put failure modes, scope limits, and similar caveats in a `<Callout>` so they stand out. Flag new or edited docs that bury these in body copy.
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
+- Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
