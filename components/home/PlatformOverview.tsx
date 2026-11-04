@@ -210,27 +210,10 @@ function SdkNode({ className }: { className?: string }) {
   );
 }
 
-function GatewayNode({
-  className,
-  highlighted = false,
-}: {
-  className?: string;
-  highlighted?: boolean;
-}) {
+function GatewayNode({ className }: { className?: string }) {
   return (
-    <NextLink
-      href={AI_GATEWAY_HREF}
-      aria-current={highlighted ? "page" : undefined}
-      className={cn("flex", highlighted && "relative z-10", className)}
-    >
-      <CornerBox
-        hoverStripes
-        className={cn(
-          "flex flex-1 flex-col gap-2 p-3 sm:p-4",
-          highlighted &&
-            "border-line-cta bg-[color-mix(in_oklab,var(--surface-cta-primary)_45%,var(--surface-bg))] shadow-[0_0_0_3px_var(--line-cta)]",
-        )}
-      >
+    <NextLink href={AI_GATEWAY_HREF} className={cn("flex", className)}>
+      <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2">
           <Wordmark width={69} height={16} className="h-4 w-auto" />
           <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
@@ -397,18 +380,14 @@ function MergeConnector() {
 const DIAGRAM_GRID =
   "grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)_44px_minmax(0,1.2fr)]";
 
-function DiagramColumns({
-  highlightGateway = false,
-}: {
-  highlightGateway?: boolean;
-}) {
+function DiagramColumns() {
   return (
     <>
       <AgentsNode />
       <SplitConnector />
       <div className="grid grid-rows-2 gap-4">
         <SdkNode />
-        <GatewayNode highlighted={highlightGateway} />
+        <GatewayNode />
       </div>
       <MergeConnector />
       <LangfuseNode />
@@ -421,11 +400,7 @@ function DiagramColumns({
  * layout is zoomed to fit; `zoom` (unlike `transform`) also shrinks the
  * layout box.
  */
-function WideDiagram({
-  highlightGateway = false,
-}: {
-  highlightGateway?: boolean;
-}) {
+function WideDiagram() {
   return (
     <div
       className={cn(
@@ -433,7 +408,7 @@ function WideDiagram({
         DIAGRAM_GRID,
       )}
     >
-      <DiagramColumns highlightGateway={highlightGateway} />
+      <DiagramColumns />
     </div>
   );
 }
@@ -443,18 +418,14 @@ function WideDiagram({
  * zoomed to the container. `zoom` shrinks the layout box; `100cqw` follows the
  * actual column if it is narrower than 680px.
  */
-function FittedWideDiagram({
-  highlightGateway = false,
-}: {
-  highlightGateway?: boolean;
-}) {
+function FittedWideDiagram() {
   return (
     <div className="@container hidden w-full min-w-0 md:block">
       <div
         className={cn("grid w-[840px]", DIAGRAM_GRID)}
         style={{ zoom: "calc(100cqw / 840px)" }}
       >
-        <DiagramColumns highlightGateway={highlightGateway} />
+        <DiagramColumns />
       </div>
     </div>
   );
@@ -480,18 +451,14 @@ function PairedDownArrows() {
 const DIAGRAM_CAPTION =
   "Personal agents, custom agents, and copilots reach Langfuse either directly, instrumented with the Langfuse SDKs or any OpenTelemetry exporter, or through the Langfuse AI Gateway or your own gateway. In Langfuse you observe with tracing, dashboards, and alerts, manage prompts and skills, and evaluate with evals, datasets, and experiments. The in-app agent Halo, or your own agent, works with this data, and every feature is available via MCP, CLI, API, and SDKs.";
 
-function CompactDiagram({
-  highlightGateway = false,
-}: {
-  highlightGateway?: boolean;
-}) {
+function CompactDiagram() {
   return (
     <div className="flex flex-col md:hidden">
       <AgentsNode />
       <PairedDownArrows />
       <div className="grid grid-cols-2 gap-2">
         <SdkNode />
-        <GatewayNode highlighted={highlightGateway} />
+        <GatewayNode />
       </div>
       <PairedDownArrows />
       <LangfuseNode />
@@ -499,18 +466,14 @@ function CompactDiagram({
   );
 }
 
-export function PlatformOverviewDiagram({
-  highlightGateway = false,
-}: {
-  highlightGateway?: boolean;
-}) {
+export function PlatformOverviewDiagram() {
   return (
     <figure
       aria-label="How AI calls flow through Langfuse"
       className="not-prose my-8 w-full min-w-0 text-left"
     >
-      <FittedWideDiagram highlightGateway={highlightGateway} />
-      <CompactDiagram highlightGateway={highlightGateway} />
+      <FittedWideDiagram />
+      <CompactDiagram />
       <figcaption className="sr-only">{DIAGRAM_CAPTION}</figcaption>
     </figure>
   );
