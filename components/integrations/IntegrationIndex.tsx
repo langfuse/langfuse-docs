@@ -19,6 +19,8 @@ const categoryConfig: Record<
     description: string;
     additionalLinks?: { route: string; frontMatter: any }[];
     featuredLinks?: ProcessedIntegrationPage[];
+    // Shown first in the regular grid, ahead of the alphabetical list.
+    pinnedLinks?: ProcessedIntegrationPage[];
   }
 > = {
   native: {
@@ -107,7 +109,7 @@ const categoryConfig: Record<
   gateways: {
     title: "Gateways",
     description: "Connect through API gateways and proxies",
-    featuredLinks: [
+    pinnedLinks: [
       {
         route: "/docs/ai-gateway/overview",
         frontMatter: {
@@ -209,7 +211,7 @@ function getCategory(category: string) {
 
   return {
     config,
-    pages: processPages(mergedPages),
+    pages: [...(config.pinnedLinks ?? []), ...processPages(mergedPages)],
     featured: config.featuredLinks,
   };
 }
