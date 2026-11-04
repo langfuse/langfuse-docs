@@ -126,7 +126,7 @@ Langfuse is available as a [managed cloud service](https://cloud.langfuse.com) i
 
 ### Do I need the AI Gateway to use Langfuse?
 
-No. The [AI Gateway](/docs/gateway/overview) is optional. To use it, swap the base URL and API key in your AI calls for the gateway's, and every call is traced without an SDK. Otherwise, the [SDKs](/docs/observability/sdk/overview) and [OpenTelemetry integrations](/integrations/native/opentelemetry) work as before. You can also [combine both](/docs/gateway/troubleshooting-and-faq#sdk), so gateway calls show up inside your existing traces.
+No. The [AI Gateway](/docs/gateway/overview) is optional. To use it, swap the base URL and API key in your AI calls for the gateway's, and every call is traced without an SDK. Otherwise, the [SDKs](/docs/observability/sdk/overview) and [OpenTelemetry integrations](/integrations/native/opentelemetry) work as before. You can also [combine both](/docs/gateway/troubleshooting-and-faq#ai-gateway-with-sdk), so gateway calls show up inside your existing traces.
 
 ### What's the latency impact?
 
