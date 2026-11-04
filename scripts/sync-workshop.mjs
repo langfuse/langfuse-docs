@@ -48,7 +48,22 @@ function retryDelayMs(attempt, response) {
   return backoff + Math.floor(Math.random() * 250);
 }
 
-async function fetchTarball() {
+async function extractTarball(response, archivePath, repoDir) {
+  await fs.writeFile(archivePath, Buffer.from(await response.arrayBuffer()));
+  await fs.rm(repoDir, { recursive: true, force: true });
+  await fs.mkdir(repoDir);
+  await execFileAsync("tar", [
+    "-xzf",
+    archivePath,
+    "-C",
+    repoDir,
+    "--strip-components=1",
+  ]);
+}
+
+async function downloadRepo(targetDir) {
+  const archivePath = path.join(targetDir, "repo.tar.gz");
+  const repoDir = path.join(targetDir, "repo");
   let lastError;
 
   for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
@@ -57,17 +72,19 @@ async function fetchTarball() {
       response = await fetch(TARBALL_URL, {
         headers: { "User-Agent": "langfuse-docs-workshop-sync" },
       });
+      if (response.ok) {
+        await extractTarball(response, archivePath, repoDir);
+        return repoDir;
+      }
     } catch (error) {
       lastError = error;
       if (attempt === MAX_FETCH_ATTEMPTS) throw error;
       console.warn(
-        `Retrying ${REPO_SLUG}@${REF} download after a network error (attempt ${attempt}/${MAX_FETCH_ATTEMPTS})`,
+        `Retrying ${REPO_SLUG}@${REF} download after it failed: ${error.message} (attempt ${attempt}/${MAX_FETCH_ATTEMPTS})`,
       );
       await delay(retryDelayMs(attempt));
       continue;
     }
-
-    if (response.ok) return Buffer.from(await response.arrayBuffer());
 
     const body = await response.text();
     lastError = new Error(
@@ -87,21 +104,6 @@ async function fetchTarball() {
   }
 
   throw lastError;
-}
-
-async function downloadRepo(targetDir) {
-  const archivePath = path.join(targetDir, "repo.tar.gz");
-  const repoDir = path.join(targetDir, "repo");
-  await fs.writeFile(archivePath, await fetchTarball());
-  await fs.mkdir(repoDir);
-  await execFileAsync("tar", [
-    "-xzf",
-    archivePath,
-    "-C",
-    repoDir,
-    "--strip-components=1",
-  ]);
-  return repoDir;
 }
 
 async function listDirectory(repoDir, repoPath) {
@@ -815,4 +817,4 @@ if (
   });
 }
 
-export { rewriteMarkdownReferences };
+export { downloadRepo, rewriteMarkdownReferences };
