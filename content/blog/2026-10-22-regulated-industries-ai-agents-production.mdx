@@ -15,7 +15,7 @@ import { CustomerQuote } from "@/components/customers/CustomerQuote";
   date="October 22, 2026"
   authors={["annabellschafer"]}
 />
-.
+
 Many teams building AI agents ship early and improve in production. In banking, insurance, and healthcare, that approach rarely gets past the first review. A wrong answer can be a compliance incident, customer data cannot go to just any vendor, and someone has to sign off before the agent talks to a customer.
 
 Often these requirements are met with a fully human-in-the-loop approach. However, the full potential of AI systems is only unlocked if agents handle cases autonomously.
@@ -61,10 +61,6 @@ Add [tracing](/docs/observability/get-started) before anyone outside the team us
 <Frame fullWidth>
   ![Trace of a synthetic small-business credit review in Langfuse, with the credit policy fetch, model calls, and tool calls as nested observations next to the agent's recommendation](/images/blog/2026-10-22-regulated-industries-ai-agents-production/credit-review-trace.png)
 </Frame>
-
-<Callout type="info">
-  Decide early where the traces will live. Many banks and healthcare providers [self-host Langfuse](/self-hosting) so that trace data never leaves their infrastructure. [DKB](/users/dkb), one of Germany's largest direct banks, made self-hosting a requirement before any production data could be touched.
-</Callout>
 
 ## Step 2: Run example inputs through the agent [#example-inputs]
 
@@ -112,7 +108,7 @@ With the evaluation criteria in place, build a ground truth [dataset](/docs/eval
 
 ### Check the ground truth [#check-the-ground-truth]
 
-Experts disagree more often than teams expect. To get to a reliable ground truth dataset, let your experts review each other's work. Have parts of the dataset labeled independently by several experts and look at where they disagree. Ideally, bring the experts into one room to talk through those cases, agree on the right handling, and write the missing rule into your guidelines.
+Experts disagree more often than teams expect. To get to a reliable ground truth dataset, let your experts review each other's work. Ideally, bring the experts into one room to talk through those cases, agree on the right handling, and write the missing rule into your guidelines.
 
 <Callout type="info">
   The more humans disagree on a case, the harder it is for an agent to handle it. Research has a name for this: inter-rater reliability, the extent to which different raters assign the same score to the same item. It comes from qualitative and clinical research, and applies equally in the context of AI agents ([McHugh, 2012](https://pubmed.ncbi.nlm.nih.gov/23092060/)).
@@ -120,7 +116,7 @@ Experts disagree more often than teams expect. To get to a reliable ground truth
 
 In Langfuse, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) let several experts label the same items. [Score analytics](/docs/evaluation/scores/score-analytics) then calculates percent agreement and Cohen's kappa between them, so you can see which cases need a discussion.
 
-## Step 6: Iterate until the agent passes [#iterate]
+## Step 6: Iterate until the agent meets the quality bar [#iterate]
 
 Run the dataset as an [experiment](/docs/evaluation/experiments/experiments-via-sdk) and record the scores as your baseline. Then review failed cases and improve the agent by changing its context, tool calls, or prompts, rerun the experiment, and [compare it with the previous run](/docs/evaluation/experiments/compare-experiments).
 
@@ -134,15 +130,13 @@ Once you are happy with the results, decide which evaluators should also run in 
 
 For chat agents, also track [explicit feedback](/docs/observability/features/user-feedback) and [signs of trouble](/academy/monitoring/capturing-signals), such as a user asking for a person or correcting the agent.
 
-At launch, let the agent escalate a little too often. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more.
-
 ## Step 8: Go live and run the AI engineering loop [#go-live]
 
-Now go live. From here on, you are in the regular AI engineering loop: trace production, watch the monitors, turn interesting traces into new dataset items, and rerun the dataset before every release.
+Now go live, depending on the risk profile with a partial or complete human in the loop setup. From here on, you are in the regular AI engineering loop: trace production, watch the monitors, turn interesting traces into new dataset items, and rerun the dataset before every release.
 
 ### Keep humans on a subset (or everything at first) [#humans-on-a-subset]
 
-People stay in the process after launch, and the amount they review shrinks as the evidence grows. A common pattern, described by [Coinbase at AI Engineer NYC](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md), has three steps:
+At launch, let the agent escalate a little too often to a human. A reply like "I can't help with that, I'll connect you to a person" costs a few minutes of staff time, and a wrong answer in a regulated setting can cost much more. The amount of human review shrinks as the evidence grows. A common pattern, described by [Coinbase at AI Engineer NYC](https://ai.engineer/reading/nyc-2026/transcripts/oct14-evan-kormos-policy-workflows.md), has three steps:
 
 1. **Supervised.** Reviewers check every output.
 2. **Sampled.** Once measured quality passes a threshold set by policy, reviewers check a sample.
@@ -152,7 +146,7 @@ Match the review rate to the risk. Guidance from the [Joint Commission and CHAI]
 
 ### Automate the slices that work [#automate-slices]
 
-Asking a person to approve everything does not scale, and reviewers who approve hundreds of routine cases a day stop looking closely. Classify incoming requests by category, let the agent handle categories that score well in your dataset and in production, such as a password reset, and keep sending the rest to a person. The Academy's [customer support chatbot example](/academy/examples/customer-support-chatbot) walks through this approach. Keep a small random sample of each automated category in an annotation queue, so you notice when quality drifts.
+Asking a person to approve everything does not scale, and reviewers who approve hundreds of routine cases a day stop looking closely. Classify incoming requests by category, let the agent handle categories that score well in your dataset and in production, such as a password reset, and keep sending the rest to a person.
 
 ## How Langfuse supports each step [#in-langfuse]
 
@@ -172,3 +166,4 @@ Asking a person to approve everything does not scale, and reviewers who approve 
 - [Langfuse for financial services](/financial-services): data protection, deployment options, and compliance documentation for banks and insurers.
 - [Building deployment gates for LLMs and AI agents in financial services](/blog/2026-07-15-llm-certification-financial-services): how to turn datasets and evaluators into pass or fail checks that a review board can inspect.
 - Customer stories from regulated industries: [DKB](/users/dkb), [Trade Republic](/users/trade-republic), and [Merck](/users/merckgroup).
+- [Example](/academy/examples/customer-support-chatbot): Automate the parts that work.
