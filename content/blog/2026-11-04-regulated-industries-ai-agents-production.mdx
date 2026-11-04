@@ -37,7 +37,11 @@ AI development teams in regulated industries usually face three requirements for
 
 ## The approach: start the loop offline [#the-approach]
 
-The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate. And then repeat this process. Regulated teams run most of this loop before going to production.
+The [AI engineering loop](/academy/ai-engineering-loop) describes how teams improve AI applications: trace, monitor, build datasets, run experiments, and evaluate, and then repeat.
+
+<LoopDiagram />
+
+Many teams enter the loop in production, with tracing and monitoring live traffic. Regulated teams run most of it before going to production. They trace offline runs, build datasets, run experiments, and evaluate until the agent meets the quality bar. Only then do they monitor live traffic. The eight steps below show how.
 
 ```mermaid
 flowchart TB
@@ -50,7 +54,7 @@ flowchart TB
         E["5. Build ground truth"] --> F["6. Iterate"] --> G["7. Production monitors"] --> H["8. Go live"]
     end
     learn --> ship
-    ship --> I["Run the AI engineering loop"]
+    ship --> I["Continuously run the AI engineering loop"]
 ```
 
 ### 1. Set up tracing [#trace-offline]
