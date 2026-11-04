@@ -18,6 +18,14 @@ For example, trigger agent re-runs from Langfuse: after you find a specific trac
 Project admins configure the endpoint, toast text and encrypted request headers under **Project Settings** > **Integrations** > **Web Callouts**.
 Users then see the callout in the three dots menu when viewing a trace, observation, or session.
 
+<Video
+  src="https://static.langfuse.com/docs-videos/web-callouts.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+  title="Set up and trigger a web callout"
+  description="Project Settings > Integrations > Web Callouts. Click “Add endpoint”, enter a name, the endpoint URL and a toast message, and click “Save endpoint”. Then open a trace, open the options menu of the trace header and click the callout. The toast confirms the backend request succeeded."
+/>
+
 Langfuse will `POST` a JSON payload to your configured endpoint with the following format:
 
 ```json
