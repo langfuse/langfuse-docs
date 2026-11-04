@@ -16,6 +16,7 @@ const DEPENDENTS_DIR = path.join(
 const SOURCES = ["python.md", "js.md"];
 const OUTPUT_PATH = path.join(DEPENDENTS_DIR, "top.md");
 const LIMIT = 25;
+const LANGFUSE_ORG_URL = "https://github.com/langfuse/";
 
 // Matches a generated row: | ![avatar](...) &nbsp; [owner](...) / [repo](url) | 123 |
 const ROW_PATTERN =
@@ -31,6 +32,8 @@ for (const source of SOURCES) {
     if (!match) continue;
     const [, repository, url, stars] = match;
     const key = url.toLowerCase();
+    // Langfuse's own repos are not third-party adopters
+    if (key.startsWith(LANGFUSE_ORG_URL)) continue;
     const existing = byRepo.get(key);
     if (!existing || Number(stars) > existing.stars) {
       byRepo.set(key, { repository, stars: Number(stars) });
