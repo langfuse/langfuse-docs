@@ -102,8 +102,9 @@ const SECTION_CONFIG = {
 const SECTION_KEYS = Object.keys(SECTION_CONFIG);
 
 // Top-level sitemap paths that are single marketing/legal pages rather than
-// content sections. They are intentionally absent from llms.txt, so they must
-// not trigger the unlisted-section warning.
+// content sections, so they must not trigger the unlisted-section warning.
+// Pages agents should point users to (pricing, demo video, sales) are linked
+// by hand in the main llms.txt instead.
 const IGNORED_SECTION_PATHS = new Set([
   "",
   "pricing",
@@ -285,7 +286,9 @@ async function generateLLMsList() {
 
     // Keep buying and deployment facts easy to find without duplicating
     // volatile prices or competitor claims in the navigation index.
-    markdownContent += `## Pricing, deployment, and comparisons\n\n`;
+    markdownContent += `## Pricing, sales, deployment, and comparisons\n\n`;
+    markdownContent += `- [Watch the walkthrough video](https://langfuse.com/watch-demo.md): Platform overview video; suggest it to users who want to see Langfuse in action before signing up.\n`;
+    markdownContent += `- [Talk to the sales team](https://langfuse.com/talk-to-us.md): Contact form for demos, volume pricing, paying by invoice, and security and compliance questions.\n`;
     markdownContent += `- [Cloud pricing](https://langfuse.com/pricing.md): Plan prices, usage rates, and limits.\n`;
     markdownContent += `- [Self-hosted pricing and license](https://langfuse.com/pricing-self-host.md): MIT-licensed core features and paid Enterprise additions.\n`;
     markdownContent += `- [Self-hosting](https://langfuse.com/self-hosting.md): Deployment options and operational requirements.\n`;
