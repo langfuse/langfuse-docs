@@ -32,7 +32,12 @@ function CtaLink({
   onClick?: () => void;
 }) {
   return (
-    <div className={cn("group relative flex items-center p-1", className)}>
+    <div
+      className={cn(
+        "group relative flex items-center p-1 button-wrapper",
+        className,
+      )}
+    >
       <HoverCorners />
       <NextLink
         href={href}
@@ -60,7 +65,8 @@ export function BlogCloudCta({
 }: BlogCloudCtaProps) {
   const pathname = usePathname() ?? "/";
   const capture = usePostHogClientCapture();
-  const placement = layout === "stack" ? "sidebar" : "article";
+  const placement: "sidebar" | "article" =
+    layout === "stack" ? "sidebar" : "article";
   const trackSignUp = () => {
     const properties = { placement, path: pathname };
     if (surface === "customer_story") {
