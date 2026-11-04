@@ -124,6 +124,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Swisscom: "Swiss communications, IT, and entertainment company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
+  Todoist: "Task and work management application",
   "Trade Republic": "European fintech bank",
   Twilio: "Customer communications platform",
 };
@@ -165,6 +166,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Samsara",
   "Sanofi",
   "Slite",
+  "Todoist",
   "Twilio",
 ]);
 

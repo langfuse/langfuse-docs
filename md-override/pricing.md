@@ -109,8 +109,10 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | [Access to historical data](/faq/all/data-access-vs-data-retention)                             | 30 days             | 90 days             | 3 years             | 3 years                      |
 | [Ingestion throughput](/faq/all/api-limits)                                                     | 1,000 req/min       | 4,000 req/min       | 20,000 req/min      | Custom                       |
 | **Langfuse AI**                                                                                 |                     |                     |                     |                              |
-| [Halo (in-app agent)](/docs/halo)                                                               | Yes                 | Yes                 | Yes                 | Yes                          |
-| [Halo usage limits](/docs/halo)                                                                 | Low                 | Medium              | High                | High                         |
+| [Halo (in-app agent)](/docs/api-and-data-platform/features/halo)                                | Yes                 | Yes                 | Yes                 | Yes                          |
+| [Halo usage limits](/docs/api-and-data-platform/features/halo)                                  | Low                 | Medium              | High                | High                         |
+| [MCP](/docs/api-and-data-platform/features/mcp-server)                                          | Yes                 | Yes                 | Yes                 | Yes                          |
+| [CLI](/docs/api-and-data-platform/features/cli)                                                 | Yes                 | Yes                 | Yes                 | Yes                          |
 | **Prompt Management**                                                                           |                     |                     |                     |                              |
 | [Prompt versioning](/docs/prompt-management/get-started)                                        | Yes                 | Yes                 | Yes                 | Yes                          |
 | Prompt fetching                                                                                 | Unlimited           | Unlimited           | Unlimited           | Unlimited                    |

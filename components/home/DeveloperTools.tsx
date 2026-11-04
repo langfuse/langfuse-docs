@@ -8,7 +8,7 @@ import { Text } from "@/components/ui/text";
 const HALO_VIDEO_SRC =
   "https://static.langfuse.com/docs-videos/in-app-agent.mp4";
 
-const HALO_HREF = "/docs/halo";
+const HALO_HREF = "/docs/api-and-data-platform/features/halo";
 
 type ToolItem = {
   title: string;

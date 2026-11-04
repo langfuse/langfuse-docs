@@ -106,13 +106,13 @@ To configure batch exports in your environment, configure the following environm
 | `BATCH_EXPORT_PAGE_SIZE`                     | `500`              | Optional page size for streaming exports to S3 to avoid memory issues. The page size can be adjusted if needed to optimize performance.                                            |
 | `BATCH_EXPORT_ROW_LIMIT`                     | `1_500_000`        | Maximum amount of rows that can be exported in a single batch export.                                                                                                              |
 
-#### S3 Compatibility
+#### S3 Compatibility [#s3-compatibility]
 
 The following settings apply to all S3 use-cases (events, media, batch exports) and help with S3-compatible stores that are not fully compatible with the Amazon S3 API.
 
-| Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                          |
-| ----------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). |
+| Variable                                        | Required / Default | Description                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM` |                    | Checksum algorithm for S3 DeleteObjects requests: `MD5`, `CRC32`, `CRC32C`, `CRC64NVME`, `SHA1`, or `SHA256`. If unset, the AWS SDK default (`CRC32`) is used. Set to `MD5` if your storage provider rejects deletions with a `MissingContentMD5` error (e.g. older MinIO versions). `MD5` cannot be used in [FIPS mode](/self-hosting/configuration/hardening#fips-mode). |
 
 ## Multi-modal LLM-as-a-Judge [#multi-modal-llm-as-a-judge]
 
@@ -348,6 +348,7 @@ Please follow the MinIO documentation or use a cloud provider managed blob store
 
 MinIO versions before `RELEASE.2025-02-03` reject S3 DeleteObjects requests with a `MissingContentMD5` error, which breaks data retention and deletion jobs.
 If you cannot upgrade MinIO, set `LANGFUSE_S3_DELETE_OBJECTS_CHECKSUM_ALGORITHM=MD5` to send the legacy `Content-MD5` header instead.
+This workaround is not available in [FIPS mode](/self-hosting/configuration/hardening#fips-mode), which refuses MD5.
 
 </Callout>
 
@@ -476,6 +477,12 @@ Langfuse provides a native OCI Object Storage integration using the OCI SDK, whi
 
 To enable the native OCI integration, set `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE=true` and choose an authentication method via `LANGFUSE_OCI_AUTH_TYPE`.
 
+<Callout type="info">
+
+The OCI SDK hashes every upload part with MD5, so the native integration cannot be used in [FIPS mode](/self-hosting/configuration/hardening#fips-mode). Use OCI's S3-compatible API instead.
+
+</Callout>
+
 | Variable                                 | Required / Default | Description                                                                                                                     |
 | ---------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | `LANGFUSE_USE_OCI_NATIVE_OBJECT_STORAGE` | `false`            | Set to `true` to enable the native OCI Object Storage integration.                                                              |
@@ -594,13 +601,20 @@ Validation behavior:
 
 Set these on both the Langfuse Web and Worker containers if your internal blob storage endpoint resolves to a private address.
 
-| Variable                                                 | Required / Default | Description                                                                                                            |
-| -------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`. |
-| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                          |
-| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                    |
+| Variable                                                 | Required / Default | Description                                                                                                                                                                                                                   |
+| -------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`.                                                                                                        |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                                                                                                                                 |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                                                                                                                           |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_ALLOWED_HOSTS`           |                    | Available from `>=v4.69.0`. Comma-separated list of exact lowercase hostnames (no scheme or port). When set, **only** these hosts are allowed and all others, including public ones, are rejected. Example: `minio.internal`. |
 
-These mirror the existing `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+<Callout type="warning">
+
+Without **Force Path Style**, S3 connects to the bucket as a subdomain of the endpoint (`{bucket}.{host}`). That name passes `LANGFUSE_BLOB_STORAGE_ENDPOINT_ALLOWED_HOSTS`, but Langfuse still blocks it if it resolves to a private address. For a private MinIO at `minio.internal`, turn on Force Path Style or add the address to `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS` or `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS`.
+
+</Callout>
+
+These mirror the existing `LANGFUSE_LLM_CONNECTION_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
 
 <Callout type="info">
 

@@ -43,11 +43,7 @@ const CHANGELOG_URL_PREFIX = "changelog";
 // exactly the pages that expose a "download as PDF" link. The PDF route strips
 // the footer as a second line of defense (app/api/md-to-pdf/route.ts), but
 // these pages should never carry it in the first place.
-const AGENT_FOOTER_EXCLUDED_PAGES = new Set([
-  "privacy.md",
-  "cookie-policy.md",
-  "imprint.md",
-]);
+const AGENT_FOOTER_EXCLUDED_PAGES = new Set(["privacy.md", "cookie-policy.md"]);
 
 /**
  * Read the `canonical` frontmatter value (a docs path) from raw MDX, if present.
