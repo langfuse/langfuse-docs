@@ -120,6 +120,7 @@ export function CinemaMode({ children }: { children: ReactNode }) {
     const onKeyDown = (event: KeyboardEvent) => {
       // Docs shortcuts must stay inactive even when a background click blurs the stage.
       event.stopPropagation();
+      if (event.isComposing || event.keyCode === 229) return;
       if (event.key !== "Escape" || event.defaultPrevented) return;
 
       const dialog =
