@@ -3,11 +3,7 @@ import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, Bot } from "lucide-react";
 import { HomeSection } from "@/components/home/HomeSection";
-import {
-  ArrowHead,
-  ARROW_COLOR,
-  VArrow,
-} from "@/components/home/diagram-arrows";
+import { ArrowHead, VArrow } from "@/components/home/diagram-arrows";
 import { CornerBox, Heading, Link, TextHighlight } from "@/components/ui";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
@@ -321,45 +317,33 @@ function LangfuseNode({ className }: { className?: string }) {
 }
 
 /**
- * Curved connectors between a single node and the two stacked middle nodes.
- * The middle column is two equal rows with a 16px gap, so each middle node's
- * center sits at 25% - 4px and 75% + 4px. Each curve is a stretched SVG with
- * a non-scaling stroke so it bends to any height without distorting the line.
+ * Right-angle connectors between a single node and the two stacked middle
+ * nodes. The middle column is two equal rows with a 16px gap, so each middle
+ * node's center sits at 25% - 4px and 75% + 4px. Lines are 1px boxes offset by
+ * half a pixel so they stay centered on those points, and the elbows sit at the
+ * column's horizontal center.
  */
-function Curve({ rising, className }: { rising: boolean; className: string }) {
+const ROW_TOP = "top-[calc(25%-4.5px)]";
+const ROW_BOTTOM = "bottom-[calc(25%-4.5px)]";
+const MID = "top-[calc(50%-0.5px)]";
+
+function Line({ className }: { className: string }) {
+  return <span className={cn("absolute bg-line-cta", className)} />;
+}
+
+function Spine() {
   return (
-    <div className={cn("absolute inset-x-0", className)}>
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        overflow="visible"
-        className="block h-full w-full"
-      >
-        <path
-          d={rising ? "M0 100C50 100 50 0 100 0" : "M0 0C50 0 50 100 100 100"}
-          fill="none"
-          stroke={ARROW_COLOR}
-          strokeWidth={1}
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    </div>
+    <Line className={cn("left-[calc(50%-0.5px)] w-px", ROW_TOP, ROW_BOTTOM)} />
   );
 }
 
-function Junction({ side }: { side: "left" | "right" }) {
+function Junction() {
   return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "absolute top-1/2 h-[5px] w-[5px] -translate-y-1/2 bg-line-cta",
-        side === "left" ? "-left-[2.5px]" : "-right-[2.5px]",
-      )}
-    />
+    <span className="absolute -left-[2.5px] top-1/2 h-[5px] w-[5px] -translate-y-1/2 bg-line-cta" />
   );
 }
 
-function CurveHead({ className }: { className: string }) {
+function ConnectorHead({ className }: { className: string }) {
   return (
     <span className={cn("absolute right-0", className)}>
       <ArrowHead direction="right" />
@@ -370,11 +354,13 @@ function CurveHead({ className }: { className: string }) {
 function SplitConnector() {
   return (
     <div className="relative h-full" aria-hidden="true">
-      <Junction side="left" />
-      <Curve rising className="top-[calc(25%-4px)] bottom-1/2" />
-      <Curve rising={false} className="top-1/2 bottom-[calc(25%-4px)]" />
-      <CurveHead className="top-[calc(25%-8px)]" />
-      <CurveHead className="bottom-[calc(25%-8px)]" />
+      <Junction />
+      <Line className={cn("left-0 h-px w-1/2", MID)} />
+      <Spine />
+      <Line className={cn("left-1/2 right-0 h-px", ROW_TOP)} />
+      <Line className={cn("left-1/2 right-0 h-px", ROW_BOTTOM)} />
+      <ConnectorHead className="top-[calc(25%-8px)]" />
+      <ConnectorHead className="bottom-[calc(25%-8px)]" />
     </div>
   );
 }
@@ -382,9 +368,11 @@ function SplitConnector() {
 function MergeConnector() {
   return (
     <div className="relative h-full" aria-hidden="true">
-      <Curve rising={false} className="top-[calc(25%-4px)] bottom-1/2" />
-      <Curve rising className="top-1/2 bottom-[calc(25%-4px)]" />
-      <CurveHead className="top-[calc(50%-4px)]" />
+      <Line className={cn("left-0 h-px w-1/2", ROW_TOP)} />
+      <Line className={cn("left-0 h-px w-1/2", ROW_BOTTOM)} />
+      <Spine />
+      <Line className={cn("left-1/2 right-0 h-px", MID)} />
+      <ConnectorHead className="top-[calc(50%-4px)]" />
     </div>
   );
 }
