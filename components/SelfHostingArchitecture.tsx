@@ -253,6 +253,7 @@ function DesktopDiagram() {
       <Client x={STORE_X} y={24} name="Apps & agents" icon={Bot} />
       {/* Explicit arrowheads avoid shared SVG marker IDs. */}
       <g className={styles.optionalPaths}>
+        <path d={`M 400 78 V 140 H 140 V ${GATEWAY_Y}`} />
         <path d={`M 140 ${GATEWAY_Y + 126} V ${WEB_Y}`} />
         <path d={`M ${LEFT} 231 H 24 V 692 H 280`} />
         <path
@@ -263,7 +264,6 @@ function DesktopDiagram() {
         />
       </g>
       <g className={styles.webPaths}>
-        <path d={`M 400 78 V 140 H 140 V ${GATEWAY_Y}`} />
         <path d={`M ${LEFT} 51 H 8 V 397 H ${LEFT}`} />
         <path d="M 240 348 C 270 348 270 208 300 208" />
         <path d="M 240 372 C 270 372 270 312 300 312" />
@@ -472,10 +472,9 @@ export function SelfHostingArchitecture() {
           </span>
         </div>
         <p>
-          Each component links to its setup guide. The optional AI gateway
-          relays model requests from your apps and coding agents to your LLM
-          providers and records them in Langfuse. LLM providers can also run in
-          the same VPC or a peered VPC.
+          The optional AI gateway relays model requests from your apps and
+          coding agents to your LLM providers and records them in Langfuse. LLM
+          providers can also run in the same VPC or a peered VPC.
         </p>
       </figcaption>
     </figure>
