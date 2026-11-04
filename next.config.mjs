@@ -97,6 +97,15 @@ const nextConfig = {
     root: __dirname,
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
+  // Mastra pulls optional server-only dependencies. Leave them external so
+  // the App Router bundler does not try to pack the agent runtime.
+  serverExternalPackages: [
+    "@mastra/core",
+    "@mastra/ai-sdk",
+    "@mastra/observability",
+    "@mastra/langfuse",
+    "@mastra/otel-exporter",
+  ],
 
   // Sparticuz Chromium ships brotli-compressed binaries under `bin/`; Next's file tracer
   // often omits them from the serverless bundle, breaking `executablePath()` on Vercel.
