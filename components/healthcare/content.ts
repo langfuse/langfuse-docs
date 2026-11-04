@@ -6,8 +6,7 @@ import type { FAQItem } from "@/components/shared/FAQAccordion";
 //     and "HIPAA-ready region" currently include Pro and Enterprise. The pricing FAQ
 //     "Where is the data stored?" still says Enterprise customers can choose a
 //     HIPAA-compliant US region. Confirm one public answer.
-// (b) Legal review before naming clinical use cases. See the medical information and
-//     clinical documentation entries below.
+// (b) Legal review before naming the medical information use case. See the entry below.
 // (c) Audit logs are Enterprise only on Cloud and Enterprise Edition when self-hosted
 //     (docs and pricing table). The HIPAA region starts at Pro. Do not describe audit
 //     logs as included with the HIPAA region.
@@ -234,7 +233,6 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
       "Turn around inquiries from healthcare professionals in less time.",
   },
   {
-    // TODO(healthcare-review): (b) Legal review of the name "clinical documentation" before publish.
     area: "Care delivery",
     title: "Clinical documentation",
     icon: "clipboard-pen",
