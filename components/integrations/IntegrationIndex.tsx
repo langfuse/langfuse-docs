@@ -226,7 +226,7 @@ function IntegrationCards({
   return (
     <>
       {featured && featured.length > 0 && (
-        <Cards num={3}>
+        <Cards num={3} className="auto-rows-fr">
           {featured.slice(0, 6).map((page) => (
             <Cards.Card
               href={page.route}
@@ -246,7 +246,7 @@ function IntegrationCards({
         </Cards>
       )}
       <div className={featured && featured.length > 0 ? "mt-4" : ""}>
-        <Cards num={3}>
+        <Cards num={3} className="auto-rows-fr">
           {pages
             .filter((p) => !(featured || []).some((f) => f.route === p.route))
             .map((page) => (
