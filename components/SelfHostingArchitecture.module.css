@@ -25,22 +25,12 @@
 .eyebrow {
   text-transform: uppercase;
 }
-.hint {
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-.scroll {
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-.scroll:focus-visible {
-  outline: 2px solid var(--line-cta);
-  outline-offset: -2px;
+.desktop {
+  padding: 8px 12px 4px;
 }
 .diagram {
   display: block;
   width: 100%;
-  min-width: 860px;
   height: auto;
 }
 .boundary {
@@ -149,13 +139,162 @@
 .caption p {
   margin: 8px 0 0;
 }
-@container (min-width: 860px) {
-  .hint {
+.mobile {
+  display: none;
+  padding: 12px 16px 16px;
+}
+.mobileClients {
+  display: grid;
+  gap: 8px;
+}
+.mobileBoundary {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: var(--surface-1);
+  border: 1px dashed var(--line-structure);
+  border-radius: 12px;
+}
+.mobileInfra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 4px;
+}
+.mobileInfraTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.mobileInfraDetail {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.mobileCard {
+  display: grid;
+  position: relative;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px 10px;
+  align-items: start;
+  padding: 12px 14px;
+  background: var(--surface-bg);
+  border: 1px solid var(--line-structure);
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 150ms ease;
+}
+a.mobileCard:hover,
+a.mobileCard:focus-visible {
+  border-color: var(--line-cta);
+}
+a.mobileCard:focus-visible {
+  outline: 2px solid var(--line-cta);
+  outline-offset: 2px;
+}
+.mobileAccent {
+  position: absolute;
+  top: 0;
+  right: 16px;
+  left: 16px;
+  height: 3px;
+  background: var(--surface-cta-primary);
+  border-radius: 0 0 2px 2px;
+}
+.mobileIcon {
+  color: var(--text-secondary);
+}
+.mobileCopy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.mobileName {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+.mobileDetail {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.mobileImage {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-structure);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.web .mobileImage,
+.worker .mobileImage,
+.gateway .mobileImage {
+  border-top-color: var(--line-cta);
+  opacity: 0.9;
+}
+.mobileStores {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mobileConnector {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 28px;
+  padding: 4px 14px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.mobileRail {
+  justify-self: center;
+  width: 1.5px;
+  height: 100%;
+  min-height: 20px;
+  background: currentColor;
+  border-radius: 1px;
+}
+.webConnector {
+  color: var(--text-primary);
+}
+.workerConnector {
+  color: var(--text-tertiary);
+}
+.optionalConnector {
+  color: var(--text-tertiary);
+}
+.optionalConnector .mobileRail {
+  background: repeating-linear-gradient(
+    to bottom,
+    currentColor 0 4px,
+    transparent 4px 8px
+  );
+}
+@container (max-width: 639px) {
+  .header {
+    padding: 16px 16px 4px;
+  }
+  .desktop {
     display: none;
+  }
+  .mobile {
+    display: block;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .card {
+  .card,
+  .mobileCard {
     transition: none;
   }
 }
