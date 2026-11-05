@@ -510,7 +510,10 @@ export function CompareLanding() {
         </div>
       </div>
 
-      <section className="border-t border-line-structure bg-surface-1">
+      <section
+        className="border-t border-line-structure bg-surface-1"
+        aria-labelledby="compare-cta"
+      >
         <div className={cn(container, "py-10 sm:py-12")}>
           <CustomerStoryCTA
             className="mt-0"
