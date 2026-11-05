@@ -150,7 +150,7 @@ Make sure to select long, random passwords for all secrets.
 
 Only the langfuse-web container and minio must be accessible from outside the instance.
 Therefore, we recommend to add a security group or firewall to your instance that restricts incoming traffic to port :3000 and :9090.
-If you use the [AI Gateway](#ai-gateway), allow traffic to the TLS-terminating reverse proxy in front of it rather than to port :3031, because the gateway serves plain HTTP. Host firewalls such as ufw don't filter ports that Docker publishes, so block :3031 in the security group or [keep it off the network](/self-hosting/configuration/ai-gateway#docker-compose-public-url).
+If you use the [AI Gateway](#ai-gateway), allow traffic to the TLS-terminating reverse proxy in front of it rather than to port :3031, because the gateway serves plain HTTP. Host firewalls such as ufw don't filter ports that Docker publishes, so block :3031 in the security group or [keep it off the network](#ai-gateway-public-url).
 
 ### Start the application
 
@@ -184,7 +184,75 @@ After changing daemon logging defaults, restart Docker and recreate existing con
 
 ## AI Gateway [#ai-gateway]
 
-The default `docker-compose.yml` includes the [AI Gateway](/docs/gateway/overview) (beta) as the `langfuse-ai-gateway` service on port `3031`. If you cloned the repository before the gateway was added, update it; if you edited `docker-compose.yml`, for example its secrets, stash your edits first, as described in [Update an existing installation](/self-hosting/configuration/ai-gateway#docker-compose). It starts with the stack but stays idle until you add its two keys to `.env`, and it needs a Langfuse release newer than `v4.75.0`. On a VM, or whenever users reach Langfuse from other machines, also set `LANGFUSE_AI_GATEWAY_PUBLIC_URL`, because the default `http://localhost:3031` only works locally. See [Deploy with Docker Compose](/self-hosting/configuration/ai-gateway#docker-compose) for the keys, the version, and the public URL.
+The default `docker-compose.yml` includes the [AI Gateway](/self-hosting/configuration/ai-gateway) (beta) as the `langfuse-ai-gateway` service. It starts with the stack but stays idle until you set its two keys: `/health` returns `200`, while `/ready` and model requests return `503` (the compose file sets `LANGFUSE_AI_GATEWAY_ALLOW_MISSING_SERVICE_KEY=true`). Read the [gateway guide](/self-hosting/configuration/ai-gateway) for the requirements and concepts, then turn it on:
+
+<Steps>
+
+### Update an existing installation
+
+<Callout type="warning">
+
+`git pull` moves the checkout to the current major version. If you still run Langfuse v3, finish the [v3 to v4 upgrade](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) first. Pulling and restarting a v3 installation directly can permanently delete data.
+
+</Callout>
+
+Checkouts from before the gateway was added need a `git pull`. If you edited `docker-compose.yml`, for example its `# CHANGEME` secrets, stash your edits first and keep your secrets when you resolve conflicts, because they must match your database volumes:
+
+```bash
+git stash && git pull && git stash pop
+```
+
+### Generate the keys
+
+Web and the gateway share a service key and an ES256 private key that web uses to sign upload tokens. Append both to the `.env` file next to `docker-compose.yml`, once:
+
+```bash
+# Start on a new line if .env doesn't end with one.
+[ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
+echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$(openssl rand -hex 32)" >> .env
+printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(openssl ecparam -name prime256v1 -genkey -noout | awk '{printf "%s\\n", $0}')'" >> .env
+```
+
+The PEM key is stored on a single line, with `\n` for its line breaks. Keep `.env` private. To change the keys later, see [Rotating keys](/self-hosting/configuration/ai-gateway#rotate-keys).
+
+### Start Langfuse
+
+The gateway needs a Langfuse release newer than `v4.75.0`. `LANGFUSE_IMAGE_TAG` (default `4`) sets the tag of web, worker, and gateway together; `LANGFUSE_AI_GATEWAY_IMAGE_TAG` overrides the gateway's only. `--pull always` replaces older cached images behind the tag:
+
+```bash
+docker compose up -d --pull always
+curl http://localhost:3031/ready
+# {"status":"ready"}
+```
+
+Web counts the gateway as deployed once both keys are set; set `LANGFUSE_AI_GATEWAY_DEPLOYED=false` to hide it. Continue with [Set up Gateway as an admin](/docs/gateway/get-started/admin-setup).
+
+</Steps>
+
+### Port, public URL, and TLS [#ai-gateway-public-url]
+
+The gateway listens on and publishes port `3031`. To change it, set `LANGFUSE_AI_GATEWAY_PORT` in `.env` to a port number; the port mapping, healthcheck, and default public URL follow it.
+
+<Callout type="warning">
+
+Web shows `http://localhost:3031` as the gateway's [public URL](/self-hosting/configuration/ai-gateway#public-url) by default, which only works on the Docker host. On a remote host, or whenever users reach Langfuse from other machines, you must set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the address clients use, such as `https://gateway.langfuse.example.com`.
+
+</Callout>
+
+The gateway serves plain HTTP. For access from other machines, put a TLS-terminating reverse proxy in front of it, configured as in [Proxy timeouts and buffering](/self-hosting/configuration/ai-gateway#timeouts), and expose only the proxy. Host firewalls such as ufw or firewalld don't filter ports that Docker publishes, so block `3031` in your cloud security group, or edit `docker-compose.yml`:
+
+- **Proxy on the host:** bind the port to loopback with the mapping `127.0.0.1:${LANGFUSE_AI_GATEWAY_PORT:-3031}:${LANGFUSE_AI_GATEWAY_PORT:-3031}`.
+- **Proxy in a container:** attach it to the Compose network, point it at `http://langfuse-ai-gateway:3031` (or your `LANGFUSE_AI_GATEWAY_PORT`), and remove the gateway's port mapping.
+
+### Optional settings [#ai-gateway-settings]
+
+Set these in `.env`:
+
+- `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS` (`30`), `LANGFUSE_AI_GATEWAY_TELEMETRY_SHUTDOWN_TIMEOUT_SECONDS` (`20`), and `LANGFUSE_AI_GATEWAY_STOP_GRACE_PERIOD` (`60s`, keep it above the sum of the two), see [Graceful shutdown](/self-hosting/configuration/ai-gateway#graceful-shutdown).
+- `LANGFUSE_AI_GATEWAY_LOG_LEVEL` (`info`).
+- The web variables `LANGFUSE_AI_GATEWAY_DEPLOYED`, `LANGFUSE_AI_GATEWAY_ENABLED`, `LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST`, and the [key rotation](/self-hosting/configuration/ai-gateway#rotate-keys) variables.
+
+The gateway reaches web at `http://langfuse-web:3000`, which `.env` can't change. If web runs under a [custom base path](/self-hosting/configuration/custom-base-path), append it to `LANGFUSE_AI_GATEWAY_WEB_URL` in `docker-compose.yml`.
 
 ## Features
 
@@ -216,7 +284,7 @@ Ensure to stop the VM instance in your cloud provider interface to avoid unneces
 
 ## Changing the exposed ports [#ports]
 
-The default `docker-compose.yml` publishes three services on the host: the Langfuse UI on port `3000` (`langfuse-web`, mapping `3000:3000`), MinIO on port `9090` (mapping `9090:9000`), and the AI Gateway on port `3031` (`langfuse-ai-gateway`). If the UI or MinIO port is already taken on your machine, change the host side of the mapping (the left value) and leave the container side unchanged, for example `3001:3000` for the UI. To move the gateway, set `LANGFUSE_AI_GATEWAY_PORT` in `.env` instead, see [Port and public URL](/self-hosting/configuration/ai-gateway#docker-compose-public-url).
+The default `docker-compose.yml` publishes three services on the host: the Langfuse UI on port `3000` (`langfuse-web`, mapping `3000:3000`), MinIO on port `9090` (mapping `9090:9000`), and the AI Gateway on port `3031` (`langfuse-ai-gateway`). If the UI or MinIO port is already taken on your machine, change the host side of the mapping (the left value) and leave the container side unchanged, for example `3001:3000` for the UI. To move the gateway, set `LANGFUSE_AI_GATEWAY_PORT` in `.env` instead, see [Port, public URL, and TLS](#ai-gateway-public-url).
 
 When you change a port, also update the URLs that point at it:
 
