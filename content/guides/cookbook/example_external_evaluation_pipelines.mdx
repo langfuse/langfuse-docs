@@ -1,10 +1,10 @@
 ---
 source: Jupyter Notebook
 title: Evaluate Langfuse LLM Traces with an External Evaluation Pipeline
-seoTitle: Evaluate Traces with an External Pipeline
 description: This notebook explains how to build an external evaluation pipeline to measure the performance of your production LLM application using Langfuse.
 category: Evaluation
 sidebarTitle: External Evaluation Pipelines
+seoTitle: Evaluate Traces with an External Pipeline
 ---
 
 # Evaluate Langfuse LLM Traces with an External Evaluation Pipeline
@@ -190,7 +190,7 @@ For the rest of the notebook, we'll have one goal:
 
 Fetching traces from Langfuse is straightforward. Just set up the Langfuse client and use one of its functions to fetch the data. We'll take an incremental approach: first, we'll fetch the initial 10 traces and evaluate them. After that, we'll add our scores back into Langfuse and move on to the next batch of 10 traces. We'll keep this cycle going until we've processed a total of 50 traces.
 
-A trace's input and output live on its root observation in Langfuse v4, so we fetch root observations and page through them with a cursor. The `filter` argument narrows results by trace name, tags, timestamps, and more. You can find more about other methods to [query data via the SDKs](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk) in our docs.
+A trace's input and output live on its root observation in Langfuse v4, so we fetch root observations and page through them with `langfuse.iter_observation_pages`. The `filter` argument narrows results by trace name, tags, timestamps, and more. You can find more about other methods to [query data via the SDKs](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk) in our docs.
 
 
 ```python
@@ -224,12 +224,12 @@ def get_trace_input(trace):
     return payload
 
 
-def fetch_root_observations_batch(*, limit, cursor=None, to_start_time=None):
+def iter_root_observation_pages(*, max_items, to_start_time=None):
     # The advanced `filter` parameter takes precedence over the individual query
     # parameters, so the time window is expressed as filter conditions as well.
-    return langfuse.api.observations.get_many(
-        limit=limit,
-        cursor=cursor,
+    return langfuse.iter_observation_pages(
+        limit=BATCH_SIZE,
+        max_items=max_items,
         fields="core,basic,io,trace_context",
         filter=json.dumps([
             {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
@@ -240,7 +240,11 @@ def fetch_root_observations_batch(*, limit, cursor=None, to_start_time=None):
     )
 
 
-traces_batch = fetch_root_observations_batch(limit=BATCH_SIZE).data
+traces_batch = [
+    trace
+    for page in iter_root_observation_pages(max_items=BATCH_SIZE)
+    for trace in page.data
+]
 
 print(f"Traces in first batch: {len(traces_batch)}")
 ```
@@ -414,21 +418,13 @@ We'll fetch the data in batches of 10 traces and then iterate through each trace
 
 
 ```python
-processed = 0
-cursor = None
 batch_number = 1
 
-while processed < TOTAL_TRACES:
-    response = fetch_root_observations_batch(
-        limit=min(BATCH_SIZE, TOTAL_TRACES - processed),
-        cursor=cursor,
-        to_start_time=five_am_today,
-    )
-    traces_batch = response.data
-    cursor = getattr(response.meta, "cursor", None)
+for page in iter_root_observation_pages(max_items=TOTAL_TRACES, to_start_time=five_am_today):
+    if not page.data:
+        continue
 
-    for trace in traces_batch:
-        processed += 1
+    for trace in page.data:
         print(f"Processing {trace.trace_id}")
 
         if trace.output is None:
@@ -452,9 +448,6 @@ while processed < TOTAL_TRACES:
 
     print(f"Batch {batch_number} processed 🚀 \n")
     batch_number += 1
-
-    if not cursor:
-        break
 ```
 
 If your pipeline ran successfully, you should see your score in the Langfuse UI.

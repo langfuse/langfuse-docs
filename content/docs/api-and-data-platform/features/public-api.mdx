@@ -155,12 +155,14 @@ from langfuse import get_client
 
 langfuse = get_client()
 
-# Retrieve row-level observations via Observations API v2
-observations = langfuse.api.observations.get_many(
+# Retrieve row-level observations via Observations API v2, following the cursor
+for page in langfuse.iter_observation_pages(
     trace_id="trace-id",
     fields="core,basic,usage",
     limit=100,
-)
+):
+    for observation in page.data:
+        print(observation.id)
 
 # Retrieve aggregates via Metrics API v2
 metrics = langfuse.api.metrics.metrics(query="""
@@ -429,6 +431,8 @@ Instead of offset-based page numbers, the v2 API paginates with a cursor for con
   while `meta.cursor` is present. Continue using the cursor even when `data` is
   empty; the page length does not indicate completion.
 </Callout>
+
+In the Python SDK, `langfuse.iter_observation_pages(...)` and `langfuse.aiter_observation_pages(...)` follow the cursor for you.
 
 Results are always sorted by `startTime` descending (newest first).
 

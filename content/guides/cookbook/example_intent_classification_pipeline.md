@@ -134,12 +134,15 @@ def extract_message(observation):
     return payload
 
 
-response = langfuse.api.observations.get_many(
-    limit=50,
-    fields="core,basic,io,trace_context",
-    is_root_observation=True,
-)
-root_observations = response.data
+root_observations = [
+    observation
+    for page in langfuse.iter_observation_pages(
+        max_items=50,
+        fields="core,basic,io,trace_context",
+        is_root_observation=True,
+    )
+    for observation in page.data
+]
 root_observations[0].dict()
 ```
 
@@ -442,19 +445,15 @@ We will fetch up to 15,000 messages sent to the demo application to create meani
 ```python
 OBSERVATIONS_TO_FETCH = 15_000
 
-root_observations = []
-cursor = None
-while len(root_observations) < OBSERVATIONS_TO_FETCH:
-    response = langfuse.api.observations.get_many(
-        limit=min(50, OBSERVATIONS_TO_FETCH - len(root_observations)),
-        cursor=cursor,
+root_observations = [
+    observation
+    for page in langfuse.iter_observation_pages(
+        max_items=OBSERVATIONS_TO_FETCH,
         fields="core,basic,io,trace_context",
         is_root_observation=True,
     )
-    cursor = getattr(response.meta, "cursor", None)
-    root_observations.extend(response.data)
-    if not cursor:
-        break
+    for observation in page.data
+]
 ```
 
 

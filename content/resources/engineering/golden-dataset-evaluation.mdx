@@ -125,26 +125,25 @@ for score in scores.data:
         continue
 
     # A trace carries no input of its own; read it from the trace's root observation.
-    root_observations = []
-    cursor = None
-    while True:
-        response = langfuse.api.observations.get_many(
-            trace_id=score.subject.id,
-            is_root_observation=True,
-            fields="core,basic,io",
-            limit=1,
-            cursor=cursor,
-        )
-        root_observations = response.data
-        cursor = getattr(response.meta, "cursor", None)
-        if root_observations or not cursor:
-            break
-    if not root_observations:
+    root_observation = next(
+        (
+            observation
+            for page in langfuse.iter_observation_pages(
+                trace_id=score.subject.id,
+                is_root_observation=True,
+                fields="core,basic,io",
+                max_items=1,
+            )
+            for observation in page.data
+        ),
+        None,
+    )
+    if root_observation is None:
         continue
 
     langfuse.create_dataset_item(
         dataset_name="support-agent/golden",
-        input=root_observations[0].input,
+        input=root_observation.input,
         expected_output=None,  # a reviewer supplies the corrected answer
         metadata={"source": "production-failure", "added": str(datetime.now(timezone.utc).date())},
         source_trace_id=score.subject.id,
