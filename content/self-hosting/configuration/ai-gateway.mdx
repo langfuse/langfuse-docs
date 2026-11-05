@@ -263,6 +263,12 @@ The default [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/mai
 
 ### Update an existing installation
 
+<Callout type="warning">
+
+`git pull` moves the checkout to the current major version. If your installation still runs Langfuse v3, finish the [v3 to v4 upgrade](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) first, including its [prerequisites](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-2-prerequisites). Pulling and restarting a v3 installation directly can permanently delete data.
+
+</Callout>
+
 If you cloned the Langfuse repository before the gateway was added, your `docker-compose.yml` has no `langfuse-ai-gateway` service. If you edited `docker-compose.yml`, for example to change the `# CHANGEME` secrets, `git pull` refuses to overwrite it. Set your edits aside, update, and reapply them in the `langfuse` directory:
 
 ```bash
@@ -357,6 +363,8 @@ The compose file passes these settings from `.env` to the gateway:
 
 It also passes these [web variables](#configuration) from `.env` to web, unset unless you add them: `LANGFUSE_AI_GATEWAY_DEPLOYED`, `LANGFUSE_AI_GATEWAY_ENABLED`, `LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST`, and the [key rotation](#rotate-keys) variables `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS`, `LANGFUSE_AI_GATEWAY_JWT_KEY_ID`, `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`, and `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`. To hide the gateway while keeping the keys, set `LANGFUSE_AI_GATEWAY_DEPLOYED=false`.
 
+The compose file sets the gateway's `LANGFUSE_AI_GATEWAY_WEB_URL` to `http://langfuse-web:3000` and doesn't read it from `.env`. If web runs under a [custom base path](/self-hosting/configuration/custom-base-path), edit `docker-compose.yml` to append the base path to that URL.
+
 ## Operations [#operations]
 
 ### Scaling [#scaling]
@@ -417,7 +425,7 @@ Key IDs are derived from the public keys. Set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_
 
 #### Rotating keys with Docker Compose [#rotate-keys-compose]
 
-With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory, one step at a time. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), so they expect the private key in that single-quoted form. Step 2 leaves `.env` unchanged if it can't read the current keys, and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`. Delete `.env.bak` when you're done, because it contains the old keys.
+With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory, one step at a time. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), so they expect the private key in that single-quoted form. Run each step only once. Step 2 leaves `.env` unchanged if it can't read the current and new keys, and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`. Delete `.env.bak` when you're done, because it contains the old keys.
 
 <Callout type="info">
 
@@ -428,6 +436,8 @@ These commands rely on derived key IDs. If you set `LANGFUSE_AI_GATEWAY_JWT_KEY_
 **Service key.** First, let web accept a new key:
 
 ```bash
+# Drop a previous key left over from an unfinished rotation.
+sed -i.bak '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
 # Start on a new line if .env doesn't end with one.
 [ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
 echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$(openssl rand -hex 32)" >> .env
@@ -439,7 +449,7 @@ Then switch web and the gateway to the new key, while web still accepts the old 
 ```bash
 new_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=' .env | cut -d= -f2)
 old_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY=' .env | cut -d= -f2)
-if [ -n "$new_key" ] && [ -n "$old_key" ]; then
+if [ "$(grep -c '^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=' .env)" = 1 ] && [ -n "$new_key" ] && [ -n "$old_key" ]; then
   sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
   echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$new_key" >> .env
   echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$old_key" >> .env
@@ -469,16 +479,17 @@ docker compose up -d
 Then sign with the new key, while web still accepts tokens signed with the old one:
 
 ```bash
+new_private_key=$(awk '{printf "%s\\n", $0}' new-gateway-jwt-key.pem 2>/dev/null)
 old_public_key=$(printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" | openssl ec -pubout | awk '{printf "%s\\n", $0}')
-case "$old_public_key" in
-  "-----BEGIN PUBLIC KEY-----"*)
+case "$new_private_key|$old_public_key" in
+  "-----BEGIN EC PRIVATE KEY-----"*"|-----BEGIN PUBLIC KEY-----"*)
     sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
-    printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(awk '{printf "%s\\n", $0}' new-gateway-jwt-key.pem)'" >> .env
+    printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$new_private_key'" >> .env
     printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$old_public_key'" >> .env
     rm new-gateway-jwt-key.pem
     docker compose up -d
     ;;
-  *) echo "Couldn't read the current private key from .env; .env is unchanged." ;;
+  *) echo "Couldn't read new-gateway-jwt-key.pem or the current private key from .env; .env is unchanged." ;;
 esac
 ```
 
