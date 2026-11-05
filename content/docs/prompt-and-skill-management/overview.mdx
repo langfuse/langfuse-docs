@@ -59,7 +59,7 @@ When prompts and skills live in Langfuse, non-technical team members update them
 
 <Callout type="info">
 
-The SDKs do not cache skills. When you fetch skills through an SDK or the API, cache file content by its hash to reuse it across requests ([fetch files on demand](/docs/skill-management/get-started#api-fetch)). Skills installed with the CLI keep their installed version until you run [`langfuse skills update`](/docs/skill-management/get-started#restore-or-update).
+The SDKs do not cache skills. Each skill fetch through an SDK or the API is a request to Langfuse, so it adds network time and depends on Langfuse being available. Cache file content by its hash to reuse it across requests ([fetch files on demand](/docs/skill-management/get-started#api-fetch)). Skills installed with the CLI keep their installed version until you run [`langfuse skills update`](/docs/skill-management/get-started#restore-or-update).
 
 </Callout>
 
