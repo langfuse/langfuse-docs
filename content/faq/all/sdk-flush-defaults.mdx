@@ -20,4 +20,4 @@ from langfuse import Langfuse
 langfuse = Langfuse(flush_at=100, flush_interval=1)
 ```
 
-In short-lived processes such as scripts, serverless functions, or notebooks, call `langfuse.flush()` (or `shutdown()`) before the process exits so queued spans are sent. The JS/TS SDK can also export every span right away with `exportMode: "immediate"`. See [Queuing and batching](/docs/observability/features/queuing-batching) and [AWS Lambda and serverless functions](/faq/all/aws-lambda-and-serverless-functions).
+In short-lived processes such as scripts, serverless functions, or notebooks, flush queued spans before the process exits or the function returns. In Python, call `langfuse.flush()` (or `langfuse.shutdown()`). In JS/TS, await `forceFlush()` on your `LangfuseSpanProcessor`; `LangfuseClient.flush()` sends only pending scores, not tracing spans. The JS/TS span processor can also export every span right away with `exportMode: "immediate"`. See [Queuing and batching](/docs/observability/features/queuing-batching) and [AWS Lambda and serverless functions](/faq/all/aws-lambda-and-serverless-functions).
