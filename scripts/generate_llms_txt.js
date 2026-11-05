@@ -9,6 +9,16 @@ const repoRoot = path.join(__dirname, "..");
 const SITEMAP_PATH = path.join(repoRoot, "public", "sitemap-0.xml");
 // Per-page metadata produced by scripts/generate-sitemap-excludes.js.
 const ALL_PAGES_PATH = path.join(repoRoot, ".sitemap-all-pages.json");
+// The gateway docs sidebar's "Integrations" folder lists the client setup
+// guides as external links; reuse it so llms.txt stays in sync.
+const GATEWAY_INTEGRATIONS_META_PATH = path.join(
+  repoRoot,
+  "content",
+  "docs",
+  "gateway",
+  "integrations",
+  "meta.json",
+);
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
@@ -197,6 +207,19 @@ function loadPageMeta() {
   return map;
 }
 
+// Turns `external:[Claude Code ↗](/integrations/...)` sidebar entries into
+// Markdown links to the `.md` variant of each page.
+function formatGatewayIntegrationLinks() {
+  const { pages } = JSON.parse(
+    fs.readFileSync(GATEWAY_INTEGRATIONS_META_PATH, "utf-8"),
+  );
+  return pages
+    .map((page) => page.match(/^external:\[(.+?)\s*↗\]\((\/[^)]+)\)$/))
+    .filter(Boolean)
+    .map(([, label, href]) => `[${label}](https://langfuse.com${href}.md)`)
+    .join(", ");
+}
+
 function generateSubFile(entries, config) {
   let content = `# ${config.subFileHeading}\n\n`;
   entries.forEach(({ title, description, url }) => {
@@ -283,6 +306,17 @@ async function generateLLMsList() {
     markdownContent += `- [Check an LLM judge against human labels](https://langfuse.com/guides/llm-as-a-judge-calibration-skill.md): Calibration workflow and [agreement metrics](https://langfuse.com/docs/evaluation/scores/score-analytics.md).\n`;
     markdownContent += `- [Evaluate grounding](https://langfuse.com/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](https://langfuse.com/resources/engineering/hallucination-detection.md).\n`;
     markdownContent += `- [Choose where evaluations run](https://langfuse.com/docs/evaluation/overview.md): Application code, managed evaluators, Cloud, and self-hosting.\n\n`;
+
+    markdownContent += `## AI Gateway\n\n`;
+    markdownContent += `The Langfuse AI Gateway (beta) routes OpenAI and Anthropic API calls through Langfuse and traces every call with usage and cost, with no SDK or code changes. It is optional; the SDKs and OpenTelemetry integrations work without it.\n\n`;
+    markdownContent += `- [Overview](https://langfuse.com/docs/gateway/overview.md): What the gateway does and its roadmap.\n`;
+    markdownContent += `- [Concepts](https://langfuse.com/docs/gateway/concepts.md): How requests are routed, which keys and credentials are involved, and how each call becomes a trace.\n`;
+    markdownContent += `- [Send your first request](https://langfuse.com/docs/gateway/get-started/first-request.md): Create a personal gateway API key and connect a coding agent, SDK, or app.\n`;
+    markdownContent += `- [Set up the gateway as an admin](https://langfuse.com/docs/gateway/get-started/admin-setup.md): Ingestion project, provider credentials, models, and team access.\n`;
+    markdownContent += `- [REST API](https://langfuse.com/docs/gateway/features/rest-api.md): Base URLs, authentication, and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages endpoints.\n`;
+    markdownContent += `- Client setup: ${formatGatewayIntegrationLinks()}.\n`;
+    markdownContent += `- [Self-host the gateway](https://langfuse.com/self-hosting/configuration/ai-gateway.md): Deploy it next to self-hosted Langfuse with the Helm chart.\n`;
+    markdownContent += `- [Troubleshooting and FAQ](https://langfuse.com/docs/gateway/troubleshooting-and-faq.md): Common errors and known limitations of the beta.\n\n`;
 
     // Keep buying and deployment facts easy to find without duplicating
     // volatile prices or competitor claims in the navigation index.
