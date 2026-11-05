@@ -3,6 +3,8 @@ title: Agents
 description: Explore each agent's activity in one project, inspect its runs and traces, and follow the skill versions it loaded.
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # Agents
 
 <AvailabilityBanner
@@ -22,11 +24,15 @@ description: Explore each agent's activity in one project, inspect its runs and 
 
 Explore the agents working in your application from one project. Open an agent to inspect its activity, runs, traces, recorded information, and loaded skill versions. Filter by environment to focus on production, staging, or development. The gallery discovers agents from activity in your selected time window; you do not register them separately.
 
+Existing traces that lack agent identity are not backfilled. Send a new instrumented invocation if the gallery is empty.
+
 ## Track multiple agents in one project [#track-agents]
 
 Record a stable agent ID and a display name on your agent's observations. For example, a support application can report `support-router`, `policy-researcher`, and `response-writer` to the same Langfuse project. You do not need a separate project for each agent.
 
 An agent ID identifies the same logical agent across its runs. The display name is the latest readable label observed from your application. Two agents can share a display name and still remain distinct when they have different IDs. Keep the ID stable when changing a display name; do not use a trace or run ID as the agent ID.
+
+Use nonempty strings: agent IDs can contain up to 256 characters and display names up to 200.
 
 Agent identity is scoped to the project. Environments separate activity within that project; use the [environment filter](/docs/observability/features/environments#configure-environments) to choose the data you want to inspect.
 
@@ -40,6 +46,14 @@ Agent identity is scoped to the project. Environments separate activity within t
 
 First [configure tracing](/docs/observability/sdk/overview) for your application. Record an **AGENT** observation for each invocation and attach the agent identity to its owned model and tool observations too. Creating or configuring an agent with `gen_ai.operation.name=create_agent` does not count as an invocation.
 
+<Callout type="warning">
+  Use the current SDK or [OpenTelemetry
+  endpoint](/integrations/native/opentelemetry) for new integrations. On Langfuse
+  Cloud, `POST /api/public/ingestion` stops accepting trace and observation events
+  on <V4CutoverDate />; score writes remain supported. See the [legacy ingestion
+  migration](/faq/all/deprecated-api-migration#ingestion) for older custom writers.
+</Callout>
+
 When using raw OpenTelemetry, record these attributes:
 
 | Attribute                     | Value                                                                                   |
@@ -52,9 +66,9 @@ When using raw OpenTelemetry, record these attributes:
 
 Langfuse also accepts `langfuse.agent.id` and `langfuse.agent.name`. When both conventions provide a nonempty string for a field, its `langfuse.agent.*` value takes precedence. You can set the environment through the [Langfuse environment configuration](/docs/observability/features/environments#configure-environments) instead.
 
-### TypeScript SDK v5 [#typescript-sdk]
+### TypeScript SDK v6 [#typescript-sdk]
 
-After [initializing the TypeScript SDK](/docs/observability/sdk/overview), set the identity attributes on the native observation's OpenTelemetry span. Pass the agent's span context when creating its children:
+After [initializing the TypeScript SDK v6](/docs/observability/sdk/overview), set the identity attributes on the native observation's OpenTelemetry span. Pass the agent's span context when creating its children:
 
 ```typescript
 import { startObservation } from "@langfuse/tracing";
