@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Refreshes the GitHub dependents tables of the Python and JS SDKs, then the
-# merged top list on /adoption. Scrapes github.com, so runs take a while and
+# merged top list and container pulls on /adoption. Scrapes github.com, so runs take a while and
 # back off on HTTP 429; run the two repos sequentially.
 set -euo pipefail
 
@@ -16,4 +16,5 @@ for pair in "langfuse-python:python" "langfuse-js:js"; do
 done
 
 node scripts/generate-top-dependents.js
-pnpm exec prettier --write ./components-mdx/dependents/
+node scripts/update-container-pulls.js
+pnpm exec prettier --write ./components-mdx/dependents/ ./components-mdx/adoption/
