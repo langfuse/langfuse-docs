@@ -113,7 +113,7 @@ Web accepts a previous key next to the current one, so you can rotate keys while
 | `LANGFUSE_AI_GATEWAY_SERVICE_KEY`     | `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS`                              |
 | `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY` | `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`, the old key's public key |
 
-To rotate, move the current key into its previous variable, set the new key in the current variable, and redeploy web and the gateway. Remove the previous variable once every instance uses the new key, and for the JWT key no sooner than 15 minutes later, the lifetime of upload tokens. If you set `LANGFUSE_AI_GATEWAY_JWT_KEY_ID`, also set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`. With Helm, [manage the keys yourself](/self-hosting/deployment/kubernetes-helm#ai-gateway-keys) first.
+To rotate, move the current key into its previous variable, set the new key in the current variable, and redeploy web and the gateway. Remove the previous variable once every instance uses the new key, and for the JWT key no sooner than 15 minutes later, the lifetime of upload tokens. If you set `LANGFUSE_AI_GATEWAY_JWT_PUBLIC_KEY` explicitly, change it with the private key or unset it. If you set `LANGFUSE_AI_GATEWAY_JWT_KEY_ID`, also set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`. With Helm, [manage the keys yourself](/self-hosting/deployment/kubernetes-helm#ai-gateway-keys) first.
 
 <Callout type="info">
 
