@@ -191,7 +191,7 @@ The default `docker-compose.yml` includes the [AI Gateway](/self-hosting/configu
 [ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
 echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$(openssl rand -hex 32)" >> .env
 printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(openssl ecparam -name prime256v1 -genkey -noout | awk '{printf "%s\\n", $0}')'" >> .env
-docker compose up -d
+docker compose up -d --pull always
 ```
 
 <Callout type="warning">
