@@ -263,13 +263,15 @@ The default [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/mai
 
 ### Update an existing installation
 
-If you cloned the Langfuse repository before the gateway was added, your `docker-compose.yml` has no `langfuse-ai-gateway` service. Update it in the `langfuse` directory:
+If you cloned the Langfuse repository before the gateway was added, your `docker-compose.yml` has no `langfuse-ai-gateway` service. If you edited `docker-compose.yml`, for example to change the `# CHANGEME` secrets, `git pull` refuses to overwrite it. Set your edits aside, update, and reapply them in the `langfuse` directory:
 
 ```bash
+git stash
 git pull
+git stash pop
 ```
 
-If you customized `docker-compose.yml`, merge the `langfuse-ai-gateway` service and the new `LANGFUSE_AI_GATEWAY_*` variables of `langfuse-web` into your file instead.
+If `git stash pop` reports conflicts, resolve them in `docker-compose.yml` and keep your secrets, because they must match your existing database volumes. Without local edits, `git pull` alone is enough.
 
 ### Generate the keys
 
@@ -338,7 +340,7 @@ The gateway serves plain HTTP on its port. Every request carries a gateway API k
 Host firewalls such as ufw or firewalld don't filter ports that Docker publishes. Block `3031` in your cloud provider's security group, or keep the port off the network in `docker-compose.yml`:
 
 - **Proxy installed directly on the host:** publish the gateway on loopback only, by changing its port mapping to `127.0.0.1:${LANGFUSE_AI_GATEWAY_PORT:-3031}:${LANGFUSE_AI_GATEWAY_PORT:-3031}`.
-- **Proxy in a container:** attach the proxy to the Compose network, point it at `http://langfuse-ai-gateway:3031`, and remove the gateway's port mapping. A port bound to the host's loopback isn't reachable from inside another container.
+- **Proxy in a container:** attach the proxy to the Compose network, point it at `http://langfuse-ai-gateway:<port>` with the gateway port (`3031` unless you set `LANGFUSE_AI_GATEWAY_PORT`), and remove the gateway's port mapping. A port bound to the host's loopback isn't reachable from inside another container.
 
 </Callout>
 
@@ -415,19 +417,26 @@ Key IDs are derived from the public keys. Set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_
 
 #### Rotating keys with Docker Compose [#rotate-keys-compose]
 
-With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), so they expect the private key in that single-quoted form. Step 2 leaves `.env` unchanged if it can't read the current keys, and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`.
+With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory, one step at a time. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), so they expect the private key in that single-quoted form. Step 2 leaves `.env` unchanged if it can't read the current keys, and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`. Delete `.env.bak` when you're done, because it contains the old keys.
 
-**Service key:**
+<Callout type="info">
+
+These commands rely on derived key IDs. If you set `LANGFUSE_AI_GATEWAY_JWT_KEY_ID` in `.env`, follow the steps in [Rotating keys](#rotate-keys) by hand and set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID` as well.
+
+</Callout>
+
+**Service key.** First, let web accept a new key:
 
 ```bash
 # Start on a new line if .env doesn't end with one.
 [ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
-
-# 1. Let web accept a new key.
 echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$(openssl rand -hex 32)" >> .env
 docker compose up -d
+```
 
-# 2. Switch web and the gateway to the new key; web still accepts the old one.
+Then switch web and the gateway to the new key, while web still accepts the old one:
+
+```bash
 new_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=' .env | cut -d= -f2)
 old_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY=' .env | cut -d= -f2)
 if [ -n "$new_key" ] && [ -n "$old_key" ]; then
@@ -438,24 +447,28 @@ if [ -n "$new_key" ] && [ -n "$old_key" ]; then
 else
   echo "Couldn't read both service keys from .env; .env is unchanged."
 fi
+```
 
-# 3. Stop accepting the old key.
+Finally, stop accepting the old key:
+
+```bash
 sed -i.bak '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
 docker compose up -d
 ```
 
-**JWT signing key:**
+**JWT signing key.** First, create the new key and let web accept its public key:
 
 ```bash
 # Start on a new line if .env doesn't end with one.
 [ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
-
-# 1. Create the new key and let web accept its public key.
 openssl ecparam -name prime256v1 -genkey -noout > new-gateway-jwt-key.pem
 printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$(openssl ec -in new-gateway-jwt-key.pem -pubout 2>/dev/null | awk '{printf "%s\\n", $0}')'" >> .env
 docker compose up -d
+```
 
-# 2. Sign with the new key; web still accepts tokens signed with the old one.
+Then sign with the new key, while web still accepts tokens signed with the old one:
+
+```bash
 old_public_key=$(printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" | openssl ec -pubout | awk '{printf "%s\\n", $0}')
 case "$old_public_key" in
   "-----BEGIN PUBLIC KEY-----"*)
@@ -467,13 +480,14 @@ case "$old_public_key" in
     ;;
   *) echo "Couldn't read the current private key from .env; .env is unchanged." ;;
 esac
+```
 
-# 3. After at least 15 minutes, stop accepting the old key.
+Wait at least 15 minutes, the lifetime of upload tokens signed with the old key. Then stop accepting the old key:
+
+```bash
 sed -i.bak '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
 docker compose up -d
 ```
-
-Run each numbered step only once, and delete `.env.bak` when you're done, because it contains the old keys.
 
 ## Configuration reference [#configuration]
 
