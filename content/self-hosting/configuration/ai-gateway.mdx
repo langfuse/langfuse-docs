@@ -1,6 +1,6 @@
 ---
 title: AI Gateway (self-hosted)
-description: Deploy the Langfuse AI Gateway next to your self-hosted Langfuse with the Helm chart, and configure its public URL, TLS, scaling, health checks, and graceful shutdown.
+description: Deploy the Langfuse AI Gateway next to your self-hosted Langfuse with the Helm chart or Docker Compose, and configure its public URL, TLS, scaling, health checks, and graceful shutdown.
 label: "Version: v4"
 sidebarTitle: "AI Gateway"
 ---
@@ -17,8 +17,8 @@ The [Langfuse AI Gateway](/docs/gateway/overview) sends model requests from your
 
 ## Requirements [#requirements]
 
-- **Kubernetes with the [Helm chart](/self-hosting/deployment/kubernetes-helm)**, in a release after `2.2.0` that includes the `langfuse.gateway` values. The chart deploys and configures the gateway. The chart is the supported deployment path during the beta: the Docker Compose setup does not include the gateway. To run it another way, run the gateway image with the [gateway variables](#configuration) and set the web variables on Langfuse Web.
-- **Langfuse `v4.75.0` or later** for web and the gateway image, and the same version for both. Image tags have no `v` prefix, for example `4.75.0`.
+- **Kubernetes with the [Helm chart](/self-hosting/deployment/kubernetes-helm)**, in a release after `2.2.0` that includes the `langfuse.gateway` values, **or the [Docker Compose](#docker-compose) setup**. Both deploy and configure the gateway. To run it another way, run the gateway image with the [gateway variables](#configuration) and set the web variables on Langfuse Web.
+- **Langfuse `v4.75.0` or later** for web and the gateway image, and the same version for both. With Docker Compose, use a release newer than `v4.75.0`. Image tags have no `v` prefix, for example `4.75.0`.
 - **The v4 data model.** The gateway is unavailable while `LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy`, because gateway generations are only stored in the v4 tables. `events_only` (the default) and `dual` work. See the [v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-2).
 - **A DNS name for the gateway**, such as `gateway.langfuse.example.com`, with a TLS certificate that covers it. See [TLS](#tls).
 - **Direct outbound HTTPS from the gateway pods and from web to your LLM providers**, `api.openai.com` and `api.anthropic.com`. Web calls the providers too, to validate credentials and discover models. The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy settings, and it always calls the providers' official API URLs, so Azure OpenAI, Amazon Bedrock, and internal LLM proxies aren't supported.
@@ -255,6 +255,77 @@ Model responses are streamed and can take minutes. The gateway ends a request af
 
 The chart sets no proxy annotations by default, because they depend on your Ingress controller. See the examples in [Deploy with Helm](#helm) for ingress-nginx and in [TLS](#tls) for the AWS Load Balancer Controller.
 
+## Deploy with Docker Compose [#docker-compose]
+
+The default [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) includes the gateway as the `langfuse-ai-gateway` service. It starts with the rest of the stack, but stays idle until you set its two keys: `/health` returns `200`, while `/ready` and model requests return `503`. Set up Langfuse with the [Docker Compose guide](/self-hosting/deployment/docker-compose) first, then turn on the gateway:
+
+<Steps>
+
+### Generate the keys
+
+Web and the gateway share two secrets: a service key that they use to authenticate each other, and an ES256 (P-256) private key that web uses to sign the gateway's upload tokens. Docker Compose reads them from the `.env` file next to `docker-compose.yml`. In the `langfuse` directory, append both keys to `.env`:
+
+```bash
+echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$(openssl rand -hex 32)" >> .env
+echo "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(openssl ecparam -name prime256v1 -genkey -noout | awk '{printf "%s\\n", $0}')'" >> .env
+```
+
+The second command writes the PEM key on a single line, with `\n` in place of its line breaks, which web reads as line breaks. Run the commands only once: if `.env` already contains the keys, edit them there instead of appending them again. Keep `.env` private and out of version control.
+
+### Choose the Langfuse version
+
+`LANGFUSE_IMAGE_TAG` sets the image tag of `langfuse-web`, `langfuse-worker`, and `langfuse-ai-gateway`, so all three run the same release. It defaults to `4`, the latest v4 release. To pin a version, add it to `.env` without the `v` prefix:
+
+```bash filename=".env"
+LANGFUSE_IMAGE_TAG=<version>
+```
+
+<Callout type="warning">
+
+The Docker Compose setup needs a Langfuse release newer than `v4.75.0`. Web in `v4.75.0` and earlier hides the gateway even with both keys set.
+
+</Callout>
+
+`LANGFUSE_AI_GATEWAY_IMAGE_TAG` overrides the tag for the gateway only, for example for a release that has no gateway image.
+
+### Start Langfuse
+
+```bash
+docker compose up -d
+```
+
+Docker Compose recreates web and the gateway with the new variables. Check that the gateway is ready:
+
+```bash
+curl http://localhost:3031/ready
+# {"status":"ready"}
+```
+
+Web counts the gateway as deployed once both keys are set, and the gateway pages appear in the Langfuse UI. Continue with [Set up Gateway as an admin](/docs/gateway/get-started/admin-setup).
+
+</Steps>
+
+### Port and public URL [#docker-compose-public-url]
+
+The gateway listens on and publishes port `3031`, next to web on `3000` and the worker on `3030`. To use another port, set `LANGFUSE_AI_GATEWAY_PORT` in `.env` to a port number, such as `3032`, without a host or protocol. The listen address, the port mapping, the healthcheck, and web's default public URL all follow it.
+
+Web shows `http://localhost:<port>` as the gateway's [public URL](#public-url) by default, which only works on the machine that runs Docker Compose. On a VM or behind a reverse proxy, set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the URL your clients use, an origin without a path such as `https://gateway.langfuse.example.com`.
+
+The gateway reaches web over the internal Docker network at `http://langfuse-web:3000`, so this traffic doesn't leave the host. It serves plain HTTP to clients, so beyond local testing, terminate [TLS](#tls) at a reverse proxy in front of it, and configure the proxy as described in [Proxy timeouts and buffering](#timeouts). On a VM, allow inbound traffic to the gateway port, or only to your reverse proxy.
+
+### Optional settings [#docker-compose-settings]
+
+The compose file passes these settings from `.env` to the gateway:
+
+| Variable                                                 | Default | Description                                                                                                                           |
+| -------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`   | `30`    | Seconds that running requests get to finish when the container stops. See [Graceful shutdown](#graceful-shutdown).                    |
+| `LANGFUSE_AI_GATEWAY_TELEMETRY_SHUTDOWN_TIMEOUT_SECONDS` | `20`    | Seconds to upload remaining generations after the drain.                                                                              |
+| `LANGFUSE_AI_GATEWAY_STOP_GRACE_PERIOD`                  | `60s`   | Time Docker waits after stopping the container before it kills it. Keep it above the sum of the two timeouts, and raise it with them. |
+| `LANGFUSE_AI_GATEWAY_LOG_LEVEL`                          | `info`  | Log level of the gateway, set as its `LANGFUSE_LOG_LEVEL`.                                                                            |
+
+It also passes these [web variables](#configuration) from `.env` to web, unset unless you add them: `LANGFUSE_AI_GATEWAY_DEPLOYED`, `LANGFUSE_AI_GATEWAY_ENABLED`, `LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST`, and the [key rotation](#rotate-keys) variables `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS`, `LANGFUSE_AI_GATEWAY_JWT_KEY_ID`, `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`, and `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`. To hide the gateway while keeping the keys, set `LANGFUSE_AI_GATEWAY_DEPLOYED=false`.
+
 ## Operations [#operations]
 
 ### Scaling [#scaling]
@@ -271,7 +342,7 @@ To watch the gateway, set `OTEL_EXPORTER_OTLP_ENDPOINT` on it. It then exports o
 
 ### Health checks [#health-checks]
 
-The gateway serves two unauthenticated endpoints on port `8080`, which the chart uses as Kubernetes probes:
+The gateway serves two unauthenticated endpoints on port `8080`, which the chart uses as Kubernetes probes. With Docker Compose, they are on port `3031`, and the container healthcheck uses `/health`, because a gateway without keys is unconfigured by design:
 
 | Endpoint  | Probe     | Response                                                                                                                                                                                            |
 | --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -297,7 +368,7 @@ Streams that run longer than `langfuse.gateway.connectionDrainTimeoutSeconds` ar
 
 ### Rotating keys [#rotate-keys]
 
-Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three deployments so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm).
+Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three deployments so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm). With Docker Compose, set all of these variables in `.env`, with `LANGFUSE_AI_GATEWAY_SERVICE_KEY` and `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY` in place of the chart values, and run `docker compose up -d` after each step.
 
 **Service key**, shared by web and the gateway:
 
@@ -315,7 +386,7 @@ Key IDs are derived from the public keys. Set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_
 
 ## Configuration reference [#configuration]
 
-The chart sets these variables for you. You only need them when you deploy the gateway without the chart or override the chart's values.
+The chart sets these variables for you, and the Docker Compose file sets the gateway's. You only need them when you deploy the gateway another way or override the defaults.
 
 **Gateway container**
 
@@ -344,20 +415,20 @@ Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The 
 
 **Web container**
 
-| Variable                                        | Default  | Description                                                                                                                                         |
-| ----------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_AI_GATEWAY_DEPLOYED`                  | `false`  | Set to `true` when a gateway runs next to web. While `false`, the UI shows that the gateway is not deployed.                                        |
-| `LANGFUSE_AI_GATEWAY_PUBLIC_URL`                | Derived  | Gateway URL shown in the UI and setup snippets. See [Public URL](#public-url).                                                                      |
-| `LANGFUSE_AI_GATEWAY_SERVICE_KEY`               | Required | Same value as on the gateway.                                                                                                                       |
-| `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`           | Required | ES256 (P-256) private key in PEM format that signs the gateway's upload tokens. Generate it with `openssl ecparam -name prime256v1 -genkey -noout`. |
-| `LANGFUSE_AI_GATEWAY_JWT_PUBLIC_KEY`            | Derived  | Optional. Derived from the private key when unset.                                                                                                  |
-| `LANGFUSE_AI_GATEWAY_JWT_KEY_ID`                | Derived  | Optional. Derived from the public key when unset.                                                                                                   |
-| `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS`      |          | Previous service key, accepted during [rotation](#rotate-keys).                                                                                     |
-| `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`   |          | Previous JWT public key, accepted during [rotation](#rotate-keys).                                                                                  |
-| `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`       | Derived  | Optional. Key ID of the previous public key.                                                                                                        |
-| `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_ENABLED`     | `true`   | Caches key lookups for the gateway.                                                                                                                 |
-| `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_TTL_SECONDS` | `60`     | How long a cached key lookup is used. Bounds how long a role change that doesn't delete a key takes to apply.                                       |
-| `ENCRYPTION_KEY`                                | Required | Encrypts stored provider credentials. Changing it makes them unreadable.                                                                            |
+| Variable                                        | Default  | Description                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_AI_GATEWAY_DEPLOYED`                  | Unset    | Whether a gateway runs next to web. Unset, web counts it as deployed once both keys below are set; in `v4.75.0` and earlier, unset means `false`. Set `false` to hide the gateway even with both keys set. While not deployed, the UI shows that the gateway is not deployed. |
+| `LANGFUSE_AI_GATEWAY_PUBLIC_URL`                | Derived  | Gateway URL shown in the UI and setup snippets. See [Public URL](#public-url).                                                                                                                                                                                                |
+| `LANGFUSE_AI_GATEWAY_SERVICE_KEY`               | Required | Same value as on the gateway.                                                                                                                                                                                                                                                 |
+| `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`           | Required | ES256 (P-256) private key in PEM format that signs the gateway's upload tokens. Generate it with `openssl ecparam -name prime256v1 -genkey -noout`.                                                                                                                           |
+| `LANGFUSE_AI_GATEWAY_JWT_PUBLIC_KEY`            | Derived  | Optional. Derived from the private key when unset.                                                                                                                                                                                                                            |
+| `LANGFUSE_AI_GATEWAY_JWT_KEY_ID`                | Derived  | Optional. Derived from the public key when unset.                                                                                                                                                                                                                             |
+| `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS`      |          | Previous service key, accepted during [rotation](#rotate-keys).                                                                                                                                                                                                               |
+| `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`   |          | Previous JWT public key, accepted during [rotation](#rotate-keys).                                                                                                                                                                                                            |
+| `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`       | Derived  | Optional. Key ID of the previous public key.                                                                                                                                                                                                                                  |
+| `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_ENABLED`     | `true`   | Caches key lookups for the gateway.                                                                                                                                                                                                                                           |
+| `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_TTL_SECONDS` | `60`     | How long a cached key lookup is used. Bounds how long a role change that doesn't delete a key takes to apply.                                                                                                                                                                 |
+| `ENCRYPTION_KEY`                                | Required | Encrypts stored provider credentials. Changing it makes them unreadable.                                                                                                                                                                                                      |
 
 ## Troubleshooting [#troubleshooting]
 
@@ -366,7 +437,7 @@ Set additional gateway variables with `langfuse.gateway.pod.additionalEnv`. The 
 <Details id="ui-not-deployed">
 <Summary>The UI says the AI Gateway isn't deployed</Summary>
 
-Web does not have `LANGFUSE_AI_GATEWAY_DEPLOYED=true`. Check that `langfuse.gateway.enabled` is `true` and that web runs `v4.75.0` or later. If the gateway pages are still missing, check that `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy`.
+Web does not count the gateway as deployed. With Helm, check that `langfuse.gateway.enabled` is `true` and that web runs `v4.75.0` or later. With Docker Compose, check that `.env` sets both keys, that `LANGFUSE_AI_GATEWAY_DEPLOYED` is not `false`, and that web runs a release newer than `v4.75.0`. If the gateway pages are still missing, check that `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy`.
 
 </Details>
 

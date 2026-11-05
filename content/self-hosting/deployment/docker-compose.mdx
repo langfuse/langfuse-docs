@@ -150,6 +150,7 @@ Make sure to select long, random passwords for all secrets.
 
 Only the langfuse-web container and minio must be accessible from outside the instance.
 Therefore, we recommend to add a security group or firewall to your instance that restricts incoming traffic to port :3000 and :9090.
+If you use the [AI Gateway](#ai-gateway), also allow port :3031, or only your reverse proxy in front of it.
 
 ### Start the application
 
@@ -181,6 +182,10 @@ The default `docker-compose.yml` inherits the [Docker daemon's logging configura
 
 After changing daemon logging defaults, restart Docker and recreate existing containers to apply them; restarting containers alone is insufficient. Plan for interruption and preserve data volumes. These settings cover container stdout/stderr, not database data volumes or ClickHouse's internal log files.
 
+## AI Gateway [#ai-gateway]
+
+The default `docker-compose.yml` includes the [AI Gateway](/docs/gateway/overview) (beta) as the `langfuse-ai-gateway` service on port `3031`. It starts with the stack but stays idle until you add its two keys to `.env`, and it needs a Langfuse release newer than `v4.75.0`. See [Deploy with Docker Compose](/self-hosting/configuration/ai-gateway#docker-compose) for the keys, the version, and the public URL.
+
 ## Features
 
 Langfuse supports many configuration options and self-hosted features.
@@ -211,7 +216,7 @@ Ensure to stop the VM instance in your cloud provider interface to avoid unneces
 
 ## Changing the exposed ports [#ports]
 
-The default `docker-compose.yml` publishes two services on the host: the Langfuse UI on port `3000` (`langfuse-web`, mapping `3000:3000`) and MinIO on port `9090` (mapping `9090:9000`). If one of these ports is already taken on your machine, change the host side of the mapping (the left value) and leave the container side unchanged, for example `3001:3000` for the UI.
+The default `docker-compose.yml` publishes three services on the host: the Langfuse UI on port `3000` (`langfuse-web`, mapping `3000:3000`), MinIO on port `9090` (mapping `9090:9000`), and the AI Gateway on port `3031` (`langfuse-ai-gateway`). If the UI or MinIO port is already taken on your machine, change the host side of the mapping (the left value) and leave the container side unchanged, for example `3001:3000` for the UI. To move the gateway, set `LANGFUSE_AI_GATEWAY_PORT` in `.env` instead, see [Port and public URL](/self-hosting/configuration/ai-gateway#docker-compose-public-url).
 
 When you change a port, also update the URLs that point at it:
 
