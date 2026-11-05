@@ -1,0 +1,32 @@
+---
+date: 2026-10-13
+title: Cost totals from any cost key
+description: When you ingest cost details without a total, Langfuse now sums all cost keys, and accepts totalCost and total_cost as the total.
+author: Hassieb
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+When you ingest `cost_details` without a `total` key, Langfuse now derives the total cost as the sum of all numeric cost keys, including custom keys. Total cost in the UI, dashboards, and the Metrics API reflects every cost you send.
+
+- Track a paid tool call with `cost_details={"web_search": 0.01}` and see it in per-user and per-session cost.
+- Send per-bucket costs such as `input`, `output`, and `cache_read_input_tokens` without computing the total yourself.
+- Send a provider-reported total as `total`, `totalCost`, or `total_cost`. Langfuse stores it as `total`, checking the keys in that order.
+
+## Details
+
+- Cost keys must not overlap. If, for example, `input` already includes cache reads, send `total` explicitly so the cache reads aren't counted twice.
+- If you ingest any cost value, Langfuse uses only the ingested cost and does not infer cost from model definition prices for that generation.
+- The rule applies to newly ingested observations. Existing observations keep their stored totals.
+
+<Cards num={1}>
+  <Card
+    title="How the total of ingested cost is derived"
+    href="/docs/observability/features/token-and-cost-tracking#cost-details-contract"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
