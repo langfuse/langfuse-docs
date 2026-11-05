@@ -208,16 +208,34 @@ function loadPageMeta() {
 }
 
 // Turns `external:[Claude Code ↗](/integrations/...)` sidebar entries into
-// Markdown links to the `.md` variant of each page.
+// Markdown links to the `.md` variant of each page. Failures only warn, so a
+// sidebar edit can never stop llms.txt from being written.
 function formatGatewayIntegrationLinks() {
-  const { pages } = JSON.parse(
-    fs.readFileSync(GATEWAY_INTEGRATIONS_META_PATH, "utf-8"),
-  );
-  return pages
-    .map((page) => page.match(/^external:\[(.+?)\s*↗\]\((\/[^)]+)\)$/))
-    .filter(Boolean)
-    .map(([, label, href]) => `[${label}](https://langfuse.com${href}.md)`)
-    .join(", ");
+  let pages = [];
+  try {
+    pages =
+      JSON.parse(fs.readFileSync(GATEWAY_INTEGRATIONS_META_PATH, "utf-8"))
+        .pages || [];
+  } catch (error) {
+    console.warn(
+      `[llms.txt] Could not read ${GATEWAY_INTEGRATIONS_META_PATH}:`,
+      error.message,
+    );
+  }
+  const links = [];
+  for (const page of pages) {
+    const match = String(page).match(
+      /^(?:external:)?\[(.+?)(?:\s*↗)?\]\((\/[^)#]+)\)$/,
+    );
+    if (match) {
+      links.push(`[${match[1]}](https://langfuse.com${match[2]}.md)`);
+    } else {
+      console.warn(
+        `[llms.txt] Skipping gateway integration sidebar entry: ${page}`,
+      );
+    }
+  }
+  return links.join(", ");
 }
 
 function generateSubFile(entries, config) {
@@ -314,7 +332,10 @@ async function generateLLMsList() {
     markdownContent += `- [Send your first request](https://langfuse.com/docs/gateway/get-started/first-request.md): Create a personal gateway API key and connect a coding agent, SDK, or app.\n`;
     markdownContent += `- [Set up the gateway as an admin](https://langfuse.com/docs/gateway/get-started/admin-setup.md): Ingestion project, provider credentials, models, and team access.\n`;
     markdownContent += `- [REST API](https://langfuse.com/docs/gateway/features/rest-api.md): Base URLs, authentication, and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages endpoints.\n`;
-    markdownContent += `- Client setup: ${formatGatewayIntegrationLinks()}.\n`;
+    const gatewayIntegrationLinks = formatGatewayIntegrationLinks();
+    if (gatewayIntegrationLinks) {
+      markdownContent += `- Client setup: ${gatewayIntegrationLinks}.\n`;
+    }
     markdownContent += `- [Self-host the gateway](https://langfuse.com/self-hosting/configuration/ai-gateway.md): Deploy it next to self-hosted Langfuse with the Helm chart.\n`;
     markdownContent += `- [Troubleshooting and FAQ](https://langfuse.com/docs/gateway/troubleshooting-and-faq.md): Common errors and known limitations of the beta.\n\n`;
 
