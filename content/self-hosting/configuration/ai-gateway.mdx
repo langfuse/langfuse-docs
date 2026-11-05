@@ -261,6 +261,16 @@ The default [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/mai
 
 <Steps>
 
+### Update an existing installation
+
+If you cloned the Langfuse repository before the gateway was added, your `docker-compose.yml` has no `langfuse-ai-gateway` service. Update it in the `langfuse` directory:
+
+```bash
+git pull
+```
+
+If you customized `docker-compose.yml`, merge the `langfuse-ai-gateway` service and the new `LANGFUSE_AI_GATEWAY_*` variables of `langfuse-web` into your file instead.
+
 ### Generate the keys
 
 Web and the gateway share two secrets: a service key that they use to authenticate each other, and an ES256 (P-256) private key that web uses to sign the gateway's upload tokens. Docker Compose reads them from the `.env` file next to `docker-compose.yml`. In the `langfuse` directory, append both keys to `.env`:
@@ -291,10 +301,10 @@ The Docker Compose setup needs a Langfuse release newer than `v4.75.0`. Web in `
 ### Start Langfuse
 
 ```bash
-docker compose up -d
+docker compose up -d --pull always
 ```
 
-Docker Compose recreates web and the gateway with the new variables. Check that the gateway is ready:
+`--pull always` replaces cached images, such as an older image behind the `4` tag, with the latest ones for your tag. Docker Compose recreates web and the gateway with the new variables. Check that the gateway is ready:
 
 ```bash
 curl http://localhost:3031/ready
@@ -313,11 +323,17 @@ Web shows `http://localhost:<port>` as the gateway's [public URL](#public-url) b
 
 <Callout type="warning">
 
-The default public URL only works when you open Langfuse on the machine that runs Docker Compose. If you run Langfuse on a remote host, such as a VM, or users reach it from other machines, you must set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the gateway address that clients use, for example `http://<instance-ip>:3031` or, behind a reverse proxy, `https://gateway.langfuse.example.com`. The value is an origin without a path. Otherwise the UI and the setup snippets point clients at `localhost`.
+The default public URL only works when you open Langfuse on the machine that runs Docker Compose. If you run Langfuse on a remote host, such as a VM, or users reach it from other machines, you must set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the gateway address that clients use, for example `https://gateway.langfuse.example.com` behind a reverse proxy. The value is an origin without a path. Otherwise the UI and the setup snippets point clients at `localhost`.
 
 </Callout>
 
-The gateway reaches web over the internal Docker network at `http://langfuse-web:3000`, so this traffic doesn't leave the host. It serves plain HTTP to clients, so beyond local testing, terminate [TLS](#tls) at a reverse proxy in front of it, and configure the proxy as described in [Proxy timeouts and buffering](#timeouts). On a VM, allow inbound traffic to the gateway port, or only to your reverse proxy.
+The gateway reaches web over the internal Docker network at `http://langfuse-web:3000`, so this traffic doesn't leave the host.
+
+<Callout type="warning">
+
+The gateway serves plain HTTP on its port. Every request carries a gateway API key, and request and response bodies contain full prompts and model outputs. For access from other machines, terminate [TLS](#tls) at a reverse proxy in front of the gateway, configure the proxy as described in [Proxy timeouts and buffering](#timeouts), and open only the proxy to inbound traffic, not port `3031`. Use a plain `http://<host>:3031` public URL only on a trusted private network.
+
+</Callout>
 
 ### Optional settings [#docker-compose-settings]
 
@@ -374,7 +390,7 @@ Streams that run longer than `langfuse.gateway.connectionDrainTimeoutSeconds` ar
 
 ### Rotating keys [#rotate-keys]
 
-Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three deployments so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm). With Docker Compose, set all of these variables in `.env`, with `LANGFUSE_AI_GATEWAY_SERVICE_KEY` and `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY` in place of the chart values, and run `docker compose up -d` after each step.
+Web accepts a previous service key and a previous JWT public key next to the current ones. Rotate in three deployments so that every web pod accepts both keys while pods restart. Set the `_PREVIOUS` variables on web with `langfuse.web.pod.additionalEnv`, and pin the current keys with `secretKeyRef` as shown in [Deploy with Helm](#helm). With Docker Compose, follow [Rotating keys with Docker Compose](#rotate-keys-compose) instead.
 
 **Service key**, shared by web and the gateway:
 
@@ -389,6 +405,53 @@ Web accepts a previous service key and a previous JWT public key next to the cur
 3. Wait at least 15 minutes, the lifetime of upload tokens signed with the old key. Then remove the previous public key and redeploy web.
 
 Key IDs are derived from the public keys. Set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID` only if you set `LANGFUSE_AI_GATEWAY_JWT_KEY_ID` explicitly.
+
+#### Rotating keys with Docker Compose [#rotate-keys-compose]
+
+With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`.
+
+**Service key:**
+
+```bash
+# 1. Let web accept a new key.
+echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$(openssl rand -hex 32)" >> .env
+docker compose up -d
+
+# 2. Switch web and the gateway to the new key; web still accepts the old one.
+new_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=' .env | cut -d= -f2)
+old_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY=' .env | cut -d= -f2)
+sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
+echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$new_key" >> .env
+echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$old_key" >> .env
+docker compose up -d
+
+# 3. Stop accepting the old key.
+sed -i.bak '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
+docker compose up -d
+```
+
+**JWT signing key:**
+
+```bash
+# 1. Create the new key and let web accept its public key.
+openssl ecparam -name prime256v1 -genkey -noout > new-gateway-jwt-key.pem
+echo "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$(openssl ec -in new-gateway-jwt-key.pem -pubout 2>/dev/null | awk '{printf "%s\\n", $0}')'" >> .env
+docker compose up -d
+
+# 2. Sign with the new key; web still accepts tokens signed with the old one.
+old_public_key=$(printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" | openssl ec -pubout 2>/dev/null | awk '{printf "%s\\n", $0}')
+sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
+echo "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(awk '{printf "%s\\n", $0}' new-gateway-jwt-key.pem)'" >> .env
+echo "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$old_public_key'" >> .env
+rm new-gateway-jwt-key.pem
+docker compose up -d
+
+# 3. After at least 15 minutes, stop accepting the old key.
+sed -i.bak '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
+docker compose up -d
+```
+
+Run each numbered step only once, and delete `.env.bak` when you're done, because it contains the old keys.
 
 ## Configuration reference [#configuration]
 
