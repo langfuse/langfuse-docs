@@ -35,6 +35,7 @@ We distinguish between officially supported and community-supported options:
 | [MinIO / AIStor](#minio)                          | Official      |
 | [OCI Object Storage](#oci-object-storage)         | Community     |
 | [Tigris](#tigris)                                 | Community     |
+| [Neon Object Storage](#neon)                      | Community     |
 | [Other S3-compatible providers](#other-providers) | Community     |
 
 For Google Cloud Storage, we recommend the [native integration](#google-cloud-storage); the [S3 interoperability mode](#google-cloud-storage-compatibility-mode) has known limitations.
@@ -540,6 +541,38 @@ Tigris uses virtual-hosted-style addressing by default. Do not set `LANGFUSE_S3_
 
 </Callout>
 
+### Neon Object Storage [#neon]
+
+[Neon Object Storage](https://neon.com/docs/storage/overview) is S3-compatible object storage built into Neon Postgres projects.
+Buckets belong to a Neon branch, and each branch has its own S3 endpoint.
+Look up your branch's endpoint and region with the [Neon API](https://neon.com/docs/storage/get-started#find-your-branch-endpoint), and create a private bucket on that branch.
+Then create a credential with both the `storage:read` and `storage:write` scopes, for example with `neon credentials create --scope storage:read --scope storage:write`.
+Use its `token_id` (`nak_live_...`) as the access key ID and its `s3_secret_access_key` (`nsk_live_...`) as the secret access key.
+
+#### Example Configuration [#neon-example-configuration]
+
+Set the following environment variables to connect Langfuse with your Neon bucket:
+
+```yaml
+LANGFUSE_S3_EVENT_UPLOAD_BUCKET=langfuse
+LANGFUSE_S3_EVENT_UPLOAD_REGION=us-east-2 # Region of your Neon project
+LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID=nak_live_YOUR_TOKEN_ID
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=nsk_live_YOUR_SECRET_KEY
+LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT=https://br-example-123456.storage.c-1.us-east-2.aws.neon.tech # S3 endpoint of your branch
+LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE=true
+LANGFUSE_S3_EVENT_UPLOAD_PREFIX=events/
+```
+
+Use the same bucket, region, endpoint, and credential for `LANGFUSE_S3_MEDIA_UPLOAD_*` and `LANGFUSE_S3_BATCH_EXPORT_*`, with prefixes such as `media/` and `exports/`.
+The branch endpoint is public, so SDKs, browsers, and the Langfuse containers can all use it, and you don't need `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT` or `LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT`.
+
+<Callout type="info">
+
+Neon Object Storage only supports path-style addressing. Set `FORCE_PATH_STYLE` to `true` for events, media, and batch exports, otherwise requests fail with a TLS certificate error.
+Neon accepts but ignores server-side encryption headers, so leave the `*_SSE` and `*_SSE_KMS_KEY_ID` variables unset.
+
+</Callout>
+
 ### Other Providers [#other-providers]
 
 Langfuse supports any S3-compatible storage provider.
@@ -568,6 +601,7 @@ Configure a lifecycle expiration rule for your storage provider:
 - **MinIO** — Use `mc ilm rule add --expire-days` to set an expiration rule. See [mc ilm rule add](https://min.io/docs/minio/linux/reference/minio-mc/mc-ilm-rule-add.html).
 - **Cloudflare R2** — Configure object lifecycle expiration rules via the R2 dashboard or API. See [Object lifecycles](https://developers.cloudflare.com/r2/buckets/object-lifecycles/).
 - **Tigris** — Configure object lifecycle expiration rules via the Tigris Dashboard or AWS CLI. See [Object Lifecycle](https://www.tigrisdata.com/docs/objects/object-lifecycle/).
+- **Neon Object Storage** — Neon stores lifecycle configurations but does not run expiration rules yet. Delete old objects under the event upload prefix with a scheduled job instead. See [S3 compatibility](https://neon.com/docs/storage/s3-compatibility#known-limitations).
 - **Azure Blob Storage** — Create a lifecycle management policy with a delete action. See [Configure a lifecycle management policy](https://learn.microsoft.com/en-us/azure/storage/blobs/lifecycle-management-policy-configure).
 - **Google Cloud Storage** — Use Object Lifecycle Management with a Delete action and an age condition. See [Object Lifecycle Management](https://cloud.google.com/storage/docs/lifecycle).
 - **OCI Object Storage** — Create a lifecycle policy rule with an object age-based delete action. See [Using Object Lifecycle Management](https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/usinglifecyclepolicies.htm).
