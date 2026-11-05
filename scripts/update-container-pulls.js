@@ -79,8 +79,10 @@ async function getGhcrPulls(packagePath) {
 
 function formatPulls(count) {
   if (count === undefined) return "–";
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  return `${Math.round(count / 1_000)}K`;
+  // Round before picking the unit so 999,500+ shows as 1.0M, not 1000K
+  const thousands = Math.round(count / 1_000);
+  if (thousands >= 1_000) return `${(count / 1_000_000).toFixed(1)}M`;
+  return `${thousands}K`;
 }
 
 async function updateContainerPulls() {
