@@ -5,6 +5,7 @@ import {
   X,
   ChevronRight,
   GraduationCap,
+  MessagesSquare,
   Presentation,
   Unplug,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import IconCompass from "@/components/icons/compass";
 const SECTIONS = [
   { title: "Docs", path: "/docs", Icon: IconBook },
   { title: "Integrations", path: "/integrations", Icon: Unplug },
+  { title: "Consultant", path: "/consultant", Icon: MessagesSquare },
   { title: "Self Hosting", path: "/self-hosting", Icon: IconDesktopTower },
   { title: "Academy", path: "/academy", Icon: GraduationCap },
   { title: "Workshop", path: "/workshop", Icon: Presentation },
@@ -91,11 +93,19 @@ export function DocsSecondaryNavMobile() {
   );
 }
 
-export function DocsSecondaryNav() {
+export function DocsSecondaryNav({
+  visibleOnMobile = false,
+}: {
+  /** Show the section tabs below the md breakpoint. Docs pages keep them desktop-only. */
+  visibleOnMobile?: boolean;
+}) {
   const pathname = usePathname();
   return (
     <div
-      className="hidden overflow-x-auto overflow-y-hidden sticky z-50 md:block bg-surface-1"
+      className={cn(
+        "overflow-x-auto overflow-y-hidden sticky z-50 bg-surface-1",
+        visibleOnMobile ? "block" : "hidden md:block",
+      )}
       style={{
         top: "calc(var(--fd-banner-height, 0px) + var(--lf-nav-primary-height))",
       }}
