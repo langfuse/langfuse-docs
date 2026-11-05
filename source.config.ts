@@ -13,6 +13,7 @@ import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
 import { remarkHideStepsFromToc } from "./lib/remark-hide-steps-from-toc.mjs";
+import { remarkIntegrationSignupCta } from "./lib/remark-integration-signup-cta.mjs";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -233,6 +234,7 @@ export default defineConfig({
       remarkMdxMermaid,
       remarkCodeFilename,
       remarkHideStepsFromToc,
+      remarkIntegrationSignupCta,
     ],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://

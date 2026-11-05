@@ -14,6 +14,9 @@ const {
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 const { hasResourceSignupCta } = require("../lib/resource-signup-cta.js");
 const {
+  injectIntegrationSignupCta,
+} = require("../lib/integration-signup-cta.js");
+const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
 
@@ -110,7 +113,11 @@ function appendAgentInstructionsFooter(markdown, destRel) {
 
 // Mirror layout-level CTAs before appending the Markdown-only agent footer.
 // Also applies to Markdown overrides and notebook-generated resource pages.
-function appendPageFooters(markdown, destRel) {
+// Integration pages get the same banner the LangChain page renders after the
+// intro. `sourceHasSignupCta` skips pages whose MDX already includes it, so
+// the component renderer and this injector do not both emit the line.
+function appendPageFooters(markdown, destRel, options) {
+  markdown = injectIntegrationSignupCta(markdown, destRel, options);
   const pathname = `/${destRel.replace(/\.md$/, "")}`;
   if (hasResourceSignupCta(pathname)) {
     const cta = replaceComponentsWithMarkdown("<SignupCTA />").trim();
@@ -220,7 +227,9 @@ function copyAll() {
       processed = injectChangelogAgentNotice(processed, originalContent);
     }
 
-    processed = appendPageFooters(processed, destRel);
+    processed = appendPageFooters(processed, destRel, {
+      sourceHasSignupCta: /<SignupCTA\b/.test(originalContent),
+    });
 
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;
