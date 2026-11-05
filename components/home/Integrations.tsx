@@ -395,6 +395,11 @@ const marqueeRow1: MarqueeItem[] = [
     icon: "/images/integrations/spring_icon.svg",
   },
   {
+    label: "Laravel AI",
+    href: "/integrations/frameworks/laravel-ai",
+    icon: "/images/integrations/laravel_icon.svg",
+  },
+  {
     label: "Cursor",
     href: "/integrations/developer-tools/cursor",
     icon: "/images/integrations/cursor_icon.png",
