@@ -48,7 +48,7 @@ const security = [
   { label: "SOC 2 Type II & ISO 27001", href: "/security" },
   { label: "EU, US & Japan Data Regions", href: "/security/data-regions" },
   {
-    label: "FIPS 140-3 & NIST hardening for Gov",
+    label: "FIPS 140-3 & Iron Bank-hardened images for Gov",
     href: "/self-hosting/configuration/hardening#hardening-for-government",
   },
   { label: "HIPAA-ready region", href: "/security/hipaa" },
