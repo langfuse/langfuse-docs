@@ -141,7 +141,7 @@ With `langfuse.gateway.enabled: true`, the chart:
 
 <Callout type="warning">
 
-With `helm template`-based GitOps tools such as Argo CD, the chart can't read existing Secrets, so the generated keys change on every sync and gateway requests fail. Create the keys yourself and reference them. This also pins them for [key rotation](/self-hosting/configuration/ai-gateway#rotate-keys):
+With `helm template`-based GitOps tools such as Argo CD, the chart can't read existing Secrets, so the generated keys change on every sync and gateway requests fail. Create the keys yourself and reference them. For a release that already runs the gateway, copy the current keys instead of generating new ones, with `"$(kubectl get secret langfuse-app -n langfuse -o jsonpath='{.data.ai-gateway-service-key}' | base64 -d)"` and the same for `ai-gateway-jwt-private-key`. Then change them only by [rotating](/self-hosting/configuration/ai-gateway#rotate-keys):
 
 ```bash
 kubectl create secret generic langfuse-gateway -n langfuse \

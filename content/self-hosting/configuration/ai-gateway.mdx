@@ -109,7 +109,7 @@ On `SIGTERM`, the gateway reports `503` on `/ready`, rejects new requests, and l
 Web accepts a previous service key and a previous JWT public key next to the current ones, so you can rotate without failing requests. Rotate in three rollouts, so that every web instance accepts both keys while instances restart:
 
 - **Helm:** pin the current keys with `secretKeyRef`, see the [Helm guide](/self-hosting/deployment/kubernetes-helm#ai-gateway), set the `_PREVIOUS` variables with `langfuse.web.pod.additionalEnv`, and run `helm upgrade` after each step. Updating a Secret in place doesn't restart pods, so then also run `kubectl rollout restart` on the web and gateway Deployments.
-- **Docker Compose:** edit the variables in `.env` and run `docker compose up -d` after each step. Store PEM keys on a single line, as in [Generate the keys](/self-hosting/deployment/docker-compose#ai-gateway), by piping them through `awk '{printf "%s\\n", $0}'`. To get the current private key back as a file, run `printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" > private-key.pem`.
+- **Docker Compose:** edit the variables in `.env` and run `docker compose up -d` after each step. Store PEM keys on a single line, as in [Generate the keys](/self-hosting/deployment/docker-compose#ai-gateway), by piping them through `awk '{printf "%s\\n", $0}'`. To get the current private key back as a file, run `printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" > old-private-key.pem`.
 
 **Service key**, shared by web and the gateway. Generate a new one with `openssl rand -hex 32`.
 
@@ -117,7 +117,7 @@ Web accepts a previous service key and a previous JWT public key next to the cur
 2. Set `LANGFUSE_AI_GATEWAY_SERVICE_KEY` to the new key on web and the gateway, and `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS` to the **old** key.
 3. Remove `LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS`.
 
-**JWT signing key**, used only by web. Generate a new private key with `openssl ecparam -name prime256v1 -genkey -noout`, and derive its public key with `openssl ec -in private-key.pem -pubout`.
+**JWT signing key**, used only by web. Generate a new private key with `openssl ecparam -name prime256v1 -genkey -noout > new-private-key.pem`. Derive a public key with `openssl ec -pubout -in <file>`: from `new-private-key.pem` in step 1, and from the old private key in step 2.
 
 1. Set the **new** public key as `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY`.
 2. Set `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY` to the new private key, and `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY` to the **old** public key.
