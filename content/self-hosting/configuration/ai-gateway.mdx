@@ -309,7 +309,13 @@ Web counts the gateway as deployed once both keys are set, and the gateway pages
 
 The gateway listens on and publishes port `3031`, next to web on `3000` and the worker on `3030`. To use another port, set `LANGFUSE_AI_GATEWAY_PORT` in `.env` to a port number, such as `3032`, without a host or protocol. The listen address, the port mapping, the healthcheck, and web's default public URL all follow it.
 
-Web shows `http://localhost:<port>` as the gateway's [public URL](#public-url) by default, which only works on the machine that runs Docker Compose. On a VM or behind a reverse proxy, set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the URL your clients use, an origin without a path such as `https://gateway.langfuse.example.com`.
+Web shows `http://localhost:<port>` as the gateway's [public URL](#public-url) by default.
+
+<Callout type="warning">
+
+The default public URL only works when you open Langfuse on the machine that runs Docker Compose. If you run Langfuse on a remote host, such as a VM, or users reach it from other machines, you must set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the gateway address that clients use, for example `http://<instance-ip>:3031` or, behind a reverse proxy, `https://gateway.langfuse.example.com`. The value is an origin without a path. Otherwise the UI and the setup snippets point clients at `localhost`.
+
+</Callout>
 
 The gateway reaches web over the internal Docker network at `http://langfuse-web:3000`, so this traffic doesn't leave the host. It serves plain HTTP to clients, so beyond local testing, terminate [TLS](#tls) at a reverse proxy in front of it, and configure the proxy as described in [Proxy timeouts and buffering](#timeouts). On a VM, allow inbound traffic to the gateway port, or only to your reverse proxy.
 
