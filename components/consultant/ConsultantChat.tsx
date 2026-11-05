@@ -209,6 +209,8 @@ function ConsultantThread({ onNewChat }: { onNewChat: () => void }) {
   }
 
   useEffect(() => {
+    // Strict Mode runs this cleanup once before the real mount.
+    discardRef.current = false;
     return () => {
       discardRef.current = true;
       abortRef.current?.abort();
