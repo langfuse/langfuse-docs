@@ -3,16 +3,28 @@ title: Incident & Breach
 description: Incident response and breach notification at Langfuse.
 ---
 
-# Incident & Breach
+# Incident and breach response
 
-## Incident Response
+This page describes incident response for Langfuse Cloud. The applicable agreement, [Information Security Addendum](/security-addendum), and [Customer Data Processing Addendum (DPA)](/dpa) set out the contractual obligations. Customer-specific terms, including an applicable Business Associate Agreement (BAA), may add requirements. See [HIPAA and BAA requirements](/security/hipaa).
 
-We follow a standard incident identification and response process. We post status updates on our [status page](https://status.langfuse.com).
+## Incident response
 
-## Notification
+Personnel should escalate suspected security incidents immediately through our [on-call incident response process](/handbook/product-engineering/incident-response). The response team assesses impact and severity, contains the incident, preserves evidence, and works to restore secure operations. We document the response and use post-mortems to identify corrective actions.
 
-We will notify customers of any breach without delay. At most within 72 hours.
+Internal reporting, investigation, and severity classification must not delay a required customer notification. We do not wait for recovery or a completed root-cause analysis before notifying customers.
 
-## Incident Response Plan
+## Customer notification [#customer-notification]
 
-Our Incident Response Plan provides a structured framework to ensure we detect and react to security incidents swiftly, requiring all personnel to report any suspected event within 24 hours. Once an incident is reported, it is investigated and assigned a severity level within 48 hours, which dictates the priority and timeline for the response. A dedicated team then works to contain, resolve, and recover from the incident, preserving forensic evidence and meticulously documenting all actions taken. Following resolution, we conduct a post-mortem analysis to identify the root cause, and in the event of a data breach involving sensitive information, we are committed to notifying all affected parties and relevant authorities.
+A Security Incident involves a security breach that results in customer data being accidentally or unlawfully destroyed, lost, changed, disclosed without authorization, or accessed without authorization. A Personal Data Breach concerns customer personal data. Notification is not limited to data classified as sensitive.
+
+Under [Section 7.20 of the Information Security Addendum](/security-addendum), we notify affected customers **without undue delay and, where feasible, within 48 hours after becoming aware of a Security Incident**, in accordance with [Section 7 of the DPA](/dpa). The period starts at awareness, rather than completion of the investigation. The feasibility qualification does not remove the obligation to notify without undue delay.
+
+The initial notice summarizes the circumstances known at the time and corrective action taken or planned. We investigate, work to mitigate the effects, and communicate and cooperate with the customer on its response as described in the DPA. Information about the contents of customer-ingested data, such as affected record counts or categories of data subjects, may not be available to us.
+
+Notifications to regulators or individuals are assessed under applicable law and the relevant agreements, with coordination between the customer and our security and privacy teams.
+
+## Service status and reporting
+
+We publish service availability updates on our [status page](https://status.langfuse.com). A public status update does not replace a required customer security notification. We avoid publishing sensitive incident details or customer data in public updates.
+
+For security inquiries, contact security@clickhouse.com. Report vulnerabilities through our [responsible disclosure program](/security/responsible-disclosure).
