@@ -1,0 +1,123 @@
+---
+title: Tamper-evident Records of Traced LLM Calls with SealedRun
+sidebarTitle: SealedRun
+logo: /images/integrations/sealedrun_icon.svg
+description: Keep a Langfuse trace and a signed, tamper-evident SealedRun record of the same model call, linked by the trace id, so a third party can verify what was sent and received.
+---
+
+# SealedRun Integration
+
+[SealedRun](https://sealedrun.com) is an open-source recorder for AI agents. It sits in front of the model API as a proxy and writes a signed, hash-chained record of every request and reply that goes through it. The record is signed by the recorder, not by the agent, so neither the agent nor the operator can rewrite it afterwards. A run is exported as a bundle that anyone can verify offline with the `sealedrun` CLI.
+
+Langfuse and SealedRun answer different questions about the same call:
+
+- **Langfuse**: what happened, how long it took, what it cost, how to debug it.
+- **SealedRun**: can a third party check that this is what was sent and received, and that nobody changed it since.
+
+This integration keeps both. The agent uses the Langfuse OpenAI client pointed at the SealedRun proxy, and the Langfuse trace id is used as the SealedRun run label, so each side leads to the other.
+
+## How It Works
+
+1. The Langfuse OpenAI drop-in (`from langfuse.openai import OpenAI`) traces the call as usual.
+2. The client's `base_url` points at the SealedRun recorder instead of the provider. The recorder forwards the request to the provider and signs the request and reply that actually went over the wire.
+3. The Langfuse trace id travels in the `X-SealedRun-Run` header and becomes the run label.
+4. In Langfuse, the trace holds the model call plus the run label in its metadata. In SealedRun, the run's `run_start` record carries the trace id, followed by one `llm_call` record per call with the digests of the request and the reply.
+
+The recorder sends nothing to Langfuse; only the client does. Only calls made through the proxy are sealed. A call the agent makes around the proxy appears in Langfuse and not in the run.
+
+## Get Started
+
+<Steps>
+
+### Start the SealedRun recorder
+
+Create `upstreams.yaml` with the provider the proxy should forward to:
+
+```yaml
+upstreams:
+  - name: openai
+    url: https://api.openai.com/v1
+    dialect: openai
+    key_env: OPENAI_API_KEY
+    location: cloud
+    models: ["gpt-*"]
+```
+
+```bash
+docker run --rm -p 127.0.0.1:8080:8080 \
+  -v ./upstreams.yaml:/data/upstreams.yaml:ro \
+  -e SEALEDRUN_API_TOKEN=change-me \
+  -e OPENAI_API_KEY=$OPENAI_API_KEY \
+  ghcr.io/sealedrun/sealedrun:0.8.1
+```
+
+The recorder exposes an OpenAI-compatible endpoint at `http://127.0.0.1:8080/v1` and an Inspector UI on the same port. See the [SealedRun README](https://github.com/sealedrun/sealedrun#readme) for other upstreams (Anthropic, Ollama, Gemini and OpenAI-compatible servers).
+
+### Install the Langfuse SDK
+
+```bash
+pip install langfuse openai
+```
+
+Set your Langfuse keys:
+
+```bash
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+export LANGFUSE_BASE_URL=https://cloud.langfuse.com  # or your self-hosted URL
+```
+
+### Point the Langfuse OpenAI client at the recorder
+
+```python
+from langfuse import get_client
+from langfuse.openai import OpenAI
+
+langfuse = get_client()
+
+with langfuse.start_as_current_observation(as_type="span", name="sealedrun-example") as span:
+    trace_id = langfuse.get_current_trace_id()
+
+    client = OpenAI(
+        base_url="http://127.0.0.1:8080/v1",
+        api_key="change-me",  # the recorder token, not the provider key
+        default_headers={"X-SealedRun-Run": trace_id},
+    )
+    reply = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[{"role": "user", "content": "Why does an auditor want a signed record of a model call?"}],
+    )
+    span.update(output=reply.choices[0].message.content, metadata={"sealedrun_run": trace_id})
+
+langfuse.flush()
+print("Langfuse trace:", trace_id)
+```
+
+### Export and verify the run
+
+```bash
+TRACE=<trace id printed above>
+RUN=$(curl -s -H "Authorization: Bearer change-me" \
+  "http://127.0.0.1:8080/api/runs?q=$TRACE" | jq -r '.[0].run_id')
+curl -s -X POST -H "Authorization: Bearer change-me" \
+  "http://127.0.0.1:8080/api/runs/$RUN/export?end=true" -o run.zip
+
+pip install sealedrun
+PRINCIPAL=$(curl -s -H "Authorization: Bearer change-me" \
+  http://127.0.0.1:8080/api/identity | jq -r .principal_id)
+python -m sealedrun run.zip $PRINCIPAL
+```
+
+The verifier checks the signatures and the hash chain and prints a report. Change one byte of the bundle and verification fails.
+
+</Steps>
+
+## Example
+
+A runnable version of this setup, with tests, is in the SealedRun repository: [`examples/langfuse`](https://github.com/sealedrun/sealedrun/tree/main/examples/langfuse). It was checked against Langfuse v4 with the Python SDK v5 and both Ollama and OpenAI upstreams.
+
+## Notes
+
+- The Langfuse Python SDK v5 requires Langfuse v4 or newer (`LANGFUSE_BASE_URL`).
+- The recorder also wraps MCP servers and records tool calls; see the [SealedRun spec](https://github.com/sealedrun/sealedrun/blob/main/SPEC.md) for the record format and [TRUST.md](https://github.com/sealedrun/sealedrun/blob/main/TRUST.md) for what the record does and does not prove.
+- Questions or issues: [github.com/sealedrun/sealedrun/issues](https://github.com/sealedrun/sealedrun/issues).
