@@ -2,24 +2,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { CredibilitySentence } from "@/components/CredibilitySentence";
 import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import {
-  compareLanding as content,
-  FORTUNE_50_TOKEN,
-  OBSERVATIONS_TOKEN,
-} from "@/lib/compare-landing-data";
-import {
-  FORTUNE_50_COMPANIES,
-  formatObservationsPerMonth,
-} from "@/lib/usage-stats";
-
-const heroDescription = content.hero.description
-  .replace(FORTUNE_50_TOKEN, String(FORTUNE_50_COMPANIES))
-  .replace(OBSERVATIONS_TOKEN, formatObservationsPerMonth());
+import { compareLanding as content } from "@/lib/compare-landing-data";
 import { cn } from "@/lib/utils";
 import styles from "./compare-landing.module.css";
+
+const heroParagraphs = content.hero.description
+  .split(/\n\n+/)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
 
 const container = "mx-auto w-full max-w-[1200px] px-4 sm:px-8";
 const eyebrow =
@@ -133,7 +127,7 @@ export function CompareLanding() {
       <section
         className={cn(
           container,
-          "grid items-center gap-10 pb-12 pt-10 @min-[900px]/compare:grid-cols-2 @min-[900px]/compare:gap-12 lg:pb-16 lg:pt-12",
+          "grid items-start gap-10 pb-12 pt-10 @min-[900px]/compare:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] @min-[900px]/compare:items-end @min-[900px]/compare:gap-12 lg:pb-16 lg:pt-12",
         )}
         aria-labelledby="compare-heading"
       >
@@ -158,9 +152,15 @@ export function CompareLanding() {
               </span>
             ))}
           </h1>
-          <p className="mt-6 max-w-[520px] text-pretty text-[16px] leading-[1.5] text-text-secondary">
-            {heroDescription}
-          </p>
+          <div className="mt-6 max-w-[640px] space-y-3 text-pretty text-[16px] leading-[1.5] text-text-secondary">
+            <CredibilitySentence
+              className="text-pretty text-[16px] leading-[1.5] text-text-secondary"
+              bold={false}
+            />
+            {heroParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
           <div className="mt-7 flex flex-wrap items-center gap-2.5">
             <Button
               href="https://cloud.langfuse.com"
