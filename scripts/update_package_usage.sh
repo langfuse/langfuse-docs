@@ -9,3 +9,5 @@ sed -i '' 's/<img class="avatar mr-2" src="/![avatar](/g' ./components-mdx/depen
 sed -i '' 's/" width="20" height="20" alt="">/)/g' ./components-mdx/dependents/js.md
 
 node scripts/generate-top-dependents.js
+node scripts/update-container-pulls.js
+npx prettier --write components-mdx/dependents/top.md components-mdx/adoption/container-pulls.md
