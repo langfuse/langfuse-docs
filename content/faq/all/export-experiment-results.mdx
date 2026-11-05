@@ -1,0 +1,31 @@
+---
+title: How do I export experiment results?
+seoTitle: "Export Experiment Results and Scores via the API"
+description: Use the Experiments API to list experiments and their items with inputs, outputs, expected outputs, and scores.
+tags: [evaluation, experiments, export-data, public-api]
+---
+
+# How do I export experiment results?
+
+The experiment views in the UI have no export button. Use the Experiments API:
+
+- `GET /api/public/experiments` lists experiments (`fields=core,metadata,scores`).
+- `GET /api/public/experiment-items` lists the items of one or more experiments. Filter with `experimentId`, `experimentName`, or `datasetId`. Request `fields=core,dataset,io,scores` to get the input, output, expected output, and scores of each item.
+
+Both endpoints require `fromStartTime` and use cursor pagination.
+
+```python
+from datetime import datetime, timezone
+
+from langfuse import get_client
+
+langfuse = get_client()
+
+page = langfuse.api.experiments.list_items(
+    experiment_id="<experimentId>",
+    from_start_time=datetime(2026, 10, 1, tzinfo=timezone.utc),
+    fields="core,dataset,io,scores",
+)
+```
+
+To export only the scores, see [How do I retrieve experiment scores?](/faq/all/retrieve-experiment-scores). Dataset items themselves can be exported from the dataset's items table in the UI.

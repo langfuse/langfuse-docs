@@ -1,0 +1,22 @@
+---
+title: What happens when I fetch a prompt with a label that does not exist?
+seoTitle: "Fetching a Prompt with a Missing Label"
+description: Fetching a prompt by a label that no version carries returns a 404. Langfuse does not fall back to production. How the default label, the fallback parameter, and the SDK cache behave.
+tags: [prompt-management]
+---
+
+# What happens when I fetch a prompt with a label that does not exist?
+
+If no version of the prompt carries the requested label, the API returns `404` (`Prompt not found: '<name>' with label '<label>'`). Langfuse does **not** fall back to the `production` or `latest` label.
+
+What the SDKs do:
+
+- **No label and no version:** the SDKs fetch the version labeled `production`. Passing both `label` and `version` raises an error.
+- **Unknown label:** the SDK raises the error, unless you passed a `fallback` prompt. With `fallback`, the SDK returns that prompt instead (`is_fallback` is `True`). It uses the fallback only when the fetch fails and no cached version of the prompt exists. See [Guaranteed availability](/docs/prompt-management/features/guaranteed-availability).
+- **Label removed while cached:** a cached prompt is served until the cache entry is refreshed. If the refresh returns `404`, the SDK removes the entry.
+
+<Callout type="info">
+  The SDKs do not read a label from an environment variable such as `LANGFUSE_PROMPT_LABEL`. Pass the label explicitly, for example read it from your own environment variable: `langfuse.get_prompt("my-prompt", label=os.environ["PROMPT_LABEL"])`.
+</Callout>
+
+To check which labels exist on a prompt, open it in the Langfuse UI, or list prompts with a label via the API (see [How do I list prompts with a specific label?](/faq/all/list-prompts-by-label)). For how labels work, see [Version control](/docs/prompt-management/features/prompt-version-control#label-resolution).

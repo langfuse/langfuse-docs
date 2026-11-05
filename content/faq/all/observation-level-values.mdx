@@ -1,0 +1,17 @@
+---
+title: What values can the observation level have?
+seoTitle: "Observation Levels: DEBUG, DEFAULT, WARNING, ERROR"
+description: Observation levels are stored and returned as the strings DEBUG, DEFAULT, WARNING, and ERROR. How OpenTelemetry spans map to these levels.
+tags: [observability, public-api, opentelemetry]
+---
+
+# What values can the observation level have?
+
+The `level` of an observation is one of four strings: `DEBUG`, `DEFAULT`, `WARNING`, or `ERROR`. Langfuse stores and returns these strings, not numbers, in the API, exports, and the UI. Filter by level with the `level` query parameter of the [Observations API v2](/docs/api-and-data-platform/features/public-api#observations-filters).
+
+When you ingest OpenTelemetry spans, Langfuse sets the level as follows:
+
+- From the `langfuse.observation.level` attribute, if present. Common aliases are mapped case-insensitively: `TRACE` and `VERBOSE` become `DEBUG`; `INFO`, `LOG`, `NOTICE`, `OK`, and `SUCCESS` become `DEFAULT`; `WARN` becomes `WARNING`; `FATAL` and `CRITICAL` become `ERROR`.
+- Otherwise from the span status: a span with status `ERROR` gets level `ERROR`, every other span gets `DEFAULT`.
+
+See [Log levels](/docs/observability/features/log-levels).

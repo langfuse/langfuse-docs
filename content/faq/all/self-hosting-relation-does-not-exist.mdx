@@ -1,0 +1,21 @@
+---
+title: 'Why do I see `relation "..." does not exist` on self-hosted Langfuse?'
+seoTitle: "Fix relation does not exist errors on self-hosted Langfuse"
+description: 'Postgres errors such as relation "prices" does not exist mean Langfuse migrations have not been applied. Common causes and fixes for Docker Compose and Kubernetes.'
+tags: [self-hosting]
+---
+
+# Why do I see `relation "..." does not exist` on self-hosted Langfuse?
+
+Errors such as `relation "prices" does not exist`, `relation "pricing_tiers" does not exist`, or `relation "public.background_migrations" does not exist` mean that a Postgres table Langfuse expects has not been created yet. Langfuse creates its tables with Prisma migrations, which the **web** container runs on startup. The worker container does not run migrations.
+
+Common causes:
+
+| Cause                                                                                                                                                                                                                                  | How to fix it                                                                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **The worker started before the web container finished migrating** (fresh Docker Compose install). The worker's startup jobs fail once and are not retried, so default model prices or dashboards stay missing.                        | Restart the worker once the web container is up: `docker compose restart langfuse-worker`.                                                                                                           |
+| **An earlier migration failed.** Prisma then stops applying later migrations (often `P3009`), so later tables never exist. A frequent root cause is a changed database user that no longer owns the tables.                            | Check the web container logs for the first migration error and resolve it. See [PostgreSQL table ownership migration failures](/faq/all/self-hosting-postgresql-table-ownership-migration-failures). |
+| **Automatic migrations are disabled** with `LANGFUSE_AUTO_POSTGRES_MIGRATION_DISABLED=true` (Helm: `postgresql.migration.autoMigrate=false`).                                                                                          | Re-enable automatic migrations, or run them yourself before starting Langfuse.                                                                                                                       |
+| **The web container cannot reach the database you expect**, for example because the `langfuse/langfuse-worker` image was used for the web service, or because an upgraded Docker Compose project created a new, empty Postgres volume. | Use the `langfuse/langfuse` image for the web service and confirm `DATABASE_URL` points at the database that holds your data.                                                                        |
+
+Migration errors appear in the web container logs on startup, so check those first. For ClickHouse migration errors, see [Handling failed ClickHouse migrations](/faq/all/self-hosting-clickhouse-handling-failed-migrations).

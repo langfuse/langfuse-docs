@@ -1,0 +1,22 @@
+---
+title: How do I delete an experiment or dataset run?
+seoTitle: "Delete an Experiment or Dataset Run"
+description: Langfuse v4 has no experiment-delete action. Delete an experiment's data by deleting its traces via the API.
+tags: [evaluation, experiments, public-api]
+---
+
+# How do I delete an experiment or dataset run?
+
+In Langfuse v4, experiments are built from traces and observations, and there is **no action that deletes only an experiment**, neither in the Experiments table nor in the API. Individual experiment items cannot be deleted on their own either.
+
+To remove an experiment's data, delete its traces:
+
+1. List the experiment's items with `GET /api/public/experiment-items?experimentId=<id>&fromStartTime=<ISO timestamp>` (SDKs: `langfuse.api.experiments.list_items(...)` / `listItems(...)`) and follow the cursor through all pages.
+2. Collect and deduplicate the trace IDs.
+3. Delete them with `DELETE /api/public/traces` (body `{"traceIds": [...]}`, at most 1,000 per request). SDKs: `langfuse.api.trace.delete_multiple(trace_ids=...)` / `deleteMultiple({ traceIds })`.
+
+<Callout type="warning">
+  Deleting the traces also deletes their observations and scores. Deletion is asynchronous and cannot be undone. See [Data deletion](/docs/administration/data-deletion).
+</Callout>
+
+The legacy endpoint `DELETE /api/public/datasets/{datasetName}/runs/{runName}` and the SDK methods `delete_dataset_run` / `deleteRun` are deprecated. See [Delete experiment data](/faq/all/deprecated-api-migration#dataset-delete-sdk-methods).
