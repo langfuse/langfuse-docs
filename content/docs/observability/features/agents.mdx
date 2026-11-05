@@ -1,0 +1,208 @@
+---
+title: Agents
+description: Explore each agent's activity in one project, inspect its runs and traces, and follow the skill versions it loaded.
+---
+
+# Agents
+
+<AvailabilityBanner
+  availability={{
+    hobby: "v4",
+    core: "v4",
+    pro: "v4",
+    enterprise: "v4",
+    selfHosted: "v4",
+  }}
+/>
+
+<Callout type="info">
+  Agents is an internal preview for accounts with the personal `agentsView`
+  feature flag enabled. It requires Langfuse v4 and is not enabled by default.
+</Callout>
+
+Explore the agents working in your application from one project. Open an agent to inspect its activity, runs, traces, recorded information, and loaded skill versions. Filter by environment to focus on production, staging, or development. The gallery discovers agents from activity in your selected time window; you do not register them separately.
+
+## Track multiple agents in one project [#track-agents]
+
+Record a stable agent ID and a display name on your agent's observations. For example, a support application can report `support-router`, `policy-researcher`, and `response-writer` to the same Langfuse project. You do not need a separate project for each agent.
+
+An agent ID identifies the same logical agent across its runs. The display name is the latest readable label observed from your application. Two agents can share a display name and still remain distinct when they have different IDs. Keep the ID stable when changing a display name; do not use a trace or run ID as the agent ID.
+
+Agent identity is scoped to the project. Environments separate activity within that project; use the [environment filter](/docs/observability/features/environments#configure-environments) to choose the data you want to inspect.
+
+<Callout type="info">
+  When instrumentation supplies a name without an ID, Langfuse shows a clearly
+  labeled name-based identity. Exact names are case-sensitive. Give your agent a
+  stable ID so a display-name change does not create a separate name-based group.
+</Callout>
+
+## Record agent identity [#record-agent-identity]
+
+First [configure tracing](/docs/observability/sdk/overview) for your application. Record an **AGENT** observation for each invocation and attach the agent identity to its owned model and tool observations too. Creating or configuring an agent with `gen_ai.operation.name=create_agent` does not count as an invocation.
+
+When using raw OpenTelemetry, record these attributes:
+
+| Attribute                     | Value                                                                                   |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| `gen_ai.agent.id`             | Your stable logical agent ID                                                            |
+| `gen_ai.agent.name`           | The agent's display name                                                                |
+| `gen_ai.operation.name`       | `invoke_agent` on the AGENT invocation                                                  |
+| `langfuse.agent.run_id`       | The owning AGENT observation's span ID on its model, tool, and other owned observations |
+| `deployment.environment.name` | The environment for the activity, such as `production`                                  |
+
+Langfuse also accepts `langfuse.agent.id` and `langfuse.agent.name`. When both conventions provide a nonempty string for a field, its `langfuse.agent.*` value takes precedence. You can set the environment through the [Langfuse environment configuration](/docs/observability/features/environments#configure-environments) instead.
+
+### TypeScript SDK v5 [#typescript-sdk]
+
+After [initializing the TypeScript SDK](/docs/observability/sdk/overview), set the identity attributes on the native observation's OpenTelemetry span. Pass the agent's span context when creating its children:
+
+```typescript
+import { startObservation } from "@langfuse/tracing";
+
+const agent = startObservation("research-policy", {}, { asType: "agent" });
+const ownership = {
+  "gen_ai.agent.id": "policy-researcher",
+  "gen_ai.agent.name": "Policy researcher",
+  "langfuse.agent.run_id": agent.id,
+};
+agent.otelSpan.setAttributes({
+  ...ownership,
+  "gen_ai.operation.name": "invoke_agent",
+});
+
+try {
+  const tool = startObservation(
+    "read-policy",
+    {},
+    { asType: "tool", parentSpanContext: agent.otelSpan.spanContext() },
+  );
+  tool.otelSpan.setAttributes(ownership);
+  try {
+    // Run your tool and record its input and result with tool.update().
+  } finally {
+    tool.end();
+  }
+} finally {
+  agent.end();
+}
+```
+
+### OpenTelemetry example [#opentelemetry-example]
+
+After configuring your OpenTelemetry exporter for Langfuse, use the AGENT span's own ID to attribute its tool observations. This example shows the identity attributes; add your tool implementation and its input and result through your existing instrumentation.
+
+```typescript
+import { trace } from "@opentelemetry/api";
+
+const tracer = trace.getTracer("support-app");
+const identity = {
+  "gen_ai.agent.id": "policy-researcher",
+  "gen_ai.agent.name": "Policy researcher",
+  "deployment.environment.name": "production",
+};
+
+await tracer.startActiveSpan(
+  "research-policy",
+  { attributes: { ...identity, "gen_ai.operation.name": "invoke_agent" } },
+  async (run) => {
+    const ownedAttributes = {
+      ...identity,
+      "langfuse.agent.run_id": run.spanContext().spanId,
+    };
+
+    try {
+      await tracer.startActiveSpan(
+        "read-policy",
+        {
+          attributes: {
+            ...ownedAttributes,
+            "gen_ai.operation.name": "execute_tool",
+            "gen_ai.tool.name": "read-policy",
+          },
+        },
+        async (tool) => {
+          try {
+            // Run your tool and record its input and result here.
+          } finally {
+            tool.end();
+          }
+        },
+      );
+    } finally {
+      run.end();
+    }
+  },
+);
+```
+
+Attach the same logical identity and owning run ID to each model-call observation. Record model calls with your [model integration](/integrations) or [SDK instrumentation](/docs/observability/sdk/instrumentation), including the model and usage fields when available. Flush your exporter before a short-lived process exits.
+
+For nested agents, record the child agent's identity on its own observations. Its model and tool observations use the child AGENT span's ID as their owning run, including when the same logical agent is invoked again inside a trace. Keep the parent-child span relationships so you can inspect both invocations in the trace.
+
+<Callout type="warning">
+  Within one OpenTelemetry export request, observations can inherit identity and
+  run ownership from their nearest AGENT ancestor in the same trace. Exporters
+  can split parents and children across requests. Record the identity and
+  `langfuse.agent.run_id` explicitly on owned observations to retain attribution
+  across batches and asynchronous boundaries. Missing identity or ownership can
+  leave model usage unattributed to a run.
+</Callout>
+
+### Reuse existing OpenTelemetry instrumentation [#reuse-instrumentation]
+
+**Logfire:** Keep your existing instrumentation and configure an additional or replacement [OTLP exporter](https://pydantic.dev/docs/logfire/guides/alternative-backends/) with the [Langfuse endpoint and authentication](/integrations/native/opentelemetry). Preserve `gen_ai.agent.id`, `gen_ai.agent.name`, `invoke_agent` operations, and the original span relationships. Check that each logical agent has an invocation boundary; an ordinary named span alone does not establish one. Add the explicit ownership fields above when related observations may be exported separately.
+
+**LangSmith:** An existing [registry identifier](https://docs.langchain.com/langsmith/agent-registry) can become your `gen_ai.agent.id`; record its display name as `gen_ai.agent.name` and its environment as `deployment.environment.name`. Add an `invoke_agent` span for each invocation and attach its ownership fields to model and tool observations. LangSmith's [agent-addressing exporter headers](https://docs.langchain.com/langsmith/trace-with-opentelemetry) select a destination for a whole request. They are not per-span identity or environment attributes in Langfuse. Configure Langfuse authentication separately rather than forwarding another service's credentials.
+
+## Explore an agent [#explore-an-agent]
+
+Open [Agents](https://cloud.langfuse.com/project/~/agents), select a date range and environment, then choose an agent from the gallery. The activity and metrics use that selected scope.
+
+<Callout type="info">
+  The default window is seven days; you can select up to 30 days. Metrics use
+  observations that started within the selected window. A model call can appear
+  in a window whose owning invocation started earlier, so an agent or trace can
+  have model activity and zero runs in that period. Info requires an invocation
+  in the selected period.
+</Callout>
+
+- **Stats:** Review run and trace counts, recorded token usage, and attributed model cost.
+- **Runs:** Inspect individual AGENT invocations and open their observations in the existing trace view.
+- **Traces:** Open the traces containing this agent's activity, including traces with several agents.
+- **Info:** Inspect the identity and other information captured by instrumentation. Unavailable fields stay marked as unavailable; recorded information does not change your running agent's configuration.
+- **Skills used:** Follow recorded managed skill loads to the identified skill versions and supporting observations.
+
+A **run** is one AGENT invocation. A trace can contain several runs, including calls to different agents. A [session](/docs/observability/features/sessions) groups related interactions across traces, such as turns in the same conversation.
+
+## Read usage and cost [#usage-and-cost]
+
+Agent usage is calculated from the agent's attributed model-call observations. A parent AGENT observation can contain an aggregate reported by a framework; Langfuse does not add that summary to the same underlying model calls again. Opening a run does not change its totals.
+
+When a nested agent makes its own model calls, those calls contribute to that child's attributed usage. Their cost does not also become the parent's direct cost.
+
+<Callout type="info">
+  Missing usage or pricing is unknown, rather than a measured zero. Read the
+  coverage information alongside the totals: a priced subset does not establish
+  the full cost of every call. Agent cost covers attributed model activity;
+  external tool-provider fees are outside that total.
+</Callout>
+
+## Follow loaded skill versions [#skills-used]
+
+[Configure skill tracing](/docs/skill-management/tracing#skill-loading-tools) to record which managed skills your agent loaded. Attach the available skill list, including its version, to the skill-loading tool observation and record the tool's input and result.
+
+Open **Skills** on the agent to inspect recorded loads and follow the linked skill version. The version's [Usage tab](/docs/skill-management/tracing#skill-usage) shows linked observations and per-file loads.
+
+<Callout type="info">
+  Publishing, installing, or declaring a skill available does not count as a
+  load. A recorded load requires a successful tool call with a non-null result
+  that matches an available skill. A name-only match does not establish which
+  managed version was loaded, and a file load does not establish script execution.
+</Callout>
+
+## Related documentation [#related-documentation]
+
+- [Observation types](/docs/observability/features/observation-types) for recording agent, model, and tool activity.
+- [Environments](/docs/observability/features/environments) for separating deployment activity in one project.
+- [Sessions](/docs/observability/features/sessions) for grouping interactions across traces.
+- [Skill tracing](/docs/skill-management/tracing) for available skills, successful loads, version links, and file usage.
