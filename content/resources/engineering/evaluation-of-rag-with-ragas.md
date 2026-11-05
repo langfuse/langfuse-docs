@@ -302,8 +302,8 @@ def parse_json_if_needed(value):
 
 
 def get_traces(name=None, limit=50):
-    # The advanced `filter` parameter takes precedence over the individual query
-    # parameters, so every condition has to be expressed inside the filter array.
+    # Each condition in the advanced `filter` parameter replaces the individual
+    # query parameter for the same field; the other query parameters still apply.
     all_data = []
     cursor = None
     filters = [{"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True}]
