@@ -257,7 +257,7 @@ The chart sets no proxy annotations by default, because they depend on your Ingr
 
 ## Deploy with Docker Compose [#docker-compose]
 
-The default [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) includes the gateway as the `langfuse-ai-gateway` service. It starts with the rest of the stack, but stays idle until you set its two keys: `/health` returns `200`, while `/ready` and model requests return `503`. Set up Langfuse with the [Docker Compose guide](/self-hosting/deployment/docker-compose) first, then turn on the gateway:
+The default [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) includes the gateway as the `langfuse-ai-gateway` service. It starts with the rest of the stack, but stays idle until you set its two keys: the compose file sets `LANGFUSE_AI_GATEWAY_ALLOW_MISSING_SERVICE_KEY=true`, so `/health` returns `200`, while `/ready` and model requests return `503`. Set up Langfuse with the [Docker Compose guide](/self-hosting/deployment/docker-compose) first, then turn on the gateway:
 
 <Steps>
 
@@ -464,6 +464,7 @@ The chart sets these variables for you, and the Docker Compose file sets the gat
 | `LANGFUSE_AI_GATEWAY_WEB_URL`                            | Required       | Base URL of Langfuse Web, including any [custom base path](/self-hosting/configuration/custom-base-path). Without it, `/ready` returns `503` and inference is disabled. With the chart, set it with `langfuse.gateway.webUrl`. |
 | `LANGFUSE_AI_GATEWAY_SERVICE_KEY`                        | Required       | Shared key that authenticates the gateway to web. Must match the value on web.                                                                                                                                                 |
 | `LANGFUSE_AI_GATEWAY_ALLOW_HTTP_WEB_URL`                 | `false`        | Set to `true` to accept a plain `http://` web URL. Only for private networks such as web's in-cluster Service.                                                                                                                 |
+| `LANGFUSE_AI_GATEWAY_ALLOW_MISSING_SERVICE_KEY`          | `false`        | Set to `true` to start unconfigured, with `503` on `/ready` and model requests, instead of failing startup when the web URL is set but the service key is not. Docker Compose sets it.                                         |
 | `LANGFUSE_AI_GATEWAY_LISTEN_ADDRESS`                     | `0.0.0.0:8080` | Address and port the gateway listens on.                                                                                                                                                                                       |
 | `LANGFUSE_AI_GATEWAY_CONNECTION_DRAIN_TIMEOUT_SECONDS`   | `10`           | Seconds to drain running requests after `SIGTERM`, from 1 to 300. The chart sets `300`.                                                                                                                                        |
 | `LANGFUSE_AI_GATEWAY_TELEMETRY_SHUTDOWN_TIMEOUT_SECONDS` | `10`           | Seconds to upload remaining generations after the drain, from 1 to 300. The chart sets `30`.                                                                                                                                   |
