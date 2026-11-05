@@ -150,7 +150,7 @@ Make sure to select long, random passwords for all secrets.
 
 Only the langfuse-web container and minio must be accessible from outside the instance.
 Therefore, we recommend to add a security group or firewall to your instance that restricts incoming traffic to port :3000 and :9090.
-If you use the [AI Gateway](#ai-gateway), allow traffic to the TLS-terminating reverse proxy in front of it rather than to port :3031, because the gateway serves plain HTTP. Host firewalls such as ufw don't filter ports that Docker publishes, so block :3031 in the security group or [publish it on loopback](/self-hosting/configuration/ai-gateway#docker-compose-public-url).
+If you use the [AI Gateway](#ai-gateway), allow traffic to the TLS-terminating reverse proxy in front of it rather than to port :3031, because the gateway serves plain HTTP. Host firewalls such as ufw don't filter ports that Docker publishes, so block :3031 in the security group or [keep it off the network](/self-hosting/configuration/ai-gateway#docker-compose-public-url).
 
 ### Start the application
 

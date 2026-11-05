@@ -276,6 +276,8 @@ If you customized `docker-compose.yml`, merge the `langfuse-ai-gateway` service 
 Web and the gateway share two secrets: a service key that they use to authenticate each other, and an ES256 (P-256) private key that web uses to sign the gateway's upload tokens. Docker Compose reads them from the `.env` file next to `docker-compose.yml`. In the `langfuse` directory, append both keys to `.env`:
 
 ```bash
+# Start on a new line if .env doesn't end with one.
+[ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
 echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$(openssl rand -hex 32)" >> .env
 printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(openssl ecparam -name prime256v1 -genkey -noout | awk '{printf "%s\\n", $0}')'" >> .env
 ```
@@ -333,7 +335,10 @@ The gateway reaches web over the internal Docker network at `http://langfuse-web
 
 The gateway serves plain HTTP on its port. Every request carries a gateway API key, and request and response bodies contain full prompts and model outputs. For access from other machines, terminate [TLS](#tls) at a reverse proxy in front of the gateway, configure the proxy as described in [Proxy timeouts and buffering](#timeouts), and open only the proxy to inbound traffic, not port `3031`. Use a plain `http://<host>:3031` public URL only on a trusted private network.
 
-Host firewalls such as ufw or firewalld don't filter ports that Docker publishes. Block `3031` in your cloud provider's security group, or, if the proxy runs on the same host, publish the gateway on loopback only by changing its port mapping in `docker-compose.yml` to `127.0.0.1:${LANGFUSE_AI_GATEWAY_PORT:-3031}:${LANGFUSE_AI_GATEWAY_PORT:-3031}`.
+Host firewalls such as ufw or firewalld don't filter ports that Docker publishes. Block `3031` in your cloud provider's security group, or keep the port off the network in `docker-compose.yml`:
+
+- **Proxy installed directly on the host:** publish the gateway on loopback only, by changing its port mapping to `127.0.0.1:${LANGFUSE_AI_GATEWAY_PORT:-3031}:${LANGFUSE_AI_GATEWAY_PORT:-3031}`.
+- **Proxy in a container:** attach the proxy to the Compose network, point it at `http://langfuse-ai-gateway:3031`, and remove the gateway's port mapping. A port bound to the host's loopback isn't reachable from inside another container.
 
 </Callout>
 
@@ -410,11 +415,14 @@ Key IDs are derived from the public keys. Set `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_
 
 #### Rotating keys with Docker Compose [#rotate-keys-compose]
 
-With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`.
+With Docker Compose, the same three steps change the variables in `.env`. Run the commands in the `langfuse` directory. They store every key on a single line, in the same form as [Generate the keys](#docker-compose), so they expect the private key in that single-quoted form. Step 2 leaves `.env` unchanged if it can't read the current keys, and `sed -i.bak` keeps a backup of the previous `.env` as `.env.bak`.
 
 **Service key:**
 
 ```bash
+# Start on a new line if .env doesn't end with one.
+[ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
+
 # 1. Let web accept a new key.
 echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$(openssl rand -hex 32)" >> .env
 docker compose up -d
@@ -422,10 +430,14 @@ docker compose up -d
 # 2. Switch web and the gateway to the new key; web still accepts the old one.
 new_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=' .env | cut -d= -f2)
 old_key=$(grep '^LANGFUSE_AI_GATEWAY_SERVICE_KEY=' .env | cut -d= -f2)
-sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
-echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$new_key" >> .env
-echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$old_key" >> .env
-docker compose up -d
+if [ -n "$new_key" ] && [ -n "$old_key" ]; then
+  sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
+  echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$new_key" >> .env
+  echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=$old_key" >> .env
+  docker compose up -d
+else
+  echo "Couldn't read both service keys from .env; .env is unchanged."
+fi
 
 # 3. Stop accepting the old key.
 sed -i.bak '/^LANGFUSE_AI_GATEWAY_SERVICE_KEY_PREVIOUS=/d' .env
@@ -435,18 +447,26 @@ docker compose up -d
 **JWT signing key:**
 
 ```bash
+# Start on a new line if .env doesn't end with one.
+[ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
+
 # 1. Create the new key and let web accept its public key.
 openssl ecparam -name prime256v1 -genkey -noout > new-gateway-jwt-key.pem
 printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$(openssl ec -in new-gateway-jwt-key.pem -pubout 2>/dev/null | awk '{printf "%s\\n", $0}')'" >> .env
 docker compose up -d
 
 # 2. Sign with the new key; web still accepts tokens signed with the old one.
-old_public_key=$(printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" | openssl ec -pubout 2>/dev/null | awk '{printf "%s\\n", $0}')
-sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
-printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(awk '{printf "%s\\n", $0}' new-gateway-jwt-key.pem)'" >> .env
-printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$old_public_key'" >> .env
-rm new-gateway-jwt-key.pem
-docker compose up -d
+old_public_key=$(printf '%b' "$(grep '^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=' .env | cut -d"'" -f2)" | openssl ec -pubout | awk '{printf "%s\\n", $0}')
+case "$old_public_key" in
+  "-----BEGIN PUBLIC KEY-----"*)
+    sed -i.bak -e '/^LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY=/d' -e '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
+    printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(awk '{printf "%s\\n", $0}' new-gateway-jwt-key.pem)'" >> .env
+    printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY='$old_public_key'" >> .env
+    rm new-gateway-jwt-key.pem
+    docker compose up -d
+    ;;
+  *) echo "Couldn't read the current private key from .env; .env is unchanged." ;;
+esac
 
 # 3. After at least 15 minutes, stop accepting the old key.
 sed -i.bak '/^LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_PUBLIC_KEY=/d' .env
