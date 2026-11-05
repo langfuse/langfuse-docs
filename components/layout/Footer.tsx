@@ -141,7 +141,7 @@ export function Footer({ className }: { className?: string }) {
   return (
     <footer
       className={cn(
-        "px-4 pb-8 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
+        "px-4 pb-20 mx-auto mt-20 w-full sm:px-8 md:px-0 md:max-w-[680px] xl:max-w-[840px]",
         className,
       )}
     >

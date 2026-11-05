@@ -5,7 +5,7 @@ export function DocsAndPageFooter() {
   return (
     <>
       <DocsFooter />
-      <Footer className="pb-4" />
+      <Footer className="pb-14" />
     </>
   );
 }
