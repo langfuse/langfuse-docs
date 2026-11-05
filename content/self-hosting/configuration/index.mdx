@@ -98,6 +98,17 @@ Self-hosted Langfuse sends media used by LLM-as-a-Judge evaluators inline by def
 
 When using `inline`, set `LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT` if the Langfuse server needs a different object storage address than browsers and SDKs. For example, Docker Compose can use `http://localhost:9090` as the public endpoint and `http://minio:9000` as the internal endpoint.
 
+## Outbound proxy for LLM requests [#outbound-proxy]
+
+Route requests to LLM providers (playground, LLM-as-a-Judge, experiments) through a forward proxy. LLM connections that use the Amazon Bedrock adapter, and in-app agent chat, do not use this proxy and connect directly. Configure these variables on both the web and worker containers.
+
+| Variable      | Required / Default | Description                                                                                                                                                                                                                                                                                                                                              |
+| ------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `HTTPS_PROXY` |                    | URL of the forward proxy for outbound LLM requests, e.g. `http://proxy.internal:3128`.                                                                                                                                                                                                                                                                   |
+| `NO_PROXY`    |                    | Available from `>=v4.0.0`. Hosts that connect directly instead of through `HTTPS_PROXY`. Comma- or whitespace-separated hostnames; each entry also matches its subdomains, an optional `:<port>` suffix restricts it to that port, and a value of exactly `*` bypasses the proxy for every host. `no_proxy` is also accepted and wins when both are set. |
+
+Hosts that match `NO_PROXY` keep the connection-time IP checks described in [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+
 ## Code evaluators
 
 | Variable                                              | Required / Default                | Description                                                                                                                                                                                          |
@@ -142,6 +153,10 @@ Halo is available from `>=v4.28.0`. It stays hidden until `LANGFUSE_IN_APP_AGENT
 | <code className="break-all text-xs">LANGFUSE_IN_APP_AGENT_SANDBOX_AWS_LAMBDA_MICROVM_EGRESS_NETWORK_CONNECTOR_ARN</code> | Unset                  | Optional egress network connector ARN. When unset, AWS attaches `INTERNET_EGRESS` and sandboxed code reaches the public internet. See [Halo](/self-hosting/configuration/halo#iam-and-network-isolation).                                                                                          |
 
 </div>
+
+## AI Gateway [#ai-gateway]
+
+The AI Gateway (beta) runs as a separate container next to web and is deployed with the Helm chart. Web needs `LANGFUSE_AI_GATEWAY_DEPLOYED=true`, `LANGFUSE_AI_GATEWAY_SERVICE_KEY`, and `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`; the chart sets them when `langfuse.gateway.enabled` is `true`. See [AI Gateway](/self-hosting/configuration/ai-gateway) for the setup, TLS, and the [full configuration reference](/self-hosting/configuration/ai-gateway#configuration).
 
 ## Additional Features
 

@@ -1,10 +1,6 @@
 // Content shared by the compare landing page and its Markdown renderer.
 // Keep claims aligned with the dated, sourced comparisons linked from each card.
-// This file is loaded by Node without a bundler, so it has no imports; the
-// stat tokens below are filled in by each consumer from usage-stats.
-export const OBSERVATIONS_TOKEN = "{observationsPerMonth}";
-export const FORTUNE_50_TOKEN = "{fortune50}";
-
+// This file is loaded by Node without a bundler, so it has no imports.
 export const compareSections = [
   ["compare-heading", "Overview"],
   ["platform-comparisons", "Compare platforms"],
@@ -95,7 +91,9 @@ export const compareLanding = {
   hero: {
     eyebrow: "Compare Langfuse",
     lines: ["Trace. Evaluate. Improve.", "On your terms."],
-    description: `Open-source AI engineering platform behind ${FORTUNE_50_TOKEN} of the Fortune 50 and ${OBSERVATIONS_TOKEN} observations a month. One MIT license, one codebase, on Langfuse Cloud or your own infrastructure, priced by usage instead of seats. The comparisons below show where that differs from LangSmith, Braintrust, Arize, and Datadog.`,
+    description: `You run one MIT-licensed codebase on your own infrastructure or Langfuse Cloud, and pay for usage instead of seats.
+
+The comparisons below show how Langfuse differs from LangSmith, Braintrust, Arize, Datadog, and others.`,
   },
   headings: {
     comparisons: "Compare what matters to your team",
@@ -109,7 +107,7 @@ export const compareLanding = {
   copy: {
     methodology:
       "Each comparison cites public documentation and shows the date we last checked it.",
-    correctionPrompt: "Spotted an error?",
+    correctionPrompt: "See something out of date?",
     correctionLabel: "Pull requests",
     correctionLink: "https://github.com/langfuse/langfuse-docs",
     correctionSuffix: "are welcome.",

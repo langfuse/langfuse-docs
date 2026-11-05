@@ -19,6 +19,8 @@ const categoryConfig: Record<
     description: string;
     additionalLinks?: { route: string; frontMatter: any }[];
     featuredLinks?: ProcessedIntegrationPage[];
+    // Shown first in the regular grid, ahead of the alphabetical list.
+    pinnedLinks?: ProcessedIntegrationPage[];
   }
 > = {
   native: {
@@ -107,6 +109,16 @@ const categoryConfig: Record<
   gateways: {
     title: "Gateways",
     description: "Connect through API gateways and proxies",
+    pinnedLinks: [
+      {
+        route: "/docs/gateway/overview",
+        frontMatter: {
+          title: "Langfuse AI Gateway",
+          logo: "/langfuse-icon.svg",
+        },
+        title: "Langfuse AI Gateway",
+      },
+    ],
   },
   "no-code": {
     title: "No-Code",
@@ -199,7 +211,7 @@ function getCategory(category: string) {
 
   return {
     config,
-    pages: processPages(mergedPages),
+    pages: [...(config.pinnedLinks ?? []), ...processPages(mergedPages)],
     featured: config.featuredLinks,
   };
 }
@@ -214,7 +226,7 @@ function IntegrationCards({
   return (
     <>
       {featured && featured.length > 0 && (
-        <Cards num={3}>
+        <Cards num={3} className="auto-rows-fr">
           {featured.slice(0, 6).map((page) => (
             <Cards.Card
               href={page.route}
@@ -234,7 +246,7 @@ function IntegrationCards({
         </Cards>
       )}
       <div className={featured && featured.length > 0 ? "mt-4" : ""}>
-        <Cards num={3}>
+        <Cards num={3} className="auto-rows-fr">
           {pages
             .filter((p) => !(featured || []).some((f) => f.route === p.route))
             .map((page) => (

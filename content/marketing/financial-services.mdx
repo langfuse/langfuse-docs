@@ -20,18 +20,21 @@ import { SecurityBadgesGrid } from "@/components/SecurityBadgesGrid";
 import { FAQAccordion } from "@/components/shared/FAQAccordion";
 import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import { BookOpen, Play, Radar } from "lucide-react";
+import { BookOpen, Play, Radar, ShieldCheck } from "lucide-react";
 
-<h1 className="sr-only">Langfuse for Financial Services</h1>
+<h1 className="sr-only">Run compliant financial services AI in production</h1>
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
   <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[2fr_1fr]">
     <div className="min-w-0 border-b border-line-structure px-6 pb-7 pt-10 sm:px-10 sm:pb-8 sm:pt-12 lg:border-b-0 lg:border-r">
       <h2 className="text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
-        <span className="block">{"Langfuse for"}</span>
-        <TextHighlight highlightClassName="bg-surface-cta-primary" className="mt-1">
-          {"Financial Services"}
-        </TextHighlight>
+        <span className="block">{"Run compliant"}</span>
+        <span className="block">{"financial services\u00A0AI"}</span>
+        <span className="mt-1 block leading-[1.15]">
+          <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">
+            {"in production"}
+          </span>
+        </span>
       </h2>
       <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
         {
@@ -54,7 +57,7 @@ import { BookOpen, Play, Radar } from "lucide-react";
           {"·"}
         </span>
         <a href="/self-hosting/configuration/hardening#hardening-for-government" className="underline decoration-line-structure underline-offset-4 hover:text-text-primary">
-          {"Government (available in Q4 2026)"}
+          {"Government: FIPS 140-3 & NIST hardening"}
         </a>
         <span aria-hidden className="text-text-tertiary">
           {"·"}
@@ -127,11 +130,19 @@ import { BookOpen, Play, Radar } from "lucide-react";
     </h2>
     <p className="mx-auto mt-2 max-w-[60ch] text-center text-[13px] text-text-tertiary">
       {
-        "Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production."
+        "Start with the steps from prototype to production, then see how teams like Trade Republic run Langfuse in production."
       }
     </p>
     <div className="mx-auto mt-8 max-w-4xl">
       <Cards num={2} className="sm:grid-cols-1 lg:grid-cols-2">
+        <Card
+          title="Getting AI agents into production"
+          href="/blog/2026-11-04-regulated-industries-ai-agents-production"
+          icon={<ShieldCheck />}
+          description="Eight steps regulated teams follow, from tracing and error analysis to production monitors and human review."
+          contentClassName="items-start p-4 sm:p-5"
+          contentWrapperClassName="gap-2"
+        />
         <Card
           title="Building deployment gates for LLMs"
           href="/blog/2026-07-15-llm-certification-financial-services"

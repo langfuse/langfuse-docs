@@ -3,7 +3,7 @@ title: Langfuse for financial services
 description: Observe and evaluate AI agents across banks, brokers, and fintechs. Deployment gates, production traces, audit trails, and self-hosting for regulated teams.
 ---
 
-# Langfuse for Financial Services
+# Run compliant financial services AI in production
 
 Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
@@ -15,7 +15,7 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 - **Flag potential policy violations:** with evals that score outputs against your policies and regulations.
 - **Self-host or air-gap:** deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
 
-[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [MIT · open source](/handbook/chapters/open-source) · [Government (available in Q4 2026)](/self-hosting/configuration/hardening#hardening-for-government) · [Security & compliance](/security)
+[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [MIT · open source](/handbook/chapters/open-source) · [Government: FIPS 140-3 & NIST hardening](/self-hosting/configuration/hardening#hardening-for-government) · [Security & compliance](/security)
 
 ## Talk to a financial services expert at Langfuse
 
@@ -139,8 +139,9 @@ Trace Claude Code, Codex, Cursor, OpenCode, and GitHub Copilot — no proxy requ
 
 ## Learn how to ship reliable agents in financial services
 
-Start with deployment gates and execution history, then see how teams like Trade Republic run Langfuse in production.
+Start with the steps from prototype to production, then see how teams like Trade Republic run Langfuse in production.
 
+- [Getting AI agents into production](/blog/2026-11-04-regulated-industries-ai-agents-production): Eight steps regulated teams follow, from tracing and error analysis to production monitors and human review.
 - [Building deployment gates for LLMs](/blog/2026-07-15-llm-certification-financial-services): Evaluate model and prompt changes against datasets and policy evals before release.
 - [Evals for High-Stakes AI Agents](/guides/videos/evals-for-high-stakes-ai-agents): Trace a banking assistant with PII masking, offline evals, and a CI gate on a candidate prompt label.
 - [Academy: customer support chatbot](/academy/examples/customer-support-chatbot): Trace, score and iterate on a support agent to raise its autonomy rate safely.
@@ -164,7 +165,7 @@ Langfuse's observability integrations collect and export traces in the backgroun
 
 Langfuse integrates with gateways such as Kong and LiteLLM to capture model calls, token usage, cost, and latency. Its OpenTelemetry support lets you add AI tracing and evaluation alongside your existing observability stack. [Gateway integrations](/integrations/gateways/kong-ai-plugin), [LiteLLM](/integrations/gateways/litellm), [existing OpenTelemetry setups](/faq/all/existing-otel-setup).
 
-We're also working on our own Langfuse Gateway, bringing model access controls together with tracing and cost tracking. It is currently in development; follow our [roadmap](/docs/roadmap) for updates.
+The [Langfuse AI Gateway](/docs/gateway/overview) (beta) brings model access controls together with tracing and cost tracking for OpenAI and Anthropic.
 
 ### How do retention and exports support our evidence requirements?
 
