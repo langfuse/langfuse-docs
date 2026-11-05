@@ -66,6 +66,8 @@ When using raw OpenTelemetry, record these attributes:
 
 Langfuse also accepts `langfuse.agent.id` and `langfuse.agent.name`. When both conventions provide a nonempty string for a field, its `langfuse.agent.*` value takes precedence. You can set the environment through the [Langfuse environment configuration](/docs/observability/features/environments#configure-environments) instead.
 
+If your framework generates a new `gen_ai.agent.id` for every instance or process, set a stable `langfuse.agent.id` on the invocation and its owned observations. Langfuse preserves explicit IDs; it does not merge different IDs just because their display names match. Check this before comparing runs across deployments.
+
 ### TypeScript SDK v6 [#typescript-sdk]
 
 After [initializing the TypeScript SDK v6](/docs/observability/sdk/overview), set the identity attributes on the native observation's OpenTelemetry span. Pass the agent's span context when creating its children:
@@ -193,6 +195,8 @@ A **run** is one AGENT invocation. A trace can contain several runs, including c
 Agent usage is calculated from the agent's attributed model-call observations. A parent AGENT observation can contain an aggregate reported by a framework; Langfuse does not add that summary to the same underlying model calls again. Opening a run does not change its totals.
 
 When a nested agent makes its own model calls, those calls contribute to that child's attributed usage. Their cost does not also become the parent's direct cost.
+
+An incomplete-data warning means a trace containing this agent also has model calls without agent identity. Those calls may belong to this agent or another agent in the same trace. Their tokens and cost are not assigned to either agent. Inspect the trace and add explicit identity and ownership to the missing observations before treating the agent's totals as complete. The warning can appear for several agents sharing a trace; do not add their unassigned counts together.
 
 <Callout type="info">
   Missing usage or pricing is unknown, rather than a measured zero. Read the
