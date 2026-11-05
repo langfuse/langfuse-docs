@@ -2,6 +2,7 @@ import { createUIMessageStream, createUIMessageStreamResponse } from "ai";
 import { toAISdkStream } from "@mastra/ai-sdk";
 import { after } from "next/server";
 import {
+  CONSULTANT_ALL_SKILLS,
   flushConsultantTraces,
   getConsultantAgent,
 } from "@/lib/consultant/agent";
@@ -15,6 +16,9 @@ export const maxDuration = 60;
 
 const unavailable =
   "The consultant is unavailable right now. Try again in a moment.";
+
+// Reading other skills and references needs room for a few more tool calls.
+const MAX_STEPS = CONSULTANT_ALL_SKILLS ? 6 : 4;
 
 type StepWithTools = {
   toolCalls?: Array<{ toolName?: string }>;
@@ -70,7 +74,7 @@ export async function POST(req: Request) {
 
   try {
     const result = await getConsultantAgent().stream(transcript.messages, {
-      maxSteps: 4,
+      maxSteps: MAX_STEPS,
       abortSignal,
       modelSettings: {
         maxOutputTokens: 4_000,
@@ -87,7 +91,9 @@ export async function POST(req: Request) {
         if (!activated) {
           return { toolChoice: { type: "tool" as const, toolName: "skill" } };
         }
-        if (steps.length >= 3) return { toolChoice: "none" as const };
+        if (steps.length >= MAX_STEPS - 1) {
+          return { toolChoice: "none" as const };
+        }
         return {};
       },
       tracingOptions: {
@@ -99,6 +105,7 @@ export async function POST(req: Request) {
           feature: "consultant",
           skillSha: consultantSkillPin.sha,
           skillName: "langfuse-consultant",
+          skillMode: CONSULTANT_ALL_SKILLS ? "all" : "consultant",
         },
       },
       onFinish: () => finish(),

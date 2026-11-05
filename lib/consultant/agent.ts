@@ -9,9 +9,14 @@ import { webFetchTool } from "@/lib/consultant/academy-loop";
 import { consultantLangfuseProject } from "@/lib/consultant/langfuse-project.mjs";
 import { CONSULTANT_SKILL_PIN } from "@/lib/consultant/pin.mjs";
 import {
+  consultantAllSkillSources,
   consultantSkillPin,
   consultantSkillSource,
 } from "@/lib/consultant/skill.generated";
+
+/** Load every pinned Langfuse skill. Set CONSULTANT_ALL_SKILLS=false for the playbook only. */
+export const CONSULTANT_ALL_SKILLS =
+  process.env.CONSULTANT_ALL_SKILLS?.trim().toLowerCase() !== "false";
 
 if (
   consultantSkillPin.sha !== CONSULTANT_SKILL_PIN.sha ||
@@ -28,6 +33,17 @@ const consultantSkill = createSkill({
   instructions: consultantSkillSource.instructions,
 });
 
+const supportingSkills = CONSULTANT_ALL_SKILLS
+  ? consultantAllSkillSources.map((skill) =>
+      createSkill({
+        name: skill.name,
+        description: skill.description,
+        instructions: skill.instructions,
+        references: { ...skill.references },
+      }),
+    )
+  : [];
+
 const HOST_INSTRUCTIONS = `You are the Langfuse consultant on the public documentation site. Help the visitor decide their next step in the AI engineering loop.
 
 You do not have Langfuse project credentials, a CLI, or the visitor's repository. Never claim you inspected traces, scores, datasets, prompts, evaluators, experiments, or source code.
@@ -38,14 +54,20 @@ On a turn about their agent or the loop, activate the langfuse-consultant skill 
 
 Ask the skill's follow-ups in one message when you still need them. When you have enough, reply in Markdown with the skill's sections in that order. Use Markdown headings, lists, and bold. Put every scorecard, comparison, or grid in a Markdown table with a header row and a blank line before it. Never run table cells together in a paragraph. At the end of a plan, note that project and repository access would make it more specific.`;
 
+const ALL_SKILLS_INSTRUCTIONS = `
+
+The ${consultantAllSkillSources.map((skill) => skill.name).join(" and ")} skills are also available. When the visitor's situation needs more detail, such as instrumentation, datasets, evaluations, prompts, CI, cost, or a migration, read the relevant skill or reference with the skill and skill_read tools and use it to make the plan specific. Steps in those skills that need a CLI, a shell, the visitor's repository, credentials, or other web pages do not apply here. Turn them into steps the visitor or their coding agent can take.`;
+
 const modelName = process.env.CONSULTANT_MODEL?.trim() || "gpt-5.6-sol";
 
 const consultantAgent = new Agent({
   id: "consultant",
   name: "Consultant",
-  instructions: HOST_INSTRUCTIONS,
+  instructions: CONSULTANT_ALL_SKILLS
+    ? HOST_INSTRUCTIONS + ALL_SKILLS_INSTRUCTIONS
+    : HOST_INSTRUCTIONS,
   model: openai(modelName),
-  skills: [consultantSkill],
+  skills: [consultantSkill, ...supportingSkills],
   tools: { web_fetch: webFetchTool },
 });
 
