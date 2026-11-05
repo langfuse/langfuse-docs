@@ -1,9 +1,9 @@
 // AI Gateway architecture: clients call the gateway inside Langfuse with a
 // gateway key, the gateway calls the external model provider, and the call is
-// traced in Langfuse. Used on /docs/gateway/overview and
-// /docs/gateway/concepts. Colors and fonts come from the design tokens in
-// style.css so the figure follows light and dark mode. Keep the labels in sync
-// with renderAiGatewayArchitectureDiagram in lib/markdown-component-renderers.js.
+// traced in Langfuse. Used on /docs/gateway/concepts. Colors and fonts come
+// from the design tokens in style.css so the figure follows light and dark
+// mode. Keep the labels in sync with renderAiGatewayArchitectureDiagram in
+// lib/markdown-component-renderers.js.
 
 import type { CSSProperties } from "react";
 
