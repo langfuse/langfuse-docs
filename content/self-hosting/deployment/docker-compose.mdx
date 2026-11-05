@@ -252,7 +252,7 @@ Set these in `.env`:
 - `LANGFUSE_AI_GATEWAY_LOG_LEVEL` (`info`).
 - The web variables `LANGFUSE_AI_GATEWAY_DEPLOYED`, `LANGFUSE_AI_GATEWAY_ENABLED`, `LANGFUSE_AI_GATEWAY_ORGANIZATION_ID_ALLOWLIST`, and the [key rotation](/self-hosting/configuration/ai-gateway#rotate-keys) variables.
 
-The gateway reaches web at `http://langfuse-web:3000`, which `.env` can't change. If web runs under a [custom base path](/self-hosting/configuration/custom-base-path), append it to `LANGFUSE_AI_GATEWAY_WEB_URL` in `docker-compose.yml`.
+The gateway reaches web at `http://langfuse-web:3000`, which `.env` can't change. If web runs under a [custom base path](/self-hosting/configuration/custom-base-path), append it to `LANGFUSE_AI_GATEWAY_WEB_URL` in `docker-compose.yml`. Because you build web yourself, rebuild it from a release newer than `v4.75.0` and start without `--pull always`, which would replace your image.
 
 ## Features
 
