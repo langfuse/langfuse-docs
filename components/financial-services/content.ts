@@ -62,7 +62,6 @@ export const financialServicesStoryCards = [
       "How DKB, Germany's largest digital bank, automates 20,000 customer conversations daily.",
     logo: "/images/customers/dkb/dkb-light.svg",
     logoDark: "/images/customers/dkb/dkb-dark.svg",
-    published: false,
   },
 ] as const;
 
@@ -249,6 +248,7 @@ export const financialServicesUseCases = [
     description:
       "Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.",
     proof: "DKB, Germany's largest digital bank · 20,000 conversations / day",
+    proofHref: "/users/dkb",
     featured: true,
   },
   {

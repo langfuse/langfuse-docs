@@ -41,9 +41,9 @@ Customer story · Self-hosted. [Read story](/users/trade-republic)
 
 Customer story · Spend management. [Read story](/users/ramp)
 
-### How DKB, Germany's largest digital bank, automates 20,000 customer conversations daily.
+### [How DKB, Germany's largest digital bank, automates 20,000 customer conversations daily.](/users/dkb)
 
-Customer story · Banking. Coming soon
+Customer story · Banking. [Read story](/users/dkb)
 
 ## Run Langfuse where your data is allowed to live
 
@@ -131,7 +131,7 @@ Trace agents that combine identity, fraud and credit-bureau checks into a risk s
 
 Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.
 
-DKB, Germany's largest digital bank · 20,000 conversations / day
+[DKB, Germany's largest digital bank · 20,000 conversations / day](/users/dkb)
 
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 
