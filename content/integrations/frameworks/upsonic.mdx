@@ -1,0 +1,125 @@
+---
+title: Observability for Upsonic Agents with Langfuse
+sidebarTitle: Upsonic
+logo: /images/integrations/upsonic_icon.svg
+description: Learn how to integrate Langfuse with Upsonic for tracing, debugging, and monitoring your AI agents.
+category: Integrations
+---
+
+# Integrate Langfuse with Upsonic
+
+This guide demonstrates how to integrate **Langfuse** with **Upsonic** to get full observability into your agents. Upsonic has a native Langfuse integration, so you just pass `instrument=langfuse` to your agent and every LLM call, tool execution, and pipeline step is automatically traced.
+
+> **What is Upsonic?** [Upsonic](https://upsonic.ai) is an open-source Python framework for building AI agents. Its `AutonomousAgent` provides built-in filesystem access, shell execution, and workspace sandboxing. Upsonic includes a safety engine for policy-based content filtering, built-in OCR and document processing, MCP server support, and [Universal Commerce Protocol (UCP)](https://github.com/Upsonic/awesome-ucp) tools.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform. It offers tracing and monitoring capabilities for AI applications. Langfuse helps developers debug, analyze, and optimize their AI systems by providing detailed insights and integrating with a wide array of tools and frameworks through native integrations, OpenTelemetry, and dedicated SDKs.
+
+## Getting Started
+
+<Steps>
+### Step 1: Install Dependencies
+
+Install Upsonic with the Langfuse extra:
+
+```bash
+pip install "upsonic[langfuse]"
+```
+
+### Step 2: Configure Environment Variables
+
+Set up your Langfuse API keys. You can get these keys by signing up for a free [Langfuse Cloud](https://langfuse.com/cloud) account or by [self-hosting Langfuse](https://langfuse.com/self-hosting).
+
+```bash filename=".env"
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_HOST=https://cloud.langfuse.com  # 🇪🇺 EU region
+# LANGFUSE_HOST=https://us.cloud.langfuse.com  # 🇺🇸 US region
+```
+
+Or set them directly in Python:
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+
+# Your LLM API key
+os.environ["ANTHROPIC_API_KEY"] = "sk-ant-..."
+# os.environ["OPENAI_API_KEY"] = "sk-proj-..."
+```
+
+### Step 3: Instrument Your Agent
+
+Import `Langfuse` from Upsonic's integration module, create an instance, and pass it as the `instrument` parameter to `AutonomousAgent`.
+
+```python
+from upsonic import AutonomousAgent, Task
+from upsonic.integrations.langfuse import Langfuse
+
+langfuse = Langfuse()
+
+agent = AutonomousAgent("anthropic/claude-sonnet-4-6", instrument=langfuse)
+
+task = Task(description="What is 2 + 2?")
+agent.print_do(task)
+
+langfuse.shutdown()
+```
+
+<Callout type="info">
+Always call `langfuse.shutdown()` at the end of your script to flush all buffered spans to Langfuse before the process exits.
+</Callout>
+
+### Step 4: View the Trace in Langfuse
+
+After running your agent, head over to your **Langfuse dashboard -> Traces**. Each `agent.do()` or `agent.print_do()` call appears as one trace with the full step-by-step execution chain, including every pipeline step, LLM call, tool execution, token count, and cost breakdown.
+
+![Upsonic example trace in Langfuse](/images/cookbook/integration-upsonic/upsonic-example-trace.png)
+
+[Example Trace in Langfuse](https://cloud.langfuse.com/project/cmn3b2tji0132ad06qpci5es7/traces/8c61319f6b511ad75e9817427b7d75c3?timestamp=2026-03-24T13:33:13.801Z)
+</Steps>
+
+## Real-World Example: Expense Tracker Bot
+
+The `AutonomousAgent` has direct access to the filesystem and shell, making it important to trace every step to understand what the agent actually did on your system. The following example shows an expense tracker bot that reads receipt images from a workspace folder. For the full source code and explanation, see the [Expense Tracker Bot](https://docs.upsonic.ai/examples/autonomous-agents/expense-tracker-bot) guide.
+
+```python
+import os
+from dotenv import load_dotenv
+from upsonic import AutonomousAgent, Task
+from upsonic.integrations.langfuse import Langfuse
+
+load_dotenv()
+
+langfuse = Langfuse()
+
+from tools import ocr_extract_text
+
+agent = AutonomousAgent(
+    model="anthropic/claude-sonnet-4-6",
+    tools=[ocr_extract_text],
+    workspace=os.path.join(os.path.dirname(__file__), "workspace"),
+    instrument=langfuse,
+)
+
+task = Task(
+    "Save my receipts from the receipts/ folder and tell me my monthly expenses."
+)
+
+agent.print_do(task)
+langfuse.shutdown()
+```
+
+## Resources
+
+- [Upsonic Documentation](https://upsonic.mintlify.app/)
+- [Upsonic Langfuse Integration Docs](https://upsonic.mintlify.app/concepts/tracing/integrations/langfuse/index)
+- [Upsonic GitHub Repository](https://github.com/Upsonic/upsonic)
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
