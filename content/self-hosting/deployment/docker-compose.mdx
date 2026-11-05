@@ -196,10 +196,10 @@ The default `docker-compose.yml` includes the [AI Gateway](/self-hosting/configu
 
 </Callout>
 
-Checkouts from before the gateway was added need a `git pull`. If you edited `docker-compose.yml`, for example its `# CHANGEME` secrets, stash your edits first and keep your secrets when you resolve conflicts, because they must match your database volumes:
+Checkouts from before the gateway was added need an update. `--autostash` keeps local edits to `docker-compose.yml`, such as its `# CHANGEME` secrets. If it reports conflicts, keep your secrets, because they must match your database volumes:
 
 ```bash
-git stash && git pull && git stash pop
+git pull --autostash
 ```
 
 ### Generate the keys
