@@ -69,7 +69,9 @@ ClaudeAgentSDKInstrumentor().instrument()
 
 ## Step 4: Build a Hello World Agent
 
-Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
+Each `query()` call, or each response turn of a `ClaudeSDKClient`, is captured as one `AGENT` span that carries the prompt input, the final result output, session and model metadata, and aggregated token counts. Tool calls are captured as child `TOOL` spans. All spans are forwarded to Langfuse.
+
+> **Note:** this instrumentation does not create a separate LLM span for every model turn, so per-turn completions, reasoning, and per-turn token usage are not recorded as individual generations in Langfuse. For per-turn LLM spans, add [`openinference-instrumentation-anthropic`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-anthropic) alongside this package. Alternatively, use [Claude Code's native OpenTelemetry export](https://code.claude.com/docs/en/monitoring-usage).
 
 ```python
 import asyncio
