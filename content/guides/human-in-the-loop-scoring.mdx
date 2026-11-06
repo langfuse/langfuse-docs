@@ -66,15 +66,14 @@ filters = json.dumps([
     {"type": "datetime", "column": "startTime", "operator": "<", "value": now.isoformat()},
 ])
 
-response = langfuse.api.observations.get_many(
+for page in langfuse.iter_observation_pages(
     filter=filters,
     fields="core,basic,io,trace_context",
-    limit=50,
-)
-
-for root_observation in response.data:
-    # Render the root observation's input / output in your review tool
-    print(root_observation.trace_id, root_observation.input)
+    max_items=50,
+):
+    for root_observation in page.data:
+        # Render the root observation's input / output in your review tool
+        print(root_observation.trace_id, root_observation.input)
 ```
 
 _See the [Python SDK reference](https://python.reference.langfuse.com)._

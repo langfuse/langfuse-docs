@@ -90,7 +90,7 @@ def classify_intent(user_message: str) -> str:
 
 
 # Classify all chatbot traces from the last 24 hours. A trace's input lives on its
-# root observation, so fetch those rows and page through them with a cursor.
+# root observation, so page through those rows.
 to_ts = datetime.now(timezone.utc)
 from_ts = to_ts - timedelta(days=1)
 
@@ -104,16 +104,11 @@ filters = json.dumps([
     {"type": "datetime", "column": "startTime", "operator": "<", "value": to_ts.isoformat()},
 ])
 
-cursor = None
-while True:
-    response = langfuse.api.observations.get_many(
-        fields="core,basic,io,trace_context",
-        filter=filters,
-        cursor=cursor,
-        limit=50,
-    )
-    cursor = getattr(response.meta, "cursor", None)
-    for observation in response.data:
+for page in langfuse.iter_observation_pages(
+    fields="core,basic,io,trace_context",
+    filter=filters,
+):
+    for observation in page.data:
         # Adjust extraction to your observation input structure
         message = (
             observation.input.get("message")
@@ -130,8 +125,6 @@ while True:
             data_type="CATEGORICAL",
             score_id=f"intent-{trace_id}",  # idempotency key, same-day reruns overwrite
         )
-    if not cursor:
-        break
 
 langfuse.flush()
 ```

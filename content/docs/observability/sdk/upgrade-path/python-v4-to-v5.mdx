@@ -161,7 +161,11 @@ v4 already marked each of these as deprecated and named the replacement. If you 
 trace = langfuse.api.trace.get("trace-id")
 
 # v5
-observations = langfuse.api.observations.get_many(trace_id="trace-id", fields="core,basic,io")
+observations = [
+    observation
+    for page in langfuse.iter_observation_pages(trace_id="trace-id", fields="core,basic,io")
+    for observation in page.data
+]
 ```
 
 ### Trace input/output setters removed [#trace-io-setters-removed]
