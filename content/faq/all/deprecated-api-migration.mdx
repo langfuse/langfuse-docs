@@ -40,7 +40,7 @@ The SDK method tables below name the Python v4 and JS/TS v5 callers. Their repla
 | Deprecated endpoint                                                                                                                                                   | Replacement                                                                | Details                       |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------- |
 | `GET /observations`, `GET /observations/{id}`                                                                                                                         | `GET /v2/observations`                                                     | [Observations](#observations) |
-| `GET /traces`, `GET /traces/{id}`                                                                                                                                     | `GET /v2/observations`, filtered by `traceId`                              | [Traces](#traces)             |
+| `GET /traces`, `GET /traces/{id}`                                                                                                                                     | `GET /v2/observations`, grouped by `traceId`; sum `totalCost` per trace    | [Traces](#traces)             |
 | `GET /sessions`, `GET /sessions/{id}`                                                                                                                                 | `GET /v2/observations`, filtered by `sessionId`                            | [Sessions](#sessions)         |
 | `GET /metrics`, `GET /metrics/daily`                                                                                                                                  | `GET /v2/metrics`                                                          | [Metrics](#metrics)           |
 | `GET /scores`, `GET /scores/{id}`, `GET /v2/scores`, `GET /v2/scores/{id}`                                                                                            | `GET /v3/scores`                                                           | [Scores](#scores)             |
@@ -130,16 +130,17 @@ curl \
 
 ### SDK methods [#traces-sdk-methods]
 
-| SDK       | Deprecated caller                | Use instead                                                                                   |
-| --------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
-| Python v4 | `client.api.trace.list(...)`     | `client.api.observations.get_many(from_start_time=..., to_start_time=...)`                    |
-| Python v4 | `client.api.trace.get(trace_id)` | `client.api.observations.get_many(trace_id=trace_id, from_start_time=..., to_start_time=...)` |
-| JS/TS v5  | `client.api.trace.list(...)`     | `client.api.observations.getMany({ fromStartTime, toStartTime })`                             |
-| JS/TS v5  | `client.fetchTraces(...)`        | `client.api.observations.getMany({ fromStartTime, toStartTime })`                             |
-| JS/TS v5  | `client.api.trace.get(traceId)`  | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
-| JS/TS v5  | `client.fetchTrace(traceId)`     | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
+| SDK       | Deprecated caller                                                                                                     | Use instead                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Python v4 | `client.api.trace.list(...)`                                                                                          | `client.api.observations.get_many(from_start_time=..., to_start_time=...)`                    |
+| Python v4 | `client.api.trace.get(trace_id)`                                                                                      | `client.api.observations.get_many(trace_id=trace_id, from_start_time=..., to_start_time=...)` |
+| Python v5 | `client.api.trace.list(...)` and `.get(...)` are removed. `client.api.trace` only has `delete` and `delete_multiple`. | Same `client.api.observations.get_many(...)` calls as Python v4                               |
+| JS/TS v5  | `client.api.trace.list(...)`                                                                                          | `client.api.observations.getMany({ fromStartTime, toStartTime })`                             |
+| JS/TS v5  | `client.fetchTraces(...)`                                                                                             | `client.api.observations.getMany({ fromStartTime, toStartTime })`                             |
+| JS/TS v5  | `client.api.trace.get(traceId)`                                                                                       | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
+| JS/TS v5  | `client.fetchTrace(traceId)`                                                                                          | `client.api.observations.getMany({ traceId, fromStartTime, toStartTime })`                    |
 
-These replacements return observation rows, not the legacy trace response shape. Group them by `traceId` and reconstruct trace-level fields as described below.
+These replacements return observation rows, not the legacy trace response shape. Group them by `traceId` and reconstruct trace-level fields as described below. Python SDK v5 and JS/TS SDK v6 remove the read methods in this table and keep the same `get_many` / `getMany` replacements.
 
 ### Parameter mapping
 
@@ -154,13 +155,15 @@ These replacements return observation rows, not the legacy trace response shape.
 | `orderBy`                      | Not available; results are always sorted by `startTime` descending |
 | `page`                         | `cursor`                                                           |
 
-Request `fields=core,basic,trace_context` to include the trace-level attributes `traceName`, `tags`, and `release` on each row.
+Request `fields=core,basic,trace_context` to include the trace-level attributes `traceName`, `tags`, and `release` on each row. Add `usage` when you need `totalCost`; that field is absent unless the `usage` group is requested.
 
 ### Semantic differences
 
 - **The response contains observation rows, not trace objects.** Group rows by `traceId` to reconstruct trace activity.
+- **Summing `totalCost` per `traceId` gives the same value as the legacy trace `totalCost`.** Traces created without observations are still returned. They come back as a single row whose id is `t-<traceId>`, with cost 0. The legacy trace id is that row's `traceId`; the `t-` prefix is only the observation id.
+- For a list of every trace, use [Export every trace with total cost](#export-every-trace). For the most expensive traces, or the cost of trace IDs you already have, use [Per-trace total cost](#per-trace-total-cost).
 - **v4 has no trace-level `input`/`output`.** Reconstruct them from the root observation of each trace: the row with `parentObservationId == null`.
-- For trace-level aggregates (counts, costs, latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead of fetching and aggregating rows yourself.
+- For other trace-level aggregates (counts and latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead of fetching and aggregating rows yourself.
 
 ### Example
 
@@ -181,6 +184,155 @@ curl -G \
   --data-urlencode "fromStartTime=2026-07-01T00:00:00Z" \
   --data-urlencode "toStartTime=2026-07-16T00:00:00Z" \
   --data-urlencode "limit=50"
+```
+
+### Export every trace with total cost [#export-every-trace]
+
+Page through [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and sum `totalCost` by `traceId`. The script writes `traces.csv` (`id`, `name`, `timestamp`, `total_cost`) for every trace whose earliest observation started in the last 7 days. It uses Python SDK v5 (`langfuse.get_client()`).
+
+The SDK returns typed objects with snake_case attributes and `datetime` start times, not dictionaries. The same fields on the REST response are camelCase: `traceId`, `totalCost`, `startTime`, `traceName`, and `parentObservationId`.
+
+- `timestamp` is the earliest observation `startTime`, which equals the legacy trace `timestamp`.
+- Use `traceName` for the trace name. When it is empty, use the root observation's `name`: the row with `parentObservationId == null`. `traceName` is empty on OpenTelemetry traces that never set a trace name, and on some older ingestion traces. In both cases the legacy endpoint returned the root span's name.
+- `meta.cursor` is omitted on the last page. Stop when it is absent.
+- Include the `usage` field group. Without it, `totalCost` is absent rather than zero.
+- Observations are filtered by their own start time. Query from one day before the window so a trace that started just before the window is summed in full, then drop it when `timestamp` is before the window. That avoids writing a partial row.
+
+```python
+"""Write traces.csv (id, name, timestamp, total_cost) for every trace of the last 7 days."""
+
+import csv
+from datetime import datetime, timedelta, timezone
+
+from langfuse import get_client
+
+langfuse = get_client()  # reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL
+
+to_time = datetime.now(timezone.utc)
+from_time = to_time - timedelta(days=7)
+# Observations are filtered by their own start time. Start one day earlier so a trace
+# that began just before from_time still sums the cost of all its observations.
+lookback = timedelta(days=1)
+
+traces = {}
+cursor = None
+while True:
+    page = langfuse.api.observations.get_many(
+        from_start_time=from_time - lookback,
+        to_start_time=to_time,
+        fields="core,basic,usage,trace_context",
+        limit=1000,
+        cursor=cursor,
+    )
+    for obs in page.data:
+        trace = traces.setdefault(
+            obs.trace_id,
+            {"id": obs.trace_id, "name": None, "root_name": None, "timestamp": obs.start_time, "total_cost": 0.0},
+        )
+        trace["total_cost"] += obs.total_cost or 0.0
+        trace["timestamp"] = min(trace["timestamp"], obs.start_time)
+        trace["name"] = trace["name"] or obs.trace_name
+        if obs.parent_observation_id is None:
+            trace["root_name"] = obs.name
+    cursor = page.meta.cursor
+    if not cursor:
+        break
+
+with open("traces.csv", "w", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(["id", "name", "timestamp", "total_cost"])
+    for trace in traces.values():
+        if trace["timestamp"] < from_time:
+            continue  # started before the window
+        writer.writerow(
+            [trace["id"], trace["name"] or trace["root_name"], trace["timestamp"].isoformat(), trace["total_cost"]]
+        )
+```
+
+One page of the same query. The response is observation rows, so group by `traceId` as in the script. Repeat with `cursor` set to `meta.cursor` until `meta.cursor` is absent.
+
+```bash
+curl -G \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/observations" \
+  --data-urlencode "fields=core,basic,usage,trace_context" \
+  --data-urlencode "fromStartTime=2026-07-01T00:00:00Z" \
+  --data-urlencode "toStartTime=2026-07-16T00:00:00Z" \
+  --data-urlencode "limit=1000"
+```
+
+### Per-trace total cost [#per-trace-total-cost]
+
+[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns the same per-trace sum without fetching observation rows. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`.
+
+<Callout type="info">
+
+`traceId` is a [high-cardinality dimension](/docs/metrics/features/metrics-api#high-cardinality-dimensions). The API accepts it as a dimension only together with `config.row_limit` (maximum 1,000), an `orderBy` with direction `desc` on a measure, and no `timeDimension`. Group by `traceId` alone. This recipe is a top-N query, or a lookup of trace IDs you already have. For every trace in a window, use [Export every trace with total cost](#export-every-trace).
+
+</Callout>
+
+Pass the known trace IDs as command-line arguments. The second query sets `row_limit` to the number of IDs, which must stay at or below 1,000.
+
+```python
+"""Per-trace total cost via Metrics API v2: top-N most expensive traces, and cost for known trace IDs."""
+
+import json
+import sys
+from datetime import datetime, timedelta, timezone
+
+from langfuse import get_client
+
+langfuse = get_client()
+
+to_time = datetime.now(timezone.utc)
+from_time = to_time - timedelta(days=7)
+
+# traceId is high-cardinality: the API requires row_limit plus a desc orderBy on a measure.
+# Don't add traceName as a second dimension; rows without it would split a trace in two.
+top = langfuse.api.metrics.metrics(
+    query=json.dumps(
+        {
+            "view": "observations",
+            "dimensions": [{"field": "traceId"}],
+            "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+            "filters": [],
+            "fromTimestamp": from_time.isoformat(),
+            "toTimestamp": to_time.isoformat(),
+            "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+            "config": {"row_limit": 100},
+        }
+    )
+)
+print("top-N:")
+for row in top.data:
+    print(" ", row)
+
+# Total cost for trace IDs you already have
+trace_ids = sys.argv[1:]
+known = langfuse.api.metrics.metrics(
+    query=json.dumps(
+        {
+            "view": "observations",
+            "dimensions": [{"field": "traceId"}],
+            "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+            "filters": [{"column": "traceId", "operator": "any of", "value": trace_ids, "type": "stringOptions"}],
+            "fromTimestamp": from_time.isoformat(),
+            "toTimestamp": to_time.isoformat(),
+            "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+            "config": {"row_limit": len(trace_ids)},
+        }
+    )
+)
+print("known ids:")
+for row in known.data:
+    print(" ", row)
+```
+
+```bash
+curl -G \
+  -H "Authorization: Basic <BASIC AUTH HEADER>" \
+  "https://cloud.langfuse.com/api/public/v2/metrics" \
+  --data-urlencode 'query={"view":"observations","dimensions":[{"field":"traceId"}],"metrics":[{"measure":"totalCost","aggregation":"sum"}],"filters":[],"fromTimestamp":"2026-07-01T00:00:00Z","toTimestamp":"2026-07-16T00:00:00Z","orderBy":[{"field":"sum_totalCost","direction":"desc"}],"config":{"row_limit":100}}'
 ```
 
 ## Sessions [#sessions]
@@ -214,7 +366,7 @@ Despite its plural name, `fetchSessions(sessionId)` calls the deprecated single-
 
 - The response contains observation rows; a "session" is the set of rows sharing a `sessionId`. Group by `sessionId` (and within a session, by `traceId`) to reconstruct the session structure.
 - Like traces, sessions have no dedicated input/output object in v4. Reconstruct the conversation from the root observations of the traces within the session.
-- `sessionId` is a high-cardinality field: it is available for **filtering** in the [Metrics API v2](/docs/metrics/features/metrics-api#v2), but not for grouping.
+- `sessionId` is a high-cardinality field. It is always available for **filtering** in the [Metrics API v2](/docs/metrics/features/metrics-api#v2). Grouping is top-N only: set `config.row_limit` and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. See [High cardinality dimensions](/docs/metrics/features/metrics-api#high-cardinality-dimensions).
 
 ### Example
 
@@ -253,16 +405,16 @@ This is not only a method rename: adapt the query as described below. In particu
 
 The query object structure carries over; the key changes are inside the query:
 
-| Deprecated (v1)                                                    | v2 equivalent                                                                                    |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`) |
-| `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                        |
-| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Not available; high-cardinality fields remain available as **filters** only                      |
-| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                          |
+| Deprecated (v1)                                                    | v2 equivalent                                                                                                                                                                                                                        |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`)                                                                                                                                     |
+| `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                                                                                                                                                            |
+| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Top-N only: set `config.row_limit` (max 1,000) and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. These fields are always available as filters. See [Per-trace total cost](#per-trace-total-cost). |
+| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                                                                                                                                                              |
 
 ### Semantic differences
 
-- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. For trace-level counts, filter on the v2-only `isRootObservation = true` dimension. See [Logical root observations](/docs/api-and-data-platform/features/public-api#logical-root-observations) for root semantics and trace-counting edge cases. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and group by `traceId` client-side.
+- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. Summing `totalCost` by `traceId` still equals the legacy trace `totalCost`; see [Export every trace with total cost](#export-every-trace). For trace-level counts, filter on the v2-only `isRootObservation = true` dimension. See [Logical root observations](/docs/api-and-data-platform/features/public-api#logical-root-observations) for root semantics and trace-counting edge cases. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and group by `traceId` client-side.
 - When ordering by an aggregated metric, use the returned field name in the format `{aggregation}_{measure}`, e.g. `sum_totalCost`.
 
 ### Example
