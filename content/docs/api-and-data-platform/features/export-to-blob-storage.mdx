@@ -149,6 +149,24 @@ The Azure integration authenticates with a storage account name and account key.
 
 </Tabs>
 
+### Authenticate with an IAM role [#iam-role-auth]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+For Amazon S3, Langfuse can assume an IAM role in your AWS account instead of storing access keys. Langfuse assumes your role through its own cross-account role and passes an external ID that is unique to the integration. Access keys remain supported and are the default. The same option is available for [External Media Storage](/docs/observability/features/multi-modality#external-s3-media).
+
+To configure an export through the [public API](#field-groups-rest-api), set `authType` to `ROLE_ARN` and provide `roleArn`. The response includes the `crossAccountRoleArn` and `externalId` to allow in your role's trust policy.
+
+On self-hosted deployments, an operator must also set `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` to the role Langfuse assumes before it assumes your role.
+
 ### Field selection [#export-field-groups]
 
 Field groups select which columns appear in observation and score files.
