@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 
 export type VideoCarouselItem = {
   title: string;
+  /** One sentence on what the video shows, printed under the title. */
+  description?: string;
   src?: string;
   poster?: string;
 };
@@ -142,6 +144,7 @@ export function VideoCarousel({
                   {src ? (
                     <Video
                       src={src}
+                      title={video.title}
                       poster={video.poster}
                       aspectRatio={VIDEO_FRAME.aspectRatio}
                       className="w-full rounded-none shadow-none"
@@ -168,6 +171,11 @@ export function VideoCarousel({
                     <p className="m-0 text-sm font-medium text-text-primary">
                       {video.title}
                     </p>
+                    {video.description ? (
+                      <p className="m-0 mt-1 text-sm text-text-secondary">
+                        {video.description}
+                      </p>
+                    ) : null}
                   </figcaption>
                 </figure>
               </CarouselItem>
