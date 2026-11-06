@@ -209,15 +209,13 @@ This process keeps the default definitions current without relying on a third-pa
 </Details>
 
 <Details id="cost-inference-for-reasoning-models">
-<Summary>Why doesn't Langfuse infer cost for reasoning models like OpenAI o1?</Summary>
+<Summary>Why doesn't Langfuse estimate token usage from inputs and outputs?</Summary>
 
-Cost inference by tokenizing the LLM input and output is not supported for reasoning models such as the OpenAI o1 model family. That is, if no token counts are ingested, Langfuse cannot infer cost for reasoning models.
+Text-based token estimates can produce incorrect costs for thinking models and cached-token pricing.
 
-Reasoning models take multiple steps to arrive at a response. The result from each step generates reasoning tokens that are billed as output tokens. So the cost-effective output token count is the sum of all reasoning tokens and the token count for the final completion. Since Langfuse does not have visibility into the reasoning tokens, it cannot infer the correct cost for generations that have no token usage provided.
-
-To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations. When utilizing the [Langfuse OpenAI wrapper](/integrations/model-providers/openai-py) or integrations such as for [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex) or [LiteLLM](/integrations/gateways/litellm), token usage is collected and provided automatically for you.
-
-For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides/reasoning) on how reasoning models work.
+<Callout type="info">
+Langfuse no longer estimates token usage for any model. Cost tracking requires submitted usage or costs. Use an [integration](/integrations) that captures provider usage, or [ingest usage or costs manually](#ingest).
+</Callout>
 
 </Details>
 
@@ -571,7 +569,6 @@ If you don't see cost on your generations, check the following:
 - **The model must match a definition.** Inferred cost requires a model definition whose `match_pattern` matches the generation's `model` value. If no model matches, add a [custom model definition](#custom-model-definitions).
 - **Model definition changes only apply to new generations.** If you change or add a model definition, the updated costs are applied only to generations logged afterward.
 - **Only `generation` and `embedding` observations track cost.** Other observation types do not carry usage or cost.
-- **Reasoning models require ingested usage.** Langfuse cannot infer cost for reasoning models such as the OpenAI o1 family without token counts. See [cost inference for reasoning models](#cost-inference-for-reasoning-models).
 - **Gateways:** If you use [OpenRouter](/integrations/gateways/openrouter#cost-tracking), Langfuse can directly capture the OpenRouter cost information. If you use LiteLLM, Langfuse directly captures the cost information returned in each LiteLLM response.
 
 ## GitHub Discussions
