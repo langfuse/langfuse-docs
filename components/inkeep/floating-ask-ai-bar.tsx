@@ -21,6 +21,7 @@ import { FloatingAskAIButton } from "./ask-ai-button";
 const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   // Inline AI chat already on the page
   /^\/docs\/ask-ai(\/|$)/,
+  /^\/docs\/demo\/?$/,
   /^\/faq(\/|$)/,
   // Conversion-focused
   /^\/talk-to-us(\/|$)/,
@@ -31,7 +32,6 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/pricing-self-host(\/|$)/,
   /^\/careers(\/|$)/,
   // Legal
-  /^\/imprint(\/|$)/,
   /^\/privacy(\/|$)/,
   /^\/terms(\/|$)/,
   /^\/cookie-policy(\/|$)/,

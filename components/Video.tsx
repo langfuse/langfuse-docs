@@ -50,7 +50,9 @@ export const Video = ({
         src={src}
         poster={poster}
         posterLoad="eager"
-        controls={!gifStyle}
+        // Native controls on every video, gifStyle included, so readers can
+        // pause, scrub and open fullscreen.
+        controls
         autoPlay={gifStyle || autoPlay}
         muted={gifStyle || muted}
         loop={gifStyle}

@@ -1,7 +1,7 @@
 ---
 title: Langfuse for healthcare and life sciences
 seoTitle: Langfuse for healthcare and life sciences
-description: Observe and evaluate AI agents that handle patient data, on Langfuse's HIPAA-ready cloud region or your own infrastructure.
+description: Bring reliable healthcare AI faster into production, with less manual review and costs in view as you scale. HIPAA-ready region or self-hosted.
 contentWidth: full
 ---
 
@@ -9,7 +9,7 @@ contentWidth: full
 
 {/* TODO(healthcare-review): Open items live in components/healthcare/content.ts. Do not resolve them in this PR. */}
 {/* TODO(healthcare-review): (a) Which plan includes HIPAA? Copy follows the HIPAA docs: Pro plan or higher. Pricing FAQ still says Enterprise. */}
-{/* TODO(healthcare-review): (b) Legal review of the clinical documentation and medical information use cases. */}
+{/* TODO(healthcare-review): (b) Legal review of the medical information use case. */}
 {/* TODO(healthcare-review): (c) Audit logs are Enterprise only. Do not describe them as included with the HIPAA region. */}
 {/* TODO(healthcare-review): (d) Logo rights. Merck Group and Evolve only, from published stories. */}
 
@@ -36,22 +36,31 @@ import { Button } from "@/components/ui/button";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { BookOpen, Play, Radar } from "lucide-react";
 
-<h1 className="sr-only">Langfuse for healthcare and life sciences</h1>
+<h1 className="sr-only">Bring reliable healthcare AI faster into production</h1>
 
 <div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
   <section data-use-case-section="hero" className="grid border-b border-line-structure lg:grid-cols-[2fr_1fr]">
     <div className="min-w-0 border-b border-line-structure px-6 pb-7 pt-10 sm:px-10 sm:pb-8 sm:pt-12 lg:border-b-0 lg:border-r">
-      <h2 className="text-[38px] leading-none text-text-primary sm:text-[48px]">
-        <span className="block leading-[0.95]">{"Langfuse for"}</span>
-        <span className="mt-3 block leading-[1.15] sm:mt-4">
-          <span className="bg-surface-cta-primary box-decoration-clone px-1.5">
-            {"Healthcare and life sciences"}
+      <h2 className="text-[38px] leading-[0.95] text-text-primary sm:text-[48px]">
+        <span className="block">{"Bring reliable healthcare AI"}</span>
+        <span className="mt-1 block leading-[1.15]">
+          <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">
+            {"faster into production"}
           </span>
         </span>
       </h2>
       <p className="mt-4 max-w-[56ch] text-[14px] leading-[1.45] text-text-secondary">
         {
-          "Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-ready cloud region or your own infrastructure. For healthcare and life sciences teams."
+          "For healthcare and life sciences teams: go live faster, spend less time on manual review, and keep costs in view as you scale. "
+        }
+        <a
+          href="/users/merckgroup"
+          className="underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+        >
+          {"Merck Group"}
+        </a>
+        {
+          " reduced development cycles from weeks to days and runs 80+ use cases on Langfuse."
         }
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
@@ -138,7 +147,7 @@ import { BookOpen, Play, Radar } from "lucide-react";
     <h2 className="mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
       {"What healthcare and life sciences teams build on Langfuse."}
     </h2>
-    {/* TODO(healthcare-review): (b) Legal review of medical information and clinical documentation. */}
+    {/* TODO(healthcare-review): (b) Legal review of medical information. */}
     <UseCaseGrid useCases={healthcareUseCases} />
   </section>
 

@@ -1,0 +1,90 @@
+---
+title: PagerDuty Integration with Langfuse
+sidebarTitle: PagerDuty
+description: Page your on-call team from Langfuse. Receive alerts, project notifications, and prompt changes as PagerDuty events.
+---
+
+# PagerDuty Integration
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4",
+  }}
+/>
+
+Page your on-call team from Langfuse. PagerDuty can receive [alert](/docs/observability/features/alerts), project notification, and [prompt change](/docs/prompt-management/features/webhooks-slack-integrations) events through Langfuse automations.
+
+## Set up PagerDuty [#get-started]
+
+<Steps>
+
+### Get a routing key from PagerDuty
+
+Copy a routing key from one of these:
+
+- **Service integration:** In PagerDuty, open the service, go to **Integrations**, add an **Events API V2** integration, and copy its **Integration Key**.
+- **Event Orchestration:** Open the orchestration under **Automation → Event Orchestration**, go to **Integrations**, and copy the routing key.
+
+Note whether your PagerDuty account is in the US or EU service region. EU accounts use a `*.eu.pagerduty.com` domain.
+
+### Create a PagerDuty automation
+
+Creating automations requires the **Admin** or **Owner** role in the project.
+
+1. Navigate to [**Automations**](https://cloud.langfuse.com/project/~/automations) and click **Create Automation**.
+2. Select the event source: **Alert** or **Prompt**.
+3. Select the action type **PagerDuty**.
+4. Paste the **Routing key** and select the **Region** of your PagerDuty account (`US` or `EU`).
+5. Give the automation a name and click **Save**.
+
+For project notifications, open **Project Settings → Notifications** and add **PagerDuty** as the notification channel with the same routing key and region fields.
+
+### Send a test event
+
+In the automation form, click **Send test event** and confirm. Langfuse triggers a `critical` test alert on the PagerDuty service, so it pages whoever is on call for that service. The button then changes to **Resolve test event**. Click it to resolve the test alert.
+
+### Link alerts to the automation
+
+[Create or edit an alert](/docs/observability/features/alerts#alert-setup) and select the PagerDuty automation in the [**Automations** panel](/docs/observability/features/alerts#notification-channel).
+
+</Steps>
+
+## What triggers a PagerDuty event [#events]
+
+### Alerts [#alerts]
+
+Each Langfuse alert maps to one PagerDuty alert. A severity change updates the open PagerDuty alert instead of opening a new one.
+
+| Langfuse severity | PagerDuty event                  |
+| ----------------- | -------------------------------- |
+| `ALERT`           | Trigger with severity `critical` |
+| `WARNING`         | Trigger with severity `warning`  |
+| `NO_DATA`         | Trigger with severity `error`    |
+| `OK`              | Resolve the alert                |
+
+Renotify and no-data settings apply as described in [Alert states](/docs/observability/features/alerts#alert-states).
+
+Acknowledging or resolving an incident in PagerDuty does not change the Langfuse alert.
+
+### Project notifications [#project-notifications]
+
+Project notifications always trigger a PagerDuty alert: `ALERT` maps to `error`, `WARNING` to `warning`, and `INFO` to `info`. Repeated failures of the same resource, such as the same blob storage export, update one PagerDuty alert.
+
+### Prompt changes [#prompt-changes]
+
+Prompt version creations, label and tag updates, and deletions show up in the service's change timeline. They never page anyone.
+
+<Callout type="warn">
+  Langfuse resolves a PagerDuty alert only when its Langfuse alert recovers to
+  `OK`. Resolve the following in PagerDuty yourself, or rely on the service's
+  auto-resolve timeout:
+
+- Project notification alerts.
+- Alerts that were breaching when the Langfuse alert was paused, deleted, or started failing to evaluate. Resuming the alert does not resolve them either.
+- A test alert that you did not resolve before closing the automation form.
+
+</Callout>

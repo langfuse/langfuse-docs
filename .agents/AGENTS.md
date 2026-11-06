@@ -90,6 +90,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 - Use existing **shadcn/ui** patterns and components where possible.
 - Use **Tailwind semantic tokens** (avoid hard-coded color values).
 - Build mobile-first responsive layouts.
+- Diagrams must fit the page. Never use horizontal "scroll to explore" for diagrams. Scale the diagram to the available width, and switch to a stacked mobile layout when the scaled version would become unreadable.
 
 ## Key config files
 
@@ -137,12 +138,17 @@ Please check the following:
 - Edited text has consistent punctuation.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
 - When documentation is added or expanded, do not repeat the same information on a page. Each fact or explanation should appear once; later sections should link back instead of restating it.
+- A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
+  - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
+  - `<FaqPreview tags={[...]} />` from `components/faq/FaqPreview.tsx`: the list of links to that area's FAQ articles. Keep this component. Do not replace it with a hand-written link list or inline Q&A.
+  - `<GhDiscussionsPreview labels={[...]} />` from `components/gh-discussions/GhDiscussionsPreview.tsx`: the GitHub Discussions component already on these pages. Keep this component. Do not replace it with a prose link to GitHub Issues.
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
 - Avoid specific model names in documentation; they go stale quickly. Prefer generic phrasing such as "your model" or the provider family, and flag new or edited docs that pin a versioned model name unless the page is specifically about that model.
 - In documentation tables, every column must add enough value on its own. Prefer fewer columns: merge or remove any column that does not help the reader, and flag tables that would stay clear with fewer columns.
 - Put failure modes, scope limits, and similar caveats in a `<Callout>` so they stand out. Flag new or edited docs that bury these in body copy.
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
+- Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.

@@ -21,7 +21,7 @@ While the [Langfuse API](/docs/api) is extremely open and flexible, there are so
 
 ### Request Constraints
 
-- **Trace Deletion**: We advise strongly against trying to send more than 30-50 trace ids in a single DELETE request. Consider using [data retention](/docs/administration/data-retention) to automatically delete old traces instead of manual deletion.
+- **Trace deletion**: Each DELETE request can include up to 1,000 trace IDs. For larger deletions, split the IDs across multiple requests. Consider using [data retention](/docs/administration/data-retention) to automatically delete old traces instead of manual deletion.
 
 ### Rate Limits
 

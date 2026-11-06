@@ -14,6 +14,9 @@ const {
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 const { hasResourceSignupCta } = require("../lib/resource-signup-cta.js");
 const {
+  injectIntegrationSignupCta,
+} = require("../lib/integration-signup-cta.js");
+const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
 
@@ -43,11 +46,7 @@ const CHANGELOG_URL_PREFIX = "changelog";
 // exactly the pages that expose a "download as PDF" link. The PDF route strips
 // the footer as a second line of defense (app/api/md-to-pdf/route.ts), but
 // these pages should never carry it in the first place.
-const AGENT_FOOTER_EXCLUDED_PAGES = new Set([
-  "privacy.md",
-  "cookie-policy.md",
-  "imprint.md",
-]);
+const AGENT_FOOTER_EXCLUDED_PAGES = new Set(["privacy.md", "cookie-policy.md"]);
 
 /**
  * Read the `canonical` frontmatter value (a docs path) from raw MDX, if present.
@@ -114,7 +113,11 @@ function appendAgentInstructionsFooter(markdown, destRel) {
 
 // Mirror layout-level CTAs before appending the Markdown-only agent footer.
 // Also applies to Markdown overrides and notebook-generated resource pages.
-function appendPageFooters(markdown, destRel) {
+// Integration pages get the same banner the LangChain page renders after the
+// intro. `sourceHasSignupCta` skips pages whose MDX already includes it, so
+// the component renderer and this injector do not both emit the line.
+function appendPageFooters(markdown, destRel, options) {
+  markdown = injectIntegrationSignupCta(markdown, destRel, options);
   const pathname = `/${destRel.replace(/\.md$/, "")}`;
   if (hasResourceSignupCta(pathname)) {
     const cta = replaceComponentsWithMarkdown("<SignupCTA />").trim();
@@ -224,7 +227,9 @@ function copyAll() {
       processed = injectChangelogAgentNotice(processed, originalContent);
     }
 
-    processed = appendPageFooters(processed, destRel);
+    processed = appendPageFooters(processed, destRel, {
+      sourceHasSignupCta: /<SignupCTA\b/.test(originalContent),
+    });
 
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;

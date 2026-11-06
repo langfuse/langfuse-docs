@@ -141,7 +141,14 @@ export function CustomerStoriesSection({
                     : "flex flex-col justify-center gap-1 border-t border-dashed border-line-divider-dash px-6 py-5 sm:border-t-0 sm:border-l lg:border-l-0 lg:border-t lg:px-7 lg:py-6"
                 }
               >
-                <p className="m-0 font-medium text-[28px] leading-none tracking-tight text-text-primary sm:text-[32px]">
+                <p
+                  className={cn(
+                    "m-0 font-medium tracking-tight text-text-primary",
+                    stat.value.length > 8
+                      ? "text-[20px] leading-[1.1] sm:text-[22px]"
+                      : "text-[28px] leading-none sm:text-[32px]",
+                  )}
+                >
                   {stat.value}
                 </p>
                 <p className="m-0 text-[13px] leading-[1.4] text-text-secondary">

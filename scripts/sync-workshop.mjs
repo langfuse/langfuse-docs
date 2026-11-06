@@ -1,19 +1,25 @@
 #!/usr/bin/env node
 
-import { existsSync } from "node:fs";
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import posixPath from "node:path/posix";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
 import workshopConfig from "../lib/workshop-config.js";
+
+const execFileAsync = promisify(execFile);
 
 const OWNER = "langfuse";
 const REPO = "langfuse-workshop";
 const REF = "main";
 const REPO_SLUG = `${OWNER}/${REPO}`;
 const REPO_URL = `https://github.com/${REPO_SLUG}`;
-const API_CONTENTS_URL = `https://api.github.com/repos/${REPO_SLUG}/contents`;
+// codeload serves the public archive without counting against the REST API
+// rate limit, so builds do not depend on a GitHub token's hourly quota.
+const TARBALL_URL = `https://codeload.github.com/${REPO_SLUG}/tar.gz/refs/heads/${REF}`;
 const GITHUB_BLOB_BASE = `${REPO_URL}/blob/${REF}`;
 const GITHUB_TREE_BASE = `${REPO_URL}/tree/${REF}`;
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO_SLUG}/${REF}`;
@@ -21,91 +27,98 @@ const OUTPUT_DIR = path.join(process.cwd(), "content", "workshop");
 const FENCED_CODE_BLOCK_PATTERN = /(```[\s\S]*?```|~~~[\s\S]*?~~~)/g;
 const { WORKSHOP_DEFAULT_CHAPTER } = workshopConfig;
 
-const initialEnvKeys = new Set(Object.keys(process.env));
-
-function parseEnvValue(value) {
-  const trimmed = value.trim();
-  const quote = trimmed[0];
-  if (
-    (quote === `"` || quote === `'`) &&
-    trimmed[trimmed.length - 1] === quote
-  ) {
-    const unquoted = trimmed.slice(1, -1);
-    return quote === `"`
-      ? unquoted.replace(/\\n/g, "\n").replace(/\\"/g, `"`)
-      : unquoted;
-  }
-  return trimmed;
-}
-
-async function loadEnvFiles() {
-  for (const filename of [".env", ".env.local"]) {
-    const filePath = path.join(process.cwd(), filename);
-    if (!existsSync(filePath)) continue;
-
-    const contents = await fs.readFile(filePath, "utf8");
-    for (const line of contents.split(/\r?\n/)) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) continue;
-
-      const match = trimmed.match(
-        /^(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)=(.*)$/,
-      );
-      if (!match) continue;
-
-      const [, key, rawValue] = match;
-      if (initialEnvKeys.has(key)) continue;
-      process.env[key] = parseEnvValue(rawValue);
-    }
-  }
-}
-
-function githubToken() {
-  return process.env.GITHUB_ACCESS_TOKEN || process.env.GITHUB_TOKEN || null;
-}
-
-function githubHeaders(accept) {
-  const headers = {
-    Accept: accept,
-    "User-Agent": "langfuse-docs-workshop-sync",
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-  const token = githubToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return headers;
-}
-
 function encodeRepoPath(repoPath) {
   return repoPath.split("/").map(encodeURIComponent).join("/");
 }
 
-function contentsUrl(repoPath) {
-  return `${API_CONTENTS_URL}/${encodeRepoPath(repoPath)}?ref=${REF}`;
+const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
+const MAX_FETCH_ATTEMPTS = 5;
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchGitHub(repoPath, accept) {
-  const response = await fetch(contentsUrl(repoPath), {
-    headers: githubHeaders(accept),
-  });
+function retryDelayMs(attempt, response) {
+  const header = response?.headers?.get("retry-after");
+  const seconds = header == null ? Number.NaN : Number(header);
+  if (Number.isFinite(seconds) && seconds >= 0) {
+    return Math.min(seconds * 1000, 20_000);
+  }
+  const backoff = 400 * 2 ** (attempt - 1);
+  return backoff + Math.floor(Math.random() * 250);
+}
 
-  if (!response.ok) {
+async function extractTarball(response, archivePath, repoDir) {
+  await fs.writeFile(archivePath, Buffer.from(await response.arrayBuffer()));
+  await fs.rm(repoDir, { recursive: true, force: true });
+  await fs.mkdir(repoDir);
+  await execFileAsync("tar", [
+    "-xzf",
+    archivePath,
+    "-C",
+    repoDir,
+    "--strip-components=1",
+  ]);
+}
+
+async function downloadRepo(targetDir) {
+  const archivePath = path.join(targetDir, "repo.tar.gz");
+  const repoDir = path.join(targetDir, "repo");
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt++) {
+    let response;
+    try {
+      response = await fetch(TARBALL_URL, {
+        headers: { "User-Agent": "langfuse-docs-workshop-sync" },
+      });
+      if (response.ok) {
+        await extractTarball(response, archivePath, repoDir);
+        return repoDir;
+      }
+    } catch (error) {
+      lastError = error;
+      if (attempt === MAX_FETCH_ATTEMPTS) throw error;
+      console.warn(
+        `Retrying ${REPO_SLUG}@${REF} download after it failed: ${error.message} (attempt ${attempt}/${MAX_FETCH_ATTEMPTS})`,
+      );
+      await delay(retryDelayMs(attempt));
+      continue;
+    }
+
     const body = await response.text();
-    throw new Error(
-      `Failed to fetch ${repoPath} from ${REPO_SLUG}@${REF}: ${response.status} ${response.statusText}\n${body}`,
+    lastError = new Error(
+      `Failed to download ${TARBALL_URL}: ${response.status} ${response.statusText}\n${body}`,
     );
+    if (
+      !RETRYABLE_STATUSES.has(response.status) ||
+      attempt === MAX_FETCH_ATTEMPTS
+    ) {
+      throw lastError;
+    }
+
+    console.warn(
+      `Retrying ${REPO_SLUG}@${REF} download after ${response.status} (attempt ${attempt}/${MAX_FETCH_ATTEMPTS})`,
+    );
+    await delay(retryDelayMs(attempt, response));
   }
 
-  return response;
+  throw lastError;
 }
 
-async function fetchJson(repoPath) {
-  const response = await fetchGitHub(repoPath, "application/vnd.github+json");
-  return response.json();
+async function listDirectory(repoDir, repoPath) {
+  const entries = await fs.readdir(path.join(repoDir, repoPath), {
+    withFileTypes: true,
+  });
+  return entries.map((entry) => ({
+    name: entry.name,
+    path: posixPath.join(repoPath, entry.name),
+    type: entry.isFile() ? "file" : entry.isDirectory() ? "dir" : "other",
+  }));
 }
 
-async function fetchMarkdown(repoPath) {
-  const response = await fetchGitHub(repoPath, "application/vnd.github.raw");
-  return response.text();
+async function readMarkdown(repoDir, repoPath) {
+  return fs.readFile(path.join(repoDir, repoPath), "utf8");
 }
 
 function isMarkdownFile(entry) {
@@ -125,10 +138,10 @@ function slugFromFileName(fileName) {
   return fileName.replace(/\.md$/i, "");
 }
 
-async function collectWorkshopFiles() {
+async function collectWorkshopFiles(repoDir) {
   const [learnerEntries, instructorEntries] = await Promise.all([
-    fetchJson("docs/learner"),
-    fetchJson("docs/instructor"),
+    listDirectory(repoDir, "docs/learner"),
+    listDirectory(repoDir, "docs/instructor"),
   ]);
 
   const learnerFiles = sortByName(
@@ -737,9 +750,16 @@ async function writePage(file, content) {
 }
 
 async function main() {
-  await loadEnvFiles();
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "workshop-sync-"));
+  try {
+    await syncFromRepo(await downloadRepo(tempDir));
+  } finally {
+    await fs.rm(tempDir, { recursive: true, force: true });
+  }
+}
 
-  const files = await collectWorkshopFiles();
+async function syncFromRepo(repoDir) {
+  const files = await collectWorkshopFiles(repoDir);
   const routeBySourcePath = new Map(
     files.map((file) => [file.sourcePath, file.route]),
   );
@@ -749,7 +769,7 @@ async function main() {
 
   const pages = await Promise.all(
     files.map(async (file) => {
-      const markdown = await fetchMarkdown(file.sourcePath);
+      const markdown = await readMarkdown(repoDir, file.sourcePath);
       return {
         file,
         content: buildGeneratedPage(markdown, file, routeBySourcePath),
@@ -797,4 +817,4 @@ if (
   });
 }
 
-export { rewriteMarkdownReferences };
+export { downloadRepo, rewriteMarkdownReferences };

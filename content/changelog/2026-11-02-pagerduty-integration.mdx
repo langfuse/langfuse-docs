@@ -1,0 +1,36 @@
+---
+date: 2026-11-02
+title: Send Langfuse alerts to PagerDuty
+description: Page your on-call team from Langfuse. Receive alerts, project notifications, and prompt changes as PagerDuty events.
+author: Mark Salpeter
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Bell, Book } from "lucide-react";
+
+<ChangelogHeader />
+
+PagerDuty can receive alert, project notification, or prompt change events from the automation configuration page in Langfuse.
+
+Paste the routing key from a PagerDuty service and Langfuse pages whoever is on call when your LLM application misbehaves:
+
+- Trigger a `critical` PagerDuty alert when an [alert](/docs/observability/features/alerts) on p95 latency, cost, or evaluator scores crosses its threshold. The PagerDuty alert resolves on its own when the Langfuse alert recovers.
+- Open an incident when a scheduled blob storage export fails or Langfuse deactivates an evaluator, by adding PagerDuty under **Project Settings → Notifications**.
+- View prompt releases in your service's change timeline.
+
+Both US and EU PagerDuty accounts are supported.
+
+<Cards num={2}>
+  <Card
+    title="PagerDuty integration"
+    href="/integrations/other/pagerduty"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Alerts"
+    href="/docs/observability/features/alerts"
+    icon={<Bell />}
+    arrow
+  />
+</Cards>
