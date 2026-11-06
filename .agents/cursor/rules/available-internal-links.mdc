@@ -30,6 +30,19 @@ On Langfuse Cloud, the legacy (Langfuse v3) public API endpoints are removed on 
 - [Evaluate grounding](/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](/resources/engineering/hallucination-detection.md).
 - [Choose where evaluations run](/docs/evaluation/overview.md): Application code, managed evaluators, Cloud, and self-hosting.
 
+## AI Gateway
+
+The Langfuse AI Gateway (beta) routes OpenAI and Anthropic API calls through Langfuse and traces every call with usage and cost, with no SDK or code changes. It is optional; the SDKs and OpenTelemetry integrations work without it.
+
+- [Overview](/docs/gateway/overview.md): What the gateway does and its roadmap.
+- [Concepts](/docs/gateway/concepts.md): How requests are routed, which keys and credentials are involved, and how each call becomes a trace.
+- [Send your first request](/docs/gateway/get-started/first-request.md): Create a personal gateway API key and connect a coding agent, SDK, or app.
+- [Set up the gateway as an admin](/docs/gateway/get-started/admin-setup.md): Ingestion project, provider credentials, models, and team access.
+- [REST API](/docs/gateway/features/rest-api.md): Base URLs, authentication, and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages endpoints.
+- Client setup: [Anthropic SDK](/integrations/model-providers/anthropic-gateway.md), [Claude Code](/integrations/developer-tools/claude-code-gateway.md), [Codex](/integrations/developer-tools/codex-gateway.md), [GitHub Copilot](/integrations/developer-tools/github-copilot-gateway.md), [OpenAI SDK](/integrations/model-providers/openai-gateway.md), [OpenCode](/integrations/developer-tools/opencode-gateway.md), [Pi](/integrations/developer-tools/pi-agent-gateway.md), [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk-gateway.md).
+- [Self-host the gateway](/self-hosting/configuration/ai-gateway.md): Deploy it next to self-hosted Langfuse with the Helm chart.
+- [Troubleshooting and FAQ](/docs/gateway/troubleshooting-and-faq.md): Common errors and known limitations of the beta.
+
 ## Pricing, sales, deployment, and comparisons
 
 - [Watch the walkthrough video](/watch-demo.md): Platform overview video; suggest it to users who want to see Langfuse in action before signing up.
@@ -259,7 +272,7 @@ For the full list with links to each page, see: /llms-changelog.txt
 - [Python v4 → v5](/docs/observability/sdk/upgrade-path/python-v4-to-v5.md): Migration guide for upgrading the Langfuse Python SDK from v4 to v5.
 - [Troubleshooting & FAQ](/docs/observability/troubleshooting-and-faq.md): Troubleshooting and FAQ for Langfuse Tracing.
 - [Concepts](/docs/prompt-and-skill-management/concepts.md): Core concepts of Langfuse Prompt and Skill Management, including runtime behavior, versioning, labels, structure, and configuration.
-- [Overview](/docs/prompt-and-skill-management/overview.md): Choose prompt templates for model calls or skills for tasks your agent loads as needed.
+- [Overview](/docs/prompt-and-skill-management/overview.md): Manage and version your prompts and agent skills in Langfuse (open source). Update them without redeploying your application.
 - [A/B Testing](/docs/prompt-management/features/a-b-testing.md): Use Open Source Prompt Management in Langfuse to systematically test and improve your LLM prompts with A/B testing.
 - [Agentic Prompt Management](/docs/prompt-management/features/agentic-access.md): Let AI agents retrieve, create, migrate, and update Langfuse prompts through the Agent Skill, CLI, or MCP server.
 - [Caching](/docs/prompt-management/features/caching.md): Langfuse prompts are cached client-side in the SDKs, so there's no latency impact after the first use.
