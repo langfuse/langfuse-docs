@@ -449,14 +449,6 @@ const resolvedTrace = await langfuse.media.resolveReferences({
 
 External Media Storage lets Langfuse display media that remains in your Amazon S3 or S3-compatible bucket. Add an `s3://<bucket>/<key>` URI to an observation's input, output, or metadata. Langfuse resolves the URI through the project's storage integration when the media is displayed.
 
-<Callout type="info" title="Enterprise feature">
-  External Media Storage requires the Enterprise plan on Langfuse Cloud or an
-  [Enterprise license key](/self-hosting/license-key) when self-hosting. Without
-  it, the integration cannot be configured, and existing integrations stop
-  resolving media: Langfuse shows the raw `s3://` URI instead. [Talk to
-  us](/talk-to-us) to upgrade.
-</Callout>
-
 Each project supports one External Media Storage integration:
 
 1. [Configure your bucket's CORS policy](#external-s3-media-cors) so browsers at your Langfuse origin can read signed object URLs.
