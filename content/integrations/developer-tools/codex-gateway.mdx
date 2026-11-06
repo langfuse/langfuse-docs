@@ -106,7 +106,9 @@ Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Eac
 <Details id="inflated-cost">
 <Summary>Why do cancelled or failed calls show high cost?</Summary>
 
-Cancelled or failed Codex calls currently show inflated, estimated usage and cost. Ignore cost on `ERROR` and `WARNING` generations until the fix ships.
+<Callout type="info">
+Older generations may still show inflated costs estimated from request or response text. Langfuse no longer tokenizes that text to fill missing usage. For new writes, calls without provider usage or submitted cost have empty usage and cost breakdowns; historical estimates are not bulk-rewritten. See [token and cost tracking](/docs/observability/features/token-and-cost-tracking#troubleshooting).
+</Callout>
 
 </Details>
 

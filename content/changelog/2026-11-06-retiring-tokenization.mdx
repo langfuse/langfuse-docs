@@ -1,0 +1,31 @@
+---
+date: 2026-11-06
+title: See when token usage is missing
+description: We're retiring automatic tokenization so missing usage is visible instead of hidden behind misleading cost estimates.
+author: Valeriy
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+You can now identify missing token usage directly in generation headers and follow links to fix your instrumentation.
+
+- Check that a new integration submits provider usage.
+- Find out whether a generation's missing cost comes from missing usage or a missing model price.
+
+<Frame>
+  ![Generation header showing the usage not submitted warning and guidance to send token usage and a model name, or submit costs directly.](/images/changelog/2026-11-06-retiring-tokenization/usage-not-submitted.png)
+</Frame>
+
+We're retiring automatic tokenization in Langfuse: estimating token counts from a generation's input and output when no usage was submitted.
+
+With thinking models and cached token pricing, these estimates can produce incorrect costs and mask broken instrumentation. We think it is better to be explicit when instrumentation needs fixing.
+
+Langfuse still calculates costs from submitted usage and model prices, and you can still submit costs directly. If your integration already sends usage or costs, no change is needed.
+
+<Callout type="warning">
+If you relied on automatic tokenization, update your instrumentation to [send provider usage or costs](/docs/observability/features/token-and-cost-tracking#ingest). The change applies to new writes and reprocessing; historical observations are not bulk-rewritten.
+</Callout>
+
+See the [troubleshooting guide](/docs/observability/features/token-and-cost-tracking#troubleshooting) for help with missing usage or cost.

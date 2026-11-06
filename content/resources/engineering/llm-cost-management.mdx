@@ -124,11 +124,13 @@ are evaluated in priority order, and the default tier applies when no condition 
 
 ### Pitfall: reasoning tokens are invisible to tokenizers [#reasoning-tokens]
 
-Reasoning models bill their internal reasoning tokens as output tokens, and those tokens
-never appear in the response text. Inferring usage by tokenizing input and output therefore
-undercounts, which is why Langfuse does not infer cost for reasoning models when no token
-counts are ingested. Always ingest the provider-reported usage for reasoning models; the
-maintained integrations do this automatically.
+<Callout type="warning">
+Reasoning models can bill for tokens that are not visible in the response text, so
+tokenizing input and output is not a reliable way to calculate costs. Langfuse no longer
+estimates token usage for any model. For cost tracking, [submit provider-reported usage or
+costs](/docs/observability/features/token-and-cost-tracking#ingest), either through an
+integration or manually.
+</Callout>
 
 ### Pitfall: non-LLM telemetry inflates the observability bill [#non-llm-spans]
 

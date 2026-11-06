@@ -66,6 +66,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | [Custom via API](/docs/api-and-data-platform/features/public-api)                                             | Yes                         | Yes                                        | Yes                   |
 | Included usage                                                                                                | Unlimited                   | Unlimited                                  | Unlimited             |
 | [Multi-modal](/docs/observability/features/multi-modality)                                                    | Yes                         | Yes                                        | Yes                   |
+| [External media storage (S3)](/docs/observability/features/multi-modality#external-s3-media)                  | --                          | Yes                                        | Yes                   |
 | **Langfuse AI**                                                                                               |                             |                                            |                       |
 | [Halo (in-app agent)](/docs/api-and-data-platform/features/halo)                                              | Yes                         | Yes                                        | Yes                   |
 | [MCP](/docs/api-and-data-platform/features/mcp-server)                                                        | Yes                         | Yes                                        | Yes                   |
