@@ -150,6 +150,7 @@ Make sure to select long, random passwords for all secrets.
 
 Only the langfuse-web container and minio must be accessible from outside the instance.
 Therefore, we recommend to add a security group or firewall to your instance that restricts incoming traffic to port :3000 and :9090.
+If you use the [AI Gateway](#ai-gateway), allow traffic to the TLS-terminating reverse proxy in front of it rather than to port :3031, because the gateway serves plain HTTP. Host firewalls such as ufw don't filter ports that Docker publishes, so block :3031 in the security group or bind it to `127.0.0.1` in `docker-compose.yml`.
 
 ### Start the application
 
@@ -180,6 +181,26 @@ Depending on your configuration, you might need to open an SSH tunnel to your VM
 The default `docker-compose.yml` inherits the [Docker daemon's logging configuration](https://docs.docker.com/engine/logging/configure/). Docker's default `json-file` driver does not rotate logs unless configured, which can exhaust disk space. Set its [`max-size` and `max-file` options](https://docs.docker.com/engine/logging/drivers/json-file/), or keep your chosen logging backend and configure retention there. Do not rotate or truncate Docker-managed JSON log files with external tools.
 
 After changing daemon logging defaults, restart Docker and recreate existing containers to apply them; restarting containers alone is insufficient. Plan for interruption and preserve data volumes. These settings cover container stdout/stderr, not database data volumes or ClickHouse's internal log files.
+
+## AI Gateway [#ai-gateway]
+
+The default `docker-compose.yml` includes the [AI Gateway](/self-hosting/configuration/ai-gateway) (beta) as the `langfuse-ai-gateway` service, listening on port `3031`. It needs Langfuse newer than `v4.75.0`; `LANGFUSE_IMAGE_TAG` sets the tag of web, worker, and gateway together. The gateway stays idle, with `503` on `/ready`, until you add its two keys to `.env`:
+
+```bash
+# Start on a new line if .env doesn't end with one.
+[ -n "$(tail -c1 .env 2>/dev/null)" ] && echo >> .env
+echo "LANGFUSE_AI_GATEWAY_SERVICE_KEY=$(openssl rand -hex 32)" >> .env
+printf '%s\n' "LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY='$(openssl ecparam -name prime256v1 -genkey -noout | awk '{printf "%s\\n", $0}')'" >> .env
+docker compose up -d --pull always
+```
+
+<Callout type="warning">
+
+Web shows `http://localhost:3031` as the gateway's [public URL](/self-hosting/configuration/ai-gateway#public-url), which only works on the Docker host. On a remote host, or whenever users reach Langfuse from other machines, set `LANGFUSE_AI_GATEWAY_PUBLIC_URL` in `.env` to the address clients use, and put a TLS-terminating reverse proxy in front of the gateway.
+
+</Callout>
+
+If you build web yourself, for example for a [custom base path](/self-hosting/configuration/custom-base-path), rebuild it from a supported release and omit `--pull always`, which would replace your image. For TLS, other settings, and key rotation, see the [AI Gateway guide](/self-hosting/configuration/ai-gateway).
 
 ## Features
 
@@ -217,6 +238,7 @@ When you change a port, also update the URLs that point at it:
 
 - `NEXTAUTH_URL` must match the URL users open in the browser, for example `http://localhost:3001`. Langfuse uses it for authentication callbacks and for links in the UI and in emails.
 - `LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT` on `langfuse-web` defaults to `http://localhost:9090` and must point at the new MinIO host port, because browsers upload and download media through this URL.
+- The [AI Gateway](#ai-gateway) publishes port `3031`. To change it, set `LANGFUSE_AI_GATEWAY_PORT` in `.env`; its port mapping and default public URL follow it.
 
 Ports that are bound to `127.0.0.1` (the worker on `3030`, MinIO console on `9091`, and the databases) are only reachable from the host itself and usually do not need to change.
 

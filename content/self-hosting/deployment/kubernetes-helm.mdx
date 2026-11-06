@@ -88,6 +88,179 @@ Use `kubectl get services -n langfuse` and search for `langfuse-web` to see the 
 Create a port-forward via `kubectl port-forward svc/langfuse-web -n langfuse <local-port>:<nodeport>` and access the UI via `http://localhost:<local-port>` in your browser.
 Go ahead and register, create a new organization, project, and explore Langfuse.
 
+## AI Gateway [#ai-gateway]
+
+The chart deploys the [AI Gateway](/self-hosting/configuration/ai-gateway) (beta) in releases after `2.2.0`. Read the [gateway guide](/self-hosting/configuration/ai-gateway) for the requirements and concepts. Enable it and give it its own Ingress host in your `values.yaml`:
+
+```yaml filename="values.yaml"
+langfuse:
+  nextauth:
+    url: https://langfuse.example.com
+  gateway:
+    enabled: true
+    ingress:
+      enabled: true
+      className: nginx
+      hosts:
+        - gateway.langfuse.example.com
+      tls:
+        enabled: true
+        secretName: langfuse-gateway-tls
+      annotations:
+        # Optional: let cert-manager issue the certificate.
+        cert-manager.io/cluster-issuer: letsencrypt
+        # Streams can run for up to 600 s and stay quiet for up to 120 s.
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "620"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "620"
+        nginx.ingress.kubernetes.io/proxy-buffering: "off"
+        nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+        # The gateway accepts request bodies of up to 16 MiB.
+        nginx.ingress.kubernetes.io/proxy-body-size: "17m"
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        memory: 2Gi
+```
+
+Apply it and check that the gateway pods become ready:
+
+```bash
+helm upgrade langfuse langfuse/langfuse -n langfuse -f values.yaml
+kubectl get pods -n langfuse -l app.kubernetes.io/component=gateway
+```
+
+With `langfuse.gateway.enabled: true`, the chart deploys the gateway as its own Deployment, Service (port `8080`), Ingress, optional HorizontalPodAutoscaler, and PodDisruptionBudget. It sets `LANGFUSE_AI_GATEWAY_DEPLOYED=true` on web, which turns on the gateway pages for all organizations, and generates the service key and JWT private key into the `<release>-app` Secret. The image tag follows `langfuse.image.tag`; if your chart's `appVersion` is older than `4.75.0`, set it to a newer release. If your cluster can't reach `docker.langfuse.com`, set `langfuse.gateway.image.repository` to `langfuse/ai-gateway` or a mirror. For all values, see the [Readme](#readme).
+
+### Keys [#ai-gateway-keys]
+
+To manage the keys yourself, for example to [rotate](/self-hosting/configuration/ai-gateway#rotate-keys) them, create a Secret and reference it. For a release that already runs the gateway, copy the current keys from the `<release>-app` Secret instead of generating new ones, for example with `kubectl get secret langfuse-app -n langfuse -o jsonpath='{.data.ai-gateway-service-key}' | base64 -d`.
+
+```bash
+kubectl create secret generic langfuse-gateway -n langfuse \
+  --from-literal=ai-gateway-service-key="$(openssl rand -hex 32)" \
+  --from-file=ai-gateway-jwt-private-key=<(openssl ecparam -name prime256v1 -genkey -noout)
+```
+
+```yaml filename="values.yaml"
+langfuse:
+  gateway:
+    serviceKey:
+      secretKeyRef:
+        name: langfuse-gateway
+        key: ai-gateway-service-key
+    jwt:
+      privateKey:
+        secretKeyRef:
+          name: langfuse-gateway
+          key: ai-gateway-jwt-private-key
+```
+
+<Callout type="warning">
+
+With `helm template`-based GitOps tools such as Argo CD, the chart can't read existing Secrets, so generated keys change on every sync and gateway requests fail. Reference your own keys as shown above.
+
+</Callout>
+
+### TLS [#ai-gateway-tls]
+
+<Tabs items={["cert-manager", "Your own certificate", "TLS at a load balancer"]}>
+
+<Tab>
+
+If cert-manager runs in your cluster, add its issuer annotation to the gateway Ingress. cert-manager then issues and renews a certificate for the gateway host and stores it in `langfuse.gateway.ingress.tls.secretName`:
+
+```yaml filename="values.yaml"
+langfuse:
+  gateway:
+    ingress:
+      enabled: true
+      hosts:
+        - gateway.langfuse.example.com
+      tls:
+        enabled: true
+        secretName: langfuse-gateway-tls
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt
+```
+
+Use a `langfuse.gateway.ingress.tls.secretName` that differs from web's `langfuse.ingress.tls.secretName`, so the two certificates do not overwrite each other. With an HTTP-01 issuer, the gateway host must be reachable from the internet; for internal hosts, use a DNS-01 issuer.
+
+</Tab>
+
+<Tab>
+
+Create a Kubernetes TLS Secret from your certificate and key, and reference it without a cert-manager annotation:
+
+```bash
+kubectl create secret tls langfuse-gateway-tls -n langfuse \
+  --cert=gateway.crt --key=gateway.key
+```
+
+```yaml filename="values.yaml"
+langfuse:
+  gateway:
+    ingress:
+      enabled: true
+      hosts:
+        - gateway.langfuse.example.com
+      tls:
+        enabled: true
+        secretName: langfuse-gateway-tls
+```
+
+If web's certificate already covers the gateway host, as a wildcard such as `*.langfuse.example.com` or as a subject alternative name, you can reference web's Secret instead. Include the full chain in `gateway.crt`, since clients reject certificates whose intermediates are missing.
+
+</Tab>
+
+<Tab>
+
+If TLS terminates at a cloud load balancer, for example an AWS Application Load Balancer, leave `langfuse.gateway.ingress.tls.enabled` off and configure the certificate on the load balancer. The chart still uses `https://` for the [public URL](#ai-gateway-public-url) when `langfuse.nextauth.url` is `https://`; otherwise set `langfuse.gateway.publicUrl`.
+
+With the AWS Load Balancer Controller:
+
+```yaml filename="values.yaml"
+langfuse:
+  gateway:
+    ingress:
+      enabled: true
+      className: alb
+      hosts:
+        - gateway.langfuse.example.com
+      annotations:
+        alb.ingress.kubernetes.io/scheme: internet-facing
+        alb.ingress.kubernetes.io/target-type: ip
+        alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+        alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:<region>:<account>:certificate/<id>
+        alb.ingress.kubernetes.io/healthcheck-path: /ready
+        alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=620
+```
+
+The idle timeout applies to the whole load balancer. If the gateway shares web's load balancer through `alb.ingress.kubernetes.io/group.name`, the timeout changes for web too, so use a separate group for the gateway.
+
+</Tab>
+
+</Tabs>
+
+### Public URL [#ai-gateway-public-url]
+
+The chart sets the [public URL](/self-hosting/configuration/ai-gateway#public-url) to `langfuse.gateway.publicUrl` or, if unset, to the first gateway Ingress host, over `https://` when the Ingress has TLS or `langfuse.nextauth.url` is `https://`. Set `langfuse.gateway.publicUrl` when you expose the gateway another way, such as the Gateway API or a `LoadBalancer` Service.
+
+### Connection to web [#ai-gateway-web-url]
+
+The chart points the gateway at web's in-cluster Service, `http://<release>-web.<namespace>.svc.cluster.local:3000`, so this traffic stays in the cluster. If web runs elsewhere or under a custom base path, set `langfuse.gateway.webUrl`, with the base path if any. Across networks, use an `https://` URL and let web's Ingress accept 16 MiB bodies, for example `proxy-body-size: "17m"`.
+
+If web's certificate is signed by a private CA, mount the bundle with `langfuse.gateway.pod.extraVolumes` and `langfuse.gateway.pod.extraVolumeMounts`, and set `SSL_CERT_FILE` with `langfuse.gateway.pod.additionalEnv`. The global `langfuse.additionalEnv` doesn't apply to the gateway.
+
+### Scaling [#ai-gateway-scaling]
+
+Enable `langfuse.gateway.hpa.enabled` and raise `langfuse.gateway.hpa.minReplicas` and `langfuse.gateway.hpa.maxReplicas` (default `1` and `2`) for production traffic. See [Scaling](/self-hosting/configuration/ai-gateway#scaling) for memory sizing.
+
+### Graceful shutdown [#ai-gateway-shutdown]
+
+When a pod stops, the chart waits `langfuse.gateway.preStopSleepSeconds` (10 s), drains for `langfuse.gateway.connectionDrainTimeoutSeconds` (300 s), uploads for `langfuse.gateway.telemetryShutdownTimeoutSeconds` (30 s), and kills the pod after `langfuse.gateway.terminationGracePeriodSeconds` (350 s), which must exceed the sum of the three.
+
 ## Readme [#readme]
 
 Source: [langfuse/langfuse-k8s](https://github.com/langfuse/langfuse-k8s)

@@ -156,7 +156,7 @@ Halo is available from `>=v4.28.0`. It stays hidden until `LANGFUSE_IN_APP_AGENT
 
 ## AI Gateway [#ai-gateway]
 
-The AI Gateway (beta) runs as a separate container next to web and is deployed with the Helm chart. Web needs `LANGFUSE_AI_GATEWAY_DEPLOYED=true`, `LANGFUSE_AI_GATEWAY_SERVICE_KEY`, and `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`; the chart sets them when `langfuse.gateway.enabled` is `true`. See [AI Gateway](/self-hosting/configuration/ai-gateway) for the setup, TLS, and the [full configuration reference](/self-hosting/configuration/ai-gateway#configuration).
+The AI Gateway (beta) runs as a separate container next to web and is deployed with the [Helm chart](/self-hosting/deployment/kubernetes-helm#ai-gateway) or the [Docker Compose setup](/self-hosting/deployment/docker-compose#ai-gateway). Web needs `LANGFUSE_AI_GATEWAY_SERVICE_KEY` and `LANGFUSE_AI_GATEWAY_JWT_PRIVATE_KEY`, and counts the gateway as deployed once both are set unless `LANGFUSE_AI_GATEWAY_DEPLOYED=false`. On `v4.75.0` and earlier, also set `LANGFUSE_AI_GATEWAY_DEPLOYED=true`. See [AI Gateway](/self-hosting/configuration/ai-gateway) for the concepts and the [full configuration reference](/self-hosting/configuration/ai-gateway#configuration).
 
 ## Additional Features
 
