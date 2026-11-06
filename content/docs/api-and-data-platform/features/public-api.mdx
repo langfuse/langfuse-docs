@@ -352,7 +352,7 @@ Rather than returning every column on every row, the v2 API lets you request onl
 | Group           | Fields                                                                                                                 |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `core`          | Always included: id, traceId, startTime, endTime, projectId, parentObservationId, type                                 |
-| `basic`         | name, level, statusMessage, version, environment, bookmarked, public, userId, sessionId, isRootObservation             |
+| `basic`         | name, status, level, statusMessage, version, environment, bookmarked, public, userId, sessionId, isRootObservation     |
 | `time`          | completionStartTime, createdAt, updatedAt                                                                              |
 | `io`            | input, output                                                                                                          |
 | `metadata`      | metadata                                                                                                               |
@@ -377,7 +377,8 @@ Requests need an API key with read access to traces. Bound every request with `f
 | `traceId`             | string                       | Observations of one trace                                                                                   |
 | `name`                | string                       | Exact observation name                                                                                      |
 | `type`                | enum                         | `GENERATION`, `SPAN`, `EVENT`, `AGENT`, `TOOL`, `CHAIN`, `RETRIEVER`, `EVALUATOR`, `EMBEDDING`, `GUARDRAIL` |
-| `level`               | enum                         | `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`                                                                      |
+| `status`              | enum                         | Observation status: `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`                                                  |
+| `level`               | enum                         | Compatibility alias for `status`                                                                            |
 | `userId`, `sessionId` | string                       | Exact match on the trace's user or session                                                                  |
 | `environment`         | string, repeatable           | Any of the given environments                                                                               |
 | `version`             | string                       | Exact match                                                                                                 |
@@ -387,14 +388,16 @@ Requests need an API key with read access to traces. Bound every request with `f
 | `expandMetadata`      | comma-separated keys         | Metadata keys to return untruncated (values are otherwise cut at 200 characters)                            |
 | `limit`, `cursor`     | int (≤ 1,000), string        | [Pagination](#observations-pagination)                                                                      |
 
+The `status` and `level` response fields contain the same value. Both filter names are supported; when both fixed query parameters are non-null, `status` takes precedence.
+
 Everything else — tags, cost, latency, token counts, model, prompt, input/output text, metadata by key, negations, and multi-value matches — goes through the `filter` parameter: a URL-encoded JSON array of conditions with the same columns and operators the filter bar in the Langfuse UI uses. When `filter` is present it takes precedence over the fixed parameters above.
 
-Each condition is `{"type", "column", "operator", "value"}` (plus `"key"` for metadata). Columns include `id`, `type`, `name`, `traceId`, `traceName`, `startTime`, `endTime`, `environment`, `level`, `statusMessage`, `version`, `userId`, `sessionId`, `isRootObservation`, `tags`, `latency`, `timeToFirstToken`, `tokensPerSecond`, `inputTokens`, `outputTokens`, `totalTokens`, `inputCost`, `outputCost`, `totalCost`, `model`, `promptName`, `promptVersion`, `input`, `output`, and `metadata`. The operators depend on the condition type:
+Each condition is `{"type", "column", "operator", "value"}` (plus `"key"` for metadata). Columns include `id`, `type`, `name`, `traceId`, `traceName`, `startTime`, `endTime`, `environment`, `status`, `level`, `statusMessage`, `version`, `userId`, `sessionId`, `isRootObservation`, `tags`, `latency`, `timeToFirstToken`, `tokensPerSecond`, `inputTokens`, `outputTokens`, `totalTokens`, `inputCost`, `outputCost`, `totalCost`, `model`, `promptName`, `promptVersion`, `input`, `output`, and `metadata`. The operators depend on the condition type:
 
 | `type`          | Operators                                                                         | Typical columns                                        |
 | --------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | `string`        | `=`, `contains`, `does not contain`, `starts with`, `ends with`                   | `name`, `traceName`, `userId`, `sessionId`, `model`, … |
-| `stringOptions` | `any of`, `none of`                                                               | `type`, `level`, `environment`, `promptName`           |
+| `stringOptions` | `any of`, `none of`                                                               | `type`, `status`, `level`, `environment`, `promptName` |
 | `arrayOptions`  | `any of`, `none of`, `all of`                                                     | `tags`                                                 |
 | `number`        | `=`, `>`, `<`, `>=`, `<=`                                                         | `latency`, `totalCost`, `totalTokens`, …               |
 | `datetime`      | `>`, `<`, `>=`, `<=`                                                              | `startTime`, `endTime`                                 |

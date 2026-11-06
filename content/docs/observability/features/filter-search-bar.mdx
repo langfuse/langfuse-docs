@@ -16,7 +16,7 @@ The filter search bar lets you filter and search the Observations and Traces tab
 />
 
 ```
-level:ERROR type:TOOL environment:production latency:>2 name:*checkout*
+status:ERROR type:TOOL environment:production latency:>2 name:*checkout*
 ```
 
 <Callout type="info">
@@ -36,7 +36,7 @@ A query is a list of `field:value` filters, combined with implicit AND.
 
 ### Fields and values
 
-`level:ERROR`, `environment:production`, `user:alice`. Type a field name and the bar suggests the values it has observed for that field, so you don't have to memorize them.
+`status:ERROR`, `environment:production`, `user:alice`. Type a field name and the bar suggests the values it has observed for that field, so you don't have to memorize them.
 
 ### Operators
 
@@ -58,7 +58,7 @@ Prefix a filter with `-` to exclude: `-environment:production`.
 
 ### Any-of and all-of
 
-- `level:(ERROR OR WARNING)` — match either value for one field
+- `status:(ERROR OR WARNING)` — match either value for one field
 - `tags:(billing AND urgent)` — match all values (array fields)
 
 ### Metadata and scores
@@ -90,7 +90,7 @@ Scope it to a single payload with `input:` or `output:` (for example `output:"re
 
 ## Field aliases [#aliases]
 
-Most fields accept a short alias so you can type less. The canonical field name always works too.
+Most fields accept a short alias so you can type less. The canonical field name always works too. Use `status` for `DEBUG`, `DEFAULT`, `WARNING`, or `ERROR`, and `statusMessage` for the accompanying text message. Existing `level` filters remain supported as an alias for `status`.
 
 | Alias        | Field               |
 | ------------ | ------------------- |
@@ -102,7 +102,7 @@ Most fields accept a short alias so you can type less. The canonical field name 
 | `cost`       | total cost          |
 | `tokens`     | total tokens        |
 | `tags`       | trace tags          |
-| `status`     | status message      |
+| `level`      | status              |
 | `ttft`       | time to first token |
 | `tps`        | tokens per second   |
 | `dataset`    | experiment dataset  |
@@ -136,11 +136,11 @@ Some operator-like tokens are not supported yet and are flagged instead of being
 
 ## Incomplete filters
 
-A bare field name with no value, such as `type`, `level`, or `env` on its own, is not yet a complete expression. The bar flags it as invalid and does not apply it to the query until you finish it, for example `type:TOOL`. To search for one of these words as literal text instead, quote it (`"type"`).
+A bare field name with no value, such as `type`, `status`, or `env` on its own, is not yet a complete expression. The bar flags it as invalid and does not apply it to the query until you finish it, for example `type:TOOL`. To search for one of these words as literal text instead, quote it (`"type"`).
 
 ## Facet counts [#facet-counts]
 
-The filter sidebar shows a count next to each facet value. Those counts are computed against the filters you already have active, not just the selected time range, so the count matches what the table actually returns. Narrow to `environment:production` and the Level facet recounts within production, so a value you pick from it never comes back with no results.
+The filter sidebar shows a count next to each facet value. Those counts are computed against the filters you already have active, not just the selected time range, so the count matches what the table actually returns. Narrow to `environment:production` and the Status facet recounts within production, so a value you pick from it never comes back with no results.
 
 ## GitHub Discussions
 

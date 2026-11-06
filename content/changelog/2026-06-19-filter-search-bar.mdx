@@ -11,10 +11,10 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-Say you are debugging an agent and you want the ERROR-level tool calls from the last hour, in production, slower than two seconds, on your checkout flow. Until now that meant clicking through a stack of sidebar dropdowns. Now you can just type it — the bar suggests fields and values as you go, so there's nothing to memorize:
+Say you are debugging an agent and you want the tool calls with an ERROR status from the last hour, in production, slower than two seconds, on your checkout flow. Until now that meant clicking through a stack of sidebar dropdowns. Now you can just type it — the bar suggests fields and values as you go, so there's nothing to memorize:
 
 ```
-level:ERROR type:TOOL environment:production latency:>2 name:*checkout*
+status:ERROR type:TOOL environment:production latency:>2 name:*checkout*
 ```
 
 The **Filter Search Bar** turns one line of text into the same filters you would otherwise assemble in the sidebar, with autocomplete the whole way.
@@ -28,14 +28,14 @@ The **Filter Search Bar** turns one line of text into the same filters you would
 
 ## What you can type
 
-- **Fields and values:** `level:ERROR`, `environment:production`, `user:alice`
+- **Fields and values:** `status:ERROR`, `environment:production`, `user:alice`
 - **Short aliases:** type less with `env` (environment), `user` (user id), `session` (session id), `model` (model name), `cost` (total cost), `tokens` (total tokens), `tags` (trace tags), plus `ttft` and `tps`
 - **Operators:** `latency:>2`, `cost:>=0.01`, `startTime:>2026-06-01`
 - **Full-text search:** a bare word or phrase like `refund failed` matches across ids, names, input and output; scope it with `input:` or `output:`
 - **Wildcards:** `name:*checkout*` (contains), `name:checkout*` (starts with)
 - **Negation:** `-environment:production`
 - **Metadata and scores:** `metadata.region:eu`, `scores.accuracy:>0.8`
-- **Any-of for one field:** `level:(ERROR OR WARNING)`
+- **Any-of for one field:** `status:(ERROR OR WARNING)`
 
 Type a field name and autocomplete suggests operators and observed values; press Enter to apply. The bar runs next to the existing filter sidebar and time-range selector.
 

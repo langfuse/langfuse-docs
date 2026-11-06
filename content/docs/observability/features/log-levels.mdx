@@ -1,17 +1,21 @@
 ---
-title: Log Levels
-description: Use Log Levels to control the verbosity of your logs and highlight errors and warnings.
-sidebarTitle: Log Levels
+title: Status
+description: Use observation status to highlight errors and warnings and focus on relevant parts of a trace.
+sidebarTitle: Status
 ---
 
-# Log Levels
+<span id="log-levels" />
 
-Traces can have a lot of observations ([data model](/docs/tracing#introduction-to-traces-in-langfuse)). You can differentiate the importance of observations with the `level` attribute to control the verbosity of your traces and highlight errors and warnings. Available `levels`: `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`.
+# Status
 
-In addition to the level, you can also include a `statusMessage` to provide additional context.
+Traces can have many [observations](/docs/observability/data-model#observations-traces-and-sessions). Use an observation's **status** to highlight errors and warnings and focus on the relevant parts of a trace. Available statuses are `DEBUG`, `DEFAULT`, `WARNING`, and `ERROR`.
+
+The API accepts `status` and returns it alongside the equivalent `level` field. Existing `level` fields remain supported. When both fields are supplied with non-null values, `status` takes precedence. The SDK examples below continue to use the supported `level` parameter to set the status.
+
+You can also include a `statusMessage` to provide additional context.
 
 <Frame fullWidth>
-  ![Trace log level and statusMessage](/images/docs/trace-log-level.png)
+  ![Observation status and status message in a trace](/images/docs/trace-log-level.png)
 </Frame>
 
 <LangTabs items={["Python SDK", "JS/TS SDK", "OpenAI SDK", "Langchain"]}>
@@ -26,7 +30,7 @@ def my_function():
     langfuse = get_client()
 
     # ... processing logic ...
-    # Update the current observation with a warning level
+    # Update the current observation with a warning status
     langfuse.update_current_span(
         level="WARNING",
         status_message="This is a warning"
@@ -42,7 +46,7 @@ langfuse = get_client()
 
 # Using context managers (recommended)
 with langfuse.start_as_current_observation(as_type="span", name="my-operation") as span:
-    # Set level and status message on creation
+    # Set status and status message on creation
     with span.start_as_current_observation(
         name="potentially-risky-operation",
         level="WARNING",
@@ -50,7 +54,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-operation") 
     ) as risky_span:
         # ... do work ...
 
-        # Or update level and status message later
+        # Or update status and status message later
         risky_span.update(
             level="ERROR",
             status_message="Operation failed with unexpected input"
@@ -65,7 +69,7 @@ with langfuse.start_as_current_observation(as_type="span", name="another-operati
     )
 ```
 
-Levels can also be set when creating generations:
+Status can also be set when creating generations:
 
 ```python
 langfuse = get_client()
@@ -74,7 +78,7 @@ with langfuse.start_as_current_observation(
     as_type="generation",
     name="llm-call",
     model="gpt-4o",
-    level="DEFAULT"  # Default level
+    level="DEFAULT"  # Default status
 ) as generation:
     # ... make LLM call ...
 
@@ -151,32 +155,34 @@ See [JS/TS SDK docs](/docs/sdk/typescript/guide) for more details.
 </Tab>
 <Tab title="OpenAI SDK">
 
-When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), `level` and `statusMessage` are automatically set based on the OpenAI API response. See [example](/integrations/model-providers/openai-py).
+When using the [OpenAI SDK Integration](/integrations/model-providers/openai-py), status and `statusMessage` are automatically set based on the OpenAI API response. See [example](/integrations/model-providers/openai-py).
 
 </Tab>
 <Tab title="Langchain">
 
-When using the [LangChain Integration](/integrations/frameworks/langchain), `level` and `statusMessage` are automatically set for each step in the LangChain pipeline.
+When using the [LangChain Integration](/integrations/frameworks/langchain), status and `statusMessage` are automatically set for each step in the LangChain pipeline.
 
 </Tab>
 
 </LangTabs>
 
-## How levels are stored and mapped [#level-mapping]
+<span id="level-mapping" />
 
-`level` is stored and returned as one of the four strings `DEBUG`, `DEFAULT`, `WARNING`, `ERROR`. There is no numeric encoding: the Observations API, exports, and filters all use these exact strings, and `level` is one of the fixed filter parameters of the [Observations API](/docs/api-and-data-platform/features/public-api#observations-filters). Observations ingested without a level are stored as `DEFAULT`.
+## How statuses are stored and mapped [#status-mapping]
 
-When you send spans through the [OpenTelemetry endpoint](/integrations/native/opentelemetry), Langfuse derives the level in this order:
+`status` and its compatibility field `level` use the four strings `DEBUG`, `DEFAULT`, `WARNING`, and `ERROR`. There is no numeric encoding: the Observations API, exports, and filters all use these exact strings. You can filter by `status` or `level` in the [Observations API](/docs/api-and-data-platform/features/public-api#observations-filters). Observations ingested without either field have status `DEFAULT`.
 
-1. The `langfuse.observation.level` span attribute, if present. Matching is case-insensitive and accepts common aliases: `TRACE` and `VERBOSE` map to `DEBUG`; `INFO`, `LOG`, `NOTICE`, `OK`, and `SUCCESS` map to `DEFAULT`; `WARN` maps to `WARNING`; `FATAL` and `CRITICAL` map to `ERROR`. Unknown values are ignored and fall through to the next rule.
+When you send spans through the [OpenTelemetry endpoint](/integrations/native/opentelemetry), Langfuse derives the status in this order:
+
+1. A recognized `langfuse.observation.status` span attribute, falling back to the compatibility attribute `langfuse.observation.level` when status is absent or unrecognized. Matching is case-insensitive and accepts common aliases: `TRACE` and `VERBOSE` map to `DEBUG`; `INFO`, `LOG`, `NOTICE`, `OK`, and `SUCCESS` map to `DEFAULT`; `WARN` maps to `WARNING`; `FATAL` and `CRITICAL` map to `ERROR`. Unknown values are ignored. If neither attribute has a recognized value, Langfuse uses the next rule.
 2. Otherwise, a span whose OpenTelemetry status code is `ERROR` becomes `ERROR`.
 3. Otherwise, `DEFAULT`.
 
-`statusMessage` is taken from the `langfuse.observation.status_message` attribute, falling back to the span's OpenTelemetry status message. OpenTelemetry log-record severity fields (`SeverityNumber`, `SeverityText`) are not read; set the span attribute when you need a level other than `DEFAULT` or `ERROR`.
+`statusMessage` is taken from the `langfuse.observation.status_message` attribute, falling back to the span's OpenTelemetry status message. OpenTelemetry log-record severity fields (`SeverityNumber`, `SeverityText`) are not read; set the span attribute when you need a status other than `DEFAULT` or `ERROR`.
 
-## Filter Trace by Log Level
+## Filter a trace by status [#filter-trace-by-log-level]
 
-When viewing a single trace, you can filter the observations by log level.
+When viewing a single trace, you can filter the observations by status.
 
 <Video
   src="https://static.langfuse.com/docs-videos/250210-trace-log-level-filter.mp4"

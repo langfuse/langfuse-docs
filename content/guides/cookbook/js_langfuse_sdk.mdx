@@ -132,7 +132,7 @@ await startActiveObservation("context-manager", async (span) => {
   // Example user information
   const user = { id: "user-5678", name: "Jane Doe", sessionId: "123" };
 
-  // Add an optional log level of type warning to the active span
+  // Set a warning status on the active span using the SDK level parameter
   updateActiveObservation(
     { level: "WARNING", statusMessage: "This is a warning" },
   );
