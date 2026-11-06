@@ -1,0 +1,277 @@
+---
+title: Evaluators
+sidebarTitle: Evaluators
+description: Create reusable Langfuse evaluators and run them on live observations, historical data, and experiments. Shared targeting, rules, API, and debugging for every evaluator type.
+---
+
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+import { Details, Summary } from "@/components/Details";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { GhDiscussionsPreview } from "@/components/gh-discussions/GhDiscussionsPreview";
+
+# Evaluators
+
+An evaluator defines **how** Langfuse scores data. You create it once, then reuse it on live production observations, selected historical observations, and experiments.
+
+Langfuse has three managed evaluator types. They share targeting, rules, testing, and execution. Choose a type for the judgment you need, then use this page for everything that applies to all of them.
+
+| Type                                                                  | Use when                                                                                 |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)  | Semantic judgment with a rubric and written reasoning (helpfulness, tone, groundedness)  |
+| [Decision-model](/docs/evaluation/evaluation-methods/decision-models) | Typed verdicts at volume without written reasoning (labels, rubric levels, yes/no flags) |
+| [Code](/docs/evaluation/evaluation-methods/code-evaluators)           | Deterministic checks (exact match, JSON validity, schema checks, custom business rules)  |
+
+Other ways to add [scores](/docs/evaluation/scores/overview) — [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), [scores via UI](/docs/evaluation/evaluation-methods/scores-via-ui), and [scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) — are not managed evaluators. They do not use the targeting and rules on this page.
+
+To score live production traces with an evaluator and a rule, start with [Evaluate Production Traffic](/docs/evaluation/get-started/online).
+
+<Video
+  src="https://static.langfuse.com/docs-videos/2026-08-22-new-eval-experience.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+/>
+
+## Evaluation targets [#understanding-each-evaluation-target]
+
+Managed evaluators run on **observations** (individual operations) or **experiments** (controlled test datasets). Observation-level evaluators are the recommended target for live production data. Trace-level evaluators are deprecated (see [below](#trace-level-evaluators)).
+
+### Decision tree
+
+<div className="flex flex-col items-center gap-6 py-8 my-6">
+
+<Card className="border-2 border-primary">
+  <CardContent className="p-4 text-center font-semibold">
+    Which data needs to be evaluated?
+  </CardContent>
+</Card>
+
+<div className="text-2xl text-primary">↓</div>
+
+<div className="flex flex-col md:flex-row gap-12 w-full justify-center">
+
+<div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
+  <Card className="border-2 border-primary w-full">
+    <CardHeader className="p-4">
+      <CardTitle className="text-base text-center">Live production data</CardTitle>
+      <CardDescription className="text-center text-xs">Monitor real-time traffic</CardDescription>
+    </CardHeader>
+  </Card>
+
+  <div className="text-xl text-primary">↓</div>
+
+  <Card className="border-2 border-primary w-full">
+    <CardContent className="p-3">
+      <div className="font-semibold text-sm">Observations</div>
+      <div className="text-xs text-muted-foreground mt-1">Individual operations: LLM calls, retrievals, tool calls</div>
+    </CardContent>
+  </Card>
+</div>
+
+<div className="flex flex-col items-center gap-4 flex-1 min-w-[280px]">
+  <Card className="border-2 border-primary w-full">
+    <CardHeader className="p-4">
+      <CardTitle className="text-base text-center">Offline experiment data</CardTitle>
+      <CardDescription className="text-center text-xs">Test in a controlled environment</CardDescription>
+    </CardHeader>
+  </Card>
+
+  <div className="text-xl text-primary">↓</div>
+
+  <Card className="border-2 border-primary w-full">
+    <CardContent className="p-3">
+      <div className="font-semibold text-sm">Experiments</div>
+      <div className="text-xs text-muted-foreground mt-1">Controlled test cases with datasets</div>
+    </CardContent>
+  </Card>
+</div>
+
+</div>
+
+</div>
+
+<Callout type="info">
+  **Production pattern**: Teams typically use **experiments** during development
+  to validate changes, then deploy **observation-level** evaluators in
+  production for scalable monitoring.
+</Callout>
+
+<Tabs items={["Live production data", "Offline experiment data"]}>
+<Tab>
+
+Evaluate live production traffic to monitor your LLM application in real time.
+
+Run evaluators on individual observations within your traces — LLM calls, retrieval operations, embedding generations, or tool calls.
+
+#### Data available to observation-level evaluators [#observation-evaluator-context]
+
+Observation-level evaluators read data from the matched observation: its input, output, metadata, and tool calls. Expected output and experiment item metadata are available only in prompt experiments.
+
+They do not load sibling or child observations from the same trace. If your evaluator needs the overall request and response of an application or agent invocation, target a logical root observation that records that overall input and output. A logical root is an observation without a physical parent or an observation explicitly marked as an application root by the SDK. It can therefore have a physical parent. The evaluator still only sees data on that root observation; it will not automatically include data from child observations unless your application writes the required summary or context onto the root observation.
+
+Use the **Is Root Observation** filter in a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) to target logical roots. This is different from filtering for an empty physical parent, which only selects observations without a physical parent.
+
+LLM-as-a-Judge and decision-model evaluators [map](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step) those fields to prompt or question variables. Code evaluators read the same fields from [`ctx`](/docs/evaluation/evaluation-methods/code-evaluators#function-contract).
+
+**Why target observations**
+
+- **Operation-level precision**: Filter by observation type to evaluate only final LLM responses or retrieval steps, not entire workflows.
+- **Compositional evaluation**: Run different evaluators on different operations within one trace — for example toxicity on LLM outputs and relevance on retrievals.
+- **Combined filtering**: Stack observation filters (type, name, metadata) with trace filters (`userId`, `sessionId`, tags, version). Example: all LLM generations in conversations tagged `customer-support` for premium users.
+
+**Data flow**
+
+When an incoming observation matches a rule's filters, the rule triggers its attached evaluators. Scores are attached to the specific observation, resulting in one score per observation per evaluator. Multiple observations in the same trace can each receive scores.
+
+**Example use cases**
+
+- Score helpfulness of only the final chatbot response to users
+- Validate that final LLM responses are parseable JSON
+- Track retrieval relevance for RAG systems by targeting document retrieval observations
+
+</Tab>
+
+<Tab>
+
+Run evaluators on controlled test datasets to compare model versions, prompt variations, or system configurations in a reproducible environment.
+
+**Why target experiments**
+
+- You need reproducible benchmarks for decision-making
+- You are comparing prompt versions or model configurations
+- You have datasets with expected outputs or item metadata that the evaluator should inspect
+
+**Data flow**
+
+Each experiment run generates traces and observations that your selected evaluators can score. Think of each experiment item as a test case: input → execution → output → evaluation.
+
+1. Create a dataset with test inputs and, optionally, expected outputs. You may also define your test data locally.
+2. Run an experiment via UI or SDK. See [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui) or [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk).
+3. Select evaluators to score the generated outputs.
+4. Compare results across experiment runs.
+
+**Example use case**
+
+- Compare two prompt versions on 50 customer support questions, score accuracy and a required JSON shape, then deploy the better-performing version
+
+</Tab>
+</Tabs>
+
+<Callout type="info">
+  Observation-level evaluators require data ingested with an OpenTelemetry-based
+  SDK (Python SDK v3+ or JS/TS SDK v4+) or [direct OTEL
+  ingestion](/integrations/native/opentelemetry). Legacy REST ingestion does not
+  produce observations in the required format. See [Why is my observation-level
+  evaluator not
+  executing?](/faq/all/observation-eval-not-executing).
+</Callout>
+
+## Create, test, and reuse [#create-test-and-reuse]
+
+The UI flow is the same for every managed evaluator type:
+
+1. Open the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**.
+2. Choose a type (or a template) and define how it scores data.
+3. On the right, filter to representative sample observations, select one, and run the evaluator. Iterate until the result is useful.
+4. Save the evaluator.
+
+After saving, you can:
+
+- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
+- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+
+Type-specific setup:
+
+- [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step): judge prompt, model, score type, and variable mappings
+- [Decision-model evaluators](/docs/evaluation/evaluation-methods/decision-models#set-up-step-by-step): typed questions and provider input
+- [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators#set-up-step-by-step): `evaluate` function and runtime constraints
+
+<Frame fullWidth>
+  ![Evaluators page with the New evaluator button](/images/docs/evaluation/create-evaluator.png)
+</Frame>
+
+## Evaluators and rules [#evaluators-and-rules]
+
+Evaluators define **how** Langfuse scores data. Rules define **which** incoming observations Langfuse scores.
+
+You can reuse an evaluator across rules. A rule's filters, sampling rate, and evaluator assignments control online evaluation. For the full distinction, historical backfill, and alerts, see [Evaluators and rules](/docs/evaluation/core-concepts#evaluators-and-rules) in Core Concepts.
+
+## Programmatic setup via API [#api]
+
+You can create and manage evaluators and rules through the public API. This is useful for version-controlling your evaluation setup, replicating it across projects, or automating rollouts from a deployment pipeline.
+
+The setup is split into two resources:
+
+- **Evaluators** define _how_ to score data. Each evaluator has a stable ID. Updating its definition creates a new version, and active rules automatically use the latest version.
+- **Evaluation rules** define _which_ live observations are evaluated: filters, sampling rate, and one or more evaluator assignments. An assignment can use the evaluator's default mapping or override it for that rule.
+
+A typical flow is to create an evaluator, read back its stable ID, then create a rule and attach one or more evaluators to it.
+
+The endpoints are designed to be explored and consumed by coding agents. Point an agent at the API reference and have it create the evaluators and wire up the evaluation rules.
+
+Observation evaluation rules support a boolean `isRootObservation` filter with the `=` and `<>` operators. To target logical roots, include this filter in the rule:
+
+```json
+{
+  "type": "boolean",
+  "column": "isRootObservation",
+  "operator": "=",
+  "value": true
+}
+```
+
+See the stable [Evaluators](https://api.reference.langfuse.com/#tag/evaluators) and [Evaluation Rules](https://api.reference.langfuse.com/#tag/evaluationrules) API reference for the full request and response schemas.
+
+## Where evaluators run [#where-evaluators-run]
+
+Managed evaluators are executed by the Langfuse **worker**. It picks up each matching observation from a queue, runs the evaluator, and writes the resulting scores back. Nothing runs inside your application or in the browser.
+
+On Langfuse Cloud, evaluators run in Langfuse's infrastructure. For self-hosted deployments:
+
+- The worker container — not the web container and not your instrumented application — needs network egress for model-backed evaluators (LLM-as-a-Judge and decision models) to reach the provider or gateway configured in the [LLM connection](/docs/administration/llm-connection). The [SSRF allowlist](/docs/administration/llm-connection#blocked-ip-address) applies to that call.
+- Evaluator execution can be pinned to specific worker replicas with `QUEUE_CONSUMER_EVAL_EXECUTION_QUEUE_IS_ENABLED` and scaled with `LANGFUSE_EVAL_EXECUTION_WORKER_CONCURRENCY` (default `5`). There is no option to run managed evaluators outside the worker.
+- [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) use a separate worker queue and sandbox. They require a configured [code evaluator dispatcher](/self-hosting/configuration/code-evaluators).
+
+## Debug evaluator executions [#debug-evaluator-executions]
+
+Every managed evaluator execution creates a trace. Use it to inspect inputs, outputs, latency, returned scores, and errors.
+
+| Evaluator type | Environment to filter in the tracing table |
+| -------------- | ------------------------------------------ |
+| LLM-as-a-Judge | `langfuse-llm-as-a-judge`                  |
+| Decision-model | `langfuse-llm-as-a-judge`                  |
+| Code           | `langfuse-code-eval`                       |
+
+Internal environments are hidden from the default tracing view. Filter the table by that environment, or open the execution trace from the related score.
+
+<Details>
+<Summary>Evaluator execution status</Summary>
+
+- **Completed**: Evaluation finished successfully.
+- **Error**: Evaluation failed (click the execution trace ID for details).
+- **Delayed**: Evaluation hit provider rate limits and is being retried with exponential backoff. Applies to model-backed evaluators.
+- **Pending**: Evaluation is queued and waiting to run.
+
+</Details>
+
+## Trace-level evaluators [#trace-level-evaluators]
+
+Trace-level evaluators are built on the old trace-centric data model and are deprecated as part of [Langfuse v4](/docs/v4). On Langfuse Cloud, existing trace-level evaluators keep running until the v4 cutover on <V4CutoverDate />; after that they stop producing results. On self-hosted Langfuse v4, once running in `events_only` mode, they will no longer produce results. Multi-span evaluations will build on the new observations-first data model.
+
+To move existing trace-level evaluators, follow the [upgrade guide](/faq/all/llm-as-a-judge-migration). If an observation-level evaluator is not executing, see [Why is my observation-level evaluator not executing?](/faq/all/observation-eval-not-executing).
+
+## Related resources
+
+- [Evaluate Production Traffic](/docs/evaluation/get-started/online) walks through creating an evaluator and attaching a rule.
+- [Core Concepts](/docs/evaluation/core-concepts#evaluators-and-rules) defines evaluators, rules, batch evaluation, and experiments.
+- [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [decision-model evaluators](/docs/evaluation/evaluation-methods/decision-models), and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) cover type-specific setup.
+- [Langfuse Academy: Evaluation](/academy/evaluate) covers how these methods fit with manual review.
+
+## GitHub Discussions
+
+<GhDiscussionsPreview labels={["feat-evals"]} />
