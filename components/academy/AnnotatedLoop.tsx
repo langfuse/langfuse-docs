@@ -39,18 +39,28 @@ export function AnnotatedLoop({
   stations = {},
   subloop = false,
   ariaLabel = "The AI engineering loop annotated for this phase",
+  deployLabel = "Deploy",
+  deployDimmed: deployDimmedOverride,
 }: {
   stations?: Partial<Record<StationId, StationAnnotation>>;
   /** Draw a small return arrow from Monitor back to Trace (a sub-loop). */
   subloop?: boolean;
   ariaLabel?: string;
+  /** Label on the return path. Defaults to "Deploy". */
+  deployLabel?: string;
+  /**
+   * Override whether the return path is dimmed. By default it dims when
+   * Trace or Evaluate is dimmed (nothing to ship back into production).
+   */
+  deployDimmed?: boolean;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const estScale = estimateInitialScale();
 
   const traceDimmed = Boolean(stations.trace?.dimmed);
-  const deployDimmed = traceDimmed || Boolean(stations.eval?.dimmed);
+  const deployDimmed =
+    deployDimmedOverride ?? (traceDimmed || Boolean(stations.eval?.dimmed));
 
   const uid = useId().replace(/:/g, "");
   const arrowId = `lfa-arrow-${uid}`;
@@ -213,7 +223,7 @@ export function AnnotatedLoop({
               opacity: deployDimmed ? 0.4 : 1,
             }}
           >
-            Deploy
+            {deployLabel}
           </div>
 
           {STATIONS.map((station, i) => {
