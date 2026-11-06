@@ -137,6 +137,7 @@ Please check the following:
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
+- When a code example is added, unless the page is specifically about one programming language, include examples for at least the Python SDK, the JS/TS SDK, and OpenTelemetry (API), using `<LangTabs>`. Additional tabs are fine when relevant. The tab names must be exactly `Python SDK`, `JS/TS SDK`, and `OpenTelemetry (API)`. Flag new or edited examples that omit one of these tabs or use a different name.
 - When documentation is added or expanded, do not repeat the same information on a page. Each fact or explanation should appear once; later sections should link back instead of restating it.
 - A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
   - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
