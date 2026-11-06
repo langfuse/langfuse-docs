@@ -24,6 +24,10 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 Explore the agents working in your application from one project. Open an agent to inspect its sessions, invocations, traces, and loaded skill versions. Filter by environment to focus on production, staging, or development. Agents are discovered from activity in your selected time window; you do not register them separately. Use the table to compare agents or switch to the gallery.
 
+<Frame>
+  ![Agents table with the shared search bar, environment filters, and Table and Gallery views.](/images/docs/agents/agents-table.png)
+</Frame>
+
 Existing traces that lack agent identity are not backfilled. Send a new instrumented invocation if the gallery is empty.
 
 ## Track multiple agents in one project [#track-agents]
@@ -172,10 +176,12 @@ For nested agents, record the child agent's identity on its own observations. It
 
 ## Explore an agent [#explore-an-agent]
 
-Open [Agents](https://cloud.langfuse.com/project/~/agents), select a date range and environment, then choose an agent. The activity and metrics use that selected scope.
+Open [Agents](https://cloud.langfuse.com/project/~/agents) and use the search bar or filter sidebar to find an agent. For example, enter `research env:production`, select several environments with `env:(production OR staging)`, or exclude one with `-env:development`. Switch between **Table** and **Gallery** without changing your search and filters.
+
+The date picker sits in the page header and shares your project’s date selection with Tracing and Sessions. After you open an agent, environment filters stay visible in the normal search bar and sidebar and carry across its tabs. Other table filters apply to the current tab.
 
 <Callout type="info">
-  The default window is seven days; you can select up to 30 days. Metrics use
+  Select a window of up to 30 days. Metrics use
   observations that started within the selected window. A model call can appear
   in a window whose owning invocation started earlier, so an agent or trace can
   have model activity and zero invocations in that period. Info requires an invocation
