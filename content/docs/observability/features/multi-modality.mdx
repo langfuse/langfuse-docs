@@ -453,7 +453,7 @@ Each project supports one External Media Storage integration:
 
 1. [Configure your bucket's CORS policy](#external-s3-media-cors) so browsers at your Langfuse origin can read signed object URLs.
 2. Open **Project Settings → Integrations → External Media Storage**.
-3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them.
+3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them. For Amazon S3, you can instead [authenticate with an IAM role](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth).
 4. Optionally set a media prefix to restrict access to one path. Grant the credentials read access only to the configured bucket and prefix.
 5. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
 

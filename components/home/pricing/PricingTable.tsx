@@ -1577,6 +1577,23 @@ const sections: Section[] = [
         },
       },
       {
+        name: "IAM role authentication for Amazon S3",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
