@@ -32,7 +32,7 @@ The screenshots use synthetic demo telemetry. Their scores and costs are authore
 
 ## Sessions, traces, and agent runs [#sessions-traces-and-agent-runs]
 
-**Invocation** and **agent run** mean the same thing here. Technically, a run is one **AGENT observation (an OpenTelemetry span)** recorded for an execution of an agent. There is no separate invocation object. The UI calls these records **Agent runs**.
+An **agent run** is one execution of an agent, recorded as an **AGENT observation (an OpenTelemetry span)**.
 
 Your application or framework instrumentation chooses the execution boundary. Usually, it starts an AGENT span when you call an agent's entry point, such as `researcher.run(input)`, and ends it when that execution completes, fails, or is cancelled. For streaming work, the boundary includes consuming the stream. That span can cover several model calls, tool calls, and delegated agents while the agent works toward its answer.
 
