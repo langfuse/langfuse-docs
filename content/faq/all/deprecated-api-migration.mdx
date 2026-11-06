@@ -186,11 +186,11 @@ curl -G \
   --data-urlencode "limit=50"
 ```
 
-That request leaves out `usage`, so the rows have no `totalCost`. Add `usage` when you need cost.
+Add `usage` to `fields` on that request when you need `totalCost`.
 
 ### Export every trace with total cost [#export-every-trace]
 
-Page through [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and sum `totalCost` by `traceId`. The script writes `traces.csv` (`id`, `name`, `timestamp`, `total_cost`) for every trace whose earliest observation started in the last 7 days. It uses Python SDK v5 (`langfuse.get_client()`). `totalCost` is selected only by the `usage` field group, so the request below includes `usage`. Without it the field is absent, and the script records that missing value as `0`.
+Page through [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and sum `totalCost` by `traceId`. The script writes `traces.csv` (`id`, `name`, `timestamp`, `total_cost`) for every trace whose earliest observation started in the last 7 days. It uses Python SDK v5 (`langfuse.get_client()`). `totalCost` belongs to the `usage` field group, so the request includes `usage`.
 
 The SDK returns typed objects with snake_case attributes and `datetime` start times, not dictionaries. The same fields on the REST response are camelCase: `traceId`, `totalCost`, `startTime`, `traceName`, and `parentObservationId`.
 
@@ -201,55 +201,60 @@ The SDK returns typed objects with snake_case attributes and `datetime` start ti
 - `fromStartTime` is inclusive and `toStartTime` is exclusive, and both apply to each observation's own start time. `lookback` is how far before the window the script reads. With the default of one day, a trace that crosses the boundary by less than a day is summed in full and then dropped when its first observation is before the window. Set `lookback` to the longest trace you need to cover. A trace whose first observation is older than `lookback`, and that also has an observation inside the window, is still written, with a partial `total_cost` and a later `timestamp`.
 
 ```python
-"""Write traces.csv (id, name, timestamp, total_cost) for every trace of the last 7 days."""
-
 import csv
 from datetime import datetime, timedelta, timezone
 
 from langfuse import get_client
 
-langfuse = get_client()  # reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGFUSE_BASE_URL
-
-to_time = datetime.now(timezone.utc)
-from_time = to_time - timedelta(days=7)
-# Observations are filtered by their own start time. Read this far before the window
-# so a trace that crosses the boundary is summed in full. One day covers traces that
-# span less than a day across from_time. A longer trace is still written, with a
-# partial cost and a timestamp later than the legacy trace timestamp.
+langfuse = get_client()
+end_time = datetime.now(timezone.utc)
+start_time = end_time - timedelta(days=7)
 lookback = timedelta(days=1)
 
 traces = {}
 cursor = None
 while True:
     page = langfuse.api.observations.get_many(
-        from_start_time=from_time - lookback,
-        to_start_time=to_time,
-        fields="core,basic,usage,trace_context",  # total_cost is absent unless usage is requested
+        from_start_time=start_time - lookback,
+        to_start_time=end_time,
+        fields="core,basic,usage,trace_context",
         limit=1000,
         cursor=cursor,
     )
-    for obs in page.data:
+    for observation in page.data:
         trace = traces.setdefault(
-            obs.trace_id,
-            {"id": obs.trace_id, "name": None, "root_name": None, "timestamp": obs.start_time, "total_cost": 0.0},
+            observation.trace_id,
+            {
+                "id": observation.trace_id,
+                "name": None,
+                "root_name": None,
+                "timestamp": observation.start_time,
+                "total_cost": 0.0,
+            },
         )
-        trace["total_cost"] += obs.total_cost or 0.0
-        trace["timestamp"] = min(trace["timestamp"], obs.start_time)
-        trace["name"] = trace["name"] or obs.trace_name
-        if obs.parent_observation_id is None:
-            trace["root_name"] = obs.name
-    cursor = page.meta.cursor
+        trace["total_cost"] += observation.total_cost or 0.0
+        trace["timestamp"] = min(trace["timestamp"], observation.start_time)
+        trace["name"] = trace["name"] or observation.trace_name
+        if observation.parent_observation_id is None:
+            trace["root_name"] = observation.name
+
+    cursor = getattr(page.meta, "cursor", None)
     if not cursor:
         break
 
-with open("traces.csv", "w", newline="") as f:
-    writer = csv.writer(f)
+with open("traces.csv", "w", newline="") as file:
+    writer = csv.writer(file)
     writer.writerow(["id", "name", "timestamp", "total_cost"])
     for trace in traces.values():
-        if trace["timestamp"] < from_time:
-            continue  # started before the window
+        if trace["timestamp"] < start_time:
+            continue
         writer.writerow(
-            [trace["id"], trace["name"] or trace["root_name"], trace["timestamp"].isoformat(), trace["total_cost"]]
+            [
+                trace["id"],
+                trace["name"] or trace["root_name"],
+                trace["timestamp"].isoformat(),
+                trace["total_cost"],
+            ]
         )
 ```
 
@@ -267,7 +272,7 @@ curl -G \
 
 ### Per-trace total cost [#per-trace-total-cost]
 
-[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns that per-trace sum without fetching observation rows. It reads `totalCost` as a measure, so it does not take a `fields` parameter and does not depend on the `usage` group. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`. The sum is the cost of observations that started in the selected period, not the lifetime cost of a trace that started earlier. A known trace with no observations in the window returns no row. `fromTimestamp` is inclusive and `toTimestamp` is inclusive (`start_time <= toTimestamp`); Observations API `toStartTime` is exclusive.
+[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns that per-trace sum as the `totalCost` measure. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`. The sum is the cost of observations that started in the selected period. A known trace with no observations in the window returns no row. `fromTimestamp` is inclusive and `toTimestamp` is inclusive (`start_time <= toTimestamp`); Observations API `toStartTime` is exclusive.
 
 <Callout type="info">
 
@@ -275,65 +280,53 @@ curl -G \
 
 </Callout>
 
-Pass the known trace IDs as command-line arguments. The second query runs only when at least one ID is passed: `row_limit` must be from 1 to 1,000, and an `any of` filter rejects an empty list. Pass at most 1,000 IDs.
+The 100 traces with the highest cost in the period:
 
 ```python
-"""Per-trace total cost via Metrics API v2: top-N most expensive traces, and cost for known trace IDs."""
-
-import json
-import sys
-from datetime import datetime, timedelta, timezone
-
 from langfuse import get_client
 
 langfuse = get_client()
 
-to_time = datetime.now(timezone.utc)
-from_time = to_time - timedelta(days=7)
+query = """
+{
+  "view": "observations",
+  "dimensions": [{"field": "traceId"}],
+  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+  "filters": [],
+  "fromTimestamp": "2026-07-01T00:00:00Z",
+  "toTimestamp": "2026-07-16T00:00:00Z",
+  "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+  "config": {"row_limit": 100}
+}
+"""
 
-# traceId is high-cardinality: the API requires row_limit plus a desc orderBy on a measure.
-# Don't add traceName as a second dimension; rows without it would split a trace in two.
-# fromTimestamp and toTimestamp filter each observation's start time. toTimestamp is inclusive.
-# A trace that started before from_time contributes only its in-window observations.
-top = langfuse.api.metrics.metrics(
-    query=json.dumps(
-        {
-            "view": "observations",
-            "dimensions": [{"field": "traceId"}],
-            "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
-            "filters": [],
-            "fromTimestamp": from_time.isoformat(),
-            "toTimestamp": to_time.isoformat(),
-            "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
-            "config": {"row_limit": 100},
-        }
-    )
-)
-print("top-N:")
-for row in top.data:
-    print(" ", row)
+metrics = langfuse.api.metrics.metrics(query = query)
+```
 
-# Total cost, inside the same window, for trace IDs you already have.
-# Skip this call with no IDs: row_limit must be 1..1000, and "any of" rejects [].
-trace_ids = sys.argv[1:]
-if trace_ids:
-    known = langfuse.api.metrics.metrics(
-        query=json.dumps(
-            {
-                "view": "observations",
-                "dimensions": [{"field": "traceId"}],
-                "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
-                "filters": [{"column": "traceId", "operator": "any of", "value": trace_ids, "type": "stringOptions"}],
-                "fromTimestamp": from_time.isoformat(),
-                "toTimestamp": to_time.isoformat(),
-                "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
-                "config": {"row_limit": len(trace_ids)},
-            }
-        )
-    )
-    print("known ids:")
-    for row in known.data:
-        print(" ", row)
+The same query filtered to trace IDs you already have. Set `row_limit` to the number of IDs, at most 1,000.
+
+```python
+query = """
+{
+  "view": "observations",
+  "dimensions": [{"field": "traceId"}],
+  "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+  "filters": [
+    {
+      "column": "traceId",
+      "operator": "any of",
+      "value": ["trace-id-1", "trace-id-2"],
+      "type": "stringOptions"
+    }
+  ],
+  "fromTimestamp": "2026-07-01T00:00:00Z",
+  "toTimestamp": "2026-07-16T00:00:00Z",
+  "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+  "config": {"row_limit": 2}
+}
+"""
+
+metrics = langfuse.api.metrics.metrics(query = query)
 ```
 
 ```bash
@@ -374,7 +367,7 @@ Despite its plural name, `fetchSessions(sessionId)` calls the deprecated single-
 
 - The response contains observation rows; a "session" is the set of rows sharing a `sessionId`. Group by `sessionId` (and within a session, by `traceId`) to reconstruct the session structure.
 - Like traces, sessions have no dedicated input/output object in v4. Reconstruct the conversation from the root observations of the traces within the session.
-- `sessionId` is a high-cardinality field. It is always available for **filtering** in the [Metrics API v2](/docs/metrics/features/metrics-api#v2). Grouping is top-N only: set `config.row_limit` and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. See [High cardinality dimensions](/docs/metrics/features/metrics-api#high-cardinality-dimensions).
+- `sessionId` is a high-cardinality field. Use it as a filter in the [Metrics API v2](/docs/metrics/features/metrics-api#v2). Grouping is top-N only: set `config.row_limit` and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. See [High cardinality dimensions](/docs/metrics/features/metrics-api#high-cardinality-dimensions).
 
 ### Example
 
@@ -413,12 +406,12 @@ This is not only a method rename: adapt the query as described below. In particu
 
 The query object structure carries over; the key changes are inside the query:
 
-| Deprecated (v1)                                                    | v2 equivalent                                                                                                                                                                                                                        |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`)                                                                                                                                     |
-| `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                                                                                                                                                            |
-| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Top-N only: set `config.row_limit` (max 1,000) and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. These fields are always available as filters. See [Per-trace total cost](#per-trace-total-cost). |
-| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                                                                                                                                                              |
+| Deprecated (v1)                                                    | v2 equivalent                                                                                                                                                                                                       |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`)                                                                                                                    |
+| `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                                                                                                                                           |
+| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Top-N only: set `config.row_limit` (max 1,000) and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. Use these fields as filters. See [Per-trace total cost](#per-trace-total-cost). |
+| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                                                                                                                                             |
 
 ### Semantic differences
 
