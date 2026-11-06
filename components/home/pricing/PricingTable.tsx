@@ -1314,15 +1314,16 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Response time SLO",
+        name: "Response time SLO (Severity 1)",
+        href: "https://clickhouse.com/legal/support-services-policy",
         description:
-          "Target response time for support requests via supported channels",
+          "Target initial response time for critical production issues. The 1-hour target applies 24/7 to committed Enterprise customers.",
         tiers: {
           cloud: {
-            Hobby: "n/a",
-            Core: "48h",
-            Pro: "48h, Teams add-on: 24h",
-            Enterprise: "Custom",
+            Hobby: "Best effort",
+            Core: "Best effort",
+            Pro: "Best effort",
+            Enterprise: "Committed: 1h (24/7); pay-as-you-go: Best effort",
           },
         },
       },
@@ -1644,8 +1645,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "Monthly",
-            Pro: "Monthly",
+            Core: "Monthly or " + YEARLY_COMMITMENT,
+            Pro: "Monthly or " + YEARLY_COMMITMENT,
             Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
@@ -1660,8 +1661,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
+            Core: YEARLY_COMMITMENT,
+            Pro: YEARLY_COMMITMENT,
             Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
@@ -1818,8 +1819,7 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available when committing to a yearly contract on the Enterprise
-              plan.
+              Available when committing to a yearly contract.
             </HoverCardContent>
           </HoverCard>
         )}
