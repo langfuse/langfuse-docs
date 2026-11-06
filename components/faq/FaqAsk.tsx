@@ -74,11 +74,12 @@ function AskForm({
   details?: boolean;
 }) {
   const id = useId();
-  const [phase, setPhase] = useState<
-    "idle" | "editing" | "loading" | "answered"
-  >("idle");
+  const [phase, setPhase] = useState<"editing" | "loading" | "answered">(
+    "editing",
+  );
   const [question, setQuestion] = useState("");
   const [focused, setFocused] = useState(false);
+  const invitation = details ? "Ask another question" : "Ask anything else";
   const { messages, sendMessage, setMessages, stop, error, clearError } =
     useChat({
       transport,
@@ -93,6 +94,7 @@ function AskForm({
     .join("\n\n");
   const input = useRef<HTMLTextAreaElement>(null);
   const loading = phase === "loading";
+  const showIdleCursor = phase === "editing" && !focused && !question.trim();
   const showDraftCursor = phase === "editing" && !focused && !!question.trim();
   const boxed = linked || details;
   // Accordion questions inherit Analog from Radix's h3; match it explicitly here.
@@ -108,10 +110,6 @@ function AskForm({
     },
     [stop],
   );
-
-  useEffect(() => {
-    if (phase === "editing") input.current?.focus();
-  }, [phase]);
 
   useLayoutEffect(() => {
     const textarea = input.current;
@@ -146,6 +144,9 @@ function AskForm({
     clearError();
     setQuestion("");
     setPhase("editing");
+    requestAnimationFrame(() => {
+      input.current?.focus();
+    });
   }
 
   function submit(event: FormEvent) {
@@ -159,109 +160,112 @@ function AskForm({
 
   return (
     <div
-      className={cn(
-        "not-prose flex flex-col",
-        !boxed && "py-5",
-        // Idle boxed: padding lives on the button so the full card is the hit target.
-        boxed && phase !== "idle" && "px-4 py-2",
-      )}
+      className={cn("not-prose flex flex-col", boxed ? "px-4 py-2" : "py-5")}
+      onClick={(event) => {
+        if (phase !== "editing") return;
+        if (
+          event.target instanceof HTMLElement &&
+          event.target.closest("button")
+        ) {
+          return;
+        }
+        input.current?.focus();
+      }}
     >
-      {phase === "idle" ? (
-        <button
-          type="button"
-          onClick={() => setPhase("editing")}
-          className={cn(
-            "inline-flex items-baseline gap-1 text-left cursor-text rounded-[2px] text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            boxed ? "w-full px-4 py-2" : "self-start",
-            questionTypography,
-          )}
-        >
-          {details ? "Ask another question" : "Ask anything else"}
-          <span aria-hidden="true" className={styles.cursor} />
-        </button>
-      ) : (
-        <form onSubmit={submit}>
-          <label htmlFor={id} className="sr-only">
-            Your question
-          </label>
-          <div className={cn("flex items-start gap-2", questionTypography)}>
-            <div
+      <form onSubmit={submit}>
+        <label htmlFor={id} className="sr-only">
+          Your question
+        </label>
+        <div className={cn("flex items-start gap-2", questionTypography)}>
+          <div
+            className={cn(
+              "relative min-w-0 flex-1 cursor-text text-text-primary",
+              questionTypography,
+            )}
+          >
+            <textarea
+              ref={input}
+              id={id}
+              rows={1}
+              maxLength={500}
+              value={question}
+              placeholder={showIdleCursor ? undefined : invitation}
+              readOnly={phase !== "editing"}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              onChange={(event) => setQuestion(event.target.value)}
+              onKeyDown={(event) => {
+                if (
+                  event.key === "Enter" &&
+                  !event.shiftKey &&
+                  !event.nativeEvent.isComposing
+                ) {
+                  event.preventDefault();
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }}
               className={cn(
-                "relative min-w-0 flex-1 text-text-primary",
+                "block h-[1lh] w-full resize-none overflow-hidden border-0 bg-transparent p-0 outline-none placeholder:text-text-tertiary caret-current focus:outline-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                (showIdleCursor || showDraftCursor) &&
+                  "caret-transparent text-transparent",
                 questionTypography,
               )}
-            >
-              <textarea
-                ref={input}
-                id={id}
-                rows={1}
-                maxLength={500}
-                value={question}
-                readOnly={phase !== "editing"}
-                onFocus={() => setFocused(true)}
-                onBlur={() => {
-                  setFocused(false);
-                  if (phase === "editing" && !question.trim()) {
-                    setQuestion("");
-                    setPhase("idle");
-                  }
-                }}
-                onChange={(event) => setQuestion(event.target.value)}
-                onKeyDown={(event) => {
-                  if (
-                    event.key === "Enter" &&
-                    !event.shiftKey &&
-                    !event.nativeEvent.isComposing
-                  ) {
-                    event.preventDefault();
-                    event.currentTarget.form?.requestSubmit();
-                  }
-                }}
+            />
+            {showIdleCursor && (
+              <div
+                aria-hidden="true"
                 className={cn(
-                  "block h-[1lh] w-full resize-none overflow-hidden border-0 bg-transparent p-0 outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0",
-                  showDraftCursor && "opacity-0",
+                  "pointer-events-none absolute inset-0 flex items-baseline gap-1 text-text-tertiary",
                   questionTypography,
                 )}
-              />
-              {showDraftCursor && (
-                <div
+              >
+                <span className="whitespace-pre-wrap break-words">
+                  {invitation}
+                </span>
+                <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-0 whitespace-pre-wrap break-words"
-                >
-                  {question}
-                  <span className={styles.cursor} />
-                </div>
-              )}
-            </div>
-            {/* Keep the row one line tall without squeezing the button's corners. */}
-            <div className="flex h-[1lh] shrink-0 items-center">
-              {phase === "answered" ? (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="small"
-                  onClick={newQuestion}
-                  aria-label="New question"
-                  wrapperClassName="shrink-0"
-                >
-                  New question
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  variant="secondary"
-                  size="small"
-                  aria-label="Ask question"
-                  disabled={!question.trim() || loading}
-                  wrapperClassName="shrink-0"
-                >
-                  {loading ? "Answering…" : "Ask"}
-                </Button>
-              )}
-            </div>
+                  className={cn(styles.cursor, "text-text-primary")}
+                />
+              </div>
+            )}
+            {showDraftCursor && (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 whitespace-pre-wrap break-words"
+              >
+                {question}
+                <span className={styles.cursor} />
+              </div>
+            )}
           </div>
-        </form>
-      )}
+          {/* Keep the row one line tall without squeezing the button's corners. */}
+          <div className="flex h-[1lh] shrink-0 items-center">
+            {phase === "answered" ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="small"
+                onClick={newQuestion}
+                aria-label="New question"
+                wrapperClassName="shrink-0"
+              >
+                New question
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="secondary"
+                size="small"
+                aria-label="Ask question"
+                disabled={!question.trim() || loading}
+                wrapperClassName="shrink-0"
+              >
+                {loading ? "Answering…" : "Ask"}
+              </Button>
+            )}
+          </div>
+        </div>
+      </form>
       <div aria-live="polite" aria-busy={loading}>
         {loading && !answer && (
           <Text size="s" className="mt-2 text-left">
