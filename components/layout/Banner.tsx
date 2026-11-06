@@ -13,7 +13,7 @@ export function Banner() {
           <span className="underline underline-offset-2">Read more</span>
         </span>
         <span className="hidden sm:inline">
-          Langfuse launches open source AI Gateway ·{" "}
+          Langfuse launches Open Source AI Gateway ·{" "}
           <span className="underline underline-offset-2">Read more</span>
         </span>
       </Link>
