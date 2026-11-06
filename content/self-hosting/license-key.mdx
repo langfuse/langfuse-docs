@@ -22,6 +22,7 @@ Some additional Enterprise features require a license key:
 - [Organization Creators](/self-hosting/administration/organization-creators)
 - [Org Management API and SCIM](/docs/administration/scim-and-org-api)
 - [Instance Management API](/self-hosting/administration/instance-management-api)
+- [External Media Storage](/docs/observability/features/multi-modality#external-s3-media)
 
 See [pricing page](/pricing-self-host) for more details on Langfuse Enterprise.
 
@@ -65,6 +66,7 @@ Before doing so, make sure you no longer rely on any of the Enterprise features 
 - **Server-side data masking:** Masking stops for new events. Move it to your application or SDK before sending sensitive data.
 - **Audit logs:** The viewer and read API become unavailable. Export any logs you will need.
 - **Provisioning and administration:** The Organization Management API, SCIM, and Instance Management API return `403`. Replace dependent automation before removal; existing resources remain.
+- **External Media Storage:** The integration can no longer be configured, and `s3://` media references are shown as raw URIs instead of being resolved.
 - **UI and organization creation:** UI customizations revert to defaults, and the organization creator allowlist stops restricting eligible users.
 - **FIPS mode:** with `LANGFUSE_REQUIRE_FIPS=true`, the web and worker containers refuse to start without a Government license key. Remove `LANGFUSE_REQUIRE_FIPS` before you remove the key.
 
