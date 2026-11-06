@@ -1,7 +1,7 @@
 ---
 date: 2026-11-05
 title: Explore agents in your project
-description: Explore each agent's sessions, invocations, and traces, and inspect the managed skill versions it loaded.
+description: Compare agent activity, cost, and quality, then follow sessions, traces, agent runs, and loaded skills.
 badge: Internal preview
 author: nikitakabardin
 ---
@@ -10,23 +10,24 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-You can now explore the agents in your application from one Langfuse project. Open **Agents** to compare agents in a table or browse the gallery, then inspect an agent's sessions, invocations, traces, and loaded skill versions. Use the familiar search bar and filters to focus on an agent or environment, such as `research env:production`.
+You can now explore the agents working across your application from one Langfuse project. Start in the gallery to compare activity, own cost per agent run, duration, and last-seen time, or switch to the table to compare agents side by side.
 
-![Agents table with environment filters and a gallery view.](/images/docs/agents/agents-table.png)
+- **Spot a change in activity:** Compare the selected period with the previous period of the same length. Agents seen only in the previous period remain visible with zero current activity. A green indicator means recent telemetry, not a health check.
+- **Investigate a quality change:** Open an agent's **Overview** to compare runs, cost, duration, cache hit rate, and tool or skill activity. Choose a score recorded on its agent runs to see quality over time and by model, with the number of scored runs alongside it.
+- **Follow the work:** Inspect sessions, traces, and individual agent runs with the familiar search, filters, saved views, and trace inspection. Follow recorded parent-child relationships into example traces, or open the managed skill version an agent loaded.
+
+![Agents gallery showing activity trends, agent-run statistics, recent activity, and environment filters.](/images/docs/agents/agents-gallery.png)
+
+One conversation can contain three request traces while its researcher executes twice, three times, and once across those requests. That is **1 session, 3 traces, and 6 Researcher agent runs**. Other agents can work in the same traces; a background job can have agent runs without a session.
+
+Cost per run uses the agent's own attributed model calls, keeping delegated agents' costs separate. Filter by environment, such as `research env:production`, to focus the comparison on one deployment.
+
+![Product search Overview with current and previous agent-run, cost, and cache-hit charts.](/images/docs/agents/agents-overview.png)
 
 <Callout type="info">
   This internal preview requires Langfuse v4 and the personal `agentsView`
   feature flag. It is not enabled by default.
 </Callout>
-
-- **Investigate one agent:** Use the familiar Tracing table with filters, saved views, column controls, and trace inspection, scoped to that agent's activity.
-- **Follow a conversation:** Browse recorded sessions across traces, or inspect an individual agent invocation. Shared sessions and traces retain the context of other participating agents.
-- **Check agent information:** Find its identity, recorded configuration, usage, and model cost in Info. Data-coverage details are available when needed.
-- **Inspect skill usage:** Follow a recorded skill load to its managed version and the observations that loaded its files.
-
-Agent identity comes from your instrumentation: a stable ID identifies the agent and a display name makes it recognizable. Multiple agents can report to the same project. An invocation is one agent execution; a trace may contain several invocations, and sessions connect related traces.
-
-Usage comes from attributed model calls. Parent AGENT summaries are not added again, and missing usage or pricing stays unknown. [Skill availability and successful loads](/docs/skill-management/tracing#availability-and-loads) remain separate.
 
 ## Get started
 
