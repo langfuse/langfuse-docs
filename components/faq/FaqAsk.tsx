@@ -69,9 +69,11 @@ function documentationUrl(url: string) {
 function AskForm({
   linked = false,
   details = false,
+  hideCursor = false,
 }: {
   linked?: boolean;
   details?: boolean;
+  hideCursor?: boolean;
 }) {
   const id = useId();
   const [phase, setPhase] = useState<
@@ -177,7 +179,9 @@ function AskForm({
           )}
         >
           {details ? "Ask another question" : "Ask anything else"}
-          <span aria-hidden="true" className={styles.cursor} />
+          {hideCursor ? null : (
+            <span aria-hidden="true" className={styles.cursor} />
+          )}
         </button>
       ) : (
         <form onSubmit={submit}>
@@ -333,14 +337,16 @@ function AskForm({
 export function FaqAsk({
   linked = false,
   details = false,
+  hideCursor = false,
 }: {
   linked?: boolean;
   details?: boolean;
+  hideCursor?: boolean;
 }) {
   if (linked || details) {
     return (
       <FaqRow>
-        <AskForm linked={linked} details={details} />
+        <AskForm linked={linked} details={details} hideCursor={hideCursor} />
       </FaqRow>
     );
   }
