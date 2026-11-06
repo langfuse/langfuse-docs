@@ -10,7 +10,7 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-Langfuse can now access your Amazon S3 buckets by assuming an IAM role in your AWS account, so you don't need to store long-lived access keys in Langfuse. Langfuse assumes your role through its own cross-account role and passes an external ID that is unique to each integration. You can use it for:
+Langfuse can now access your Amazon S3 buckets by assuming an IAM role in your AWS account, so you don't need to store long-lived access keys in Langfuse. You can use it for:
 
 - [Scheduled blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage) to Amazon S3, configured in the UI or through `PUT /api/public/integrations/blob-storage` with `authType: ROLE_ARN`.
 - [External Media Storage](/docs/observability/features/multi-modality#external-s3-media), which renders `s3://` media from your own bucket in traces.
