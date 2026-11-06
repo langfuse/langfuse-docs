@@ -73,6 +73,19 @@ You can manage prices in **Project Settings > Models**, add your own [custom mod
   model](/images/docs/model-definitions-settings.png)
 </Frame>
 
+### When default prices update [#default-price-updates]
+
+Default prices ship with each Langfuse release. A [daily audit](https://github.com/langfuse/langfuse/actions/workflows/model-price-audit.yml) checks official provider documentation and opens a pull request when a price, pricing tier, or new major model should change. See [how that audit works](#default-model-price-maintenance).
+
+<Callout type="info">
+
+- **Langfuse Cloud** receives the updated default prices with every release.
+- **Self-hosted** deployments use the default prices shipped with the version they run. Those prices update when you [upgrade](/self-hosting/upgrade) to a release that includes them. To price a model your version does not include, or to use your own rates, add a [custom model definition](#custom-model-definitions) or [ingest the cost directly](#ingest).
+
+Updated prices apply to generations ingested after the update. Generations already stored keep the cost calculated at ingestion time.
+
+</Callout>
+
 ### Usage
 
 If a tokenizer is specified for the model, Langfuse automatically calculates token amounts for ingested generations.
@@ -206,9 +219,9 @@ The audit follows an evidence-first workflow:
 1. It verifies model IDs, prices, units, usage keys, and pricing tiers against official provider documentation.
 2. It makes focused changes only when the provider evidence can be represented safely in Langfuse. Uncertain findings are reported without changing the defaults.
 3. It validates the pricing data and any changed model-matching patterns.
-4. When changes are needed, a pull request is opened, and the updated prices are deployed shortly after approval.
+4. When changes are needed, a pull request is opened.
 
-This process keeps the default definitions current without relying on a third-party pricing aggregator. Because inferred costs are calculated at ingestion time, updated defaults apply only to new generations. If you need support for a model immediately or use private pricing, add a [custom model definition](#custom-model-definitions) or [ingest the cost directly](#ingest).
+This process keeps the default definitions current without relying on a third-party pricing aggregator. Approved changes ship in the next Langfuse release. See [When default prices update](#default-price-updates) for how Langfuse Cloud and self-hosted deployments pick them up.
 
 </Details>
 
