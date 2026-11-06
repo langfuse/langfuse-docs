@@ -160,7 +160,7 @@ Request `fields=core,basic,trace_context` to include the trace-level attributes 
 ### Semantic differences
 
 - **The response contains observation rows, not trace objects.** Group rows by `traceId` to reconstruct trace activity.
-- **Summing `totalCost` per `traceId` gives the same value as the legacy trace `totalCost`.** Traces created without observations are still returned. They come back as a single row whose id is `t-<traceId>`, with cost 0. The legacy trace id is that row's `traceId`; the `t-` prefix is only the observation id.
+- **The legacy trace `totalCost` is the sum of its observations' `totalCost`.** Summing `totalCost` per `traceId` gives that same value when the query includes every observation of the trace. Both replacements below filter on observation start time, so a trace that started before the window contributes only the observations that started inside it. Traces created without observations are still returned. They come back as a single row whose id is `t-<traceId>`, with cost 0. The legacy trace id is that row's `traceId`; the `t-` prefix is only the observation id.
 - For a list of every trace, use [Export every trace with total cost](#export-every-trace). For the most expensive traces, or the cost of trace IDs you already have, use [Per-trace total cost](#per-trace-total-cost).
 - **v4 has no trace-level `input`/`output`.** Reconstruct them from the root observation of each trace: the row with `parentObservationId == null`.
 - For other trace-level aggregates (counts and latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead of fetching and aggregating rows yourself.
@@ -192,11 +192,11 @@ Page through [Observations API v2](/docs/api-and-data-platform/features/public-a
 
 The SDK returns typed objects with snake_case attributes and `datetime` start times, not dictionaries. The same fields on the REST response are camelCase: `traceId`, `totalCost`, `startTime`, `traceName`, and `parentObservationId`.
 
-- `timestamp` is the earliest observation `startTime`, which equals the legacy trace `timestamp`.
-- Use `traceName` for the trace name. When it is empty, use the root observation's `name`: the row with `parentObservationId == null`. `traceName` is empty on OpenTelemetry traces that never set a trace name, and on some older ingestion traces. In both cases the legacy endpoint returned the root span's name.
-- `meta.cursor` is omitted on the last page. Stop when it is absent.
+- `timestamp` is the earliest fetched observation `startTime`. That equals the legacy trace `timestamp` when the query includes the trace's first observation.
+- Use `traceName` for the trace name. The API fills it from the stored trace name. When that is empty, a root row uses its own `name`: a row with `parentObservationId` null, or an application root. Child rows can still have an empty `traceName`, so the script also keeps the name of the row with `parentObservationId == null`. That is the name the legacy endpoint returned for OpenTelemetry traces that never set a trace name, and for some older ingestion traces.
+- `meta.cursor` is omitted on the last page. Stop when it is absent. An empty `data` array can still include a cursor; keep paging until the cursor is absent.
 - Include the `usage` field group. Without it, `totalCost` is absent rather than zero.
-- Observations are filtered by their own start time. Query from one day before the window so a trace that started just before the window is summed in full, then drop it when `timestamp` is before the window. That avoids writing a partial row.
+- `fromStartTime` is inclusive and `toStartTime` is exclusive, and both apply to each observation's own start time. `lookback` is how far before the window the script reads. With the default of one day, a trace that crosses the boundary by less than a day is summed in full and then dropped when its first observation is before the window. Set `lookback` to the longest trace you need to cover. A trace whose first observation is older than `lookback`, and that also has an observation inside the window, is still written, with a partial `total_cost` and a later `timestamp`.
 
 ```python
 """Write traces.csv (id, name, timestamp, total_cost) for every trace of the last 7 days."""
@@ -210,8 +210,10 @@ langfuse = get_client()  # reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, LANGF
 
 to_time = datetime.now(timezone.utc)
 from_time = to_time - timedelta(days=7)
-# Observations are filtered by their own start time. Start one day earlier so a trace
-# that began just before from_time still sums the cost of all its observations.
+# Observations are filtered by their own start time. Read this far before the window
+# so a trace that crosses the boundary is summed in full. One day covers traces that
+# span less than a day across from_time. A longer trace is still written, with a
+# partial cost and a timestamp later than the legacy trace timestamp.
 lookback = timedelta(days=1)
 
 traces = {}
@@ -263,15 +265,15 @@ curl -G \
 
 ### Per-trace total cost [#per-trace-total-cost]
 
-[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns the same per-trace sum without fetching observation rows. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`.
+[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns that per-trace sum without fetching observation rows. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`. The sum is the cost of observations that started in the selected period, not the lifetime cost of a trace that started earlier. A known trace with no observations in the window returns no row. `fromTimestamp` is inclusive and `toTimestamp` is inclusive (`start_time <= toTimestamp`); Observations API `toStartTime` is exclusive.
 
 <Callout type="info">
 
-`traceId` is a [high-cardinality dimension](/docs/metrics/features/metrics-api#high-cardinality-dimensions). The API accepts it as a dimension only together with `config.row_limit` (maximum 1,000), an `orderBy` with direction `desc` on a measure, and no `timeDimension`. Group by `traceId` alone. This recipe is a top-N query, or a lookup of trace IDs you already have. For every trace in a window, use [Export every trace with total cost](#export-every-trace).
+`traceId` is a [high-cardinality dimension](/docs/metrics/features/metrics-api#high-cardinality-dimensions). The API accepts it as a dimension only together with `config.row_limit` (an integer from 1 to 1,000), an `orderBy` with direction `desc` on a measure, and no `timeDimension`. Group by `traceId` alone. This recipe is a top-N query, or a lookup of trace IDs you already have. For every trace in a window, use [Export every trace with total cost](#export-every-trace).
 
 </Callout>
 
-Pass the known trace IDs as command-line arguments. The second query sets `row_limit` to the number of IDs, which must stay at or below 1,000.
+Pass the known trace IDs as command-line arguments. The second query runs only when at least one ID is passed: `row_limit` must be from 1 to 1,000, and an `any of` filter rejects an empty list. Pass at most 1,000 IDs.
 
 ```python
 """Per-trace total cost via Metrics API v2: top-N most expensive traces, and cost for known trace IDs."""
@@ -289,6 +291,8 @@ from_time = to_time - timedelta(days=7)
 
 # traceId is high-cardinality: the API requires row_limit plus a desc orderBy on a measure.
 # Don't add traceName as a second dimension; rows without it would split a trace in two.
+# fromTimestamp and toTimestamp filter each observation's start time. toTimestamp is inclusive.
+# A trace that started before from_time contributes only its in-window observations.
 top = langfuse.api.metrics.metrics(
     query=json.dumps(
         {
@@ -307,25 +311,27 @@ print("top-N:")
 for row in top.data:
     print(" ", row)
 
-# Total cost for trace IDs you already have
+# Total cost, inside the same window, for trace IDs you already have.
+# Skip this call with no IDs: row_limit must be 1..1000, and "any of" rejects [].
 trace_ids = sys.argv[1:]
-known = langfuse.api.metrics.metrics(
-    query=json.dumps(
-        {
-            "view": "observations",
-            "dimensions": [{"field": "traceId"}],
-            "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
-            "filters": [{"column": "traceId", "operator": "any of", "value": trace_ids, "type": "stringOptions"}],
-            "fromTimestamp": from_time.isoformat(),
-            "toTimestamp": to_time.isoformat(),
-            "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
-            "config": {"row_limit": len(trace_ids)},
-        }
+if trace_ids:
+    known = langfuse.api.metrics.metrics(
+        query=json.dumps(
+            {
+                "view": "observations",
+                "dimensions": [{"field": "traceId"}],
+                "metrics": [{"measure": "totalCost", "aggregation": "sum"}],
+                "filters": [{"column": "traceId", "operator": "any of", "value": trace_ids, "type": "stringOptions"}],
+                "fromTimestamp": from_time.isoformat(),
+                "toTimestamp": to_time.isoformat(),
+                "orderBy": [{"field": "sum_totalCost", "direction": "desc"}],
+                "config": {"row_limit": len(trace_ids)},
+            }
+        )
     )
-)
-print("known ids:")
-for row in known.data:
-    print(" ", row)
+    print("known ids:")
+    for row in known.data:
+        print(" ", row)
 ```
 
 ```bash
@@ -414,7 +420,7 @@ The query object structure carries over; the key changes are inside the query:
 
 ### Semantic differences
 
-- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. Summing `totalCost` by `traceId` still equals the legacy trace `totalCost`; see [Export every trace with total cost](#export-every-trace). For trace-level counts, filter on the v2-only `isRootObservation = true` dimension. See [Logical root observations](/docs/api-and-data-platform/features/public-api#logical-root-observations) for root semantics and trace-counting edge cases. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and group by `traceId` client-side.
+- **The `traces` view is removed.** In the `observations` view, measures such as `count`, `latency`, `totalCost`, and `totalTokens` are calculated over observation rows, not traces. Summing `totalCost` by `traceId` equals the legacy trace `totalCost` when the query includes every observation of the trace; see [Export every trace with total cost](#export-every-trace). For trace-level counts, filter on the v2-only `isRootObservation = true` dimension. See [Logical root observations](/docs/api-and-data-platform/features/public-api#logical-root-observations) for root semantics and trace-counting edge cases. For trace durations or raw per-trace data, use [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and group by `traceId` client-side.
 - When ordering by an aggregated metric, use the returned field name in the format `{aggregation}_{measure}`, e.g. `sum_totalCost`.
 
 ### Example
