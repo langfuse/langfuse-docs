@@ -514,6 +514,23 @@ const sections: Section[] = [
         },
       },
       {
+        name: "External media storage (S3)",
+        href: "/docs/observability/features/multi-modality#external-s3-media",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Access to historical data",
         description: DATA_ACCESS_DESCRIPTION,
         href: DATA_ACCESS_FAQ_HREF,
