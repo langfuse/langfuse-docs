@@ -18,7 +18,7 @@ function LabeledArrow({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <Label step={step} className="whitespace-nowrap px-1 text-center">
+      <Label step={step} className="px-1 text-center">
         {children}
       </Label>
       <HorizontalArrow direction={direction} />
@@ -51,7 +51,7 @@ function DownArrow({
 
 export function BackgroundRunDiagram() {
   return (
-    <figure className={`not-prose my-8 ${styles.figure}`}>
+    <figure className={`not-prose my-8 ${styles.figure} ${styles.wide}`}>
       <div
         className={`${styles.desktop} grid grid-cols-[0.85fr_1.5fr_0.85fr_1.5fr_0.85fr] grid-rows-[auto_5rem_auto] text-xs text-text-secondary`}
       >
@@ -91,6 +91,9 @@ export function BackgroundRunDiagram() {
           <Box>App server</Box>
           <StackArrow step={2}>Save run as queued</StackArrow>
           <Box>Postgres</Box>
+          <div className="mt-4">
+            <Box>App server</Box>
+          </div>
           <StackArrow step={3}>Enqueue run ID</StackArrow>
           <Box>BullMQ</Box>
           <StackArrow step={4}>Deliver run ID</StackArrow>

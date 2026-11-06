@@ -123,13 +123,19 @@ function Connection({
 function VerticalConnection({
   children,
   dashed,
+  continuous,
   responseLabel,
+  responseDashed,
+  responseContinuous,
   active,
   responseActive,
 }: {
   children: React.ReactNode;
   dashed?: boolean;
+  continuous?: boolean;
   responseLabel?: string;
+  responseDashed?: boolean;
+  responseContinuous?: boolean;
   active: boolean;
   responseActive?: boolean;
 }) {
@@ -153,7 +159,10 @@ function VerticalConnection({
         {active && (
           <span
             aria-hidden="true"
-            className="halo-packet halo-packet-down halo-packet-once"
+            className={cn(
+              "halo-packet halo-packet-down",
+              !continuous && "halo-packet-once",
+            )}
           />
         )}
       </div>
@@ -165,11 +174,14 @@ function VerticalConnection({
               responseActive ? "halo-active-line" : "halo-inactive",
             )}
           >
-            <VerticalArrow direction="up" />
+            <VerticalArrow direction="up" dashed={responseDashed} />
             {responseActive && (
               <span
                 aria-hidden="true"
-                className="halo-packet halo-packet-up halo-packet-once"
+                className={cn(
+                  "halo-packet halo-packet-up",
+                  !responseContinuous && "halo-packet-once",
+                )}
               />
             )}
           </div>
@@ -184,6 +196,30 @@ function VerticalConnection({
         </>
       )}
     </div>
+  );
+}
+
+function WorkerBox({ active }: { active: boolean }) {
+  return (
+    <Box active={active}>
+      <div>
+        Langfuse worker
+        <div className="mt-1 font-normal text-text-secondary">Agent loop</div>
+      </div>
+    </Box>
+  );
+}
+
+function PostgresBox({ active }: { active: boolean }) {
+  return (
+    <Box active={active}>
+      <div>
+        Postgres
+        <div className="mt-1 font-normal text-text-secondary">
+          Run state + events
+        </div>
+      </div>
+    </Box>
   );
 }
 
@@ -469,6 +505,8 @@ export function AssistantArchitectureDiagram() {
               active={flow === "start"}
               responseActive={executing}
               responseLabel="SSE"
+              responseDashed
+              responseContinuous
             >
               Start run
             </VerticalConnection>
@@ -477,17 +515,15 @@ export function AssistantArchitectureDiagram() {
               active={flow === "save"}
               responseActive={executing}
               responseLabel="New events"
+              responseDashed
+              responseContinuous
             >
               Save run
             </VerticalConnection>
-            <Box active={activeNodes.has("postgres")}>
-              <div>
-                Postgres
-                <div className="mt-1 font-normal text-text-secondary">
-                  Run state + events
-                </div>
-              </div>
-            </Box>
+            <PostgresBox active={activeNodes.has("postgres")} />
+            <div className="mt-4">
+              <Box active={activeNodes.has("web")}>Langfuse web</Box>
+            </div>
             <VerticalConnection active={flow === "enqueue"}>
               Enqueue run ID
             </VerticalConnection>
@@ -495,14 +531,11 @@ export function AssistantArchitectureDiagram() {
             <VerticalConnection active={flow === "pickup"}>
               Pick up run
             </VerticalConnection>
-            <Box active={activeNodes.has("worker")}>
-              <div>
-                Langfuse worker
-                <div className="mt-1 font-normal text-text-secondary">
-                  Agent loop
-                </div>
-              </div>
-            </Box>
+            <WorkerBox active={activeNodes.has("worker")} />
+            <VerticalConnection active={executing}>
+              Save progress and results
+            </VerticalConnection>
+            <PostgresBox active={activeNodes.has("postgres")} />
           </div>
           <div
             className={cn(
@@ -513,14 +546,7 @@ export function AssistantArchitectureDiagram() {
             <h3 className="mb-2 font-medium text-text-tertiary">
               Model and tools
             </h3>
-            <Box active={activeNodes.has("worker")}>
-              <div>
-                Langfuse worker
-                <div className="mt-1 font-normal text-text-secondary">
-                  Agent loop
-                </div>
-              </div>
-            </Box>
+            <WorkerBox active={activeNodes.has("worker")} />
             <VerticalConnection
               active={flow === "model-request"}
               responseActive={flow === "model-response"}
@@ -529,6 +555,9 @@ export function AssistantArchitectureDiagram() {
               Model calls
             </VerticalConnection>
             <Box active={activeNodes.has("model")}>Claude on Bedrock</Box>
+            <div className="mt-4">
+              <WorkerBox active={activeNodes.has("worker")} />
+            </div>
             <VerticalConnection
               active={flow === "mcp-request"}
               responseActive={flow === "mcp-response"}
@@ -544,6 +573,9 @@ export function AssistantArchitectureDiagram() {
                 </div>
               </div>
             </Box>
+            <div className="mt-4">
+              <WorkerBox active={activeNodes.has("worker")} />
+            </div>
             <VerticalConnection
               active={flow === "sandbox-start" || flow === "sandbox-request"}
               responseActive={flow === "sandbox-response"}

@@ -11,7 +11,7 @@ export function AiGatewayDiagramFigure({
   children: ReactNode;
 }) {
   return (
-    <figure className={`not-prose ${styles.figure}`} aria-label={ariaLabel}>
+    <figure className={`not-prose ${styles.figure}`}>
       <div className={styles.desktop}>{desktop}</div>
       <div className={styles.mobile} role="group" aria-label={ariaLabel}>
         {children}

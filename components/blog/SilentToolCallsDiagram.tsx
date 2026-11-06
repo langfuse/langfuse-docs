@@ -83,12 +83,17 @@ export function SilentToolCallsDiagram() {
             operation
           </StackArrow>
           <Box>Sandbox VM</Box>
-          <StackArrow step={4}>Run grep, head, jq, Python</StackArrow>
-          <StackArrow step={5} dashed>
-            Only the output
-          </StackArrow>
+          <div className="mt-4">
+            <Box>MCP tool worker</Box>
+          </div>
           <StackArrow step={3} dashed>
             File path instead of the result
+          </StackArrow>
+          <Box>Halo</Box>
+          <StackArrow step={4}>Run grep, head, jq, Python</StackArrow>
+          <Box>Sandbox VM</Box>
+          <StackArrow step={5} dashed>
+            Only the output
           </StackArrow>
           <Box>Halo</Box>
         </div>

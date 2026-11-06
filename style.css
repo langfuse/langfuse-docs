@@ -225,20 +225,19 @@
   background-color: transparent !important;
 }
 
-/* Inside the centered flex layout the SVG's width:auto can't resolve and the
-   diagram collapses to 0x0. Give it a definite width so it renders at its
-   natural size (capped by the inline max-width Mermaid sets). */
-.embedded-mermaid .mermaid-diagram svg {
-  width: 100%;
-  height: auto;
-}
-
+/* Mermaid sets inline width/max-width to the chart's natural pixel size.
+   !important on max-width beats that so charts scale down instead of clipping.
+   Standalone charts keep their natural width when the container is wider.
+   Embedded charts need width:100% so they don't collapse in a flex layout. */
 .mermaid-diagram svg {
   display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
+  max-width: 100% !important;
+  height: auto !important;
   margin-inline: auto;
+}
+
+.embedded-mermaid .mermaid-diagram svg {
+  width: 100% !important;
 }
 
 /* CSS custom properties for shadcn/ui color system */
