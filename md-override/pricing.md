@@ -159,7 +159,7 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | [Private Slack channel](/support#slack)                                                         | --                  | --                  | Teams add-on        | Yes                          |
 | [Named lead support engineer](/support#onboarding)                                              | --                  | --                  | --                  | Yes                          |
 | [Onboarding & architectural guidance](/support#onboarding)                                      | --                  | --                  | --                  | Yes                          |
-| Response time SLO                                                                               | n/a                 | 48h                 | 48h (Teams: 24h)    | Custom                       |
+| [Response time SLO (Severity 1)](https://clickhouse.com/legal/support-services-policy)              | Best effort         | Best effort         | Best effort         | Committed: 1h (24/7); pay-as-you-go: Best effort |
 | [Support SLA](/enterprise#faq)                                                                  | --                  | --                  | --                  | Yes                          |
 | **Security**                                                                                    |                     |                     |                     |                              |
 | [Data region](/security/data-regions)                                                           | US, EU, or Japan    | US, EU, or Japan    | US, EU, or Japan    | US, EU, Japan, or HIPAA      |
@@ -176,8 +176,8 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | **Billing**                                                                                     |                     |                     |                     |                              |
 | Subscription management                                                                         | --                  | Self-serve          | Self-serve          | Self-serve, or contact sales |
 | Payment methods                                                                                 | --                  | Credit card         | Credit card         | Credit card, Invoice         |
-| Contract duration                                                                               | --                  | Monthly             | Monthly             | Yearly Commitment            |
-| Billing via AWS Marketplace                                                                     | --                  | --                  | --                  | Yearly Commitment            |
+| Contract duration                                                                               | --                  | Monthly or Yearly Commitment | Monthly or Yearly Commitment | Yearly Commitment            |
+| Billing via AWS Marketplace                                                                     | --                  | Yearly Commitment   | Yearly Commitment   | Yearly Commitment            |
 | **Compliance**                                                                                  |                     |                     |                     |                              |
 | Contracts                                                                                       | Standard T&Cs & DPA | Standard T&Cs & DPA | Standard T&Cs & DPA | Talk to sales                |
 | [Data processing agreement (GDPR)](/security/dpa)                                               | Yes                 | Yes                 | Yes                 | Yes                          |
@@ -186,6 +186,8 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | InfoSec/legal reviews                                                                           | --                  | --                  | --                  | Yearly Commitment            |
 
 \* Available for Enterprise customers with a committed contract and subject to regional availability. See [networking documentation](/security/networking) for details.
+
+The Severity 1 SLO is a target for the initial response to critical production issues. The 1-hour target applies 24/7 to committed Enterprise customers. See the [ClickHouse Support Services Policy](https://clickhouse.com/legal/support-services-policy) for full definitions and applicable terms.
 
 ## Graduated Usage Pricing
 
@@ -281,6 +283,9 @@ On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compar
 **When do I get billed?**
 You get one bill each month. The plan fee is charged at the start of the month, and usage is charged at the end of the month.
 
+**Can I choose a yearly commitment?**
+Yearly commitments are always available for Enterprise; Core, Pro, and Teams customers can also choose a yearly commitment if they meet the minimum contract value threshold.
+
 **What are Langfuse Cloud Credits, and how do they affect me?**
 A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing).
 
@@ -295,7 +300,7 @@ Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to rece
 Through the organization settings in Langfuse Cloud or the [Customer Portal](/billing-portal).
 
 **Can I purchase Langfuse through AWS Marketplace?**
-Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.
+Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available for Enterprise customers.
 
 **Can I redline the contracts?**
 Yes, customized contracts are available for Enterprise customers with a yearly commitment. [Contact sales](/talk-to-us) to discuss your requirements. Default plans are self-serve on standard terms.
