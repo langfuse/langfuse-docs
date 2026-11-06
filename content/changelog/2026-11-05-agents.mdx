@@ -1,7 +1,7 @@
 ---
 date: 2026-11-05
 title: Explore agents in your project
-description: See each agent's activity, open its runs and traces, and inspect the managed skill versions it loaded.
+description: Explore each agent's sessions, invocations, and traces, and inspect the managed skill versions it loaded.
 badge: Internal preview
 author: nikitakabardin
 ---
@@ -10,20 +10,21 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 
 <ChangelogHeader />
 
-You can now explore the agents in your application from one Langfuse project. Open **Agents** to browse their activity, filter by environment, and inspect an agent's runs, traces, recorded information, and loaded skill versions.
+You can now explore the agents in your application from one Langfuse project. Open **Agents** to compare agents in a table or browse the gallery, filter by environment, and inspect an agent's sessions, invocations, traces, and loaded skill versions.
 
 <Callout type="info">
   This internal preview requires Langfuse v4 and the personal `agentsView`
   feature flag. It is not enabled by default.
 </Callout>
 
-- **Investigate one agent:** Start with its run count, token usage, or attributed model cost, then open a run and inspect its model and tool observations.
-- **Follow a multi-agent workflow:** Open a trace containing a router, researcher, and writer while keeping their identities and usage distinct.
+- **Investigate one agent:** Use the familiar Tracing table with filters, saved views, column controls, and trace inspection, scoped to that agent's activity.
+- **Follow a conversation:** Browse recorded sessions across traces, or inspect an individual agent invocation. Shared sessions and traces retain the context of other participating agents.
+- **Check agent information:** Find its identity, recorded configuration, usage, and model cost in Info. Data-coverage details are available when needed.
 - **Inspect skill usage:** Follow a recorded skill load to its managed version and the observations that loaded its files.
 
-Agent identity comes from your instrumentation: a stable ID identifies the agent and a display name makes it recognizable. Multiple agents can report to the same project. A run is one AGENT invocation; a trace may contain several runs, and sessions can connect related traces.
+Agent identity comes from your instrumentation: a stable ID identifies the agent and a display name makes it recognizable. Multiple agents can report to the same project. An invocation is one agent execution; a trace may contain several invocations, and sessions connect related traces.
 
-Usage comes from attributed model calls. Parent AGENT summaries are not added again, and missing usage or pricing stays unknown. A warning highlights traces with model calls that have no agent identity, so incomplete attribution remains visible. [Skill availability and successful loads](/docs/skill-management/tracing#availability-and-loads) remain separate.
+Usage comes from attributed model calls. Parent AGENT summaries are not added again, and missing usage or pricing stays unknown. [Skill availability and successful loads](/docs/skill-management/tracing#availability-and-loads) remain separate.
 
 ## Get started
 

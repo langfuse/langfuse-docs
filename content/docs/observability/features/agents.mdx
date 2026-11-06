@@ -1,6 +1,6 @@
 ---
 title: Agents
-description: Explore each agent's activity in one project, inspect its runs and traces, and follow the skill versions it loaded.
+description: Explore each agent's sessions, invocations, and traces in one project, and follow the skill versions it loaded.
 ---
 
 import { V4CutoverDate } from "@/components/V4CutoverDate";
@@ -22,7 +22,7 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
   feature flag enabled. It requires Langfuse v4 and is not enabled by default.
 </Callout>
 
-Explore the agents working in your application from one project. Open an agent to inspect its activity, runs, traces, recorded information, and loaded skill versions. Filter by environment to focus on production, staging, or development. The gallery discovers agents from activity in your selected time window; you do not register them separately.
+Explore the agents working in your application from one project. Open an agent to inspect its sessions, invocations, traces, and loaded skill versions. Filter by environment to focus on production, staging, or development. Agents are discovered from activity in your selected time window; you do not register them separately. Use the table to compare agents or switch to the gallery.
 
 Existing traces that lack agent identity are not backfilled. Send a new instrumented invocation if the gallery is empty.
 
@@ -172,31 +172,38 @@ For nested agents, record the child agent's identity on its own observations. It
 
 ## Explore an agent [#explore-an-agent]
 
-Open [Agents](https://cloud.langfuse.com/project/~/agents), select a date range and environment, then choose an agent from the gallery. The activity and metrics use that selected scope.
+Open [Agents](https://cloud.langfuse.com/project/~/agents), select a date range and environment, then choose an agent. The activity and metrics use that selected scope.
 
 <Callout type="info">
   The default window is seven days; you can select up to 30 days. Metrics use
   observations that started within the selected window. A model call can appear
   in a window whose owning invocation started earlier, so an agent or trace can
-  have model activity and zero runs in that period. Info requires an invocation
+  have model activity and zero invocations in that period. Info requires an invocation
   in the selected period.
 </Callout>
 
-- **Stats:** Review run and trace counts, recorded token usage, and attributed model cost.
-- **Runs:** Inspect individual AGENT invocations and open their observations in the existing trace view.
-- **Traces:** Open the traces containing this agent's activity, including traces with several agents.
-- **Info:** Inspect the identity and other information captured by instrumentation. Unavailable fields stay marked as unavailable; recorded information does not change your running agent's configuration.
+- **Sessions:** Find conversations or tasks that include this agent and open them in the existing session view. With the Session Timeline preview enabled, that view shows messages and tool activity across traces. Only recorded session IDs appear here; traces without a session remain available in Traces.
+- **Invocations:** Search and filter individual executions of the agent in the native observation table. Inspect inputs, outputs, and the corresponding trace.
+- **Traces:** Use the same table as Tracing, with search, filters, saved views, column controls, and trace inspection. The table stays scoped to traces containing this agent, including traces shared with other agents. Its normal root and observation views retain the surrounding trace context.
+- **Tools:** Inspect tool-call observations attributed to this agent, with the same search, filters, and trace inspection. Calls from another agent in the same trace remain outside this tab.
+- **Info:** Review agent stats, its identity, and other information captured by instrumentation. Expand **Model metric coverage** when you need to check missing usage or attribution. Recorded information does not change your running agent's configuration.
 - **Skills used:** Follow recorded managed skill loads to the identified skill versions and supporting observations.
 
-A **run** is one AGENT invocation. A trace can contain several runs, including calls to different agents. A [session](/docs/observability/features/sessions) groups related interactions across traces, such as turns in the same conversation.
+An **invocation** is one execution recorded as an AGENT observation. A trace can contain several invocations, including calls to different agents. A [session](/docs/observability/features/sessions) groups related interactions across traces, such as turns in the same conversation. Set the session ID through your [instrumentation](/docs/observability/features/sessions) to connect those interactions. A session and an invocation are separate concepts; Langfuse does not infer one from the other.
+
+The `langfuse.agent.run_id` instrumentation attribute identifies the owning invocation, not a session. It continues to use the AGENT observation's span ID.
+
+Propagate `sessionId` to all related observations, as shown in the [session setup guide](/docs/observability/features/sessions#set-up-sessions). Session metrics use recorded session IDs. An ID attached only to a root outside the selected period does not assign its otherwise sessionless children to that conversation.
+
+Filters and saved views narrow the table within the selected agent's scope. Session and trace views can include other agents working in the same conversation or trace. Their displayed metrics keep the usual session or observation meaning; **Info** contains this agent's own attributed totals.
 
 ## Read usage and cost [#usage-and-cost]
 
-Agent usage is calculated from the agent's attributed model-call observations. A parent AGENT observation can contain an aggregate reported by a framework; Langfuse does not add that summary to the same underlying model calls again. Opening a run does not change its totals.
+Agent usage is calculated from the agent's attributed model-call observations. A parent AGENT observation can contain an aggregate reported by a framework; Langfuse does not add that summary to the same underlying model calls again. Opening an invocation does not change its totals.
 
 When a nested agent makes its own model calls, those calls contribute to that child's attributed usage. Their cost does not also become the parent's direct cost.
 
-An incomplete-data warning means a trace containing this agent also has model calls without agent identity. Those calls may belong to this agent or another agent in the same trace. Their tokens and cost are not assigned to either agent. Inspect the trace and add explicit identity and ownership to the missing observations before treating the agent's totals as complete. The warning can appear for several agents sharing a trace; do not add their unassigned counts together.
+In **Info → Model metric coverage**, you can check how many calls have usage, pricing, and invocation ownership. Calls without any agent identity are excluded from agent totals. They may belong to this agent or another agent in the same trace. If attribution is incomplete, inspect the trace and add explicit identity and ownership to the missing observations. The same unassigned calls can appear in the coverage details of several agents sharing a trace; do not add those counts together.
 
 <Callout type="info">
   Missing usage or pricing is unknown, rather than a measured zero. Read the
