@@ -276,7 +276,7 @@ curl -G \
 
 <Callout type="info">
 
-`traceId` is a [high-cardinality dimension](/docs/metrics/features/metrics-api#high-cardinality-dimensions). The API accepts it as a dimension only together with `config.row_limit` (an integer from 1 to 1,000), an `orderBy` with direction `desc` on a measure, and no `timeDimension`. Group by `traceId` alone. This recipe is a top-N query, or a lookup of trace IDs you already have. For every trace in a window, use [Export every trace with total cost](#export-every-trace).
+`traceId` is a [high-cardinality dimension](/docs/metrics/features/metrics-api#high-cardinality-dimensions). Group by `traceId` alone. This recipe is a top-N query, or a lookup of trace IDs you already have. For every trace in a window, use [Export every trace with total cost](#export-every-trace).
 
 </Callout>
 
@@ -367,7 +367,7 @@ Despite its plural name, `fetchSessions(sessionId)` calls the deprecated single-
 
 - The response contains observation rows; a "session" is the set of rows sharing a `sessionId`. Group by `sessionId` (and within a session, by `traceId`) to reconstruct the session structure.
 - Like traces, sessions have no dedicated input/output object in v4. Reconstruct the conversation from the root observations of the traces within the session.
-- `sessionId` is a high-cardinality field. Use it as a filter in the [Metrics API v2](/docs/metrics/features/metrics-api#v2). Grouping is top-N only: set `config.row_limit` and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. See [High cardinality dimensions](/docs/metrics/features/metrics-api#high-cardinality-dimensions).
+- `sessionId` is a [high-cardinality dimension](/docs/metrics/features/metrics-api#high-cardinality-dimensions). Use it as a filter in the [Metrics API v2](/docs/metrics/features/metrics-api#v2).
 
 ### Example
 
@@ -406,12 +406,12 @@ This is not only a method rename: adapt the query as described below. In particu
 
 The query object structure carries over; the key changes are inside the query:
 
-| Deprecated (v1)                                                    | v2 equivalent                                                                                                                                                                                                       |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`)                                                                                                                    |
-| `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                                                                                                                                           |
-| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | Top-N only: set `config.row_limit` (max 1,000) and an `orderBy` with direction `desc` on a measure, and do not set `timeDimension`. Use these fields as filters. See [Per-trace total cost](#per-trace-total-cost). |
-| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                                                                                                                                             |
+| Deprecated (v1)                                                    | v2 equivalent                                                                                                                                                                                       |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `view: "traces"`                                                   | `view: "observations"` with trace-level dimensions (`traceName`, `traceRelease`, `traceVersion`)                                                                                                    |
+| `view: "observations"`, `"scores-numeric"`, `"scores-categorical"` | Unchanged                                                                                                                                                                                           |
+| Grouping by `userId`, `sessionId`, `id`, `traceId`                 | [High-cardinality dimensions](/docs/metrics/features/metrics-api#high-cardinality-dimensions). Use as filters, or group with a top-N query. Example: [Per-trace total cost](#per-trace-total-cost). |
+| Default result size                                                | `config.row_limit` (default 100); set explicitly for larger result sets                                                                                                                             |
 
 ### Semantic differences
 
