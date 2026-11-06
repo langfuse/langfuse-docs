@@ -3,13 +3,17 @@ import {
   Head,
   HorizontalArrow,
   Label,
+  StackArrow,
   VerticalArrow,
 } from "./diagram-primitives";
+import styles from "./diagram-fit.module.css";
 
 export function SilentToolCallsDiagram() {
   return (
-    <figure className="not-prose my-8 overflow-x-auto">
-      <div className="grid min-w-[560px] grid-cols-[1fr_1.3fr_1fr] grid-rows-[auto_6rem_auto] text-xs text-text-secondary">
+    <figure className={`not-prose my-8 ${styles.figure}`}>
+      <div
+        className={`${styles.desktop} grid grid-cols-[1fr_1.3fr_1fr] grid-rows-[auto_6rem_auto] text-xs text-text-secondary`}
+      >
         <Box>Halo</Box>
         <div className="flex flex-col justify-center gap-4">
           <div className="flex flex-col items-center gap-1.5">
@@ -62,6 +66,31 @@ export function SilentToolCallsDiagram() {
         <div aria-hidden="true" className="relative">
           <div className="absolute left-0 right-1/2 top-1/2 border-t border-line-cta" />
           <div className="absolute bottom-1/2 left-1/2 top-0 border-l border-line-cta" />
+        </div>
+      </div>
+      <div className={`${styles.mobile} text-xs text-text-secondary`}>
+        <div className={styles.stack}>
+          <Box>Halo</Box>
+          <StackArrow step={1}>
+            Tool call with{" "}
+            <code className="bg-surface-cta-primary px-1 font-mono">
+              silent: true
+            </code>
+          </StackArrow>
+          <Box>MCP tool worker</Box>
+          <StackArrow step={2}>
+            Saved calls written in as JSON files before the next sandbox
+            operation
+          </StackArrow>
+          <Box>Sandbox VM</Box>
+          <StackArrow step={4}>Run grep, head, jq, Python</StackArrow>
+          <StackArrow step={5} dashed>
+            Only the output
+          </StackArrow>
+          <StackArrow step={3} dashed>
+            File path instead of the result
+          </StackArrow>
+          <Box>Halo</Box>
         </div>
       </div>
     </figure>

@@ -1,0 +1,29 @@
+.figure {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.desktop {
+  min-width: 0;
+}
+
+.mobile {
+  display: none;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+@container (max-width: 559px) {
+  .desktop {
+    display: none;
+  }
+
+  .mobile {
+    display: block;
+  }
+}
