@@ -155,12 +155,12 @@ These replacements return observation rows, not the legacy trace response shape.
 | `orderBy`                      | Not available; results are always sorted by `startTime` descending |
 | `page`                         | `cursor`                                                           |
 
-Request `fields=core,basic,trace_context` to include the trace-level attributes `traceName`, `tags`, and `release` on each row. Add `usage` when you need `totalCost`; that field is absent unless the `usage` group is requested.
+Request `fields=core,basic,trace_context` to include the trace-level attributes `traceName`, `tags`, and `release` on each row. `totalCost` is returned only when `fields` includes the `usage` group. The default `core,basic` response omits it, and the field is absent rather than zero.
 
 ### Semantic differences
 
 - **The response contains observation rows, not trace objects.** Group rows by `traceId` to reconstruct trace activity.
-- **The legacy trace `totalCost` is the sum of its observations' `totalCost`.** Summing `totalCost` per `traceId` gives that same value when the query includes every observation of the trace. Both replacements below filter on observation start time, so a trace that started before the window contributes only the observations that started inside it. Traces created without observations are still returned. They come back as a single row whose id is `t-<traceId>`, with cost 0. The legacy trace id is that row's `traceId`; the `t-` prefix is only the observation id.
+- **The legacy trace `totalCost` is the sum of its observations' `totalCost`.** On an observation row that value exists only if `fields` includes `usage`. Summing it per `traceId` gives the legacy value when every observation of the trace is included. Both replacements below filter on observation start time, so a trace that started before the window contributes only the observations that started inside it. Traces created without observations are still returned. They come back as a single row whose id is `t-<traceId>`, with cost 0. The legacy trace id is that row's `traceId`; the `t-` prefix is only the observation id.
 - For a list of every trace, use [Export every trace with total cost](#export-every-trace). For the most expensive traces, or the cost of trace IDs you already have, use [Per-trace total cost](#per-trace-total-cost).
 - **v4 has no trace-level `input`/`output`.** Reconstruct them from the root observation of each trace: the row with `parentObservationId == null`.
 - For other trace-level aggregates (counts and latency grouped by `traceName`, `traceRelease`, or `traceVersion`), use the [Metrics API v2](/docs/metrics/features/metrics-api#v2) instead of fetching and aggregating rows yourself.
@@ -186,16 +186,18 @@ curl -G \
   --data-urlencode "limit=50"
 ```
 
+That request leaves out `usage`, so the rows have no `totalCost`. Add `usage` when you need cost.
+
 ### Export every trace with total cost [#export-every-trace]
 
-Page through [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and sum `totalCost` by `traceId`. The script writes `traces.csv` (`id`, `name`, `timestamp`, `total_cost`) for every trace whose earliest observation started in the last 7 days. It uses Python SDK v5 (`langfuse.get_client()`).
+Page through [Observations API v2](/docs/api-and-data-platform/features/public-api#v2) and sum `totalCost` by `traceId`. The script writes `traces.csv` (`id`, `name`, `timestamp`, `total_cost`) for every trace whose earliest observation started in the last 7 days. It uses Python SDK v5 (`langfuse.get_client()`). `totalCost` is selected only by the `usage` field group, so the request below includes `usage`. Without it the field is absent, and the script records that missing value as `0`.
 
 The SDK returns typed objects with snake_case attributes and `datetime` start times, not dictionaries. The same fields on the REST response are camelCase: `traceId`, `totalCost`, `startTime`, `traceName`, and `parentObservationId`.
 
 - `timestamp` is the earliest fetched observation `startTime`. That equals the legacy trace `timestamp` when the query includes the trace's first observation.
 - Use `traceName` for the trace name. The API fills it from the stored trace name. When that is empty, a root row uses its own `name`: a row with `parentObservationId` null, or an application root. Child rows can still have an empty `traceName`, so the script also keeps the name of the row with `parentObservationId == null`. That is the name the legacy endpoint returned for OpenTelemetry traces that never set a trace name, and for some older ingestion traces.
 - `meta.cursor` is omitted on the last page. Stop when it is absent. An empty `data` array can still include a cursor; keep paging until the cursor is absent.
-- Include the `usage` field group. Without it, `totalCost` is absent rather than zero.
+- `totalCost` is not part of `core` or `basic`. Request `usage`, or every trace is written with cost 0.
 - `fromStartTime` is inclusive and `toStartTime` is exclusive, and both apply to each observation's own start time. `lookback` is how far before the window the script reads. With the default of one day, a trace that crosses the boundary by less than a day is summed in full and then dropped when its first observation is before the window. Set `lookback` to the longest trace you need to cover. A trace whose first observation is older than `lookback`, and that also has an observation inside the window, is still written, with a partial `total_cost` and a later `timestamp`.
 
 ```python
@@ -222,7 +224,7 @@ while True:
     page = langfuse.api.observations.get_many(
         from_start_time=from_time - lookback,
         to_start_time=to_time,
-        fields="core,basic,usage,trace_context",
+        fields="core,basic,usage,trace_context",  # total_cost is absent unless usage is requested
         limit=1000,
         cursor=cursor,
     )
@@ -265,7 +267,7 @@ curl -G \
 
 ### Per-trace total cost [#per-trace-total-cost]
 
-[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns that per-trace sum without fetching observation rows. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`. The sum is the cost of observations that started in the selected period, not the lifetime cost of a trace that started earlier. A known trace with no observations in the window returns no row. `fromTimestamp` is inclusive and `toTimestamp` is inclusive (`start_time <= toTimestamp`); Observations API `toStartTime` is exclusive.
+[Metrics API v2](/docs/metrics/features/metrics-api#v2) returns that per-trace sum without fetching observation rows. It reads `totalCost` as a measure, so it does not take a `fields` parameter and does not depend on the `usage` group. Each row is shaped like `{"traceId": "...", "sum_totalCost": 0.043}`. The sum is the cost of observations that started in the selected period, not the lifetime cost of a trace that started earlier. A known trace with no observations in the window returns no row. `fromTimestamp` is inclusive and `toTimestamp` is inclusive (`start_time <= toTimestamp`); Observations API `toStartTime` is exclusive.
 
 <Callout type="info">
 
