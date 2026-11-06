@@ -3,6 +3,7 @@ date: 2026-11-06
 title: Connect your S3 buckets with an IAM role
 description: Blob storage exports and External Media Storage can assume an IAM role in your AWS account instead of using stored access keys. Available on Enterprise.
 author: Tobias Wochinger
+canonical: /docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -15,7 +16,7 @@ Langfuse can now access your Amazon S3 buckets by assuming an IAM role in your A
 - [Scheduled blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage) to Amazon S3, configured in the UI or through `PUT /api/public/integrations/blob-storage` with `authType: ROLE_ARN`.
 - [External Media Storage](/docs/observability/features/multi-modality#external-s3-media), which renders `s3://` media from your own bucket in traces.
 
-Access keys remain supported and are the default. IAM role authentication is available on Langfuse Cloud Enterprise and on self-hosted Enterprise. Self-hosted deployments also need `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` set.
+Access keys remain supported and are the default. IAM role authentication is available on Langfuse Cloud Enterprise and on self-hosted Enterprise. Self-hosted deployments also need [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role) set.
 
 <Cards num={1}>
   <Card
