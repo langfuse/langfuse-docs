@@ -28,9 +28,13 @@ Find the agents working across your application in one project. Browse the galle
   ![Agents gallery with activity trends, agent-run statistics, recent-activity indicators, and environment filters.](/images/docs/agents/agents-gallery.png)
 </Frame>
 
+The screenshots use synthetic demo telemetry. Their scores and costs are authored examples, rather than measurements of a live application.
+
 ## Sessions, traces, and agent runs [#sessions-traces-and-agent-runs]
 
-These are three levels of the same work:
+**Invocation** and **agent run** mean the same thing here. Technically, a run is one **AGENT observation (an OpenTelemetry span)** recorded for an execution of an agent. There is no separate invocation object. The UI calls these records **Agent runs**.
+
+Your application or framework instrumentation chooses the execution boundary. Usually, it starts an AGENT span when you call an agent's entry point, such as `researcher.run(input)`, and ends it when that execution completes, fails, or is cancelled. For streaming work, the boundary includes consuming the stream. That span can cover several model calls, tool calls, and delegated agents while the agent works toward its answer.
 
 | Level         | Meaning                                                                                                                        |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -38,7 +42,45 @@ These are three levels of the same work:
 | **Trace**     | One recorded operation, such as handling a user message. It can contain different agents and repeated calls to the same agent. |
 | **Agent run** | One execution of one agent, recorded as an AGENT observation, with its owned model and tool calls.                             |
 
-For example, a research conversation has three user requests, each recorded as its own trace. The researcher executes twice for the first request, three times for the second, and once for the third. That researcher's activity is **1 session, 3 traces, and 6 agent runs**. Other agents can contribute their own runs to the same traces.
+### What increments the run count? [#what-counts-as-an-agent-run]
+
+A distinct execution AGENT observation, identified by its **trace ID and span ID**, adds one run. The stable **agent ID** tells Langfuse which agent's count to increment. A run can still be in progress; closing or updating the same observation does not add runs.
+
+For example, this single trace contains **two Researcher runs**, even though the first run makes two model calls:
+
+```text
+Trace: handle one user message
+  AGENT: researcher.run("find deployment documents")  ← run A
+    GENERATION: decide which sources to request
+    TOOL: search_documents
+    GENERATION: summarize the sources
+  AGENT: researcher.run("check the rollback claim")   ← run B
+    GENERATION: verify the claim
+```
+
+The instrumentation creates the two AGENT spans; these function names are illustrative. [The SDK example below](#record-agent-identity) shows the actual calls that create them.
+
+| Recorded work                                                        | Effect on agent-run counts                                               |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Another model call, tool call, or model retry inside run A           | Still one Researcher run for A.                                          |
+| Call Researcher again and record a new AGENT span                    | Another Researcher run, even in the same trace.                          |
+| Researcher delegates to Reviewer, which records its own AGENT span   | One Reviewer run in addition to the Researcher run.                      |
+| Resume work by updating the same AGENT observation in the same trace | Still the same run. Starting a new AGENT span instead records a new run. |
+
+On owned model and tool spans, `langfuse.agent.run_id` points to the owning AGENT span's ID. This attribute assigns those steps to a run; adding it to a model or tool span does not create a run. An agent's stable ID, a run's span ID, a trace ID, and a session ID serve different purposes.
+
+<Callout type="info">
+  Agent runs count recorded execution boundaries. Langfuse does not infer a new
+  run from every model request, user message, or change in the agent's reasoning.
+  Creating or configuring an agent with `gen_ai.operation.name=create_agent`
+  does not count as an execution.
+</Callout>
+
+### Why distinguish runs from sessions? [#why-agent-runs]
+
+Use runs to ask, “How much did one execution of Researcher cost, and how long did it take?” A trace can include several Researcher executions and other agents, so its total answers a different question. Use sessions to read the conversation or task across requests.
+
+For example, a research conversation has three user requests, each recorded as its own trace. The researcher executes twice for the first request, three times for the second, and once for the third. That researcher's activity is **1 session, 3 traces, and 6 agent runs**. Three orchestrator runs, two reviewer runs, and three writer runs bring the conversation's total to **14 agent runs** across four agents.
 
 ```mermaid
 flowchart TD
@@ -46,9 +88,7 @@ flowchart TD
   traces --> runs["6 researcher runs · 2 + 3 + 1"]
 ```
 
-Open an agent run to inspect one research attempt, even when several attempts share a trace. A model or tool call inside that run does not count as another agent run. A delegated agent has its own run and owns its own model and tool calls; the trace preserves that nesting.
-
-[Sessions](/docs/observability/features/sessions) group traces through an explicitly recorded session ID. A background job can have a trace and agent runs without a session. The `langfuse.agent.run_id` attribute identifies the owning AGENT observation's span ID; it is separate from the session ID.
+[Sessions](/docs/observability/features/sessions) group traces through an explicitly recorded session ID. Every agent run belongs to one trace; a session can connect several traces. A background job can have a trace and agent runs without a session.
 
 <Callout type="info">
   Propagate `sessionId` to all related observations, as shown in the [session
@@ -67,6 +107,8 @@ Use nonempty strings: agent IDs can contain up to 256 characters and display nam
 
 Agent identity is scoped to the project. Environments separate activity within that project; use the [environment filter](/docs/observability/features/environments#configure-environments) to choose the data you want to inspect.
 
+You can also record `langfuse.agent.description` and `langfuse.agent.version`. **Info** shows the latest observed description and version alongside the instrumentation scope, service, and an associated model call's parameters and prompt name/version when recorded. This is observed telemetry, rather than a managed agent configuration. [Link your model calls to managed prompts](/docs/prompt-management/features/link-to-traces) to retain the prompt version used for each request.
+
 <Callout type="info">
   When instrumentation supplies a name without an ID, Langfuse groups activity
   by that exact name. Names are case-sensitive. Give your agent a
@@ -75,7 +117,7 @@ Agent identity is scoped to the project. Environments separate activity within t
 
 ## Record agent identity [#record-agent-identity]
 
-First [configure tracing](/docs/observability/sdk/overview) for your application. Record an **AGENT** observation for each agent run and attach the agent identity to its owned model and tool observations too. Creating or configuring an agent with `gen_ai.operation.name=create_agent` does not count as an agent run.
+First [configure tracing](/docs/observability/sdk/overview) for your application. Record an **AGENT** observation for each agent run and attach the agent identity to its owned model and tool observations too. In the SDK example, `startObservation(..., { asType: "agent" })` starts the run, its `.id` identifies the run, and `.end()` closes it. The nested Reviewer starts a separate run with a separate ID.
 
 <Callout type="warning">
   Use the current SDK or [OpenTelemetry
@@ -128,6 +170,39 @@ try {
     // Run your tool and record its input and result with tool.update().
   } finally {
     tool.end();
+  }
+
+  const reviewer = startObservation(
+    "review-policy",
+    {},
+    { asType: "agent", parentSpanContext: agent.otelSpan.spanContext() },
+  );
+  const reviewOwnership = {
+    "gen_ai.agent.id": "policy-reviewer",
+    "gen_ai.agent.name": "Policy reviewer",
+    "langfuse.agent.run_id": reviewer.id,
+  };
+  reviewer.otelSpan.setAttributes({
+    ...reviewOwnership,
+    "gen_ai.operation.name": "invoke_agent",
+  });
+  try {
+    const generation = startObservation(
+      "review-answer",
+      { model: "your-model" },
+      { asType: "generation", parentSpanContext: reviewer.otelSpan.spanContext() },
+    );
+    generation.otelSpan.setAttributes({
+      ...reviewOwnership,
+      "gen_ai.operation.name": "chat",
+    });
+    try {
+      // Call your model and record input, output, and usage with generation.update().
+    } finally {
+      generation.end();
+    }
+  } finally {
+    reviewer.end();
   }
 } finally {
   agent.end();
@@ -189,10 +264,11 @@ For nested agents, record the child agent's identity on its own observations. It
 <Callout type="warning">
   Within one OpenTelemetry export request, observations can inherit identity and
   run ownership from their nearest AGENT ancestor in the same trace. Exporters
-  can split parents and children across requests. Record the identity and
-  `langfuse.agent.run_id` explicitly on owned observations to retain attribution
-  across batches and asynchronous boundaries. Missing identity or ownership can
-  leave model usage unattributed to a run.
+  can split parents and children across requests, including while an agent is
+  streaming. Record the identity and `langfuse.agent.run_id` explicitly on every
+  owned model and tool observation when you create it. Span nesting alone does
+  not retain attribution across batches or asynchronous boundaries. Missing
+  identity or ownership can leave model usage unattributed to a run.
 </Callout>
 
 ### Reuse existing OpenTelemetry instrumentation [#reuse-instrumentation]
@@ -240,7 +316,7 @@ Overview compares the selected period with the immediately preceding period of t
 
 The green activity indicator means the agent's latest recorded activity was less than an hour ago. It describes recent telemetry, not health or whether the agent is currently running. An older last-seen time is neutral: there may simply have been no work to do.
 
-Choose an existing numeric or boolean score under **Quality and models**. Only scores attached directly to agent runs contribute. Latest score values are used, including evaluations received after a run completes. Repeated evaluations of the selected score are averaged within each run before averaging across runs, so frequently evaluated runs do not dominate. The scored-run count and model-group coverage show how much evidence supports each average.
+Choose an existing numeric score, such as a 0–1 answer-quality rubric, or a boolean score under **Quality and models**. Only scores attached directly to agent runs contribute. Latest score values are used, including evaluations received after a run completes. Repeated evaluations of the selected score are averaged within each run before averaging across runs, so frequently evaluated runs do not dominate. For boolean scores, 1 means a passed check and 0 a failed check; the same per-run weighting applies. The scored-run count and model-group coverage show how much evidence supports each average.
 
 Model groups use the names recorded on a run's owned model calls. Runs with several models stay separate from single-model runs; missing model names remain unknown.
 
@@ -289,7 +365,7 @@ In **Info → Model metric coverage**, you can check how many calls have usage, 
 
 [Configure skill tracing](/docs/skill-management/tracing#skill-loading-tools) to record which managed skills your agent loaded. Attach the available skill list, including its version, to the skill-loading tool observation and record the tool's input and result.
 
-Open **Skills** on the agent to inspect recorded loads and follow the linked skill version. The version's [Usage tab](/docs/skill-management/tracing#skill-usage) shows linked observations and per-file loads.
+Open **Skills** on the agent to inspect recorded loads and follow the linked skill version. The version's [Usage tab](/docs/skill-management/tracing#skill-usage) shows linked observations and per-file loads, including `SKILL.md` and reference files such as `references/checklist.md`.
 
 <Callout type="info">
   Publishing, installing, or declaring a skill available does not count as a

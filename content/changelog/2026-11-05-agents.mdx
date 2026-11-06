@@ -13,16 +13,20 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 You can now explore the agents working across your application from one Langfuse project. Start in the gallery to compare activity, own cost per agent run, duration, and last-seen time, or switch to the table to compare agents side by side.
 
 - **Spot a change in activity:** Compare the selected period with the previous period of the same length. Agents seen only in the previous period remain visible with zero current activity. A green indicator means recent telemetry, not a health check.
-- **Investigate a quality change:** Open an agent's **Overview** to compare runs, cost, duration, cache hit rate, and tool or skill activity. Choose a score recorded on its agent runs to see quality over time and by model, with the number of scored runs alongside it.
-- **Follow the work:** Inspect sessions, traces, and individual agent runs with the familiar search, filters, saved views, and trace inspection. Follow recorded parent-child relationships into example traces, or open the managed skill version an agent loaded.
+- **Investigate a quality change:** Open an agent's **Overview** to compare runs, cost, duration, cache hit rate, and tool or skill activity. Choose a numeric or boolean score recorded on its agent runs to see quality over time and by model, with scored-run coverage alongside it.
+- **Follow the work:** Inspect sessions, traces, individual agent runs, and tool calls with the familiar search, filters, saved views, and trace inspection. Follow observed parent-child relationships into example traces, or open the managed skill version and files an agent loaded.
 
 ![Agents gallery showing activity trends, agent-run statistics, recent activity, and environment filters.](/images/docs/agents/agents-gallery.png)
 
-One conversation can contain three request traces while its researcher executes twice, three times, and once across those requests. That is **1 session, 3 traces, and 6 Researcher agent runs**. Other agents can work in the same traces; a background job can have agent runs without a session.
+An **agent run**, also called an invocation, is one execution recorded as an AGENT observation. Its model and tool calls are steps within that execution. Calling the agent again with a new AGENT observation creates another run, even in the same trace. [See exactly what counts as a run](/docs/observability/features/agents#what-counts-as-an-agent-run).
 
-Cost per run uses the agent's own attributed model calls, keeping delegated agents' costs separate. Filter by environment, such as `research env:production`, to focus the comparison on one deployment.
+One conversation can contain three request traces while its researcher executes twice, three times, and once across those requests. That is **1 session, 3 traces, and 6 Researcher agent runs**. Add three orchestrator, two reviewer, and three writer runs, and the conversation contains **14 agent runs** overall. A background job can have agent runs without a session.
+
+Cost per run uses the agent's own attributed model calls, keeping delegated agents' costs separate. Cache hit rate is weighted by reported input tokens. Filter by environment, such as `research env:production`, to focus the comparison on one deployment.
 
 ![Product search Overview with current and previous agent-run, cost, and cache-hit charts.](/images/docs/agents/agents-overview.png)
+
+Open **Info** to review the observed agent version, service, model, and prompt version. The screenshots above use synthetic demo telemetry.
 
 <Callout type="info">
   This internal preview requires Langfuse v4 and the personal `agentsView`
