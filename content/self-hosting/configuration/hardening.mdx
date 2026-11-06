@@ -104,6 +104,8 @@ On self-hosted instances, blob storage endpoint validation activates only once o
 
 If outbound LLM requests must go through a forward proxy, set `HTTPS_PROXY` (see [Outbound proxy for LLM requests](/self-hosting/configuration#outbound-proxy)).
 
+The [AI Gateway](/self-hosting/configuration/ai-gateway#gateway-to-providers) applies the LLM connection variables too, but ignores `HTTPS_PROXY`.
+
 <Callout type="warning">
 
 The forward proxy resolves DNS for proxied requests, so Langfuse cannot re-check the resolved IP at connection time. It still validates the URL before each request and on every redirect hop. Hosts that match `NO_PROXY` connect directly and keep the connection-time IP checks.
