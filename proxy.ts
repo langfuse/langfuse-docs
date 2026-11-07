@@ -28,7 +28,7 @@ export const config = {
     "/llms-docs.txt",
     "/llms-integrations.txt",
     "/llms-self-hosting.txt",
-    "/((?!_next/|api/|md-src/|\\.well-known/|.*\\.(?:png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|txt|json|webmanifest|ipynb)$).*)",
+    "/((?!_next/|api/|md-src/|\\.well-known/|.*\\.(?:png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|txt|json|ya?ml|webmanifest|ipynb)$).*)",
   ],
 };
 
