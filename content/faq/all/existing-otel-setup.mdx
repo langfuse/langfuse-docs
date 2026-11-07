@@ -27,13 +27,15 @@ The latest Langfuse SDKs (Python SDK v3+ and JS SDK v4+) are built on [OpenTelem
 
 By default, Langfuse attaches its span processor on the [**global TracerProvider**](#global-tracer-provider), the same one that other OTEL-based tools use. This is where conflicts arise.
 
-Langfuse applies a default export filter to keep traces LLM-focused. By default, it exports:
+Starting with Python SDK v4 and JS/TS SDK v5, the Langfuse SDK span processors apply a default filter before exporting each span to Langfuse. By default, they export:
 
 - Spans created by the Langfuse SDK (`langfuse-sdk`)
 - Spans with `gen_ai.*` attributes
 - Spans from known LLM instrumentation scopes
 
-To bypass the default filter and export everything, use an always-true custom callback.
+This is a per-span decision, not a check for an LLM call somewhere in the trace. This filter does not change which spans other exporters on the same TracerProvider receive. For custom filters, see [unwanted spans in Langfuse](#unwanted-spans-in-langfuse).
+
+Spans sent directly through an OTLP exporter or Collector do not pass through the Langfuse SDK filter. Configure filtering in that pipeline; see [Collector span filtering](/integrations/native/opentelemetry#filtering-spans-sent-to-langfuse).
 
 ### The Global TracerProvider [#global-tracer-provider]
 
@@ -101,12 +103,9 @@ HTTP Request (parent)
     └── Token Streaming (grandchild)
 ```
 
-**Important:** Even when using [isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) (covered below), they still share this context. This means:
-
-- A parent span from one [TracerProvider](#global-tracer-provider) can have children from another
-- If you filter out a parent span either by a rule in the span processor or if it originated from a different TraceProvider, its children become "orphaned" and appear disconnected in the UI
-
-Keep it in mind when filtering spans.
+<Callout type="warning">
+Even [isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) share OpenTelemetry context, so spans from different providers can have parent-child relationships. If a parent is not exported to Langfuse, exported children retain its ID but the hierarchy is incomplete. See [orphaned traces](#orphaned-traces) for ways to handle missing ancestors.
+</Callout>
 
 ## Troubleshooting
 
@@ -383,24 +382,26 @@ setLangfuseTracerProvider(langfuseProvider);
 
 </LangTabs>
 
-**Caveat:** [Isolated TracerProviders](/docs/observability/sdk/advanced-features#isolated-tracer-provider) still share OTEL context. Some spans may appear orphaned if their parent was created by a different provider.
+<Callout type="warning">
+Review the [shared-context limitation](#context-parent-child) when using isolated providers.
+</Callout>
 
 ### Unwanted Spans Appearing in Langfuse [#unwanted-spans-in-langfuse]
 
 Your Langfuse dashboard shows HTTP requests, database queries, or other infrastructure spans instead of just LLM traces.
 
 <Callout type="warning">
-Every span that reaches Langfuse is ingested as a **billable observation**. If your OpenTelemetry pipeline forwards HTTP, database, or framework spans, they are counted and billed like any other observation, so an over-permissive export configuration can increase your usage and cost significantly. You control what reaches Langfuse through the `should_export_span` / `shouldExportSpan` callback described below. To catch unexpected volume early, set up [spend alerts](/docs/administration/spend-alerts) and review how usage is counted in [billable units](/docs/administration/billable-units).
+Spans ingested by Langfuse are **billable observations**, including HTTP, database, and framework spans. The backend does not discard a valid span just because its trace has no AI-related spans. Filter unwanted spans before export to control usage and cost. To catch unexpected volume early, set up [spend alerts](/docs/administration/spend-alerts) and review how usage is counted in [billable units](/docs/administration/billable-units).
 </Callout>
 
 **Why this happens**
 
-Langfuse attaches its span processor to your [TracerProvider](#global-tracer-provider). If that provider also has OTEL auto-instrumentation attached, spans from your web frameworks, databases, and HTTP clients flow through the same pipeline. They reach Langfuse when one of these is true:
+[OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/) can produce spans for web frameworks, databases, and HTTP clients. These spans reach Langfuse when one of these is true:
 
+- You use an older SDK version without the default export filter
 - Your custom `should_export_span` / `shouldExportSpan` callback is more permissive than the default filter
-- A third-party span matches the default LLM-focused criteria (`gen_ai.*` attributes or a known LLM scope)
-
-This is especially common with [OTEL auto-instrumentation](https://opentelemetry.io/docs/platforms/kubernetes/operator/automatic/), which instruments web frameworks, databases, HTTP clients, and more. You decide what reaches Langfuse: the export filter is yours to configure.
+- A third-party span matches the [default export criteria](#how-langfuse-uses-otel)
+- A direct OTLP exporter or Collector forwards them without filtering
 
 **How to debug**
 
@@ -408,8 +409,10 @@ Look at the unwanted spans in Langfuse and check their `metadata.scope.name` fie
 
 **How to fix it**
 
-1. Tighten your filter rules (or fall back to the default filter).
-2. Add explicit scope blocks for noisy libraries if needed.
+1. For the Langfuse SDK processor, tighten your callback rules or fall back to the default filter. Add explicit scope blocks for noisy libraries if needed.
+2. For direct OTLP export, follow the [Collector filtering guidance](/integrations/native/opentelemetry#filtering-spans-sent-to-langfuse).
+
+The `should_export_span` (Python) and `shouldExportSpan` (JS/TS) callbacks replace the default content filter. Combine your rules with the default filter helper, as shown below, to preserve its criteria, or use an always-true callback to disable that content filter.
 
 <LangTabs items={["Python", "JS/TS"]}>
 
@@ -464,8 +467,6 @@ The older `blocked_instrumentation_scopes` parameter was removed in Python SDK v
 
 Use `shouldExportSpan` with a blocklist approach (exclude specific scopes):
 
-`shouldExportSpan` is a full override. Compose with `isDefaultExportSpan` if you want to keep the default LLM-focused behavior.
-
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { LangfuseSpanProcessor, isDefaultExportSpan } from "@langfuse/otel";
@@ -504,7 +505,9 @@ sdk.start();
 
 </LangTabs>
 
-**Warning about filtering:** If you filter out a span that's a parent of other spans, the children will appear as orphaned top-level traces. This is especially common when filtering out web framework spans (like `fastapi`) that wrap your LLM calls. See [Orphaned Traces](#orphaned-traces) below.
+<Callout type="warning">
+Before excluding spans, review the [effect on parent-child relationships](#context-parent-child).
+</Callout>
 
 <Callout type="info">
 If you're deploying to **AWS Bedrock AgentCore** and seeing health check spans (`/ping`, `/health`), see [AWS Bedrock AgentCore (ADOT)](#aws-bedrock-agentcore-adot) for how to filter them out.
@@ -512,17 +515,11 @@ If you're deploying to **AWS Bedrock AgentCore** and seeing health check spans (
 
 ### Orphaned or Disconnected Traces [#orphaned-traces]
 
-Traces in Langfuse appear as standalone items when they should be nested under a parent, or you see broken [hierarchies](#context-parent-child).
+Observations in Langfuse appear disconnected from their expected parents, or you see broken [hierarchies](#context-parent-child).
 
 **Why this happens**
 
-This typically occurs when:
-
-1. You're filtering spans, and a parent span got filtered out
-2. You're using multiple [TracerProviders](#global-tracer-provider), and they're creating interleaved span hierarchies
-3. The root span is from a [blocked instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
-
-For example:
+This can result from [filtering or using separate providers](#context-parent-child), as illustrated below:
 
 ```
 Before filtering:
@@ -531,17 +528,17 @@ HTTP Request (fastapi)        ← You block this
     └── Completion (ai)
 
 After filtering:
-LLM Call (langfuse-sdk)       ← Now a root span, missing context
+LLM Call (langfuse-sdk)       ← Original parent is missing
 └── Completion (ai)
 ```
 
 **How to fix this**
 
-This is largely a tradeoff. You can't filter parent spans without affecting the [hierarchy](#context-parent-child). Your options:
+Choose how much context to preserve:
 
 1. **Accept orphaned spans:** If the trace data itself is correct, the visual hierarchy issue may be acceptable.
 
-2. **Filter more selectively:** Instead of [blocking entire scopes](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope), consider whether you can allow the root span through while blocking deeper infrastructure spans.
+2. **Preserve the hierarchy:** Retain the root and every intermediate parent of the observations you keep.
 
 3. **Set trace-level data explicitly:** If you're losing important metadata that was on the root span, set it explicitly on your Langfuse trace:
 
