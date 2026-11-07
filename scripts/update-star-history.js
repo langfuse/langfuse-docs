@@ -8,6 +8,7 @@ const path = require("path");
 
 const REPOS = [
   "langfuse/langfuse",
+  "mlflow/mlflow",
   "comet-ml/opik",
   "arize-ai/phoenix",
   "pydantic/logfire",
