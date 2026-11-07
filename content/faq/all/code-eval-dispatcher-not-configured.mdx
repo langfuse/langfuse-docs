@@ -1,0 +1,19 @@
+---
+title: 'Why do code evaluators fail with "Code eval dispatcher is not configured"?'
+seoTitle: "Fix: Code eval dispatcher is not configured"
+description: Code-based evaluators on self-hosted Langfuse need a dispatcher. Set LANGFUSE_CODE_EVAL_DISPATCHER on web and worker to fix the error.
+tags: [self-hosting, evaluation]
+---
+
+# Why do code evaluators fail with "Code eval dispatcher is not configured"?
+
+[Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) run your evaluation code outside the main Langfuse process. On self-hosted Langfuse you choose where that code runs with `LANGFUSE_CODE_EVAL_DISPATCHER`. In production builds this variable has no default, so testing or running a code evaluator fails with `Code eval dispatcher is not configured` until you set it.
+
+Set the variable on **both** the web and worker containers:
+
+| Value            | Runs                       | Notes                                                                                                                                                                                                                      |
+| ---------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aws-lambda`     | Python and TypeScript      | Executes code in AWS Lambda functions. Configure the function names and IAM permissions as described in [AWS Lambda dispatcher](/self-hosting/configuration/code-evaluators#aws-lambda-dispatcher).                        |
+| `insecure-local` | TypeScript/JavaScript only | Runs code inside the worker process. Not a sandbox; use only when every user who can create evaluators is trusted. See [Local insecure dispatcher](/self-hosting/configuration/code-evaluators#local-insecure-dispatcher). |
+
+Restart web and worker after changing the variable. Code evaluators are available in open-source self-hosted Langfuse; no license key is required.

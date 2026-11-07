@@ -1,0 +1,14 @@
+---
+title: Can I use images in the Langfuse Playground?
+seoTitle: "Images and Multimodal Inputs in the Langfuse Playground"
+description: Playground messages are text only. When you open a generation with images in the Playground, images appear as [Image] placeholders and are not sent to the model.
+tags: [prompt-management]
+---
+
+# Can I use images in the Langfuse Playground?
+
+Not today. Playground messages are text only. When you open a generation that contains images in the Playground, each image is replaced with the text `[Image]` (audio with `[Audio]`), and only the text is sent to the model.
+
+To open an existing generation in the Playground, select the generation in the trace view and use **Add to → Playground**. You can start a fresh playground or add it to an existing one, and choose whether to include the generation's output. See [Open a generation in the playground](/docs/prompt-management/features/playground).
+
+To evaluate prompts with images, run an [experiment via the SDK](/docs/evaluation/experiments/experiments-via-sdk), where your own code calls the model with multimodal inputs.

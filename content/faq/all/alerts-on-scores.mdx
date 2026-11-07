@@ -1,0 +1,16 @@
+---
+title: Can I get notified when a score drops?
+seoTitle: "Alerts on Scores and Evaluation Results"
+description: Use Langfuse alerts with a score data source to get notified via Slack, webhooks, or PagerDuty when a score crosses a threshold.
+tags: [evaluation, observability]
+---
+
+# Can I get notified when a score drops?
+
+Yes, with [alerts](/docs/observability/features/alerts). When you create an alert, choose a score data source (**Scores (numeric)**, **Scores (categorical)**, or **Scores (boolean)**), filter for your score name, and pick an aggregation and threshold, for example _average `helpfulness` below 0.7 over the last hour_. For boolean scores, the average is the share of `true` values.
+
+When the alert fires, Langfuse notifies you through an [automation](/docs/observability/features/alerts#automations): Slack, a webhook, or PagerDuty. You can also [create alerts directly from an evaluator](/docs/observability/features/alerts#evaluator-alerts).
+
+<Callout type="info">
+  There is no webhook that fires for every individual score. Alerts evaluate aggregated score values over a time window.
+</Callout>
