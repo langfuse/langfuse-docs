@@ -1,0 +1,106 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Monitor PopNow with Langfuse
+sidebarTitle: PopNow
+logo: /images/integrations/popnow_icon.png
+description: Learn how to trace PopNow chat models (Claude, GPT, Gemini, DeepSeek, Kimi) with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for PopNow with Langfuse
+
+This guide shows you how to integrate PopNow with Langfuse. PopNow's chat API is compatible with OpenAI's Chat Completions and Responses APIs. This allows us to use the Langfuse OpenAI drop-in replacement to trace all parts of your application.
+
+> **What is PopNow?** [PopNow](https://popnow.ai/api?utm_source=langfuse&utm_campaign=integration&utm_medium=integration&utm_content=integration) is a pay-as-you-go AI API that gives you Claude, GPT, Gemini, DeepSeek, Kimi and other chat models through one OpenAI-compatible endpoint, billed per token in USD. The same key also covers PopNow's image, video and audio generation models.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open source AI engineering platform that helps teams trace API calls, monitor performance, and debug issues in their LLM applications. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
+
+<Steps>
+## Step 1: Install Dependencies
+
+Make sure you have installed the necessary Python packages:
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+```python
+import os
+
+# Get keys for your project from the project settings page
+# https://cloud.langfuse.com
+
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+
+# Get your PopNow API key from https://popnow.ai/api/console/keys
+os.environ.setdefault("POPNOW_API_KEY", "sk-popnow-...");
+```
+
+## Step 3: Langfuse OpenAI drop-in Replacement
+
+In this step we use the native [OpenAI drop-in replacement](https://langfuse.com/integrations/model-providers/openai-py) by importing `from langfuse.openai import openai`.
+
+To start using PopNow with OpenAI's client libraries, pass in your PopNow API key to the `api_key` option, and change the `base_url` to `https://api.popnow.ai/v1`:
+
+```python
+# instead of import openai:
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("POPNOW_API_KEY"),
+  base_url="https://api.popnow.ai/v1",
+)
+```
+
+<Callout type="info" emoji="ℹ️">
+**Note:** The OpenAI drop-in replacement is fully compatible with the [Low-Level Langfuse Python SDKs](https://langfuse.com/docs/sdk/python/low-level-sdk) and [`@observe()` decorator](https://langfuse.com/docs/sdk/python/decorators) to trace all parts of your application.
+
+</Callout>
+
+## Step 4: Run An Example
+
+The following cell calls a PopNow chat model through the traced OpenAI client. Model IDs follow the `<lab>/<model>/chat` pattern; list them with `client.models.list()`. All API calls will be automatically traced by Langfuse.
+
+```python
+client = openai.OpenAI(
+  api_key=os.environ.get("POPNOW_API_KEY"),
+  base_url="https://api.popnow.ai/v1",
+)
+
+response = client.chat.completions.create(
+  model="google/gemini-3.7-flash/chat",
+  messages=[
+    {"role": "system", "content": "Act like you are a helpful assistant."},
+    {"role": "user", "content": "What are the famous attractions in San Francisco?"},
+  ]
+)
+
+print(response.choices[0].message.content)
+```
+
+## Step 5: See Traces in Langfuse
+
+After running the example model call, you can see the traces in Langfuse. You will see detailed information about your PopNow API calls, including:
+
+- Request parameters (model, messages, temperature, etc.)
+- Response content
+- Token usage statistics
+- Latency metrics
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
+## Resources
+
+- Check the [PopNow chat API documentation](https://popnow.ai/docs/chat) for available models, parameters and pricing.
+- Visit [PopNow](https://popnow.ai/api?utm_source=langfuse&utm_campaign=integration&utm_medium=integration&utm_content=integration) to get your API key.
+- Visit [Langfuse](https://langfuse.com) to learn more about monitoring and tracing capabilities for your LLM applications.
