@@ -1,0 +1,136 @@
+---
+title: "Codex with the Langfuse AI Gateway"
+sidebarTitle: Codex (gateway)
+seoTitle: "Trace OpenAI Codex with the Langfuse AI Gateway (beta)"
+description: Route the OpenAI Codex CLI through the Langfuse AI Gateway to trace every turn, model round, tool call, token, and cost.
+logo: /images/integrations/openai_icon.svg
+logoAppearance: dark
+category: Integrations
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Codex with the Langfuse AI Gateway
+
+<AiGatewayBetaCallout />
+
+**Requires** Codex CLI 0.157 or later and an `OPENAI` provider credential. Verified with Codex 0.157.0.
+
+<Callout type="info">
+  For tracing Codex without the gateway, see the [Codex integration](/integrations/developer-tools/codex).
+</Callout>
+
+## Setup [#setup]
+
+<Steps>
+
+### Create a gateway API key [#create-a-key]
+
+Create a gateway API key under **Organization settings → AI Gateway → Gateway keys**. See [API keys](/docs/gateway/features/api-keys#create-a-key).
+
+### Export the gateway key [#export-the-key]
+
+Codex reads the key from this variable when it starts:
+
+```sh
+ export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+```
+
+The leading space keeps the key out of shell history if your shell ignores commands that start with a space. To keep the setup across sessions, add the `export` lines to `~/.zshrc`.
+
+### Add the gateway provider [#add-the-provider]
+
+Add this to `~/.codex/config.toml` (`$CODEX_HOME/config.toml` if you set `CODEX_HOME`). Put `model_provider` next to your other top-level keys, before any `[table]` section, and the `[model_providers.langfuse]` table after them:
+
+```toml filename="~/.codex/config.toml"
+model_provider = "langfuse"
+
+[model_providers.langfuse]
+name = "Langfuse AI Gateway"
+base_url = "https://gateway.cloud.langfuse.com/openai/v1"
+env_key = "LANGFUSE_GATEWAY_KEY"   # sent as Authorization: Bearer
+wire_api = "responses"
+```
+
+To pick a model, add `model = "<model-id>"` next to `model_provider`, using an ID from [`/models`](/docs/gateway/get-started/first-request#list-models). To add tags or other headers, use `http_headers`. See [request headers](/docs/gateway/features/tracing#request-headers).
+
+### Start Codex [#start-codex]
+
+```sh
+codex
+```
+
+Each turn appears in Langfuse as one trace.
+
+</Steps>
+
+## Turn grouping [#turn-grouping]
+
+Codex sends its own turn ID, so the gateway groups all model rounds of a turn into one trace named `codex`, with no extra setup. Each model round is an `openai.responses` generation, and the session is `codex:<thread id>`.
+
+- The trace's input and output are copied from the turn's **last** round.
+- Compaction calls appear in the same trace with `agent.request_kind=compaction`.
+
+## Troubleshooting and FAQ [#troubleshooting-and-faq]
+
+<FaqDetails>
+
+<Details id="old-credentials">
+<Summary>Codex still uses old credentials after a change</Summary>
+
+Restart the Codex app-server daemon with `codex app-server daemon restart`. The daemon can keep using credentials loaded before the change until it restarts.
+
+</Details>
+
+<Details id="missing-input">
+<Summary>Why is the input missing on long sessions?</Summary>
+
+Codex sends `store: false` and replays the **whole conversation** on every round. Each generation's input is the full history, so long sessions can exceed the 5 MiB input capture limit, and the input is then dropped. See [known limitations](/faq/all/ai-gateway-known-limitations).
+
+</Details>
+
+<Details id="model-400">
+<Summary>A model fails with a 400 error</Summary>
+
+A global `model_reasoning_effort` makes non-reasoning models fail with a `400`. Some small models reject Codex's `tool_search` tool.
+
+</Details>
+
+<Details id="retries">
+<Summary>Why does a trace contain several generations for one call?</Summary>
+
+Codex retries failed requests (`request_max_retries`, `stream_max_retries`). Each retry is its own generation in the same trace.
+
+</Details>
+
+<Details id="inflated-cost">
+<Summary>Why do cancelled or failed calls show high cost?</Summary>
+
+<Callout type="info">
+As of November 6, 2026, Langfuse no longer tokenizes request or response text to fill missing usage. Older generations may still show inflated costs estimated from that text. For new writes, calls without provider usage or submitted cost have empty usage and cost breakdowns; historical estimates are not bulk-rewritten. See [token and cost tracking](/docs/observability/features/token-and-cost-tracking#troubleshooting).
+</Callout>
+
+</Details>
+
+<Details id="websockets">
+<Summary>Can I use websocket features?</Summary>
+
+No. Keep websocket features off for this provider. The gateway serves HTTP server-sent events only.
+
+</Details>
+
+<Details id="image-generation">
+<Summary>Why can't Codex generate images through the gateway?</Summary>
+
+Codex offers its built-in `image_gen` tool only when the model provider is OpenAI itself, so it hides the tool for the gateway provider. Codex may then suggest the `imagegen` skill's CLI fallback instead. Support for custom providers in Codex is tracked in [openai/codex#24465](https://github.com/openai/codex/issues/24465).
+
+<Callout type="warning">
+  The `imagegen` CLI fallback calls OpenAI directly with `OPENAI_API_KEY`, so
+  those calls bypass the gateway and are not traced in Langfuse. The gateway
+  does not serve the OpenAI Images API (`/images/generations`, `/images/edits`)
+  yet either; see [supported endpoints](/docs/gateway/features/rest-api#routes).
+</Callout>
+
+</Details>
+
+</FaqDetails>

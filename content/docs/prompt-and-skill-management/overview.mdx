@@ -1,0 +1,79 @@
+---
+title: Overview
+seoTitle: "Open Source Prompt and Skill Management"
+description: Manage and version your prompts and agent skills in Langfuse (open source). Update them without redeploying your application.
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Prompt and Skill Management
+
+Prompt/skill management is a systematic approach to storing, versioning, and retrieving the instructions for your LLM application. Instead of hardcoding prompts and skills in your application code, you manage them centrally in Langfuse.
+
+Prompts are text or chat templates your application compiles for model calls. Skills are task instructions in a `SKILL.md` file, with optional supporting files, that your agent loads when a task needs them. See [prompts and skills at a glance](/docs/prompt-and-skill-management/concepts#prompts-and-skills-at-a-glance) to choose between them.
+
+<Tabs items={["Prompts", "Skills"]}>
+<Tab>
+
+<Frame fullWidth>
+  <Image
+    src="/images/docs/prompt-management.png"
+    alt="Prompt Management showing version history, production labels, structured instructions, variables, and reusable prompt references"
+    loading="lazy"
+    quality={85}
+  />
+</Frame>
+
+</Tab>
+<Tab>
+
+<Frame fullWidth>
+  <Image
+    src="/images/changelog/2026-11-03-skill-management-editor.png"
+    alt="Skill Management showing a skill's version history, production label, SKILL.md instructions, and supporting reference files"
+    loading="lazy"
+    quality={85}
+  />
+</Frame>
+
+</Tab>
+</Tabs>
+
+<Callout type="info" emoji="🎥">
+
+[**Watch this walkthrough**](/watch-demo) of Langfuse Prompt Management and how to integrate it with your application.
+
+</Callout>
+
+## Decouple prompt and skill updates from code deployment
+
+In most LLM applications, **iterating on instructions and deploying code** are handled by **different people**. Product managers and domain experts iterate on prompts and skills, while engineers manage deployments.
+
+With prompts and skills in code, a simple text change requires engineering involvement, code review, and a full deployment cycle, turning a 2-minute update into hours or days of waiting.
+
+When prompts and skills live in Langfuse, non-technical team members update them directly in the UI while your application fetches the version labeled `production`. This **separation of concerns** means **you ship prompt and skill updates without involving engineering or triggering a deployment**.
+
+## No latency, no availability risk
+
+**Langfuse Prompt and Skill Management adds no latency to your application**. Prompts are cached client-side by the SDK, so retrieving them is as fast as reading from memory. See [the caching docs page](/docs/prompt-management/features/caching) for more details. Skills installed with the CLI are files your agent reads from disk, so loading them does not call Langfuse.
+
+<Callout type="info">
+
+The SDKs do not cache skills. Each skill fetch through an SDK or the API is a request to Langfuse, so it adds network time and depends on Langfuse being available. Cache file content by its hash to reuse it across requests ([fetch files on demand](/docs/skill-management/get-started#api-fetch)). Skills installed with the CLI keep their installed version until you run [`langfuse skills update`](/docs/skill-management/get-started#restore-or-update).
+
+</Callout>
+
+## Getting started
+
+Start by [adding your first prompt](/docs/prompt-management/get-started) or [creating your first skill](/docs/skill-management/get-started) in Langfuse, and connecting it to your application. You can create prompts and skills from scratch in the UI or import existing ones from your application.
+
+Take a moment to understand the core concepts: [prompt types, skill structure, versioning, and labels](/docs/prompt-and-skill-management/concepts).
+
+Once you have prompts or skills in Langfuse and are using them in your application, there are a few things you can do to get the most out of Langfuse Prompt and Skill Management:
+
+- Link [prompts](/docs/prompt-management/features/link-to-traces) and [skills](/docs/skill-management/tracing) to traces to analyze performance by prompt version and see which skill versions your agent loaded
+- Use version control and labels for [prompts](/docs/prompt-management/features/prompt-version-control) and [skills](/docs/skill-management/version-control) to manage deployments across environments
+
+Looking for something specific? Take a look under _Features_ for guides on specific topics.
+
+<SignupCTA className="my-6" />

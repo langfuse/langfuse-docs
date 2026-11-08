@@ -38,12 +38,12 @@ For every LLM generation, Langfuse records two things, each broken down by **usa
   UI](/images/docs/costs-and-usage-example.png)
 </Frame>
 
-Both are captured on observations of [type](/docs/observability/features/observation-types) `generation` and `embedding`, and each can be either:
+Both are captured on observations of [type](/docs/observability/features/observation-types) `generation` and `embedding`. Usage must be ingested, while cost can be either:
 
 - [**Ingested**](#ingest): you send the usage and cost from the LLM response, via the API, SDKs, or an integration.
-- [**Inferred**](#infer): Langfuse works them out from the generation's `model` parameter, using a model definition that stores prices per usage type. Langfuse ships with definitions for popular OpenAI, Anthropic, and Google models, and you can [add your own](#custom-model-definitions).
+- [**Inferred**](#infer): Langfuse calculates cost from submitted usage and the generation's `model` parameter, using a model definition that stores prices per usage type. Langfuse ships with definitions for popular OpenAI, Anthropic, and Google models, and you can [add your own](#custom-model-definitions).
 
-When both are available, **ingested values take priority** over inferred ones:
+When both are available, **ingested costs take priority** over inferred ones:
 
 ```mermaid
 flowchart LR
@@ -52,44 +52,54 @@ flowchart LR
   C["Cost (in USD)"]
   A --> D{Includes usage?}
   D -->|Yes| B
-  D -->|No| E(Use tokenizer) --> B
+  D -->|No| E[Usage unavailable]
   A --> F{Includes cost?}
   F -->|Yes| C
-  F -->|No| G(Use model price/unit) --> C
-  B -->|multiply by usage| G
+  F -->|No| G{Usage and model prices available?}
+  G -->|Yes| H(Multiply usage by price) --> C
+  G -->|No| I[Cost unavailable]
+  B --> G
 ```
 
 ## Model definitions and prices [#infer]
 
 When cost is not ingested directly, Langfuse infers it. The `model` parameter of the generation is matched to a **model definition**, which stores a price per usage type. Langfuse then multiplies those prices by the observation's usage to calculate cost. This is especially useful for model providers or self-hosted models that do not include cost in the response.
 
-Langfuse comes with a **list of predefined popular models and their tokenizers** including **OpenAI, Anthropic, Google**. Check out the [full list](https://cloud.langfuse.com/project/~/models) (you need to sign in).
+Langfuse comes with a **list of predefined popular models** including **OpenAI, Anthropic, Google**. Check out the [full list](https://cloud.langfuse.com/project/~/models) (you need to sign in).
 
 You can manage prices in **Project Settings > Models**, add your own [custom model definitions](#custom-model-definitions), or request official support for new models via [GitHub](/issue).
 
 <Frame>
   ![Model Definitions table in Langfuse Project Settings, showing match
-  patterns, prices per unit, and tokenizers per
-  model](/images/docs/model-definitions-settings.png)
+  patterns and prices per unit](/images/docs/model-definitions-settings.jpg)
 </Frame>
+
+### When default prices update [#default-price-updates]
+
+Default prices ship with each Langfuse release. A [daily audit](https://github.com/langfuse/langfuse/actions/workflows/model-price-audit.yml) checks official provider documentation and opens a pull request when a price, pricing tier, or new major model should change. See [how that audit works](#default-model-price-maintenance).
+
+<Callout type="info">
+
+- **Langfuse Cloud** receives the updated default prices with every release.
+- **Self-hosted** deployments use the default prices shipped with the version they run. Those prices update when you [upgrade](/self-hosting/upgrade) to a release that includes them. To price a model your version does not include, or to use your own rates, add a [custom model definition](#custom-model-definitions) or [ingest the cost directly](#ingest).
+
+Updated prices apply to generations ingested after the update. Generations already stored keep the cost calculated at ingestion time.
+
+</Callout>
 
 ### Usage
 
-If a tokenizer is specified for the model, Langfuse automatically calculates token amounts for ingested generations.
+Usage must be submitted by your integration or [ingested manually](#ingest).
 
-The following tokenizers are currently supported:
-
-| Model     | Tokenizer     | Used package                                                                       | Comment                                                                                                                               |
-| --------- | ------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `gpt-4o`  | `o200k_base`  | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |                                                                                                                                       |
-| `gpt*`    | `cl100k_base` | [`tiktoken`](https://www.npmjs.com/package/tiktoken)                               |                                                                                                                                       |
-| `claude*` | `claude`      | [`@anthropic-ai/tokenizer`](https://www.npmjs.com/package/@anthropic-ai/tokenizer) | According to Anthropic, their tokenizer is not accurate for Claude 3 models. If possible, send us the tokens from their API response. |
+<Callout type="warning">
+Langfuse no longer estimates token counts from inputs and outputs. If neither usage nor cost is submitted, no cost is calculated. See the [tokenization retirement announcement](/changelog/2026-11-06-retiring-tokenization) for the rationale and next steps.
+</Callout>
 
 ### Cost
 
 Model definitions include prices per usage type. Usage types must match exactly with the keys in the `usage_details` object of the generation.
 
-Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested or inferred, (2) and a matching model definition includes prices.
+Langfuse automatically calculates cost for ingested generations at the time of ingestion if (1) usage is ingested, (2) and a matching model definition includes prices.
 
 ### Adding custom model definitions [#custom-model-definitions]
 
@@ -101,7 +111,7 @@ You can flexibly add your own model definitions (incl. [pricing tiers](#pricing-
 
 To add a custom model definition in the Langfuse UI, you can either click on the "+" sign next to the model name or navigate to the **Project Settings > Models** to add a new model definition.
 
-Then you can add the prices per token type and save the model definition. Now all **new traces** with this model will have the correct token usage and cost inferred.
+Then you can add the prices per token type and save the model definition. Now all **new traces** with this model and submitted usage will have cost inferred.
 
   <Video
   src="https://static.langfuse.com/docs-videos/2025-10-20-custom-model-definition-169.mp4"
@@ -133,20 +143,6 @@ Models are matched to generations based on:
 | `model`              | `match_pattern` | Uses regular expressions, e.g. `(?i)^(gpt-4-0125-preview)$` matches `gpt-4-0125-preview`. |
 
 User-defined models take priority over models maintained by Langfuse.
-
-<Callout type="info">
-
-When using the `openai` tokenizer, you need to specify the following tokenization config. You can also copy the config from the list of predefined OpenAI models. See the OpenAI [documentation](https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb) for further details. `tokensPerName` and `tokensPerMessage` are required for chat models.
-
-```json
-{
-  "tokenizerModel": "gpt-3.5-turbo", // tiktoken model name
-  "tokensPerName": -1, // OpenAI Chatmessage tokenization config
-  "tokensPerMessage": 4 // OpenAI Chatmessage tokenization config
-}
-```
-
-</Callout>
 
 ### Pricing Tiers [#pricing-tiers]
 
@@ -206,26 +202,26 @@ The audit follows an evidence-first workflow:
 1. It verifies model IDs, prices, units, usage keys, and pricing tiers against official provider documentation.
 2. It makes focused changes only when the provider evidence can be represented safely in Langfuse. Uncertain findings are reported without changing the defaults.
 3. It validates the pricing data and any changed model-matching patterns.
-4. When changes are needed, a pull request is opened, and the updated prices are deployed shortly after approval.
+4. When changes are needed, a pull request is opened.
 
-This process keeps the default definitions current without relying on a third-party pricing aggregator. Because inferred costs are calculated at ingestion time, updated defaults apply only to new generations. If you need support for a model immediately or use private pricing, add a [custom model definition](#custom-model-definitions) or [ingest the cost directly](#ingest).
+This process keeps the default definitions current without relying on a third-party pricing aggregator. Approved changes ship in the next Langfuse release. See [When default prices update](#default-price-updates) for how Langfuse Cloud and self-hosted deployments pick them up.
 
 </Details>
 
 <Details id="cost-inference-for-reasoning-models">
-<Summary>Why doesn't Langfuse infer cost for reasoning models like OpenAI o1?</Summary>
+<Summary>Why doesn't Langfuse estimate token usage from inputs and outputs?</Summary>
 
-Cost inference by tokenizing the LLM input and output is not supported for reasoning models such as the OpenAI o1 model family. That is, if no token counts are ingested, Langfuse cannot infer cost for reasoning models.
+Text-based token estimates can produce incorrect costs for thinking models and cached-token pricing.
 
-Reasoning models take multiple steps to arrive at a response. The result from each step generates reasoning tokens that are billed as output tokens. So the cost-effective output token count is the sum of all reasoning tokens and the token count for the final completion. Since Langfuse does not have visibility into the reasoning tokens, it cannot infer the correct cost for generations that have no token usage provided.
-
-To benefit from Langfuse cost tracking, please provide the token usage when ingesting o1 model generations. When utilizing the [Langfuse OpenAI wrapper](/integrations/model-providers/openai-py) or integrations such as for [Langchain](/integrations/frameworks/langchain), [LlamaIndex](/integrations/frameworks/llamaindex) or [LiteLLM](/integrations/gateways/litellm), token usage is collected and provided automatically for you.
-
-For more details, see [the OpenAI guide](https://platform.openai.com/docs/guides/reasoning) on how reasoning models work.
+<Callout type="info">
+Langfuse no longer estimates token usage for any model. Cost tracking requires submitted usage or costs. Use an [integration](/integrations) that captures provider usage, or [ingest usage or costs manually](#ingest).
+</Callout>
 
 </Details>
 
 </FaqDetails>
+
+<span id="ingest-usage-and-cost-manually" />
 
 ## Ingest usage and cost manually [#ingest]
 
@@ -563,15 +559,16 @@ generation.end();
 
 You can also ingest OpenAI-style usage via `generation.update()` and `generation.end()`.
 
-## Troubleshooting
+## Troubleshooting [#troubleshooting]
+
+The `usage not submitted` and `no cost` warnings in a generation's header explain when usage is missing or no model price matched. Hover or focus the warning for links to model settings and the ingestion guide.
 
 If you don't see cost on your generations, check the following:
 
-- **Usage or cost must be present.** Langfuse can only infer cost if usage is ingested or a tokenizer is available for the model. If neither cost nor usage is ingested and the model has no tokenizer, no cost is calculated.
+- **Usage or cost must be present.** Langfuse can only infer cost if usage is ingested. If neither cost nor usage is ingested, no cost is calculated. Check that your integration captures provider usage, or [ingest usage or cost manually](#ingest).
 - **The model must match a definition.** Inferred cost requires a model definition whose `match_pattern` matches the generation's `model` value. If no model matches, add a [custom model definition](#custom-model-definitions).
 - **Model definition changes only apply to new generations.** If you change or add a model definition, the updated costs are applied only to generations logged afterward.
 - **Only `generation` and `embedding` observations track cost.** Other observation types do not carry usage or cost.
-- **Reasoning models require ingested usage.** Langfuse cannot infer cost for reasoning models such as the OpenAI o1 family without token counts. See [cost inference for reasoning models](#cost-inference-for-reasoning-models).
 - **Gateways:** If you use [OpenRouter](/integrations/gateways/openrouter#cost-tracking), Langfuse can directly capture the OpenRouter cost information. If you use LiteLLM, Langfuse directly captures the cost information returned in each LiteLLM response.
 
 ## GitHub Discussions

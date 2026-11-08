@@ -693,7 +693,7 @@ Related FAQs: [/faq/all/existing-otel-setup](/faq/all/existing-otel-setup), [/fa
 **Triage steps:**
 
 1. Is the model on our supported pricing list? Check the model in the UI's "Model" definition. Custom models need a `Model` entry with input/output token pricing or Langfuse can't compute cost.
-2. Does the SDK / framework send token counts? If yes, Langfuse uses them; if no, we tokenize the input/output ourselves with the model's tokenizer (best-effort).
+2. Does the SDK / framework send token counts? If yes, Langfuse uses them; if no, fix the instrumentation or submit costs directly.
 3. For agent frameworks (pydantic-ai notably), token double-counting can happen when both the parent agent span and the child LLM span report usage. Known issue, escalate with the trace link.
 4. For frameworks where Langfuse calculates cost despite the framework also reporting it, the framework's `otel operation.cost` attribute is overridden: our pricing table is the source of truth.
 
@@ -704,9 +704,9 @@ Hi {name},
 
 Cost discrepancies usually come from one of three places:
 
-1. Custom or unsupported model, we need a Model entry (Project Settings → Models) with the right input/output token pricing for Langfuse to compute cost. If your model isn't there, cost shows as 0 or uses a generic estimate.
+1. Custom or unsupported model, we need a Model entry (Project Settings → Models) with the right input/output token pricing for Langfuse to compute cost. If your model isn't there, Langfuse cannot infer cost from usage.
 2. The framework you're using double-reports usage on both parent and child spans (this happens with some agent frameworks). If you can share a trace link, I'll check whether double-counting is the cause.
-3. Tokenization difference between your provider's billing and our internal tokenizer when usage isn't sent, small numerical drift, not a bug.
+3. Missing provider usage. Your instrumentation needs to send usage or costs.
 
 Can you share a specific trace that looks off, and the model name?
 

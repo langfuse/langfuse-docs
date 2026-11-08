@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
-import { Heading } from "@/components/ui/heading";
+import { Heading, type HeadingLevel } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 type CustomerStoryCTAProps = {
@@ -14,6 +15,11 @@ type CustomerStoryCTAProps = {
   contactLabel?: string;
   contactHref?: string;
   footnote?: string;
+  /** Heading level for the title. Defaults to h3, matching story and industry pages. */
+  headingAs?: HeadingLevel;
+  /** Anchor id for the title, used by in-page navigation. */
+  titleId?: string;
+  className?: string;
 };
 
 export const CustomerStoryCTA = ({
@@ -26,22 +32,40 @@ export const CustomerStoryCTA = ({
   contactLabel = "Talk to an expert",
   contactHref = "/talk-to-us",
   footnote = "No credit card required · Free tier available · Self-hosting option",
+  headingAs = "h3",
+  titleId,
+  className,
 }: CustomerStoryCTAProps = {}) => {
   return (
-    <div className="mt-14 not-prose">
+    <div className={cn("mt-14 not-prose", className)}>
       <CornerBox
         hoverStripes
         className="flex flex-col items-center gap-6 px-6 py-10 sm:px-10"
       >
-        <Heading as="h3" size="normal" className="text-center">
+        <Heading
+          as={headingAs}
+          id={titleId}
+          size="normal"
+          className={cn("text-center", titleId && "scroll-mt-28")}
+        >
           {title}
         </Heading>
         <Text className="max-w-lg">{description}</Text>
         <div className="flex flex-wrap gap-3 justify-center items-center">
-          <Button variant="primary" size="default" href={primaryCtaHref}>
+          <Button
+            variant="primary"
+            size="default"
+            href={primaryCtaHref}
+            shortcutKey={primaryCtaLabel.charAt(0)}
+          >
             {primaryCtaLabel}
           </Button>
-          <Button variant="secondary" size="default" href={secondaryCtaHref}>
+          <Button
+            variant="secondary"
+            size="default"
+            href={secondaryCtaHref}
+            shortcutKey={secondaryCtaLabel.charAt(0)}
+          >
             {secondaryCtaLabel}
           </Button>
         </div>

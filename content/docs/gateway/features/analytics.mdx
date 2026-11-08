@@ -1,0 +1,41 @@
+---
+title: Analytics
+seoTitle: "Langfuse AI Gateway analytics: cost and usage per user, key, and model (beta)"
+description: Track cost, requests, and tokens of the Langfuse AI Gateway per user, API key, and model, and build your own dashboards in the gateway's ingestion project.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Analytics
+
+<AiGatewayBetaCallout />
+
+The **Analytics** page shows what your organization spends on the gateway and who uses it.
+
+You can find it under **Organization settings → AI Gateway → Analytics**. What you see depends on your role:
+
+- **Owners and admins** see all gateway usage in the organization, including the **User** filter and cost and requests per user.
+- **People with the AI Gateway role** see only requests made with their own gateway keys.
+
+<Frame fullWidth>
+  ![Gateway analytics page showing total cost, requests, tokens, cost over time, and cost and requests per user](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## Charts are only using gateway data [#data-source]
+
+The charts read the generations the gateway records in its [ingestion project](/docs/gateway/get-started/admin-setup#configure-the-gateway). Only calls made with a gateway key are considered. SDK traces sent to the same project don't impact gateway analytics numbers.
+
+<Callout type="info">
+  Analytics need recorded traces. `USAGE` [ingestion
+  mode](/docs/gateway/features/tracing#ingestion-modes) is enough. On
+  self-hosted Langfuse with ingestion mode `NONE`, the page shows "Gateway
+  requests are not recorded" instead of charts. Cost is subject to the [known
+  cost bugs](/faq/all/ai-gateway-known-limitations).
+</Callout>
+
+## Build your own dashboards [#custom-dashboards]
+
+Gateway traces are regular Langfuse traces, so admins and owners can build their own [custom dashboards](/docs/metrics/features/custom-dashboards) in the ingestion project:
+
+- To limit a chart to gateway traffic, filter on the metadata key `langfuse.gateway.api_key.id`.
+- To chart a single team or cost center, add [key metadata](/docs/gateway/features/api-keys#key-metadata) when you create keys and filter on `langfuse.gateway.api_key.metadata.<key>`.

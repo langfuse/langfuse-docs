@@ -1,0 +1,135 @@
+---
+title: "Vercel AI SDK with the Langfuse AI Gateway"
+sidebarTitle: Vercel AI SDK (gateway)
+seoTitle: "Use the Vercel AI SDK with the Langfuse AI Gateway (beta)"
+description: Call OpenAI and Anthropic models through the Langfuse AI Gateway with the Vercel AI SDK by pointing its OpenAI and Anthropic providers at the gateway.
+logo: /images/integrations/vercel_ai_sdk_icon.png
+logoAppearance: multicolor
+category: Integrations
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Vercel AI SDK with the Langfuse AI Gateway
+
+<AiGatewayBetaCallout />
+
+Use the [AI SDK](https://ai-sdk.dev/docs/introduction) by Vercel with the gateway by pointing its OpenAI or Anthropic provider at the gateway. Each provider needs the matching provider credential in your organization: `OPENAI` for OpenAI models, `ANTHROPIC` for Anthropic models.
+
+<Callout type="info">
+  For tracing the Vercel AI SDK without the gateway, see the [Vercel AI SDK integration](/integrations/frameworks/vercel-ai-sdk).
+</Callout>
+
+Before you start, create a gateway key and export `LANGFUSE_GATEWAY_HOST` and `LANGFUSE_GATEWAY_KEY` as in [Send your first request](/docs/gateway/get-started/first-request). Replace `<model-id>` with an ID from the [models endpoint](/docs/gateway/features/rest-api#routes).
+
+## Configure the provider [#configure-the-provider]
+
+Create the provider with the gateway's route as base URL and the gateway key as API key.
+
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
+
+Use the gateway's OpenAI route, `/openai/v1`, with the [OpenAI provider](https://ai-sdk.dev/providers/ai-sdk-providers/openai).
+
+```bash
+npm install ai @ai-sdk/openai
+```
+
+```ts
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+
+const openai = createOpenAI({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/openai/v1`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+});
+
+const { text } = await generateText({
+  model: openai("<model-id>"),
+  prompt: "Say hello",
+});
+console.log(text);
+```
+
+`openai("<model-id>")` uses the Responses API. To use Chat Completions instead, use `openai.chat("<model-id>")`.
+
+</Tab>
+<Tab>
+
+Use the gateway's Anthropic route with the [Anthropic provider](https://ai-sdk.dev/providers/ai-sdk-providers/anthropic). Unlike the Anthropic SDK, the AI SDK provider expects `/v1` in the base URL, so use `/anthropic/v1`.
+
+```bash
+npm install ai @ai-sdk/anthropic
+```
+
+```ts
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText } from "ai";
+
+const anthropic = createAnthropic({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/anthropic/v1`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+});
+
+const { text } = await generateText({
+  model: anthropic("<model-id>"),
+  prompt: "Say hello",
+});
+console.log(text);
+```
+
+</Tab>
+</Tabs>
+
+## Add request headers [#request-headers]
+
+Set [request headers](/docs/gateway/features/tracing#request-headers) on the provider for every call, or per call for values such as a session ID.
+
+<Tabs items={["OpenAI", "Anthropic"]}>
+<Tab>
+
+```ts
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+
+const openai = createOpenAI({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/openai/v1`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+  headers: { "langfuse-tags": "checkout,production" },
+});
+
+const { text } = await generateText({
+  model: openai("<model-id>"),
+  prompt: "Say hello",
+  headers: { "langfuse-session-id": "<session-id>" },
+});
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText } from "ai";
+
+const anthropic = createAnthropic({
+  baseURL: `${process.env.LANGFUSE_GATEWAY_HOST}/anthropic/v1`,
+  apiKey: process.env.LANGFUSE_GATEWAY_KEY,
+  headers: { "langfuse-tags": "checkout,production" },
+});
+
+const { text } = await generateText({
+  model: anthropic("<model-id>"),
+  prompt: "Say hello",
+  headers: { "langfuse-session-id": "<session-id>" },
+});
+```
+
+</Tab>
+</Tabs>
+
+<Callout type="info">
+  The gateway already records every call. Don't also trace the same calls with
+  the [Langfuse Vercel AI SDK integration](/integrations/frameworks/vercel-ai-sdk),
+  or each model call is recorded twice.
+</Callout>

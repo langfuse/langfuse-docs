@@ -84,6 +84,8 @@ See [working with observations](/faq/all/explore-observations-in-v4) for common 
   src="https://static.langfuse.com/docs-videos/2026-03-10-demo-saved-views.mp4"
   aspectRatio={16 / 9}
   className="mt-3"
+  title="Save a table view"
+  description="Tracing table. Search name:draft-reply latency:>2 to filter to slow replies, then open “My Views” > “Create Custom View”, name it “Slow support replies” and click “Save View”. Clear the search, and opening the saved view from “My Views” brings the filters back."
 />
 
 Scores and comments that were previously attached to a trace are shown on the corresponding root observation.
@@ -164,13 +166,13 @@ The blob storage, PostHog, and Mixpanel integrations read their data through an 
 
 Langfuse v4 raises the minimum infrastructure versions:
 
-| Component  | Requirement                                                                                                 |
-| ---------- | ----------------------------------------------------------------------------------------------------------- |
-| ClickHouse | **25.12 minimum, 26.4 recommended.** Required for lightweight updates, the JSON type, and full-text search. |
-| PostgreSQL | 15 minimum, 16 recommended                                                                                  |
-| Redis      | 7.0 minimum, 7.2 recommended                                                                                |
+| Component  | Requirement                                                                                                                                                                                                            |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ClickHouse | **25.12 minimum**, required for lightweight updates, the JSON type, and full-text search. Run a version that still receives [security patches](/self-hosting/deployment/infrastructure/clickhouse#supported-versions). |
+| PostgreSQL | 15 minimum, 16 recommended                                                                                                                                                                                             |
+| Redis      | 7.0 minimum, 7.2 recommended                                                                                                                                                                                           |
 
-Upgrade ClickHouse **before** the server upgrade. Langfuse v3 releases are fully compatible with current ClickHouse versions, so you can perform the ClickHouse upgrade on your existing v3 deployment and operate it as long as you like before continuing. See the [ClickHouse deployment guide](/self-hosting/deployment/infrastructure/clickhouse) for version and operations guidance.
+Upgrade ClickHouse **before** the server upgrade. Langfuse v3 releases are fully compatible with current ClickHouse versions, so you can perform the ClickHouse upgrade on your existing v3 deployment and operate it as long as you like before continuing. See [supported ClickHouse versions](/self-hosting/deployment/infrastructure/clickhouse#supported-versions) for how long each minimum version applies and which version to pick.
 
 <Callout type="warning">
 

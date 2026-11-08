@@ -1,13 +1,13 @@
 ---
 title: Langfuse for healthcare and life sciences
-description: Observe and evaluate AI agents that handle patient data, on Langfuse's HIPAA-ready cloud region or your own infrastructure.
+description: Bring reliable healthcare AI faster into production, with less manual review and costs in view as you scale. HIPAA-ready region or self-hosted.
 ---
 
-# Langfuse for healthcare and life sciences
+# Bring reliable healthcare AI faster into production
 
-Observe and evaluate AI agents that handle patient data. Use Langfuse's HIPAA-ready cloud region or your own infrastructure. For healthcare and life sciences teams.
+For healthcare and life sciences teams: go live faster, spend less time on manual review, and keep costs in view as you scale. [Merck Group](/users/merckgroup) reduced development cycles from weeks to days and runs 80+ use cases on Langfuse.
 
-[Get started](/cloud)
+[Start free](/cloud) · [Documentation](/docs)
 
 - **HIPAA-ready cloud region with a self-serve BAA:** Sign the ClickHouse BAA, then send PHI only to the dedicated US region.
 - **Self-host so patient data never leaves your network:** Run Langfuse in your VPC or in an air-gapped environment.
@@ -29,9 +29,9 @@ Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** 
 >
 > Walid Mehanna, Chief Data & AI Officer at Merck
 
+- **Weeks to days** shorter development cycles
+- **80+** use cases on Langfuse
 - **200+** users, engineers, PMs and domain experts
-- **80+** use cases built on Langfuse
-- **1** central platform team
 
 ## Run Langfuse where patient data is allowed to live
 
@@ -94,37 +94,35 @@ Control prompts, protect data, and manage access.
 
 ### Patient support and intake
 
-Write, trace, and monitor agents that answer patient questions and collect intake data. Score answers and review cases. Clinicians and domain experts review cases to build ground truth.
+Answer patient questions and complete intake in less time. Clinicians and domain experts review the cases that need a person.
 
 ### Appointment booking
 
-Observe agents that book and change appointments. Catch failed tool calls and wrong bookings, and test them on representative cases before they go live.
+Book and change appointments with fewer failed or wrong bookings for staff to fix. Test representative cases before the agent goes live.
 
-### [Medical information](/users/merckgroup)
+### Medical information
 
-Companies like Merck Group build agents that use medical insights to draft answers, and trace them on Langfuse. Merck Group does this with Generative Medical Insights.
-
-Merck Group · Generative Medical Insights
+Turn around inquiries from healthcare professionals in less time.
 
 ### Clinical documentation
 
-Observe and improve agents that draft clinical notes from visits and conversations.
+Draft clinical notes from visits and conversations, with less rework on the drafts clinicians review.
 
 ### Payer and claims workflows
 
-Catch failing executions in production and evaluate changes before they go live. Keep traces for audit.
+Catch failing claim steps early, before they become manual rework, and keep a trace for audit.
 
 ### [Voice agents](/users/evolve)
 
-Trace and evaluate voice agents across speech, transcripts, and model calls. Companies like Evolve trace assistive agents such as Rest, and improve them in annotation queues.
+Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.
 
 Evolve · Rest sleep coach
 
 ### [Internal platform teams](/users/merckgroup)
 
-Companies like Merck Group give AI teams one platform for traces, prompts, and evaluations. Merck Group's platform team serves 80+ use cases on Langfuse.
+Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.
 
-Merck Group · 80+ use cases
+Merck Group · 80+ use cases on Langfuse
 
 ## Learn how to ship reliable agents in healthcare and life sciences
 

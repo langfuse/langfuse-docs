@@ -15,7 +15,7 @@ This also works if you:
 1. Reference media files via external URLs.
 2. Customize the handling of media files in the SDKs via the `LangfuseMedia` class.
 3. Integrate via the Langfuse API directly.
-4. Reference media in your own S3 or S3-compatible bucket.
+4. Reference media in your own S3 or S3-compatible bucket ([Enterprise](#external-s3-media)).
 
 Learn more on how to get started and how this works under the hood below.
 
@@ -437,19 +437,23 @@ const resolvedTrace = await langfuse.media.resolveReferences({
 
 ## External S3 media [#external-s3-media]
 
-External Media Storage lets Langfuse display media that remains in your Amazon S3 or S3-compatible bucket. Add an `s3://<bucket>/<key>` URI to an observation's input, output, or metadata. Langfuse resolves the URI through the project's storage integration when the media is displayed.
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
 
-<Callout type="info" title="Feature preview">
-  An organization admin must enable **External Media Storage** under
-  **Organization Settings → Feature Previews** before you can configure this
-  integration.
-</Callout>
+External Media Storage lets Langfuse display media that remains in your Amazon S3 or S3-compatible bucket. Add an `s3://<bucket>/<key>` URI to an observation's input, output, or metadata. Langfuse resolves the URI through the project's storage integration when the media is displayed.
 
 Each project supports one External Media Storage integration:
 
 1. [Configure your bucket's CORS policy](#external-s3-media-cors) so browsers at your Langfuse origin can read signed object URLs.
 2. Open **Project Settings → Integrations → External Media Storage**.
-3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them.
+3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them. For Amazon S3, you can instead [authenticate with an IAM role](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth).
 4. Optionally set a media prefix to restrict access to one path. Grant the credentials read access only to the configured bucket and prefix.
 5. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
 
