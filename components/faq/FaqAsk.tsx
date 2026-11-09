@@ -69,9 +69,11 @@ function documentationUrl(url: string) {
 function AskForm({
   linked = false,
   details = false,
+  hideCursor = false,
 }: {
   linked?: boolean;
   details?: boolean;
+  hideCursor?: boolean;
 }) {
   const id = useId();
   const [phase, setPhase] = useState<"editing" | "loading" | "answered">(
@@ -94,7 +96,8 @@ function AskForm({
     .join("\n\n");
   const input = useRef<HTMLTextAreaElement>(null);
   const loading = phase === "loading";
-  const showIdleCursor = phase === "editing" && !focused && !question.trim();
+  const showIdleCursor =
+    !hideCursor && phase === "editing" && !focused && !question.trim();
   const showDraftCursor = phase === "editing" && !focused && !!question.trim();
   const boxed = linked || details;
   // Accordion questions inherit Analog from Radix's h3; match it explicitly here.
@@ -337,14 +340,16 @@ function AskForm({
 export function FaqAsk({
   linked = false,
   details = false,
+  hideCursor = false,
 }: {
   linked?: boolean;
   details?: boolean;
+  hideCursor?: boolean;
 }) {
   if (linked || details) {
     return (
       <FaqRow>
-        <AskForm linked={linked} details={details} />
+        <AskForm linked={linked} details={details} hideCursor={hideCursor} />
       </FaqRow>
     );
   }
