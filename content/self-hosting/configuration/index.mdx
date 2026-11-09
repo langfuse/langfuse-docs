@@ -87,6 +87,16 @@ Langfuse (self-hosted) has extensive configuration options via environment varia
 | `LANGFUSE_MARKDOWN_RENDER_CHARACTER_LIMIT`      | `150000`           | Character count above which trace and observation input/output renders as plain text instead of markdown.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `LANGFUSE_DISABLE_SIGNUP_ONBOARDING`            | `false`            | Available from `>=v4.61.0`. Set to `true` on the web container to skip the newsletter step that new users see right after signing up. Their browser then makes no request to `langfuse.com` for this step. See [browser requests](/self-hosting/security/telemetry#hostnames-browser).                                                                                                                                                                                                                                                            |
 
+## IAM role authentication for customer S3 [#cross-account-role]
+
+On self-hosted Enterprise, Langfuse can assume an intermediate IAM role, then assume a role in the customer's AWS account. Use this for [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth) and [External Media Storage](/docs/observability/features/multi-modality#external-s3-media) instead of storing access keys. Configure the variable on both the web and worker containers. If it is unset, the IAM role option is hidden.
+
+The IAM role the Langfuse containers use to access Langfuse's own buckets is documented on the [blob storage](/self-hosting/deployment/infrastructure/blobstorage#amazon-s3) page. `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` is a separate intermediate role that customer storage roles trust.
+
+| Variable                          | Required / Default | Description                                                                                                              |
+| --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` |                    | ARN of the intermediate IAM role Langfuse assumes before it assumes a customer role. Customer roles must trust this ARN. |
+
 ## LLM-as-a-Judge media [#llm-as-a-judge-media]
 
 Self-hosted Langfuse sends media used by LLM-as-a-Judge evaluators inline by default. This lets model providers receive attachments even when they cannot access your object storage. Configure these variables on both the web and worker containers.
