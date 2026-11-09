@@ -263,7 +263,7 @@ The selected LLM-as-a-Judge model and provider must support the media type. Lang
 
 LLM-as-a-Judge evaluators are executed by the Langfuse **worker**: it picks up each matching observation from a queue, renders the evaluation prompt, calls the model through the project's [LLM connection](/docs/administration/llm-connection), and writes the resulting score back. Nothing runs inside your application or in the browser.
 
-For self-hosted deployments this means the worker container — not the web container and not your instrumented application — needs network egress to the LLM provider or gateway configured in the LLM connection, and the [SSRF allowlist variables](/docs/administration/llm-connection#blocked-ip-address) apply to that call. Evaluator execution can be pinned to specific worker replicas with `QUEUE_CONSUMER_EVAL_EXECUTION_QUEUE_IS_ENABLED` and scaled with `LANGFUSE_EVAL_EXECUTION_WORKER_CONCURRENCY` (default `5`), but there is no option to run managed evaluators outside the worker. On Langfuse Cloud, evaluators run in Langfuse's infrastructure. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) use a separate worker queue and sandbox.
+For self-hosted deployments this means the worker container — not the web container and not your instrumented application — needs network egress to the LLM provider or gateway configured in the LLM connection, and the [SSRF allowlist variables](/docs/administration/llm-connection#blocked-ip-address) apply to that call. Scale the LLM-as-a-Judge execution queue with `LANGFUSE_LLM_AS_JUDGE_EXECUTION_WORKER_CONCURRENCY` (default `5`); the legacy evaluation queue uses `LANGFUSE_EVAL_EXECUTION_WORKER_CONCURRENCY`. On Langfuse Cloud, evaluators run in Langfuse's infrastructure. [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) use a separate worker queue and sandbox.
 
 ## Project default model [#project-default-model]
 
@@ -339,11 +339,38 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
 <Summary>LLM-as-a-Judge Execution Status</Summary>
 
 - **Completed**: Evaluation finished successfully.
-- **Error**: Evaluation failed (click execution trace ID for details).
-- **Delayed**: Evaluation hit rate limits by the LLM provider and is being retried with exponential backoff.
+- **Error**: Evaluation failed and will not be retried automatically (click execution trace ID for details).
+- **Delayed**: Evaluation encountered a retryable provider error, such as a rate limit, and is waiting for a scheduled retry. See [retry timing](#rate-limits-and-retries).
 - **Pending**: Evaluation is queued and waiting to run.
 
 </Details>
+
+### Rate limits and retries [#rate-limits-and-retries]
+
+When the judge's LLM provider returns a retryable error, such as a rate-limit HTTP `429` from Azure OpenAI, Langfuse schedules another attempt on the worker queue. By default, it allows **up to four queued retries in addition to the initial attempt**, spread across a **120-minute retry window**. Each queue attempt may also make a short retry within the LLM SDK, so this is not a cap of five provider requests.
+
+The nominal retry targets are approximately **5, 43, 82, and 120 minutes** into that window. These are elapsed times, not delays to add after each failure. The targets are evenly spaced after the first five-minute target; the queue does not use exponential backoff for this schedule. Each scheduled delay has up to **±20% jitter**, capped at the remaining time in the window.
+
+<Callout type="info">
+The retry window starts at the evaluation job's creation time plus its configured initial evaluation delay. Queue wait time consumes that window, so these times are approximate and fewer than four retries may be scheduled. A queued retry can execute after the window ends. After a failed attempt, Langfuse sets the execution to **Error** if the retry count or time budget is exhausted. Permanent credential, billing, or model errors do not follow this schedule and can pause the evaluator; a `429` with `insufficient_quota` is one such terminal error.
+</Callout>
+
+Self-hosters can change the retry count with `LANGFUSE_LLM_AS_JUDGE_QUEUE_RETRY_MAX_ATTEMPTS` and the window with `LANGFUSE_LLM_AS_JUDGE_QUEUE_RETRY_MAX_AGE_SECONDS` on the worker. See [retry configuration](/self-hosting/configuration#llm-as-a-judge-retries) for defaults and units. These are deployment settings, not per-project controls in Langfuse Cloud.
+
+<Callout type="info">
+Langfuse does not provide a requests-per-minute limit or a time-of-day execution schedule for managed evaluators. Use [rule filters and sampling](/docs/evaluation/core-concepts#evaluators-and-rules) to reduce the volume evaluated. Self-hosted worker concurrency controls simultaneous executions; it does not enforce a per-minute rate.
+</Callout>
+
+### Find and rerun failed evaluations [#rerun-failed-evaluations]
+
+1. On the **Evaluators** page, open the evaluator's actions menu and choose **View executions**. You can also filter the Traces table to the environment `langfuse-llm-as-a-judge`. Adjust the time range to include the failed attempts.
+2. Inspect executions with errors and open their traces to read the provider error and rendered prompt. A failed attempt may still have a scheduled retry; check whether the evaluation is **Delayed** or has reached terminal **Error** before rerunning it.
+3. Identify the original application data from the execution trace's `target_trace_id` and, for observation-level evaluation, `target_observation_id` metadata. Resolve the provider quota or configuration problem first.
+4. Return to the original application traces in the Traces table, select the affected rows, and choose **Actions → Evaluate**. Select the evaluator to run a new [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) on those observations. For a broader historical backfill, use [Also run on past observations](/docs/evaluation/core-concepts#backfill-evaluator-scores).
+
+<Callout type="info">
+Rerun the original application data, rather than the judge's execution traces. Batch evaluation creates new evaluations and can also score observations that already have scores; select the affected data carefully.
+</Callout>
 
 ## FAQ
 
