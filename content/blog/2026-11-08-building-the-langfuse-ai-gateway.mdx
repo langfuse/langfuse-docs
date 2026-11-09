@@ -15,7 +15,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   date="November 8, 2026"
 />
 
-Coding agents now send a large share of a team's LLM traffic, and teams want to know who uses which models, what it costs, and what the agents actually do. You can instrument your own application with an SDK, but you instrumenting Claude Code or Codex requires clunky client-side hooks. Using a gateway unlocks seamless tracing by simply changing the base URL coding agents target.
+Coding agents now send a large share of a team's LLM traffic, and teams want to know who uses which models, what it costs, and what the agents actually do. You can instrument your own application with an SDK, but instrumenting Claude Code or Codex requires clunky client-side hooks. Using a gateway unlocks seamless tracing by simply changing the base URL coding agents target.
 
 The [Langfuse AI Gateway](/docs/gateway/overview) is the place every one of those calls passes through. It holds the provider keys, routes each call to OpenAI or Anthropic and soon more providers, and records it in Langfuse, where you can analyze and evaluate it like any other trace.
 
@@ -25,7 +25,7 @@ We built it around three goals:
 2. **Stable for users.** An agent should behave the same with or without the gateway. That's why we don't translate between provider APIs, at least for now.
 3. **Best-in-class tracing.** Every call should become a Langfuse trace with enough context to unlock observability, evaluation, and other Langfuse platform features.
 
-For each goal, this post covers the decision it led to, why it matters, and what we traded-off for it.
+For each goal, this post covers the decision it led to, why it matters, and what we traded off for it.
 
 ## Stable for operators: why we use Rust
 
@@ -35,9 +35,9 @@ The workload makes that harder than it sounds. Coding-agent requests are large, 
 
 We wrote the gateway in Rust. Without a garbage collector, the memory a request holds is the memory we allocated for it, so we can reliably account for it. Async tasks are cheap, so thousands of open streams that are mostly waiting cost little. CPU-bound tasks such as serialization, encoding / decoding, and cryptographic work can be shared across threads.
 
-That lets us treat memory as a budget. The gateway sizes the budget from its container's memory limit, and each request reserves its share of it while it runs. When the budget is used up, the next request gets a 503 right away instead of waiting in a queue. A queue would hold memory for work it isn't doing and turn overload into latency for everyone. A 503 tells the client immediately, a load balancer can send the retry to another instance, and the provider SDKs that coding agents use already retry 503s with backoff. Responses stream straight through without being buffered, so a long response costs no more memory than a short one.
+That lets us treat memory as a budget. By default, the gateway sizes the budget from its container's memory limit, and operators can [set it explicitly](/self-hosting/configuration/ai-gateway#scaling) instead. Each request reserves its share of it while it runs. When the budget is used up, the next request gets a 503 right away instead of waiting in a queue. A queue would hold memory for work it isn't doing and turn overload into latency for everyone. A 503 tells the client immediately, a load balancer can send the retry to another instance, and the provider SDKs that coding agents use already retry 503s with backoff. Responses stream straight through without being buffered, so a long response costs no more memory than a short one.
 
-The gateway also keeps no state of its own. Keys, provider credentials and routing live in Langfuse Web, which the gateway asks for each request (cached in Redis). Traces are uploaded in the background, so responses never wait for them. There's no direct database dependency and nothing on disk: scaling is straightforfard by simply adding instances.
+The gateway also keeps no state of its own. Keys, provider credentials and routing live in Langfuse Web, which the gateway asks for each request (cached in Redis). Traces are uploaded in the background, so responses never wait for them. There's no direct database dependency and nothing on disk: scaling is straightforward by simply adding instances.
 
 To see whether this holds up, we ran the same workload through three gateways: ours in Rust, one in Node.js and one in Python. Each had 2 vCPU and 4 GiB, and each request was a ~500 KB streaming coding-agent turn.[^setup] The point was to highlight how each language and runtime behaves under pressure directionally.
 
@@ -47,7 +47,7 @@ To see whether this holds up, we ran the same workload through three gateways: o
 
 At 100 concurrent streams, Rust added 3 ms to the time to first token, Node.js about 745 ms and Python about 1.9 s. The other two slowed down for different reasons. Python parses each request body into Python objects and counts the prompt tokens itself, so it runs out of CPU first. Node.js forwarded requests about as fast as Rust at light load, but JavaScript runs on a single thread, so past a point every request waited for the same event loop.
 
-What matters most to operators is what happens when a lot of requests arrives at once during a burst. We sent five rounds of 1,000 simultaneous requests to each gateway and watched container memory over time:
+What matters most to operators is what happens when a lot of requests arrive at once during a burst. We sent five rounds of 1,000 simultaneous requests to each gateway and watched container memory over time:
 
 <Frame fullWidth>
   ![Container memory over time during five rounds of 1,000 simultaneous requests. Rust peaks at 1.7 GiB and serves all 5,000 requests in 8 seconds. Node.js serves 97% and drops connections from 12 seconds in. Python fills the 4 GiB limit, has a worker killed for running out of memory, and serves 64%](/images/blog/2026-11-08-building-the-langfuse-ai-gateway/memory-under-load.png)
@@ -67,13 +67,13 @@ So the gateway speaks each provider's native API and doesn't convert between the
 
 The alternative is a translating gateway: one format in converted to and from each provider's. This is undoubtedly a strong feature (think using Claude Code harness with OpenAI models). That works for simple chat. But our goal is to support coding agents without breaking them or subtly changing how they behave, and translation struggles with exactly the features they rely on most. Anthropic's own [OpenAI SDK compatibility layer](https://docs.anthropic.com/en/api/openai-sdk) documents several of these gaps, and notes that "most unsupported fields are silently ignored rather than producing errors." Public bug reports in open-source translation gateways show the same pattern.[^issues]
 
-- **Prompt caching** lets the provider reuse the conversation an agent resends every turn, which makes each turn much cheaper. The compatibility layer doesn't support it, and gateways have dropped cache markers, so you silently pay the full input price on every turn.
-- **Extended thinking** lets the model carry its reasoning from one turn to the next. The compatibility layer doesn't return it, and gateways have dropped it on replay, so the agent gets weaker, behaves differently, or its next request fails.
-- **Strict tool schemas** keep the model's tool calls in the shape the agent expects. The compatibility layer ignores them, and gateways have streamed tool calls with empty arguments, so you see broken calls, retries and loops.
-- **Cache and reasoning usage** tells you how many tokens came from cache and went to reasoning, which decides the bill. The compatibility layer always leaves these empty, and gateways have dropped them, so your usage and cost numbers are wrong.
-- **Errors and retries** tell the agent whether to wait or stop, and each provider encodes that differently. Gateways have turned overloads into generic errors and dropped `retry-after`, which sent a coding agent into an infinite retry loop.
+- **Prompt caching** lets the provider reuse the conversation an agent resends every turn, which makes each turn much cheaper and faster. Providers mark and match cached content in different ways, so a translator has to recreate the caching on every request, and when it doesn't, you silently pay the full input price on every turn.
+- **Extended thinking** lets the model carry its reasoning from one turn to the next. Each provider returns that reasoning as signed or encrypted data that only it can read, so it can't be converted, and if a translator drops or alters it, the agent gets weaker, behaves differently, or its next request fails.
+- **Strict tool schemas** keep the model's tool calls in the shape the agent expects. Providers represent and stream tool calls differently, and not every format has an equivalent strict mode, so translated calls can arrive malformed and you see broken calls, retries and loops.
+- **Cache and reasoning usage** tells you how many tokens came from cache and went to reasoning, which decides the bill. Providers report these counters in different fields with different meanings, so a translator that flattens them into one shape gets your usage and cost numbers wrong.
+- **Errors and retries** tell the agent whether to wait or stop, and each provider encodes that differently, in the status code, the error type and headers like `retry-after`. A translator that maps them onto one common set loses that signal, so agents give up too early or keep retrying a provider that asked them to wait.
 
-Staying native avoids this whole class of problem. Reasoning state survives, because signatures and encrypted reasoning pass through as the provider sent them. New provider features work on the day they ship, because new fields and beta headers pass through without the gateway knowing about them. Provider errors keep their status, body and headers, so an agent's retry logic works unchanged. Claude Code, Codex, OpenCode, Pi and GitHub Copilot need only a base URL and a key.
+Staying native avoids this whole class of problem. Reasoning state survives, because signatures and encrypted reasoning pass through as the provider sent them. New provider features usually work on the day they ship, because new fields and beta headers pass through without the gateway knowing about them. Provider errors keep their status, body and headers, so an agent's retry logic works unchanged. Claude Code, Codex, OpenCode, Pi and GitHub Copilot need only a base URL and a key.
 
 <Callout type="warning">
   **Placeholder (draft):** request time breakdown chart, showing where the
@@ -89,9 +89,9 @@ As we progress and API schemas stabilize, we will reconsider introducing some fo
 
 Routing calls is only half of why you'd run a gateway. The other half is knowing what happens on them: who spends what, what the agents do, and where they go wrong. Langfuse already answers those questions for applications you instrument yourself. The third goal is to bring the same depth to traffic you can't instrument, so that a coding agent's session is as easy to analyze as your own app.
 
-Every call becomes a native Langfuse generation, so nothing about it is gateway-specific once it lands, and everything in Langfuse works on it. Attribution comes from the key, not the caller: a user key records its owner on every call, and callers can add context such as a session or tags, but can't overwrite who made the call. Admins choose per organization whether to capture full prompts and outputs or only usage, cost and latency.
+Every call becomes a native Langfuse generation, so nothing about it is gateway-specific once it lands, and everything in Langfuse works on it. Attribution comes from the key, not the caller: a user key records its owner on every call, and callers can add context such as a session or tags, but can't overwrite who made the call. Admins choose per organization whether to capture full prompts and outputs or only usage, cost and latency. On self-hosted Langfuse, admins can also turn recording off, and the gateway then only routes calls.
 
-The gateway also groups calls the way the agent thinks about them. A coding agent makes many model calls per user request, with tool execution in between. The gateway recognizes Claude Code, Codex, OpenCode and Pi, groups their calls into sessions, and, where the agent sends a turn ID, puts every call in one turn into a single trace. If a caller sends its own trace context, the gateway's calls nest inside the caller's trace, next to spans from the Langfuse SDKs or any OpenTelemetry instrumentation.
+The gateway also groups calls the way the agent thinks about them. A coding agent makes many model calls per user request, with tool execution in between. The gateway recognizes Claude Code, Codex, OpenCode and Pi, groups their calls into sessions (Pi needs [one setting](/integrations/developer-tools/pi-agent-gateway#add-the-providers) for this on the Anthropic route), and, where the agent sends a turn ID, puts every call in one turn into a single trace. If a caller sends its own trace context, the gateway's calls nest inside the caller's trace, next to spans from the Langfuse SDKs or any OpenTelemetry instrumentation.
 
 That unlocks the rest of the platform without extra setup:
 
