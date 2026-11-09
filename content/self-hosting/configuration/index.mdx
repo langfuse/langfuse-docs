@@ -97,6 +97,15 @@ The IAM role the Langfuse containers use to access Langfuse's own buckets is doc
 | --------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
 | `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` |                    | ARN of the intermediate IAM role Langfuse assumes before it assumes a customer role. Customer roles must trust this ARN. |
 
+## LLM-as-a-Judge retries [#llm-as-a-judge-retries]
+
+Configure these variables on the worker to change how queued LLM-as-a-Judge evaluations retry provider rate limits and other retryable provider errors. See [rate limits and retries](/docs/evaluation/evaluation-methods/llm-as-a-judge#rate-limits-and-retries) for the schedule and [failed evaluation recovery](/docs/evaluation/evaluation-methods/llm-as-a-judge#rerun-failed-evaluations) for rerun steps.
+
+| Variable                                            | Default | Description                                                                                                                                            |
+| --------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_LLM_AS_JUDGE_QUEUE_RETRY_MAX_ATTEMPTS`    | `4`     | Maximum number of queue retries after the initial attempt. Set to `0` to disable these retries.                                                        |
+| `LANGFUSE_LLM_AS_JUDGE_QUEUE_RETRY_MAX_AGE_SECONDS` | `7200`  | Retry window in seconds (120 minutes by default), measured from job creation plus the configured initial evaluation delay. Must be a positive integer. |
+
 ## LLM-as-a-Judge media [#llm-as-a-judge-media]
 
 Self-hosted Langfuse sends media used by LLM-as-a-Judge evaluators inline by default. This lets model providers receive attachments even when they cannot access your object storage. Configure these variables on both the web and worker containers.
