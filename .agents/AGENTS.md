@@ -61,7 +61,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Passing CI checks on the first try
 
-CI runs three required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
+CI runs four required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
 
 ### 1. Prettier format (`format` job) — this is the check that most often fails
 
@@ -77,7 +77,11 @@ CI runs `pnpm run format:check`. To fix locally, run `pnpm run format` and commi
 
 CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc.
 
-### 3. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
+### 3. Middle dot check (`check_middle_dot` job)
+
+CI runs `node scripts/check-middle-dot.js` (locally: `pnpm run lint:middle-dot`). It fails if any tracked text file outside `public/` contains a middle dot (U+00B7) or its lookalikes, the bullet operator (U+2219) and the dot operator (U+22C5). It prints each hit as `path:line:col`. The only exceptions are proper nouns on the allowlist in the script (currently only the DALL-E product name). See the writing guidelines for what to use instead.
+
+### 4. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
 
 These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The full build is ~10 minutes locally — don't run it for routine edits. Instead, before pushing:
 
@@ -114,6 +118,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 ## Writing guidelines
 
 - Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
+- Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
@@ -136,6 +141,7 @@ Please check the following:
 
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
+- Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
 - When documentation is added or expanded, do not repeat the same information on a page. Each fact or explanation should appear once; later sections should link back instead of restating it.
 - A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
