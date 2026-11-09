@@ -158,6 +158,17 @@ export function buildSectionMetadata(
       // so a page with a `canonical` override still points at its own mirror.
       types: {
         "text/markdown": buildPageUrl(`${opts?.publicPath ?? pagePath}.md`),
+        // Let feed readers discover the changelog RSS feed from any entry.
+        ...(section === "changelog"
+          ? {
+              "application/rss+xml": [
+                {
+                  url: buildPageUrl("/changelog/rss.xml"),
+                  title: "Langfuse Changelog",
+                },
+              ],
+            }
+          : {}),
       },
       ...(opts?.languages ? { languages: opts.languages } : {}),
     },

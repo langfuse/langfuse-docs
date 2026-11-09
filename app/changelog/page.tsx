@@ -3,13 +3,14 @@ import { ChangelogIndex } from "@/components/changelog/ChangelogIndex";
 import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
 import {
   CHANGELOG_ITEMS_PER_PAGE,
+  CHANGELOG_RSS_PATH,
   changelogPageHref,
   getChangelogIndexItems,
   parseChangelogPageParam,
 } from "@/lib/changelog-index";
 import { ContentColumns } from "@/components/layout";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import { Link } from "@/components/ui/link";
+import { Link, linkVariants } from "@/components/ui/link";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 
@@ -35,6 +36,11 @@ export async function generateMetadata({
       "Latest product updates from the Langfuse team: new features, improvements, and release notes.",
     alternates: {
       canonical,
+      types: {
+        "application/rss+xml": [
+          { url: CHANGELOG_RSS_PATH, title: "Langfuse Changelog" },
+        ],
+      },
     },
     pagination: {
       ...(currentPage > 1 && {
@@ -73,7 +79,17 @@ export default async function ChangelogIndexPage({ searchParams }: PageProps) {
             <Link href="/docs/roadmap" variant="text">
               Roadmap
             </Link>{" "}
-            to see what&apos;s next.
+            to see what&apos;s next. Follow along via email or the{" "}
+            {/* Plain anchor: the feed is a route handler, not a page, so skip
+                client-side navigation and prefetching. */}
+            <a
+              href={CHANGELOG_RSS_PATH}
+              type="application/rss+xml"
+              className={linkVariants({ variant: "text" })}
+            >
+              RSS feed
+            </a>
+            .
           </Text>
         </div>
         <div className="mb-8">

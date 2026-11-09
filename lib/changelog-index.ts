@@ -9,6 +9,7 @@ export type ChangelogPageItem = {
     title?: string;
     description?: string;
     badge?: string;
+    author?: string;
     ogVideo?: string;
     ogImage?: string;
     gif?: string;
@@ -17,6 +18,9 @@ export type ChangelogPageItem = {
 };
 
 export const CHANGELOG_ITEMS_PER_PAGE = 50;
+
+/** Public path of the changelog RSS feed (app/changelog/rss.xml/route.ts). */
+export const CHANGELOG_RSS_PATH = "/changelog/rss.xml";
 
 export function getChangelogIndexItems(): ChangelogPageItem[] {
   return changelogSource
@@ -39,6 +43,7 @@ export function getChangelogIndexItems(): ChangelogPageItem[] {
         ogVideo: p.data.ogVideo as string | undefined,
         gif: p.data.gif as string | undefined,
         badge: p.data.badge as string | undefined,
+        author: p.data.author as string | undefined,
       },
     }));
 }

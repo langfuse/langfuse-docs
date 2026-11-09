@@ -291,7 +291,7 @@ const nextConfig = {
       // and /events have no mirror either. Advertising a Link that 404s is
       // worse than advertising nothing.
       {
-        source: `/:section(${MIRRORED_URL_PREFIXES.join("|")})/:path((?!.*\\.md$).+)`,
+        source: `/:section(${MIRRORED_URL_PREFIXES.join("|")})/:path((?!.*\\.(?:md|xml)$).+)`,
         headers: [
           {
             key: "Link",
