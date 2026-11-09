@@ -17,3 +17,9 @@ Langfuse ingests **traces only**, at `/api/public/otel/v1/traces` over OTLP/HTTP
 | Span links                         | No. Links on spans are ignored during ingestion and are not shown in the UI.                            |
 
 Any language with an OpenTelemetry SDK, for example Java, Go, or .NET, can send traces to Langfuse with an OTLP/HTTP exporter. To show token usage, cost, and model information, set the attributes described in [OpenTelemetry](/integrations/native/opentelemetry). Langfuse calculates metrics such as cost and latency from the ingested traces; see [Metrics](/docs/metrics/overview).
+
+## Send logs and metrics to ClickStack
+
+For OpenTelemetry logs and metrics, use [ClickStack](https://clickhouse.com/clickstack), the open-source observability stack built on ClickHouse. ClickStack ingests logs, metrics, and traces for operational monitoring, while Langfuse focuses on inspecting, evaluating, and improving your AI application.
+
+Both accept OpenTelemetry, so you can export the same traces to Langfuse and ClickStack and keep sending logs and metrics to ClickStack only. See [Langfuse and ClickStack](/integrations/clickhouse/observability) for the setup.
