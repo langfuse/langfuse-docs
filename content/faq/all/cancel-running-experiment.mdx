@@ -1,0 +1,17 @@
+---
+title: Can I cancel a running experiment?
+seoTitle: "Stop or Cancel a Running Experiment"
+description: Langfuse has no cancel action for running experiments. SDK experiments run in your process; experiments started from the UI run until all dataset items are processed.
+tags: [evaluation, experiments]
+---
+
+# Can I cancel a running experiment?
+
+There is no cancel or stop action for experiments in the Langfuse UI or API.
+
+- **Experiments run with the SDK** (`run_experiment` / `experiment.run`) execute in your own process. Stop the process to stop the experiment. Items that already finished stay in Langfuse.
+- **Experiments started from the UI** run in the Langfuse worker until every dataset item is processed. They cannot be stopped once started.
+
+To limit the impact of a mistake, try a prompt or model on a small dataset first. To remove the results of an experiment afterwards, see [Delete experiment data](/faq/all/deprecated-api-migration#dataset-delete-sdk-methods).
+
+See [Experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk) and [Experiments via UI](/docs/evaluation/experiments/experiments-via-ui).

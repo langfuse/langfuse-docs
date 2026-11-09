@@ -1,0 +1,44 @@
+---
+title: How do I list prompts with a specific label?
+seoTitle: "List Prompts by Label or Tag via the API"
+description: Use GET /api/public/v2/prompts with the label parameter, or langfuse.api.prompts.list in the SDKs, to list prompts that carry a label or tag.
+tags: [prompt-management, public-api]
+---
+
+# How do I list prompts with a specific label?
+
+Call `GET /api/public/v2/prompts` with the `label` query parameter:
+
+```bash
+curl -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  "https://cloud.langfuse.com/api/public/v2/prompts?label=production&limit=100"
+```
+
+Other query parameters are `name`, `tag`, `version`, `fromUpdatedAt`, `toUpdatedAt`, `page` (starts at 1), and `limit` (up to 100). The response lists each matching prompt with its versions and labels. The `versions` and `labels` in the response include only the versions that match your filter.
+
+With the SDKs:
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import get_client
+
+langfuse = get_client()
+prompts = langfuse.api.prompts.list(label="production", limit=100)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { LangfuseClient } from "@langfuse/client";
+
+const langfuse = new LangfuseClient();
+const prompts = await langfuse.api.prompts.list({ label: "production", limit: 100 });
+```
+
+</Tab>
+</LangTabs>
+
+To fetch the content of a prompt, use `langfuse.get_prompt()` (Python) or `langfuse.prompt.get()` (JS/TS). See [Get started with prompt management](/docs/prompt-management/get-started).

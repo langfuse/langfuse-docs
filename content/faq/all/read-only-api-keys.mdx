@@ -1,0 +1,25 @@
+---
+title: Can I create read-only or scoped API keys?
+seoTitle: "Read-only, Ingestion-only, and Expiring API Keys"
+description: Project API keys can be limited to Viewer (read-only), Ingestion, or Scores ingestion permissions, and can expire after a set time.
+tags: [administration, public-api, auth]
+---
+
+# Can I create read-only or scoped API keys?
+
+Yes. When you create a project API key in **Project Settings → API Keys → Create new API keys**, choose its **Permissions**:
+
+| Permissions           | What the key can do                                |
+| --------------------- | -------------------------------------------------- |
+| Full access (default) | Read and write everything in the project           |
+| Viewer                | Read-only access to the project's data             |
+| Ingestion             | Create traces, scores, and media; cannot read data |
+| Scores ingestion      | Submit scores only                                 |
+
+You can also set an **expiration**: no expiration (default), 30, 60, or 90 days, 1 year, or a custom date. Requests with an expired key are rejected.
+
+<Callout type="info">
+  A key's permissions cannot be changed after it is created. To change them, create a new key and delete the old one. Keys created before permissions were available keep their existing access.
+</Callout>
+
+Creating project API keys requires the `Owner` or `Admin` role on the project. See [API key permissions](/docs/administration/rbac#api-key-permissions) and [Where are my API keys?](/faq/all/where-are-langfuse-api-keys).
