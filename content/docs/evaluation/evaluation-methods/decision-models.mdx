@@ -10,6 +10,8 @@ Decision models answer **typed questions** about an observation instead of gener
 
 They are often cheaper to run than [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), which is why you would use them when you do not need written reasoning. Use an LLM judge when you do, or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks.
 
+Decision-model evaluators use the same targeting, rules, testing, and execution model as [other Langfuse evaluators](/docs/evaluation/evaluation-methods/evaluators). This page covers question types, provider connections, and model input.
+
 <span id="how-jev-as-a-judge-works" />
 <span id="why-use-jev-as-a-judge" />
 
@@ -57,10 +59,7 @@ On the right, filter to representative sample observations, select one, and run 
 
 ### Save the evaluator
 
-After saving, you can:
-
-- Create a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) from the filters you used to select test samples, or attach the evaluator to an existing rule to run it on incoming observations.
-- Continue without a rule. You can still use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui).
+After saving, attach a [rule](/docs/evaluation/core-concepts#evaluators-and-rules) or use the evaluator for [batch evaluation](/docs/evaluation/core-concepts#batch-evaluation) or [prompt experiments](/docs/evaluation/experiments/experiments-via-ui). See [Create, test, and reuse](/docs/evaluation/evaluation-methods/evaluators#create-test-and-reuse).
 
 </Steps>
 
@@ -146,7 +145,7 @@ Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in th
 <span id="scores" />
 <Summary>How do I debug a decision-model run?</Summary>
 
-Every run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. Internal environments are hidden from the default tracing view: filter by `environment = langfuse-llm-as-a-judge` or open the trace from a score.
+Every run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. See [Debug evaluator executions](/docs/evaluation/evaluation-methods/evaluators#debug-evaluator-executions). Internal environments are hidden from the default tracing view: filter by `environment = langfuse-llm-as-a-judge` or open the trace from a score.
 
 Probabilities and confidence are stored in score metadata (`metadata.openai` or `metadata.typesafe`) where the provider returns them, not in the score value.
 
@@ -171,6 +170,7 @@ Probabilities and confidence are stored in score metadata (`metadata.openai` or 
 
 ## Related resources
 
+- [Evaluators](/docs/evaluation/evaluation-methods/evaluators) covers targeting, rules, the evaluator API, and debugging shared by every managed evaluator type.
 - [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse): score production chat with the User Conversation Signal template.
 - [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals): what Jev is good for and a walkthrough of Jev-as-a-judge.
 - [Writing good evaluators](/academy/evaluate/writing-evaluators): how to define criteria that hold up.

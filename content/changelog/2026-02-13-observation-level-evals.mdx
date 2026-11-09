@@ -12,7 +12,7 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 <ChangelogHeader />
 
-[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) can now be run on individual observations—LLM calls, retrievals, tool executions, or any operation within your traces. Previously, evaluations could only be run on [entire traces](/docs/evaluation/evaluation-methods/llm-as-a-judge#understanding-each-evaluation-target). This architectural shift delivers dramatically faster execution and operation-level precision for production monitoring.
+[LLM-as-a-Judge evaluations](/docs/evaluation/evaluation-methods/llm-as-a-judge) can now be run on individual observations—LLM calls, retrievals, tool executions, or any operation within your traces. Previously, evaluations could only be run on [entire traces](/docs/evaluation/evaluation-methods/evaluators#understanding-each-evaluation-target). This architectural shift delivers dramatically faster execution and operation-level precision for production monitoring.
 
 **Example**: In a RAG pipeline with 10 operations (retrieval → reranking → generation → citation), evaluate only the final generation for helpfulness and the retrieval step for relevance—not the entire workflow. Each operation gets its own score.
 
@@ -70,12 +70,12 @@ import { Book, Gauge } from "lucide-react";
 
 <Cards num={3}>
   <Card
-    title="LLM-as-a-Judge Complete Guide"
-    href="/docs/evaluation/evaluation-methods/llm-as-a-judge"
+    title="Evaluators"
+    href="/docs/evaluation/evaluation-methods/evaluators"
     icon={<Book />}
   />
   <Card
-    title="Observation-Level Setup"
+    title="LLM-as-a-Judge setup"
     href="/docs/evaluation/evaluation-methods/llm-as-a-judge#set-up-step-by-step"
     icon={<Gauge />}
   />
