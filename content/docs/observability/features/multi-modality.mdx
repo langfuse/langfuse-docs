@@ -453,9 +453,14 @@ Each project supports one External Media Storage integration:
 
 1. [Configure your bucket's CORS policy](#external-s3-media-cors) so browsers at your Langfuse origin can read signed object URLs.
 2. Open **Project Settings → Integrations → External Media Storage**.
-3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them. For Amazon S3, you can instead [authenticate with an IAM role](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth).
-4. Optionally set a media prefix to restrict access to one path. Grant the credentials read access only to the configured bucket and prefix.
-5. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
+3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket and region. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them.
+4. Enter an access key ID and secret access key, or, for Amazon S3, [use an IAM role](#external-s3-media-iam-role).
+5. Optionally set a media prefix to restrict access to one path. Grant the access key or IAM role read access only to the configured bucket and prefix.
+6. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
+
+### Authenticate with access keys or an IAM role [#external-s3-media-iam-role]
+
+You can authenticate External Media Storage with access keys or, for Amazon S3, with role authentication (IAM role). With role authentication, Langfuse assumes a role in your AWS account instead of storing access keys. Set **Authentication** to **IAM role** and enter your role ARN. The Langfuse UI then shows the external ID and the trust and permission policies to add to the role.
 
 ### Configure bucket CORS [#external-s3-media-cors]
 
