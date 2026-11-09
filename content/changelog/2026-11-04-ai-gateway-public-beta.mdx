@@ -20,7 +20,7 @@ The [Langfuse AI Gateway](/docs/gateway/overview) is now in public beta. Your ap
 
 ## Set up once, then hand out keys [#keys]
 
-An admin adds OpenAI and Anthropic provider credentials under **Organization settings → AI Gateway**, chooses which models gateway keys can call, picks the project that receives gateway traces, and invites the team. Teammates then [issue their own gateway key](/docs/gateway/get-started/first-request) and copy setup instructions for their tool straight from the key dialog.
+An admin adds OpenAI and Anthropic provider credentials under **AI Gateway → Providers & Models**, chooses which models gateway keys can call, picks the project that receives gateway traces, and invites the team. Teammates then [issue their own gateway key](/docs/gateway/get-started/first-request) and copy setup instructions for their tool straight from the key dialog.
 
 The gateway serves the native OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages APIs, including streaming. It doesn't translate between them, so keep the format your client already uses.
 
@@ -34,7 +34,7 @@ The gateway serves the native OpenAI Responses, OpenAI Chat Completions, and Ant
 
 ## Track spend per user, key, and model [#analytics]
 
-Owners and admins can open the [**Analytics**](/docs/gateway/features/analytics) tab in the AI Gateway settings. It shows total cost, requests, and tokens, cost over time, and the top users, API keys, and models by cost. Filter by user or API key to find where a spike came from. People with the AI Gateway role see their own cost, requests, and tokens, without the user filter and per-user charts. If some calls use models without a Langfuse price, an alert says so and links to [custom model prices](/docs/observability/features/token-and-cost-tracking#custom-model-definitions). Gateway traces are regular Langfuse traces, so you can also build [custom dashboards](/docs/metrics/features/custom-dashboards) on key metadata, for example cost per team or cost center.
+Owners and admins can open [**Analytics**](/docs/gateway/features/analytics) on the **AI Gateway → Overview** page. It shows total cost, requests, and tokens, cost over time, and the top users, API keys, and models by cost. Filter by user or API key to find where a spike came from. People with the AI Gateway role see their own cost, requests, and tokens, without the user filter and per-user charts. If some calls use models without a Langfuse price, an alert says so and links to [custom model prices](/docs/observability/features/token-and-cost-tracking#custom-model-definitions). Gateway traces are regular Langfuse traces, so you can also build [custom dashboards](/docs/metrics/features/custom-dashboards) on key metadata, for example cost per team or cost center.
 
 ## Every request is a trace [#tracing]
 
