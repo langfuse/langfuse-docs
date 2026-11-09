@@ -140,7 +140,7 @@ For the rest of the notebook, we'll have one goal:
 
 Fetching recent root observations from Langfuse is straightforward. We'll use the Observations API v2 via the SDK, filter to logical root observations, and then evaluate that sample. After that, we'll add our scores back into Langfuse.
 
-The `langfuse.api.observations.get_many()` method supports timestamp filters, field selection, and structured filters for trace tags. You can find more querying patterns in our [query-via-sdk docs](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk).
+The `langfuse.iter_observation_pages()` method pages through the Observations API v2 and supports timestamp filters, field selection, and structured filters for trace tags. You can find more querying patterns in our [query-via-sdk docs](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk).
 
 ```python
 from langfuse import get_client
@@ -153,15 +153,20 @@ one_day_ago = now - timedelta(hours=24)
 
 # The advanced `filter` parameter takes precedence over the individual query
 # parameters, so the time window is expressed as filter conditions as well.
-traces = langfuse.api.observations.get_many(
-    fields="core,basic,io,metadata,trace_context",
-    filter=json.dumps([
-        {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
-        {"type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["TLM_eval_pipeline"]},
-        {"type": "datetime", "column": "startTime", "operator": ">=", "value": one_day_ago.isoformat()},
-        {"type": "datetime", "column": "startTime", "operator": "<", "value": now.isoformat()},
-    ]),
-).data
+traces = [
+    observation
+    for page in langfuse.iter_observation_pages(
+        fields="core,basic,io,metadata,trace_context",
+        filter=json.dumps([
+            {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
+            {"type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["TLM_eval_pipeline"]},
+            {"type": "datetime", "column": "startTime", "operator": ">=", "value": one_day_ago.isoformat()},
+            {"type": "datetime", "column": "startTime", "operator": "<", "value": now.isoformat()},
+        ]),
+        max_items=50,
+    )
+    for observation in page.data
+]
 ```
 
 ### Generate evaluations with TLM

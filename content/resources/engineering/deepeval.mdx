@@ -10,11 +10,11 @@ DeepEval and Langfuse work together through the Langfuse Python SDK: DeepEval co
 
 There are three common ways to combine the two:
 
-| You want to                              | Approach                                                | Langfuse API                                              |
-| ---------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
-| Score production traffic on a schedule   | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.api.observations.get_many()` + `create_score()` |
-| Evaluate a change against a test dataset | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`                |
-| Build a test dataset from scratch        | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`              |
+| You want to                              | Approach                                                | Langfuse API                                           |
+| ---------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------ |
+| Score production traffic on a schedule   | Fetch traces, run DeepEval metrics, push scores back    | `langfuse.iter_observation_pages()` + `create_score()` |
+| Evaluate a change against a test dataset | Wrap DeepEval metrics as experiment evaluator functions | `dataset.run_experiment(evaluators=[...])`             |
+| Build a test dataset from scratch        | Generate items with DeepEval's Synthesizer, then upload | `create_dataset()` + `create_dataset_item()`           |
 
 ## What is DeepEval? [#what-is-deepeval]
 
@@ -59,23 +59,22 @@ def joyfulness_score(observation):
     return {"score": metric.score, "reason": metric.reason}
 
 # A trace's input/output lives on its root observation, so filter for those rows.
-root_observations = langfuse.api.observations.get_many(
+for page in langfuse.iter_observation_pages(
     fields="core,basic,io,trace_context",
     filter=json.dumps([
         {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
         {"type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["my-app"]},
     ]),
-    limit=10,
-).data
-
-for observation in root_observations:
-    result = joyfulness_score(observation)
-    langfuse.create_score(
-        trace_id=observation.trace_id,
-        name="joyfulness",
-        value=result["score"],
-        comment=result["reason"],
-    )
+    max_items=10,
+):
+    for observation in page.data:
+        result = joyfulness_score(observation)
+        langfuse.create_score(
+            trace_id=observation.trace_id,
+            name="joyfulness",
+            value=result["score"],
+            comment=result["reason"],
+        )
 ```
 
 Schedule this as a cron job or event-triggered pipeline to evaluate traffic incrementally. The [external evaluation pipeline cookbook](/guides/cookbook/example_external_evaluation_pipelines) walks through the full pattern with batching, filtering by tags and timestamps, and checkpointing.
