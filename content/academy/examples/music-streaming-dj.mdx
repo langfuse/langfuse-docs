@@ -48,7 +48,7 @@ A listening session and both trace types up close:
 
 <TraceViewDiagram
   ariaLabel="A listening session with DJ-initiated traces and one user request"
-  label="Session listen_7f3e · user u_8841"
+  label="Session listen_7f3e, user u_8841"
   rows={[
     {
       kind: "trace",
@@ -90,9 +90,9 @@ A listening session and both trace types up close:
       chips: ["session: listen_7f3e", "user: u_8841"],
       duration: "1.5s",
       input:
-        'taste: electronica, downtempo · recent: Tycho "Awake", Bonobo "Kerala" · instruction: "calmer"',
+        'taste: electronica, downtempo; recent: Tycho "Awake", Bonobo "Kerala"; instruction: "calmer"',
       output:
-        '4 tracks queued · commentary: "Calming it down, here is some ambient piano."',
+        '4 tracks queued; commentary: "Calming it down, here is some ambient piano."',
     },
     {
       kind: "tool",
@@ -100,9 +100,9 @@ A listening session and both trace types up close:
       duration: "0.6s",
       indent: true,
       input:
-        'taste: electronica, downtempo · recent: Tycho "Awake", Bonobo "Kerala" · instruction: "calmer"',
+        'taste: electronica, downtempo; recent: Tycho "Awake", Bonobo "Kerala"; instruction: "calmer"',
       output:
-        'Nils Frahm "Says" · Ólafur Arnalds "Saman" · Max Richter "On the Nature of Daylight" · Joep Beving "Sleeping Lotus"',
+        'Nils Frahm "Says", Ólafur Arnalds "Saman", Max Richter "On the Nature of Daylight", Joep Beving "Sleeping Lotus"',
     },
     {
       kind: "gen",
@@ -110,7 +110,7 @@ A listening session and both trace types up close:
       chips: ["gpt-4.1-mini", "120 tok", "$0.0002"],
       duration: "0.9s",
       indent: true,
-      input: 'the 4 selected tracks · instruction: "calmer"',
+      input: 'the 4 selected tracks; instruction: "calmer"',
       output: '"Calming it down, here is some ambient piano."',
     },
   ]}
@@ -128,7 +128,7 @@ A listening session and both trace types up close:
       chips: ["session: listen_7f3e", "user: u_8841"],
       duration: "1.6s",
       input: "voice clip (2s)",
-      output: 'reply: "Got it, calming things down." · instruction: "calmer"',
+      output: 'reply: "Got it, calming things down."; instruction: "calmer"',
     },
     {
       kind: "tool",
@@ -144,8 +144,8 @@ A listening session and both trace types up close:
       chips: ["gpt-4.1-mini", "210 tok", "$0.0004"],
       duration: "1.2s",
       indent: true,
-      input: '"Play something calmer." · current queue',
-      output: 'reply: "Got it, calming things down." · instruction: "calmer"',
+      input: '"Play something calmer."; current queue',
+      output: 'reply: "Got it, calming things down."; instruction: "calmer"',
     },
     {
       kind: "event",
@@ -279,13 +279,13 @@ In this use case, testing end to end is very hard offline: whether a session was
       items: [
         {
           input:
-            "taste: indie folk · recent: Big Thief 'Vampire Empire', Fleet Foxes 'Mykonos' · instruction: none",
+            "taste: indie folk; recent: Big Thief 'Vampire Empire', Fleet Foxes 'Mykonos'; instruction: none",
           expectedOutput:
             "Good directions: adjacent indie folk, soft rock. Bad directions: high-energy EDM, hip hop.",
         },
         {
           input:
-            "taste: electronica, house · recent: an upbeat house set · instruction: 'something calmer'",
+            "taste: electronica, house; recent: an upbeat house set; instruction: 'something calmer'",
           expectedOutput:
             "Good directions: downtempo, ambient electronica. Bad directions: more upbeat house, ignoring the instruction.",
         },

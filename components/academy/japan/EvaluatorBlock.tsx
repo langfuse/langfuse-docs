@@ -111,7 +111,7 @@ export function EvaluatorBlock({
                 <div className="evaluator-block__details">
                   <div className="evaluator-block__detail-meta">
                     {evaluator.type}
-                    {evaluator.returns ? ` · 返す値: ${evaluator.returns}` : ""}
+                    {evaluator.returns ? `、返す値: ${evaluator.returns}` : ""}
                   </div>
                   <div className="evaluator-block__narrative">
                     {evaluator.details}

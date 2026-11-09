@@ -134,13 +134,8 @@ const GlossaryEntry = ({ term }: { term: GlossaryTerm }) => {
             <span className="text-xs text-muted-foreground font-medium">
               Related:
             </span>
-            {term.relatedTerms.map((rt, i) => (
-              <React.Fragment key={rt}>
-                <RelatedTermLink termId={rt} />
-                {i < term.relatedTerms!.length - 1 && (
-                  <span className="text-muted-foreground">·</span>
-                )}
-              </React.Fragment>
+            {term.relatedTerms.map((rt) => (
+              <RelatedTermLink key={rt} termId={rt} />
             ))}
           </div>
         )}

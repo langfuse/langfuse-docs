@@ -93,7 +93,7 @@ export function CustomerQuoteCard({
               <p className="m-0 break-words text-[13px] leading-[1.45] text-text-tertiary">
                 {quoteAuthor}
                 {quoteRole ? `, ${quoteRole}` : ""}
-                {quoteCompany ? ` · ${quoteCompany}` : ""}
+                {quoteCompany ? `, ${quoteCompany}` : ""}
               </p>
             </div>
           )}
