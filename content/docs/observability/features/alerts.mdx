@@ -86,12 +86,19 @@ Choose special handling for edge cases when data is missing or when an alert sta
 
 **No-data handling** — what happens when the query returns no data:
 
-| Mode                                  | Behavior                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------- |
-| **Treat missing data as 0** (default) | Treat null as `0` and compare against thresholds                          |
-| **Keep the previous severity**        | Hold the previous severity; send no notification                          |
-| **Show severity NO_DATA**             | Record `NO_DATA` severity; send no notification                           |
-| **Notify after sustained NO_DATA**    | Record `NO_DATA` severity; send a notification after a configurable delay |
+| Mode                                    | Behavior                                                                                      |
+| --------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Treat missing data as `0`** (default) | Treat null as `0` and compare against thresholds                                              |
+| **Treat missing data as `OK`**          | Record `OK` severity; an open `WARNING` or `ALERT` resolves and sends a recovery notification |
+| **Notify `NO DATA`**                    | Record `NO_DATA` severity; send a notification after the configured number of minutes         |
+| **Silence `NO DATA`**                   | Record `NO_DATA` severity; send no notification                                               |
+| **Keep the previous `SEVERITY`**        | Hold the previous severity; send no notification                                              |
+
+Use **Treat missing data as `OK`** when an alert should resolve on its own once data stops arriving, for example to close a PagerDuty incident after a test or demo. The recovery notification states that the metric had no data in the window and was treated as `OK`.
+
+<Callout type="warn">
+  **Treat missing data as `OK`** makes an outage look healthy: if your application stops sending data, the alert resolves instead of firing. Keep the default for production alerts unless missing data really means everything is fine. If you switch an alert that is currently in `NO_DATA` to this mode, the next evaluation without data moves it to `OK` and sends one recovery notification.
+</Callout>
 
 **Renotify** — whether to re-notify while severity stays elevated:
 
@@ -116,20 +123,20 @@ Give the alert a descriptive name (max 200 characters) and optional tags, then c
 
 Each alert carries a **severity** that updates after every evaluation.
 
-| Severity  | Meaning                                                                                                    |
-| --------- | ---------------------------------------------------------------------------------------------------------- |
-| `UNKNOWN` | Initial state — not yet evaluated                                                                          |
-| `OK`      | Metric is within bounds                                                                                    |
-| `WARNING` | Metric crossed the warning threshold                                                                       |
-| `ALERT`   | Metric crossed the alert threshold                                                                         |
-| `NO_DATA` | Query returned no data and no-data mode is **Show severity NO_DATA** or **Notify after sustained NO_DATA** |
-| `PAUSED`  | Alert is paused; no evaluations run                                                                        |
+| Severity  | Meaning                                                                                                   |
+| --------- | --------------------------------------------------------------------------------------------------------- |
+| `UNKNOWN` | Initial state — not yet evaluated                                                                         |
+| `OK`      | Metric is within bounds, or the query returned no data and no-data mode is **Treat missing data as `OK`** |
+| `WARNING` | Metric crossed the warning threshold                                                                      |
+| `ALERT`   | Metric crossed the alert threshold                                                                        |
+| `NO_DATA` | Query returned no data and no-data mode is **Notify `NO DATA`** or **Silence `NO DATA`**                  |
+| `PAUSED`  | Alert is paused; no evaluations run                                                                       |
 
 **When notifications fire:**
 
 - Breach (`UNKNOWN | OK → WARNING | ALERT`): always notifies.
-- Recovery (`WARNING | ALERT → OK`): always notifies.
-- No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify after sustained `NO_DATA`**.
+- Recovery (`WARNING | ALERT → OK`): always notifies, including when no data is treated as `OK`.
+- No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify `NO DATA`**. The one exception is `NO_DATA → OK` under **Treat missing data as `OK`**, which sends a recovery notification.
 - Sustained severity (`WARNING → WARNING`, `ALERT → ALERT`): notifies only when **Renotify** is enabled.
 
 ## Pause, resume, or delete an alert [#pause]
