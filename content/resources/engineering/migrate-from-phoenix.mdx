@@ -216,7 +216,7 @@ experiment scores.
 
 </Details>
 
-## Step 4: Decide what to do with historical traces
+## Step 4: Decide what to do with historical traces [#step-4-decide-what-to-do-with-historical-traces]
 
 Most teams cut over fresh: old traces stay queryable in Phoenix, and Langfuse becomes the
 system of record from cutover day. Bulk-importing historical traces is rarely worth it beyond
@@ -228,6 +228,9 @@ a few showcase traces.
 There is no turn-key history import. Re-run those requests, or send OpenTelemetry via the
 [OTLP endpoint](/integrations/native/opentelemetry) with `x-langfuse-ingestion-version=4`. Do
 not use the deprecated ingestion API.
+[Import conversations from an external chat export](/guides/import-external-chat-export)
+is a worked example of that backfill: original timestamps, sessions, user ids, and a
+cursor so a rerun does not resend spans Langfuse has already accepted.
 
 </Details>
 

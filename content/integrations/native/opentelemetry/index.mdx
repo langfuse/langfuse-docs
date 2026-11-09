@@ -497,6 +497,8 @@ with tracer.start_as_current_span("Langfuse Attributes") as span:
 
 Once spans are arriving in Langfuse, [Tracing in the Langfuse Academy](/academy/tracing) covers how traces are structured and which attributes make them useful downstream, and [Monitoring](/academy/monitoring) covers how to read them once they are there.
 
+To backfill conversations from a product you cannot instrument, post OTLP JSON with the original timestamps, session ids, and user ids. [Import conversations from an external chat export](/guides/import-external-chat-export) is the worked example, including a polling cursor so a rerun does not resend spans Langfuse has already accepted.
+
 ## Troubleshooting
 
 - If you encounter `4xx` errors while self-hosting Langfuse, please upgrade your deployment to the latest version. The OpenTelemetry endpoint was first introduced in Langfuse [v3.22.0](https://github.com/langfuse/langfuse/releases/tag/v3.22.0) and has seen significant improvements since then.

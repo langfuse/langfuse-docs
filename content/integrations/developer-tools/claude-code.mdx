@@ -56,6 +56,10 @@ By using Claude Code's [hooks system](https://code.claude.com/docs/en/hooks-guid
 
 Claude Code is one of several agents Langfuse traces; our guide to [tracing coding agents](/resources/engineering/coding-agent-tracing) covers Codex, Copilot, Cursor, and team-level rollout patterns.
 
+<Callout type="info">
+  Web-hosted [claude.ai](https://claude.ai) chats, including a Claude Enterprise export from Anthropic's Compliance API, have no Claude Code hook. Import that history with [Import conversations from an external chat export](/guides/import-external-chat-export).
+</Callout>
+
 ## How It Works
 
 Claude Code provides a [hooks system](https://code.claude.com/docs/en/hooks-guide) that allows you to run custom scripts at different lifecycle points. This integration uses the **Stop hook**, which runs after each Claude Code response.
@@ -1059,3 +1063,4 @@ Verify your Langfuse API keys are correct and the base URL matches your region:
 - [Claude Code GitHub Repository](https://github.com/anthropics/claude-code)
 - [Langfuse SDK Instrumentation](/docs/observability/sdk/instrumentation)
 - [Langfuse Python SDK Reference](https://python.reference.langfuse.com)
+- [Import conversations from an external chat export](/guides/import-external-chat-export) for claude.ai and other history the hooks never see
