@@ -1,26 +1,28 @@
 ---
-title: Why don't I see Gateway pages like Models, Keys, and Analytics?
-seoTitle: "AI Gateway Models, Gateway keys, or Analytics missing? How to fix it"
-description: The Models, Gateway keys, and Analytics tabs of the Langfuse AI Gateway stay disabled until a project is set. On self-hosted Langfuse with the NONE ingestion mode, Analytics has no data to show.
+title: Why can't I open AI Gateway pages like Providers & Models or Gateway keys?
+seoTitle: "AI Gateway Providers & Models, Gateway keys, or analytics unavailable? How to fix it"
+description: The Providers & Models and Gateway keys pages of the Langfuse AI Gateway stay unavailable until an admin finishes the setup on Overview. On self-hosted Langfuse with the NONE ingestion mode, the Overview analytics have no data to show.
 tags: [ai-gateway, ai-gateway-get-started]
 ---
 
-# Why don't I see Gateway pages like Models, Keys, and Analytics?
+# Why can't I open AI Gateway pages like Providers & Models or Gateway keys?
 
-Under **Organization settings → AI Gateway**, the gateway has a **Setup** tab and the **Models**, **Gateway keys**, and **Analytics** tabs. If those tabs are disabled or empty, check the following.
+The **AI Gateway** sidebar has the **Overview**, **Providers & Models**, **Gateway keys**, and **Tracing** pages. If a page is disabled, missing, or empty, check the following.
 
-## Is a project set? [#no-project]
+## Is the gateway set up? [#no-project]
 
-The gateway records every call in one project of your organization. Until an admin chooses that project, the **Models**, **Gateway keys**, and **Analytics** tabs stay disabled.
+The gateway records every call in one project of your organization. Until an admin finishes the setup wizard on **Overview** and chooses that project, **Providers & Models** and **Gateway keys** stay disabled for admins, and other members see "AI Gateway isn’t set up yet".
 
-To fix this, go to **Organization settings → AI Gateway → Setup** and choose a project. See [Set up Gateway as an admin](/docs/gateway/get-started/admin-setup#configure-the-gateway).
+To fix this, go to **AI Gateway → Overview** and complete the setup. See [Set up Gateway as an admin](/docs/gateway/get-started/admin-setup#configure-the-gateway).
 
-## Does your role include Analytics? [#analytics-role]
+## Does your role include analytics? [#analytics-role]
 
-Owners, admins, and people with the AI Gateway role see the **Analytics** tab. People with the AI Gateway role only see their own usage. See [Analytics](/docs/gateway/features/analytics).
+Owners, admins, and people with the AI Gateway role see the analytics on **Overview**. People with the AI Gateway role only see their own usage. See [Analytics](/docs/gateway/features/analytics).
+
+The **Tracing** link opens the gateway's project. It appears for owners and admins after setup, if they can open that project.
 
 ## Are you self-hosting with the `NONE` ingestion mode? [#none-mode]
 
-On self-hosted Langfuse, the `NONE` ingestion mode routes requests without recording them. You don't need a project in this mode, but **Analytics** shows "Gateway requests are not recorded" instead of charts, because there is no data to chart.
+On self-hosted Langfuse, the `NONE` ingestion mode routes requests without recording them. You don't need a project in this mode, but **Overview** shows "Gateway requests are not recorded" instead of charts, because there is no data to chart.
 
 To see analytics, switch to the `USAGE` or `FULL` [ingestion mode](/docs/gateway/features/tracing#ingestion-modes) and choose a project.
