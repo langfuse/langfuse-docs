@@ -453,9 +453,67 @@ Each project supports one External Media Storage integration:
 
 1. [Configure your bucket's CORS policy](#external-s3-media-cors) so browsers at your Langfuse origin can read signed object URLs.
 2. Open **Project Settings → Integrations → External Media Storage**.
-3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket, region, access key ID, and secret access key. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them. For Amazon S3, you can instead [authenticate with an IAM role](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth).
-4. Optionally set a media prefix to restrict access to one path. Grant the credentials read access only to the configured bucket and prefix.
-5. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
+3. Select **Amazon S3** or **S3 Compatible Storage**, then enter the bucket and region. For S3-compatible storage, also enter the endpoint and enable path-style URLs if your provider requires them.
+4. Choose how Langfuse authenticates. By default, enter an access key ID and secret access key. For Amazon S3, you can instead set **Authentication** to **IAM role** and [let Langfuse assume a role in your AWS account](#external-s3-media-iam-role).
+5. Optionally set a media prefix to restrict access to one path. Grant the access key or IAM role read access only to the configured bucket and prefix.
+6. Save the integration, then use **Test** with an `s3://` URI to verify object access and browser CORS.
+
+### Authenticate with an IAM role [#external-s3-media-iam-role]
+
+With IAM role authentication, Langfuse does not store access keys. It assumes your role through its own cross-account role and passes an external ID that is unique to the integration. The integration settings show the Langfuse cross-account role ARN, the external ID, and the trust and permission policies for your bucket, so you can copy them from there.
+
+1. In **Project Settings → Integrations → External Media Storage**, select **Amazon S3** and set **Authentication** to **IAM role**.
+2. Enter the bucket, the bucket's AWS region, and the ARN of the role Langfuse should assume, for example `arn:aws:iam::123456789012:role/langfuse-media`. The role does not need to exist yet.
+3. Save the integration. Langfuse generates the external ID on the first save and keeps it when you edit the integration later.
+4. In the AWS setup instructions below the role ARN, select **Show external ID**, then copy the trust policy and the permission policy. Both are filled in with your bucket, prefix, the Langfuse cross-account role, and the external ID.
+5. In AWS, create the role with the trust policy, or replace the trust policy of an existing role, and attach the permission policy. If the bucket uses SSE-KMS with a customer managed key, also allow the role to use `kms:Decrypt` on that key.
+6. Use **Test** with an `s3://` URI to verify that Langfuse can assume the role and read the object.
+
+The trust policy lets the Langfuse cross-account role assume your role only with the external ID. The second statement lets Langfuse tag the session with the Langfuse project and organization IDs and set the project as the session's source identity, so you can attribute access in AWS CloudTrail.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "AWS": "<langfuse-cross-account-role-arn>" },
+      "Action": "sts:AssumeRole",
+      "Condition": { "StringEquals": { "sts:ExternalId": "<external-id>" } }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": { "AWS": "<langfuse-cross-account-role-arn>" },
+      "Action": ["sts:TagSession", "sts:SetSourceIdentity"]
+    }
+  ]
+}
+```
+
+The permission policy grants read access to objects under the configured prefix. Without a prefix, the resource is `arn:aws:s3:::YOUR_BUCKET/*`.
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:GetObject"],
+      "Resource": "arn:aws:s3:::YOUR_BUCKET/YOUR_PREFIX/*"
+    }
+  ]
+}
+```
+
+<Callout type="warning" title="IAM role requirements">
+
+- The **Authentication** field only appears for Amazon S3. S3-compatible storage uses access keys.
+- Langfuse refuses to use a role whose trust policy does not require the external ID. Keep the `sts:ExternalId` condition.
+- The region must be the bucket's AWS region, not `auto`, and the role must be in the same AWS partition as the Langfuse cross-account role.
+- The media prefix cannot start with `/` or contain `//`, `*`, `?`, or `$`.
+- On self-hosted deployments, an operator must set `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` to the role Langfuse assumes before it assumes your role. The **Authentication** field does not appear until it is set.
+
+</Callout>
 
 ### Configure bucket CORS [#external-s3-media-cors]
 
