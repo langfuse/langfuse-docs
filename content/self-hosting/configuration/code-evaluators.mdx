@@ -144,10 +144,6 @@ LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET=<at least 32 characters>
 QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
 ```
 
-Generate a signing secret, for example with `echo "lf-whsec_$(openssl rand -hex 32)"`, and share it with your executor. Langfuse refuses to start when the dispatcher is `external` and the endpoint or signing secret is missing or invalid.
-
-The Langfuse `docker-compose.yml` passes all `LANGFUSE_CODE_EVAL_EXTERNAL_*` variables to web and worker, so you can set them in your `.env` file. On Kubernetes, set them with `langfuse.additionalEnv` and reference the secrets from a Kubernetes Secret.
-
 ### Configuration [#external-dispatcher-configuration]
 
 | Variable                                         | Default             | Description                                                                                                                                                                                                                                |
