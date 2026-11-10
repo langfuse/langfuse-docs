@@ -35,7 +35,7 @@ When building filters on `/api/public/v2/observations`, prefer `=` when you know
 
 - `matches` is **case-insensitive** for `input` and `output`, so `refund failed` can match `Refund Failed`.
 - For metadata filters, `matches` is **case-sensitive** and applies to the string metadata value of the selected key.
-- Substring operators such as `contains`, `starts with`, and `ends with` are rejected with `400` on `input` and `output` filters because they would require slow full-content scans. Use `matches` for token search on these fields instead.
+- Substring operators such as `contains`, `starts with`, and `ends with` on `input` and `output` are rejected with `400` unless the same request also has an `=` or `matches` condition on `input` or `output`, because on their own they would require slow full-content scans. Use `matches` for token search on these fields instead.
 
 Example `matches` filter for observation output:
 
