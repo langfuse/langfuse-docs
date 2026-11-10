@@ -419,7 +419,7 @@ export function AssistantArchitectureDiagram() {
           </nav>
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 text-xs text-text-secondary">
-              Example run{!overview && ` · ${steps[step].title}`}
+              Example run{!overview && `: ${steps[step].title}`}
             </div>
             <div className="flex shrink-0 gap-2">
               <button

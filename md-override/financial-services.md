@@ -7,7 +7,7 @@ description: Observe and evaluate AI agents across banks, brokers, and fintechs.
 
 Observe and evaluate AI agents across your institution. Give engineering, platform, and risk teams visibility into production behavior, with deployment in Langfuse Cloud or your own infrastructure.
 
-[Start free](/cloud) · [Documentation](/docs)
+[Start free](/cloud), [Documentation](/docs)
 
 - **Standardize observability and evals across teams:** Bring agents across frameworks, models, and gateways into a shared view of traces and evaluations.
 - **Ship reliable agents with clear deployment quality gates:** evaluate model and agent changes against datasets before release.
@@ -15,13 +15,13 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 - **Flag potential policy violations:** with evals that score outputs against your policies and regulations.
 - **Self-host or air-gap:** deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
 
-[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [MIT · open source](/handbook/chapters/open-source) · [Government: FIPS 140-3 & Iron Bank-hardened images](/self-hosting/configuration/hardening#hardening-for-government) · [Security & compliance](/security)
+[ISO 27001](/security/iso27001), [SOC 2](/security/soc2), [GDPR](/security/gdpr), [Open source (MIT)](/handbook/chapters/open-source), [Government: FIPS 140-3 & Iron Bank-hardened images](/self-hosting/configuration/hardening#hardening-for-government), [Security & compliance](/security)
 
 ## Talk to a financial services expert at Langfuse
 
 Use the contact form on this page to talk to a financial services expert at Langfuse.
 
-Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** engineers building on Langfuse.
+Used by **21** of the Fortune 50, **90B+** observations/month, **100,000+** engineers building on Langfuse.
 
 ### [Merck](/users/merckgroup)
 
@@ -35,15 +35,15 @@ Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** 
 
 ### [How a European neobroker runs self-hosted Langfuse in production.](/users/trade-republic)
 
-Customer story · Self-hosted. [Read story](/users/trade-republic)
+Customer story: Self-hosted. [Read story](/users/trade-republic)
 
 ### [How Ramp auto-improves agents on Langfuse.](/users/ramp)
 
-Customer story · Spend management. [Read story](/users/ramp)
+Customer story: Spend management. [Read story](/users/ramp)
 
 ### [How DKB, Germany's largest digital bank, automates 20,000 customer conversations daily.](/users/dkb)
 
-Customer story · Banking. [Read story](/users/dkb)
+Customer story: Banking. [Read story](/users/dkb)
 
 ## Run Langfuse where your data is allowed to live
 
@@ -57,8 +57,8 @@ Customer story · Banking. [Read story](/users/dkb)
 
 Managed cloud in the EU, US or Japan.
 
-- Regions: EU · US · JP
-- Certifications: SOC 2 Type II · ISO 27001
+- Regions: EU, US, JP
+- Certifications: SOC 2 Type II, ISO 27001
 - Data residency: Pinned to region
 - Support: Enterprise SLA
 
@@ -66,9 +66,9 @@ Managed cloud in the EU, US or Japan.
 
 Run Langfuse in your own VPC.
 
-- Infra: Kubernetes · Docker
-- Storage: ClickHouse · Postgres · S3
-- Access: SSO · VPN-only
+- Infra: Kubernetes, Docker
+- Storage: ClickHouse, Postgres, S3
+- Access: SSO, VPN-only
 - License: MIT core + Enterprise
 
 ### [Air-gapped](/self-hosting/security/networking)
@@ -131,7 +131,7 @@ Trace agents that combine identity, fraud and credit-bureau checks into a risk s
 
 Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.
 
-[DKB, Germany's largest digital bank · 20,000 conversations / day](/users/dkb)
+[DKB, Germany's largest digital bank: 20,000 conversations / day](/users/dkb)
 
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 
