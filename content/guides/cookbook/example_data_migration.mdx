@@ -687,8 +687,7 @@ progress_every = 10  # print a progress line every N traces
 t_start = time.time()
 while True:
     # `is_root_observation` is the first-class parameter for logical roots, so the
-    # listing returns one row per trace. Prefer it over the advanced `filter`
-    # parameter, which takes precedence over every other query parameter.
+    # listing returns one row per trace without the advanced `filter` parameter.
     listing = with_retries(lambda: src.api.observations.get_many(
         fields="core,basic,io,metadata,trace_context",
         limit=limit,
