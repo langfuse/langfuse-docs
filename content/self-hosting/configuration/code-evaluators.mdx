@@ -9,7 +9,7 @@ sidebarTitle: "Code evaluators"
 
 This page covers self-hosted infrastructure setup. For an introduction to the feature, see [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators).
 
-Self-hosted code evaluators are picked up by the Langfuse worker and executed through a dispatcher backend. The dispatcher currently invokes either AWS Lambda or the local insecure runner synchronously. Production self-hosted deployments need a dispatcher for execution.
+Self-hosted code evaluators are picked up by the Langfuse worker and executed through a dispatcher backend. The dispatcher invokes AWS Lambda, an HTTP executor you operate, or the local insecure runner synchronously. Production self-hosted deployments need a dispatcher for execution.
 
 Code evaluator availability is derived from `LANGFUSE_CODE_EVAL_DISPATCHER`. If this variable is unset, code evaluators are disabled for self-hosted deployments. Set it on the web service so the UI can show the supported code evaluator templates, and on the worker service so executions can be dispatched.
 
@@ -17,16 +17,16 @@ Code evaluator availability is derived from `LANGFUSE_CODE_EVAL_DISPATCHER`. If 
 
 Set `LANGFUSE_CODE_EVAL_DISPATCHER` to one of the available dispatchers:
 
-| Dispatcher     | Value            | Use for                                   | Runtime support                  |
-| -------------- | ---------------- | ----------------------------------------- | -------------------------------- |
-| AWS Lambda     | `aws-lambda`     | Production self-hosted deployments        | TypeScript/JavaScript and Python |
-| Local insecure | `insecure-local` | Local development and trusted deployments | TypeScript/JavaScript only       |
+| Dispatcher     | Value            | Use for                                                                                      | Runtime support                      |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------- | ------------------------------------ |
+| AWS Lambda     | `aws-lambda`     | Production self-hosted deployments on AWS                                                    | TypeScript/JavaScript and Python     |
+| External HTTP  | `external`       | Production deployments with your own sandboxed executor, e.g. on Kubernetes or another cloud | The languages your executor supports |
+| Local insecure | `insecure-local` | Local development and trusted deployments                                                    | TypeScript/JavaScript only           |
 
 <Callout type="warning">
-  If you do not run Langfuse on AWS, use the `insecure-local` dispatcher only
-  when all evaluator code is fully trusted. For sandboxed execution on other
-  platforms, let us know what support you need in [GitHub
-  Discussions](https://github.com/orgs/langfuse/discussions).
+  If you do not run Langfuse on AWS, use the [external HTTP
+  dispatcher](#external-dispatcher) with a sandboxed executor. Use the
+  `insecure-local` dispatcher only when all evaluator code is fully trusted.
 </Callout>
 
 ## AWS Lambda dispatcher
@@ -103,6 +103,325 @@ LANGFUSE_CODE_EVAL_AWS_LAMBDA_ENDPOINT=http://localhost:4566
 <Callout type="warning">
   Self-hosters deploying Lambda runners are responsible for isolating evaluator
   execution, including no-network-egress isolation.
+</Callout>
+
+## External HTTP dispatcher [#external-dispatcher]
+
+Use the external dispatcher to run code evaluators on an executor you operate, for example a sandboxed service on Kubernetes, another cloud, or on premises. Langfuse sends each evaluation as a signed HTTP `POST` to your endpoint and reads the scores from the response. Langfuse provides the dispatcher; you build and run the executor against the contract on this page.
+
+```mermaid
+sequenceDiagram
+  participant L as Langfuse web or worker
+  participant E as Your executor
+  participant S as Sandbox
+  L->>E: POST signed evaluation request
+  E->>E: Verify x-langfuse-signature
+  E->>S: Run evaluate(ctx)
+  S-->>E: Scores or error
+  E-->>L: 200 with scores, or 422 with error
+```
+
+<Callout type="warning">
+  Your executor runs code written by project members. Run every evaluation in
+  a sandbox with no network egress, no route to Langfuse infrastructure, no
+  credentials, and bounded CPU, memory, and runtime.
+</Callout>
+
+### Enable the dispatcher [#external-dispatcher-enable]
+
+Set these variables on both the web and the worker containers. The worker calls the executor for evaluator executions, and web calls it for test runs in the evaluator editor, so both need network access to the endpoint.
+
+```bash
+LANGFUSE_CODE_EVAL_DISPATCHER=external
+LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT=http://code-eval-executor.langfuse.svc:8080/evaluate
+LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET=<at least 32 characters>
+# Worker only
+QUEUE_CONSUMER_CODE_EVAL_EXECUTION_QUEUE_IS_ENABLED=true
+```
+
+Generate a signing secret, for example with `echo "lf-whsec_$(openssl rand -hex 32)"`, and share it with your executor. Langfuse refuses to start when the dispatcher is `external` and the endpoint or signing secret is missing or invalid.
+
+The Langfuse `docker-compose.yml` passes all `LANGFUSE_CODE_EVAL_EXTERNAL_*` variables to web and worker, so you can set them in your `.env` file. On Kubernetes, set them with `langfuse.additionalEnv` and reference the secrets from a Kubernetes Secret.
+
+### Configuration [#external-dispatcher-configuration]
+
+| Variable                                         | Default             | Description                                                                                                                                                                                                   |
+| ------------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT`           | Required            | URL that Langfuse sends evaluations to. Must use `http` or `https` and must not contain credentials. Any port is allowed, and private or in-cluster hosts work because Langfuse allowlists exactly this host. |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET`     | Required            | Secret for the `x-langfuse-signature` HMAC. At least 32 characters.                                                                                                                                           |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_HEADERS`            |                     | Extra request headers as a JSON object of strings, e.g. `{"Authorization":"Bearer <token>"}` for an API gateway. Cannot override `content-type`, `user-agent`, or `x-langfuse-signature`.                     |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS`         | `10000`             | Timeout per attempt in milliseconds, from connecting until the response body is read. Range: `1000`–`15000`.                                                                                                  |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_CONNECT_TIMEOUT_MS` | `3000`              | Timeout per attempt in milliseconds for establishing the connection, including TLS. Range: `100`–`15000`.                                                                                                     |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS`       | `3`                 | Attempts per job for retryable failures before the job goes back to the queue. Range: `1`–`10`.                                                                                                               |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES`          | `PYTHON,TYPESCRIPT` | Comma-separated languages your executor supports. The UI only offers evaluator templates in these languages, and the worker rejects other languages with `UNSUPPORTED_RUNTIME` before sending a request.      |
+
+<Callout type="info">
+  The signing secret and extra headers are plain environment variables.
+  Langfuse does not store them, but anyone who can read the web or worker
+  environment can read them. Store them in your secret manager, e.g. a
+  Kubernetes Secret. Requests to the executor connect directly and do not
+  use `HTTPS_PROXY`. Use `https` when requests leave a trusted network, because
+  the body contains evaluator code and trace data.
+</Callout>
+
+### Request [#external-dispatcher-request]
+
+Langfuse sends one `POST` per attempt with these headers:
+
+```http
+POST /evaluate HTTP/1.1
+content-type: application/json
+user-agent: Langfuse/1.0
+x-langfuse-signature: t=1762770000,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd
+Authorization: Bearer <token>
+```
+
+The last header comes from `LANGFUSE_CODE_EVAL_EXTERNAL_HEADERS`. The body looks like this:
+
+```json
+{
+  "apiVersion": "v1",
+  "scope": {
+    "organizationId": "org-id",
+    "projectId": "project-id",
+    "evaluatorId": "evaluator-id"
+  },
+  "runtime": { "language": "PYTHON" },
+  "execution": { "jobExecutionId": "job-execution-id" },
+  "code": {
+    "source": "def evaluate(ctx):\n    return EvaluationResult(scores=[...])"
+  },
+  "payload": {
+    "observation": {
+      "input": "What is the capital of France?",
+      "output": "Paris",
+      "metadata": {},
+      "toolCalls": [
+        {
+          "id": "call_1",
+          "name": "search",
+          "arguments": { "query": "capital of France" },
+          "type": "function",
+          "index": 0
+        }
+      ]
+    },
+    "experiment": {
+      "itemExpectedOutput": "Paris",
+      "itemMetadata": {}
+    }
+  }
+}
+```
+
+| Field                      | Description                                                                                                                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apiVersion`               | Contract version, currently `v1`. Like the [prompt webhook payloads](/docs/prompt-management/features/webhooks-slack-integrations), the version is only in the body. New optional fields keep the version, so ignore unknown fields. Breaking changes get a new version.       |
+| `scope`                    | Organization, project, and evaluator IDs, e.g. for logging, quotas, or routing.                                                                                                                                                                                                |
+| `runtime.language`         | `PYTHON` or `TYPESCRIPT`.                                                                                                                                                                                                                                                      |
+| `execution.jobExecutionId` | Identifies the evaluation and stays the same across retries. Use it as an idempotency key.                                                                                                                                                                                     |
+| `code.source`              | Evaluator source code that defines `evaluate`.                                                                                                                                                                                                                                 |
+| `payload`                  | Data for the `ctx` argument of `evaluate`, in camelCase. `experiment` is only present when the evaluator runs on an experiment. See the [function contract](/docs/evaluation/evaluation-methods/code-evaluators#function-contract) for how `ctx` is exposed to evaluator code. |
+
+The request body is at most 5.5 MB, including evaluator source code of at most 256 KB.
+
+### Verify the signature [#external-dispatcher-signature]
+
+`x-langfuse-signature` uses the same scheme as [prompt webhooks](/docs/prompt-management/features/webhooks-slack-integrations): `t=<unix seconds>,v1=<hex HMAC-SHA256 of "<t>.<raw body>">`, keyed with `LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET`. Langfuse signs every attempt again, so retries carry a fresh timestamp.
+
+Verify the signature over the raw request bytes before parsing the JSON, compare in constant time, and reject old timestamps to block replayed requests:
+
+<LangTabs items={["Python", "TypeScript"]}>
+<Tab>
+
+```python
+# signature.py
+import hashlib
+import hmac
+import time
+
+TOLERANCE_SECONDS = 300
+
+
+def verify_signature(raw_body: bytes, header: str, secret: str) -> bool:
+    parts = dict(part.split("=", 1) for part in header.split(",") if "=" in part)
+    timestamp, signature = parts.get("t", ""), parts.get("v1", "")
+    if not timestamp.isdigit() or abs(time.time() - int(timestamp)) > TOLERANCE_SECONDS:
+        return False
+
+    signed_payload = timestamp.encode() + b"." + raw_body
+    expected = hmac.new(secret.encode(), signed_payload, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, signature)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+const TOLERANCE_SECONDS = 300;
+
+export function verifySignature(
+  rawBody: Buffer,
+  header: string,
+  secret: string,
+): boolean {
+  const parts = new URLSearchParams(header.replaceAll(",", "&"));
+  const timestamp = parts.get("t") ?? "";
+  const ageSeconds = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!/^\d+$/.test(timestamp) || ageSeconds > TOLERANCE_SECONDS) return false;
+
+  const expected = createHmac("sha256", secret)
+    .update(`${timestamp}.`)
+    .update(rawBody)
+    .digest();
+  const received = Buffer.from(parts.get("v1") ?? "", "hex");
+  return (
+    received.length === expected.length && timingSafeEqual(received, expected)
+  );
+}
+```
+
+</Tab>
+</LangTabs>
+
+### Response [#external-dispatcher-response]
+
+On success, return a 2xx status with a JSON body of at least one score. Scores use the fields from the [function contract](/docs/evaluation/evaluation-methods/code-evaluators#function-contract), in camelCase:
+
+```json
+{
+  "scores": [
+    {
+      "name": "Exact match",
+      "value": true,
+      "dataType": "BOOLEAN",
+      "comment": "Output exactly matches the expected output."
+    }
+  ]
+}
+```
+
+When the evaluator code fails, return `422` (or a 2xx) with an error envelope. Use `USER_CODE_ERROR`, `INVALID_SOURCE`, `INVALID_RESULT`, `TIMEOUT`, `OUT_OF_MEMORY`, or `UNSUPPORTED_RUNTIME` as the code. The message is shown to the user on the failed execution.
+
+```json
+{
+  "error": {
+    "code": "USER_CODE_ERROR",
+    "message": "ValueError: boom (line 2)"
+  }
+}
+```
+
+Langfuse handles responses like this:
+
+| Response                                                                                               | Error code                     | Retried |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------ | ------- |
+| 2xx with valid `scores`                                                                                | None, the scores are stored    | –       |
+| `422` or 2xx with an error envelope                                                                    | The code from the envelope     | No      |
+| 2xx with JSON that is neither valid scores nor an error envelope                                       | `INVALID_RESULT`               | No      |
+| 2xx or `422` with a body larger than 256 KB                                                            | `RESULT_TOO_LARGE`             | No      |
+| `413`                                                                                                  | `PAYLOAD_TOO_LARGE`            | No      |
+| `408`, `425`, `429`, 5xx, network or DNS errors, connect or request timeouts                           | `EXTERNAL_INVOCATION_ERROR`    | Yes     |
+| 3xx, any other 4xx such as `401` or `404`, a body that is not JSON, or `422` without an error envelope | `EXTERNAL_CONFIGURATION_ERROR` | No      |
+
+A response with valid scores is accepted even if it also contains an `error` field. Users see a generic internal error for `EXTERNAL_INVOCATION_ERROR` and `EXTERNAL_CONFIGURATION_ERROR`; the details are in the Langfuse logs.
+
+<Callout type="warning">
+  Enforce your own runtime limit per evaluation, below
+  `LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS`, and report it as a `TIMEOUT` error
+  envelope. When the Langfuse timeout fires first, Langfuse treats it as an
+  executor outage and retries, which runs the evaluator code again.
+</Callout>
+
+### Retries, timeouts, and redirects [#external-dispatcher-retries]
+
+- **Attempts.** Langfuse retries retryable failures up to `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS` times, with exponential backoff and full jitter, starting at 100 ms and capped at 2 seconds. Each attempt has its own timeouts and a fresh signature.
+- **Queue retries.** When all attempts of a worker execution fail, the code evaluator queue retries the job up to two more times, about 30 and 60 seconds later. Test runs from the evaluator editor are not queued. With the defaults, one evaluation can reach your executor up to nine times, so deduplicate on `execution.jobExecutionId`.
+- **Redirects.** Langfuse never follows redirects and treats any 3xx as a configuration error. Point `LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT` at the final URL.
+
+### Example executor [#external-dispatcher-example]
+
+This minimal Python executor uses only the standard library. It verifies the signature with `signature.py` from [Verify the signature](#external-dispatcher-signature) and runs the evaluator with the Langfuse Python runner, [`code_based_eval_handler.py`](https://github.com/langfuse/langfuse/blob/main/scripts/code-eval-runners/python/code_based_eval_handler.py). The runner accepts the request body as its event and returns either `scores` or an error envelope. Put both files next to `executor.py` and set `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES=PYTHON`.
+
+```python
+# executor.py
+import json
+import os
+import subprocess
+import sys
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+from signature import verify_signature
+
+SIGNING_SECRET = os.environ["LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET"]
+# Keep this below LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS.
+EVAL_TIMEOUT_SECONDS = 2
+
+# Runs the Langfuse Python runner on the request from stdin. User code that
+# prints is redirected to stderr so stdout only carries the result.
+RUNNER = """
+import json, sys
+result_stream, sys.stdout = sys.stdout, sys.stderr
+from code_based_eval_handler import handler
+result_stream.write(json.dumps(handler(json.load(sys.stdin), None)))
+"""
+
+
+def user_error(code: str, message: str):
+    return 422, {"error": {"code": code, "message": message}}
+
+
+def evaluate(body: bytes):
+    request = json.loads(body)
+    if request.get("apiVersion") != "v1":
+        return 400, {"message": "Unsupported apiVersion"}
+    if request["runtime"]["language"] != "PYTHON":
+        return user_error("UNSUPPORTED_RUNTIME", "Only Python is supported")
+
+    try:
+        # A subprocess is not a sandbox. Run this in your isolated runtime.
+        completed = subprocess.run(
+            [sys.executable, "-c", RUNNER],
+            input=body,
+            capture_output=True,
+            timeout=EVAL_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        return user_error("TIMEOUT", f"Evaluator exceeded {EVAL_TIMEOUT_SECONDS}s")
+    if completed.returncode != 0:
+        return user_error("USER_CODE_ERROR", "Evaluator process exited early")
+
+    result = json.loads(completed.stdout)
+    return (422 if "error" in result else 200), result
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        body = self.rfile.read(int(self.headers.get("content-length", 0)))
+        signature = self.headers.get("x-langfuse-signature", "")
+        if verify_signature(body, signature, SIGNING_SECRET):
+            status, payload = evaluate(body)
+        else:
+            status, payload = 401, {"message": "Invalid signature"}
+
+        data = json.dumps(payload).encode()
+        self.send_response(status)
+        self.send_header("content-type", "application/json")
+        self.send_header("content-length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+
+ThreadingHTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
+```
+
+<Callout type="warning">
+  This sketch shows the contract only. A subprocess shares the executor's
+  network, filesystem, and credentials, so replace it with a real sandbox, such
+  as a gVisor or Firecracker workload without network egress, before you run
+  untrusted evaluator code.
 </Callout>
 
 ## Local insecure dispatcher

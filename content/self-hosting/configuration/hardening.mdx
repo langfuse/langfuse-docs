@@ -118,6 +118,7 @@ Webhook deliveries are additionally restricted to ports 80 and 443, and sensitiv
 
 - `insecure-local` runs evaluator code in-process on the worker via `node:vm`, which is **not a security boundary** — evaluator code can reach everything the worker can, including your databases, queues, and cloud credentials. Only use it when everyone who can create evaluators is fully trusted.
 - `aws-lambda` dispatches evaluator code to Lambda functions you deploy, keeping execution out of the worker process. Langfuse Cloud uses this dispatcher with executor functions running in an isolated network without egress to internal services; apply the same principle when deploying your own — give the functions no network route back into your infrastructure.
+- `external` sends evaluator code to an HTTP executor you operate, as a signed request. The isolation boundary is whatever sandbox your executor uses, so run each evaluation without network egress, credentials, or a route back into your infrastructure.
 
 See [Code evaluators (self-hosted)](/self-hosting/configuration/code-evaluators) for the full dispatcher setup.
 
