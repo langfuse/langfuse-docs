@@ -26,7 +26,7 @@ As an admin, you can manage which models are allowed to be used. This page expla
 
 ### Amazon Bedrock [#amazon-bedrock]
 
-A Bedrock credential takes an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and an AWS region. To list the available models, the API key needs the `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` permissions.
+A Bedrock credential takes an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and an AWS region. To list the available models, the API key needs the `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` permissions. Alternatively, you can add custom models to the credential on its models page.
 
 Bedrock model IDs always need the credential prefix, for example `bedrock-prod:<bedrock-model-id>`, because unprefixed `claude-` IDs never reach a Bedrock credential. For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the inference profile ID, for example `bedrock-prod:global.<bedrock-model-id>`.
 
