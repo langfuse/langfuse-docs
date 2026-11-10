@@ -1,6 +1,6 @@
 ---
 date: 2026-11-10
-title: Amazon Bedrock in the AI Gateway
+title: Call Amazon Bedrock models through the AI Gateway
 description: Add an Amazon Bedrock API key as an AI Gateway provider credential and call Bedrock models, including cross-region inference profiles, through the gateway.
 author: Tobias Wochinger
 ---
@@ -12,7 +12,7 @@ import { Book } from "lucide-react";
 
 You can now add Amazon Bedrock as a provider credential in the [Langfuse AI Gateway](/changelog/2026-11-04-ai-gateway-public-beta), next to OpenAI and Anthropic. Gateway keys then call Bedrock models in your AWS account, and every call is traced like any other gateway request.
 
-- **Run Claude Code on Bedrock.** Claude models on Bedrock use the gateway's Anthropic Messages route, so your coding agent only needs a gateway key.
+- **Call Claude and other Bedrock models with your existing SDK.** Claude models on Bedrock use the gateway's Anthropic Messages route, and other models the OpenAI routes. Select a [Bedrock model ID](/docs/gateway/features/models#bedrock-model-ids) with the credential prefix, for example `bedrock-prod:<bedrock-model-id>`.
 - **Bill model usage to your AWS account.** The gateway calls Bedrock with your own API key, so usage counts toward your existing AWS agreement.
 - **Choose where requests run.** Pick the AWS region when you add the credential, or call a model by its inference profile ID with a `us.` or `global.` prefix for cross-region inference, for example `bedrock-prod:global.<bedrock-model-id>`.
 

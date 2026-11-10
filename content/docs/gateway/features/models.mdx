@@ -45,7 +45,7 @@ Model IDs have the form `<credential>:<model>`, for example `openai-prod:<model>
 
 ### Bedrock model IDs [#bedrock-model-ids]
 
-Bedrock models always need the credential prefix, followed by the Bedrock model ID, for example `bedrock-prod:<bedrock-model-id>`. Claude models on Bedrock use the Anthropic Messages route; other models use the OpenAI Responses or Chat Completions route, depending on what Bedrock serves for them.
+Bedrock models always need the credential prefix, followed by the Bedrock model ID, for example `bedrock-prod:<bedrock-model-id>`. IDs without a prefix, such as the `claude-` IDs coding agents send by default, never reach a Bedrock credential, so set the prefixed ID as the client's model. Claude models on Bedrock use the Anthropic Messages route; other models use the OpenAI Responses or Chat Completions route, depending on what Bedrock serves for them.
 
 For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the model's inference profile ID: the model ID with a geography prefix, such as `us.` or `global.`, for example `bedrock-prod:global.<bedrock-model-id>`. Some newer models can only be called this way.
 
