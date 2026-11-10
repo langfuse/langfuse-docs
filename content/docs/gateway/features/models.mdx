@@ -16,6 +16,20 @@ As an admin, you can manage which models are allowed to be used. This page expla
   ![Providers & Models page on the Models tab with a searchable model list filtered to one provider credential, an Enabled switch per model, and Enable all and Disable all buttons](/images/docs/ai-gateway/models-manage.png)
 </Frame>
 
+## Supported providers [#supported-providers]
+
+| Provider       | API formats                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| OpenAI         | OpenAI Responses, OpenAI Chat Completions                                                   |
+| Anthropic      | Anthropic Messages                                                                          |
+| Amazon Bedrock | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models |
+
+### Amazon Bedrock [#amazon-bedrock]
+
+A Bedrock credential takes an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and an AWS region. To list the available models, the API key needs the `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` permissions. Alternatively, you can add custom models to the credential on its models page.
+
+Bedrock model IDs always need the credential prefix, for example `bedrock-prod:<bedrock-model-id>`, because unprefixed `claude-` IDs never reach a Bedrock credential. For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the inference profile ID, for example `bedrock-prod:global.<bedrock-model-id>`.
+
 ## Available models [#available-models]
 
 You can find a list of every model gateway keys can call under **AI Gateway → Providers & Models → Models**. Everyone with gateway access can open this page, including Viewers and the AI Gateway role.
