@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getGitHubStars } from "@/lib/github-stars";
 import {
   DOCKER_PULLS,
@@ -11,10 +12,13 @@ export const CredibilitySentence = ({
   bold = true,
   className = "mt-6",
   style = "paragraph",
+  linkAdoption = false,
 }: {
   bold?: boolean;
   className?: string;
   style?: "paragraph" | "list";
+  /** Compare index only: lead with the /adoption claim, then the same metrics. */
+  linkAdoption?: boolean;
 }) => {
   const Metric = bold ? "strong" : "span";
   const metricClassName = bold ? "font-semibold" : "";
@@ -58,7 +62,23 @@ export const CredibilitySentence = ({
 
   return (
     <p className={className}>
-      Langfuse is the most widely adopted LLM Engineering platform, used by{" "}
+      {linkAdoption ? (
+        <>
+          Langfuse is the{" "}
+          <Link
+            href="/adoption"
+            className="underline decoration-line-cta underline-offset-4 hover:text-text-primary"
+          >
+            most used open-source LLM engineering platform
+          </Link>
+          . It is used by{" "}
+        </>
+      ) : (
+        <>
+          Langfuse is the most widely adopted LLM Engineering platform, used
+          by{" "}
+        </>
+      )}
       <Metric className={metricClassName}>
         {formatCompanyCount()} companies
       </Metric>

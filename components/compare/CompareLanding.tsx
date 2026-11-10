@@ -156,6 +156,7 @@ export function CompareLanding() {
             <CredibilitySentence
               className="text-pretty text-[16px] leading-[1.5] text-text-secondary"
               bold={false}
+              linkAdoption
             />
             {heroParagraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
