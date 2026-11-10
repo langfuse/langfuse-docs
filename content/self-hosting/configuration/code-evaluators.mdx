@@ -327,12 +327,6 @@ A response with valid scores is accepted even if it also contains an `error` fie
   executor outage and retries, which runs the evaluator code again.
 </Callout>
 
-### Retries, timeouts, and redirects [#external-dispatcher-retries]
-
-- **Attempts.** Langfuse retries retryable failures up to `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS` times, with exponential backoff and full jitter, starting at 100 ms and capped at 2 seconds. Each attempt has its own timeouts and a fresh signature.
-- **Queue retries.** When all attempts of a worker execution fail, the code evaluator queue retries the job up to two more times, about 30 and 60 seconds later. Test runs from the evaluator editor are not queued. With the defaults, one evaluation can reach your executor up to nine times, so deduplicate on `execution.jobExecutionId`.
-- **Redirects.** Langfuse never follows redirects and treats any 3xx as a configuration error. Point `LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT` at the final URL.
-
 ## Local insecure dispatcher
 
 For local development and trusted production environments, you can run code evaluators in the worker process:
