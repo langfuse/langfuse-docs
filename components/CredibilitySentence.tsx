@@ -23,7 +23,7 @@ export const CredibilitySentence = ({
     <>
       Langfuse is the{" "}
       <Link href="/adoption" variant="underline">
-        most used open-source LLM engineering platform
+        most widely adopted open-source LLM engineering platform
       </Link>
     </>
   );
