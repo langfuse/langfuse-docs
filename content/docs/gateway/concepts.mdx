@@ -19,7 +19,7 @@ The gateway serves as a layer between the user's AI requests and the model provi
 
 <AiGatewayArchitectureDiagram />
 
-On Langfuse Cloud, Langfuse runs the gateway in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/gateway/features/rest-api#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to OpenAI, Anthropic, or Amazon Bedrock and processed under your agreement with them.
+On Langfuse Cloud, Langfuse runs the gateway in the EU, US, JP, and HIPAA regions, each with its own [gateway host](/docs/gateway/features/rest-api#gateway-hosts). Gateway traces are stored in your organization's Langfuse region. Requests are forwarded to your model providers and processed under your agreement with them.
 
 On self-hosted Langfuse, the gateway is a separate service that you deploy next to your instance. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
 
@@ -49,9 +49,8 @@ An organization can add several provider credentials, including more than one pe
 
 <Callout type="info">
   The gateway doesn't convert one API format into the other, so a client that
-  uses the OpenAI API can only call OpenAI models, or [Bedrock
-  models](/docs/gateway/features/models#bedrock-model-ids) that Bedrock serves
-  on the OpenAI API.
+  uses the OpenAI API can only call models from providers that support it, see
+  [model IDs](/docs/gateway/features/models#model-ids).
 </Callout>
 
 **The model ID decides the credential.** Each model ID starts with the name of a credential, in the form `<credential>:<model>`. For example, `openai-prod:<model>` calls `<model>` with the credential named `openai-prod`.
