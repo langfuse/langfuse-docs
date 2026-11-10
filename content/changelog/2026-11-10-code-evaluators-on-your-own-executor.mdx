@@ -1,7 +1,7 @@
 ---
 date: 2026-11-10
 title: Run code evaluators on your own executor
-description: Self-hosted Langfuse can send code evaluators to an HTTP executor you operate, with HMAC-signed requests, retries, and a versioned contract.
+description: Self-hosted Langfuse can send code evaluators to an HTTP executor you operate.
 author: Tobias Wochinger
 ---
 
@@ -10,13 +10,7 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-Self-hosted Langfuse can now run [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on any sandbox you operate. Set `LANGFUSE_CODE_EVAL_DISPATCHER=external` and an endpoint, and Langfuse sends each evaluation as a signed HTTP `POST` and stores the scores your executor returns. You can use it to:
-
-- Run Python and TypeScript evaluators in a gVisor or Firecracker sandbox on Kubernetes.
-- Use code evaluators on GCP, Azure, or on premises, without AWS Lambda.
-- Route evaluations through your API gateway with extra headers such as `Authorization`.
-
-Requests carry the same `x-langfuse-signature` HMAC as webhooks and a versioned body (`apiVersion: "v1"`). Langfuse retries timeouts, 5xx, and 429 responses with backoff, and never follows redirects. The docs include the full request and response contract and a minimal example executor.
+Self-hosted Langfuse can now run [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on an executor you operate. Set `LANGFUSE_CODE_EVAL_DISPATCHER=external` and an endpoint, and Langfuse sends each evaluation over HTTP and stores the returned scores. This lets you run code evaluators on GCP, Azure, or on premises, without AWS Lambda.
 
 <Cards num={1}>
   <Card
