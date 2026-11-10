@@ -25,9 +25,23 @@ const TEXT_EXTENSIONS = new Set([
 
 const EXCLUDE_PREFIXES = ["public/"];
 const EXCLUDE_FILES = new Set(["pnpm-lock.yaml", "package-lock.json"]);
+// This script spells out the escaped forms it bans.
+const SELF = path.relative(process.cwd(), __filename).split(path.sep).join("/");
 
-// Middle dot (U+00B7) plus lookalikes. Japanese katakana middle dot (U+30FB) is allowed.
-const BANNED = /[\u00B7\u2219\u22C5]/g;
+// Middle dot (U+00B7) plus lookalikes, as raw characters, HTML entities, or
+// JS/Python escapes. Japanese katakana middle dot (U+30FB) is allowed.
+const BANNED = new RegExp(
+  [
+    "[\\u00B7\\u2219\\u22C5]",
+    "&(?:middot|centerdot|sdot);",
+    "&#0*(?:183|8729|8901);",
+    "&#x0*(?:b7|2219|22c5);",
+    "\\\\u0*(?:00b7|2219|22c5)",
+    "\\\\u\\{0*(?:b7|2219|22c5)\\}",
+    "\\\\xb7",
+  ].join("|"),
+  "gi",
+);
 
 // Proper nouns whose official spelling contains a middle dot.
 const ALLOWED_WORDS = ["DALL\u00B7E"];
@@ -43,6 +57,7 @@ function listTrackedFiles(root) {
     .filter(Boolean)
     .filter((file) => TEXT_EXTENSIONS.has(path.extname(file)))
     .filter((file) => !EXCLUDE_FILES.has(path.basename(file)))
+    .filter((file) => file !== SELF)
     .filter(
       (file) => !EXCLUDE_PREFIXES.some((prefix) => file.startsWith(prefix)),
     );
