@@ -698,7 +698,15 @@ The test files above run in any CI system that can install Python or Node.js. Ea
 - Set `APP_VERSION` to the commit under test, so every experiment in Langfuse links back to a specific change.
 - Fail the job when the test fails. Pytest and Vitest exit with a non-zero code on a failed assertion, which fails the pipeline.
 
-The examples use the Python SDK and Pytest. For the JS/TS SDK, install your Node.js dependencies instead and replace the `pytest` command with `npx vitest run test/application-experiment.test.ts`.
+The examples use the Python SDK and Pytest. For the JS/TS SDK, make three changes in either pipeline:
+
+- Use a Node.js image, for example `node:24`, instead of `python:3.14`.
+- Replace the two `pip install` commands with `npm ci`.
+- Replace the `pytest` command with a Vitest command that writes the same JUnit file:
+
+```bash
+npx vitest run test/application-experiment.test.ts --reporter=default --reporter=junit --outputFile.junit=langfuse-experiment.xml
+```
 
 #### GitLab CI
 
@@ -721,7 +729,7 @@ langfuse-experiment:
       junit: langfuse-experiment.xml
 ```
 
-The JUnit report shows each failed case in the merge request. The experiment link printed by `result.format()` appears in the job log.
+The JUnit report shows the experiment as one test in the merge request. If several cases fail, it reports only the first assertion failure. Follow the experiment link printed by `result.format()` in the job log to inspect all case results in Langfuse.
 
 #### Jenkins
 
