@@ -1,6 +1,6 @@
 ---
 title: Billable Units
-description: Learn how billable units are calculated and monitor organization usage by project or type, with CSV export.
+description: Learn how billable units are calculated and monitor usage across your organization and within individual projects.
 ---
 
 # Billable Units
@@ -9,76 +9,54 @@ Langfuse [pricing](/pricing) is based on the number of ingested units per billin
 
 `Units` = `Count of Traces` + `Count of Observations` + `Count of Scores`
 
-## Monitor organization usage [#monitor-organization-usage]
+On Langfuse Cloud, use the [pricing calculator](/pricing?calculatorOpen=true) to estimate your monthly costs. Self-hosted Langfuse (OSS) is free under the MIT license, with no usage-based billing; for self-hosted Enterprise, billable units are one component of the pricing. Unit counts also help you estimate data volume when sizing a self-hosted deployment.
 
-The **Usage breakdown** chart shows unit counts across your organization's projects over time. Use it to investigate usage spikes and understand which projects contribute to your total.
+## Monitor usage [#monitor-usage]
 
-### Where to find it
+You can monitor the same unit types at two levels: across your organization to see which projects drive usage, and within a project to inspect its trace, observation, and score counts. Both views are available on Langfuse Cloud and self-hosted deployments.
 
-Open your organization settings, then select the page for your deployment:
+Start with the organization overview when investigating a usage increase, then open the relevant project's dashboard for more detail. If you already know which project to inspect, go directly to its dashboard.
+
+<Steps>
+
+### Compare usage across projects [#monitor-organization-usage]
+
+In **Organization Settings**, open the page for your deployment. Its **Usage breakdown** chart shows unit counts across all projects in the organization.
 
 | Deployment     | Page        | Required organization role |
 | -------------- | ----------- | -------------------------- |
 | Langfuse Cloud | **Billing** | Owner                      |
 | Self-hosted    | **Usage**   | Owner or Admin             |
 
-On Cloud, the chart appears alongside your plan, invoices, and billing period usage. Self-hosted deployments show usage without Cloud billing information.
-
 <Frame>
   ![Organization usage breakdown showing daily unit counts stacked by project, with By project and By type controls, a date range selector, and CSV download](/images/changelog/2026-10-06-organization-usage-breakdown.png)
 </Frame>
 
-### Explore and export usage
+- **Select a time range.** Presets span **Past 1 day** through **Past 1 year**, with hourly, daily, weekly, or monthly buckets chosen automatically. All buckets use UTC.
+- **Choose a grouping.** Select **By project** to identify projects driving a spike, or **By type** to compare traces, observations, and scores.
+- **Export the data.** Use **Download as CSV** for offline analysis or allocating usage across teams. Each row represents a time bucket, project, and unit type.
 
-1. **Select a time range.** Presets span **Past 1 day** through **Past 1 year**. Custom ranges can cover up to one year. Bar intervals adjust automatically between hourly, daily, weekly, and monthly buckets, all in UTC.
-2. **Choose a grouping.** Select **By project** to identify projects driving a spike, then open a project to investigate. Select **By type** to compare traces, observations, and scores.
-3. **Export the data.** Use **Download as CSV** for offline analysis or allocating usage across teams. Each row represents a time bucket, project, and unit type.
+<Callout type="info">
+  Custom date ranges can cover up to one year.
+</Callout>
 
-For email notifications about your Langfuse Cloud bill, configure [spend alerts](/docs/administration/spend-alerts).
+### Inspect usage within a project [#project-usage]
 
-## Langfuse Cloud
+Open a project you have access to, go to **Dashboards**, and select **Langfuse Usage Management**, one of Langfuse's [curated dashboards](/docs/metrics/features/custom-dashboards). This view counts units for that project only.
 
-For Langfuse Cloud, you can use our [pricing calculator](/pricing?calculatorOpen=true) to estimate your monthly costs based on your expected usage.
-
-## Self-hosted (OSS/Enterprise)
-
-Self-hosted Langfuse (OSS) is free under the MIT license, so there is no usage-based billing. For self-hosted Langfuse Enterprise, billable units are one component of the pricing.
-
-The unit definition above is still useful when you want to quantify your data volume, for example to estimate the cost of moving to [Langfuse Cloud](/pricing) or to size a [self-hosted](/self-hosting) deployment.
-
-For organization totals across projects, use the [Usage breakdown chart](#monitor-organization-usage). To inspect a single project's unit counts, you can also use the built-in **Langfuse Usage Management** dashboard, one of Langfuse's curated dashboards (see [Custom Dashboards](/docs/metrics/features/custom-dashboards)).
-
-<Steps>
-
-### Open the dashboard
-
-In your Langfuse project, go to **Dashboards** and open **Langfuse Usage Management**.
-
-<Frame>
-  ![List of Langfuse dashboards including the maintained Langfuse Usage Management dashboard](/images/docs/self-hosted-usage-management-dashboards-list.png)
-</Frame>
-
-### Select the last 30 days
-
-Set the date range to the last 30 days to capture a month of usage.
-
-### Sum the counts
-
-Add the count widgets together to get your monthly units:
-
-- **Total Trace Count**
-- **Total Observation Count**
-- **Total Score Count** (add the numeric and categorical widgets)
+Select the same date range as the organization chart to inspect the period that caught your attention. To estimate a month of usage for this project, select the last 30 days and add **Total Trace Count**, **Total Observation Count**, and **Total Score Count** (including both numeric and categorical score widgets).
 
 <Frame>
   ![Langfuse Usage Management dashboard showing total trace, observation, and score counts](/images/docs/self-hosted-usage-management-dashboard.png)
 </Frame>
 
-</Steps>
-
 For the example above:
 
 `Units` = `20,070 Traces` + `119,500 Observations` + `561 Scores` = `140,131 units / month` (≈ `1,681,572 units / year`)
+
+</Steps>
+
+On Langfuse Cloud, you can also configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when your organization's bill crosses a monetary threshold.
 
 ## FAQ
 
@@ -87,7 +65,7 @@ For the example above:
 <Details>
 <Summary>How can I track my usage in Langfuse Cloud?</Summary>
 
-Organization owners can open **Organization Settings → Billing** to [monitor organization usage](#monitor-organization-usage), compare projects and unit types, and export the data as CSV. For a single project, open **Dashboards → Langfuse Usage Management**. Configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when your Cloud bill crosses a monetary threshold.
+Follow the [usage monitoring flow](#monitor-usage) above to start with an organization overview or inspect an individual project.
 
 </Details>
 
