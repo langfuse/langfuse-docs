@@ -172,10 +172,10 @@ function NeedHelpFooter() {
       Need help? —{" "}
       <a href="/talk-to-us" className={linkClassName}>
         Talk to Sales
-      </a>
-      <span className="mr-1.5 text-text-tertiary">,</span>
+      </a>{" "}
+      or{" "}
       <a href="/support" className={linkClassName}>
-        Reach out to Support
+        reach out to Support
       </a>
     </Text>
   );

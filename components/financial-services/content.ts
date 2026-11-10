@@ -247,7 +247,7 @@ export const financialServicesUseCases = [
     icon: "messages-square" as const,
     description:
       "Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.",
-    proof: "DKB, Germany's largest digital bank, 20,000 conversations / day",
+    proof: "DKB, Germany's largest digital bank: 20,000 conversations / day",
     proofHref: "/users/dkb",
     featured: true,
   },

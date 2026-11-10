@@ -15,7 +15,7 @@ For healthcare and life sciences teams: go live faster, spend less time on manua
 - **Quality gates and evidence for audits:** Evaluate changes with datasets and experiments before going live, and keep traces and scores for review.
 - **One platform for every AI team:** Orchestrate one platform for tracing, evals, and cost tracking across teams. Govern centrally across the org.
 
-[ISO 27001](/security/iso27001), [SOC 2](/security/soc2), [GDPR](/security/gdpr), [HIPAA](/security/hipaa), [HIPAA-ready, BAA available](/security/hipaa), [MIT, open source](/handbook/chapters/open-source), [Security & compliance](/security)
+[ISO 27001](/security/iso27001), [SOC 2](/security/soc2), [GDPR](/security/gdpr), [HIPAA](/security/hipaa), [HIPAA-ready, BAA available](/security/hipaa), [Open source (MIT)](/handbook/chapters/open-source), [Security & compliance](/security)
 
 ## Talk to a healthcare and life sciences expert at Langfuse
 
@@ -116,13 +116,13 @@ Catch failing claim steps early, before they become manual rework, and keep a tr
 
 Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.
 
-Evolve, Rest sleep coach
+Evolve: Rest sleep coach
 
 ### [Internal platform teams](/users/merckgroup)
 
 Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.
 
-Merck Group, 80+ use cases on Langfuse
+Merck Group: 80+ use cases on Langfuse
 
 ## Learn how to ship reliable agents in healthcare and life sciences
 

@@ -96,7 +96,7 @@ function Hero() {
 
         <div className="relative flex flex-col gap-6">
           <div className="japan-eyebrow">
-            Langfuse Cloud, ap-northeast-1, 東京
+            Langfuse Cloud: ap-northeast-1 (東京)
           </div>
           <h1 className="japan-h1">
             Langfuse Cloud、

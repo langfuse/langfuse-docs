@@ -85,7 +85,7 @@ export function ObservationsTableDiagram() {
                   Observation-level data
                 </th>
                 <th colSpan={4} className="obs-table__group obs-table__trace">
-                  Trace-level data, on every row
+                  Trace-level data on every row
                 </th>
               </tr>
               <tr>

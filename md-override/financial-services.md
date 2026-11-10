@@ -15,7 +15,7 @@ Observe and evaluate AI agents across your institution. Give engineering, platfo
 - **Flag potential policy violations:** with evals that score outputs against your policies and regulations.
 - **Self-host or air-gap:** deploy with no internet access, lock to internal users via VPN to cater for data sensitivity needs.
 
-[ISO 27001](/security/iso27001), [SOC 2](/security/soc2), [GDPR](/security/gdpr), [MIT, open source](/handbook/chapters/open-source), [Government: FIPS 140-3 & Iron Bank-hardened images](/self-hosting/configuration/hardening#hardening-for-government), [Security & compliance](/security)
+[ISO 27001](/security/iso27001), [SOC 2](/security/soc2), [GDPR](/security/gdpr), [Open source (MIT)](/handbook/chapters/open-source), [Government: FIPS 140-3 & Iron Bank-hardened images](/self-hosting/configuration/hardening#hardening-for-government), [Security & compliance](/security)
 
 ## Talk to a financial services expert at Langfuse
 
@@ -131,7 +131,7 @@ Trace agents that combine identity, fraud and credit-bureau checks into a risk s
 
 Raise autonomy rate of AI support agents: the share of cases resolved without human intervention. Trace edge cases, score good/bad runs, and iterate so agents cover more of the long tail safely.
 
-[DKB, Germany's largest digital bank, 20,000 conversations / day](/users/dkb)
+[DKB, Germany's largest digital bank: 20,000 conversations / day](/users/dkb)
 
 ### [Govern coding agents across the whole engineering organization](/coding-agents)
 

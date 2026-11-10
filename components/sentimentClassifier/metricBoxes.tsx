@@ -154,7 +154,7 @@ export const CompareMetricBoxes = ({
         <span className="text-text-secondary">
           <span className="font-medium text-text-primary">Latency</span> Jev{" "}
           <MetricValue metric={latency.jev} format={formatLatencyMs} />
-          <span className="text-muted-foreground">, </span>
+          <span className="text-muted-foreground"> vs </span>
           Luna <MetricValue metric={latency.luna} format={formatLatencyMs} />
           {latencySummary && (
             <span className="ml-1.5 font-medium text-text-primary">
@@ -165,7 +165,7 @@ export const CompareMetricBoxes = ({
         <span className="text-text-secondary">
           <span className="font-medium text-text-primary">Cost</span> Jev{" "}
           <MetricValue metric={cost.jev} format={formatCostUsd} />
-          <span className="text-muted-foreground">, </span>
+          <span className="text-muted-foreground"> vs </span>
           Luna <MetricValue metric={cost.luna} format={formatCostUsd} />
           {costSummary && (
             <span className="ml-1.5 font-medium text-text-primary">

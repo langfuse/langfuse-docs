@@ -252,7 +252,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     icon: "mic",
     description:
       "Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.",
-    proof: "Evolve, Rest sleep coach",
+    proof: "Evolve: Rest sleep coach",
     href: "/users/evolve",
     featured: true,
   },
@@ -262,7 +262,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     icon: "users",
     description:
       "Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.",
-    proof: "Merck Group, 80+ use cases on Langfuse",
+    proof: "Merck Group: 80+ use cases on Langfuse",
     href: "/users/merckgroup",
     featured: true,
   },
