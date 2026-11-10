@@ -135,7 +135,9 @@ const GlossaryEntry = ({ term }: { term: GlossaryTerm }) => {
               Related:
             </span>
             {term.relatedTerms.map((rt) => (
-              <RelatedTermLink key={rt} termId={rt} />
+              <React.Fragment key={rt}>
+                <RelatedTermLink termId={rt} />
+              </React.Fragment>
             ))}
           </div>
         )}
