@@ -20,7 +20,7 @@ As an admin, you can manage which models are allowed to be used. This page expla
 
 You can find a list of every model gateway keys can call under **AI Gateway → Providers & Models → Models**. Everyone with gateway access can open this page, including Viewers and the AI Gateway role.
 
-The list comes from each provider credential: the gateway pings the provider's own `/models` endpoint to check which models the credential can access.
+The list comes from each provider credential: the gateway pings the provider's own `/models` endpoint to check which models the credential can access. For Amazon Bedrock, it lists the foundation models and system-defined inference profiles in the credential's region. If the key may call models but isn't allowed to list them, grant it `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles`.
 
 <Callout type="warning">
   If a provider rejects a credential during model discovery, for example
@@ -42,6 +42,18 @@ A credential with every model enabled also allows models that the provider publi
 ## Model IDs [#model-ids]
 
 Model IDs have the form `<credential>:<model>`, for example `openai-prod:<model>`, so the gateway knows which credential to use. For coding agents that send the provider's own model names, IDs without a prefix also work if they start with `gpt-`, `codex-`, `ft:`, or `claude-`, and the gateway uses the oldest matching credential. Renaming a credential changes its prefix, so update clients that use the old IDs.
+
+### Bedrock model IDs [#bedrock-model-ids]
+
+Bedrock models always need the credential prefix, followed by the Bedrock model ID, for example `bedrock-prod:<bedrock-model-id>`. Claude models on Bedrock use the Anthropic Messages route; other models use the OpenAI Responses or Chat Completions route, depending on what Bedrock serves for them.
+
+For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the model's inference profile ID: the model ID with a geography prefix, such as `us.` or `global.`, for example `bedrock-prod:global.<bedrock-model-id>`. Some newer models can only be called this way.
+
+<Callout type="info">
+  With an inference profile, Bedrock may process the request in another AWS
+  region than the credential's region: within the geography for prefixes like
+  `us.`, or in any commercial region for `global.`.
+</Callout>
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
