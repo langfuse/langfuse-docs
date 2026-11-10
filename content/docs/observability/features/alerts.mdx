@@ -86,12 +86,13 @@ Choose special handling for edge cases when data is missing or when an alert sta
 
 **No-data handling** — what happens when the query returns no data:
 
-| Mode                                  | Behavior                                                                  |
-| ------------------------------------- | ------------------------------------------------------------------------- |
-| **Treat missing data as 0** (default) | Treat null as `0` and compare against thresholds                          |
-| **Keep the previous severity**        | Hold the previous severity; send no notification                          |
-| **Show severity NO_DATA**             | Record `NO_DATA` severity; send no notification                           |
-| **Notify after sustained NO_DATA**    | Record `NO_DATA` severity; send a notification after a configurable delay |
+| Mode                                    | Behavior                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| **Treat missing data as `0`** (default) | Treat null as `0` and compare against thresholds                          |
+| **Treat missing data as `OK`**          | Record `OK` severity; an open `WARNING` or `ALERT` resolves               |
+| **Notify `NO DATA`**                    | Record `NO_DATA` severity; send a notification after a configurable delay |
+| **Silence `NO DATA`**                   | Record `NO_DATA` severity; send no notification                           |
+| **Keep the previous `SEVERITY`**        | Hold the previous severity; send no notification                          |
 
 **Renotify** — whether to re-notify while severity stays elevated:
 
@@ -116,20 +117,20 @@ Give the alert a descriptive name (max 200 characters) and optional tags, then c
 
 Each alert carries a **severity** that updates after every evaluation.
 
-| Severity  | Meaning                                                                                                    |
-| --------- | ---------------------------------------------------------------------------------------------------------- |
-| `UNKNOWN` | Initial state — not yet evaluated                                                                          |
-| `OK`      | Metric is within bounds                                                                                    |
-| `WARNING` | Metric crossed the warning threshold                                                                       |
-| `ALERT`   | Metric crossed the alert threshold                                                                         |
-| `NO_DATA` | Query returned no data and no-data mode is **Show severity NO_DATA** or **Notify after sustained NO_DATA** |
-| `PAUSED`  | Alert is paused; no evaluations run                                                                        |
+| Severity  | Meaning                                                                                  |
+| --------- | ---------------------------------------------------------------------------------------- |
+| `UNKNOWN` | Initial state — not yet evaluated                                                        |
+| `OK`      | Metric is within bounds                                                                  |
+| `WARNING` | Metric crossed the warning threshold                                                     |
+| `ALERT`   | Metric crossed the alert threshold                                                       |
+| `NO_DATA` | Query returned no data and no-data mode is **Notify `NO DATA`** or **Silence `NO DATA`** |
+| `PAUSED`  | Alert is paused; no evaluations run                                                      |
 
 **When notifications fire:**
 
 - Breach (`UNKNOWN | OK → WARNING | ALERT`): always notifies.
 - Recovery (`WARNING | ALERT → OK`): always notifies.
-- No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify after sustained `NO_DATA`**.
+- No data (`NO_DATA ↔ WARNING | ALERT | OK | UNKNOWN`): only notifies when no-data mode is **Notify `NO DATA`**.
 - Sustained severity (`WARNING → WARNING`, `ALERT → ALERT`): notifies only when **Renotify** is enabled.
 
 ## Pause, resume, or delete an alert [#pause]
