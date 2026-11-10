@@ -160,15 +160,6 @@ The Langfuse `docker-compose.yml` passes all `LANGFUSE_CODE_EVAL_EXTERNAL_*` var
 | `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS`       | `3`                 | Attempts per job for retryable failures before the job goes back to the queue. Range: `1`–`10`.                                                                                                                                            |
 | `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES`          | `PYTHON,TYPESCRIPT` | Languages your executor supports: `PYTHON`, `TYPESCRIPT`, or both, comma-separated. The UI only offers evaluator templates in these languages, and the worker rejects other languages with `UNSUPPORTED_RUNTIME` before sending a request. |
 
-<Callout type="info">
-  The signing secret and extra headers are plain environment variables.
-  Langfuse does not store them, but anyone who can read the web or worker
-  environment can read them. Store them in your secret manager, e.g. a
-  Kubernetes Secret. Requests to the executor connect directly and do not
-  use `HTTPS_PROXY`. Use `https` when requests leave a trusted network, because
-  the body contains evaluator code and trace data.
-</Callout>
-
 ### Request [#external-dispatcher-request]
 
 Langfuse sends one `POST` per attempt with these headers:
@@ -178,10 +169,9 @@ POST /evaluate HTTP/1.1
 content-type: application/json
 user-agent: Langfuse/1.0
 x-langfuse-signature: t=1762770000,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd
-Authorization: Bearer <token>
 ```
 
-The last header comes from `LANGFUSE_CODE_EVAL_EXTERNAL_HEADERS`. The body looks like this:
+Headers from `LANGFUSE_CODE_EVAL_EXTERNAL_HEADERS`, if set, are added to these. The body looks like this:
 
 ```json
 {
@@ -240,7 +230,6 @@ Verify the signature over the raw request bytes before parsing the JSON, compare
 <Tab>
 
 ```python
-# signature.py
 import hashlib
 import hmac
 import time
@@ -347,96 +336,6 @@ A response with valid scores is accepted even if it also contains an `error` fie
 - **Attempts.** Langfuse retries retryable failures up to `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS` times, with exponential backoff and full jitter, starting at 100 ms and capped at 2 seconds. Each attempt has its own timeouts and a fresh signature.
 - **Queue retries.** When all attempts of a worker execution fail, the code evaluator queue retries the job up to two more times, about 30 and 60 seconds later. Test runs from the evaluator editor are not queued. With the defaults, one evaluation can reach your executor up to nine times, so deduplicate on `execution.jobExecutionId`.
 - **Redirects.** Langfuse never follows redirects and treats any 3xx as a configuration error. Point `LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT` at the final URL.
-
-### Example executor [#external-dispatcher-example]
-
-This minimal Python executor uses only the standard library. It verifies the signature with `signature.py` from [Verify the signature](#external-dispatcher-signature) and runs the evaluator with the Langfuse Python runner, [`code_based_eval_handler.py`](https://github.com/langfuse/langfuse/blob/main/scripts/code-eval-runners/python/code_based_eval_handler.py). The runner accepts the request body as its event and returns either `scores` or an error envelope. Put both files next to `executor.py` and set `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES=PYTHON`.
-
-```python
-# executor.py
-import json
-import os
-import subprocess
-import sys
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-
-from signature import verify_signature
-
-SIGNING_SECRET = os.environ["LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET"]
-# Keep this below LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS.
-EVAL_TIMEOUT_SECONDS = 2
-RUNNER_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Runs the Langfuse Python runner on the request from stdin. User code that
-# prints is redirected to stderr so stdout only carries the result.
-RUNNER = """
-import json, sys
-result_stream, sys.stdout = sys.stdout, sys.stderr
-from code_based_eval_handler import handler
-result_stream.write(json.dumps(handler(json.load(sys.stdin), None)))
-"""
-
-
-def user_error(code: str, message: str):
-    return 422, {"error": {"code": code, "message": message}}
-
-
-def evaluate(body: bytes):
-    request = json.loads(body)
-    if request.get("apiVersion") != "v1":
-        return 400, {"message": "Unsupported apiVersion"}
-    if request["runtime"]["language"] != "PYTHON":
-        return user_error("UNSUPPORTED_RUNTIME", "Only Python is supported")
-
-    try:
-        # A subprocess is not a sandbox. Run this in your isolated runtime.
-        completed = subprocess.run(
-            [sys.executable, "-c", RUNNER],
-            input=body,
-            capture_output=True,
-            timeout=EVAL_TIMEOUT_SECONDS,
-            cwd=RUNNER_DIR,
-        )
-    except subprocess.TimeoutExpired:
-        return user_error("TIMEOUT", f"Evaluator exceeded {EVAL_TIMEOUT_SECONDS}s")
-    if completed.returncode != 0:
-        return user_error("USER_CODE_ERROR", "Evaluator process exited early")
-
-    try:
-        result = json.loads(completed.stdout)
-    except ValueError:
-        result = None
-    if not isinstance(result, dict) or not ("scores" in result or "error" in result):
-        return user_error("USER_CODE_ERROR", "Evaluator produced no result")
-    return (422 if "error" in result else 200), result
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        body = self.rfile.read(int(self.headers.get("content-length", 0)))
-        signature = self.headers.get("x-langfuse-signature", "")
-        if verify_signature(body, signature, SIGNING_SECRET):
-            status, payload = evaluate(body)
-        else:
-            status, payload = 401, {"message": "Invalid signature"}
-
-        data = json.dumps(payload).encode()
-        self.send_response(status)
-        self.send_header("content-type", "application/json")
-        self.send_header("content-length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
-
-
-ThreadingHTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
-```
-
-<Callout type="warning">
-  This sketch shows the contract only. A subprocess shares the executor's
-  network, filesystem, and credentials, so replace it with a real sandbox, such
-  as a gVisor or Firecracker workload without network egress, before you run
-  untrusted evaluator code.
-</Callout>
 
 ## Local insecure dispatcher
 
