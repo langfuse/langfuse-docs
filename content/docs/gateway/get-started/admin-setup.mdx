@@ -40,11 +40,14 @@ On the same page, select **Add credential** and add [API keys](/docs/gateway/con
   ![Add provider credential dialog with the provider, name, and secret key fields](/images/docs/ai-gateway/setup-add-provider-credential.png)
 </Frame>
 
-For **Amazon Bedrock**, enter an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and pick the **AWS region** the gateway sends requests to. The key needs access to models in that region. To call a model through [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use its inference profile ID, see [Bedrock model IDs](/docs/gateway/features/models#bedrock-model-ids).
+For **Amazon Bedrock**, enter a long-term [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and pick the **AWS region** the gateway sends requests to. The key needs access to models in that region. To call a model through [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use its inference profile ID, see [Bedrock model IDs](/docs/gateway/features/models#bedrock-model-ids).
 
-<Callout type="info">
-  A Bedrock credential's region can't be changed after saving. To use another
-  region, add another credential.
+<Callout type="warning">
+
+- The gateway can't refresh a Bedrock API key. Short-term keys expire within 12 hours, so use a long-term key and update the credential before the key expires.
+- Inference profiles need the key's IAM policy, and any service control policy, to allow invoking the profile and the model in every region the profile routes to.
+- A Bedrock credential's region can't be changed after saving. To use another region, add another credential.
+
 </Callout>
 
 <Callout type="info">
