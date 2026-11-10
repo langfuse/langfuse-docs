@@ -1,0 +1,104 @@
+---
+title: "How to evaluate coding agent sessions"
+description: "Measure whether Claude Code, Codex, and other coding agents finish the tasks developers give them: LLM-as-a-Judge on real sessions, human review, and datasets for regression tests."
+tags: [guide, evaluation]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# How to evaluate coding agent sessions
+
+Coding agent benchmarks measure a model on someone else's tasks. Teams usually want a different answer: does the agent, with our prompts, skills, and repositories, finish the work our developers hand it? That question can be answered from real sessions, by scoring them with an LLM judge, reviewing a sample by hand, and turning the hard cases into a dataset.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Record coding agent sessions with their content, through the [Langfuse AI Gateway](/docs/gateway/overview) in `FULL` mode or a hooks integration. Score them with observation-level [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators for outcome and quality, check the judge against human labels in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and collect failing sessions in a [dataset](/docs/evaluation/experiments/datasets) to test changes to prompts, skills, or models before rolling them out.
+
+<Frame fullWidth>
+  ![Langfuse session view of a coding agent conversation with messages, tool calls, cost, and token usage](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## What to measure [#what-to-measure]
+
+Pick a few scores that map to decisions you would make:
+
+| Score             | Type        | Question it answers                                                    |
+| ----------------- | ----------- | ---------------------------------------------------------------------- |
+| Outcome           | Categorical | Did the agent complete, partially complete, or abandon the task?       |
+| Task type         | Categorical | Was it a bug fix, feature, test, refactor, or investigation?           |
+| Instruction match | Boolean     | Did the agent do what was asked, without unrequested changes?          |
+| Rework needed     | Boolean     | Did the developer have to correct or redo the agent's work?            |
+| Tool errors       | Numeric     | How many tool calls failed? Counted from observations, without a judge |
+
+Outcome by task type is the most useful view: it shows which work the agent handles and which work developers should keep doing themselves, or support with better [skills and prompts](/resources/engineering/coding-agent-usage-analytics).
+
+## Step 1: record sessions with content [#record]
+
+A judge can only score what was recorded:
+
+- **Gateway:** set the [ingestion mode](/docs/gateway/features/tracing#ingestion-modes) to `FULL`. Each generation then stores the full input, including the system prompt, messages, and tool results, and the streamed output.
+- **Hooks:** the [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), and [Cursor](/integrations/developer-tools/cursor) integrations upload the transcript of each turn.
+
+<Callout type="warning">
+  The default gateway mode, `USAGE`, stores no input or output. It supports
+  cost and usage analysis, not quality evaluation.
+</Callout>
+
+## Step 2: score sessions with an LLM judge [#llm-judge]
+
+LLM-as-a-Judge evaluators run on observations, not on whole sessions, because Langfuse doesn't know when a session has ended. For coding agents that works well: agents resend the conversation with every model call, so a late generation in a session contains almost the whole session as input. See [evaluating sessions and conversations](/resources/engineering/evaluating-sessions-conversations) for the general pattern.
+
+Set up an evaluator in three parts:
+
+1. **Target.** Filter on the generations you want to score, for example by trace name (the agent name), tags, or environment. To limit cost, score a sample instead of every call.
+2. **Prompt.** Map the generation's input and output to variables, and ask for one outcome category with a short reason. Give the judge concrete definitions: "completed" means the requested change was made and the developer did not report a problem afterwards.
+3. **Backfill.** Run the evaluator on [historical observations](/docs/evaluation/evaluation-methods/llm-as-a-judge) to get a baseline before you change anything.
+
+Scores attach to the scored generation. Filter and chart them in [score analytics](/docs/evaluation/scores/score-analytics) and in custom dashboards, next to cost and token usage.
+
+## Step 3: check the judge against people [#human-review]
+
+A judge is only useful if it agrees with the developers it replaces. Send a sample of sessions to an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues) and have two or three engineers label the same outcome category. Compare their labels with the judge's scores, and refine the judge's prompt where they disagree. Re-check after changing the judge model.
+
+## Step 4: turn failures into a dataset [#dataset]
+
+Sessions the judge marks as abandoned or needing rework are the best test cases you have. Add them to a [dataset](/docs/evaluation/experiments/datasets) with the developer's request as input, and use the dataset when you change something that affects every session:
+
+- a new version of a shared skill or `AGENTS.md` file;
+- a different default model, for example one with lower cost per token;
+- a change to the agent's configuration, such as allowed tools.
+
+For how to run tests against a dataset, see [LLM regression testing](/resources/engineering/llm-regression-testing). Replaying a coding agent run is harder than replaying a chat turn, because the result depends on the repository state, so many teams evaluate the plan or the first steps instead of the full run.
+
+## What good looks like [#interpretation]
+
+- **Rising abandonment on one task type** usually points at missing context: an undocumented build step, a service the agent can't reach, or a skill that is out of date.
+- **Many tool errors in completed sessions** cost time and tokens even when the task succeeds. Check the [failing tool calls](/resources/engineering/coding-agent-usage-analytics#tools) first.
+- **High cost per completed task** on one model is the number to compare when you evaluate another. See [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="evaluate-whole-session">
+<Summary>Can I run an LLM-as-a-Judge evaluator on a whole session?</Summary>
+
+Not directly. Evaluators run on observations, because a session has no defined end. Target a late generation in the session, whose input contains the conversation so far, or tag the last trace of a session and filter the evaluator on that tag.
+
+</Details>
+
+<Details id="cost-of-evaluation">
+<Summary>Doesn't judging long coding sessions get expensive?</Summary>
+
+It can, because coding agent inputs are long. Score a sample of generations, limit the evaluator to the generations that matter, such as the last one of each turn, and use a smaller judge model where its labels still match human reviewers.
+
+</Details>
+
+<Details id="hooks-vs-gateway-eval">
+<Summary>Should I evaluate gateway traces or hook traces?</Summary>
+
+Either works if content is recorded. Gateway traces in `FULL` mode store every model call with its exact input. Hook traces store the transcript per turn, which is often easier for a judge to read. Pick the one you already use for cost tracking.
+
+</Details>
+
+</FaqDetails>

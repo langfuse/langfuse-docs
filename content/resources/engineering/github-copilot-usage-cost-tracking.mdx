@@ -1,0 +1,115 @@
+---
+title: "Track GitHub Copilot usage and cost per developer"
+description: "Track GitHub Copilot agent usage, tokens, and cost in Langfuse with Copilot's OpenTelemetry export or the AI Gateway for bring-your-own-key models."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Track GitHub Copilot usage and cost per developer
+
+GitHub Copilot bills by plan and by AI credits, so the GitHub billing page shows what each seat consumed. It doesn't show what the agent did in a session or how many tokens a task took. Langfuse traces Copilot's agent sessions in VS Code and the Copilot CLI, with token usage per model call, so you can see usage per developer, per session, and per model.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** There are two ways to get Copilot data into Langfuse. Copilot's built-in **OpenTelemetry export** covers every model, including GitHub-hosted ones, and records spans and token counts by default. The **Langfuse AI Gateway** covers only bring-your-own-key (BYOK) models, but adds central key custody and cost from the actual provider calls. Most teams start with OpenTelemetry.
+
+<Frame fullWidth>
+  ![Langfuse session view of a coding agent conversation with messages, tool calls, cost, and token usage](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## How Copilot usage is billed [#billing]
+
+As of November 2026, GitHub's [plans page](https://github.com/features/copilot/plans) lists Free, Pro, Pro+, and Max plans for individuals, plus Business and Enterprise for organizations. Each plan includes a monthly allowance of GitHub AI credits (1 credit = $0.01), and admins can set a dollar budget for usage beyond it. Code completions and next edit suggestions don't use credits.
+
+BYOK models are different: requests to them are billed directly by the model provider and don't count against Copilot quotas, according to GitHub's [BYOK announcement](https://github.blog/changelog/2025-11-20-enterprise-bring-your-own-key-byok-for-github-copilot-is-now-in-public-preview/). That split decides which tracking path works for which model.
+
+## Path 1: Copilot's OpenTelemetry export [#opentelemetry]
+
+Copilot agent mode in VS Code and the Copilot CLI can export OpenTelemetry traces, and Langfuse is an [OpenTelemetry backend](/integrations/native/opentelemetry). The [GitHub Copilot integration](/integrations/developer-tools/github-copilot) shows the exporter settings.
+
+What arrives in Langfuse:
+
+- **Model calls** follow the OpenTelemetry GenAI conventions and map to Langfuse generations.
+- **Token usage** includes input, output, cache-read, cache-creation, and reasoning tokens per model call.
+- **Tool executions** appear as observations nested in the session.
+
+Langfuse computes cost from the tokens and its [model prices](/docs/observability/features/token-and-cost-tracking). For GitHub-hosted models, that is an API-equivalent estimate: useful for comparing sessions and developers, but not the same number as your AI credit consumption.
+
+<Callout type="info">
+  By default, Copilot exports span structure, timing, and token counts, but no
+  prompts, responses, or tool arguments. To see inputs and outputs in Langfuse,
+  turn on content capture as described on the [integration
+  page](/integrations/developer-tools/github-copilot).
+</Callout>
+
+## Path 2: the Langfuse AI Gateway for BYOK models [#gateway]
+
+When your organization brings its own OpenAI or Anthropic key to Copilot, you can point that BYOK provider at the [Langfuse AI Gateway](/docs/gateway/overview) instead of the provider. Each developer uses their own gateway key, and the provider key stays in Langfuse.
+
+For the Copilot CLI with an Anthropic credential:
+
+```sh
+export COPILOT_PROVIDER_BASE_URL="https://gateway.cloud.langfuse.com/anthropic"
+export COPILOT_PROVIDER_TYPE="anthropic"
+export COPILOT_PROVIDER_API_KEY="<your-gateway-key>"
+export COPILOT_MODEL="<model-id>"
+copilot
+```
+
+The [Copilot gateway guide](/integrations/developer-tools/github-copilot-gateway) covers the OpenAI route and the GitHub Copilot app.
+
+<Callout type="warning">
+  Only BYOK models go through the gateway. GitHub-hosted models in the same
+  model picker are not traced this way. The Copilot CLI also can't send custom
+  headers to a BYOK provider, so attribute teams with [key
+  metadata](/docs/gateway/features/api-keys#key-metadata) instead of request
+  headers.
+</Callout>
+
+## Which path to choose [#choose]
+
+| Situation                                                             | Use                  |
+| --------------------------------------------------------------------- | -------------------- |
+| Developers use GitHub-hosted models                                   | OpenTelemetry export |
+| You want visibility without changing how Copilot calls models         | OpenTelemetry export |
+| Your organization pays for models through its own provider key        | AI Gateway           |
+| You need one place that holds the provider key and records every call | AI Gateway           |
+
+Both paths can run side by side: OpenTelemetry for hosted models and the gateway for BYOK models, in the same Langfuse project.
+
+## What to look at first [#first-questions]
+
+1. **Tokens per developer per week**, to see adoption and outliers.
+2. **Tokens per session**, to find long sessions worth reading.
+3. **Model mix**, to see which models developers pick in the model picker.
+4. **Tool failures**, to find tasks where the agent struggles.
+
+To compare Copilot with Claude Code, Codex, and Cursor on one dashboard, see [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="can-i-see-copilot-usage-per-user">
+<Summary>Can I see GitHub Copilot usage per user?</Summary>
+
+GitHub's billing and admin views show usage per seat. For per-session detail, such as tokens per task and the tool calls the agent made, export Copilot's OpenTelemetry traces to Langfuse, where each session is attributed to its user.
+
+</Details>
+
+<Details id="does-langfuse-show-ai-credits">
+<Summary>Does Langfuse show my GitHub AI credit consumption?</Summary>
+
+No. Langfuse records tokens and computes cost from model prices. AI credit consumption is GitHub's billing measure and stays in GitHub. Use Langfuse to compare sessions, developers, and models, and GitHub billing for your invoice.
+
+</Details>
+
+<Details id="byok-billing">
+<Summary>Who bills BYOK models used in Copilot?</Summary>
+
+The model provider. GitHub states that BYOK usage is billed directly by your chosen provider and doesn't count against Copilot request quotas. Routing BYOK models through the Langfuse AI Gateway doesn't change that: the gateway forwards requests with your organization's provider credential.
+
+</Details>
+
+</FaqDetails>

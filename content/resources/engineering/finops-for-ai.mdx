@@ -1,0 +1,110 @@
+---
+title: "FinOps for AI: attribute LLM spend to teams, cost centers, and features"
+description: "FinOps for AI in practice: measure LLM and coding agent spend, attribute it to teams, cost centers, and features, alert on spikes, and export it to your warehouse."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# FinOps for AI: attribute LLM spend to teams, cost centers, and features
+
+AI spend arrives as a few large invoices from model providers, while the decisions that drive it are made by dozens of teams, services, and developers. FinOps for AI is the practice of closing that gap: measuring spend at the level of the call, attributing it to whoever made the call, and putting the numbers in front of the people who can change them. This guide shows how to set that up with LLM tracing and an AI gateway.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Record every model call with its cost, then attribute it along the dimensions finance cares about. Put cost centers and teams on [gateway keys](/docs/gateway/features/api-keys#key-metadata) so every call carries them, tag application traces with the feature that made them, chart spend per team and feature in dashboards, alert on spikes, and export the raw records to your data warehouse. Provider invoices stay the source of truth for what you paid. Langfuse explains where it went.
+
+<Frame fullWidth>
+  ![Langfuse AI Gateway analytics with total cost, cost over time, and cost per user, API key, and model](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## Why AI spend is hard to attribute [#why-hard]
+
+Cloud FinOps works because every resource carries tags. AI spend has three properties that break that model:
+
+1. **One key, many consumers.** A single provider API key often serves several services and developers, so the invoice can't be split by owner.
+2. **Cost per call varies by orders of magnitude.** The model, the context size, cached tokens, and reasoning tokens change the price of a request, so request counts say little about spend.
+3. **Spend is created in code and in tools.** Production features, batch jobs, and developers' coding agents all draw from the same providers, through different paths.
+
+The fix is to attach ownership to each call at the moment it is made, and to price it at the same time.
+
+## Step 1: record cost for every call [#record-cost]
+
+There are two ways to get calls into Langfuse with their cost, and most companies use both:
+
+- **Application tracing** with the [Langfuse SDKs](/docs/observability/sdk/overview) or [OpenTelemetry](/integrations/native/opentelemetry) records each model call inside the trace of the feature that made it.
+- **The [Langfuse AI Gateway](/docs/gateway/overview)** records every call that passes through it, including traffic from apps nobody instrumented and from coding agents.
+
+In both cases, Langfuse stores token usage by type (input, output, cached, reasoning) and computes cost from [model prices](/docs/observability/features/token-and-cost-tracking). Add custom prices for fine-tuned or negotiated models, so the numbers match what you pay.
+
+## Step 2: attach ownership [#ownership]
+
+Pick the dimensions your finance team reports on, then make sure every call carries them:
+
+| Dimension         | Through the gateway                                                                      | In application traces                                           |
+| ----------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Person            | Automatic: a user key records its owner                                                  | [User ID](/docs/observability/features/users) on the trace      |
+| Team, cost center | [Key metadata](/docs/gateway/features/api-keys#key-metadata) such as `cost_center: 4711` | Trace [metadata](/docs/observability/features/metadata) or tags |
+| Service           | One service account key per service                                                      | Trace name or tag                                               |
+| Feature           | `langfuse-tags` or `langfuse-metadata` request header                                    | Trace name or tag per feature                                   |
+| Customer          | `langfuse-user-id` header with a service account key                                     | User ID set to the customer, or customer metadata               |
+
+Key metadata is the strongest option for cost centers: it is set by an admin when the key is created, and clients can't change it. Request headers and SDK tags are set by the client, so they suit feature-level detail that engineers own.
+
+## Step 3: report spend [#report]
+
+Gateway admins get an [analytics page](/docs/gateway/features/analytics) with total cost, requests, and tokens, cost over time, and the top users, keys, and models. For finance reporting, build [custom dashboards](/docs/metrics/features/custom-dashboards) on the dimensions from step 2:
+
+1. **Spend per cost center per month**, grouped on `langfuse.gateway.api_key.metadata.cost_center`.
+2. **Spend per feature**, grouped on trace name or tag.
+3. **Spend per model**, to see where switching models would save the most.
+4. **Unit cost**, such as cost per conversation or per resolved ticket, by dividing cost by a count of sessions or traces.
+
+Unit cost is the number that turns AI spend into a business conversation. A feature whose total cost doubled may be fine if its cost per resolved ticket fell.
+
+## Step 4: catch spikes early [#alerts]
+
+[Alerts](/docs/observability/features/alerts) watch a cost metric over a time window, filtered by model, tag, or user, and notify Slack, PagerDuty, a GitHub Action, or a webhook when it crosses a threshold. Typical alerts are hourly cost for one feature, daily cost per developer for coding agents, and cost per call for a new model.
+
+<Callout type="info">
+  Alerts notify, they don't block requests. Hard spend caps at the gateway are
+  on the [gateway roadmap](/docs/gateway/overview#roadmap), not available yet.
+  Until then, combine alerts with provider-side limits on your provider account.
+</Callout>
+
+## Step 5: export to the warehouse [#export]
+
+Finance and data teams usually want AI spend next to revenue and headcount data. [Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage) writes observations, including model, tokens, cost, and metadata, to S3, GCS, or Azure Blob Storage on a schedule. Load the files into your warehouse and join on cost center or customer.
+
+## Reconciling with provider invoices [#reconcile]
+
+Langfuse cost is computed from tokens and prices, so small differences from your invoice are expected: negotiated discounts, credits, and pricing changes all live on the provider side. Treat the provider invoice as the total and Langfuse as the breakdown. If the two drift apart, check for models without a price definition, which show tokens but no cost, and for the [known gateway cost bugs](/faq/all/ai-gateway-known-limitations) during the beta.
+
+For coding agents specifically, see [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking). For general cost reduction techniques, see [LLM cost management](/resources/engineering/llm-cost-management).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="what-is-finops-for-ai">
+<Summary>What is FinOps for AI?</Summary>
+
+FinOps for AI applies cloud financial management to AI spend: measuring the cost of model calls, attributing it to the teams and features that create it, and using that data to make tradeoffs between cost, speed, and quality. The core requirement is per-call cost data with ownership attached.
+
+</Details>
+
+<Details id="chargeback">
+<Summary>How do I charge AI spend back to teams?</Summary>
+
+Issue gateway keys per team or service with a cost-center metadata field, and report spend grouped on that field. For application traffic, tag traces with the owning team. Export the monthly totals per cost center to your finance system.
+
+</Details>
+
+<Details id="can-i-set-budgets">
+<Summary>Can I set a budget that stops spending?</Summary>
+
+Not in the Langfuse AI Gateway today: hard spend caps are on the roadmap. You can set alerts on cost thresholds in Langfuse and spending limits on your provider account in the meantime.
+
+</Details>
+
+</FaqDetails>

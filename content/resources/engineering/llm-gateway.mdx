@@ -1,15 +1,15 @@
 ---
-title: "What is an LLM gateway? When you need one (and when you don't)"
-seoTitle: "What Is an LLM Gateway? When You Need One"
-description: "An LLM gateway is a proxy layer between your application and model providers: one API, failover, caching, cost controls. How gateways work and how to pick one."
+title: "What is an AI gateway? LLM gateways explained, and when you need one"
+seoTitle: "What Is an AI Gateway (LLM Gateway)? When You Need One"
+description: "An AI gateway, or LLM gateway, is a proxy between your apps and model providers: one endpoint, keys, routing, cost controls, and logging. How gateways work and how to pick one."
 tags: [guide]
 ---
 
 import { SignupCTA } from "@/components/SignupCTA";
 
-# What is an LLM gateway?
+# What is an AI gateway?
 
-An LLM gateway is a proxy layer that sits between your application and model providers. Your
+An AI gateway, also called an LLM gateway, is a proxy layer that sits between your application and model providers. Your
 code sends requests to one endpoint in one format, and the gateway translates them to each
 provider's native API, applies policies on the way through, and returns the response. Most
 gateways expose an OpenAI-compatible API, so switching providers becomes a change of model
@@ -23,9 +23,13 @@ an SDK are serving you fine: a gateway is one more hop and one more system to op
 gateway and your observability platform are complementary layers, not substitutes; the
 gateway controls traffic, observability explains behavior. The [Langfuse AI
 Gateway](/docs/gateway/overview) combines the two: every call through it is recorded as a
-full Langfuse trace.
+Langfuse trace.
 
-## What an LLM gateway does
+<Frame fullWidth>
+  ![Langfuse AI Gateway analytics with total cost, cost over time, and cost per user, API key, and model](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## What an AI gateway does [#what-it-does]
 
 Across the major gateways, the recurring capabilities are:
 
@@ -43,7 +47,7 @@ Across the major gateways, the recurring capabilities are:
 Not every gateway ships every feature, and the depth varies a lot, which is what the
 selection below turns on.
 
-## When you need a gateway
+## When you need a gateway [#when-you-need-one]
 
 The strongest signals that a gateway earns its operational cost:
 
@@ -65,29 +69,33 @@ And the counter-case is just as real: one provider, one team, moderate volume. A
 retries covers that, and skipping the gateway removes a latency hop, an availability
 dependency, and an operational surface.
 
-## The gateway landscape
+## The gateway landscape [#landscape]
 
-A non-exhaustive map of commonly used gateways (details verified July 2026; capabilities
-move fast, check the linked docs):
+A non-exhaustive map of commonly used gateways (details verified July 2026, with the Langfuse,
+LiteLLM, and Portkey rows updated November 2026; capabilities move fast, check the linked docs):
 
-| Gateway                                                                | Model                                      | Notable traits                                                                                                        |
-| ---------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| [Langfuse AI Gateway](/docs/gateway/overview) (beta)                   | Open source; Langfuse Cloud or self-hosted | Native OpenAI and Anthropic APIs; every call becomes a Langfuse trace; cost per user, key, and model; model allowlist |
-| [LiteLLM](https://github.com/BerriAI/litellm)                          | Open source; Python SDK + proxy server     | Calls 100+ LLM APIs in OpenAI format; the default self-hosted choice                                                  |
-| [OpenRouter](https://openrouter.ai/)                                   | Hosted                                     | OpenAI-compatible API over 280+ models and providers; per-request provider routing                                    |
-| [Portkey](https://portkey.ai/)                                         | Hosted + self-host options                 | Unified interface to 250+ models with control, visibility, and security tooling                                       |
-| [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) | Hosted (Cloudflare)                        | Analytics, logging, caching, rate limiting, retries, model fallback; on all Cloudflare plans                          |
-| [Kong AI Gateway](https://konghq.com/)                                 | Open-core API gateway + AI plugins         | Brings existing API-gateway policy machinery (auth, rate limits) to LLM traffic                                       |
-| [Vercel AI Gateway](https://vercel.com/docs/ai-gateway)                | Hosted (Vercel)                            | Provider routing for apps in the Vercel ecosystem, OpenAI-compatible                                                  |
-| [Helicone](https://helicone.ai/)                                       | Open source                                | AI gateway to 100+ models with routing, failover, caching, and cost tracking                                          |
-| [TrueFoundry](https://www.truefoundry.com/ai-gateway)                  | Enterprise                                 | Gateway + control plane with governance, cost controls, and on-prem support                                           |
+| Gateway                                                                | Model                                      | Notable traits                                                                                                              |
+| ---------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| [Langfuse AI Gateway](/docs/gateway/overview) (beta)                   | Open source; Langfuse Cloud or self-hosted | OpenAI, Anthropic, and Amazon Bedrock with native APIs; every call becomes a Langfuse trace; per-user keys; model allowlist |
+| [LiteLLM](https://github.com/BerriAI/litellm)                          | Open source; Python SDK + proxy server     | Calls 100+ LLM APIs in OpenAI format; virtual keys with budgets; a common self-hosted choice                                |
+| [OpenRouter](https://openrouter.ai/)                                   | Hosted                                     | OpenAI-compatible API over 280+ models and providers; per-request provider routing                                          |
+| [Portkey](https://portkey.ai/)                                         | Hosted + self-host options                 | Unified API with routing, guardrails, and caching; part of Palo Alto Networks Prisma AIRS since May 2026                    |
+| [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) | Hosted (Cloudflare)                        | Analytics, logging, caching, rate limiting, retries, model fallback; on all Cloudflare plans                                |
+| [Kong AI Gateway](https://konghq.com/)                                 | Open-core API gateway + AI plugins         | Brings existing API-gateway policy machinery (auth, rate limits) to LLM traffic                                             |
+| [Vercel AI Gateway](https://vercel.com/docs/ai-gateway)                | Hosted (Vercel)                            | Provider routing for apps in the Vercel ecosystem, OpenAI-compatible                                                        |
+| [Helicone](https://helicone.ai/)                                       | Open source                                | AI gateway to 100+ models with routing, failover, caching, and cost tracking                                                |
+| [TrueFoundry](https://www.truefoundry.com/ai-gateway)                  | Enterprise                                 | Gateway + control plane with governance, cost controls, and on-prem support                                                 |
 
 Selection usually comes down to three questions. Where must it run (a self-hosted gateway
 like LiteLLM for VPC-only environments, a hosted one when operating it is undesirable)? What
 depth of policy do you need (budgets, guardrails, audit)? And what does it do to latency and
 availability on your critical path?
 
-## Gateways and observability are different layers
+For detailed comparisons, see [Langfuse AI Gateway vs LiteLLM Proxy](/resources/engineering/ai-gateway-vs-litellm)
+and [Portkey alternative](/resources/engineering/portkey-alternative). To run a gateway in your own
+infrastructure, see [self-host an open source AI gateway](/resources/engineering/self-hosted-ai-gateway).
+
+## Gateways and observability are different layers [#gateway-vs-observability]
 
 A gateway sees every request that passes through it, so gateway logs answer "what did we
 send and what did it cost". They stop at the request boundary. What they cannot show is why
@@ -119,15 +127,27 @@ trace from the application with Langfuse for understanding, and keep cost attrib
 consistent by passing user and session identifiers through both layers.
 
 The [Langfuse AI Gateway](/docs/gateway/overview) puts both layers in one place. Every
-request through it is recorded as a Langfuse generation with input, output, tokens, cost,
-and latency, attributed to the gateway key, the user who owns it, and any team or cost
+request through it is recorded as a Langfuse generation with tokens, cost, and latency, plus
+input and output in `FULL` mode, attributed to the gateway key, the user who owns it, and any team or cost
 center metadata on that key. Teams can then add application-level detail, such as the tool
 calls of a complex agent, with the SDKs or [OpenTelemetry](/integrations/native/opentelemetry);
-distributed tracing merges both into the same trace.
+distributed tracing merges both into the same trace. See [AI gateway vs SDK
+tracing](/resources/engineering/ai-gateway-vs-sdk-tracing).
+
+Common uses of the Langfuse AI Gateway:
+
+- [Coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking) for Claude
+  Code, Codex, and GitHub Copilot.
+- [Per-developer and service account keys](/resources/engineering/ai-gateway-api-keys) instead
+  of shared provider keys.
+- An [AI audit trail](/resources/engineering/ai-audit-trail) and [FinOps for
+  AI](/resources/engineering/finops-for-ai) across all model traffic.
+- [Tracing an app without code changes](/resources/engineering/trace-llm-app-without-code-changes).
 
 <Callout type="info">
   The Langfuse AI Gateway is in public beta. It serves the native OpenAI Responses, OpenAI
-  Chat Completions, and Anthropic Messages APIs, and doesn't translate between them. Retries,
+  Chat Completions, and Anthropic Messages APIs for OpenAI, Anthropic, and Amazon Bedrock, and
+  doesn't translate between them. Retries,
   fallbacks, caching, and guardrails are not available yet. See the [known
   limitations](/faq/all/ai-gateway-known-limitations).
 </Callout>
@@ -135,6 +155,15 @@ distributed tracing merges both into the same trace.
 ## FAQ
 
 <FaqDetails>
+
+<Details id="ai-gateway-vs-llm-gateway">
+<Summary>What is the difference between an AI gateway and an LLM gateway?</Summary>
+
+Usually none. Both terms describe a proxy between applications and model providers. "AI
+gateway" is often used when the gateway also handles access control and governance for a
+whole company, and some API gateway vendors use it for AI plugins on their existing product.
+
+</Details>
 
 <Details id="is-langfuse-an-llm-gateway">
 <Summary>Is Langfuse an LLM gateway?</Summary>

@@ -1,0 +1,108 @@
+---
+title: "Give your team Claude Code and Codex without sharing provider keys"
+description: "Hand out per-developer and service account gateway keys instead of OpenAI or Anthropic API keys. Revoke one person, rotate provider keys, and attribute every call."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Give your team Claude Code and Codex without sharing provider keys
+
+The fastest way to roll out a coding agent is to paste one OpenAI or Anthropic API key into a team wiki. It is also the hardest setup to undo: you can't revoke one person, you can't tell who spent what, and rotating the key breaks everyone at once. An AI gateway fixes this by giving every developer and every service its own key, while the provider key stays in one place.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** With the [Langfuse AI Gateway](/docs/gateway/overview), admins store provider credentials once, and clients get gateway keys. **User keys** belong to one developer, record that developer on every call, and stop working when they leave the organization. **Service account keys** belong to the organization, for CI and shared services. Keys can expire, are revoked immediately, can carry team or cost-center metadata, and can't read any other Langfuse data. Creating and revoking keys is recorded in the audit log.
+
+<Frame fullWidth>
+  ![Create gateway key dialog with the Issued as choice, name, expiration, and metadata fields](/images/docs/ai-gateway/create-key.png)
+</Frame>
+
+## Three kinds of keys [#key-types]
+
+The gateway separates the key that reaches the provider from the keys clients hold:
+
+| Key                 | Held by               | Purpose                                                        |
+| ------------------- | --------------------- | -------------------------------------------------------------- |
+| Provider credential | Only the gateway      | Calls OpenAI, Anthropic, or Amazon Bedrock on your account     |
+| User key            | One developer         | Coding agents and local development                            |
+| Service account key | A CI job or a service | Pipelines and shared services that must outlive any one person |
+
+Because clients never see the provider credential, you can rotate it without touching any client, and revoke one person's access without affecting anyone else. The provider still bills model usage to your provider account. See [credential types](/docs/gateway/concepts#credential-types).
+
+## Per-developer keys for coding agents [#user-keys]
+
+Every gateway user creates their own key under **AI Gateway → Gateway keys** and pastes it into their agent's configuration. For Claude Code, that is `ANTHROPIC_AUTH_TOKEN` next to the gateway base URL. For Codex, it is the `env_key` of a custom provider. The [coding agent guides](/integrations#developer-tools) show the exact setup for each agent.
+
+What makes user keys suitable for a team rollout:
+
+- **Every call is attributed.** A user key always records its owner's email as the trace user, and clients can't override it.
+- **Access ends with membership.** A user key stops working when its owner leaves the organization, changes to a role that can't call the gateway, or deletes their account. No cleanup is needed.
+- **People don't need project access.** The **AI Gateway** organization role lets someone call the gateway, manage their own keys, and see their own usage, without seeing any Langfuse project. See [roles and permissions](/docs/administration/rbac).
+
+<Callout type="info">
+  Viewers can't create gateway keys. Give developers the AI Gateway, Member,
+  Admin, or Owner role.
+</Callout>
+
+## Service account keys for CI and shared services [#service-accounts]
+
+Owners and admins can issue a key as **Service account** instead of **My user**. A service account key:
+
+- keeps working when people join or leave, because it belongs to the organization;
+- uses its own name as the trace user, so name it after what uses it, such as `CI release pipeline`;
+- accepts a `langfuse-user-id` [header](/docs/gateway/features/tracing#headers), so a shared service can forward the end user it is acting for.
+
+Use one service account key per pipeline or service. That keeps cost per service visible and lets you revoke one without touching the others.
+
+## Expiry, revocation, and audit [#lifecycle]
+
+- **Expiry** is optional on any key, and useful for contractors and temporary projects.
+- **Revocation** takes effect immediately.
+- **Audit logs** record creating and revoking keys, so security reviews can answer who had access and when. See [audit logs](/docs/administration/audit-logs).
+- **Scope** is limited to the gateway: a gateway key can't read or write traces, prompts, or any other Langfuse data.
+
+## Attribute keys to teams and cost centers [#metadata]
+
+When you create a key, add metadata such as `team: platform` or `cost_center: 4711`. The gateway attaches it to every generation recorded with that key, under `langfuse.gateway.api_key.metadata.<key>`, and clients can't change it. Filter traces and [custom dashboards](/docs/metrics/features/custom-dashboards) on it to see cost per team.
+
+Metadata can only be set at creation. To change it, issue a new key and revoke the old one. For a full cost-attribution setup, see [FinOps for AI](/resources/engineering/finops-for-ai).
+
+## Limit which models keys can call [#models]
+
+Every key can call every model your provider credentials allow. To keep expensive or unapproved models out, turn them off per credential. See [control which models your company can use](/resources/engineering/ai-model-allowlist).
+
+## A rollout checklist [#checklist]
+
+1. Add provider credentials and choose the [ingestion mode](/docs/gateway/features/tracing#ingestion-modes) in **AI Gateway → Overview**.
+2. Turn off models you don't want used.
+3. Invite developers with the AI Gateway role, and ask each to create their own key.
+4. Issue one service account key per CI pipeline and shared service, with team metadata.
+5. Remove any shared provider keys from wikis, `.env` files, and CI secrets, and rotate the provider key once everyone has moved.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="what-happens-when-someone-leaves">
+<Summary>What happens to a developer's gateway key when they leave?</Summary>
+
+It stops working as soon as they lose gateway access, for example when they are removed from the organization. Service account keys are not affected by membership changes, so shared services keep running.
+
+</Details>
+
+<Details id="can-i-rotate-provider-keys">
+<Summary>How do I rotate the OpenAI or Anthropic key?</Summary>
+
+Update the provider credential in **AI Gateway → Providers & Models → Providers**. Clients hold gateway keys, not the provider key, so no client configuration changes.
+
+</Details>
+
+<Details id="does-a-gateway-key-expose-my-langfuse-data">
+<Summary>Can a gateway key read my Langfuse traces?</Summary>
+
+No. A gateway key can only call the gateway. Reading traces requires Langfuse project API keys or a role with project access.
+
+</Details>
+
+</FaqDetails>

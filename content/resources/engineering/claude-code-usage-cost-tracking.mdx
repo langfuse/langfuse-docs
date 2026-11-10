@@ -1,0 +1,139 @@
+---
+title: "How to track Claude Code usage and cost across your team"
+description: "Track Claude Code cost and token usage per developer, team, and model. What Claude Code costs, Anthropic's native reports, and how to add a gateway or hooks."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# How to track Claude Code usage and cost across your team
+
+Claude Code cost is driven by tokens: every prompt, file read, tool result, and retry sends context to the model. For one developer, the built-in `/usage` command is enough. For a team, you need cost per developer, per team, and per model in one place, plus the sessions behind any spike. This guide covers what Claude Code costs, what Anthropic reports natively, and two ways to track it in Langfuse.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Claude Code is billed either through a Claude subscription seat or per token through the API. Anthropic reports usage in `/usage`, in org analytics for Team and Enterprise plans, and in the Console for API billing. To see cost per developer and team next to the full session, route Claude Code through the [Langfuse AI Gateway](/docs/gateway/overview) (one base URL and one key per developer, API billing) or install the [hooks integration](/integrations/developer-tools/claude-code) (keeps your existing billing, cost is estimated from tokens).
+
+<Frame fullWidth>
+  ![Langfuse AI Gateway analytics with total cost, requests, tokens, cost over time, and cost per user](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## What Claude Code costs [#what-claude-code-costs]
+
+Claude Code is billed in one of two ways, as of November 2026:
+
+| Billing model     | How it works                                                                                                    | Where usage shows up                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Subscription seat | Claude Code is included in the Pro, Max, Ultra, Team, and Enterprise plans. Enterprise adds usage at API rates. | `/usage` in the CLI, org analytics for Team and Enterprise |
+| API (per token)   | Claude Code charges by API token consumption, billed to an Anthropic Console organization or a cloud provider.  | Console cost page, Claude Code Analytics API               |
+
+Anthropic's [cost documentation](https://code.claude.com/docs/en/costs) puts the average at around $13 per developer per active day and $150-250 per developer per month, with costs below $30 per active day for 90% of users. Plan prices change often, so check [Anthropic's pricing page](https://claude.com/pricing) for current numbers.
+
+The spread between developers is large. Long sessions, large repositories, and agents that re-read many files cost several times more than short, focused tasks. That spread is why per-developer and per-session visibility matters more than a monthly total.
+
+## What Anthropic reports natively [#native-reporting]
+
+Before adding a tool, check what you already have:
+
+- **`/usage` in the CLI** shows the current session's tokens and an estimated dollar figure computed at list price. It covers one developer on one machine.
+- **Org analytics on Team and Enterprise plans** include a spend report per user and per model with CSV export, updated daily. Enterprise also offers an Analytics API.
+- **The Console** shows cost for API-billed usage, and the Claude Code Analytics API returns it programmatically with an Admin API key.
+- **OpenTelemetry export** (`CLAUDE_CODE_ENABLE_TELEMETRY=1`) sends usage metrics and events to a collector you run, tagged with resource attributes such as team or cost center.
+
+When Claude Code runs on Amazon Bedrock or another cloud provider, it doesn't send usage back to Anthropic, so the native reports stay empty. Anthropic's docs point to OpenTelemetry or an LLM gateway for per-user attribution in that setup.
+
+The native reports tell you who spent how much. They don't show what a session did: which files the agent read, which tool calls failed, or why one task took 40 model calls. That is the gap tracing fills.
+
+## Option 1: route Claude Code through the Langfuse AI Gateway [#gateway]
+
+The [Langfuse AI Gateway](/docs/gateway/overview) sits between Claude Code and Anthropic. Each developer gets their own gateway key, and the gateway forwards requests with a provider credential your organization stores in Langfuse. Every model call becomes a trace with tokens, cost, and latency.
+
+Setup per developer is three environment variables:
+
+```sh
+claude /logout                                                     # remove subscription credentials
+export ANTHROPIC_BASE_URL="https://gateway.cloud.langfuse.com/anthropic"
+export ANTHROPIC_AUTH_TOKEN="<your-gateway-key>"
+unset ANTHROPIC_API_KEY
+claude
+```
+
+The [Claude Code gateway guide](/integrations/developer-tools/claude-code-gateway) covers Claude Desktop, model discovery, custom headers, and turn grouping.
+
+What you get:
+
+- **Cost per developer without trust issues.** A user key always records its owner as the trace user, and clients can't override it.
+- **Cost per team or cost center.** Add [key metadata](/docs/gateway/features/api-keys#key-metadata) such as `team: platform` when a key is created, and filter dashboards on it.
+- **Sessions grouped automatically.** The gateway reads Claude Code's session ID, so a whole session is one Langfuse session.
+- **A choice of what is stored.** `USAGE` mode records tokens, cost, and latency without prompts. `FULL` mode adds input and output, so you can see what the agent did. See [ingestion modes](/docs/gateway/features/tracing#ingestion-modes).
+
+<Callout type="warning">
+  The gateway route uses API billing through your organization's provider
+  credential (Anthropic or Amazon Bedrock), not a claude.ai subscription.
+  Developers must log out of their subscription first. The gateway is in public
+  beta, and Anthropic 1-hour cache writes are currently priced at the 5-minute
+  rate. See [known limitations](/faq/all/ai-gateway-known-limitations).
+</Callout>
+
+## Option 2: trace Claude Code with hooks [#hooks]
+
+The [Claude Code hooks integration](/integrations/developer-tools/claude-code) runs a script after each response, reads the local session transcript, and sends the turn to Langfuse with its token usage. Claude Code keeps talking to Anthropic directly, so billing doesn't change.
+
+Cost in this setup is computed from token usage and Langfuse's [model prices](/docs/observability/features/token-and-cost-tracking). For subscription users, that number is the API-equivalent cost of the work, not their invoice. It is still the right number for comparing developers, tasks, and models.
+
+## Choosing between the gateway and hooks [#gateway-vs-hooks]
+
+| Question                                   | AI Gateway                                   | Hooks                                 |
+| ------------------------------------------ | -------------------------------------------- | ------------------------------------- |
+| Billing                                    | API, through your provider credential        | Unchanged (subscription or API)       |
+| Can a developer turn tracking off locally? | No, the gateway is the only way to the model | Yes, by removing the hook             |
+| Who holds the Anthropic key?               | Only the gateway                             | Each developer                        |
+| Cost figure                                | Cost of the actual API calls                 | API-equivalent estimate from tokens   |
+| Setup                                      | Base URL and gateway key                     | Hook script and Langfuse project keys |
+
+Pick the gateway when spend control and enforcement matter: one place holds the provider key, and every call is recorded. Pick hooks when developers stay on subscription seats and you mainly want visibility.
+
+## Reading the numbers [#reading-the-numbers]
+
+Once traces arrive, the questions teams usually answer first:
+
+1. **Which developers and repositories drive cost?** Group cost by user and by a `repo` tag set through [request headers](/docs/gateway/features/tracing#request-headers).
+2. **Which sessions are outliers?** Sort sessions by cost and open the most expensive ones. Repeated file reads and failing test loops are common causes.
+3. **How much does prompt caching save?** Generations record cached tokens separately, so you can compare cached and uncached input across sessions.
+4. **Is a cheaper model good enough?** Compare cost per session across models for the same kind of task before changing the default.
+
+For dashboards on team or cost-center metadata, see [custom dashboards](/docs/metrics/features/custom-dashboards). For the same workflow on other agents, see [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="how-much-does-claude-code-cost">
+<Summary>How much does Claude Code cost per developer?</Summary>
+
+Anthropic's cost documentation puts the average at around $13 per developer per active day and $150-250 per developer per month, with 90% of users below $30 per active day (as of November 2026). Your numbers depend on session length, repository size, and model choice, so measure your own team before budgeting.
+
+</Details>
+
+<Details id="how-do-i-check-claude-code-usage">
+<Summary>How do I check my Claude Code usage?</Summary>
+
+Run `/usage` in Claude Code to see the current session's tokens and an estimated cost. Team and Enterprise admins can open the spend report in org analytics. For per-session detail across a team, send Claude Code's calls to Langfuse through the AI Gateway or the hooks integration.
+
+</Details>
+
+<Details id="can-i-use-the-gateway-with-a-claude-subscription">
+<Summary>Can I use the Langfuse AI Gateway with a Claude Pro or Max subscription?</Summary>
+
+No. The gateway forwards requests with your organization's provider credential, so calls are billed per token through the API. To keep subscription billing and still trace sessions, use the hooks integration instead.
+
+</Details>
+
+<Details id="does-the-gateway-store-my-code">
+<Summary>Does the gateway store prompts and code?</Summary>
+
+Only in `FULL` ingestion mode. The default `USAGE` mode records the model, tokens, cost, and latency without input or output. Admins choose the mode for the whole organization.
+
+</Details>
+
+</FaqDetails>

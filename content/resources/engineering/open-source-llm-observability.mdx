@@ -1,0 +1,80 @@
+---
+title: "Open source LLM observability: what to look for and how to self-host it"
+description: "What makes an LLM observability tool open source in practice: license, feature gating, self-hosting, OpenTelemetry, and data ownership. How Langfuse fits, and how to get started."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+# Open source LLM observability: what to look for and how to self-host it
+
+LLM observability records what your models and agents do: every model call, tool call, and retrieval, with inputs, outputs, cost, and latency, so you can debug failures and measure quality. Many teams want that tooling to be open source, so they can run it in their own infrastructure, inspect the code, and avoid lock-in. "Open source" covers very different things across tools, though, and the differences matter once you deploy.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Check five things before you pick an open source LLM observability tool: the license, which features are gated, whether self-hosting is production-ready at scale, whether it accepts OpenTelemetry, and whether you can get your data out. [Langfuse](/docs) is MIT-licensed, includes all core features (tracing, evaluation, prompt management, datasets, dashboards) in the open source version without usage limits, runs on the same architecture as Langfuse Cloud, and accepts OpenTelemetry. [Self-host it](/self-hosting) with Docker Compose for a trial or Helm for production.
+
+<ArchitectureDiagram />
+
+## Five questions for any open source tool [#criteria]
+
+| Question                          | Why it matters                                                                                 | Langfuse                                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Which license?                    | Permissive licenses allow internal use and modification without conditions; others restrict it | MIT for the core; enterprise features in a separately licensed directory              |
+| Which features are gated?         | Some tools open-source only a tracing SDK and keep evaluation or the UI closed                 | Tracing, evaluation, prompt management, datasets, dashboards, and SSO are open source |
+| Is self-hosting production-ready? | A single-container demo is different from a deployment that handles spikes and large payloads  | Same architecture as Langfuse Cloud, with Helm and Terraform deployments              |
+| Does it accept OpenTelemetry?     | Standard instrumentation avoids lock-in to one SDK                                             | Native OTLP endpoint, plus SDKs built on OpenTelemetry                                |
+| Can you get your data out?        | You may want traces in your warehouse or need to migrate later                                 | Public API, blob storage export, and direct ClickHouse access when self-hosted        |
+
+## What open source Langfuse includes [#included]
+
+- **[Tracing](/docs/observability/overview)** for agents, RAG pipelines, and chat apps, with [sessions](/docs/observability/features/sessions), [users](/docs/observability/features/users), and [cost tracking](/docs/observability/features/token-and-cost-tracking).
+- **[Evaluation](/docs/evaluation/overview)** with LLM-as-a-Judge, code evaluators, annotation queues, datasets, and experiments.
+- **[Prompt management](/docs/prompt-management/overview)** with versions, release labels, and a playground.
+- **[Dashboards](/docs/metrics/features/custom-dashboards)** and the [public API](/docs/api-and-data-platform/features/public-api).
+- **The [AI Gateway](/self-hosting/configuration/ai-gateway)**, in beta, for routing and recording calls to OpenAI, Anthropic, and Bedrock.
+
+Features such as audit logs, data retention, project-level roles, and server-side masking need an Enterprise license key when self-hosted. See the [license key page](/self-hosting/license-key).
+
+## Why teams self-host [#why-self-host]
+
+- **Data stays in their network.** Prompts and outputs often contain customer or regulated data. See [HIPAA-compliant LLM observability](/resources/engineering/hipaa-compliant-llm-observability) and [LLM observability for financial services](/resources/engineering/llm-observability-financial-services).
+- **No internet access.** Langfuse does not require it. See [air-gapped LLM observability](/resources/engineering/air-gapped-llm-observability).
+- **Existing platform.** Teams that already run Kubernetes and a data stack add Langfuse at low marginal cost.
+
+Self-hosting is not the only way to use open source Langfuse. [Langfuse Cloud](https://cloud.langfuse.com) runs the same code, if you would rather not operate it. See [self-hosted vs Cloud](/resources/engineering/self-hosted-vs-cloud).
+
+## Get started [#get-started]
+
+1. **Try it locally** with [Docker Compose](/self-hosting/deployment/docker-compose).
+2. **Instrument an app** with the [Python or JS/TS SDK](/docs/observability/sdk/overview), [OpenTelemetry](/integrations/native/opentelemetry), or one of the [framework integrations](/integrations).
+3. **Deploy for production** with the [Helm chart](/self-hosting/deployment/kubernetes-helm) or the [AWS](/self-hosting/deployment/aws), [Azure](/self-hosting/deployment/azure), or [GCP](/self-hosting/deployment/gcp) modules. Use the [production checklist](/resources/engineering/self-hosted-langfuse-production-checklist).
+4. **Plan ClickHouse** early. See [ClickHouse for self-hosted Langfuse](/resources/engineering/clickhouse-for-self-hosted-langfuse).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="is-langfuse-open-source">
+<Summary>Is Langfuse open source?</Summary>
+
+Yes. The core of Langfuse is MIT-licensed on [GitHub](https://github.com/langfuse/langfuse), and includes all core features without usage limits. A set of enterprise features lives in a separately licensed part of the repository and needs a license key when self-hosted.
+
+</Details>
+
+<Details id="free-self-hosted">
+<Summary>Is self-hosted Langfuse free?</Summary>
+
+The open source version is free, with unlimited usage. You pay for your own infrastructure. Enterprise and Government licenses are paid. See [self-hosted pricing](/pricing-self-host).
+
+</Details>
+
+<Details id="otel-only">
+<Summary>Can I use Langfuse with OpenTelemetry only, without the Langfuse SDK?</Summary>
+
+Yes. Langfuse accepts traces on its OpenTelemetry endpoint, so any OpenTelemetry instrumentation or GenAI semantic conventions library can send traces. See [OpenTelemetry](/integrations/native/opentelemetry).
+
+</Details>
+
+</FaqDetails>

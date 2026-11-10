@@ -1,0 +1,110 @@
+---
+title: "What does your team use coding agents for? Claude Code and Codex analytics"
+description: "Go beyond cost: see what engineers use Claude Code, Codex, and other coding agents for by classifying sessions, mining tool calls, and asking questions about the traces."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# What does your team use coding agents for?
+
+Coding agent dashboards usually stop at spend: cost per developer, tokens per model, sessions per week. Those numbers say how much a team uses an agent, not what it uses it for. Knowing the mix of work (bug fixes, test writing, refactors, migrations, documentation) tells you where agents already deliver, where developers give up on them, and which team skills or prompts would help most. That answer is in the sessions themselves.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Record coding agent sessions with their content, using the [Langfuse AI Gateway](/docs/gateway/overview) in `FULL` mode or a hooks integration. Then classify sessions by task type with an [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator, mine tool calls and skill tags for patterns, and ask [Halo](/docs/api-and-data-platform/features/halo), the Langfuse assistant, questions like "what does the platform team use Claude Code for?" The result is a breakdown of work by task type, team, and outcome, next to its cost.
+
+<Frame fullWidth>
+  ![Langfuse session view of a Codex conversation with messages, tool calls, cost, and token usage](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## What usage analytics adds to cost data [#beyond-cost]
+
+| Question                                        | Cost data | Session content |
+| ----------------------------------------------- | --------- | --------------- |
+| How much does each developer spend?             | Yes       | Yes             |
+| What kinds of tasks do agents work on?          | No        | Yes             |
+| Which tasks end in failure or abandonment?      | No        | Yes             |
+| Which tools and skills does the agent rely on?  | Partly    | Yes             |
+| Where would a team skill or better prompt help? | No        | Yes             |
+
+The first row needs only tokens and prices. Every other row needs the conversation: the developer's request, the agent's steps, and the result.
+
+## Step 1: capture session content [#capture]
+
+How you capture depends on the agent:
+
+- **Through the gateway**, set the [ingestion mode](/docs/gateway/features/tracing#ingestion-modes) to `FULL`, which records the input and output of every model call. The default `USAGE` mode records no content, so it supports cost analysis only. The mode applies to the whole organization.
+- **Through hooks**, the [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), and [Cursor](/integrations/developer-tools/cursor) integrations upload the session transcript with prompts, tool calls, and outputs.
+
+The gateway groups each agent's calls into sessions automatically, from the agent's own session ID. For Codex, each turn is one trace. For Claude Code, enable [turn grouping](/integrations/developer-tools/claude-code-gateway#turn-grouping) to get one trace per prompt instead of one per model call.
+
+<Callout type="warning">
+  Session content includes code, file contents, and anything developers paste
+  into the agent. Agree on what may be captured before switching to `FULL`
+  mode, restrict project access with [roles](/docs/administration/rbac), and set
+  [data retention](/docs/administration/data-retention) to the shortest period
+  your analysis needs.
+</Callout>
+
+## Step 2: add context the agent doesn't send [#context]
+
+Tag sessions with the dimensions you want to slice by. Through the gateway, [request headers](/docs/gateway/features/tracing#request-headers) such as `langfuse-tags` and `langfuse-metadata` can carry the repository and team, set once in each developer's agent configuration:
+
+```text
+langfuse-tags: claude-code,platform-team
+langfuse-metadata: repo:payments-service
+```
+
+Team and cost center are better set as [key metadata](/docs/gateway/features/api-keys#key-metadata), which developers can't change.
+
+## Step 3: classify sessions by task type [#classify]
+
+Create an observation-level [LLM-as-a-Judge evaluator](/docs/evaluation/get-started/online) that reads the developer's request and returns one category. Coding agents resend the conversation with every model call, so the input of a generation already contains the request. Useful categories are `bug_fix`, `new_feature`, `tests`, `refactor`, `docs`, `investigation`, or `other`. Run it on incoming traces and on past ones with a backfill. The categories become [scores](/docs/evaluation/scores/overview) you can filter and chart.
+
+A second evaluator can judge the outcome, such as `completed`, `partially_completed`, or `abandoned`, from the end of the session. Combining both gives the table that matters: which task types the agent finishes and which it doesn't. The [intent classification guide](/resources/engineering/chatbot-intent-analytics) shows the same pattern for chat products, and [evaluating coding agent sessions](/resources/engineering/evaluate-coding-agent-sessions) goes deeper on outcomes.
+
+## Step 4: mine tool calls and skills [#tools]
+
+Tool calls are observations, so they can be counted and filtered without any model:
+
+- **Most-used tools** show how developers work with the agent: mostly reading code, mostly running tests, or mostly editing.
+- **Failing tools** point at environment problems, such as missing dependencies or blocked commands, that waste sessions.
+- **Skill usage**, recorded as `skill:<name>` tags by the Cursor integration, shows which team skills are read and how sessions that use them compare.
+
+## Step 5: ask questions in plain language [#halo]
+
+[Halo](/docs/api-and-data-platform/features/halo) is the Langfuse assistant for exploring project data. It can fetch and cluster observations, summarize sessions, and build dashboards, with your approval for anything it creates. Questions that work well on coding agent data:
+
+- "What did the platform team use Claude Code for last week? Group the sessions by task type."
+- "Cluster the failed tool calls from the last 7 days and show the main causes."
+- "Build a dashboard of cost per task type per team."
+
+Halo reads the same data you can, so it needs `FULL` mode or hook-captured content to answer questions about what sessions contained.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="usage-mode-enough">
+<Summary>Is the default USAGE mode enough for usage analytics?</Summary>
+
+For cost, tokens, and models per developer, yes. To know what sessions were about, you need their content, which means `FULL` ingestion mode on the gateway or a hooks integration that uploads transcripts.
+
+</Details>
+
+<Details id="halo-self-hosted">
+<Summary>Is Halo available on self-hosted Langfuse?</Summary>
+
+Halo is in public beta for self-hosted Langfuse from version 4.28.0 and needs an instance-wide Langfuse AI model. See the [self-hosted Halo setup](/self-hosting/configuration/halo).
+
+</Details>
+
+<Details id="privacy">
+<Summary>How do I analyze agent usage without exposing code to everyone?</Summary>
+
+Keep coding agent traces in a dedicated project, grant access only to the people running the analysis, and set a short data retention period. For aggregate reporting, share dashboards of categories and counts instead of raw sessions.
+
+</Details>
+
+</FaqDetails>

@@ -1,0 +1,84 @@
+---
+title: "AI gateway vs SDK tracing: which one do you need?"
+description: "When to trace LLM calls with a gateway, when to use an SDK or OpenTelemetry, and how to combine both in one trace with traceparent, without recording calls twice."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# AI gateway vs SDK tracing: which one do you need?
+
+There are two ways to get LLM calls into an observability tool. A gateway sits between the app and the provider and records every call that passes through it. An SDK, or OpenTelemetry, runs inside the app and records the call together with the code around it. They answer different questions, and most teams end up using both.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Use the [Langfuse AI Gateway](/docs/gateway/overview) for coverage and control: every model call, from every app and coding agent, with cost, the caller, and no code change. Use the [Langfuse SDKs](/docs/observability/sdk/overview) or [OpenTelemetry](/integrations/native/opentelemetry) for depth: retrieval, tool calls, and business logic in one trace per request. To combine them, send the W3C `traceparent` header from your app, and the gateway records its generation inside your trace. Don't also trace the same call with a provider SDK integration, or it is recorded twice.
+
+<Frame fullWidth>
+  ![Langfuse session view of a model conversation recorded by the gateway, with messages, tool calls, cost, and token usage](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## How they compare [#comparison]
+
+| Question                               | AI gateway                                             | SDK or OpenTelemetry                          |
+| -------------------------------------- | ------------------------------------------------------ | --------------------------------------------- |
+| Code change needed?                    | No, change the base URL and key                        | Yes, add the SDK or an instrumentation        |
+| What is recorded?                      | Model calls                                            | Model calls plus any span you add             |
+| Covers uninstrumented apps and agents? | Yes, anything that goes through it                     | Only code you instrument                      |
+| Who is the caller?                     | Set by the gateway key, can't be spoofed by a user key | Set by the app                                |
+| Controls access to providers?          | Yes: keys, revocation, model allowlist                 | No                                            |
+| Providers                              | OpenAI, Anthropic, Amazon Bedrock (Nov 2026)           | Any provider or framework with an integration |
+| Works with coding agents?              | Yes, the main use case                                 | Through hooks or native OpenTelemetry exports |
+
+## When to start with the gateway [#gateway-first]
+
+- **You need numbers for all traffic quickly.** Cost and usage per person, service, and model, including apps nobody instrumented. See [FinOps for AI](/resources/engineering/finops-for-ai).
+- **You hand out provider access.** Developers and services get their own [gateway keys](/resources/engineering/ai-gateway-api-keys) instead of a shared provider key.
+- **You need an audit trail.** Every call is attributed to a person or service. See [AI audit trail](/resources/engineering/ai-audit-trail).
+- **You can't change the code.** Third-party tools and coding agents only let you set a base URL. See [trace an LLM app without code changes](/resources/engineering/trace-llm-app-without-code-changes).
+
+## When to start with the SDK [#sdk-first]
+
+- **You are debugging an agent or RAG pipeline.** You need retrieval results, tool executions, and the order of steps, not just the model calls.
+- **You evaluate application output.** Scores belong on the response the user saw, which is usually a span the app creates, not a single model call.
+- **You call providers the gateway doesn't support,** or use a framework integration such as LangChain, LlamaIndex, or the Vercel AI SDK.
+- **You use [prompt management](/docs/prompt-management/features/link-to-traces).** The SDK links each generation to the prompt version it used.
+
+## Use both in one trace [#combine]
+
+The gateway reads the W3C `traceparent` header. When an app traced with the Langfuse SDK or OpenTelemetry sends it, the gateway uses the trace ID and nests its generation under the calling span. The app records the request, retrieval, and tools; the gateway records the model call with exact token usage and cost. The gateway also reads [baggage](/docs/gateway/features/tracing#trace-context) entries such as `langfuse_user_id` and `langfuse_session_id`, the same keys the Langfuse SDKs propagate.
+
+If your app uses OpenTelemetry, an HTTP client instrumentation can inject `traceparent` into outgoing requests, so you don't set it by hand.
+
+<Callout type="warning">
+  Don't trace the same model call twice. If the app sends its calls through
+  the gateway, remove provider SDK integrations, such as the Langfuse OpenAI
+  integration or an OpenAI OpenTelemetry instrumentation, for those calls.
+  Otherwise each call shows up as two generations, and cost is counted twice.
+</Callout>
+
+## A common rollout path [#rollout]
+
+1. Route all model traffic through the gateway in `USAGE` mode to get cost and attribution for everything.
+2. Pick the applications where quality matters most and add the SDK there, sending `traceparent` to the gateway.
+3. Switch to `FULL` mode, or rely on SDK-recorded inputs, where you want to evaluate content.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="billing-both">
+<Summary>Is a call counted twice if I use the gateway and the SDK?</Summary>
+
+Not when you combine them with `traceparent` and no provider integration: the gateway records the generation, and the SDK records the spans around it. Each generation and span is one [billable unit](/docs/administration/billable-units), like any other observation.
+
+</Details>
+
+<Details id="otel-only">
+<Summary>Can I use OpenTelemetry instead of the Langfuse SDK?</Summary>
+
+Yes. Langfuse accepts OpenTelemetry traces, and the gateway reads `traceparent` from any W3C-compatible tracer. See [OpenTelemetry](/integrations/native/opentelemetry).
+
+</Details>
+
+</FaqDetails>

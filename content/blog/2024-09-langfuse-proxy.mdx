@@ -16,6 +16,17 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
   authors={["clemensrawert", "marcklingen"]}
 />
 
+<Callout type="info">
+  **Update, November 2026:** Langfuse now offers an optional gateway, the
+  [Langfuse AI Gateway](/docs/gateway/overview) (beta). It is aimed at company
+  traffic such as coding agents and internal tools, where per-person keys and
+  an audit trail matter, and records every call as a Langfuse trace.
+  Asynchronous tracing with the SDKs stays the default for applications. See
+  [AI gateway vs SDK tracing](/resources/engineering/ai-gateway-vs-sdk-tracing)
+  and [trace an LLM app without code
+  changes](/resources/engineering/trace-llm-app-without-code-changes).
+</Callout>
+
 LLM Proxies are popular tools that add much functionality like caching, rate limiting, and routing to making LLM requests. This blog post will explain what a proxy is, what it does well and why ultimately we would recommend to think hard about using a proxy for your application.
 
 ## TLDR; Should you use an LLM Proxy?

@@ -1,0 +1,96 @@
+---
+title: "Coding agent cost tracking: Claude Code, Codex, Copilot, Cursor"
+description: "Track AI coding agent cost across Claude Code, Codex, GitHub Copilot, and Cursor in one place: per developer, team, model, and session, with gateway or hooks."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Coding agent cost tracking: Claude Code, Codex, Copilot, Cursor
+
+Once a team uses more than one coding agent, cost lives in several places: an Anthropic org report, an OpenAI admin console, GitHub billing, and Cursor's dashboard. None of them shows the others, and none shows what a session did. This page explains how to bring all of them into one Langfuse project, so you can compare cost per developer, team, model, and session across agents.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Each agent reaches Langfuse one of two ways. The [Langfuse AI Gateway](/docs/gateway/overview) handles Claude Code, Codex, the Copilot CLI and app (bring-your-own-key models), OpenCode, and Pi, and records the cost of the actual API calls. Hooks and OpenTelemetry integrations handle Claude Code, Codex, Copilot, and Cursor without changing billing, and estimate cost from tokens. Send all of them to one project, tag each developer's traces with their team, and build one dashboard.
+
+<Frame fullWidth>
+  ![Langfuse AI Gateway analytics with total cost, requests, tokens, cost over time, and cost per user](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## Which path each agent supports [#paths]
+
+| Agent          | Through the AI Gateway                                                        | Without the gateway                                                  |
+| -------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Claude Code    | [Yes](/integrations/developer-tools/claude-code-gateway), API billing only    | [Hooks](/integrations/developer-tools/claude-code)                   |
+| Codex          | [Yes](/integrations/developer-tools/codex-gateway), API key only              | [Plugin hooks](/integrations/developer-tools/codex)                  |
+| GitHub Copilot | [Yes](/integrations/developer-tools/github-copilot-gateway), BYOK models only | [OpenTelemetry export](/integrations/developer-tools/github-copilot) |
+| Cursor         | No                                                                            | [Plugin hooks](/integrations/developer-tools/cursor)                 |
+| OpenCode       | [Yes](/integrations/developer-tools/opencode-gateway)                         | [Plugin](/integrations/developer-tools/opencode)                     |
+
+The per-agent guides go deeper: [Claude Code](/resources/engineering/claude-code-usage-cost-tracking), [Codex](/resources/engineering/codex-usage-cost-tracking), [GitHub Copilot](/resources/engineering/github-copilot-usage-cost-tracking), and [Cursor](/resources/engineering/cursor-usage-cost-tracking).
+
+## Gateway or hooks: the cost question decides [#gateway-or-hooks]
+
+The two paths produce different cost numbers, and that matters for budgeting:
+
+- **Through the gateway**, the agent calls models with your organization's provider credential. The cost Langfuse records is the cost of the calls you pay for.
+- **Through hooks or OpenTelemetry**, the agent keeps its own billing, often a subscription seat. Langfuse computes cost from tokens and model prices, so the number is what the same work would cost at API rates.
+
+Use gateway numbers for chargeback and budgets. Use hook numbers to compare developers, tasks, and models, and to spot sessions worth reading. If some developers use the gateway and others use hooks, keep the two apart on dashboards with a tag or the trace name.
+
+## What drives coding agent cost [#cost-drivers]
+
+Across agents, the same few patterns explain most of the spread between developers:
+
+1. **Context size** comes first: agents that read many files or replay long histories send far more input tokens per call.
+2. **Session length** compounds it, because many agents resend the conversation on every round.
+3. **Model choice** changes the price per token by an order of magnitude between small and large models.
+4. **Cache hits** reduce input cost. Generations record cached tokens separately, so you can see how much caching saves.
+5. **Retries and loops** add cost without progress. Failed tool calls followed by the same model call are the signature.
+
+Each of these is visible per session in Langfuse, which is why per-session data finds savings that monthly totals miss.
+
+## One dashboard across agents [#dashboard]
+
+With every agent in one project, a [custom dashboard](/docs/metrics/features/custom-dashboards) can answer the questions platform teams get asked:
+
+| Chart                   | Configuration                                                   |
+| ----------------------- | --------------------------------------------------------------- |
+| Cost per agent per week | Total cost, grouped by trace name                               |
+| Cost per developer      | Total cost, grouped by user                                     |
+| Cost per team           | Total cost, filtered or grouped on a `team` tag or key metadata |
+| Most expensive sessions | Sessions table sorted by cost                                   |
+
+On the gateway, attach `team` and `cost_center` as [key metadata](/docs/gateway/features/api-keys#key-metadata) when a developer's key is created; clients can't change it. For hooks, set a team tag in each developer's integration config. For cost attribution beyond coding agents, see [FinOps for AI](/resources/engineering/finops-for-ai).
+
+## Beyond cost: what the sessions show [#beyond-cost]
+
+Cost is the first reason teams collect this data, and rarely the last. Once sessions are in Langfuse, you can see [what your team uses coding agents for](/resources/engineering/coding-agent-usage-analytics), and [evaluate coding agent sessions](/resources/engineering/evaluate-coding-agent-sessions) to find where the agent fails. For the setup details of every agent integration, see [tracing coding agents](/resources/engineering/coding-agent-tracing).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="which-coding-agent-is-cheapest">
+<Summary>Which coding agent is cheapest?</Summary>
+
+It depends on the plan, the model, and how your team works, so measure rather than compare list prices. Send every agent to one Langfuse project and compare cost per session for similar tasks. For a direct comparison of two agents, see [Claude Code vs Codex](/resources/engineering/claude-code-vs-codex).
+
+</Details>
+
+<Details id="can-i-track-cost-without-the-gateway">
+<Summary>Can I track coding agent cost without the gateway?</Summary>
+
+Yes. Hooks and OpenTelemetry integrations record token usage for Claude Code, Codex, Copilot, and Cursor, and Langfuse computes cost from model prices. The gateway adds central key custody, enforced recording, and the cost of the actual API calls.
+
+</Details>
+
+<Details id="can-developers-opt-out">
+<Summary>Can developers opt out of tracking?</Summary>
+
+With hooks, yes: the integration runs on each machine and can be removed. With the gateway, the gateway key is the only way to reach the model, so every call through it is recorded. Choose based on whether you need visibility or enforcement.
+
+</Details>
+
+</FaqDetails>

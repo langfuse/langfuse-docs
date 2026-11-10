@@ -1,0 +1,99 @@
+---
+title: "Self-host an open source AI gateway"
+description: "Run the open source Langfuse AI Gateway in your own infrastructure: what it does, how it fits next to self-hosted Langfuse, requirements, sizing, and current beta limits."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Self-host an open source AI gateway
+
+Some companies can't send prompts, keys, or usage records through a third-party service, even one that only routes requests. For them, an AI gateway has to run in their own network, next to the rest of their infrastructure. The Langfuse AI Gateway ships with open source Langfuse and deploys with the same Helm chart or Docker Compose setup.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** The [self-hosted Langfuse AI Gateway](/self-hosting/configuration/ai-gateway) is a stateless container that runs next to self-hosted Langfuse. It accepts native OpenAI, Anthropic, and Amazon Bedrock requests, replaces gateway keys with your provider credentials, streams responses back, and records every call as a Langfuse generation in your own database. It needs Langfuse `v4.75.0` or later on the v4 data model, a DNS name with TLS, and direct outbound HTTPS to the providers. It is in beta, as of November 2026.
+
+<Frame fullWidth>
+  ![Langfuse AI Gateway overview with ingestion mode setting and setup steps](/images/docs/ai-gateway/setup-ingestion-mode.png)
+</Frame>
+
+## What you get [#what-you-get]
+
+The self-hosted gateway has the same features as the gateway on Langfuse Cloud:
+
+- **Gateway keys instead of provider keys**, per developer and per service, with expiry and immediate revocation. See [gateway API keys](/resources/engineering/ai-gateway-api-keys).
+- **A model allowlist** per provider credential. See [control which AI models your company can use](/resources/engineering/ai-model-allowlist).
+- **A trace for every call**, with model, tokens, cost, latency, errors, and the caller. See [AI audit trail](/resources/engineering/ai-audit-trail).
+- **Coding agent support** for Claude Code, Codex, GitHub Copilot with your own key, and other agents. See [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking).
+
+Self-hosting adds one ingestion mode that Cloud doesn't have: `NONE`, which routes requests without recording anything, for teams that only want key management.
+
+## How it fits into your deployment [#architecture]
+
+| Component                              | Role                                                                                       | State                         |
+| -------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------- |
+| Gateway                                | Receives client requests, calls the provider, streams the response, uploads the generation | Stateless, no database access |
+| Langfuse Web                           | Resolves gateway keys, stores encrypted provider credentials, ingests generations          | Uses your Postgres            |
+| Langfuse Worker, ClickHouse, Redis, S3 | Store and serve traces, like any other Langfuse trace                                      | Your existing stack           |
+
+The gateway has no database, Redis, ClickHouse, or S3 credentials. It only talks to Langfuse Web and to the providers. Keep the connection between gateway and web on a private network or encrypted, because web's responses contain provider credentials.
+
+## Requirements [#requirements]
+
+- The [Helm chart](/self-hosting/deployment/kubernetes-helm#ai-gateway) in a release after `2.2.0`, or the [Docker Compose](/self-hosting/deployment/docker-compose#ai-gateway) setup.
+- Langfuse `v4.75.0` or later, with the same version for web and the gateway.
+- The v4 data model: `LANGFUSE_MIGRATION_V4_WRITE_MODE` must not be `legacy`.
+- A DNS name for the gateway with a TLS certificate, terminated at your Ingress or load balancer.
+- `ENCRYPTION_KEY` set on web, because provider credentials are stored encrypted with it.
+
+<Callout type="warning">
+  The gateway calls the providers' official API URLs directly and ignores
+  `HTTP_PROXY` and `HTTPS_PROXY`. Networks that only allow egress through a
+  proxy, Azure OpenAI endpoints, and internal LLM proxies are not supported
+  today. Amazon Bedrock is available in releases after `v4.77.0`. See the
+  [self-hosting requirements](/self-hosting/configuration/ai-gateway#requirements).
+</Callout>
+
+## Sizing and operations [#operations]
+
+- **Replicas:** the gateway is stateless, so scale it horizontally. Run at least two replicas in production and scale on CPU.
+- **Memory:** each instance reserves memory for running requests up to a budget of 1 GiB by default, and returns `503` when it is used up. Set the memory limit to at least the budget plus 512 MiB.
+- **Timeouts:** requests can stream for up to 600 seconds. Set proxy and load balancer timeouts above 120 seconds, `620` to cover the full limit, and turn off response buffering.
+- **Langfuse capacity:** every recorded call is ingested like any other trace, so plan [Langfuse scaling](/self-hosting/configuration/scaling) for gateway traffic as well.
+- **Health checks:** use `/ready` for the load balancer, `/health` for liveness.
+
+## Choosing between self-hosted and Cloud [#cloud-vs-self-hosted]
+
+The gateway on [Langfuse Cloud](/docs/gateway/overview) needs no deployment and is available in the EU, US, Japan, and HIPAA regions. Self-host it when your data has to stay in your infrastructure, or when you already run Langfuse yourself. For the broader decision, see [self-hosted vs Cloud](/resources/engineering/self-hosted-vs-cloud).
+
+## Alternatives [#alternatives]
+
+Other open source gateways, such as LiteLLM Proxy and the Portkey gateway, focus on routing across many providers, with retries and fallbacks. The Langfuse AI Gateway focuses on access control and tracing for OpenAI, Anthropic, and Bedrock, and records into the same Langfuse instance as your application traces. See [Langfuse AI Gateway vs LiteLLM](/resources/engineering/ai-gateway-vs-litellm) and [Portkey alternative](/resources/engineering/portkey-alternative).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="license">
+<Summary>Is the self-hosted AI gateway open source?</Summary>
+
+Yes. It is part of open source Langfuse and deploys with the same Helm chart and Docker Compose setup. It is in beta, so its configuration may change in minor releases.
+
+</Details>
+
+<Details id="air-gapped-gateway">
+<Summary>Does the self-hosted gateway work in an air-gapped network?</Summary>
+
+Only if the network allows direct outbound HTTPS to the provider APIs you use. The gateway can't reach providers through an egress proxy, and it doesn't support self-hosted models today.
+
+</Details>
+
+<Details id="without-langfuse">
+<Summary>Can I run the gateway without the rest of Langfuse?</Summary>
+
+No. The gateway resolves keys and stores credentials through Langfuse Web, and records generations into Langfuse. With the `NONE` ingestion mode, it only routes requests and records nothing, but it still needs Langfuse Web.
+
+</Details>
+
+</FaqDetails>

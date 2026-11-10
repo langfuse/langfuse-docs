@@ -1,0 +1,95 @@
+---
+title: "Claude Code vs Codex: cost, usage limits, and team reporting"
+description: "Claude Code vs OpenAI Codex compared on billing, usage limits, admin reporting, and observability, plus how to measure which agent costs less on your own work."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Claude Code vs Codex: cost, usage limits, and team reporting
+
+Claude Code (Anthropic) and Codex (OpenAI) are the two coding agents most teams evaluate side by side. Both run in the terminal, edit files, run commands, and work through multi-step tasks. This comparison focuses on the questions that decide a team rollout: how each is billed, how usage limits work, what admins can see, and how to measure which one costs less for your own work.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Both agents can run on a subscription plan or per token through the API. Codex is included in ChatGPT plans from Free to Enterprise, with usage limits over a 5-hour and a weekly window. Claude Code is included in Claude Pro, Max, Ultra, Team, and Enterprise plans, and Anthropic reports an average of around $13 per developer per active day for API-billed use. Both offer admin analytics on business plans and both can be pointed at an LLM gateway. Which one is cheaper depends on your tasks, so trace both on the same work in Langfuse and compare cost per session. Facts below were checked in November 2026.
+
+<Frame fullWidth>
+  ![Langfuse AI Gateway analytics with cost, requests, and tokens per user and model](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## Side-by-side comparison [#comparison]
+
+| Dimension                  | Claude Code                                                                                                           | Codex                                                                                                      |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Vendor                     | Anthropic                                                                                                             | OpenAI                                                                                                     |
+| Plans that include it      | Pro, Max, Ultra, Team, Enterprise (not Free)                                                                          | Free, Go, Plus, Pro, Business, Edu, Enterprise                                                             |
+| Pay per token              | Yes, through the Anthropic Console or a cloud provider                                                                | Yes, with an OpenAI API key at standard API pricing                                                        |
+| Plan usage limits          | Plan-based allowance, shown in `/usage`                                                                               | Allowance over a 5-hour window and a weekly window                                                         |
+| Native admin reporting     | Spend report in org analytics (Team, Enterprise); Console cost page and Analytics API                                 | Codex analytics in the admin console (Business, Enterprise); analytics API                                 |
+| Points at a custom gateway | `ANTHROPIC_BASE_URL` with a bearer token                                                                              | Custom model provider in `config.toml`                                                                     |
+| Langfuse integration       | [AI Gateway](/integrations/developer-tools/claude-code-gateway) or [hooks](/integrations/developer-tools/claude-code) | [AI Gateway](/integrations/developer-tools/codex-gateway) or [plugin](/integrations/developer-tools/codex) |
+
+Sources: [Claude pricing](https://claude.com/pricing), [Claude Code costs](https://code.claude.com/docs/en/costs), [Codex pricing](https://developers.openai.com/codex/pricing), [Codex CLI repository](https://github.com/openai/codex).
+
+## Billing and limits [#billing]
+
+**Claude Code** is included in Anthropic's paid plans, and Enterprise combines a seat price with usage at API rates. With API billing, Claude Code charges by token consumption. Anthropic's [cost documentation](https://code.claude.com/docs/en/costs) gives an average of around $13 per developer per active day and $150-250 per developer per month, with 90% of users below $30 per active day.
+
+**Codex** is included in every ChatGPT plan, with Business at $20 per user per month on annual billing, according to OpenAI's [pricing page](https://developers.openai.com/codex/pricing). On a plan, usage counts against an allowance that resets over a 5-hour window and a weekly window, and you need allowance left in both. With an API key, Codex is billed at standard API rates and plan limits don't apply. The Codex CLI itself is open source under Apache-2.0.
+
+The practical difference for teams: Codex has a lower entry point because it ships with plans many companies already pay for. Claude Code's published per-developer averages make API budgets easier to plan. Neither tells you what your own tasks cost.
+
+## Admin reporting [#admin-reporting]
+
+Both vendors give admins totals:
+
+- **Anthropic** offers a spend report per user and per model in org analytics for Team and Enterprise, updated daily with CSV export, plus the Console cost page and a Claude Code Analytics API for API billing.
+- **OpenAI** offers Codex analytics in the admin console for Business and Enterprise: active users, credits and tokens, threads and turns, user leaderboards, and model usage, plus a Codex analytics API.
+
+Both views stop at totals per user. To see what a session did (which model rounds ran, which tool calls failed, why one task took ten times as long) you need traces.
+
+## How to compare them on your own work [#measure]
+
+Published averages describe other teams. To decide for yours, run both agents on comparable work and compare traces:
+
+1. **Send both agents to one Langfuse project.** Use the AI Gateway for both if your organization pays through the API, so cost reflects real API calls. Follow the [Claude Code guide](/resources/engineering/claude-code-usage-cost-tracking) and the [Codex guide](/resources/engineering/codex-usage-cost-tracking).
+2. **Tag the work.** Add a tag per task type (`bugfix`, `feature`, `refactor`) through [request headers](/docs/gateway/features/tracing#request-headers), so you compare like with like.
+3. **Compare cost per session, not per call.** Agents differ in how many model rounds a task takes. A cheaper call means little if the task needs three times as many.
+4. **Read the outliers.** Open the most expensive sessions for each agent. Repeated file reads, failing test loops, and long replayed histories explain most of the gap.
+5. **Check quality too.** Cost per session only matters for tasks that succeed. [Evaluate coding agent sessions](/resources/engineering/evaluate-coding-agent-sessions) with a judge or human review to compare outcomes.
+
+Running both through the [Langfuse AI Gateway](/docs/gateway/overview) also means one key per developer for both agents, and one analytics page for both vendors.
+
+## Which to choose [#which]
+
+- **Choose Codex** when your company already pays for ChatGPT Business or Enterprise and plan limits fit your usage, or when you want an open-source client you can inspect.
+- **Choose Claude Code** when your team standardizes on Anthropic models, or wants to run the agent through a cloud provider such as Amazon Bedrock.
+- **Run both** for a few weeks on the same kinds of tasks when the decision is about cost or quality. Trace data from your own repositories beats any published benchmark.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="is-claude-code-or-codex-cheaper">
+<Summary>Is Claude Code or Codex cheaper?</Summary>
+
+On plans, Codex starts lower because it is included in every ChatGPT plan, while Claude Code needs a paid Claude plan. Per token, it depends on the model and on how many rounds each agent needs for your tasks. Trace both on the same work and compare cost per successful session.
+
+</Details>
+
+<Details id="can-i-use-both">
+<Summary>Can a team use Claude Code and Codex at the same time?</Summary>
+
+Yes. Many teams give developers a choice. Route both through the Langfuse AI Gateway with one gateway key per developer, and compare cost and usage for both agents on one analytics page.
+
+</Details>
+
+<Details id="usage-limits">
+<Summary>Do Claude Code and Codex have usage limits?</Summary>
+
+On subscription plans, both count usage against a plan allowance: Codex over a 5-hour window and a weekly window, Claude Code according to the plan, visible in `/usage`. With API billing, usage limits are replaced by your API organization's rate limits and per-token charges.
+
+</Details>
+
+</FaqDetails>

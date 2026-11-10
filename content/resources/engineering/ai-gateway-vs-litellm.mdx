@@ -1,0 +1,87 @@
+---
+title: "Langfuse AI Gateway vs LiteLLM Proxy"
+description: "Compare the Langfuse AI Gateway and LiteLLM Proxy: providers, keys, budgets, routing, tracing, licensing, and self-hosting. When to use each, and how to use LiteLLM with Langfuse."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Langfuse AI Gateway vs LiteLLM Proxy
+
+LiteLLM Proxy and the Langfuse AI Gateway both sit between your clients and your model providers, and both hand out keys instead of provider credentials. They are built for different jobs. LiteLLM is a routing layer that speaks one API to a very large number of providers. The Langfuse AI Gateway is an access and tracing layer for a few major providers, recording into the same Langfuse project as your application traces. Many teams use LiteLLM with Langfuse, through its Langfuse callback.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Choose **LiteLLM Proxy** when you need many providers behind one OpenAI-compatible API, routing, fallbacks, or per-key budgets and rate limits. Choose the **[Langfuse AI Gateway](/docs/gateway/overview)** when you use OpenAI, Anthropic, or Amazon Bedrock, want native provider APIs for coding agents, and want every call traced in Langfuse without running a separate service. If you already run LiteLLM, keep it and send its logs to Langfuse with the [LiteLLM integration](/integrations/gateways/litellm). Details as of November 2026.
+
+<Frame fullWidth>
+  ![Langfuse AI Gateway analytics with total cost, cost over time, and cost per user, API key, and model](/images/docs/ai-gateway/analytics.png)
+</Frame>
+
+## Side-by-side comparison [#comparison]
+
+Verified against public documentation and the LiteLLM GitHub repository in November 2026. Both products change quickly, so check the linked sources before you decide.
+
+| Capability              | Langfuse AI Gateway                                                                 | LiteLLM Proxy                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Providers               | OpenAI, Anthropic, Amazon Bedrock                                                   | "100+ LLMs", per its [README](https://github.com/BerriAI/litellm)          |
+| API format              | Native OpenAI and Anthropic APIs, no translation                                    | OpenAI-compatible API translated to each provider, plus some native routes |
+| Keys                    | User keys and service account keys, expiry, revocation, key metadata                | Virtual keys with metadata, teams, and users                               |
+| Budgets and rate limits | Alerts on cost; hard caps on the [roadmap](/docs/gateway/overview#roadmap)          | Per-key and per-team budgets, TPM and RPM limits                           |
+| Model access control    | Per provider credential allowlist                                                   | Per-key and per-team model lists                                           |
+| Routing and fallbacks   | Not available during the beta                                                       | Load balancing, retries, fallbacks                                         |
+| Tracing                 | Every call is a Langfuse generation, with sessions for coding agents                | Logging callbacks to observability tools, including Langfuse               |
+| Hosting                 | Langfuse Cloud, or self-hosted next to Langfuse                                     | Self-hosted; a managed offering is available from the vendor               |
+| License                 | Open source, part of Langfuse                                                       | MIT core; an `enterprise/` directory under a separate license              |
+| SSO and audit logs      | Langfuse SSO; key changes in Langfuse [audit logs](/docs/administration/audit-logs) | Enterprise license for SSO beyond 5 users and for audit logs               |
+
+<Callout type="info">
+  The Langfuse AI Gateway is in beta. It doesn't retry or fall back between
+  providers, and it doesn't cache responses. Recording is best-effort. See
+  [known limitations](/faq/all/ai-gateway-known-limitations).
+</Callout>
+
+## Where LiteLLM fits better [#litellm]
+
+- **Many providers.** If your apps call Mistral, Gemini, Groq, self-hosted models, and others through one client, LiteLLM's translation layer saves you an integration per provider.
+- **Hard budgets today.** LiteLLM enforces `max_budget` per key or team over a budget window, and blocks requests over it. The Langfuse AI Gateway alerts on cost but doesn't block yet.
+- **Reliability features.** Fallbacks between deployments, retries, and load balancing across keys or regions.
+- **Restricting models per team.** LiteLLM can give each key or team its own model list. In the Langfuse AI Gateway, every key can call every enabled model. See [model allowlist](/resources/engineering/ai-model-allowlist).
+
+## Where the Langfuse AI Gateway fits better [#langfuse]
+
+- **Coding agents.** Claude Code, Codex, and other agents speak the provider's native API. The Langfuse AI Gateway forwards it unchanged and groups calls into sessions from the agent's own session ID. See [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking).
+- **Tracing without a second system.** Calls land as generations in Langfuse, so you can filter, evaluate, and chart them next to your application traces, and nest them in SDK traces with `traceparent`. See [AI gateway vs SDK tracing](/resources/engineering/ai-gateway-vs-sdk-tracing).
+- **People-based access.** User keys record their owner and stop working when that person leaves the organization. See [gateway API keys](/resources/engineering/ai-gateway-api-keys).
+- **No extra service on Cloud.** On Langfuse Cloud, there is nothing to deploy or operate.
+
+## Use LiteLLM with Langfuse [#together]
+
+If LiteLLM already routes your traffic, you don't need to replace it to get Langfuse tracing. Configure LiteLLM's Langfuse callback, and every request through the proxy is logged to your Langfuse project. See the [LiteLLM Proxy integration](/integrations/gateways/litellm). Don't send the same calls through both gateways, or each call is recorded twice.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="is-langfuse-a-litellm-alternative">
+<Summary>Is the Langfuse AI Gateway a LiteLLM alternative?</Summary>
+
+For teams that use OpenAI, Anthropic, or Bedrock and mainly need keys, attribution, and tracing, yes. For teams that need many providers, hard budgets, or fallbacks today, LiteLLM covers more, and works with Langfuse through its callback.
+
+</Details>
+
+<Details id="litellm-open-source">
+<Summary>Is LiteLLM Proxy open source?</Summary>
+
+Its core is MIT-licensed. Some features, such as SSO for more than five users and audit logs, are in an `enterprise/` directory that needs a commercial license, according to its repository and documentation as of November 2026.
+
+</Details>
+
+<Details id="migrate-from-litellm">
+<Summary>How do I move from LiteLLM to the Langfuse AI Gateway?</Summary>
+
+Add your provider credentials to the Langfuse AI Gateway, issue gateway keys, and change each client's base URL and key. Model IDs differ: the gateway uses `<credential>:<model>`, and coding agents can send plain provider model names. See [send your first request](/docs/gateway/get-started/first-request).
+
+</Details>
+
+</FaqDetails>
