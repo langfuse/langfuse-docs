@@ -13,15 +13,20 @@ Self-hosted code evaluators are picked up by the Langfuse worker and executed th
 
 Code evaluator availability is derived from `LANGFUSE_CODE_EVAL_DISPATCHER`. If this variable is unset, code evaluators are disabled for self-hosted deployments. Set it on the web service so the UI can show the supported code evaluator templates, and on the worker service so executions can be dispatched.
 
+<Frame fullWidth>
+  ![Testing a code evaluator with sample observations, which runs through the
+  configured dispatcher](/images/docs/evaluation/test-code-evaluator.png)
+</Frame>
+
 ## Available dispatchers
 
 Set `LANGFUSE_CODE_EVAL_DISPATCHER` to one of the available dispatchers:
 
-| Dispatcher     | Value            | Use for                                                                                      | Runtime support                      |
-| -------------- | ---------------- | -------------------------------------------------------------------------------------------- | ------------------------------------ |
-| AWS Lambda     | `aws-lambda`     | Production self-hosted deployments on AWS                                                    | TypeScript/JavaScript and Python     |
-| External HTTP  | `external`       | Production deployments with your own sandboxed executor, e.g. on Kubernetes or another cloud | The languages your executor supports |
-| Local insecure | `insecure-local` | Local development and trusted deployments                                                    | TypeScript/JavaScript only           |
+| Dispatcher     | Value            | Use for                                                                                      | Runtime support                                                                            |
+| -------------- | ---------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| AWS Lambda     | `aws-lambda`     | Production self-hosted deployments on AWS                                                    | TypeScript/JavaScript and Python                                                           |
+| External HTTP  | `external`       | Production deployments with your own sandboxed executor, e.g. on Kubernetes or another cloud | TypeScript/JavaScript and Python, or the subset in `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES` |
+| Local insecure | `insecure-local` | Local development and trusted deployments                                                    | TypeScript/JavaScript only                                                                 |
 
 <Callout type="warning">
   If you do not run Langfuse on AWS, use the [external HTTP
@@ -145,15 +150,15 @@ The Langfuse `docker-compose.yml` passes all `LANGFUSE_CODE_EVAL_EXTERNAL_*` var
 
 ### Configuration [#external-dispatcher-configuration]
 
-| Variable                                         | Default             | Description                                                                                                                                                                                                   |
-| ------------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT`           | Required            | URL that Langfuse sends evaluations to. Must use `http` or `https` and must not contain credentials. Any port is allowed, and private or in-cluster hosts work because Langfuse allowlists exactly this host. |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET`     | Required            | Secret for the `x-langfuse-signature` HMAC. At least 32 characters.                                                                                                                                           |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_HEADERS`            |                     | Extra request headers as a JSON object of strings, e.g. `{"Authorization":"Bearer <token>"}` for an API gateway. Cannot override `content-type`, `user-agent`, or `x-langfuse-signature`.                     |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS`         | `10000`             | Timeout per attempt in milliseconds, from connecting until the response body is read. Range: `1000`–`15000`.                                                                                                  |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_CONNECT_TIMEOUT_MS` | `3000`              | Timeout per attempt in milliseconds for establishing the connection, including TLS. Range: `100`–`15000`.                                                                                                     |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS`       | `3`                 | Attempts per job for retryable failures before the job goes back to the queue. Range: `1`–`10`.                                                                                                               |
-| `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES`          | `PYTHON,TYPESCRIPT` | Comma-separated languages your executor supports. The UI only offers evaluator templates in these languages, and the worker rejects other languages with `UNSUPPORTED_RUNTIME` before sending a request.      |
+| Variable                                         | Default             | Description                                                                                                                                                                                                                                |
+| ------------------------------------------------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_ENDPOINT`           | Required            | URL that Langfuse sends evaluations to. Must use `http` or `https` and must not contain credentials. Any port is allowed, and private or in-cluster hosts work because Langfuse allowlists exactly this host.                              |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET`     | Required            | Secret for the `x-langfuse-signature` HMAC. At least 32 characters.                                                                                                                                                                        |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_HEADERS`            |                     | Extra request headers as a JSON object of strings, e.g. `{"Authorization":"Bearer <token>"}` for an API gateway. Cannot override `content-type`, `user-agent`, or `x-langfuse-signature`.                                                  |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS`         | `10000`             | Timeout per attempt in milliseconds, from connecting until the response body is read. Range: `1000`–`15000`.                                                                                                                               |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_CONNECT_TIMEOUT_MS` | `3000`              | Timeout per attempt in milliseconds for establishing the connection, including TLS. Range: `100`–`15000`.                                                                                                                                  |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_MAX_ATTEMPTS`       | `3`                 | Attempts per job for retryable failures before the job goes back to the queue. Range: `1`–`10`.                                                                                                                                            |
+| `LANGFUSE_CODE_EVAL_EXTERNAL_LANGUAGES`          | `PYTHON,TYPESCRIPT` | Languages your executor supports: `PYTHON`, `TYPESCRIPT`, or both, comma-separated. The UI only offers evaluator templates in these languages, and the worker rejects other languages with `UNSUPPORTED_RUNTIME` before sending a request. |
 
 <Callout type="info">
   The signing secret and extra headers are plain environment variables.
@@ -246,12 +251,14 @@ TOLERANCE_SECONDS = 300
 def verify_signature(raw_body: bytes, header: str, secret: str) -> bool:
     parts = dict(part.split("=", 1) for part in header.split(",") if "=" in part)
     timestamp, signature = parts.get("t", ""), parts.get("v1", "")
-    if not timestamp.isdigit() or abs(time.time() - int(timestamp)) > TOLERANCE_SECONDS:
+    if not (timestamp.isascii() and timestamp.isdecimal()):
+        return False
+    if abs(time.time() - int(timestamp)) > TOLERANCE_SECONDS:
         return False
 
     signed_payload = timestamp.encode() + b"." + raw_body
     expected = hmac.new(secret.encode(), signed_payload, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(expected, signature)
+    return hmac.compare_digest(expected.encode(), signature.encode())
 ```
 
 </Tab>
@@ -358,6 +365,7 @@ from signature import verify_signature
 SIGNING_SECRET = os.environ["LANGFUSE_CODE_EVAL_EXTERNAL_SIGNING_SECRET"]
 # Keep this below LANGFUSE_CODE_EVAL_EXTERNAL_TIMEOUT_MS.
 EVAL_TIMEOUT_SECONDS = 2
+RUNNER_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Runs the Langfuse Python runner on the request from stdin. User code that
 # prints is redirected to stderr so stdout only carries the result.
@@ -387,13 +395,19 @@ def evaluate(body: bytes):
             input=body,
             capture_output=True,
             timeout=EVAL_TIMEOUT_SECONDS,
+            cwd=RUNNER_DIR,
         )
     except subprocess.TimeoutExpired:
         return user_error("TIMEOUT", f"Evaluator exceeded {EVAL_TIMEOUT_SECONDS}s")
     if completed.returncode != 0:
         return user_error("USER_CODE_ERROR", "Evaluator process exited early")
 
-    result = json.loads(completed.stdout)
+    try:
+        result = json.loads(completed.stdout)
+    except ValueError:
+        result = None
+    if not isinstance(result, dict) or not ("scores" in result or "error" in result):
+        return user_error("USER_CODE_ERROR", "Evaluator produced no result")
     return (422 if "error" in result else 200), result
 
 
