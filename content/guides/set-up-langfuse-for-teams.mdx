@@ -93,6 +93,13 @@ Your portal, CI job, script, or workflow tool coordinates the process. Power Aut
 
 Use an organization API key created by an Owner for project and membership management. Keep it in the provisioning system's secret store. Requests use the selected regional base URL and HTTP Basic Auth, with the public key as username and secret key as password. Project configuration calls use a separate project key. See [SCIM and the Organization Management API](/docs/administration/scim-and-org-api).
 
+<Callout type="info">
+  **Pro tip: manage project configuration with Terraform.** Use the [Langfuse Terraform provider](https://github.com/langfuse/terraform-provider-langfuse) and its [configuration examples](https://github.com/langfuse/terraform-provider-langfuse/tree/main/examples) to manage projects, retention, API keys, organization and project memberships, and project LLM connections in version control. Review changes with `terraform plan` before applying them. Use the API steps below for evaluator and evaluation-rule setup.
+
+On Langfuse Cloud, supply an existing organization API key created in the UI. The examples that create organizations and organization API keys require the self-hosted Enterprise Instance Management API.
+
+</Callout>
+
 #### Create the project with retention
 
 Store a mapping from your onboarding request ID to the resulting project ID so retries can resume. Check existing projects with `GET /api/public/organizations/projects` before creating another one. With the organization key, send `POST /api/public/projects`:
