@@ -67,6 +67,16 @@ Never use a plain `http://` web URL across a public network. If web's certificat
 
 </Callout>
 
+## Gateway to LLM providers [#gateway-to-providers]
+
+In releases after `v4.76.0`, the gateway applies the same [outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) as web's LLM connections and reads the same variables: `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS`, `LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS`, and `LANGFUSE_OUTBOUND_BLOCKED_IP_SEGMENTS`. Set them to the same values on web and the gateway. Neither deployment option copies them from web: with Docker Compose, add them to the `langfuse-ai-gateway` service's `environment`; with Helm, add them to `langfuse.gateway.pod.additionalEnv`.
+
+<Callout type="warning">
+
+`LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS` also applies to the official provider hosts. If you set it, include `api.openai.com` and `api.anthropic.com`, or web and the gateway reject requests to them.
+
+</Callout>
+
 ## Proxy timeouts and buffering [#timeouts]
 
 Model responses are streamed and can take minutes. The gateway ends a request after 600 seconds (`LANGFUSE_AI_GATEWAY_MAX_EXECUTION_SECONDS`) or after 120 seconds without progress (`LANGFUSE_AI_GATEWAY_STALL_TIMEOUT_SECONDS`). Everything between the client and the gateway must allow this:
