@@ -400,6 +400,24 @@
   }
 }
 
+/*
+ * Sticky first column: default to the surface color, but let row and cell
+ * background utilities win (they sit in the utilities layer).
+ */
+@layer base {
+  table.table-sticky-first-col {
+    background-color: var(--surface-bg);
+  }
+
+  table.table-sticky-first-col :where(thead, tbody, tfoot, tr) {
+    background-color: inherit;
+  }
+
+  table.table-sticky-first-col :where(th, td):first-child {
+    background-color: inherit;
+  }
+}
+
 @layer components {
   /*
    * Keep tabs panel spacing consistent:
