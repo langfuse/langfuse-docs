@@ -1,7 +1,7 @@
 ---
 title: Evaluation
 sidebarTitle: Evaluation
-description: How to judge whether experiment outputs are good, using manual review, code evaluator checks, and LLM-as-a-judge evaluators.
+description: How to judge whether experiment outputs are good, using manual review, code evaluator checks, LLM-as-a-judge evaluators, and decision models.
 ---
 
 # Evaluation
@@ -32,7 +32,7 @@ Manual evaluation is not a one-and-done step. Good production setups incorporate
 
 ## Evaluation methods [#three-kinds-of-evaluation]
 
-There are three main ways to evaluate: manually, with code, or with an LLM. Each is suited to different kinds of quality checks.
+There are three main ways to evaluate: manually, with code, or with a model. Model-based evaluation comes in two kinds: an LLM-as-a-judge, which writes out its reasoning, and a decision model, which answers typed questions. Each is suited to different kinds of quality checks.
 
 ### Manual evaluation
 
@@ -57,7 +57,7 @@ Their limitation is that they cannot assess meaning. A code evaluator can check 
 
 ### LLM-as-a-judge
 
-An [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) uses a language model to score outputs. It is required to overcome the core issue that quality of AI Applications/Agents depends on grading the quality of a text output.
+An [LLM-as-a-judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) uses a language model to score outputs and explain its verdict. Model-based evaluators like this one are required to overcome the core issue that quality of AI Applications/Agents depends on grading the quality of a text output.
 
 This is the right method for qualities that require understanding language: whether a response is relevant to the question, whether the tone matches the intended audience, whether a summary captures the key points of the source material, etc.
 
@@ -69,14 +69,26 @@ LLM judges are imperfect and easy to get wrong. This means:
 
 These limitations aren't reasons to avoid LLM judges. An LLM judge that has been calibrated against human labels and is backed by code evaluator checks is a reliable evaluator. How to write one is covered in our deeper dive into [Writing good evaluators](/academy/evaluate/writing-evaluators).
 
+### Decision models
+
+A [decision model](/docs/evaluation/evaluation-methods/decision-models) is the other kind of model-based evaluator. It also reads language, but instead of writing a verdict, it answers typed questions: yes or no, one option from a list you define, or a level on a rubric. Each answer comes with probabilities and becomes a score.
+
+Because it generates no text, a decision model is often cheaper and faster than an LLM judge, cheap enough to run on every production trace instead of a sample. Some example checks where decision models are a natural fit:
+
+- Is the user disagreeing with the assistant's last reply?
+- Which team should handle this ticket: `billing`, `technical`, or `sales`?
+- Does the reply ask for information the user already gave?
+
+The trade-off is that you get no reasoning back. If you need to read why a case failed, or the criterion doesn't fit a fixed set of answers, use an LLM-as-a-judge. And like a judge, a decision model needs to be [validated against your own labels](/academy/evaluate/writing-evaluators#validate-the-judge) before you trust it. [Writing good evaluators](/academy/evaluate/writing-evaluators#decision-model-or-judge) covers when to pick which.
+
 ## Reference-based vs reference-free evaluators [#reference-based-vs-reference-free]
 
-Both code evaluators and LLM-as-a-judge evaluators can be either reference-based or reference-free. A reference-based evaluator compares the output against a predefined expected output, like a correct answer or a golden response. A reference-free evaluator assesses the output on its own, without needing a ground truth to compare against.
+Code evaluators, LLM-as-a-judge evaluators, and decision models can all be either reference-based or reference-free. A reference-based evaluator compares the output against a predefined expected output, like a correct answer or a golden response. A reference-free evaluator assesses the output on its own, without needing a ground truth to compare against.
 
-|                 | Code evaluators          | LLM-as-a-judge / manual                                     |
-| --------------- | ------------------------ | ----------------------------------------------------------- |
-| Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" |
-| Reference-free  | Validate JSON structure  | Tone-of-voice evaluation; language detection                |
+|                 | Code evaluators          | LLM-as-a-judge / manual                                     | Decision models                                                   |
+| --------------- | ------------------------ | ----------------------------------------------------------- | ----------------------------------------------------------------- |
+| Reference-based | Exact string match check | "Does the response correctly explain this specific policy?" | "Does `output` recommend the same next step as `expectedOutput`?" |
+| Reference-free  | Validate JSON structure  | Tone-of-voice evaluation; language detection                | "Is the user disagreeing with the assistant?"                     |
 
 The advantage of reference-free evaluators is that they can be applied to unseen production data, while reference-based evaluators always need a pre-defined reference response.
 
@@ -124,6 +136,7 @@ _A tone-of-voice rewriter that takes draft marketing copy and rewrites it to mat
 | ------------------------------------ | -------------- |
 | Tone matches the brand voice         | LLM-as-a-judge |
 | Original message captured faithfully | LLM-as-a-judge |
+| Formality fits the target channel    | Decision model |
 | Calibration on a continuous sample   | Manual review  |
 
 </Tab>

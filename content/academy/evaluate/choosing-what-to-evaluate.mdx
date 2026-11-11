@@ -124,9 +124,10 @@ In OpenAI's receipt-processing walkthrough, merchant-name extraction was wrong 8
 This one is more helpful to prune once you have set up your evaluators. Some evaluators cost more than others to run:
 
 - Code evaluators are close to free
+- A decision model costs money per call, but often much less than a judge, and one evaluator answers several questions in the same call
 - An LLM-as-a-judge evaluator costs money to run, and is also harder to maintain (see [writing good evaluators](/academy/evaluate/writing-evaluators))
 
-If a metric is not that important and is expensive to track, it might be a good decision to scratch it.
+If a metric is not that important and is expensive to track, it might be a good decision to scratch it, or to check whether a [decision model](/academy/evaluate/writing-evaluators#decision-model-or-judge) can answer it instead of a judge.
 
 ## Starting from zero [#starting-from-zero]
 
@@ -152,7 +153,7 @@ A metric set describes your application as it is today. Three habits keep it cur
 
 1. Run [error analysis](/academy/monitoring/error-analysis) if you haven't.
 2. Write down the product goals and hard constraints, and turn each goal into a signal you can observe in traces.
-3. Apply the filters: fix what a prompt change fixes, keep only candidates tied to a decision, and let the judge budget push back.
+3. Apply the filters: fix what a prompt change fixes, keep only candidates tied to a decision, and let the evaluator budget push back.
 4. When you are happy with the set of metrics you assembled, implement the evaluators for it. The deep dive on [writing good evaluators](/academy/evaluate/writing-evaluators) covers how.
 
 ## References
