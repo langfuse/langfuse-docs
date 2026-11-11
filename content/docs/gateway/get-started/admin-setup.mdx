@@ -1,7 +1,7 @@
 ---
 title: Set up Gateway as an admin
 seoTitle: "Set up the Langfuse AI Gateway for your team (beta)"
-description: Set up the Langfuse AI Gateway for an organization. Choose the ingestion project and ingestion mode, add provider credentials, choose models, give your team access, and issue gateway API keys.
+description: Set up the Langfuse AI Gateway for an organization. Choose the ingestion project and ingestion mode, add provider connections, choose models, give your team access, and issue gateway API keys.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -32,25 +32,25 @@ Go to **AI Gateway → Overview** and choose:
   ![Gateway setup page with the first step, choosing between the Full and Usage ingestion modes and the project to record in](/images/docs/ai-gateway/setup-ingestion-mode.png)
 </Frame>
 
-### Add provider credentials [#add-provider-connections]
+### Add provider connections [#add-provider-connections]
 
-On the same page, select **Add credential** and add [API keys](/docs/gateway/concepts#credential-types) for model providers you’d like to use. The credential's **name** becomes the prefix of its [model IDs](/docs/gateway/features/models#model-ids).
+On the same page, select **Add connection** and add [API keys](/docs/gateway/concepts#credential-types) for model providers you’d like to use. The connection's **name** becomes the prefix of its [model IDs](/docs/gateway/features/models#model-ids).
 
 <Frame>
-  ![Add provider credential dialog with the provider, name, and secret key fields](/images/docs/ai-gateway/setup-add-provider-credential.png)
+  ![Add provider connection dialog with the provider, name, and secret key fields](/images/docs/ai-gateway/setup-add-provider-credential.png)
 </Frame>
 
-For the providers you can add and their API formats, see [supported providers](/docs/gateway/features/models#supported-providers).
+For the providers you can add and how to point a connection at your own endpoint, see [supported providers](/docs/gateway/features/models#supported-providers) and [custom base URL](/docs/gateway/features/models#custom-base-url).
 
 <Callout type="info">
-  Provider credentials are separate from project [LLM
+  Gateway provider connections are separate from project [LLM
   connections](/docs/administration/llm-connection), which power the Playground
   and LLM-as-a-Judge.
 </Callout>
 
 ### Configure allowed models (optional) [#choose-models]
 
-By default, a credential allows every model the provider offers, including models the provider publishes later. To restrict a credential to selected models, turn models off on its models page. See [Model management](/docs/gateway/features/models#manage-models).
+By default, a connection allows every model the provider offers, including models the provider publishes later. To restrict a connection to selected models, turn models off on its models page. See [Models and providers](/docs/gateway/features/models#manage-models).
 
 ### Give your team access [#give-your-team-access]
 

@@ -1,58 +1,86 @@
 ---
-title: Model management
-seoTitle: "Langfuse AI Gateway model management (beta)"
-description: See which models the Langfuse AI Gateway can call, enable or disable models per provider credential, and choose the right model ID for your client.
+title: Models and providers
+seoTitle: "Langfuse AI Gateway models and providers (beta)"
+description: See which models the Langfuse AI Gateway can call, enable or disable models per provider connection, and choose the right model ID for your client.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
-# Model management
+# Models and providers
 
 <AiGatewayBetaCallout />
 
 As an admin, you can manage which models are allowed to be used. This page explains where the model list comes from, how admins choose models, and which model ID to send.
 
 <Frame fullWidth>
-  ![Providers & Models page on the Models tab with a searchable model list filtered to one provider credential, an Enabled switch per model, and Enable all and Disable all buttons](/images/docs/ai-gateway/models-manage.png)
+  ![Providers & Models page on the Models tab with a searchable model list filtered to one provider connection, an Enabled switch per model, and Enable all and Disable all buttons](/images/docs/ai-gateway/models-manage.png)
 </Frame>
 
 ## Supported providers [#supported-providers]
 
-| Provider          | API formats                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------- |
-| OpenAI            | OpenAI Responses, OpenAI Chat Completions                                                   |
-| Anthropic         | Anthropic Messages                                                                          |
-| Amazon Bedrock    | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models |
-| OpenRouter        | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages                               |
-| Vercel AI Gateway | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages                               |
-| xAI               | OpenAI Responses, OpenAI Chat Completions                                                   |
+| Provider                                           | API formats                                                                                 |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [OpenAI](https://openai.com)                       | OpenAI Responses, OpenAI Chat Completions                                                   |
+| [Anthropic](https://www.anthropic.com)             | Anthropic Messages                                                                          |
+| [Amazon Bedrock](https://aws.amazon.com/bedrock/)  | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models |
+| [OpenRouter](https://openrouter.ai)                | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages                               |
+| [Vercel AI Gateway](https://vercel.com/ai-gateway) | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages                               |
+| [xAI](https://x.ai)                                | OpenAI Responses, OpenAI Chat Completions                                                   |
+
+## Custom base URL [#custom-base-url]
+
+OpenAI and Anthropic connections can send requests to another endpoint that serves the same API, such as an internal LLM proxy. When you add or edit the connection, set **API Base URL** under **Show advanced settings**.
+
+- End the URL at the API version, for example `https://llm.example.com/v1`. Anthropic URLs get `/v1` appended if it's missing. Query strings, fragments, and `{model}` aren't supported.
+- Changing the base URL of a saved connection requires its API key and extra header values again.
+
+<Callout type="info">
+  On Langfuse Cloud, the base URL must use HTTPS and can't point to a private
+  network address. On self-hosted Langfuse, private addresses are blocked
+  unless you allow them, see [Gateway to LLM
+  providers](/self-hosting/configuration/ai-gateway#gateway-to-providers).
+</Callout>
+
+## Extra headers [#extra-headers]
+
+The same connections can send extra HTTP headers with every request, for example to authenticate with your proxy or tag traffic. Add them under **Show advanced settings**.
+
+- Headers that carry the provider API key or control the HTTP connection can't be set: `Authorization`, `x-api-key`, `Host`, `Connection`, `Content-Length`, `Transfer-Encoding`, `Accept-Encoding`, and other hop-by-hop or `Proxy-*` headers.
+- Values are stored encrypted and aren't shown again. Leave a value blank to keep the stored one.
 
 ## Available models [#available-models]
 
 You can find a list of every model gateway keys can call under **AI Gateway → Providers & Models → Models**. Everyone with gateway access can open this page, including Viewers and the AI Gateway role.
 
-The list comes from each provider credential: the gateway pings the provider's own `/models` endpoint to check which models the credential can access.
+The list comes from each provider connection: the gateway pings the provider's own `/models` endpoint to check which models the connection can access.
 
 <Callout type="warning">
-  If a provider rejects a credential during model discovery, for example
-  because the key was rotated, the credential is marked as failing and the
+  If a provider rejects a connection's API key during model discovery, for example
+  because the key was rotated, the connection is marked as failing and the
   gateway stops routing to it. Update the key or select **Retry** in
   **AI Gateway → Providers & Models → Providers** to restore it.
 </Callout>
 
 ## Manage models [#manage-models]
 
-Gateway managers (Owners and Admins) can configure models per provider credential:
+Gateway managers (Owners and Admins) can configure models per provider connection:
 
-1. Go to **AI Gateway → Providers & Models → Models** and select a provider credential.
+1. Go to **AI Gateway → Providers & Models → Models** and select a provider connection.
 2. Turn models on or off with the **Enabled** switch.
 3. Select **Refresh provider models** to fetch the provider's current list.
 
-A credential with every model enabled also allows models that the provider publishes later. As soon as you turn one model off, the credential keeps an explicit list. Select **Enable all** to go back to allowing every model.
+A connection with every model enabled also allows models that the provider publishes later. As soon as you turn one model off, the connection keeps an explicit list. Select **Enable all** to go back to allowing every model.
 
 ## Model IDs [#model-ids]
 
-Model IDs have the form `<credential>:<model>`, for example `openai-prod:<model>`, so the gateway knows which credential to use. For coding agents that send the provider's own model names, IDs without a prefix also work if they start with `gpt-`, `codex-`, `ft:`, or `claude-`, and the gateway uses the oldest matching OpenAI or Anthropic credential. All other providers always need the prefix. Renaming a credential changes its prefix, so update clients that use the old IDs.
+Model IDs have the form `<connection>:<model>`, for example `openai-prod:<model>` or `openrouter:openai/<model>`. The prefix is the name of the provider connection that serves the request, and `<model>` uses that provider's own naming. This form works for every provider and is the only way to choose between connections that offer the same model. Renaming a connection changes its prefix, so update clients that use the old IDs.
+
+Coding agents that send plain model names also work for OpenAI (`gpt-`, `codex-`, `ft:`) and Anthropic (`claude-`) models. The gateway then uses the oldest OpenAI or Anthropic connection that supports the request's API format and has the model enabled. Connections to other providers, such as OpenRouter or Amazon Bedrock, are never used for plain model names.
+
+<Callout type="warning">
+  Each request goes to one connection. If that connection fails, the gateway
+  doesn't retry the request with another connection.
+</Callout>
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
@@ -61,14 +89,14 @@ Model IDs have the form `<credential>:<model>`, for example `openai-prod:<model>
 <Details id="new-models">
 <Summary>Why can't I call a new model?</Summary>
 
-A model the provider just released is available right away only on credentials that have every model enabled. If an admin turned off any model on a credential, the credential keeps an explicit list, and new models stay off until an admin enables them under **AI Gateway → Providers & Models → Models**. Select **Refresh provider models** there if the model doesn't appear in the list yet.
+A model the provider just released is available right away only on connections that have every model enabled. If an admin turned off any model on a connection, the connection keeps an explicit list, and new models stay off until an admin enables them under **AI Gateway → Providers & Models → Models**. Select **Refresh provider models** there if the model doesn't appear in the list yet.
 
 </Details>
 
 <Details id="bedrock-models">
-<Summary>Why doesn't my Amazon Bedrock credential list any models?</Summary>
+<Summary>Why doesn't my Amazon Bedrock connection list any models?</Summary>
 
-A Bedrock credential takes an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and an AWS region. To list models, the key needs the `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` permissions. Otherwise, add custom models to the credential on its models page. For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the inference profile ID as the model, for example `bedrock-prod:global.<bedrock-model-id>`.
+A Bedrock connection takes an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and an AWS region. To list models, the key needs the `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` permissions. Otherwise, add custom models to the connection on its models page. For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the inference profile ID as the model, for example `bedrock-prod:global.<bedrock-model-id>`.
 
 </Details>
 
