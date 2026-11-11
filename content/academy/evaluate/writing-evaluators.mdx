@@ -76,14 +76,14 @@ The two are not exclusive. You can measure the same metric in your experiments d
 
 ### Prefer deterministic evaluators where you can [#make-it-verifiable]
 
-There are three kinds of automated evaluators. Code evaluators are deterministic. The other two are model-based: decision models answer typed questions, and LLM-as-a-judge evaluators write out their reasoning before a verdict. Each has its trade-offs.
+There are deterministic evaluators (code-based evaluators) and nondeterministic evaluators (LLM-as-a-judge, decision models). Both have their trade-offs:
 
-|                    | Code evaluator                                                        | Decision model                                                                      | LLM-as-a-judge                                                                          |
-| ------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Cost               | close to free                                                         | cheap                                                                               | expensive                                                                               |
-| Speed              | milliseconds                                                          | fast, since it generates no text                                                    | seconds to minutes                                                                      |
-| Answer consistency | same input always gets the same verdict                               | verdicts can vary between runs on the same input                                    | verdicts can vary between runs on the same input                                        |
-| Scope              | limited: structure, state, and comparisons against an expected output | questions whose answers you can list up front: yes or no, categories, rubric levels | broadest: anything you can describe in language, including criteria that need reasoning |
+|                    | Deterministic (code evaluator)                                        | Nondeterministic (LLM-as-a-judge, decision model)                                 |
+| ------------------ | --------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Cost               | cheap                                                                 | expensive                                                                         |
+| Speed              | milliseconds                                                          | seconds to minutes                                                                |
+| Answer consistency | same input always gets the same verdict                               | verdicts can vary between runs on the same input                                  |
+| Scope              | limited: structure, state, and comparisons against an expected output | broader: anything you can describe in language: meaning, relevance, tone of voice |
 
 If the thing you want to evaluate is
 
