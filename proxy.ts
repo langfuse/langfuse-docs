@@ -32,6 +32,23 @@ export const config = {
   ],
 };
 
+// Links copied from prose, chat answers, or broken Markdown often drag the
+// next characters into the URL: `/pricing,`, `/docs/v4.`, `/docs)`,
+// `/docs/halo](https:/langfuse.com/docs/halo`, `.../annotation%3E(1)`. No page
+// path contains these characters, so cut the path at the first one (and drop
+// trailing dots and colons) and redirect to what is left. Redirects in
+// next.config.mjs then apply to the cleaned path as usual.
+const STRAY_PATH_SUFFIX =
+  /(?:https?:\/|[)\]>"'`*,;!]|%22|%27|%29|%3E|%5B|%5D|%60|%E2%80%8B|%EF%BC%89).*$/i;
+const TRAILING_PUNCTUATION = /[.:]+$/;
+
+function strippedPathname(pathname: string): string | null {
+  const cleaned =
+    pathname.replace(STRAY_PATH_SUFFIX, "").replace(TRAILING_PUNCTUATION, "") ||
+    "/";
+  return cleaned === pathname ? null : cleaned;
+}
+
 function contentKind(pathname: string, accept: string | null): string {
   if (pathname.startsWith("/llms") && pathname.endsWith(".txt")) {
     return "llms_txt";
@@ -49,6 +66,13 @@ export function proxy(
   request: NextRequest,
   event: NextFetchEvent,
 ): NextResponse {
+  const stripped = strippedPathname(request.nextUrl.pathname);
+  if (stripped) {
+    const url = request.nextUrl.clone();
+    url.pathname = stripped;
+    return NextResponse.redirect(url, 308);
+  }
+
   if (posthogKey && process.env.DISABLE_AGENT_FETCH_TRACKING !== "true") {
     const userAgent = request.headers.get("user-agent") ?? "";
     const pathname = request.nextUrl.pathname;
