@@ -451,7 +451,7 @@ export const FeatureTabs = ({
             ref={tabListScrollRef}
             role="tablist"
             aria-label="Product area screenshots. Use arrow keys to navigate, Escape to toggle auto-advance."
-            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:flex-none md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
+            className="flex !flex-nowrap md:!flex-wrap items-center min-w-0 flex-1 overflow-x-auto md:overflow-visible [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-sm leading-snug"
             onKeyDown={handleKeyDown}
           >
             {features.map((feature, index) => {
@@ -474,7 +474,7 @@ export const FeatureTabs = ({
                     tabIndex={state.focusedIndex === index ? 0 : -1}
                     onClick={() => handleTabChange(feature.id)}
                     className={cn(
-                      "cursor-pointer whitespace-nowrap rounded-sm py-0.5 transition-colors duration-150",
+                      "cursor-pointer whitespace-nowrap rounded-sm py-1.5 md:py-0.5 transition-colors duration-150",
                       "focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/50",
                       isActive
                         ? "font-medium text-primary"

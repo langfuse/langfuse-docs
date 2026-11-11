@@ -75,7 +75,7 @@ const tools: ToolEntry[] = [
   {
     title: "Human Annotation",
     description:
-      "Collaborative Human-in the-Loop workflows to review traces and create golden datasets.",
+      "Collaborative Human-in-the-Loop workflows to review traces and create golden datasets.",
     href: "/docs/evaluation/evaluation-methods/annotation-queues",
     tooltip: "Read more",
     span: "col-span-1",
@@ -178,7 +178,7 @@ export function AllTheTools() {
               </ChipCard>
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
             {tools.slice(3).map((tool) => (
               <ChipCard
                 key={tool.title}
