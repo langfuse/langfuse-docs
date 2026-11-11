@@ -1,6 +1,6 @@
 ---
 date: 2026-11-11
-title: Default evaluation model and batch evaluation via MCP
+title: Set the default evaluation model and run batch evaluations via MCP
 description: AI agents can now read, set, and delete a project's default evaluation model and run evaluators over existing observations through the Langfuse MCP server.
 author: Tobias Wochinger
 ---
@@ -11,8 +11,6 @@ import { Book } from "lucide-react";
 <ChangelogHeader />
 
 The Langfuse MCP server now lets AI agents manage the project's [default evaluation model](/docs/evaluation/evaluation-methods/llm-as-a-judge#project-default-model) and run [batch evaluations](/docs/evaluation/core-concepts#batch-evaluation) on existing data. For example, an agent can switch the project's evaluators to a new judge model, then score last week's production observations with an updated evaluator before attaching it to a rule.
-
-`setDefaultEvaluationModel` tests the model with a call to the provider before saving it and resumes evaluators that were paused because no default model was set. `deleteDefaultEvaluationModel` pauses the evaluators that rely on it. `runBatchEvaluation` runs saved evaluators over the observations that match a filter and time range. The run is processed asynchronously, and the resulting scores carry the batch action id as `batch_action_id` metadata.
 
 ## New MCP tools
 
