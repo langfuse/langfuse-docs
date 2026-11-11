@@ -88,9 +88,9 @@ export function AiGatewayOverviewDiagram() {
   return (
     <figure className="not-prose my-6 overflow-x-auto">
       <svg
-        viewBox="0 0 800 540"
+        viewBox="0 0 840 540"
         role="img"
-        aria-label="AI Gateway overview. Coding agents and AI applications send requests to the AI gateway, which runs in Langfuse. The gateway authorizes the user with the gateway key, maps the model name and URL to a valid model provider request, calls the external model provider (OpenAI or Anthropic), and returns the response. Langfuse tracing captures the request data, with different tracing options."
+        aria-label="AI Gateway overview. Coding agents and AI applications send requests to the AI gateway, which runs in Langfuse. The gateway authorizes the user with the gateway key, maps the model name and URL to a valid model provider request, calls the external model provider (OpenAI, Anthropic, Amazon Bedrock, OpenRouter, Vercel AI Gateway, or xAI), and returns the response. Langfuse tracing captures the request data, with different tracing options."
         style={{
           display: "block",
           width: "100%",
@@ -276,22 +276,29 @@ export function AiGatewayOverviewDiagram() {
         {/* External model provider */}
         <rect
           x="664.5"
-          y="175.5"
-          width="135"
-          height="111"
+          y="122.5"
+          width="160"
+          height="200"
           rx="2"
           style={boxStyle}
         />
         <Lines
           x={680}
-          y={208}
+          y={155}
           lines={["External model", "provider"]}
           style={titleStyle}
         />
         <Lines
           x={680}
-          y={245.5}
-          lines={["OpenAI,", "Anthropic"]}
+          y={200}
+          lines={[
+            "OpenAI",
+            "Anthropic",
+            "Amazon Bedrock",
+            "OpenRouter",
+            "Vercel AI Gateway",
+            "xAI",
+          ]}
           style={{ ...bodyStyle, fill: "var(--text-tertiary)" }}
         />
       </svg>
