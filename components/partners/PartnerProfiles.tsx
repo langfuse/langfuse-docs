@@ -70,8 +70,12 @@ export function PartnerProfiles({
       aria-label="Approved Langfuse partners"
       aria-roledescription={hasMultiplePartners ? "carousel" : undefined}
       className="not-prose"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "mouse") setIsHovered(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "mouse") setIsHovered(false);
+      }}
       onFocusCapture={(event) => {
         if (!(event.target as HTMLElement).closest("[data-rotation-control]")) {
           setIsPaused(true);

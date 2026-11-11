@@ -14,7 +14,7 @@ export const langfusePartnerProfiles = [
   },
   {
     name: "Bonneville Data",
-    url: "http://bonnevilledata.com",
+    url: "https://bonnevilledata.com",
     regions: ["North America"],
     capabilities: [
       "AI agent implementation",
