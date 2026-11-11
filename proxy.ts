@@ -31,6 +31,29 @@ export const config = {
 // Crawler IP ranges, loaded in the background (never on the response path).
 const getIpRanges = createIpRangesCache();
 
+// Links copied from prose, chat answers, or broken Markdown often drag the
+// next characters into the URL: `/pricing,`, `/docs/v4.`, `/docs)`,
+// `/docs/halo](https:/langfuse.com/docs/halo`, `.../annotation%3E(1)`. No page
+// path contains these characters, so cut the path at the first one (and drop
+// trailing dots and colons) and redirect to what is left. Redirects in
+// next.config.mjs then apply to the cleaned path as usual.
+//
+// /cloud is skipped: app/cloud/[[...path]] forwards any subpath to the
+// Langfuse app, where resource names (prompts, datasets) may contain these
+// characters.
+const STRAY_PATH_SUFFIX =
+  /(?:https?:\/|[)\]>"'`*,;!]|%21|%22|%27|%29|%2C|%3B|%3E|%5B|%5D|%60|%E2%80%8B|%EF%BC%89).*$/i;
+const TRAILING_PUNCTUATION = /[.:]+$/;
+const UNCLEANED_PATH = /^\/cloud(?:\/|$)/;
+
+function strippedPathname(pathname: string): string | null {
+  if (UNCLEANED_PATH.test(pathname)) return null;
+  const cleaned =
+    pathname.replace(STRAY_PATH_SUFFIX, "").replace(TRAILING_PUNCTUATION, "") ||
+    "/";
+  return cleaned === pathname ? null : cleaned;
+}
+
 function contentKind(pathname: string, accept: string | null): string {
   if (pathname.startsWith("/llms") && pathname.endsWith(".txt")) {
     return "llms_txt";
@@ -48,6 +71,13 @@ export function proxy(
   request: NextRequest,
   event: NextFetchEvent,
 ): NextResponse {
+  const stripped = strippedPathname(request.nextUrl.pathname);
+  if (stripped) {
+    const url = request.nextUrl.clone();
+    url.pathname = stripped;
+    return NextResponse.redirect(url, 307);
+  }
+
   if (posthogKey && process.env.DISABLE_AGENT_FETCH_TRACKING !== "true") {
     const headers = request.headers;
     const userAgent = headers.get("user-agent") ?? "";

@@ -21,7 +21,7 @@ The [Langfuse AI Gateway](/docs/gateway/overview) sends model requests from your
 - **Langfuse `v4.75.0` or later** for web and the gateway image, and the same version for both. With Docker Compose, use a release newer than `v4.75.0`. Image tags have no `v` prefix, for example `4.75.0`.
 - **The v4 data model.** The gateway is unavailable while `LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy`, because gateway generations are only stored in the v4 tables. `events_only` (the default) and `dual` work. See the [v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-2).
 - **A DNS name for the gateway**, such as `gateway.langfuse.example.com`, with a TLS certificate that covers it. See [TLS](#tls).
-- **Direct outbound HTTPS from the gateway and from web to your LLM providers**, `api.openai.com` and `api.anthropic.com`. For [Amazon Bedrock](/docs/gateway/get-started/admin-setup#add-provider-connections), available in releases after `v4.77.0`, also `bedrock.<region>.amazonaws.com` and `bedrock-runtime.<region>.amazonaws.com`. For OpenRouter, Vercel AI Gateway, and xAI, also `openrouter.ai`, `ai-gateway.vercel.sh`, and `api.x.ai`. Web calls the providers too, to validate provider API keys and discover models. The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy settings, and it always calls the providers' official API URLs, so Azure OpenAI and internal LLM proxies aren't supported.
+- **Direct outbound HTTPS from the gateway and from web to your LLM providers**, `api.openai.com` and `api.anthropic.com`. For [Amazon Bedrock](/docs/gateway/get-started/admin-setup#add-provider-connections), available in releases after `v4.77.0`, also `bedrock.<region>.amazonaws.com` and `bedrock-runtime.<region>.amazonaws.com`. For OpenRouter, Vercel AI Gateway, and xAI, also `openrouter.ai`, `ai-gateway.vercel.sh`, and `api.x.ai`. Web calls the providers too, to validate provider API keys and discover models. The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy settings. To reach an internal endpoint, use a [custom base URL](/docs/gateway/features/models#custom-base-url) and allow its host as described in [Gateway to LLM providers](#gateway-to-providers).
 - **`ENCRYPTION_KEY` on web.** Provider API keys are stored encrypted with it, like [LLM connections](/docs/administration/llm-connection). If it changes, stored provider API keys can no longer be read and have to be added again.
 
 ## How it works [#architecture]
@@ -64,6 +64,16 @@ The gateway calls web, at `LANGFUSE_AI_GATEWAY_WEB_URL`, to resolve every reques
 <Callout type="warning">
 
 Never use a plain `http://` web URL across a public network. If web's certificate is signed by a private CA, point `SSL_CERT_FILE` on the gateway at a bundle that contains your CA **and** the public root certificates: it replaces the trust store for all connections, including the ones to your LLM providers.
+
+</Callout>
+
+## Gateway to LLM providers [#gateway-to-providers]
+
+In releases after `v4.76.0`, the gateway applies the same [outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) as web's LLM connections and reads the same variables: `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS`, `LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS`, and `LANGFUSE_OUTBOUND_BLOCKED_IP_SEGMENTS`. Set them to the same values on web and the gateway. Neither deployment option copies them from web: with Docker Compose, add them to the `langfuse-ai-gateway` service's `environment`; with Helm, add them to `langfuse.gateway.pod.additionalEnv`.
+
+<Callout type="warning">
+
+`LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS` also applies to the official provider hosts. If you set it, include the hosts of every provider you use, or web and the gateway reject requests to them: `api.openai.com`, `api.anthropic.com`, `openrouter.ai`, `api.x.ai`, and `ai-gateway.vercel.sh`. For Amazon Bedrock, include both `bedrock.<region>.amazonaws.com` and `bedrock-runtime.<region>.amazonaws.com` for each region. Hosts must match exactly, so wildcards don't work.
 
 </Callout>
 
