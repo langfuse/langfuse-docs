@@ -11,7 +11,7 @@ Langfuse calls some user-configured URLs on your behalf: LLM connection base URL
 The check runs when you save the setting and again on every request and redirect.
 
 <Callout type="info">
-  On IPv6-only networks with DNS64, even public provider hostnames can resolve to the NAT64 range `64:ff9b::/96`. Langfuse blocks this range, so a public endpoint can fail with this error too. Allow the host explicitly (see below) or give the Langfuse containers IPv4 egress.
+  On IPv6-only networks with DNS64, even public provider hostnames can resolve to the NAT64 range `64:ff9b::/96`. Langfuse blocks this range, so a public endpoint can fail with this error too. Allow the host explicitly (see [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists)) or give the Langfuse containers IPv4 egress.
 </Callout>
 
 ## Langfuse Cloud
@@ -20,19 +20,10 @@ The check is always enforced and cannot be relaxed. LLM connection base URLs mus
 
 ## Self-hosted Langfuse
 
-Allow specific internal endpoints per feature with comma-separated lists:
-
-| Feature         | Variables                                                                                                                                |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| LLM connections | `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IPS`, `LANGFUSE_LLM_CONNECTION_WHITELISTED_IP_SEGMENTS` |
-| Webhooks        | `LANGFUSE_WEBHOOK_WHITELISTED_HOST`, `LANGFUSE_WEBHOOK_WHITELISTED_IPS`, `LANGFUSE_WEBHOOK_WHITELISTED_IP_SEGMENTS`                      |
-| Blob storage    | `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`, `..._WHITELISTED_IPS`, `..._WHITELISTED_IP_SEGMENTS`                                  |
-| External media  | `LANGFUSE_EXTERNAL_MEDIA_STORAGE_ENDPOINT_WHITELISTED_HOST`, `..._WHITELISTED_IPS`, `..._WHITELISTED_IP_SEGMENTS`                        |
-
-A hostname in `_WHITELISTED_HOST` skips the IP check. `_WHITELISTED_IPS` takes exact IPs and `_WHITELISTED_IP_SEGMENTS` takes CIDR ranges such as `10.0.0.0/8`. Set the variables on both the web and worker containers, because both make outbound requests.
+On self-hosted Langfuse, allow specific internal endpoints with the per-feature allowlist environment variables. Set them on both the web and worker containers, because both make outbound requests.
 
 <Callout type="warning">
   There is no setting that turns the check off for all targets. Every internal endpoint has to be listed explicitly, because anything on these lists is exempt from SSRF protection.
 </Callout>
 
-For the full list of variables, including the positive `*_ALLOWED_HOSTS` allowlists, see [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) and [LLM connection troubleshooting](/docs/administration/llm-connection#blocked-ip-address).
+See [Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) for the variables, including the positive `*_ALLOWED_HOSTS` allowlists, and [LLM connection troubleshooting](/docs/administration/llm-connection#blocked-ip-address) for LLM connections.
