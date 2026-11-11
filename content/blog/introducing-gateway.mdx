@@ -47,7 +47,7 @@ Adding a gateway was widely requested by our users. To get a complete picture of
 
 Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because every call through it becomes a full Langfuse trace (opt-in).
 
-**See your spend.** Cost and usage for every call land in one AI spend [dashboard](/docs/metrics/overview), by model and provider. Get [alerted](/docs/observability/features/alerts) before anyone runs into a surprise bill.
+**See your spend.** Cost and usage for every call land in one AI spend [dashboard](/docs/gateway/features/analytics), by model and provider. Get [alerted](/docs/gateway/features/analytics#alerts) before anyone runs into a surprise bill.
 
 <Video
   src="https://static.langfuse.com/docs-videos/20261109_analytics.mp4"
@@ -90,14 +90,14 @@ Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because 
 ## Fully open source
 
 - **Open source.** Like the rest of Langfuse, the core gateway is MIT-licensed. [Run it in your own infrastructure](/self-hosting/configuration/ai-gateway), or use it fully managed in Langfuse Cloud.
-- **Easy to self-host.** Deploy it as a single 22MB Docker image alongside your existing Langfuse instance, with no extra dependencies. [Read the docs](/self-hosting/configuration/ai-gateway).
+- **Easy to self-host.** Deploy it as a single 22 MB Docker image alongside your existing Langfuse instance, with no extra dependencies. [Read the docs](/self-hosting/configuration/ai-gateway#scaling).
 - **Your keys, no markup.** You keep your contracts, rates, and compliance agreements, such as zero data retention, with model/cloud providers. We don't resell tokens.
 
 ## Built for maximum performance and predictable scaling
 
 - **Built in Rust.** We built the gateway in Rust for high performance, availability, and reliability, even during usage peaks.
 - **High speed.** \<3ms median latency with tracing on.
-- **High reliability.** 1,000+ concurrent streams on a single 2 vCPU node.
+- **High reliability.** 1,000+ concurrent streams on a single 2 vCPU node. See [scaling](/self-hosting/configuration/ai-gateway#scaling).
 - **Predictable scaling.** Memory footprint scales in line with load.
 
 ## What's next
@@ -156,7 +156,7 @@ No. Change the base URL and use a gateway key. Requests and responses stay in th
 <Details>
 <Summary>Does Langfuse record my prompts?</Summary>
 
-Only if you opt in. By default, the gateway records metadata, usage, and cost, not content. Pass-through mode records nothing, and self-hosting keeps all data on your infrastructure. Turn on full logging, and every request becomes a complete Langfuse trace you can debug, evaluate, and turn into datasets, all without touching your code.
+Only if you opt in. By default, the gateway records metadata, usage, and cost, not content. On self-hosted Langfuse, the `NONE` ingestion mode records nothing. Self-hosting keeps all data on your infrastructure. Turn on full logging, and every request becomes a complete Langfuse trace you can debug, evaluate, and turn into datasets, all without touching your code.
 
 </Details>
 
