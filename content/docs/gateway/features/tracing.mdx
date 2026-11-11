@@ -34,7 +34,7 @@ There are different ingestion modes, which gateway managers set for the whole or
 - level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations
 - sessions, grouped automatically from each coding agent's own session ID
 - the [trace user](/docs/gateway/features/api-keys#trace-user), which depends on the key type
-- the gateway key, its [key metadata](/docs/gateway/features/api-keys#key-metadata), and the provider credential in metadata, under `langfuse.gateway.api_key.*` and `langfuse.gateway.connection.*`
+- the gateway key, its [key metadata](/docs/gateway/features/api-keys#key-metadata), and the provider connection in metadata, under `langfuse.gateway.api_key.*` and `langfuse.gateway.connection.*`
 
 </Details>
 
@@ -139,7 +139,7 @@ The gateway adds these headers to its responses:
 | `langfuse-organization-id`        | After the gateway key is resolved                                                                            | Your Langfuse organization ID                                          |
 | `langfuse-project-id`             | After the gateway key is resolved, when an ingestion project is set                                          | The ingestion project ID                                               |
 | `langfuse-provider`               | After the gateway called a provider                                                                          | The provider, for example `openai`, `bedrock`, or `openrouter`         |
-| `langfuse-provider-connection-id` | After the gateway called a provider                                                                          | The ID of the provider credential that served the call                 |
+| `langfuse-provider-connection-id` | After the gateway called a provider                                                                          | The ID of the provider connection that served the call                 |
 
 - Calls that produce a generation are `POST /openai/v1/responses`, `/openai/v1/responses/compact`, `/openai/v1/chat/completions`, and `/anthropic/v1/messages`. The trace and observation IDs are also set on `502` and `504` responses for provider failures, which still record a generation. Model listings, `count_tokens`, and requests rejected before they reach the provider (for example, with a `401`) omit them.
 - Recording is best-effort, so in rare cases a returned trace ID has no stored trace.
