@@ -73,7 +73,7 @@ In releases after `v4.76.0`, the gateway applies the same [outbound URL allowlis
 
 <Callout type="warning">
 
-`LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS` also applies to the official provider hosts. If you set it, include `api.openai.com` and `api.anthropic.com`, or web and the gateway reject requests to them.
+`LANGFUSE_LLM_CONNECTION_ALLOWED_HOSTS` also applies to the official provider hosts. If you set it, include the hosts of every provider you use, or web and the gateway reject requests to them: `api.openai.com`, `api.anthropic.com`, `openrouter.ai`, `api.x.ai`, and `ai-gateway.vercel.sh`. For Amazon Bedrock, include both `bedrock.<region>.amazonaws.com` and `bedrock-runtime.<region>.amazonaws.com` for each region. Hosts must match exactly, so wildcards don't work.
 
 </Callout>
 

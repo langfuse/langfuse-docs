@@ -32,7 +32,7 @@ As an admin, you can manage which models are allowed to be used. This page expla
 OpenAI and Anthropic connections can send requests to another endpoint that serves the same API, such as an internal LLM proxy. When you add or edit the connection, set **API Base URL** under **Show advanced settings**.
 
 - End the URL at the API version, for example `https://llm.example.com/v1`. Anthropic URLs get `/v1` appended if it's missing. Query strings, fragments, and `{model}` aren't supported.
-- Changing the base URL of a saved connection requires its API key again.
+- Changing the base URL of a saved connection requires its API key and extra header values again.
 
 <Callout type="info">
   On Langfuse Cloud, the base URL must use HTTPS and can't point to a private
@@ -40,6 +40,13 @@ OpenAI and Anthropic connections can send requests to another endpoint that serv
   unless you allow them, see [Gateway to LLM
   providers](/self-hosting/configuration/ai-gateway#gateway-to-providers).
 </Callout>
+
+## Extra headers [#extra-headers]
+
+The same connections can send extra HTTP headers with every request, for example to authenticate with your proxy or tag traffic. Add them under **Show advanced settings**.
+
+- Headers that carry the provider API key or control the HTTP connection can't be set: `Authorization`, `x-api-key`, `Host`, `Connection`, `Content-Length`, `Transfer-Encoding`, `Accept-Encoding`, and other hop-by-hop or `Proxy-*` headers.
+- Values are stored encrypted and aren't shown again. Leave a value blank to keep the stored one.
 
 ## Available models [#available-models]
 
