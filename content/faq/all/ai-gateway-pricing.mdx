@@ -16,9 +16,11 @@ Each generation the gateway records counts as a [billable unit](/docs/administra
 
 <Callout type="info">
   `NONE` is available only on
-  [self-hosted](/self-hosting/configuration/ai-gateway) Langfuse. Langfuse Cloud
-  always records `USAGE` or `FULL`, so every Cloud gateway request produces a
-  billable generation. There is no unbilled pass-through mode on Cloud.
+  [self-hosted](/self-hosting/configuration/ai-gateway) Langfuse. On Cloud,
+  recorded generations are billed. [Model listings, `count_tokens`, and
+  requests rejected before they reach the
+  provider](/docs/gateway/features/tracing#response-headers) do not produce a
+  generation. There is no unbilled pass-through mode for model calls on Cloud.
 </Callout>
 
 Self-hosted Langfuse (OSS) has no usage-based billing. For self-hosted Enterprise, [billable units](/docs/administration/billable-units) are one component of the pricing.
