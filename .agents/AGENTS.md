@@ -129,9 +129,9 @@ Changelog entries live in `content/changelog/`.
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section.
+- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section. Flag new or edited entries that skip the use cases.
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
-- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text.
+- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Do not invent visuals.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
 - Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
 
@@ -154,6 +154,7 @@ Please check the following:
 - Put failure modes, scope limits, and similar caveats in a `<Callout>` so they stand out. Flag new or edited docs that bury these in body copy.
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
+- When a PR adds or edits a changelog entry in `content/changelog/`, flag it if the intro is not immediately followed by 2-3 concrete example use cases, or if a UI change has no screenshot or `.mp4` video (`ogImage` / `ogVideo` in frontmatter, or interleaved in the body). A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
 - Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
