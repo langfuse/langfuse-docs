@@ -141,7 +141,7 @@ The gateway adds these headers to its responses:
 | `langfuse-provider`               | After the gateway called a provider                                                                          | The provider, for example `openai`, `bedrock`, or `openrouter`         |
 | `langfuse-provider-connection-id` | After the gateway called a provider                                                                          | The ID of the provider connection that served the call                 |
 
-- Calls that produce a generation are `POST /openai/v1/responses`, `/openai/v1/responses/compact`, `/openai/v1/chat/completions`, and `/anthropic/v1/messages`. The trace and observation IDs are also set on `502` and `504` responses for provider failures, which still record a generation. Model listings, `count_tokens`, and requests rejected before they reach the provider (for example, with a `401`) omit them.
+- Calls that produce a generation are `POST /openai/v1/responses`, `/openai/v1/responses/compact`, `/openai/v1/chat/completions`, `/openai/v1/decisions`, and `/anthropic/v1/messages`. The trace and observation IDs are also set on `502` and `504` responses for provider failures, which still record a generation. Model listings, `count_tokens`, and requests rejected before they reach the provider (for example, with a `401`) omit them.
 - Recording is best-effort, so in rare cases a returned trace ID has no stored trace.
 - Gateway error bodies also carry the request ID as a top-level `request_id` field, in the native error format of each namespace. Errors returned by the provider keep their original body.
 - The request ID is stored on the generation as the metadata key `langfuse.gateway.request.id`. Filter on it to find the call.
