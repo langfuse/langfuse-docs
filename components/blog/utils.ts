@@ -66,19 +66,58 @@ export function formatAbsoluteDate(dateStr?: string): string {
   });
 }
 
-export function formatDate(dateStr?: string): string {
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const CALENDAR_DATE = /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/;
+
+/**
+ * Whole calendar days between `dateStr` and today in the viewer's local
+ * calendar. Calendar dates are taken as-is; timestamps are first converted to
+ * the viewer's local day. Comparing against the current instant instead would
+ * count a post from earlier today as one day old after UTC noon.
+ */
+export function calendarDaysSince(
+  dateStr?: string,
+  now: Date = new Date(),
+): number | null {
   const d = parseCalendarDate(dateStr);
-  if (!d) return "";
-  const now = new Date();
-  const diffDays = Math.round(
-    (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  if (!d || !dateStr) return null;
+  const day = CALENDAR_DATE.test(dateStr.trim())
+    ? d.getTime()
+    : Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((today - day) / MS_PER_DAY);
+}
+
+export function formatDate(dateStr?: string, now: Date = new Date()): string {
+  const d = parseCalendarDate(dateStr);
+  const diffDays = calendarDaysSince(dateStr, now);
+  if (!d || diffDays === null) return "";
   if (diffDays < 1) return "Today";
   if (diffDays === 1) return "1 Day Ago";
   if (diffDays < 14) return `${diffDays} Days Ago`;
   if (diffDays < 30) return `${Math.round(diffDays / 7)} Weeks Ago`;
   return d.toLocaleDateString("en-US", {
     month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/** Lowercase, short-month variant used in the home sidebar. */
+export function formatShortRelativeDate(
+  dateStr?: string,
+  now: Date = new Date(),
+): string {
+  const d = parseCalendarDate(dateStr);
+  const diffDays = calendarDaysSince(dateStr, now);
+  if (!d || diffDays === null) return "";
+  if (diffDays < 1) return "today";
+  if (diffDays === 1) return "1 day ago";
+  if (diffDays < 14) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.round(diffDays / 7)} weeks ago`;
+  return d.toLocaleDateString(undefined, {
+    month: "short",
     day: "numeric",
     year: "numeric",
     timeZone: "UTC",
