@@ -50,7 +50,7 @@ export const references = [
 
 # Writing good evaluators
 
-Once you know what you want to evaluate, the next question is how. What kind of evaluator do I need? How do I translate the metric I want to measure into inputs and outputs? How do I write a good [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) prompt, or good questions for a [decision model](/docs/evaluation/evaluation-methods/decision-models)?
+Once you know what you want to evaluate, the next question is how. What kind of evaluator do I need? How do I translate the metric I want to measure into inputs and outputs? How do I write a good [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) prompt?
 
 <Callout type="info">
 Haven't decided what to evaluate yet? Take a look at 
@@ -59,7 +59,7 @@ Haven't decided what to evaluate yet? Take a look at
 - the evaluators on the [Langfuse demo project](/docs/demo) and [these example setups](/academy/examples), as they are good templates to start from
 </Callout>
 
-We'll first touch upon inputs, outputs, and which evaluator to choose. Then we'll zoom in on model-based evaluators: LLM-as-a-judge evaluators first, since they are the easiest to get wrong, then decision models.
+We'll first touch upon inputs, outputs, and which evaluator to choose. Then we'll zoom in on LLM-as-a-judge evaluators specifically, since they are the easiest to get wrong.
 
 ## What kind of evaluator do you need? [#what-kind-of-evaluator]
 
@@ -134,7 +134,7 @@ Once you know what kind of evaluator to use, you'll need to decide what data you
 
 It might be tempting to create a single judge that rates accuracy, tone of voice, and completeness together on a 1-10 scale. This is sometimes also called a _God Evaluator_<Ref refs={references} id="yan-product-evals" />. The problem with this is that your resulting score does not tell you what to fix.
 
-For model-based evaluators specifically, narrow ones are also easier to build. Getting a model to agree with you on one specific criterion is a much lower bar than agreeing on "quality". Decision models are built around this: each question asks for [one decision](#writing-decision-model-questions).
+For model-based evaluators specifically, narrow ones are also easier to build. Getting a model to agree with you on one specific criterion is a much lower bar than agreeing on "quality". Decision models are built around this: each question asks for one decision.
 
 ### Input → actions over words [#outcome-not-claim]
 
@@ -207,31 +207,12 @@ Beware of the _criteria drift_ that was [mentioned before](#label-first). Someti
   lede="Run this loop hands-on: build a ground-truth dataset, run your judge prompt against it, and get an agreement report with the exact disagreements."
 />
 
-## Writing good decision-model questions [#writing-decision-model-questions]
-
-A decision model needs the same groundwork as a judge: [label real cases first](#label-first), then [validate against them](#validate-the-judge) before you trust the scores. What changes is what you write. Instead of a prompt, you write questions with a fixed set of answers:
-
-- **One decision per question.** "Is the answer correct and polite?" is two questions. All questions in an evaluator are answered in the same call, so splitting them costs little.
-- **Define every answer, not only the question.** For a Yes / no question, write down what counts as yes and what counts as no, including the borderline cases you hit while labeling. For a Choice question, describe each option.
-- **Give it a way out.** A decision model has no built-in way to say "I don't know". When the input may not hold enough information to decide, use a Choice question with an `unclear` or `other` option. A Yes / no question can't return a third answer.
-- **Keep the input focused.** Map only the fields the question needs. Accuracy drops as irrelevant material piles up in the input, which matters for long agent traces.
-- **Choose the threshold with your labels.** A Yes / no answer is the probability that the statement is true. Pick the cutoff that best matches your labeled cases, or send a middle band to human review.
-
-<Callout type="info">
-**Debugging without reasoning**
-
-When you disagree with a verdict, there is no reasoning to read. Look at the probabilities instead: an answer split between two options usually means their definitions overlap, or the input doesn't hold enough to tell them apart.
-
-</Callout>
-
-[Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals#jevs-strengths-for-evals) shows one check, user disagreement, written both as a judge prompt and as a decision-model question.
-
 ## Where to start
 
 1. Do [error analysis](/academy/monitoring/error-analysis) if you haven't already, and pick one failure mode from it.
 2. Check whether a state or a stored expected output can settle it. If yes, write a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) and stop here.
 3. Otherwise, label 10-20 cases with how you'd expect the evaluator to score them.
-4. If the possible answers are known up front and the verdict is all you need, write [decision-model questions](#writing-decision-model-questions). If you need the reasoning, write a judge prompt: context, one precise criterion, a few of your labeled examples, reasoning before verdict.
+4. If the possible answers are known up front and the verdict is all you need, set up a [decision model](/docs/evaluation/evaluation-methods/decision-models). If you need the reasoning, write a judge prompt: context, one precise criterion, a few of your labeled examples, reasoning before verdict.
 5. Run the evaluator on the remaining labeled cases, compare, and iterate on it until it is aligned with how you judge the cases.
 6. Ship it, and keep reviewing a sample of its verdicts.
 
