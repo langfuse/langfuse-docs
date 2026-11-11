@@ -14,7 +14,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. Both require an `ANTHROPIC` provider credential.
+Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. Both require an `ANTHROPIC` provider connection.
 
 <Callout type="info">
   This page routes Claude's model calls through the AI Gateway. For tracing
@@ -117,7 +117,7 @@ Alternatively, use `~/.claude/settings.json`:
 ```
 
 - `ANTHROPIC_CUSTOM_HEADERS` takes newline-separated `Name: value` pairs. See [request headers](/docs/gateway/features/tracing#request-headers).
-- Pick models with `--model` or `/model`, using IDs from [`/models`](/docs/gateway/get-started/first-request#list-models). Bare `claude-…` IDs and `<credential>:<model>` IDs both work, see [model IDs](/docs/gateway/features/models#model-ids).
+- Pick models with `--model` or `/model`, using IDs from [`/models`](/docs/gateway/get-started/first-request#list-models). Bare `claude-…` IDs and `<connection>:<model>` IDs both work, see [model IDs](/docs/gateway/features/models#model-ids).
 - MCP servers configured locally through the CLI remain available because Claude Code stores them in `.claude.json`.
 
 ### Verify [#verify]

@@ -21,8 +21,8 @@ The [Langfuse AI Gateway](/docs/gateway/overview) sends model requests from your
 - **Langfuse `v4.75.0` or later** for web and the gateway image, and the same version for both. With Docker Compose, use a release newer than `v4.75.0`. Image tags have no `v` prefix, for example `4.75.0`.
 - **The v4 data model.** The gateway is unavailable while `LANGFUSE_MIGRATION_V4_WRITE_MODE=legacy`, because gateway generations are only stored in the v4 tables. `events_only` (the default) and `dual` work. See the [v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#step-2).
 - **A DNS name for the gateway**, such as `gateway.langfuse.example.com`, with a TLS certificate that covers it. See [TLS](#tls).
-- **Direct outbound HTTPS from the gateway and from web to your LLM providers**, `api.openai.com` and `api.anthropic.com`. For [Amazon Bedrock](/docs/gateway/get-started/admin-setup#add-provider-connections), available in releases after `v4.77.0`, also `bedrock.<region>.amazonaws.com` and `bedrock-runtime.<region>.amazonaws.com`. For OpenRouter, Vercel AI Gateway, and xAI, also `openrouter.ai`, `ai-gateway.vercel.sh`, and `api.x.ai`. Web calls the providers too, to validate credentials and discover models. The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy settings, and it always calls the providers' official API URLs, so Azure OpenAI and internal LLM proxies aren't supported.
-- **`ENCRYPTION_KEY` on web.** Provider credentials are stored encrypted with it, like [LLM connections](/docs/administration/llm-connection). If it changes, stored provider credentials can no longer be read and have to be added again.
+- **Direct outbound HTTPS from the gateway and from web to your LLM providers**, `api.openai.com` and `api.anthropic.com`. For [Amazon Bedrock](/docs/gateway/get-started/admin-setup#add-provider-connections), available in releases after `v4.77.0`, also `bedrock.<region>.amazonaws.com` and `bedrock-runtime.<region>.amazonaws.com`. For OpenRouter, Vercel AI Gateway, and xAI, also `openrouter.ai`, `ai-gateway.vercel.sh`, and `api.x.ai`. Web calls the providers too, to validate provider API keys and discover models. The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy settings, and it always calls the providers' official API URLs, so Azure OpenAI and internal LLM proxies aren't supported.
+- **`ENCRYPTION_KEY` on web.** Provider API keys are stored encrypted with it, like [LLM connections](/docs/administration/llm-connection). If it changes, stored provider API keys can no longer be read and have to be added again.
 
 ## How it works [#architecture]
 
@@ -33,11 +33,11 @@ import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
 <ArchitectureDiagram />
 
 1. A client sends a request to the gateway's public URL, for example `https://gateway.langfuse.example.com/anthropic/v1/messages`, with a gateway API key.
-2. The gateway asks Langfuse Web to resolve the key. Web checks the key and returns the organization's provider credential.
-3. The gateway forwards the native request to the provider, with the provider credential in place of the gateway key, and streams the response back. See [what the gateway changes](/faq/all/ai-gateway-request-changes).
+2. The gateway asks Langfuse Web to resolve the key. Web checks the key and returns the organization's provider connection.
+3. The gateway forwards the native request to the provider, with the provider API key in place of the gateway key, and streams the response back. See [what the gateway changes](/faq/all/ai-gateway-request-changes).
 4. The gateway uploads the generation to Langfuse Web, which ingests it like any other trace.
 
-Organization admins then add provider credentials and gateway API keys in the Langfuse UI. For how clients, keys, and providers fit together, see [Concepts](/docs/gateway/concepts).
+Organization admins then add provider connections and gateway API keys in the Langfuse UI. For how clients, keys, and providers fit together, see [Concepts](/docs/gateway/concepts).
 
 ## Deploy [#deploy]
 
@@ -164,7 +164,7 @@ The Helm chart and the Docker Compose file set these variables. You only need th
 | `LANGFUSE_AI_GATEWAY_JWT_PREVIOUS_KEY_ID`       | Derived  | Optional. Key ID of the previous public key.                                                                                                                                                                                                                                  |
 | `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_ENABLED`     | `true`   | Caches key lookups for the gateway.                                                                                                                                                                                                                                           |
 | `LANGFUSE_AI_GATEWAY_CACHE_RESOLVE_TTL_SECONDS` | `60`     | How long a cached key lookup is used. Bounds how long a role change that doesn't delete a key takes to apply.                                                                                                                                                                 |
-| `ENCRYPTION_KEY`                                | Required | Encrypts stored provider credentials. Changing it makes them unreadable.                                                                                                                                                                                                      |
+| `ENCRYPTION_KEY`                                | Required | Encrypts stored provider API keys. Changing it makes them unreadable.                                                                                                                                                                                                         |
 
 ## Troubleshooting [#troubleshooting]
 

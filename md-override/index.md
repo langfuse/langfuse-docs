@@ -10,7 +10,7 @@ Langfuse is one [open](https://github.com/langfuse/langfuse) platform for every 
 
 Used by 21 of the Fortune 50. 100,000+ engineers build on Langfuse, and the platform processes 90B+ observations per month.
 
-[Start free](/cloud) · [Documentation](/docs) · [Watch demo](/watch-demo) · [Interactive demo](/docs/demo)
+[Start free](/cloud), [Documentation](/docs), [Watch demo](/watch-demo), [Interactive demo](/docs/demo)
 
 ## Every AI call. One platform.
 
@@ -79,7 +79,7 @@ Traditional observability handles many small spans. LLM systems run differently:
 - **Reliability at scale** — 65M+ SDK installs per month, 90B+ observations processed per month, 50,000+ companies using Langfuse, 99.9% uptime.
 - **Security and compliance** — [SOC 2 Type II & ISO 27001](/security), [EU, US, and Japan data regions](/security/data-regions), [FIPS 140-3 & Iron Bank-hardened images for Gov](/self-hosting/configuration/hardening#hardening-for-government), a [HIPAA-ready region](/security/hipaa), and [GDPR](/security/gdpr). See the [security overview](/security).
 
-[Enterprise](/enterprise) · [Talk to us](/talk-to-us)
+[Enterprise](/enterprise), [Talk to us](/talk-to-us)
 
 ## Why use Langfuse?
 

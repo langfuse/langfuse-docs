@@ -7,7 +7,7 @@ description: Bring reliable healthcare AI faster into production, with less manu
 
 For healthcare and life sciences teams: go live faster, spend less time on manual review, and keep costs in view as you scale. [Merck Group](/users/merckgroup) reduced development cycles from weeks to days and runs 80+ use cases on Langfuse.
 
-[Start free](/cloud) · [Documentation](/docs)
+[Start free](/cloud), [Documentation](/docs)
 
 - **HIPAA-ready cloud region with a self-serve BAA:** Sign the ClickHouse BAA, then send PHI only to the dedicated US region.
 - **Self-host so patient data never leaves your network:** Run Langfuse in your VPC or in an air-gapped environment.
@@ -15,13 +15,13 @@ For healthcare and life sciences teams: go live faster, spend less time on manua
 - **Quality gates and evidence for audits:** Evaluate changes with datasets and experiments before going live, and keep traces and scores for review.
 - **One platform for every AI team:** Orchestrate one platform for tracing, evals, and cost tracking across teams. Govern centrally across the org.
 
-[ISO 27001](/security/iso27001) · [SOC 2](/security/soc2) · [GDPR](/security/gdpr) · [HIPAA](/security/hipaa) · [HIPAA-ready · BAA available](/security/hipaa) · [MIT · open source](/handbook/chapters/open-source) · [Security & compliance](/security)
+[ISO 27001](/security/iso27001), [SOC 2](/security/soc2), [GDPR](/security/gdpr), [HIPAA](/security/hipaa), [HIPAA-ready, BAA available](/security/hipaa), [Open source (MIT)](/handbook/chapters/open-source), [Security & compliance](/security)
 
 ## Talk to a healthcare and life sciences expert at Langfuse
 
 Use the contact form on this page to talk to a healthcare and life sciences expert at Langfuse.
 
-Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** engineers building on Langfuse.
+Used by **21** of the Fortune 50, **90B+** observations/month, **100,000+** engineers building on Langfuse.
 
 ### [Merck Group](/users/merckgroup)
 
@@ -45,7 +45,7 @@ Used by **21** of the Fortune 50 · **90B+** observations/month · **100,000+** 
 
 HIPAA-ready region in the US. BAA available.
 
-- Region: US · Oregon
+- Region: US, Oregon
 - Location: AWS us-west-2
 - Agreement: BAA available
 - Plans: Pro or higher
@@ -54,9 +54,9 @@ HIPAA-ready region in the US. BAA available.
 
 Run Langfuse in your own network.
 
-- Infra: Kubernetes · Docker
-- Storage: ClickHouse · Postgres · S3
-- Access: SSO · VPN-only
+- Infra: Kubernetes, Docker
+- Storage: ClickHouse, Postgres, S3
+- Access: SSO, VPN-only
 - Patient data: Stays in your network
 
 ### [Air-gapped](/self-hosting/security/networking)
@@ -116,13 +116,13 @@ Catch failing claim steps early, before they become manual rework, and keep a tr
 
 Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.
 
-Evolve · Rest sleep coach
+Evolve: Rest sleep coach
 
 ### [Internal platform teams](/users/merckgroup)
 
 Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.
 
-Merck Group · 80+ use cases on Langfuse
+Merck Group: 80+ use cases on Langfuse
 
 ## Learn how to ship reliable agents in healthcare and life sciences
 

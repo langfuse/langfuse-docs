@@ -43,7 +43,7 @@ export function PartnerProfiles({
                   ) : null}
                   <div>
                     <p className="m-0 font-mono text-xs uppercase tracking-wider text-text-tertiary">
-                      {profile.regions.join(" · ")}
+                      {profile.regions.join(", ")}
                     </p>
                     <h3 className="m-0 mt-1 text-xl font-medium text-text-primary">
                       {profile.name}
