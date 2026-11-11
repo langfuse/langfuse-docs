@@ -146,7 +146,7 @@ export function Footer({ className }: { className?: string }) {
       )}
     >
       {/* Social icons row */}
-      <CornerBox className="flex gap-5 items-center p-4 -mb-px bg-transparent">
+      <CornerBox className="flex gap-6 items-center p-4 -mb-px bg-transparent">
         {socialLinks.map((s) => {
           const Icon = s.icon;
           const isExternal = s.href.startsWith("http");
