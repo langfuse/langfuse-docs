@@ -1,7 +1,7 @@
 import { Text } from "@/components/ui/text";
 import { formatDate } from "@/components/blog/utils";
 import { HoverPostRow } from "@/components/lists/HoverPostRow";
-import { RelativeDate } from "@/components/changelog/RelativeDate";
+import { RelativeDate } from "@/components/RelativeDate";
 import {
   Pagination,
   PaginationContent,

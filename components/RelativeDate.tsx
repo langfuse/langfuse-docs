@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatDate } from "@/components/blog/utils";
+import { formatDate, formatShortRelativeDate } from "@/components/blog/utils";
+
+const formatters = {
+  default: formatDate,
+  short: formatShortRelativeDate,
+};
 
 /**
  * Relative date label ("Today", "1 Day Ago", ...). The server-rendered label
@@ -11,15 +16,17 @@ import { formatDate } from "@/components/blog/utils";
 export function RelativeDate({
   date,
   serverLabel,
+  variant = "default",
 }: {
   date?: string;
   serverLabel: string;
+  variant?: keyof typeof formatters;
 }) {
   const [label, setLabel] = useState(serverLabel);
 
   useEffect(() => {
-    setLabel(formatDate(date));
-  }, [date]);
+    setLabel(formatters[variant](date));
+  }, [date, variant]);
 
   return <>{label}</>;
 }
