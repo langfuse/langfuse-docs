@@ -26,6 +26,12 @@ There are different ingestion modes, which gateway managers set for the whole or
 | `USAGE` (default)         | The fields listed below, without input or output                                                                                                                                                                | You need cost, usage, and an audit trail, but prompts and responses must not be stored in Langfuse |
 | `NONE` (self-hosted only) | Nothing. The gateway only routes requests.                                                                                                                                                                      | You only want to hand out gateway keys instead of provider keys, without any traces                |
 
+<Callout type="info">
+  `NONE` is self-hosted only. On Langfuse Cloud, every request is recorded as
+  `USAGE` or `FULL`, and each recorded generation is a
+  [billable unit](/faq/all/ai-gateway-pricing).
+</Callout>
+
 <Details>
 <Summary>Full list of fields recorded in `FULL` and `USAGE` mode</Summary>
 

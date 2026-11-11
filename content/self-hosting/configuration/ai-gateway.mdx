@@ -91,6 +91,8 @@ For examples, see the [Helm guide](/self-hosting/deployment/kubernetes-helm#ai-g
 
 ### Scaling [#scaling]
 
+The [`langfuse/ai-gateway`](https://hub.docker.com/r/langfuse/ai-gateway) image is about 22 MB and has no extra dependencies. A single 2 vCPU instance handles 1,000+ concurrent streams. Memory footprint scales with load.
+
 The gateway is stateless, so scale it horizontally. Run at least two replicas in production, and scale on CPU.
 
 - **Size memory with the memory budget.** Each instance reserves memory for every running request from `LANGFUSE_AI_GATEWAY_MEMORY_BUDGET_BYTES` (1 GiB by default), and returns `503` right away when the budget is used up. Set the memory limit to at least the budget plus 512 MiB.
