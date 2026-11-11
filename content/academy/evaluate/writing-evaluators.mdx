@@ -213,7 +213,7 @@ A decision model needs the same groundwork as a judge: [label real cases first](
 
 - **One decision per question.** "Is the answer correct and polite?" is two questions. All questions in an evaluator are answered in the same call, so splitting them costs little.
 - **Define every answer, not only the question.** For a Yes / no question, write down what counts as yes and what counts as no, including the borderline cases you hit while labeling. For a Choice question, describe each option.
-- **Give it a way out.** A decision model has no built-in way to say "I don't know". Add an `unclear` or `other` option when the input may not hold enough information to decide.
+- **Give it a way out.** A decision model has no built-in way to say "I don't know". When the input may not hold enough information to decide, use a Choice question with an `unclear` or `other` option. A Yes / no question can't return a third answer.
 - **Keep the input focused.** Map only the fields the question needs. Accuracy drops as irrelevant material piles up in the input, which matters for long agent traces.
 - **Choose the threshold with your labels.** A Yes / no answer is the probability that the statement is true. Pick the cutoff that best matches your labeled cases, or send a middle band to human review.
 
