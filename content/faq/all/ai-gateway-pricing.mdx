@@ -6,9 +6,9 @@ tags: [ai-gateway]
 
 # How is gateway usage billed?
 
-The gateway does not resell tokens. Your model provider bills model usage to your own provider account.
+Each generation the gateway records counts as a [billable unit](/docs/administration/billable-units), like any other observation. Your provider bills model usage to your own provider account.
 
-Each generation the gateway records counts as a [billable unit](/docs/administration/billable-units), like any other observation. What is recorded depends on the organization's [ingestion mode](/docs/gateway/features/tracing#ingestion-modes):
+What is recorded depends on the organization's [ingestion mode](/docs/gateway/features/tracing#ingestion-modes):
 
 - The default `USAGE` mode records one generation per request (usage, cost, and metadata, without prompts or responses). That generation is billable on Langfuse Cloud.
 - `FULL` also records one generation per request, including prompts and responses. That generation is billable on Langfuse Cloud.
