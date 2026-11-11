@@ -1,7 +1,6 @@
 import { Text } from "@/components/ui/text";
 import { formatDate } from "@/components/blog/utils";
 import { HoverPostRow } from "@/components/lists/HoverPostRow";
-import { RelativeDate } from "@/components/RelativeDate";
 import {
   Pagination,
   PaginationContent,
@@ -107,10 +106,7 @@ export function ChangelogIndex({
                   size="s"
                   className="text-left md:text-right text-[12px] text-text-tertiary whitespace-nowrap"
                 >
-                  <RelativeDate
-                    date={page.frontMatter?.date}
-                    serverLabel={formatDate(page.frontMatter?.date)}
-                  />
+                  {formatDate(page.frontMatter?.date)}
                 </Text>
               }
               previewOnHover

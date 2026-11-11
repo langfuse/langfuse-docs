@@ -4,7 +4,6 @@ import {
   formatShortRelativeDate,
   parseCalendarDate,
 } from "@/components/blog/utils";
-import { RelativeDate } from "@/components/RelativeDate";
 import { getGitHubStars } from "@/lib/github-stars";
 import { getLatestGitHubReleaseDate } from "@/lib/github-releases";
 import { LinkBox } from "@/components/ui/link-box";
@@ -99,11 +98,7 @@ function RecentArticleList({ items }: { items: RecentArticle[] }) {
               size="xs"
               className="text-left no-underline group-hover:text-text-primary"
             >
-              <RelativeDate
-                date={item.date}
-                serverLabel={formatShortRelativeDate(item.date)}
-                variant="short"
-              />
+              {formatShortRelativeDate(item.date)}
             </Text>
           </div>
         </LinkBox>
@@ -210,11 +205,7 @@ export async function HomeSidebar() {
                     size="s"
                     className="text-right text-[13px] shrink-0 group-hover:text-text-primary"
                   >
-                    <RelativeDate
-                      date={latestReleaseDate}
-                      serverLabel={formatShortRelativeDate(latestReleaseDate)}
-                      variant="short"
-                    />
+                    {formatShortRelativeDate(latestReleaseDate)}
                   </Text>
                 </div>
               </LinkBox>
