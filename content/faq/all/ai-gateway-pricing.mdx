@@ -1,26 +1,9 @@
 ---
 title: How is gateway usage billed?
-description: How Langfuse billable units and model-provider charges apply to calls made through the AI Gateway, including USAGE, FULL, and NONE ingestion modes.
+description: How Langfuse billable units and model-provider charges apply to calls made through the AI Gateway.
 tags: [ai-gateway]
 ---
 
 # How is gateway usage billed?
 
 Each generation the gateway records counts as a [billable unit](/docs/administration/billable-units), like any other observation. Your provider bills model usage to your own provider account.
-
-What is recorded depends on the organization's [ingestion mode](/docs/gateway/features/tracing#ingestion-modes):
-
-- The default `USAGE` mode records one generation per request (usage, cost, and metadata, without prompts or responses). That generation is billable on Langfuse Cloud.
-- `FULL` also records one generation per request, including prompts and responses. That generation is billable on Langfuse Cloud.
-- `NONE` records nothing, so it creates no Langfuse billable units.
-
-<Callout type="info">
-  `NONE` is available only on
-  [self-hosted](/self-hosting/configuration/ai-gateway) Langfuse. On Cloud,
-  recorded generations are billed. [Model listings, `count_tokens`, and
-  requests rejected before they reach the
-  provider](/docs/gateway/features/tracing#response-headers) do not produce a
-  generation. There is no unbilled pass-through mode for model calls on Cloud.
-</Callout>
-
-Self-hosted Langfuse (OSS) has no usage-based billing. For self-hosted Enterprise, [billable units](/docs/administration/billable-units) are one component of the pricing.
