@@ -88,7 +88,14 @@ export function calendarDaysSince(
   return Math.round((today - day) / MS_PER_DAY);
 }
 
+/**
+ * Static exports (`pnpm build:static`) are rendered once at build time, so a
+ * relative label would freeze. Those builds show absolute dates instead.
+ */
+const isStaticExport = () => process.env.STATIC_EXPORT === "true";
+
 export function formatDate(dateStr?: string, now: Date = new Date()): string {
+  if (isStaticExport()) return formatAbsoluteDate(dateStr);
   const d = parseCalendarDate(dateStr);
   const diffDays = calendarDaysSince(dateStr, now);
   if (!d || diffDays === null) return "";
@@ -109,6 +116,7 @@ export function formatShortRelativeDate(
   dateStr?: string,
   now: Date = new Date(),
 ): string {
+  if (isStaticExport()) return formatAbsoluteDate(dateStr);
   const d = parseCalendarDate(dateStr);
   const diffDays = calendarDaysSince(dateStr, now);
   if (!d || diffDays === null) return "";
