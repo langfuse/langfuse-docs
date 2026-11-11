@@ -75,3 +75,16 @@ test("timestamps are counted from the viewer's local day", () => {
     "1 day ago",
   );
 });
+
+test("static exports render absolute dates instead of relative labels", () => {
+  const previous = process.env.STATIC_EXPORT;
+  process.env.STATIC_EXPORT = "true";
+  try {
+    const now = localTime(2026, 11, 11, 15);
+    assert.equal(formatDate("2026-11-11", now), "Nov 11, 2026");
+    assert.equal(formatShortRelativeDate("2026-11-10", now), "Nov 10, 2026");
+  } finally {
+    if (previous === undefined) delete process.env.STATIC_EXPORT;
+    else process.env.STATIC_EXPORT = previous;
+  }
+});
