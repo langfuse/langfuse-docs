@@ -1,0 +1,182 @@
+---
+title: Set up Langfuse for your teams
+sidebarTitle: Set up teams
+description: Choose project boundaries, configure shared defaults, and automate project creation and user access so teams can start using Langfuse.
+category: Administration
+---
+
+import { Frame } from "@/components/Frame";
+
+# Set up Langfuse for your teams
+
+When a team asks for Langfuse access, they need a project with the right people, credentials, and configuration. This guide walks through setting that up once, then automating the same process for the next team.
+
+The examples follow a support assistant. Your platform team owns access and shared configuration; the application team owns its instrumentation, evaluation criteria, and release decisions.
+
+<Frame>
+  ![Onboarding workflow from request and review through provisioning, instrumentation, verification, and handoff. Failed checks return to setup before handoff.](/images/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams/onboarding-lifecycle.png)
+</Frame>
+
+## Prerequisites
+
+- A Langfuse organization and an administrator responsible for onboarding.
+- An application owner who can decide who needs access and what data the application will send.
+- For automated provisioning, **Cloud Enterprise or self-hosted Enterprise Edition**, which provide the [Organization Management API and SCIM](/docs/administration/scim-and-org-api).
+
+## Walkthrough
+
+<Steps>
+
+### Choose project boundaries
+
+Keep related work in as few projects as your access and configuration requirements allow. Prompts, datasets, and evaluators belong to a project, so separating projects also introduces work to share those resources.
+
+| Boundary             | When to use it                                                                                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Region or deployment | Data must reside in a particular location or infrastructure. [Cloud regions](/security/data-regions) have separate accounts, organizations, endpoints, and credentials.      |
+| Organization         | Projects need a shared administration model. Use separate organizations for independently administered groups.                                                               |
+| Project              | The permitted audience or project settings, such as retention, differ.                                                                                                       |
+| Environment          | Development, staging, and production can share access and project settings. Use [environment metadata](/docs/observability/features/environments) to filter their telemetry. |
+
+For example, use `support-nonprod` and `support-prod` if developers may inspect development traffic but only selected staff may inspect production. If both can share access and retention, one `support` project with environment metadata may be enough.
+
+<Callout type="warn">
+  Environment filters do not restrict access. Separate projects also do not provide separate infrastructure or exclude organization administrators from their broad access. Include administrators in your access design. See [RBAC](/docs/administration/rbac).
+</Callout>
+
+### Configure identity and shared model access
+
+Set up and test [SSO](/docs/administration/authentication-and-sso), or follow the [self-hosted SSO guide](/self-hosting/security/authentication-and-sso) for your deployment. SSO authenticates a person; organization membership and project roles determine what they can access.
+
+For users who should see only selected projects, use organization role **None** with explicit project roles: **Member** for contributors, **Viewer** for read-only reviewers, and **Admin** for delegated project administrators. Reserve organization **Owner/Admin** for platform operators. See [project-level roles](/docs/administration/rbac#project-level-roles).
+
+Choose who manages memberships. If your identity provider provisions users through SCIM, let it remain authoritative for organization roles. Your onboarding workflow maps users or groups to project roles and handles removals. For Okta, SSO and SCIM use separate applications; follow the [SCIM setup](/docs/administration/scim-and-org-api#okta).
+
+Create an **organization LLM connection** when its credentials should be available to every project. New projects inherit it automatically. Use project connections for separate provider accounts or routing; a connection with the same name overrides the organization connection and must use the same adapter. Assign an owner for provider credential rotation. See [LLM connections](/docs/administration/llm-connection).
+
+### Define a standard project configuration
+
+Keep the baseline in your platform repository or service catalog. Record which settings the platform maintains and which the application team can change.
+
+| Setting            | Starting point                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| Ownership          | Application owner, backup, support contact, and baseline version.                          |
+| Access             | Explicit project roles and an authoritative source for membership changes.                 |
+| Retention          | A duration agreed with the data owner, applied to every project.                           |
+| Model access       | An approved inherited connection or a project-specific connection.                         |
+| Evaluation         | A small starter set for the workload, with an explicit model and data mapping.             |
+| Live evaluation    | Disabled until validated, then enabled with explicit filters and sampling.                 |
+| Credentials        | Separate application and provisioning keys, stored in a secret manager.                    |
+| Alerts and exports | A notification destination, responder, or export destination where the workload needs one. |
+
+Retention is configured per project; there is no organization-wide policy inherited by new projects. Set it before data arrives. For example, you might choose 30 days for experiments and 90 days for production, but the duration should come from your data policy. The API accepts `retention: 0` for no automatic deletion, or at least three days for a retention period. See [data retention](/docs/administration/data-retention).
+
+<Callout type="info">
+  A Cloud plan's data-access window is not a deletion policy. Project retention does not delete saved dataset items or audit logs; exported copies also need their own lifecycle.
+</Callout>
+
+For evaluations, standardize the setup while letting application owners define quality. A structured-output application might start with JSON validity; a retrieval application might need groundedness; the support assistant might need an escalation-policy check. An **evaluator** defines how to score; a **rule** selects which observations to score and how often. See [evaluation concepts](/docs/evaluation/core-concepts).
+
+Select an explicit connection and model for each LLM judge, or configure the [project default evaluation model](/docs/evaluation/evaluation-methods/llm-as-a-judge#project-default-model). Adding a connection alone does not choose that default. These connections power Langfuse evaluations and the Playground, not the application's own model calls.
+
+### Validate one project manually
+
+Create the first project in the UI and apply the baseline with its application owner. Test sign-in, access, the model connection, and a starter evaluator before turning the setup into automation.
+
+Provide a reference integration based on the [tracing quickstart](/docs/observability/get-started). Include the regional endpoint, environment, release, stable observation names, and [masking](/docs/observability/features/masking) rules. Put useful input/output on the root observation.
+
+For the support assistant, test an evaluator on representative `support-answer` observations. Confirm its results with a domain reviewer. An observation evaluator only reads mapped data from that observation; put any required context there too. See [data available to evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge#observation-evaluator-context).
+
+### Automate the onboarding workflow [#automate-provisioning]
+
+Your portal, CI job, script, or workflow tool coordinates the process. Power Automate can call the same HTTP APIs. Capture the application owner, region, access groups, data classification, environments, retention, and evaluation starter set in the request.
+
+Use an organization API key created by an Owner for project and membership management. Keep it in the provisioning system's secret store. Requests use the selected regional base URL and HTTP Basic Auth, with the public key as username and secret key as password. Project configuration calls use a separate project key. See [SCIM and the Organization Management API](/docs/administration/scim-and-org-api).
+
+#### Create the project with retention
+
+Store a mapping from your onboarding request ID to the resulting project ID so retries can resume. Check existing projects with `GET /api/public/organizations/projects` before creating another one. With the organization key, send `POST /api/public/projects`:
+
+```json
+{
+  "name": "support-prod",
+  "retention": 90,
+  "metadata": {
+    "provisioningRequestId": "onboarding-1234",
+    "owner": "support-platform@example.com",
+    "baselineVersion": "1"
+  }
+}
+```
+
+Save the returned `id`. Metadata helps locate the resource but does not enforce uniqueness. After a timeout, check whether creation succeeded before repeating it. Use `PUT /api/public/projects/{projectId}` for later settings updates.
+
+#### Apply connections and evaluation starters
+
+Use the organization key to create a project provisioning key through `POST /api/public/projects/{projectId}/apiKeys`. Store its secret without logging it, then use that project key for configuration:
+
+| Task                                                     | Project-scoped endpoint                |
+| -------------------------------------------------------- | -------------------------------------- |
+| Add a project connection, if inheritance is insufficient | `PUT /api/public/llm-connections`      |
+| Create a starter evaluator                               | `POST /api/public/v2/evaluators`       |
+| Create a disabled live rule                              | `POST /api/public/v2/evaluation-rules` |
+
+Maintain approved evaluator definitions in a repository or source project, copy them to the destination, and save the returned IDs. Map the destination model connection and evaluator variables using the [current API schemas](/docs/evaluation/evaluation-methods/llm-as-a-judge#api). Set starter rules to `enabled: false`.
+
+For example, a validated rule could later sample 5% of production `support-answer` root observations. Choose the rate from expected traffic and model cost; it is not a spending cap.
+
+<Callout type="warn">
+  Set rule filters and sampling explicitly: omitted filters match every incoming observation, and omitted sampling evaluates every match. Evaluators and rules are project resources; inheriting an organization LLM connection does not copy them.
+</Callout>
+
+#### Provision users and project roles
+
+For IdP-managed users, wait for SCIM to create their organization memberships and resolve their user IDs. If your workflow manages users directly, look them up through `GET /api/public/scim/Users` and provision missing memberships with `POST /api/public/scim/Users`:
+
+```json
+{
+  "userName": "reviewer@example.com",
+  "name": { "formatted": "Example Reviewer" },
+  "active": true
+}
+```
+
+New SCIM memberships default to organization role None when no role is supplied. Preserve existing organization roles when adding another project. Once the user belongs to the organization, use the organization key to send `PUT /api/public/projects/{projectId}/memberships`:
+
+```json
+{
+  "userId": "<resolved-user-id>",
+  "role": "VIEWER"
+}
+```
+
+Use `MEMBER` for contributors or `ADMIN` for project administrators. SCIM does not set passwords. After setup succeeds, have your workflow send the regional project link and SSO instructions; provisioning access and sending an invitation message are separate steps. For a manual pilot, use invitations in organization settings.
+
+#### Deliver credentials and complete remaining setup
+
+Issue separate application credentials and deliver them through the approved secret store. Choose permissions for their use: an ingestion key cannot fetch managed prompts, while reporting may only need Viewer access. See [API key permissions](/docs/administration/rbac#api-key-permissions).
+
+<Callout type="info">
+  The published organization endpoint for creating project keys does not currently expose the UI's permission selector. Use UI issuance where restricted keys are required unless your deployed version documents API support. Likewise, the public schema does not document alert-management endpoints; keep [alert setup](/docs/observability/features/alerts) as an explicit UI step instead of assuming the organization key can automate it.
+</Callout>
+
+Record completed steps and resource IDs. If configuration fails, leave the request open and resume from that step rather than deleting a project that may already contain data. Revoke temporary provisioning keys after setup, or retain a dedicated automation key with an owner and rotation procedure.
+
+### Verify and hand over
+
+Give the team its project link, regional endpoint, secret reference, retention policy, telemetry conventions, and support contact. Complete these checks together:
+
+- An intended user can use the project, and an unrelated user cannot access it.
+- A representative request reaches the right project with useful input/output and the expected environment.
+- Sensitive fields are absent or masked, including errors and nested observations.
+- The starter evaluator scores the intended observation and agrees with reviewed examples.
+- Filters, sampling, and expected model cost are accepted before enabling live rules.
+- Any configured alert reaches its responder, and the owner knows how to request changes.
+
+Help the team complete one useful task, such as adding a sanitized failure to a [dataset and running an experiment](/docs/evaluation/get-started/offline). Mark onboarding complete when the checks pass, rather than when the project is created.
+
+</Steps>
+
+## Next steps
+
+Follow [Operate Langfuse across teams](/guides/operate-langfuse-across-teams) for updating shared defaults, managing integrations, reviewing access, and allocating costs.
