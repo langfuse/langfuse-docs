@@ -70,7 +70,7 @@ export function proxy(
   if (stripped) {
     const url = request.nextUrl.clone();
     url.pathname = stripped;
-    return NextResponse.redirect(url, 308);
+    return NextResponse.redirect(url, 307);
   }
 
   if (posthogKey && process.env.DISABLE_AGENT_FETCH_TRACKING !== "true") {
