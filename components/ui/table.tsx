@@ -8,11 +8,11 @@ const Table = React.forwardRef<
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
   <CornerBox>
-    <div className="overflow-auto w-full">
+    <div className="overflow-x-auto w-full [scrollbar-gutter:stable]">
       <table
         ref={ref}
         className={cn(
-          "my-0! w-full h-full text-sm caption-bottom border-none",
+          "my-0! min-w-full w-max h-full text-sm caption-bottom border-none",
           className,
         )}
         {...props}

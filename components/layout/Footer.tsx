@@ -155,7 +155,10 @@ export function Footer({ className }: { className?: string }) {
               key={s.name}
               href={s.href}
               aria-label={s.name}
-              className={linkClassName}
+              className={cn(
+                linkClassName,
+                "-m-3 inline-flex size-11 items-center justify-center",
+              )}
               {...(isExternal && {
                 target: "_blank",
                 rel: "nofollow noreferrer",
