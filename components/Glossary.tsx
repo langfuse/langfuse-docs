@@ -252,7 +252,7 @@ export const Glossary = () => {
               key={letter}
               href={activeLetters.has(letter) ? `#letter-${letter}` : undefined}
               className={cn(
-                "w-7 h-7 flex items-center justify-center rounded transition-colors",
+                "size-9 md:size-7 flex items-center justify-center rounded transition-colors",
                 activeLetters.has(letter)
                   ? "text-primary hover:bg-primary/10 font-medium"
                   : "text-muted-foreground/40 cursor-default",
