@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatAbsoluteDate, parseCalendarDate } from "./utils";
+import { formatAbsoluteDate, formatDate, parseCalendarDate } from "./utils";
+
+const localTime = (y: number, m: number, d: number, h: number) =>
+  new Date(y, m - 1, d, h);
 
 test("parseCalendarDate treats YYYY/MM/DD as a UTC calendar day", () => {
   const parsed = parseCalendarDate("2026/04/24");
@@ -22,4 +25,29 @@ test("formatAbsoluteDate does not shift a day when formatted in UTC", () => {
 test("parseCalendarDate rejects impossible calendar dates", () => {
   assert.equal(parseCalendarDate("2026/02/31"), null);
   assert.equal(formatAbsoluteDate("2026/02/31"), "");
+});
+
+test("formatDate labels a post from today as Today at any time of day", () => {
+  assert.equal(formatDate("2026-11-11", localTime(2026, 11, 11, 0)), "Today");
+  assert.equal(formatDate("2026-11-11", localTime(2026, 11, 11, 15)), "Today");
+  assert.equal(formatDate("2026-11-11", localTime(2026, 11, 11, 23)), "Today");
+});
+
+test("formatDate counts calendar days, not elapsed 24h periods", () => {
+  assert.equal(
+    formatDate("2026-11-10", localTime(2026, 11, 11, 1)),
+    "1 Day Ago",
+  );
+  assert.equal(
+    formatDate("2026-11-10", localTime(2026, 11, 11, 23)),
+    "1 Day Ago",
+  );
+  assert.equal(
+    formatDate("2026/11/08", localTime(2026, 11, 11, 15)),
+    "3 Days Ago",
+  );
+});
+
+test("formatDate treats a date ahead of the viewer's calendar as Today", () => {
+  assert.equal(formatDate("2026-11-12", localTime(2026, 11, 11, 20)), "Today");
 });

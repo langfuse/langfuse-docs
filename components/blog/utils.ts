@@ -66,13 +66,27 @@ export function formatAbsoluteDate(dateStr?: string): string {
   });
 }
 
-export function formatDate(dateStr?: string): string {
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+/**
+ * Whole calendar days between `date` (a UTC calendar day) and today in the
+ * viewer's local calendar. Comparing against the current instant instead
+ * would count a post from earlier today as "1 Day Ago" after UTC noon.
+ */
+export function calendarDaysSince(date: Date, now: Date = new Date()): number {
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const day = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+  );
+  return Math.round((today - day) / MS_PER_DAY);
+}
+
+export function formatDate(dateStr?: string, now: Date = new Date()): string {
   const d = parseCalendarDate(dateStr);
   if (!d) return "";
-  const now = new Date();
-  const diffDays = Math.round(
-    (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const diffDays = calendarDaysSince(d, now);
   if (diffDays < 1) return "Today";
   if (diffDays === 1) return "1 Day Ago";
   if (diffDays < 14) return `${diffDays} Days Ago`;
