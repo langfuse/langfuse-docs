@@ -105,7 +105,7 @@ For example, a docs chatbot dataset can use either approach:
 | Reference-free  | `{ question, retrievedContext[] }` | Omit `expectedOutput` or set it to `null`           | LLM-as-a-judge checks whether the answer is grounded in the retrieved documentation, answers the question, and avoids unsupported facts.             |
 | Reference-based | `{ question }`                     | `{ requiredFacts[], requiredSources[], mustNot[] }` | A code or LLM evaluator compares the answer against the required facts and sources. This takes more preparation, but failures are easier to inspect. |
 
-Choose the cheapest evaluator that captures the requirement: [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for language-quality judgments, and [manual evaluation](/academy/evaluate#how-evaluation-typically-evolves) while you are still learning what good and bad outputs look like.
+Choose the cheapest evaluator that captures the requirement: [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks, [decision models](/docs/evaluation/evaluation-methods/decision-models) for typed verdicts like yes/no flags or categories, [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for language-quality judgments that need written reasoning, and [manual evaluation](/academy/evaluate#how-evaluation-typically-evolves) while you are still learning what good and bad outputs look like.
 
 At this stage, you only need to decide how each dataset item will be reviewed: by an automated evaluator, manual annotation, or both. For the deeper work of designing the evaluator itself, see the [Academy page on evaluation](/academy/evaluate).
 
@@ -181,7 +181,7 @@ After the first run, expand and iterate until you arrive at scope and shape that
 Datasets have to evolve with your application. By [monitoring production](/academy/monitoring) and frequently reviewing data through structured [error analysis](/academy/monitoring/error-analysis), your datasets can evolve over time to represent the production scope of your system. There are three useful expansion patterns:
 
 - **Production-mirroring**: add interesting cases from production no matter if good or bad, to expand the coverage of your dataset over time.
-- **Bad-trace expansion:** add a reviewed dataset item whenever you find a serious production failure. This works well once the system is live and you can continuously mine traces. For scoring, use automated evaluators such as [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), or send examples to [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for manual review.
+- **Bad-trace expansion:** add a reviewed dataset item whenever you find a serious production failure. This works well once the system is live and you can continuously mine traces. For scoring, use automated evaluators such as [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), [decision models](/docs/evaluation/evaluation-methods/decision-models), or [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators), or send examples to [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) for manual review.
 - **Purpose-specific datasets:** build separate datasets for stable regression, adversarial inputs, single-step evaluations.
 
 <ManualGuideCallout
