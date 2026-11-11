@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
 import {
-  classify,
-  loadIpRanges,
-  type Classification,
-  type IpRanges,
-} from "@mintlify/agent-traffic";
+  classifyAgentTraffic,
+  createIpRangesCache,
+  isAgentOrAiCrawler,
+} from "./lib/agent-traffic";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 const posthogHost =
@@ -29,85 +28,8 @@ export const config = {
   ],
 };
 
-// Agents seen on langfuse.com that the @mintlify/agent-traffic dataset does
-// not cover yet. Checked only when the library finds no known agent.
-const EXTRA_AGENTS: {
-  pattern: RegExp;
-  result: Omit<Classification, "verified" | "confidence" | "reasons">;
-}[] = [
-  {
-    pattern: /\bDevin\/[\d.]+/i,
-    result: {
-      category: "agent",
-      kind: "coding",
-      id: "devin",
-      name: "Devin",
-      operator: "Cognition",
-    },
-  },
-  {
-    // Bare user agent without the version suffix the dataset expects.
-    pattern: /^ChatGPT-User$/i,
-    result: {
-      category: "agent",
-      kind: "assistant",
-      id: "chatgpt-user",
-      name: "ChatGPT-User",
-      operator: "OpenAI",
-    },
-  },
-];
-
-function classifyRequest(
-  headers: Headers,
-  ip: string | undefined,
-  ipRanges?: IpRanges,
-): Classification {
-  const result = classify({ headers, ip }, { ipRanges });
-  if (result.category === "agent" || result.category === "ai-crawler") {
-    return result;
-  }
-  const userAgent = headers.get("user-agent") ?? "";
-  const extra = EXTRA_AGENTS.find((a) => a.pattern.test(userAgent));
-  return extra
-    ? {
-        ...extra.result,
-        verified: null,
-        confidence: "medium",
-        reasons: [`user agent matches ${extra.result.name}`],
-      }
-    : result;
-}
-
-// Operator-published IP ranges, used to verify crawlers and flag
-// impersonators. Loaded lazily in the background (never on the response
-// path), shared across requests, and refreshed daily.
-const IP_RANGES_TTL_MS = 24 * 60 * 60 * 1000;
-const IP_RANGES_RETRY_MS = 10 * 60 * 1000;
-const IP_RANGES_FETCH_TIMEOUT_MS = 3000;
-let ipRangesCache: { promise: Promise<IpRanges>; expiresAt: number } | null =
-  null;
-
-function getIpRanges(): Promise<IpRanges> {
-  const now = Date.now();
-  if (!ipRangesCache || ipRangesCache.expiresAt <= now) {
-    const promise = loadIpRanges((input, init) =>
-      fetch(input, {
-        ...init,
-        signal: AbortSignal.timeout(IP_RANGES_FETCH_TIMEOUT_MS),
-      }),
-    ).catch((): IpRanges => ({}));
-    const cache = { promise, expiresAt: now + IP_RANGES_TTL_MS };
-    ipRangesCache = cache;
-    // If no operator file loaded, retry sooner than the normal refresh.
-    void promise.then((ranges) => {
-      if (Object.keys(ranges).length === 0) {
-        cache.expiresAt = Date.now() + IP_RANGES_RETRY_MS;
-      }
-    });
-  }
-  return ipRangesCache.promise;
-}
+// Crawler IP ranges, loaded in the background (never on the response path).
+const getIpRanges = createIpRangesCache();
 
 function contentKind(pathname: string, accept: string | null): string {
   if (pathname.startsWith("/llms") && pathname.endsWith(".txt")) {
@@ -140,14 +62,13 @@ export function proxy(
     // (posthog-js covers that). This first pass is user-agent and header
     // based only, so it adds no latency.
     const shouldTrack =
-      kind !== "page" ||
-      ["agent", "ai-crawler"].includes(classifyRequest(headers, ip).category);
+      kind !== "page" || isAgentOrAiCrawler(classifyAgentTraffic(headers, ip));
 
     if (shouldTrack) {
       const send = async () => {
         // Re-classify with IP ranges to verify crawlers and catch
         // impersonators (category "bot", kind "impersonator").
-        const traffic = classifyRequest(headers, ip, await getIpRanges());
+        const traffic = classifyAgentTraffic(headers, ip, await getIpRanges());
         const payload = {
           api_key: posthogKey,
           event: "agent_content_fetch",
