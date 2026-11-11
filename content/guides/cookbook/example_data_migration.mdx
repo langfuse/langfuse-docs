@@ -1,7 +1,7 @@
 ---
 title: Migrating Data Between Langfuse Projects (Python SDK v4)
 sidebarTitle: Data Migration Script
-description: Migrate observations, scores, prompts, datasets, custom models, and score configs between Langfuse projects using the Python SDK v4.
+description: Migrate observations, scores, prompts, datasets, evaluators, custom models, and score configs between Langfuse projects using the Python SDK v4.
 category: Examples
 ---
 
@@ -28,10 +28,13 @@ Common use cases:
 4. **Observations** (traces + nested observations, via the OTLP endpoint so original `start_time` / `end_time` are preserved)
 5. **Scores**
 6. **Datasets** (definitions + items, linked to migrated traces/observations)
+7. **Evaluators** (latest LLM-as-a-Judge and code evaluator definitions, via the public API)
 
 ## What is not migrated
 
-The Langfuse public API does not currently support programmatic creation of: **LLM-as-a-Judge evaluator configurations**, **custom dashboards**, **users / RBAC / SSO**, and **project/organization settings**. Historical **dataset run items** are also left behind, see section 6. These must be recreated manually or copied through UI-level exports.
+The Langfuse public API does not currently support programmatic creation of: **custom dashboards**, **users / RBAC / SSO**, and **project/organization settings**. Historical **dataset run items** are also left behind, see section 6. These must be recreated manually or copied through UI-level exports.
+
+Evaluator version history and evaluation rules are not copied by this notebook. See section 7 for how to recreate rules with the migrated evaluator IDs.
 
 
 ## 0. Setup
@@ -982,3 +985,112 @@ print(
 )
 
 ```
+
+## 7. Evaluators
+
+<Callout type="info">
+The stable Evaluators and Evaluation Rules APIs used here are available on Langfuse Cloud and on self-hosted [Langfuse v4.23.0](https://github.com/langfuse/langfuse/releases/tag/v4.23.0) or newer. Both source and destination must support these endpoints.
+
+</Callout>
+
+We use `GET /api/public/v2/evaluators` with cursor pagination and `POST /api/public/v2/evaluators` to copy the latest definition of each LLM-as-a-Judge or code evaluator. These requests use HTTP Basic authentication with the same project keys configured in section 0. See the [Evaluators API reference](https://api.reference.langfuse.com/#tag/evaluators).
+
+The destination assigns new evaluator IDs and starts each evaluator at version 1. The code keeps an `evaluator_id_map` for rule assignments. It copies prompts, output definitions, complete default variable mappings, explicit model choices, and code definitions; historical versions, original authors, timestamps, and paused states are not preserved.
+
+Before running this cell, configure the destination's [LLM connections](https://langfuse.com/docs/administration/llm-connection). An evaluator with `modelConfig: null` uses the destination's default evaluation model. For self-hosted code evaluators, also configure the [code evaluator executor](https://langfuse.com/self-hosting/configuration/code-evaluators). Check each copied evaluator's status in the destination before using it.
+
+Successful creations are skipped if you rerun the cell in the same kernel. Save `evaluator_id_map` before restarting the notebook: names are not unique identifiers, and rerunning without the map creates duplicates. POST requests are deliberately not retried automatically; after an ambiguous timeout, check the destination before retrying.
+
+
+
+```python
+# Reuse successful source-to-destination mappings within this notebook session.
+evaluator_id_map = globals().get("evaluator_id_map", {})
+
+
+def evaluation_request(client, method, path, **kwargs):
+    response = client.request(method, path, **kwargs)
+    response.raise_for_status()
+    return response.json()
+
+
+def evaluator_create_body(evaluator):
+    body = {
+        "name": evaluator["name"],
+        "description": evaluator.get("description"),
+        "type": evaluator["type"],
+    }
+    if evaluator["type"] == "llm_as_judge":
+        mappings = evaluator.get("variableMapping")
+        if mappings is not None and any(not m.get("source") for m in mappings):
+            raise ValueError("Complete the source evaluator's default variable mapping first")
+        body.update(
+            prompt=evaluator["prompt"],
+            outputDefinition=evaluator["outputDefinition"],
+            variableMapping=mappings,
+            modelConfig=evaluator.get("modelConfig"),
+        )
+    elif evaluator["type"] == "code":
+        body.update(
+            sourceCode=evaluator["sourceCode"],
+            sourceCodeLanguage=evaluator["sourceCodeLanguage"],
+        )
+    else:
+        raise ValueError(f"Unsupported evaluator type: {evaluator['type']}")
+    return body
+
+
+migrated = skipped = failed = 0
+with httpx.Client(
+    base_url=SOURCE_CFG["base_url"],
+    auth=(SOURCE_CFG["public_key"], SOURCE_CFG["secret_key"]),
+    timeout=60,
+) as source_api, httpx.Client(
+    base_url=DEST_CFG["base_url"],
+    auth=(DEST_CFG["public_key"], DEST_CFG["secret_key"]),
+    timeout=60,
+) as destination_api:
+    cursor = None
+    while True:
+        params = {"limit": 100}
+        if cursor:
+            params["cursor"] = cursor
+        page = evaluation_request(
+            source_api, "GET", "/api/public/v2/evaluators", params=params
+        )
+        for evaluator in page["data"]:
+            if evaluator["id"] in evaluator_id_map:
+                skipped += 1
+                continue
+            try:
+                # Only writable definition fields are sent, not IDs or rule assignments.
+                created = evaluation_request(
+                    destination_api, "POST", "/api/public/v2/evaluators",
+                    json=evaluator_create_body(evaluator),
+                )
+                evaluator_id_map[evaluator["id"]] = created["id"]
+                migrated += 1
+                print(f"  {evaluator['name']}: {created['id']} (status={created['status']})")
+            except Exception as exc:
+                print(f"  failed evaluator {evaluator['id']} ({evaluator['name']}): {exc}")
+                failed += 1
+        cursor = page.get("meta", {}).get("cursor")
+        if not cursor:
+            break
+
+print(f"Evaluators — migrated: {migrated}, skipped: {skipped}, failed: {failed}")
+print(dumps(evaluator_id_map))
+
+```
+
+### Recreate evaluation rules
+
+Evaluators define how to score data; evaluation rules define which incoming observations to evaluate. Copying an evaluator does not copy or enable its rules.
+
+To migrate rules through the [Evaluation Rules API](https://api.reference.langfuse.com/#tag/evaluationrules):
+
+1. Read the source rules with cursor-paginated `GET /api/public/v2/evaluation-rules`.
+2. Build a create body with `name`, `sampling`, `filter`, and `evaluatorAssignments`. Replace every assignment's `evaluatorId` with `evaluator_id_map[source_id]` and preserve its `variableMapping` override. Remap project-specific filter values, such as `datasetId`, to destination IDs; dataset names from section 6 can help match datasets. If an evaluator failed to migrate, resolve that failure before copying its rules.
+3. Create each rule with `POST /api/public/v2/evaluation-rules`, setting `enabled: false`. Review its filters, mappings, evaluator status, and sampling in the destination, then enable it with `PATCH /api/public/v2/evaluation-rules/{evaluationRuleId}` and `{"enabled": true}`.
+
+Legacy trace and dataset rules may be returned by the read endpoint, but cannot be recreated unchanged. Convert them to observation rules following the [evaluator upgrade guide](https://langfuse.com/faq/all/llm-as-a-judge-migration). New rules evaluate incoming observations; copying them does not rerun evaluation on the historical data migrated above.
