@@ -92,17 +92,12 @@ If the thing you want to evaluate is
 
 a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can often settle the question exactly, and is faster and a lot cheaper to run. Prefer these over model-based evaluators where you can.
 
-An example: an invoice-processing tool that extracts structured fields (vendor, total, due date) from PDFs, evaluated three ways:
+An example: an invoice-processing tool that extracts structured fields (vendor, total, due date) from PDFs, evaluated both ways:
 
-<Tabs items={["LLM-as-a-judge without expected output", "Decision model without expected output", "Code evaluator with expected output"]}>
+<Tabs items={["Nondeterministic without expected output", "Deterministic with expected output"]}>
 <Tab>
 
 Nothing exists to compare against, so an LLM-as-a-judge has to do the reading: it receives the invoice text and the extracted fields, and decides for each field whether it appears as that field in the document. This works, but it costs a model call per invoice, and the verdict can differ between runs.
-
-</Tab>
-<Tab>
-
-A decision model can do the same reading for less. It asks one Yes / no question per field, such as "Does `vendor` name the company that issued the invoice in `invoice_text`?", and answers all of them in a single call. Cheaper and faster than a judge, but still a model call per invoice, and each answer is a probability rather than an exact match.
 
 </Tab>
 <Tab>
