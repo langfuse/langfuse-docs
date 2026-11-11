@@ -38,11 +38,17 @@ export const config = {
 // path contains these characters, so cut the path at the first one (and drop
 // trailing dots and colons) and redirect to what is left. Redirects in
 // next.config.mjs then apply to the cleaned path as usual.
+//
+// /cloud is skipped: app/cloud/[[...path]] forwards any subpath to the
+// Langfuse app, where resource names (prompts, datasets) may contain these
+// characters.
 const STRAY_PATH_SUFFIX =
-  /(?:https?:\/|[)\]>"'`*,;!]|%22|%27|%29|%3E|%5B|%5D|%60|%E2%80%8B|%EF%BC%89).*$/i;
+  /(?:https?:\/|[)\]>"'`*,;!]|%21|%22|%27|%29|%2C|%3B|%3E|%5B|%5D|%60|%E2%80%8B|%EF%BC%89).*$/i;
 const TRAILING_PUNCTUATION = /[.:]+$/;
+const UNCLEANED_PATH = /^\/cloud(?:\/|$)/;
 
 function strippedPathname(pathname: string): string | null {
+  if (UNCLEANED_PATH.test(pathname)) return null;
   const cleaned =
     pathname.replace(STRAY_PATH_SUFFIX, "").replace(TRAILING_PUNCTUATION, "") ||
     "/";
