@@ -78,12 +78,12 @@ The two are not exclusive. You can measure the same metric in your experiments d
 
 There are three kinds of automated evaluators. Code evaluators are deterministic. The other two are model-based: decision models answer typed questions, and LLM-as-a-judge evaluators write out their reasoning before a verdict. Each has its trade-offs.
 
-|                   | Code evaluator                                                        | Decision model                                                                      | LLM-as-a-judge                                                                          |
-| ----------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Cost              | close to free                                                         | cheap                                                                               | expensive                                                                               |
-| Speed             | milliseconds                                                          | fast, since it generates no text                                                    | seconds to minutes                                                                      |
-| What you get back | the same verdict for the same input, every time                       | a probability for each answer, no reasoning                                         | a verdict with written reasoning, which can vary between runs on the same input         |
-| Scope             | limited: structure, state, and comparisons against an expected output | questions whose answers you can list up front: yes or no, categories, rubric levels | broadest: anything you can describe in language, including criteria that need reasoning |
+|                    | Code evaluator                                                        | Decision model                                                                      | LLM-as-a-judge                                                                          |
+| ------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Cost               | close to free                                                         | cheap                                                                               | expensive                                                                               |
+| Speed              | milliseconds                                                          | fast, since it generates no text                                                    | seconds to minutes                                                                      |
+| Answer consistency | same input always gets the same verdict                               | verdicts can vary between runs on the same input                                    | verdicts can vary between runs on the same input                                        |
+| Scope              | limited: structure, state, and comparisons against an expected output | questions whose answers you can list up front: yes or no, categories, rubric levels | broadest: anything you can describe in language, including criteria that need reasoning |
 
 If the thing you want to evaluate is
 
