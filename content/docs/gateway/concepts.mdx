@@ -1,7 +1,7 @@
 ---
 title: Concepts
 seoTitle: "How the Langfuse AI Gateway works (beta)"
-description: How the Langfuse AI Gateway routes model calls, which keys and credentials are involved, how a request reaches a model, and how each call becomes a Langfuse trace.
+description: How the Langfuse AI Gateway routes model calls, which keys and connections are involved, how a request reaches a model, and how each call becomes a Langfuse trace.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -23,23 +23,23 @@ On Langfuse Cloud, Langfuse runs the gateway in the EU, US, JP, and HIPAA region
 
 On self-hosted Langfuse, the gateway is a separate service that you deploy next to your instance. See [Self-hosting the AI Gateway](/self-hosting/configuration/ai-gateway).
 
-### Credential types [#credential-types]
+### Keys and connections [#credential-types]
 
-The gateway uses three types of keys. Clients hold user keys or service account keys, and only the gateway holds the provider credentials:
+The gateway uses three types of keys. Clients hold user keys or service account keys, and only the gateway holds the provider API keys:
 
-| Key type                                                                              | Origin                                          | Scope                                                                    | Provided by |
-| ------------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ | ----------- |
-| [Provider credential](/docs/gateway/get-started/admin-setup#add-provider-connections) | Model provider, for example OpenAI or Anthropic | Held only by the gateway. Clients never see it.                          | Owner/admin |
-| [User key](/docs/gateway/features/api-keys#key-types)                                 | AI Gateway                                      | Scoped to one user. Stops working when the user leaves the organization. | User        |
-| [Service account key](/docs/gateway/features/api-keys#key-types)                      | AI Gateway                                      | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin |
+| Key type                                                                           | Origin                                          | Scope                                                                    | Provided by |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------ | ----------- |
+| [Provider API key](/docs/gateway/get-started/admin-setup#add-provider-connections) | Model provider, for example OpenAI or Anthropic | Held only by the gateway. Clients never see it.                          | Owner/admin |
+| [User key](/docs/gateway/features/api-keys#key-types)                              | AI Gateway                                      | Scoped to one user. Stops working when the user leaves the organization. | User        |
+| [Service account key](/docs/gateway/features/api-keys#key-types)                   | AI Gateway                                      | Scoped to a CI or shared service. Not linked to an individual user.      | Owner/admin |
 
 Because clients only hold gateway keys, you can rotate a provider key without changing any client, and revoke one person's access without affecting anyone else.
 
-The gateway calls the provider with your own credentials, so the provider bills model usage to your provider account. Langfuse counts each recorded generation as a [billable unit](/docs/administration/billable-units).
+The gateway calls the provider with your own provider API keys, so the provider bills model usage to your provider account. Langfuse counts each recorded generation as a [billable unit](/docs/administration/billable-units).
 
 ### Model and key routing [#routing]
 
-An organization can add several provider credentials, including more than one per provider.
+An organization can add several provider connections, including more than one per provider.
 
 **The URL path decides which API format the gateway expects.** Requests look exactly like requests to the provider. Only the base URL and the key change:
 
@@ -53,18 +53,17 @@ An organization can add several provider credentials, including more than one pe
   [supported providers](/docs/gateway/features/models#supported-providers).
 </Callout>
 
-**The model ID decides the credential.** Each model ID starts with the name of a credential, in the form `<credential>:<model>`. For example, `openai-prod:<model>` calls `<model>` with the credential named `openai-prod`.
+**The model ID decides the connection.** Each model ID starts with the name of a connection, in the form `<connection>:<model>`. For example, `openai-prod:<model>` calls `<model>` with the connection named `openai-prod`.
 
 <Callout type="info">
   Some coding agents send the provider's model names without a prefix, which
-  also works for OpenAI and Anthropic models. The gateway then uses the oldest
-  matching OpenAI or Anthropic credential. See [model names without a
-  prefix](/docs/gateway/features/models#model-names-without-a-prefix).
+  also works for OpenAI and Anthropic models. See [model
+  IDs](/docs/gateway/features/models#model-ids).
 </Callout>
 
 <Callout type="info">
-  By default, a credential allows every model the provider offers. Admins can
-  turn models off per credential, see [Model
+  By default, a connection allows every model the provider offers. Admins can
+  turn models off per connection, see [Model
   management](/docs/gateway/features/models).
 </Callout>
 
