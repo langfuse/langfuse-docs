@@ -7,7 +7,7 @@ description: Queuing/batching configuration for Langfuse Tracing.
 
 Langfuse's client SDKs and integrations are all designed to queue and batch requests in the background to optimize API calls and network time. Batches are determined by a combination of time and size (number of events and size of batch).
 
-### Configuration
+### Configuration [#configuration]
 
 All integrations have a sensible default configuration, but you can customize the batching behaviour to suit your needs.
 
@@ -17,6 +17,34 @@ All integrations have a sensible default configuration, but you can customize th
 | `flush_interval`, `LANGFUSE_FLUSH_INTERVAL` (s) | `flushInterval` (seconds) | The maximum time to wait before sending a batch in seconds. |
 
 You can e.g. set `flushAt=1` to send every event immediately, or `flushInterval=1` to send every second.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+<Tab>
+
+```python
+from langfuse import Langfuse
+
+langfuse = Langfuse(flush_at=100, flush_interval=1)
+```
+
+</Tab>
+<Tab>
+
+```ts
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+export const langfuseSpanProcessor = new LangfuseSpanProcessor({
+  flushAt: 100,
+  flushInterval: 1,
+});
+
+const sdk = new NodeSDK({ spanProcessors: [langfuseSpanProcessor] });
+sdk.start();
+```
+
+</Tab>
+</LangTabs>
 
 ### Manual flushing [#manual-flushing]
 
