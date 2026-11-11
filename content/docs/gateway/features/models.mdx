@@ -52,7 +52,33 @@ A credential with every model enabled also allows models that the provider publi
 
 ## Model IDs [#model-ids]
 
-Model IDs have the form `<credential>:<model>`, for example `openai-prod:<model>`, so the gateway knows which credential to use. For coding agents that send the provider's own model names, IDs without a prefix also work if they start with `gpt-`, `codex-`, `ft:`, or `claude-`, and the gateway uses the oldest matching OpenAI or Anthropic credential. All other providers always need the prefix. Renaming a credential changes its prefix, so update clients that use the old IDs.
+Every request names a model. You can send it in two forms: a credential-scoped model ID, which picks the credential explicitly, or a plain model name, which lets the gateway pick the credential.
+
+### Credential-scoped model IDs [#credential-scoped-model-ids]
+
+A credential-scoped model ID has the form `<credential>:<model>`. `<credential>` is the name you gave the provider credential, and `<model>` is the model ID in that provider's own naming. For example:
+
+- `openai-prod:<model>` calls `<model>` with the credential named `openai-prod`.
+- `openrouter:openai/<model>` calls OpenRouter's `openai/<model>` with the credential named `openrouter`.
+
+Use this form whenever your client lets you set the model ID. It's the only form that works for OpenRouter, Vercel AI Gateway, xAI, and Amazon Bedrock credentials, and the only way to choose between several credentials that offer the same model. Renaming a credential changes its prefix, so update clients that use the old IDs.
+
+### Model names without a prefix [#model-names-without-a-prefix]
+
+Some coding agents don't read the gateway's model list and always send the provider's plain model name, for example `gpt-<version>` or `claude-<version>`. The gateway accepts a name without a prefix only if it starts with `gpt-`, `codex-`, or `ft:` (served by an OpenAI credential) or `claude-` (served by an Anthropic credential). It rejects any other name without a prefix.
+
+If your organization has several credentials that could serve the model, the gateway picks one like this:
+
+1. It considers only OpenAI or Anthropic credentials, matching the name, that support the API format of the request path and aren't failing. OpenRouter, Vercel AI Gateway, xAI, and Amazon Bedrock credentials are never picked for a name without a prefix, even if they offer the same model.
+2. Of those, it uses the oldest credential, the one added first, that has the model enabled.
+3. If none of them has the model enabled, the request fails with a `model_not_allowed` error.
+
+<Callout type="warning">
+  The gateway sends each request to exactly one credential. If that credential
+  fails, for example because the provider returns an error or a rate limit,
+  the gateway doesn't retry the request with another credential. To control
+  which credential serves a request, send a credential-scoped model ID.
+</Callout>
 
 ## Troubleshooting and FAQ [#troubleshooting-and-faq]
 
