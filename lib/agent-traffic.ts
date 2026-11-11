@@ -1,5 +1,4 @@
 // Agent traffic classification for proxy.ts, built on @mintlify/agent-traffic.
-// Kept free of Next.js imports so it can be unit tested with `node --test`.
 import {
   classify,
   loadIpRanges,
