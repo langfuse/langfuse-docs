@@ -1,7 +1,7 @@
 ---
 title: Migrating Data Between Langfuse Projects (Python SDK v4)
 sidebarTitle: Data Migration Script
-description: Migrate observations, scores, prompts, datasets, custom models, and score configs between Langfuse projects using the Python SDK v4.
+description: Migrate observations, scores, prompts, datasets, evaluators, custom models, and score configs between Langfuse projects using the Python SDK v4.
 category: Examples
 ---
 
@@ -12,7 +12,7 @@ This cookbook is also available in [Japanese](/guides/cookbook/example_data_migr
 This notebook migrates data from one Langfuse project to another using the **Langfuse Python SDK v4**.
 
 <Callout type="warning">
-Migrating data into a Langfuse project creates new ingestion events in the destination project. This migration therefore incurs Langfuse ingestion charges based on the number of observations transferred.
+Migrating observation and score data into a Langfuse project creates new ingestion events in the destination project. This migration therefore incurs Langfuse ingestion charges based on the observations and scores transferred.
 
 </Callout>
 
@@ -25,13 +25,16 @@ Common use cases:
 1. **Score Configs**
 2. **Custom Model Definitions**
 3. **Prompts** (all versions)
-4. **Observations** (traces + nested observations, via the OTLP endpoint so original `start_time` / `end_time` are preserved)
-5. **Scores**
-6. **Datasets** (definitions + items, linked to migrated traces/observations)
+4. **Evaluators** (latest LLM-as-a-Judge and code evaluator definitions, via the public API)
+5. **Observations** (traces + nested observations, via the OTLP endpoint so original `start_time` / `end_time` are preserved)
+6. **Scores**
+7. **Datasets** (definitions + items, linked to migrated traces/observations)
 
 ## What is not migrated
 
-The Langfuse public API does not currently support programmatic creation of: **LLM-as-a-Judge evaluator configurations**, **custom dashboards**, **users / RBAC / SSO**, and **project/organization settings**. Historical **dataset run items** are also left behind, see section 6. These must be recreated manually or copied through UI-level exports.
+This notebook does not copy **media files**, **custom dashboards**, **users / RBAC / SSO**, or **project/organization settings**. Recreate these separately. Historical **dataset run items** are also left behind; see section 7.
+
+Evaluator version history and evaluation rules are not copied by this notebook. See section 4 for how to recreate rules with the migrated evaluator IDs.
 
 
 ## 0. Setup
@@ -151,17 +154,17 @@ def to_otel_trace_id(source_trace_id: str) -> str:
       re-runs always produce the same destination ID.
     """
     sid = source_trace_id.lower()
-    if _HEX32.match(sid):
+    if _HEX32.match(sid) and int(sid, 16):
         return sid
-    return sha256(sid.encode("utf-8")).hexdigest()[:32]
+    return sha256(source_trace_id.encode("utf-8")).hexdigest()[:32]
 
 
 def to_otel_span_id(source_obs_id: str) -> str:
     """Return a valid 16-hex-char OTel span ID for a source observation ID."""
     sid = source_obs_id.lower()
-    if _HEX16.match(sid):
+    if _HEX16.match(sid) and int(sid, 16):
         return sid
-    return sha256(sid.encode("utf-8")).hexdigest()[:16]
+    return sha256(source_obs_id.encode("utf-8")).hexdigest()[:16]
 
 
 import httpx
@@ -181,7 +184,7 @@ _RETRIABLE_EXCEPTIONS = (
 def with_retries(fn, *, max_retries: int = 5, base_sleep: float = 0.5):
     """Exponential-backoff retry on rate limits / 5xx / transient network errors.
 
-    Retries on (a) Fern-generated HTTP errors whose `status_code` attribute is
+    Retries on (a) Fern or httpx HTTP errors with status codes
     in {429, 500, 502, 503, 504}, or (b) the transient-network exception
     classes listed in `_RETRIABLE_EXCEPTIONS`. Everything else is raised
     immediately.
@@ -190,7 +193,9 @@ def with_retries(fn, *, max_retries: int = 5, base_sleep: float = 0.5):
         try:
             return fn()
         except Exception as exc:
-            status = getattr(exc, "status_code", None)
+            status = getattr(exc, "status_code", None) or getattr(
+                getattr(exc, "response", None), "status_code", None
+            )
             retriable = status in _RETRIABLE_CODES or isinstance(exc, _RETRIABLE_EXCEPTIONS)
             if not retriable or attempt == max_retries - 1:
                 raise
@@ -225,7 +230,14 @@ Score configs must be migrated first so that scores created in the destination c
 from langfuse.api import ConfigCategory
 
 config_id_map: Dict[str, str] = {}
-existing_by_name = {c.name: c for c in dst.api.score_configs.get(limit=100).data}
+existing_by_name = {}
+page = 1
+while True:
+    resp = with_retries(lambda: dst.api.score_configs.get(page=page, limit=100))
+    existing_by_name.update({c.name: c for c in resp.data})
+    if page >= resp.meta.total_pages:
+        break
+    page += 1
 
 page = 1
 migrated = skipped = failed = 0
@@ -259,6 +271,7 @@ while True:
                     create_kwargs["max_value"] = cfg.max_value
             created = with_retries(lambda: dst.api.score_configs.create(**create_kwargs))
             config_id_map[cfg.id] = created.id
+            existing_by_name[cfg.name] = created
             migrated += 1
         except Exception as exc:
             print(f"  failed to migrate score config '{cfg.name}': {exc}")
@@ -278,6 +291,8 @@ Only user-defined models are migrated. Langfuse-managed models are skipped — t
 
 
 ```python
+from langfuse.api import PricingTierInput
+
 page = 1
 migrated = skipped = failed = 0
 while True:
@@ -302,7 +317,12 @@ while True:
                 "tokenizer_config": m.tokenizer_config,
             }
             if getattr(m, "pricing_tiers", None):
-                create_kwargs["pricing_tiers"] = m.pricing_tiers
+                create_kwargs["pricing_tiers"] = [
+                    PricingTierInput(
+                        name=t.name, is_default=t.is_default, priority=t.priority,
+                        conditions=t.conditions, prices=t.prices,
+                    ) for t in m.pricing_tiers
+                ]
             else:
                 if m.input_price is not None:
                     create_kwargs["input_price"] = m.input_price
@@ -328,7 +348,7 @@ print(f"Custom models — migrated: {migrated}, skipped: {skipped}, failed: {fai
 
 ## 3. Prompts
 
-Every version of every prompt is migrated. The destination assigns fresh version numbers; the original source version is recorded in `commit_message` so it stays traceable. Tags and labels are preserved as-is.
+Every version of every prompt is migrated. The destination assigns fresh version numbers; the original source version is recorded in `commit_message` so it stays traceable. Tags and labels are preserved as-is. The code records destination versions in `prompt_version_map` so migrated observations reference the correct prompt version.
 
 
 
@@ -343,6 +363,8 @@ from langfuse.api import (
     Prompt_Chat,
     Prompt_Text,
 )
+
+prompt_version_map = {}
 
 page = 1
 prompt_versions = []  # (name, version) tuples
@@ -393,7 +415,8 @@ for name, version in prompt_versions:
             print(f"  unknown prompt type for {name} v{version}: {type(p).__name__}")
             failed += 1
             continue
-        with_retries(lambda: dst.api.prompts.create(request=req))
+        created = with_retries(lambda: dst.api.prompts.create(request=req))
+        prompt_version_map[(name, version)] = created.version
         migrated += 1
     except Exception as exc:
         print(f"  failed {name} v{version}: {exc}")
@@ -403,33 +426,178 @@ print(f"Prompts — migrated: {migrated}, failed: {failed}")
 
 ```
 
-## 4. Observations (via OTLP ingestion endpoint)
+## 4. Evaluators
+
+<Callout type="info">
+The stable Evaluators and Evaluation Rules APIs used here are available on Langfuse Cloud and on self-hosted [Langfuse v4.23.0](https://github.com/langfuse/langfuse/releases/tag/v4.23.0) or newer. Both source and destination must support these endpoints.
+
+</Callout>
+
+We use `GET /api/public/v2/evaluators` with cursor pagination and `POST /api/public/v2/evaluators` to copy the latest definition of each LLM-as-a-Judge or code evaluator. These requests use HTTP Basic authentication with the same project keys configured in section 0. See the [Evaluators API reference](https://api.reference.langfuse.com/#tag/evaluators).
+
+The destination assigns new evaluator IDs and starts each evaluator at version 1. The code keeps an `evaluator_id_map` for rule assignments. It copies prompts, output definitions, complete default variable mappings, explicit model choices, and code definitions; historical versions, original authors, timestamps, and paused states are not preserved.
+
+Before running this cell, configure the destination's [LLM connections](https://langfuse.com/docs/administration/llm-connection). An evaluator with `modelConfig: null` uses the destination's default evaluation model. For self-hosted code evaluators, also configure the [code evaluator executor](https://langfuse.com/self-hosting/configuration/code-evaluators). Check each copied evaluator's status in the destination before using it.
+
+Successful creations are skipped if you rerun the cell in the same kernel. Save `evaluator_id_map` before restarting the notebook: names are not unique identifiers, and rerunning without the map creates duplicates. POST requests are deliberately not retried automatically; after an ambiguous timeout, check the destination before retrying.
+
+
+
+```python
+# Reuse successful source-to-destination mappings within this notebook session.
+evaluator_id_map = globals().get("evaluator_id_map", {})
+
+
+def evaluation_request(client, method, path, **kwargs):
+    def send():
+        response = client.request(method, path, **kwargs)
+        response.raise_for_status()
+        return response.json()
+
+    return with_retries(send) if method == "GET" else send()
+
+
+def evaluator_create_body(evaluator):
+    body = {
+        "name": evaluator["name"],
+        "description": evaluator.get("description"),
+        "type": evaluator["type"],
+    }
+    if evaluator["type"] == "llm_as_judge":
+        mappings = evaluator.get("variableMapping")
+        if mappings is not None and any(not m.get("source") for m in mappings):
+            raise ValueError("Complete the source evaluator's default variable mapping first")
+        body.update(
+            prompt=evaluator["prompt"],
+            outputDefinition=evaluator["outputDefinition"],
+            variableMapping=mappings,
+            modelConfig=evaluator.get("modelConfig"),
+        )
+    elif evaluator["type"] == "code":
+        body.update(
+            sourceCode=evaluator["sourceCode"],
+            sourceCodeLanguage=evaluator["sourceCodeLanguage"],
+        )
+    else:
+        raise ValueError(f"Unsupported evaluator type: {evaluator['type']}")
+    return body
+
+
+migrated = skipped = failed = 0
+with httpx.Client(
+    base_url=SOURCE_CFG["base_url"],
+    auth=(SOURCE_CFG["public_key"], SOURCE_CFG["secret_key"]),
+    timeout=60,
+) as source_api, httpx.Client(
+    base_url=DEST_CFG["base_url"],
+    auth=(DEST_CFG["public_key"], DEST_CFG["secret_key"]),
+    timeout=60,
+) as destination_api:
+    cursor = None
+    while True:
+        params = {"limit": 100}
+        if cursor:
+            params["cursor"] = cursor
+        page = evaluation_request(
+            source_api, "GET", "/api/public/v2/evaluators", params=params
+        )
+        for evaluator in page["data"]:
+            if evaluator["id"] in evaluator_id_map:
+                skipped += 1
+                continue
+            try:
+                # Only writable definition fields are sent, not IDs or rule assignments.
+                created = evaluation_request(
+                    destination_api, "POST", "/api/public/v2/evaluators",
+                    json=evaluator_create_body(evaluator),
+                )
+                evaluator_id_map[evaluator["id"]] = created["id"]
+                migrated += 1
+                print(f"  {evaluator['name']}: {created['id']} (status={created['status']})")
+            except Exception as exc:
+                print(f"  failed evaluator {evaluator['id']} ({evaluator['name']}): {exc}")
+                failed += 1
+        cursor = page.get("meta", {}).get("cursor")
+        if not cursor:
+            break
+
+print(f"Evaluators — migrated: {migrated}, skipped: {skipped}, failed: {failed}")
+print(dumps(evaluator_id_map))
+
+```
+
+### Recreate evaluation rules
+
+Evaluators define how to score data; evaluation rules define which incoming observations to evaluate. Copying an evaluator does not copy or enable its rules.
+
+To migrate rules through the [Evaluation Rules API](https://api.reference.langfuse.com/#tag/evaluationrules):
+
+1. Read the source rules with cursor-paginated `GET /api/public/v2/evaluation-rules`.
+2. Build a create body with `name`, `sampling`, `filter`, and `evaluatorAssignments`. Replace every assignment's `evaluatorId` with `evaluator_id_map[source_id]` and preserve its `variableMapping` override. Remap project-specific filter values, such as `datasetId`, to destination IDs; dataset names from section 7 can help match datasets. If an evaluator failed to migrate, resolve that failure before copying its rules.
+3. Create each rule with `POST /api/public/v2/evaluation-rules`, setting `enabled: false`. Review its filters, mappings, evaluator status, and sampling in the destination, then enable it with `PATCH /api/public/v2/evaluation-rules/{evaluationRuleId}` and `{"enabled": true}`.
+
+Legacy trace and dataset rules may be returned by the read endpoint, but cannot be recreated unchanged. Convert them to observation rules following the [evaluator upgrade guide](https://langfuse.com/faq/all/llm-as-a-judge-migration). New rules evaluate incoming observations; copying them does not rerun evaluation on the historical data copied by this notebook.
+
+## 5. Observations (via OTLP ingestion endpoint)
 
 This is the core of the migration. We push each source trace (and its nested observations) into the destination's OTLP ingestion endpoint at `/api/public/otel/v1/traces`. The OTLP endpoint is the **only** way to set the authoritative `start_time` / `end_time` of an observation at ingest — the legacy REST ingestion rewrites those fields.
 
 > **Self-hosted deployments:** the v2 Observations API requires [Langfuse v4](https://langfuse.com/docs/v4), which is generally available for self-hosted deployments. If your source deployment still runs Langfuse v3, the v2 endpoints are unavailable there: enumerate traces with `src.api.trace.list(page=..., from_timestamp=FROM_TS, to_timestamp=TO_TS)` and fetch each trace's observations with `src.api.legacy.observations_v1.get_many(trace_id=...)`. Both are deprecated on v4, but they are the only option against a v3 source.
 
-> **Which traces are migrated:** the listing below pages through *logical root observations*, so it yields one row per trace. A trace whose root observation never reached Langfuse — for example when only child spans were exported — has no logical root and is skipped. Compare the migrated trace count against the source project's trace count; if they differ, page through observations without the root filter and group the rows by `trace_id` to pick up the remainder.
+> **Which traces are migrated:** the listing below pages through *logical root observations*, and deduplicates trace IDs when a trace has multiple app roots. A trace whose root observation never reached Langfuse — for example when only child spans were exported — has no logical root and is skipped. Compare the migrated trace count against the source project's trace count; if they differ, page through observations without the root filter and group the rows by `trace_id` to pick up the remainder.
 
 
 
 ```python
+from contextvars import ContextVar
+
 from opentelemetry import trace as otel_trace
+from opentelemetry.context import Context
+from opentelemetry.sdk.trace.id_generator import RandomIdGenerator
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor, SpanExportResult
 from opentelemetry.trace import NonRecordingSpan, SpanContext, TraceFlags
+
+# Force the IDs actually exported to match the score/dataset reference maps.
+_migration_trace_id = ContextVar("migration_trace_id", default=None)
+_migration_span_id = ContextVar("migration_span_id", default=None)
+
+
+class MigrationIdGenerator(RandomIdGenerator):
+    def generate_trace_id(self):
+        return _migration_trace_id.get() or super().generate_trace_id()
+
+    def generate_span_id(self):
+        return _migration_span_id.get() or super().generate_span_id()
+
+
+class MigrationSpanExporter(OTLPSpanExporter):
+    failed_span_ids = []
+
+    def export(self, spans):
+        result = SpanExportResult.FAILURE
+        try:
+            result = super().export(spans)
+            return result
+        finally:
+            if result != SpanExportResult.SUCCESS:
+                self.failed_span_ids.extend(format(s.context.span_id, "016x") for s in spans)
+
 
 # --- Build a dedicated OTLP pipeline that points at the destination project ---
 _auth = base64.b64encode(
     f"{DEST_CFG['public_key']}:{DEST_CFG['secret_key']}".encode("utf-8")
 ).decode("ascii")
 
-otlp_provider = TracerProvider(resource=Resource.create({"service.name": "langfuse-migration"}))
+otlp_provider = TracerProvider(
+    resource=Resource.create({"service.name": "langfuse-migration"}),
+    id_generator=MigrationIdGenerator(),
+)
 otlp_provider.add_span_processor(
     SimpleSpanProcessor(
-        OTLPSpanExporter(
+        MigrationSpanExporter(
             endpoint=f"{DEST_CFG['base_url']}/api/public/otel/v1/traces",
             headers={
                 "Authorization": f"Basic {_auth}",
@@ -462,8 +630,8 @@ def _set_scalar(span, key: str, value: Any) -> None:
 def _as_attr_string(value: Any) -> Optional[str]:
     """Coerce an input/output/metadata value to a JSON attribute string.
 
-    The Observations API v2 returns input/output/metadata as raw JSON strings,
-    while the Trace listing returns them as parsed dicts/lists. Pass strings
+    The Observations API v2 returns input/output as raw JSON strings,
+    while older trace responses may return parsed dicts/lists. Pass strings
     through unchanged so we don't end up double-encoded; JSON-encode
     everything else with ensure_ascii=False (Japanese-safe).
     """
@@ -475,11 +643,11 @@ def _as_attr_string(value: Any) -> Optional[str]:
 
 
 def _set_trace_attrs(span, trace_obj) -> None:
-    """Set trace-level and root-observation langfuse.* attributes on the root span."""
+    """Set the context associated with this observation."""
     trace_name = getattr(trace_obj, "trace_name", None) or trace_obj.name
     _set_scalar(span, "langfuse.trace.name", trace_name)
-    _set_scalar(span, "langfuse.user.id", trace_obj.user_id)
-    _set_scalar(span, "langfuse.session.id", trace_obj.session_id)
+    _set_scalar(span, "user.id", trace_obj.user_id)
+    _set_scalar(span, "session.id", trace_obj.session_id)
     _set_scalar(span, "langfuse.release", getattr(trace_obj, "release", None))
     _set_scalar(span, "langfuse.version", trace_obj.version)
     _set_scalar(span, "langfuse.environment", trace_obj.environment or "default")
@@ -488,31 +656,13 @@ def _set_trace_attrs(span, trace_obj) -> None:
     if getattr(trace_obj, "tags", None):
         # Langfuse accepts both a string[] attribute and a JSON string.
         span.set_attribute("langfuse.trace.tags", list(trace_obj.tags))
-    input_str = _as_attr_string(trace_obj.input)
-    if input_str is not None:
-        span.set_attribute("langfuse.observation.input", input_str)
-    output_str = _as_attr_string(trace_obj.output)
-    if output_str is not None:
-        span.set_attribute("langfuse.observation.output", output_str)
-    md = trace_obj.metadata
-    if isinstance(md, dict):
-        for k, v in md.items():
-            _set_scalar(span, f"langfuse.trace.metadata.{k}", v)
-    elif md is not None:
-        _set_scalar(span, "langfuse.trace.metadata._raw", md)
 
 
 _OBS_TYPE_MAP = {
-    "SPAN": "span",
-    "GENERATION": "generation",
-    "EVENT": "event",
-    "AGENT": "span",
-    "TOOL": "span",
-    "CHAIN": "span",
-    "RETRIEVER": "span",
-    "EVALUATOR": "span",
-    "EMBEDDING": "generation",
-    "GUARDRAIL": "span",
+    kind: kind.lower() for kind in (
+        "SPAN", "GENERATION", "EVENT", "AGENT", "TOOL", "CHAIN", "RETRIEVER",
+        "EVALUATOR", "EMBEDDING", "GUARDRAIL",
+    )
 }
 
 
@@ -537,7 +687,7 @@ def _set_observation_attrs(span, obs) -> None:
         _set_scalar(span, "langfuse.observation.metadata._raw", md)
     # Generation-only attributes. ObservationV2 exposes the model name as
     # `model`; retain a fallback for older SDK response types.
-    if obs_type == "generation":
+    if obs_type in ("generation", "embedding"):
         model_name = getattr(obs, "model", None) or getattr(obs, "provided_model_name", None)
         _set_scalar(span, "langfuse.observation.model.name", model_name)
         if obs.model_parameters:
@@ -557,12 +707,15 @@ def _set_observation_attrs(span, obs) -> None:
         if getattr(obs, "prompt_name", None):
             _set_scalar(span, "langfuse.observation.prompt.name", obs.prompt_name)
         if getattr(obs, "prompt_version", None) is not None:
-            span.set_attribute("langfuse.observation.prompt.version", int(obs.prompt_version))
+            destination_version = prompt_version_map.get(
+                (obs.prompt_name, obs.prompt_version), obs.prompt_version
+            )
+            span.set_attribute("langfuse.observation.prompt.version", int(destination_version))
 
 
 def _parent_ctx(trace_id_hex: str, parent_span_id_hex: Optional[str]):
     if not parent_span_id_hex:
-        return None
+        return Context()
     parent_sc = SpanContext(
         trace_id=int(trace_id_hex, 16),
         span_id=int(parent_span_id_hex, 16),
@@ -580,7 +733,7 @@ obs_id_map: Dict[str, str] = {}
 # completionStartTime; `io` adds input/output; `metadata` adds metadata;
 # `model` adds model/modelParameters; `usage` adds
 # usageDetails/costDetails; `prompt` adds promptName/promptVersion.
-OBSERVATIONS_FIELDS = "core,basic,time,io,metadata,model,usage,prompt"
+OBSERVATIONS_FIELDS = "core,basic,time,io,metadata,model,usage,prompt,trace_context"
 
 
 def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
@@ -600,6 +753,13 @@ def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
             limit=1000,
             cursor=cursor,
         ))
+        metadata_keys = sorted({key for o in resp.data for key in (o.metadata or {})})
+        if metadata_keys:
+            # The default API response truncates metadata values at 200 characters.
+            resp = with_retries(lambda: src.api.observations.get_many(
+                trace_id=source_trace_id, fields=OBSERVATIONS_FIELDS,
+                limit=1000, cursor=cursor, expand_metadata=",".join(metadata_keys),
+            ))
         if resp.data:
             results.extend(resp.data)
         cursor = getattr(resp.meta, "cursor", None)
@@ -609,73 +769,36 @@ def _fetch_observations_v2(source_trace_id: str) -> List[Any]:
 
 
 def migrate_one_trace(trace_obj) -> int:
-    """Migrate one trace + its observations. Returns the number of child observations migrated."""
+    """Copy the source observations using deterministic trace and span IDs."""
     source_trace_id = getattr(trace_obj, "trace_id", None) or trace_obj.id
     observations = _fetch_observations_v2(source_trace_id)
     new_trace_hex = to_otel_trace_id(source_trace_id)
-    trace_id_map[source_trace_id] = new_trace_hex
-
-    # Sort observations: parents before children, earliest first.
-    observations.sort(key=lambda o: (o.start_time, o.id))
-
-    # Root span carrying trace-level attributes. If the source has no explicit
-    # root observation we synthesize one with the root observation timestamps.
-    root_span_hex = to_otel_span_id(source_trace_id)  # deterministic root span id
-    trace_start = min(
-        (o.start_time for o in observations),
-        default=getattr(trace_obj, "start_time", None) or getattr(trace_obj, "timestamp", None),
-    )
-    trace_end = max(
-        (o.end_time or o.start_time for o in observations),
-        default=getattr(trace_obj, "end_time", None) or trace_start,
-    )
-
-    # --- Root span ---
-    root_parent_sc = SpanContext(
-        trace_id=int(new_trace_hex, 16),
-        span_id=int(root_span_hex, 16),
-        is_remote=True,
-        trace_flags=TraceFlags(0x01),
-    )
-    # Root span is created with its own SpanContext as parent context so the
-    # trace_id is forced. We then create a child span underneath it that
-    # *acts* as the root observation. This keeps the code uniform for nesting.
-    root_ctx = otel_trace.set_span_in_context(NonRecordingSpan(root_parent_sc))
-    root_span = migration_tracer.start_span(
-        name=(getattr(trace_obj, "trace_name", None) or trace_obj.name or "trace"),
-        start_time=_to_ns(trace_start),
-        context=root_ctx,
-    )
-    try:
-        _set_trace_attrs(root_span, trace_obj)
-        root_span.set_attribute("langfuse.observation.type", "span")
-        # Reserve the root span's span_id so children under source-root
-        # observations (parent_observation_id is None) nest beneath it.
-        actual_root_span_id_hex = format(root_span.get_span_context().span_id, "016x")
-
-        for obs in observations:
-            new_span_hex = to_otel_span_id(obs.id)
-            obs_id_map[obs.id] = new_span_hex
-            parent_hex = (
-                obs_id_map.get(obs.parent_observation_id)
-                if obs.parent_observation_id
-                else actual_root_span_id_hex
-            )
-            child_ctx = _parent_ctx(new_trace_hex, parent_hex)
-            child = migration_tracer.start_span(
+    # Precompute every ID so equal timestamps or child-first API results cannot
+    # break parent links. A parent's span need not be exported before its child.
+    local_ids = {o.id: to_otel_span_id(o.id) for o in observations}
+    for obs in observations:
+        parent_hex = to_otel_span_id(obs.parent_observation_id) if obs.parent_observation_id else None
+        trace_token = _migration_trace_id.set(int(new_trace_hex, 16))
+        span_token = _migration_span_id.set(int(local_ids[obs.id], 16))
+        try:
+            span = migration_tracer.start_span(
                 name=obs.name or obs.type.lower(),
                 start_time=_to_ns(obs.start_time),
-                context=child_ctx,
+                context=_parent_ctx(new_trace_hex, parent_hex),
             )
-            try:
-                _set_observation_attrs(child, obs)
-            finally:
-                child.end(end_time=_to_ns(obs.end_time) or _to_ns(obs.start_time))
-    finally:
-        root_span.end(end_time=_to_ns(trace_end))
-
+        finally:
+            _migration_span_id.reset(span_token)
+            _migration_trace_id.reset(trace_token)
+        try:
+            _set_trace_attrs(span, obs)
+            _set_observation_attrs(span, obs)
+            if getattr(obs, "is_root_observation", False):
+                span.set_attribute("langfuse.internal.is_app_root", True)
+        finally:
+            span.end(end_time=_to_ns(obs.end_time) or _to_ns(obs.start_time))
+    trace_id_map[source_trace_id] = new_trace_hex
+    obs_id_map.update(local_ids)
     return len(observations)
-
 
 # --- Drive the migration ---
 cursor: Optional[str] = None
@@ -686,18 +809,23 @@ failures = 0
 progress_every = 10  # print a progress line every N traces
 t_start = time.time()
 while True:
-    # `is_root_observation` is the first-class parameter for logical roots, so the
-    # listing returns one row per trace without the advanced `filter` parameter.
+    # The structured filter works with the minimum supported SDK (4.8.1).
+    # Multiple app roots can belong to one trace, so deduplicate trace IDs below.
     listing = with_retries(lambda: src.api.observations.get_many(
         fields="core,basic,io,metadata,trace_context",
         limit=limit,
         cursor=cursor,
         from_start_time=FROM_TS,
         to_start_time=TO_TS,
-        is_root_observation=True,
+        filter=dumps([{
+            "type": "boolean", "column": "isRootObservation", "operator": "=", "value": True
+        }]),
     ))
     cursor = getattr(listing.meta, "cursor", None)
     for t in listing.data:
+        source_trace_id = getattr(t, "trace_id", None) or t.id
+        if source_trace_id in trace_id_map:
+            continue
         try:
             obs_count = migrate_one_trace(t)
             total += 1
@@ -721,6 +849,10 @@ while True:
         break
 
 otlp_provider.force_flush()
+assert not MigrationSpanExporter.failed_span_ids, (
+    f"OTLP export failed for {len(MigrationSpanExporter.failed_span_ids)} observation(s). "
+    "Resolve the ingestion error and rerun the observations cell before copying scores or datasets."
+)
 elapsed = time.time() - t_start
 print(
     f"\nObservations — migrated: {total} traces / {total_obs} observations, "
@@ -731,9 +863,9 @@ print(f"  obs_id_map entries:   {len(obs_id_map)}")
 
 ```
 
-## 5. Scores
+## 6. Scores
 
-Scores are fetched from the source via the v3 Scores API (`api.scores_v3.get_many_v3`) and re-created on the destination through the `POST /api/public/scores` endpoint (`api.legacy.score_v1.create`). Original `id` is preserved so re-runs are idempotent. `config_id` is remapped through `config_id_map` from Section 1; trace / observation references are remapped through `trace_id_map` / `obs_id_map` from Section 4.
+Scores are fetched from the source via the v3 Scores API (`api.scores_v3.get_many_v3`) and re-created on the destination through the `POST /api/public/scores` endpoint (`api.legacy.score_v1.create`). Original `id` is preserved so re-runs are idempotent. `config_id` is remapped through `config_id_map` from Section 1; trace / observation references are remapped through `trace_id_map` / `obs_id_map` from Section 5.
 
 Compared to the older v2 endpoint, the v3 API differs in three ways that matter here:
 
@@ -744,7 +876,7 @@ Compared to the older v2 endpoint, the v3 API differs in three ways that matter 
 A few behavioral notes:
 
 - v2 silently dropped scores whose trace no longer exists, while v3 returns them. If slightly more scores migrate than the v2 flow used to transfer, these previously hidden scores are now carried over — an improvement, not a loss.
-- Scores attached to dataset runs (`kind="experiment"`) are skipped by this section: the destination assigns new run ids when Section 6 re-creates the runs, so the source run id would be a dangling reference. Migrate these scores after the destination runs exist, matching runs by name.
+- Scores attached to dataset runs (`kind="experiment"`) are skipped by this section: historical experiment runs are not copied, so the source run ID would be a dangling reference. Re-run experiments on the destination to produce new results.
 - Score creation is asynchronous: a success response means the score was accepted for ingestion, not that it is already durably written. Verify the destination project once ingestion has caught up.
 - The create endpoint does not accept a timestamp, so migrated scores carry the migration time as their timestamp; source score timestamps cannot be preserved through the public API.
 
@@ -798,7 +930,7 @@ while True:
         elif kind == "experiment":  # v3 name for dataset runs
             # The subject id is the source project's run id; the destination
             # assigns new run ids, so this reference cannot be carried over.
-            print(f"  skipping score {s.id} ({s.name}): dataset-run scores must be migrated after the destination runs exist")
+            print(f"  skipping score {s.id} ({s.name}): historical experiment runs are not copied; rerun the experiment on the destination")
             skipped += 1
             continue
         else:
@@ -851,11 +983,11 @@ while True:
 print(f"Scores — migrated: {migrated}, skipped: {skipped}, failed: {failed}")
 ```
 
-## 6. Datasets and items
+## 7. Datasets and items
 
-We migrate datasets themselves via the native **`create_dataset`** helper and items via **`create_dataset_item`** (preserving source item IDs).
+We migrate datasets themselves via the **`api.datasets.create`** endpoint (including input and expected-output schemas) and items via **`create_dataset_item`** (preserving source item IDs).
 
-Historical dataset run items are **not** copied. The legacy `POST /api/public/dataset-run-items` endpoint is deprecated, and both of its replacements create *new* experiment runs rather than backfilling past ones. The cell below lists the runs it finds on the source so that nothing disappears silently. To reproduce a run on the destination, either re-run the experiment with the [Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk), or emit the item traces yourself with [experiment attributes over OTLP](https://langfuse.com/integrations/native/opentelemetry/experiments).
+Historical dataset run items are **not** copied. The legacy `POST /api/public/dataset-run-items` endpoint is deprecated, and both of its replacements create *new* experiment runs rather than backfilling past ones. To reproduce a run on the destination, either re-run the experiment with the [Experiments SDK](https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk), or emit the item traces yourself with [experiment attributes over OTLP](https://langfuse.com/integrations/native/opentelemetry/experiments).
 
 
 
@@ -873,7 +1005,6 @@ def _enc(name: str) -> str:
 
 ds_migrated = ds_skipped = ds_failed = 0
 items_migrated = items_failed = 0
-runs_found = 0
 
 t_start = time.time()
 ds_seen = 0  # count of source datasets processed (new + existing)
@@ -906,8 +1037,9 @@ while True:
                 ds_failed += 1
                 continue
             try:
-                with_retries(lambda: dst.create_dataset(
-                    name=ds.name, description=ds.description, metadata=ds.metadata
+                with_retries(lambda: dst.api.datasets.create(
+                    name=ds.name, description=ds.description, metadata=ds.metadata,
+                    input_schema=ds.input_schema, expected_output_schema=ds.expected_output_schema,
                 ))
                 ds_migrated += 1
                 print(f"    created dataset in destination")
@@ -916,7 +1048,7 @@ while True:
                 ds_failed += 1
                 continue
 
-        # Items (preserve source IDs so run items link correctly)
+        # Items (preserve source IDs for repeatable migrations)
         ds_items_before = items_migrated
         ds_items_failed_before = items_failed
         page_item = 1
@@ -949,26 +1081,6 @@ while True:
         ds_items_fail = items_failed - ds_items_failed_before
         print(f"    items: {ds_items} migrated, {ds_items_fail} failed")
 
-        # Historical run items are not copied: POST /dataset-run-items is
-        # deprecated, and its replacements create new experiment runs instead of
-        # backfilling old ones. List the source runs so nothing is lost silently.
-        run_count = 0
-        page_run = 1
-        while True:
-            rresp = with_retries(lambda: src.api.datasets.get_runs(
-                dataset_name=_enc(ds.name), page=page_run, limit=100
-            ))
-            if not rresp.data:
-                break
-            for run_meta in rresp.data:
-                run_count += 1
-                runs_found += 1
-                print(f"      run '{run_meta.name}' not copied — re-run it on the destination")
-            if page_run >= getattr(rresp.meta, "total_pages", page_run):
-                break
-            page_run += 1
-        print(f"    runs: {run_count} run(s) found on source; not copied")
-
     if page_ds >= getattr(dsresp.meta, "total_pages", page_ds):
         break
     page_ds += 1
@@ -977,8 +1089,9 @@ elapsed = time.time() - t_start
 print(
     f"\nDatasets — new: {ds_migrated}, existing: {ds_skipped}, failed: {ds_failed}  |  "
     f"items: {items_migrated} migrated / {items_failed} failed  |  "
-    f"runs found on source (not copied): {runs_found}  |  "
     f"elapsed: {elapsed:.1f}s"
 )
+
+print("Historical experiment runs are not copied; rerun experiments on the destination.")
 
 ```
