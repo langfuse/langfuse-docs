@@ -18,14 +18,14 @@ As an admin, you can manage which models are allowed to be used. This page expla
 
 ## Supported providers [#supported-providers]
 
-| Provider                                           | API formats                                                                                 |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [OpenAI](https://openai.com)                       | OpenAI Responses, OpenAI Chat Completions, OpenAI Decisions                                 |
-| [Anthropic](https://www.anthropic.com)             | Anthropic Messages                                                                          |
-| [Amazon Bedrock](https://aws.amazon.com/bedrock/)  | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models |
-| [OpenRouter](https://openrouter.ai)                | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages                               |
-| [Vercel AI Gateway](https://vercel.com/ai-gateway) | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Decisions             |
-| [xAI](https://x.ai)                                | OpenAI Responses, OpenAI Chat Completions                                                   |
+| Provider                                           | API formats                                                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [OpenAI](https://openai.com)                       | OpenAI Responses, OpenAI Chat Completions, OpenAI Decisions, OpenAI Embeddings                     |
+| [Anthropic](https://www.anthropic.com)             | Anthropic Messages                                                                                 |
+| [Amazon Bedrock](https://aws.amazon.com/bedrock/)  | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models        |
+| [OpenRouter](https://openrouter.ai)                | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Embeddings                   |
+| [Vercel AI Gateway](https://vercel.com/ai-gateway) | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Decisions, OpenAI Embeddings |
+| [xAI](https://x.ai)                                | OpenAI Responses, OpenAI Chat Completions                                                          |
 
 ## Custom base URL [#custom-base-url]
 
@@ -52,7 +52,7 @@ The same connections can send extra HTTP headers with every request, for example
 
 You can find a list of every model gateway keys can call under **AI Gateway → Providers & Models → Models**. Everyone with gateway access can open this page, including Viewers and the AI Gateway role.
 
-The list comes from each provider connection: the gateway pings the provider's own `/models` endpoint to check which models the connection can access. Models that only serve OpenAI Decisions show a **Decisions** badge.
+The list comes from each provider connection: the gateway pings the provider's own `/models` endpoint to check which models the connection can access. Models that only serve OpenAI Decisions or OpenAI Embeddings show a **Decisions** or **Embeddings** badge.
 
 <Callout type="warning">
   If a provider rejects a connection's API key during model discovery, for example
@@ -75,7 +75,7 @@ A connection with every model enabled also allows models that the provider publi
 
 Model IDs have the form `<connection>:<model>`, for example `openai-prod:<model>` or `openrouter:openai/<model>`. The prefix is the name of the provider connection that serves the request, and `<model>` uses that provider's own naming. This form works for every provider and is the only way to choose between connections that offer the same model. Renaming a connection changes its prefix, so update clients that use the old IDs.
 
-Coding agents that send plain model names also work for OpenAI (`gpt-`, `codex-`, `ft:`) and Anthropic (`claude-`) models. The gateway then uses the oldest OpenAI or Anthropic connection that supports the request's API format and has the model enabled. Connections to other providers, such as OpenRouter or Amazon Bedrock, are never used for plain model names.
+Coding agents that send plain model names also work for OpenAI (`gpt-`, `codex-`, `ft:`, and `text-embedding-` on `/openai/v1/embeddings`) and Anthropic (`claude-`) models. The gateway then uses the oldest OpenAI or Anthropic connection that supports the request's API format and has the model enabled. Connections to other providers, such as OpenRouter or Amazon Bedrock, are never used for plain model names.
 
 <Callout type="warning">
   Each request goes to one connection. If that connection fails, the gateway
