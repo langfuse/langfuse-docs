@@ -214,9 +214,13 @@ function GatewayNode({ className }: { className?: string }) {
   return (
     <NextLink href={AI_GATEWAY_HREF} className={cn("flex", className)}>
       <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
-        <div className="flex items-center justify-between gap-2">
-          <Wordmark width={105} height={28} className="h-7 w-auto" />
-          <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <Wordmark
+            width={105}
+            height={28}
+            className="h-auto max-h-7 w-auto min-w-0 max-w-full"
+          />
+          <span className="shrink-0 bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
             new
           </span>
         </div>
