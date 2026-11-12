@@ -104,13 +104,7 @@ function Section({
   className?: string;
 }) {
   return (
-    <section
-      id={id}
-      className={cn(
-        "scroll-mt-24 mx-auto w-full max-w-[1080px] px-4 sm:px-8",
-        className,
-      )}
-    >
+    <section id={id} className={cn("w-full px-4 md:px-8", className)}>
       {children}
     </section>
   );
@@ -140,7 +134,12 @@ function DiscountCode() {
         <p className="font-mono text-[12px] text-text-tertiary">
           Langfuse Cloud
         </p>
-        <Heading as="h2" size="large" className="text-left">
+        <Heading
+          as="h2"
+          id="discount"
+          size="large"
+          className="scroll-mt-24 text-left"
+        >
           90% off Pro and Teams for 12 months
         </Heading>
         <p className="max-w-[62ch] text-[15px] leading-[150%] text-text-secondary">
@@ -250,13 +249,18 @@ export function ReinventLanding() {
         </div>
       </Section>
 
-      <Section id="discount">
+      <Section>
         <DiscountCode />
       </Section>
 
-      <Section id="schedule" className="flex flex-col gap-6">
+      <Section className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <Heading as="h2" size="large" className="text-left">
+          <Heading
+            as="h2"
+            id="schedule"
+            size="large"
+            className="scroll-mt-24 text-left"
+          >
             Where to find us
           </Heading>
           <p className="max-w-[62ch] text-[15px] leading-[150%] text-text-secondary">
@@ -310,9 +314,14 @@ export function ReinventLanding() {
         </CornerBox>
       </Section>
 
-      <Section id="integrations" className="flex flex-col gap-6">
+      <Section className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <Heading as="h2" size="large" className="text-left">
+          <Heading
+            as="h2"
+            id="integrations"
+            size="large"
+            className="scroll-mt-24 text-left"
+          >
             Langfuse on AWS
           </Heading>
           <p className="max-w-[62ch] text-[15px] leading-[150%] text-text-secondary">
