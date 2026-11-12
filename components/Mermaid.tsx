@@ -44,6 +44,8 @@ function getMermaidConfig(
   return {
     startOnLoad: false,
     securityLevel: "strict",
+    layout: "dagre",
+    look: "classic",
     theme: "base",
     htmlLabels: true,
     fontFamily: "var(--font-sans)",

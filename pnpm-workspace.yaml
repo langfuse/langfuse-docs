@@ -30,6 +30,11 @@ overrides:
   "mcp-handler@1.1.0>@modelcontextprotocol/sdk": "1.32.2"
   "@types/react": "^19.2.18"
   "@types/react-dom": "^19.2.7"
+  # These Markdown math renderers declare the vulnerable KaTeX 0.16 line.
+  "rehype-katex@7.0.1>katex": "0.18.2"
+  "micromark-extension-math@3>katex": "0.18.2"
+  # Satori pins fflate 0.7.3, which lacks the decompression security fix.
+  "satori@0.33.5>fflate": "0.7.5"
 
 allowBuilds:
   # Funding message only; no build output.
