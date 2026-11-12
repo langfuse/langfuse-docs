@@ -130,16 +130,18 @@ const moreIntegrationGroups: {
       { label: "Kiro CLI", href: "/integrations/developer-tools/kiro-cli" },
     ],
   },
-];
-
-const dataLinks: { label: string; href: string }[] = [
   {
-    label: "Export to Amazon S3",
-    href: "/docs/api-and-data-platform/features/export-to-blob-storage",
-  },
-  {
-    label: "External S3 media",
-    href: "/docs/observability/features/multi-modality#external-s3-media",
+    eyebrow: "Data",
+    items: [
+      {
+        label: "Export to Amazon S3",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage",
+      },
+      {
+        label: "External S3 media",
+        href: "/docs/observability/features/multi-modality#external-s3-media",
+      },
+    ],
   },
 ];
 
@@ -179,6 +181,23 @@ function Ctas() {
         Get 90% off Langfuse Cloud ↗
       </Button>
     </div>
+  );
+}
+
+function GuideLinks({ items }: { items: { label: string; href: string }[] }) {
+  return (
+    <ul className="m-0 flex list-none flex-col items-start gap-2.5 p-0">
+      {items.map((item) => (
+        <li key={item.href}>
+          <Link
+            href={item.href}
+            className="border-b border-text-primary pb-px font-mono text-[12px] leading-snug text-text-primary"
+          >
+            {item.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -404,25 +423,13 @@ function Integrations() {
 
       <div className="rei-chip-card mt-2 flex flex-col gap-5 p-6">
         <div className="rei-eyebrow">More AWS guides</div>
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-5 md:grid-cols-4">
           {moreIntegrationGroups.map((group) => (
-            <div key={group.eyebrow} className="flex flex-col gap-2.5">
+            <div key={group.eyebrow} className="flex min-w-0 flex-col gap-2.5">
               <div className="rei-eyebrow">{group.eyebrow}</div>
-              <LinkList items={group.items} />
+              <GuideLinks items={group.items} />
             </div>
           ))}
-        </div>
-        <div className="flex flex-col gap-2.5 border-t border-line-structure pt-4 sm:flex-row sm:items-baseline sm:gap-6">
-          <div className="rei-eyebrow shrink-0">Data</div>
-          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 sm:flex-row sm:gap-5">
-            {dataLinks.map((item) => (
-              <li key={item.href}>
-                <Link className="rei-link text-[13.5px]" href={item.href}>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
 
