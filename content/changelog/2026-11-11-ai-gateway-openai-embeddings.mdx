@@ -6,7 +6,35 @@ author: Tobias Wochinger
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, KeyRound } from "lucide-react";
 
 <ChangelogHeader />
 
-You can now send [OpenAI Embeddings](https://developers.openai.com/api/reference/resources/embeddings/methods/create) requests through the [Langfuse AI Gateway](/docs/gateway/overview) at `POST /openai/v1/embeddings`, using OpenAI, OpenRouter, or Vercel AI Gateway connections. See [supported providers](/docs/gateway/features/models#supported-providers) in [Models and providers](/docs/gateway/features/models) and the [REST API endpoints](/docs/gateway/features/rest-api#routes), then [send your first request](/docs/gateway/get-started/first-request).
+You can now send [OpenAI Embeddings](https://developers.openai.com/api/reference/resources/embeddings/methods/create) requests through the [Langfuse AI Gateway](/docs/gateway/overview) at `POST /openai/v1/embeddings`, using OpenAI, OpenRouter, or Vercel AI Gateway connections.
+
+<Cards num={2}>
+  <Card
+    title="AI Gateway overview"
+    href="/docs/gateway/overview"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Send your first request"
+    href="/docs/gateway/get-started/first-request"
+    icon={<KeyRound />}
+    arrow
+  />
+  <Card
+    title="Models and providers"
+    href="/docs/gateway/features/models#supported-providers"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="REST API endpoints"
+    href="/docs/gateway/features/rest-api#routes"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
