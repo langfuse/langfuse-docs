@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { createMcpHandler } from "@vercel/mcp-adapter";
+import { createMcpHandler } from "mcp-handler";
 import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";

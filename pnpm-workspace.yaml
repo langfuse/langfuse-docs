@@ -11,8 +11,6 @@ minimumReleaseAgeExclude:
   - "hls.js@1.7.2"
   - "react-aria@3.52.0"
   - "react-stately@3.50.0"
-  - "undici@6.28.1"
-  - "undici@7.29.1"
   # First-party Langfuse JS SDK v6 release.
   - "@langfuse/browser@6.0.0"
   - "@langfuse/client@6.0.0"
@@ -28,6 +26,8 @@ minimumReleaseAgeExclude:
 enablePrePostScripts: true
 
 overrides:
+  # The adapter's exact peer requires an SDK version with security advisories.
+  "mcp-handler@1.1.0>@modelcontextprotocol/sdk": "1.32.2"
   "@types/react": "^19.2.18"
   "@types/react-dom": "^19.2.7"
 
