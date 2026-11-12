@@ -29,39 +29,53 @@ Each quarter, we host a Langfuse town hall to demo new features and discuss what
 
 ### New capabilities
 
-- **[AI Gateway](/docs/gateway/overview) (public beta)**
-  - The bring-your-own-key gateway for OpenAI and Anthropic is in public beta on Langfuse Cloud and self-hosted deployments, with gateway keys, access controls, and built-in tracing and cost tracking.
-  - Take it out of beta based on your feedback.
+- **General availability of the [AI Gateway](/docs/gateway/overview)**
+  - Broaden model and provider support.
+  - Add fallbacks to keep requests flowing when a model or provider is unavailable.
+  - Add spend caps to control costs per gateway key.
+  - Provision users via SCIM.
+  - Add guardrails to enforce policies on requests and responses.
 - **Proactive issue detection**
   - Develop Topics to identify recurring user intents, behaviors, and failure patterns across traces at scale.
   - Surface clusters, outliers, and representative examples so teams can find issues without reviewing every trace.
 - **Agent transcripts**
   - Extend a shared transcript representation across traces and sessions to make long-running agent interactions easier to read.
   - Use transcripts as a foundation for Topics and other improvement workflows.
-- **In-app agent improvements**
+- **[Halo](/docs/api-and-data-platform/features/halo) improvements**
   - Help users complete workflows such as LLM-as-a-judge calibration with more capable sandbox tools.
-- **Multi-span, session, and trajectory evaluations**
-  - Evaluate complete agent interactions using the observations-first data model.
-- **Skill management**
-  - Manage and version agent skills, then trace how agents use them.
+  - Introduce Halo loops to automate recurring workflows.
+  - Introduce Halo reports and apps to build custom views on top of your Langfuse data.
+- **MCP server improvements**
+  - Add OAuth authentication to the MCP server so it can respect user-level permissions.
+  - Improve reliability and expose more opinionated tools to help agents perform better.
+- **Agent view**
+  - Provide one overview page for each agent observed with Langfuse.
+- **Evaluation**
+  - Evaluate complete agent interactions with multi-span, session, and trajectory evaluations, using the observations-first data model.
+  - Add native support for the Harbor framework to run evaluations and experiments in sandboxed environments.
+  - Add semantic value ranges to evaluation scores so results are easier to interpret.
 - **Security and authentication improvements**
   - Add granular permissions to API keys, including gateway-specific access.
   - Support user-owned and service-account API keys.
   - Add organization-level API keys that can write across multiple projects.
-  - Add OAuth authentication to the MCP server so it can respect user-level permissions.
-- **Organization-level dashboards**
-  - Provide an aggregated view of cost, quality, and other metrics across an organization's projects.
+  - Support custom user roles and user groups.
+  - Restrict an organization to your email domain and automatically invite new teammates.
+  - Add read-level audit logs that record who viewed which data, not only who changed it.
 - **Usage visibility and cost controls**
   - Break down Langfuse usage by project, environment, and span name for organization admins.
-  - Control ingestion with filters, sampling, and usage limits.
-- **Custom trace viewers**
-  - Build and adapt trace viewers with coding agents.
+  - Control ingestion with server-side filters, sampling, usage limits, and data masking (including PII) before data is stored.
+- **Data platform**
+  - Expose the query builder via API and MCP to run flexible metrics queries against your Langfuse data, programmatically or from coding agents.
+  - Speed up metadata analytics with performant group-bys and aggregations.
+- **UI/UX**
+  - Continued improvements to the new unified UI
+  - UI accessibility
 
 ### Self-hosting improvements
 
 - Batch more S3 ingestion events to reduce cost.
 - Move ingestion work to Rust in stages to reduce latency and cost.
-- Extend [Hardening for Government](/self-hosting/configuration/hardening#hardening-for-government) with documentation for a complete air-gapped deployment stack.
+- Make sure all new features are available self-hosted and across cloud providers.
 
 ## ✅ Recently released [#releases]
 
