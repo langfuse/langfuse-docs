@@ -115,15 +115,15 @@ function Wordmark({
   return (
     <>
       <Image
-        src="/brand-assets/wordmark/Langfuse/light/langfuse-wordart.svg"
-        alt="Langfuse"
+        src="/brand-assets/wordmark/light/langfuse-by-clickhouse.svg"
+        alt="Langfuse by ClickHouse"
         width={width}
         height={height}
         className={cn("dark:hidden", className)}
       />
       <Image
-        src="/brand-assets/wordmark/Langfuse/dark/langfuse-wordart-white.svg"
-        alt="Langfuse"
+        src="/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.svg"
+        alt="Langfuse by ClickHouse"
         width={width}
         height={height}
         className={cn("hidden dark:block", className)}
@@ -215,7 +215,7 @@ function GatewayNode({ className }: { className?: string }) {
     <NextLink href={AI_GATEWAY_HREF} className={cn("flex", className)}>
       <CornerBox hoverStripes className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2">
-          <Wordmark width={69} height={16} className="h-4 w-auto" />
+          <Wordmark width={105} height={28} className="h-7 w-auto" />
           <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
             new
           </span>
@@ -256,7 +256,7 @@ function LangfuseNode({ className }: { className?: string }) {
       )}
     >
       <div className="flex flex-1 flex-col gap-3.5 p-4">
-        <Wordmark width={86} height={20} className="h-5 w-auto self-start" />
+        <Wordmark width={120} height={32} className="h-8 w-auto self-start" />
         {FEATURE_GROUPS.map((group) => (
           <LangfuseSection key={group.title} title={group.title}>
             <ul className="flex flex-wrap gap-1.5">
