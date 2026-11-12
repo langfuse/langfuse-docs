@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { ReinventLanding } from "@/components/reinvent/ReinventLanding";
 
-const title = "Meet Langfuse at AWS re:Invent 2026";
+const title = "Start building today";
 const description =
-  "Langfuse at AWS re:Invent in Las Vegas, Nov 30 to Dec 4, 2026. Get a Langfuse Cloud discount code, find the booth, breakout, and workshop, and start with AgentCore, Strands, and Bedrock.";
+  "Sign up and get 90% off the Core Plan base fee for your first 12 months. 100k monthly events included. Volume pricing applies. AWS re:Invent, Las Vegas, Nov 30 to Dec 4, 2026.";
 
 const ogImageUrl = `https://langfuse.com/api/og?${new URLSearchParams({
   title,

@@ -1,16 +1,10 @@
-# Meet Langfuse at AWS re:Invent
+# Start building today!
 
-Las Vegas, Nov 30 to Dec 4, 2026. One page for every Langfuse campaign at the show: the Cloud discount, where to find the team, and the AWS integrations to try before you get to Las Vegas.
+AWS re:Invent 2026, Las Vegas, Nov 30 to Dec 4.
 
-## Langfuse Cloud discount [#discount]
+Sign up and get 90% off the Core Plan base fee for your first 12 months. 100k monthly events included. Volume pricing applies.
 
-90% off the Pro base fee and the Teams add-on for 12 months. Usage stays on the [standard rate](/pricing).
-
-Code: `REINVENT2026`
-
-1. Copy the code.
-2. [Create a Langfuse Cloud account](https://cloud.langfuse.com/auth/sign-up?utm_source=reinvent&utm_medium=landing&utm_campaign=aws-reinvent-2026), or open the one you already have.
-3. An organization owner pastes it under Organization Settings, then Billing, when upgrading to Pro or adding Teams.
+The discount code is on this page after you submit the form with your work email, first name, and company. You can also ask to meet the team at the show. Then [sign up for Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up). An organization owner pastes the code under Organization Settings, then Billing.
 
 ## Where to find us [#schedule]
 

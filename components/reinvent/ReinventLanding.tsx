@@ -1,21 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { CornerBox } from "@/components/ui/corner-box";
 import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-/**
- * Billing coupon for the re:Invent Cloud offer: 90% off the Pro base fee
- * and the Teams add-on for 12 months. This string has to match the coupon
- * in Langfuse Cloud billing before the page is used on print or slides.
- */
-export const REINVENT_PROMO_CODE = "REINVENT2026";
-
-const SIGN_UP_HREF =
-  "https://cloud.langfuse.com/auth/sign-up?utm_source=reinvent&utm_medium=landing&utm_campaign=aws-reinvent-2026";
+import { ReinventOfferForm } from "@/components/reinvent/ReinventOfferForm";
 
 const activities = [
   {
@@ -110,151 +101,25 @@ function Section({
   );
 }
 
-function DiscountCode() {
-  const [copied, setCopied] = useState(false);
-
-  async function copyCode() {
-    try {
-      await navigator.clipboard.writeText(REINVENT_PROMO_CODE);
-    } catch {
-      const input = document.createElement("textarea");
-      input.value = REINVENT_PROMO_CODE;
-      input.setAttribute("readonly", "");
-      input.style.position = "fixed";
-      input.style.left = "-9999px";
-      document.body.appendChild(input);
-      input.select();
-      const didCopy = document.execCommand("copy");
-      input.remove();
-      if (!didCopy) return;
-    }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 2000);
-  }
-
-  return (
-    <CornerBox className="flex flex-col gap-6 p-5 sm:p-8">
-      <div className="flex flex-col gap-3">
-        <p className="font-mono text-[12px] text-text-tertiary">
-          Langfuse Cloud
-        </p>
-        <Heading
-          as="h2"
-          id="discount"
-          size="large"
-          className="scroll-mt-24 text-left"
-        >
-          90% off Pro and Teams for 12 months
-        </Heading>
-        <p className="max-w-[62ch] text-[15px] leading-[150%] text-text-secondary">
-          The discount covers the Pro base fee and the Teams add-on. Usage stays
-          on the{" "}
-          <Link href="/pricing" className="text-text-primary underline">
-            standard rate
-          </Link>
-          . Copy the code, create a Cloud account, and paste it when you
-          upgrade.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex min-h-12 flex-1 items-center border border-line-structure bg-surface-bg px-4">
-          <code className="font-mono text-[20px] tracking-[0.04em] text-text-primary">
-            {REINVENT_PROMO_CODE}
-          </code>
-        </div>
-        <Button
-          type="button"
-          variant="secondary"
-          size="default"
-          wrapperClassName="w-full sm:w-fit"
-          onClick={copyCode}
-          aria-describedby="reinvent-code-status"
-        >
-          {copied ? "Copied" : "Copy code"}
-        </Button>
-      </div>
-      <p id="reinvent-code-status" className="sr-only" aria-live="polite">
-        {copied ? "Discount code copied." : ""}
-      </p>
-
-      <ol className="grid gap-3 sm:grid-cols-3">
-        {[
-          "Copy the code on this page.",
-          "Create a Langfuse Cloud account, or open the one you already have.",
-          "An organization owner pastes it under Organization Settings, then Billing, when upgrading to Pro or adding Teams.",
-        ].map((step, index) => (
-          <li
-            key={step}
-            className="border border-line-structure p-4 text-[14px] leading-[150%] text-text-secondary"
-          >
-            <span className="mb-2 block font-mono text-[12px] text-text-tertiary">
-              0{index + 1}
-            </span>
-            {step}
-          </li>
-        ))}
-      </ol>
-
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          href={SIGN_UP_HREF}
-          target="_blank"
-          rel="noopener noreferrer"
-          size="default"
-          wrapperClassName="w-full sm:w-fit"
-        >
-          Sign up for Langfuse Cloud
-        </Button>
-        <Button
-          href="/pricing"
-          variant="secondary"
-          size="default"
-          wrapperClassName="w-full sm:w-fit"
-        >
-          See Cloud pricing
-        </Button>
-      </div>
-    </CornerBox>
-  );
-}
-
 export function ReinventLanding() {
   return (
-    <div className="flex flex-col gap-16 pb-20 pt-8 sm:gap-20 sm:pt-12">
+    <div className="flex flex-col gap-16 pb-20 pt-6 sm:gap-20 sm:pt-10">
       <Section>
-        <p className="font-mono text-[12px] text-text-tertiary">
-          Las Vegas, Nov 30 to Dec 4, 2026
-        </p>
-        <Heading as="h1" size="big" className="mt-4 max-w-[16ch] text-left">
-          Meet Langfuse at AWS re:Invent
-        </Heading>
-        <p className="mt-5 max-w-[58ch] text-[17px] leading-[150%] text-text-secondary">
-          One page for every Langfuse campaign at the show: the Cloud discount,
-          where to find the team, and the AWS integrations to try before you get
-          to Las Vegas.
-        </p>
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button
-            href="#discount"
-            size="default"
-            wrapperClassName="w-full sm:w-fit"
-          >
-            Get the discount code
-          </Button>
-          <Button
-            href="#schedule"
-            variant="secondary"
-            size="default"
-            wrapperClassName="w-full sm:w-fit"
-          >
-            See the schedule
-          </Button>
+        <div className="grid items-start gap-8 lg:grid-cols-2">
+          <div>
+            <p className="font-mono text-[12px] text-text-tertiary">
+              AWS re:Invent 2026, Las Vegas, Nov 30 to Dec 4
+            </p>
+            <Heading as="h1" size="big" className="mt-4 max-w-[12ch] text-left">
+              Start building today!
+            </Heading>
+            <p className="mt-5 max-w-[42ch] text-[17px] leading-[150%] text-text-secondary">
+              Sign up and get 90% off the Core Plan base fee for your first 12
+              months. 100k monthly events included. Volume pricing applies.
+            </p>
+          </div>
+          <ReinventOfferForm />
         </div>
-      </Section>
-
-      <Section>
-        <DiscountCode />
       </Section>
 
       <Section className="flex flex-col gap-6">
