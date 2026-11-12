@@ -23,6 +23,15 @@ export const metadata: Metadata = {
     url: "https://langfuse.com/reinvent",
     images: [{ url: ogImageUrl }],
   },
+  // Next.js replaces the twitter object from the root layout, so set the
+  // campaign image here. Otherwise X keeps the generic site image.
+  twitter: {
+    card: "summary_large_image",
+    site: "langfuse.com",
+    title,
+    description,
+    images: [{ url: ogImageUrl }],
+  },
 };
 
 export default function ReinventPage() {
