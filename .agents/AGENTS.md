@@ -131,6 +131,10 @@ This repo and the site are public. Never put an internal ticket id (any Linear t
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
+- Give prominent, current behavior an evergreen home. Blog posts and changelog entries are tied to a date, so a fact most users of a feature need (how it works, a default, a limit, a pricing rule) must also live on a docs page. Integration pages and FAQ entries count as evergreen homes too. Scope:
+  - Migration guidance for an older Langfuse or SDK version stays on its migration guide or FAQ. A current docs page gets at most a one-line link to it, not the guidance itself.
+  - A niche caveat (one SDK, one protocol, one edge case) may live only on the integration page or FAQ where people run into it.
+  - A changelog entry whose main claim has a docs home sets frontmatter `canonical` to that page.
 
 ### Changelog entries
 
@@ -161,6 +165,7 @@ Please check the following:
   - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
   - `<FaqPreview tags={[...]} />` from `components/faq/FaqPreview.tsx`: the list of links to that area's FAQ articles. Keep this component. Do not replace it with a hand-written link list or inline Q&A.
   - `<GhDiscussionsPreview labels={[...]} />` from `components/gh-discussions/GhDiscussionsPreview.tsx`: the GitHub Discussions component already on these pages. Keep this component. Do not replace it with a prose link to GitHub Issues.
+- Flag a blog post or changelog entry that states a prominent, current behavior (how a feature works, a default, a limit, a pricing rule) that no docs, integration, or FAQ page states, and a changelog whose main claim has a docs home but no frontmatter `canonical`. Do not flag migration guidance for an older version that lives only on its migration guide or FAQ, a niche caveat that lives only on the integration page or FAQ where people hit it, or historical context ("starting today", "previously") that only makes sense in the post.
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
 - Avoid specific model names in documentation; they go stale quickly. Prefer generic phrasing such as "your model" or the provider family, and flag new or edited docs that pin a versioned model name unless the page is specifically about that model.
 - In documentation tables, every column must add enough value on its own. Prefer fewer columns: merge or remove any column that does not help the reader, and flag tables that would stay clear with fewer columns.
