@@ -55,7 +55,6 @@ Models:
 
 - [Amazon Bedrock tracing](/integrations/model-providers/amazon-bedrock)
 - [Bedrock for Playground and LLM-as-a-judge](/docs/administration/llm-connection)
-- [Amazon SageMaker via OpenTelemetry](/integrations/native/opentelemetry)
 
 Coding agents:
 

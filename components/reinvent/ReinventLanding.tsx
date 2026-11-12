@@ -117,10 +117,6 @@ const moreIntegrationGroups: {
         label: "Bedrock for Playground and LLM-as-a-judge",
         href: "/docs/administration/llm-connection",
       },
-      {
-        label: "Amazon SageMaker via OpenTelemetry",
-        href: "/integrations/native/opentelemetry",
-      },
     ],
   },
   {
