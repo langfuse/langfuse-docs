@@ -148,6 +148,7 @@ const IGNORED_SECTION_PATHS = new Set([
   "japan",
   "kr",
   "launch-week-5",
+  "reinvent",
   "customers",
   "community",
   "cookie-policy",
