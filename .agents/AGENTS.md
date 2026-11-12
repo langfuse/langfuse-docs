@@ -155,7 +155,7 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 
 - Name what you refer to. Write "the **Models**, **Gateway keys**, and **Analytics** tabs", not "the other pages", and link to the section that explains a term, not to the top of its page.
 - A heading must tell the reader what the section contains. Prefer short names for the concept, such as "Request flow", "Credential types", or "Model and key routing", over vague phrases such as "How a request reaches a model".
-- Keep pages evergreen. Don't build an intro or a heading around today's supported providers, endpoints, versions, or limits; keep those in one table, limitations page, or roadmap that is updated when they change.
+- Keep pages evergreen. Don't build an intro or a heading around today's supported providers, endpoints, versions, or limits. Often the docs don't need to list them at all, because readers discover them while using the product. When a list is needed, keep it in one table, limitations page, or roadmap that is updated when they change.
 - Examples that hard-code a regional Langfuse Cloud URL say which region they use and link to the URLs of the other regions.
 - When you rename a page, change its frontmatter `title` (the sidebar label) and its H1 together. Sidebar labels must fit on one line, about three or four words.
 
