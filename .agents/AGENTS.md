@@ -162,7 +162,7 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 #### Formatting
 
 - Use `info` callouts for side notes, requirements, defaults, and pointers. Reserve `warning` for things that expose or lose data, cost money unexpectedly, or break a setup.
-- Use a table when several items share the same attributes, such as key types, ingestion modes, or per-key-type behavior. Keep cells to a few words and put explanations in the surrounding text. Turn a sentence that lists three or more parallel items into a bulleted list.
+- Use a table when several items share the same attributes, such as key types, ingestion modes, or per-key-type behavior. Cut or merge as many columns as you can, and keep only the ones that add real value. Keep cells to a few words and put explanations in the surrounding text. Turn a sentence that lists three or more parallel items into a bulleted list.
 - Link the key word or short phrase, not a whole sentence or bullet. Link text names its target, for example "trace user ID" or "Concepts". Put "See X" references in the sentence they support, not on a line of their own.
 - Use relative links to langfuse.com pages. Never link to preview deployments (`*.vercel.app`) or leave placeholder link targets.
 - When a page needs a screenshot or recording that doesn't exist yet, put `<TextHighlight className="italic">TODO: add a screenshot of …</TextHighlight>` (from `@/components/ui/text-highlight`) where it belongs, not a callout, and list it in the PR description. Resolve every TODO highlight before merge.
