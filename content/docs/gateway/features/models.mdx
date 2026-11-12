@@ -13,7 +13,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 As an admin, you can manage which models are allowed to be used. This page explains where the model list comes from, how admins choose models, and which model ID to send.
 
 <Frame fullWidth>
-  ![Providers & Models page on the Models tab with a searchable model list filtered to one provider connection, an Enabled switch per model, and Enable all and Disable all buttons](/images/docs/ai-gateway/models-manage.png)
+  ![Connections & Models page on the Models tab with a searchable model list filtered to one connection, an Enabled switch per model, and Enable all and Disable all buttons](/images/docs/ai-gateway/models-manage.png)
 </Frame>
 
 ## Supported providers [#supported-providers]
@@ -29,7 +29,7 @@ As an admin, you can manage which models are allowed to be used. This page expla
 
 ## Available models [#available-models]
 
-You can find a list of every model gateway keys can call under **AI Gateway → Providers & Models → Models**. Everyone with gateway access can open this page, including Viewers and the AI Gateway role.
+You can find a list of every model gateway keys can call under **AI Gateway → Connections & Models → Models**. Everyone with gateway access can open this page, including Viewers and the AI Gateway role.
 
 The list comes from each provider connection: the gateway pings the provider's own `/models` endpoint to check which models the connection can access. Models that only serve OpenAI Decisions or OpenAI Embeddings show a **Decisions** or **Embeddings** badge.
 
@@ -37,16 +37,16 @@ The list comes from each provider connection: the gateway pings the provider's o
   If a provider rejects a connection's API key during model discovery, for example
   because the key was rotated, the connection is marked as failing and the
   gateway stops routing to it. Update the key or select **Retry** in
-  **AI Gateway → Providers & Models → Providers** to restore it.
+  **AI Gateway → Connections & Models → Connections** to restore it.
 </Callout>
 
 ## Manage models [#manage-models]
 
 Gateway managers (Owners and Admins) can configure models per provider connection:
 
-1. Go to **AI Gateway → Providers & Models → Models** and select a provider connection.
+1. Go to **AI Gateway → Connections & Models → Models** and select a connection.
 2. Turn models on or off with the **Enabled** switch.
-3. Select **Refresh provider models** to fetch the provider's current list.
+3. Select **Refresh models for this connection** to fetch the connection's current model list from the provider.
 
 A connection with every model enabled also allows models that the provider publishes later. As soon as you turn one model off, the connection keeps an explicit list. Select **Enable all** to go back to allowing every model.
 
@@ -93,7 +93,7 @@ The same connections can send extra HTTP headers with every request, for example
 <Details id="new-models">
 <Summary>Why can't I call a new model?</Summary>
 
-A model the provider just released is available right away only on connections that have every model enabled. If an admin turned off any model on a connection, the connection keeps an explicit list, and new models stay off until an admin enables them under **AI Gateway → Providers & Models → Models**. Select **Refresh provider models** there if the model doesn't appear in the list yet.
+A model the provider just released is available right away only on connections that have every model enabled. If an admin turned off any model on a connection, the connection keeps an explicit list, and new models stay off until an admin enables them under **AI Gateway → Connections & Models → Models**. Select **Refresh models for this connection** there if the model doesn't appear in the list yet.
 
 </Details>
 
