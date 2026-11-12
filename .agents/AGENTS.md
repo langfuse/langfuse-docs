@@ -117,12 +117,20 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines
 
+### No internal ticket ids
+
+This repo and the site are public. Never put an internal ticket id (any Linear team prefix, for example `LFE-1234`, `LFINT-1234`, `LFMKT-1234`) or a Linear URL in page content, commit messages, PR titles, or PR descriptions. This includes closing lines such as `Fixes LFMKT-1234` or `Closes LFE-1234`, even when a task, issue, or template hands you the id. Describe the change on its own terms instead. A ticket-prefixed branch name is the one place the identifier belongs.
+
+- Bad PR description: `Fixes LFMKT-2732. Adds IAM role docs.`
+- Good PR description: `Documents IAM role authentication for customer S3 storage.`
+
+### Style and content
+
 - Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
 - Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
-- Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 
 ### Changelog entries
 
@@ -143,6 +151,7 @@ Changelog entries live in `content/changelog/`.
 
 Please check the following:
 
+- Flag any internal ticket id (`LFE-`, `LFINT-`, `LFMKT-`, or any other Linear prefix) or Linear URL in page content, commit messages, the PR title, or the PR description, including `Fixes <ticket>` / `Closes <ticket>` lines. Only the branch name may carry it. See "No internal ticket ids" above.
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
