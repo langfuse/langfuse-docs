@@ -170,7 +170,7 @@ When using the [LangChain Integration](/integrations/frameworks/langchain), stat
 
 ## How statuses are stored and mapped [#status-mapping]
 
-`status` and its compatibility field `level` use the four strings `DEBUG`, `DEFAULT`, `WARNING`, and `ERROR`. There is no numeric encoding: the Observations API, exports, and filters all use these exact strings. You can filter by `status` or `level` in the [Observations API](/docs/api-and-data-platform/features/public-api#observations-filters). Observations ingested without either field have status `DEFAULT`.
+`status` and its compatibility field `level` use the four strings `DEBUG`, `DEFAULT`, `WARNING`, and `ERROR`. There is no numeric encoding: the Observations API, table exports, trace JSON downloads, and filters use these exact strings. [Scheduled blob-storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#export-field-groups) retain the `level` field. You can filter by `status` or `level` in the [Observations API](/docs/api-and-data-platform/features/public-api#observations-filters). Observations ingested without either field have status `DEFAULT`.
 
 When you send spans through the [OpenTelemetry endpoint](/integrations/native/opentelemetry), Langfuse derives the status in this order:
 
