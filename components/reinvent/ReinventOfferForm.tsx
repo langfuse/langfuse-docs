@@ -50,7 +50,7 @@ type MarketoFormsApi = {
 };
 
 function marketoApi(): MarketoFormsApi | undefined {
-  return (window as Window & { MktoForms2?: MarketoFormsApi }).MktoForms2;
+  return (window as unknown as { MktoForms2?: MarketoFormsApi }).MktoForms2;
 }
 
 function readUtm(name: string) {
