@@ -245,10 +245,6 @@ function processLinks(links, baseUrl = getBaseUrl()) {
       continue;
     }
 
-    if (processedLink.startsWith(`${baseUrl}/api/md-to-pdf`)) {
-      continue;
-    }
-
     try {
       new URL(processedLink);
       processedLinks.push(processedLink);
