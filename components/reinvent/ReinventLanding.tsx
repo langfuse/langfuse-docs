@@ -59,21 +59,43 @@ const events: {
   },
 ];
 
-const integrationGroups: {
+const featuredIntegrations: {
   eyebrow: string;
   title: string;
   body: string;
+  href?: string;
+  linkLabel?: string;
+  comingSoon?: boolean;
+}[] = [
+  {
+    eyebrow: "Agents",
+    title: "Strands Box",
+    body: "Run a Strands agent in Box and forward the trace through your own collector.",
+    comingSoon: true,
+  },
+  {
+    eyebrow: "Agents",
+    title: "Amazon Bedrock AgentCore",
+    body: "Trace every model call, tool call, and agent step from agents running on AgentCore.",
+    href: "/integrations/frameworks/amazon-agentcore",
+    linkLabel: "AgentCore guide",
+  },
+  {
+    eyebrow: "AI Gateway",
+    title: "Bedrock in the AI Gateway",
+    body: "Call Bedrock models through the Langfuse AI Gateway with your own credentials.",
+    href: "/docs/gateway/get-started/admin-setup#add-provider-connections",
+    linkLabel: "Add a Bedrock connection",
+  },
+];
+
+const moreIntegrationGroups: {
+  eyebrow: string;
   items: { label: string; href: string }[];
 }[] = [
   {
     eyebrow: "Agents",
-    title: "Trace agents built on AWS",
-    body: "Capture every model call, tool call, and agent step as a trace you can inspect and evaluate.",
     items: [
-      {
-        label: "Amazon Bedrock AgentCore",
-        href: "/integrations/frameworks/amazon-agentcore",
-      },
       {
         label: "Strands Agents",
         href: "/integrations/frameworks/strands-agents",
@@ -82,16 +104,10 @@ const integrationGroups: {
         label: "Amazon Bedrock Agents",
         href: "/integrations/model-providers/amazon-bedrock-agents",
       },
-      {
-        label: "LangChain on AgentCore",
-        href: "/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot",
-      },
     ],
   },
   {
     eyebrow: "Models",
-    title: "Use Amazon Bedrock models",
-    body: "Trace Bedrock calls from your code, and use Bedrock models in the Playground, in evaluators, and through the AI Gateway.",
     items: [
       {
         label: "Amazon Bedrock tracing",
@@ -102,10 +118,6 @@ const integrationGroups: {
         href: "/docs/administration/llm-connection",
       },
       {
-        label: "Bedrock in the AI Gateway",
-        href: "/docs/gateway/get-started/admin-setup#add-provider-connections",
-      },
-      {
         label: "Amazon SageMaker via OpenTelemetry",
         href: "/integrations/native/opentelemetry",
       },
@@ -113,27 +125,21 @@ const integrationGroups: {
   },
   {
     eyebrow: "Coding agents",
-    title: "Trace Kiro sessions",
-    body: "See the prompts, tool use, and file edits behind every session in the AWS coding agents.",
     items: [
       { label: "Kiro IDE", href: "/integrations/developer-tools/kiro" },
       { label: "Kiro CLI", href: "/integrations/developer-tools/kiro-cli" },
     ],
   },
+];
+
+const dataLinks: { label: string; href: string }[] = [
   {
-    eyebrow: "Data",
-    title: "Keep your data in Amazon S3",
-    body: "Export observations and scores to your own bucket, and show media that stays in S3. Both support IAM role authentication.",
-    items: [
-      {
-        label: "Export to Amazon S3",
-        href: "/docs/api-and-data-platform/features/export-to-blob-storage",
-      },
-      {
-        label: "External S3 media",
-        href: "/docs/observability/features/multi-modality#external-s3-media",
-      },
-    ],
+    label: "Export to Amazon S3",
+    href: "/docs/api-and-data-platform/features/export-to-blob-storage",
+  },
+  {
+    label: "External S3 media",
+    href: "/docs/observability/features/multi-modality#external-s3-media",
   },
 ];
 
@@ -363,39 +369,72 @@ function Integrations() {
           <span className="rei-highlight">the AWS stack you use.</span>
         </h2>
         <p className="rei-body">
-          From agent frameworks and Bedrock models to S3 exports and
-          self-hosting in your own AWS account.
+          Start with Strands Box, Bedrock AgentCore, and Bedrock in the AI
+          Gateway.
         </p>
       </div>
 
-      <div className="grid gap-2 md:grid-cols-2">
-        {integrationGroups.map((group, i) => (
+      <div className="grid gap-2 md:grid-cols-3">
+        {featuredIntegrations.map((item) => (
           <div
-            key={group.title}
-            className="rei-chip-card flex flex-col gap-3.5 p-6"
+            key={item.title}
+            className="rei-chip-card rei-accent-top flex h-full flex-col gap-3.5 p-6"
           >
             <div className="flex items-center justify-between gap-3">
-              <span className="rei-step-num">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="rei-eyebrow">{group.eyebrow}</span>
+              <span className="rei-eyebrow">{item.eyebrow}</span>
+              {item.comingSoon ? (
+                <span className="rei-pill is-accent">Coming soon</span>
+              ) : null}
             </div>
             <div className="font-analog text-[22px] font-medium leading-[1.3] text-text-primary [text-wrap:balance]">
-              {group.title}
+              {item.title}
             </div>
-            <p className="rei-body-sm">{group.body}</p>
-            <LinkList items={group.items} />
+            <p className="rei-body-sm">{item.body}</p>
+            {item.href && item.linkLabel ? (
+              <Link
+                href={item.href}
+                className="mt-auto self-start border-b border-text-primary pb-px font-mono text-[12px] text-text-primary"
+              >
+                {item.linkLabel}
+              </Link>
+            ) : null}
           </div>
         ))}
       </div>
+
+      <div className="rei-chip-card mt-2 flex flex-col gap-5 p-6">
+        <div className="rei-eyebrow">More AWS guides</div>
+        <div className="grid gap-6 sm:grid-cols-3">
+          {moreIntegrationGroups.map((group) => (
+            <div key={group.eyebrow} className="flex flex-col gap-2.5">
+              <div className="rei-eyebrow">{group.eyebrow}</div>
+              <LinkList items={group.items} />
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2.5 border-t border-line-structure pt-4 sm:flex-row sm:items-baseline sm:gap-6">
+          <div className="rei-eyebrow shrink-0">Data</div>
+          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 sm:flex-row sm:gap-5">
+            {dataLinks.map((item) => (
+              <li key={item.href}>
+                <Link className="rei-link text-[13.5px]" href={item.href}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <RunOnAws />
     </section>
   );
 }
 
 function RunOnAws() {
   return (
-    <section id="deploy" className="rei-section scroll-mt-24 pb-10 pt-[100px]">
-      <div className="grid items-stretch gap-4 md:grid-cols-[1fr_1.5fr]">
+    <div id="deploy" className="mt-2 scroll-mt-24">
+      <div className="grid items-stretch gap-2 md:grid-cols-[1fr_1.5fr]">
         <div
           className={`${cornerBoxBase} relative flex flex-col gap-5 overflow-hidden p-7`}
         >
@@ -430,10 +469,7 @@ function RunOnAws() {
         </div>
 
         <div className="rei-chip-card flex flex-col gap-3.5 p-6">
-          <div className="flex items-center justify-between gap-3">
-            <span className="rei-step-num">05</span>
-            <span className="rei-eyebrow">Self-hosting</span>
-          </div>
+          <div className="rei-eyebrow">Self-hosting</div>
           <div className="font-analog text-[22px] font-medium leading-[1.3] text-text-primary [text-wrap:balance]">
             Deploy in your own AWS account
           </div>
@@ -444,7 +480,7 @@ function RunOnAws() {
           <LinkList items={deployItems} />
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -476,7 +512,6 @@ export function ReinventLanding() {
         <Hero />
         <Events />
         <Integrations />
-        <RunOnAws />
         <CTABanner />
       </div>
     </div>

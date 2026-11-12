@@ -26,36 +26,43 @@ Times are Pacific Time.
 
 ## Langfuse works with the AWS stack you use [#integrations]
 
-From agent frameworks and Bedrock models to S3 exports and self-hosting in your own AWS account.
+Start with Strands Box, Bedrock AgentCore, and Bedrock in the AI Gateway.
 
-### Trace agents built on AWS
+### Strands Box
 
-Capture every model call, tool call, and agent step as a trace you can inspect and evaluate.
+Coming soon. Run a Strands agent in Box and forward the trace through your own collector.
 
-- [Amazon Bedrock AgentCore](/integrations/frameworks/amazon-agentcore)
+### Amazon Bedrock AgentCore
+
+Trace every model call, tool call, and agent step from agents running on AgentCore.
+
+- [AgentCore guide](/integrations/frameworks/amazon-agentcore)
+
+### Bedrock in the AI Gateway
+
+Call Bedrock models through the Langfuse AI Gateway with your own credentials.
+
+- [Add a Bedrock connection](/docs/gateway/get-started/admin-setup#add-provider-connections)
+
+### More AWS guides
+
+Agents:
+
 - [Strands Agents](/integrations/frameworks/strands-agents)
 - [Amazon Bedrock Agents](/integrations/model-providers/amazon-bedrock-agents)
-- [LangChain on AgentCore](/faq/all/existing-otel-setup#aws-bedrock-agentcore-adot)
 
-### Use Amazon Bedrock models
-
-Trace Bedrock calls from your code, and use Bedrock models in the Playground, in evaluators, and through the AI Gateway.
+Models:
 
 - [Amazon Bedrock tracing](/integrations/model-providers/amazon-bedrock)
 - [Bedrock for Playground and LLM-as-a-judge](/docs/administration/llm-connection)
-- [Bedrock in the AI Gateway](/docs/gateway/get-started/admin-setup#add-provider-connections)
 - [Amazon SageMaker via OpenTelemetry](/integrations/native/opentelemetry)
 
-### Trace Kiro sessions
-
-See the prompts, tool use, and file edits behind every session in the AWS coding agents.
+Coding agents:
 
 - [Kiro IDE](/integrations/developer-tools/kiro)
 - [Kiro CLI](/integrations/developer-tools/kiro-cli)
 
-### Keep your data in Amazon S3
-
-Export observations and scores to your own bucket, and show media that stays in S3. Both support IAM role authentication.
+Data:
 
 - [Export to Amazon S3](/docs/api-and-data-platform/features/export-to-blob-storage)
 - [External S3 media](/docs/observability/features/multi-modality#external-s3-media)
