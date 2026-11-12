@@ -18,14 +18,16 @@ As an admin, you can manage which models are allowed to be used. This page expla
 
 ## Supported providers [#supported-providers]
 
-| Provider                                           | API formats                                                                                        |
-| -------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [OpenAI](https://openai.com)                       | OpenAI Responses, OpenAI Chat Completions, OpenAI Decisions, OpenAI Embeddings                     |
-| [Anthropic](https://www.anthropic.com)             | Anthropic Messages                                                                                 |
-| [Amazon Bedrock](https://aws.amazon.com/bedrock/)  | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models        |
-| [OpenRouter](https://openrouter.ai)                | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Embeddings                   |
-| [Vercel AI Gateway](https://vercel.com/ai-gateway) | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Decisions, OpenAI Embeddings |
-| [xAI](https://x.ai)                                | OpenAI Responses, OpenAI Chat Completions                                                          |
+| Provider                                                    | API formats                                                                                                                                   |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [OpenAI](https://openai.com)                                | OpenAI Responses, OpenAI Chat Completions, OpenAI Decisions, OpenAI Embeddings                                                                |
+| [Anthropic](https://www.anthropic.com)                      | Anthropic Messages                                                                                                                            |
+| [Amazon Bedrock](https://aws.amazon.com/bedrock/)           | Anthropic Messages for Claude models; OpenAI Responses or Chat Completions for other models                                                   |
+| [Google AI Studio](https://aistudio.google.com)             | OpenAI Chat Completions, OpenAI Embeddings                                                                                                    |
+| [Microsoft Azure](https://ai.azure.com) (Microsoft Foundry) | Anthropic Messages for Claude models; OpenAI Chat Completions and OpenAI Embeddings for other models, plus OpenAI Responses for OpenAI models |
+| [OpenRouter](https://openrouter.ai)                         | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Embeddings                                                              |
+| [Vercel AI Gateway](https://vercel.com/ai-gateway)          | OpenAI Responses, OpenAI Chat Completions, Anthropic Messages, OpenAI Decisions, OpenAI Embeddings                                            |
+| [xAI](https://x.ai)                                         | OpenAI Responses, OpenAI Chat Completions                                                                                                     |
 
 ## Available models [#available-models]
 
@@ -101,6 +103,20 @@ A model the provider just released is available right away only on connections t
 <Summary>Why doesn't my Amazon Bedrock connection list any models?</Summary>
 
 A Bedrock connection takes an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html) and an AWS region. To list models, the key needs the `bedrock:ListFoundationModels` and `bedrock:ListInferenceProfiles` permissions. Otherwise, add custom models to the connection on its models page. For [cross-region inference](https://docs.aws.amazon.com/bedrock/latest/userguide/cross-region-inference.html), use the inference profile ID as the model, for example `bedrock-prod:global.<bedrock-model-id>`.
+
+</Details>
+
+<Details id="azure-models">
+<Summary>Why doesn't my Microsoft Azure connection list any models?</Summary>
+
+A Microsoft Azure connection takes the name of a [Microsoft Foundry](https://ai.azure.com) resource, for example `my-resource` for `https://my-resource.services.ai.azure.com`, an API key of that resource, and an optional Foundry project name. Requests name a deployment, so the connection's models are the deployments of its project, for example `azure-prod:<deployment-name>`.
+
+<Callout type="warning">
+  Without a project name, the gateway lists the resource's default project,
+  which not every resource has. Deployments on connected resources aren't
+  listed. If the deployments can't be listed, add the deployment names as
+  custom models to the connection on its models page.
+</Callout>
 
 </Details>
 
