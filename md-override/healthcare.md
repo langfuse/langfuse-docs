@@ -21,7 +21,7 @@ For healthcare and life sciences teams: go live faster, spend less time on manua
 
 Use the contact form on this page to talk to a healthcare and life sciences expert at Langfuse.
 
-Used by **21** of the Fortune 50, **90B+** observations/month, **100,000+** engineers building on Langfuse.
+Used by **21** of the Fortune 50, **110B+** observations/month, **100,000+** engineers building on Langfuse.
 
 ### [Merck Group](/users/merckgroup)
 
