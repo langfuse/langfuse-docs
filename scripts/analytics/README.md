@@ -84,7 +84,7 @@ node scripts/check-h1-headings.js
 git diff --check
 ```
 
-The browser fixture mocks PostHog; tests send no production events and submit no real sales forms. It checks exposure thresholds, hidden content, fast and modifier clicks, whole-card activation, path changes, URL preservation, attribution expiry, and successful-form-only reporting. The local rendered pages and all four regional link destinations were also checked.
+The unit tests run in Node without a browser. They check conversion URL preservation, attribution validation and expiry, and successful-form-only reporting. PostHog and Marketo use in-process stubs; tests send no production events and submit no real sales forms.
 
 After deployment, verify the six new event names in PostHog live events, then confirm production host filters and the first real Marketo/Cloud completion paths. Empty dashboards before deployment are expected. Do not send synthetic production signups or sales inquiries for validation.
 
