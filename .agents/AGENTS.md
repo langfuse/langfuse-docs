@@ -165,8 +165,6 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 - Use a table when several items share the same attributes, such as key types, ingestion modes, or per-key-type behavior. Cut or merge as many columns as you can, and keep only the ones that add real value. Keep cells to a few words and put explanations in the surrounding text. Turn a sentence that lists three or more parallel items into a bulleted list.
 - Link the key word or short phrase, not a whole sentence or bullet. Link text names its target, for example "trace user ID" or "Concepts". Put "See X" references in the sentence they support, not on a line of their own.
 - Use relative links to langfuse.com pages. Never link to preview deployments (`*.vercel.app`) or leave placeholder link targets.
-- When a page needs a screenshot or recording that doesn't exist yet, put `<TextHighlight className="italic">TODO: add a screenshot of …</TextHighlight>` (from `@/components/ui/text-highlight`) where it belongs, not a callout, and list it in the PR description. Resolve every TODO highlight before merge.
-
 ### Changelog entries
 
 Changelog entries live in `content/changelog/`.
@@ -192,7 +190,7 @@ Please check the following:
   - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
   - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, a prerequisites section, or troubleshooting kept inline instead of in FAQ pages.
   - On get-started pages, check that a reader can reach a working setup using only that page, and using only the tab they selected.
-  - Flag leftover TODO highlights, placeholder link targets, and links to preview deployments.
+  - Flag leftover TODOs, placeholder link targets, and links to preview deployments.
 - A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
   - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
   - `<FaqPreview tags={[...]} />` from `components/faq/FaqPreview.tsx`: the list of links to that area's FAQ articles. Keep this component. Do not replace it with a hand-written link list or inline Q&A.
