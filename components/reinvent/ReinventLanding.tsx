@@ -113,17 +113,21 @@ function Section({
 function DiscountCode() {
   const [copied, setCopied] = useState(false);
 
-  function copyCode() {
-    const input = document.createElement("textarea");
-    input.value = REINVENT_PROMO_CODE;
-    input.setAttribute("readonly", "");
-    input.style.position = "fixed";
-    input.style.left = "-9999px";
-    document.body.appendChild(input);
-    input.select();
-    const didCopy = document.execCommand("copy");
-    input.remove();
-    if (!didCopy) return;
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(REINVENT_PROMO_CODE);
+    } catch {
+      const input = document.createElement("textarea");
+      input.value = REINVENT_PROMO_CODE;
+      input.setAttribute("readonly", "");
+      input.style.position = "fixed";
+      input.style.left = "-9999px";
+      document.body.appendChild(input);
+      input.select();
+      const didCopy = document.execCommand("copy");
+      input.remove();
+      if (!didCopy) return;
+    }
     setCopied(true);
     window.setTimeout(() => setCopied(false), 2000);
   }
