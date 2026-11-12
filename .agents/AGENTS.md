@@ -142,7 +142,7 @@ Changelog entries live in `content/changelog/`.
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases when the entry adds a new capability or workflow whose value readers can't infer from the title (for example API key permissions, a PagerDuty integration, a redesigned view). Don't put them in a separate section.
+- Follow the intro immediately with 2-3 concrete example use cases when the entry adds a new capability or workflow (for example API key permissions, a PagerDuty integration, a redesigned view). Don't put them in a separate section.
 - Skip the use cases when the entry only extends an existing feature to another provider, model, endpoint, or SDK, or changes API behavior or a config option. The parent feature's use cases already apply. Say in the intro what is now covered and how to turn it on, then link the docs. Never pad with generic use cases to reach a count.
   - Needs use cases: "You can now set an expiration date on API keys" (a temporary integration key, a 90-day rotation).
   - Fine without: "You can now send OpenAI Embeddings requests through the AI Gateway at `POST /openai/v1/embeddings`."
