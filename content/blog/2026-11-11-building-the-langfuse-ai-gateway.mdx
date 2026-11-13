@@ -17,7 +17,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 Langfuse is an LLM engineering platform with tools for tracing, improving and monitoring AI applications. To trace an application, you instrument it with a Langfuse SDK or with OpenTelemetry, and it sends traces to Langfuse.
 
-Right now, the killer app in AI is coding agents. Their cost is growing fast in most organizations, and there is very little transparency into what that money buys or how well the agents work. You can't instrument Claude Code or Codex the way you instrument your own application. What you do control is which endpoint they call.
+Right now, the killer app in AI is coding agents. Their cost is growing fast in most organizations, and there is very little transparency into what that money buys or how well the agents work. Claude Code and Codex offer client-side hooks for observability, but they are clunky and not always reliable. They have to be set up on every developer's machine, and they can drift out of sync with the agent version that is actually running. Changing the base URL the agents call is a much smaller step.
 
 That's where an AI gateway helps. It is the one place all AI traffic passes through, so platform teams get control back. With the [Langfuse AI Gateway](/docs/gateway/overview), operators hand out gateway keys that work across providers, and manage and revoke them in one place, while the provider credentials stay secret in Langfuse. They can see cost per user and, through key metadata, per team. And because every call lands in Langfuse as a trace, they can use dashboards, evaluations and alerts to monitor and improve how their organization uses coding agents.
 
@@ -99,7 +99,7 @@ Using every core also keeps the gateway's overhead flat as load grows, because C
   ![Added time to first token at 100 concurrent streams versus calling the upstream directly. Median: Rust 3.2 ms, Node.js 734 ms, Python 729 ms. Slowest 1%: Rust 15.7 ms, Node.js 1,166 ms, Python 1,668 ms](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/latency-overhead.png)
 </Frame>
 
-At 100 concurrent streams, Rust added 3.2 ms to the median time to first token and 15.7 ms at the 99th percentile. Node.js added 734 ms and 1,166 ms, and Python 729 ms and 1,668 ms. With one request at a time, all three stayed between 6 and 17 ms. Each request needs the same work at both levels; the extra time is waiting in line, behind the event loop in Node.js and behind the GIL and the busy workers in Python. A model takes hundreds of milliseconds to seconds to answer, so a few milliseconds disappear in that. Hundreds of milliseconds on every request don't.
+At 100 concurrent streams, Rust added 3.2 ms to the median time to first token and 15.7 ms at the 99th percentile. Node.js added 734 ms and 1,166 ms, and Python 729 ms and 1,668 ms. With one request at a time, all three stayed between 6 and 17 ms. Most of Rust's added time isn't Rust itself: at 100 concurrent streams, about 2.2 of its 3.2 ms is the gateway's call to Langfuse Web to resolve the key and model, so the chart overstates the gateway's own overhead. Each request needs the same work at both levels; the extra time is waiting in line, behind the event loop in Node.js and behind the GIL and the busy workers in Python. A model takes hundreds of milliseconds to seconds to answer, so a few milliseconds disappear in that. Hundreds of milliseconds on every request don't.
 
 ### Memory as a budget
 
@@ -109,13 +109,13 @@ We chose a fast `503` over a queue on purpose. A queue holds memory for requests
 
 Responses stream straight through without being buffered, so a long response costs no more memory than a short one.
 
-This is what keeps an instance up during a spike. We sent five rounds of 1,000 simultaneous requests to each gateway.
+This is what keeps an instance up during a spike. We sent five rounds of 1,000 simultaneous requests to each gateway: all 1,000 requests of a round are released at the same instant, and the next round starts as soon as every request of the previous one has finished.
 
 <Frame fullWidth>
   ![Container memory during five rounds of 1,000 simultaneous requests. Rust peaks at 1.7 GiB and serves all 5,000 requests in 7 seconds. Node.js serves 88% and finishes at 47 seconds. Python fills the 4 GiB limit, has a worker killed for running out of memory at 34 seconds, and serves 96% by 61 seconds](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/memory-during-spikes.png)
 </Frame>
 
-The Rust gateway served all 5,000 requests in 7 seconds, and its memory peaked at 1.7 GiB. Its memory follows the requests in flight, because each request's memory is freed when it ends. The Node.js gateway dropped 12% of the connections and took 47 seconds. The Python gateway's memory climbed to the 4 GiB limit within 15 seconds and stayed there until, 34 seconds in, the kernel killed a worker for running out of memory, which cut off every stream on that worker. It finished after 61 seconds with 96% of requests served. For operators, this decides how many instances you need to get through a spike, and how confidently you can pick that number.
+The Rust gateway served all 5,000 requests in 7 seconds, and its memory peaked at 1.7 GiB. Its memory follows the requests in flight, because each request's memory is freed when it ends. The Node.js gateway dropped 12% of the connections and took 47 seconds. The Python gateway's memory climbed to the 4 GiB limit within 15 seconds and stayed there until, 34 seconds in, the kernel killed one of its two worker processes for running out of memory. The container kept running: the server started a new worker, and the other worker kept serving. The streams on the killed worker were cut off, and 221 requests failed with dropped connections. It finished after 61 seconds with 96% of requests served. For operators, this decides how many instances you need to get through a spike, and how confidently you can pick that number.
 
 ### No state in the gateway
 
@@ -137,13 +137,13 @@ The gateway speaks each provider's native API and doesn't convert between them. 
 
 The alternative is a translating gateway, where one format is converted to and from each provider's. That is a real feature: running the Claude Code harness against OpenAI models, for example. It works for simple chat. Coding agents are different. Their vendors tune them against one API, and they depend on features that don't map cleanly between providers. Anthropic's own [OpenAI SDK compatibility layer](https://docs.anthropic.com/en/api/openai-sdk) documents several of these gaps, and notes that "most unsupported fields are silently ignored rather than producing errors." Public bug reports in open-source translation gateways show the same pattern.[^issues]
 
-- **Prompt caching** makes each turn cheaper, but providers cache differently, so a translator that gets it wrong silently bills the full input price.
-- **Extended thinking** carries the model's reasoning between turns as provider-signed data that can't be converted, so losing it weakens the agent or breaks its next request.
-- **Strict tool schemas** keep tool calls in the shape the agent expects, but not every format has one, so translated calls can arrive malformed.
-- **Cache and reasoning usage** decides the bill, but providers report it differently, so flattening it makes your usage and cost numbers wrong.
-- **Errors and retries** tell the agent whether to wait or stop, and mapping them onto one common set makes agents give up early or retry when asked to wait.
+- **Prompt caching** makes each turn cheaper, but providers cache differently, so a translator that gets it wrong silently bills the full input price. If the cache markers are dropped, every turn of a long session sends the whole conversation uncached, which costs more and makes the first token arrive later.
+- **Extended thinking** carries the model's reasoning between turns as provider-signed data that can't be converted, so losing it weakens the agent or breaks its next request. Without the signed blocks, the model starts each turn without its earlier reasoning, or the provider rejects the next request in a tool-use loop with an error.
+- **Strict tool schemas** keep tool calls in the shape the agent expects, but not every format has one, so translated calls can arrive malformed. The agent then can't parse the arguments of a file edit or shell command, and spends a turn retrying the call or abandons the step.
+- **Cache and reasoning usage** decides the bill, but providers report it differently, so flattening it makes your usage and cost numbers wrong. Cached input counted as regular input inflates the cost of every turn, and reasoning tokens that go missing make it look too low.
+- **Errors and retries** tell the agent whether to wait or stop, and mapping them onto one common set makes agents give up early or retry when asked to wait. An overloaded provider's error with a retry delay can turn into a generic server error that the agent retries at once, and a request that is too long for the model can turn into one it retries even though it will never succeed.
 
-None of these fail loudly. The agent keeps working, just more expensively or a little worse, which is the hardest kind of problem to notice and the easiest reason to stop using a gateway.
+Most of these don't fail loudly. The agent keeps working, just more expensively or a little worse, which is the hardest kind of problem to notice and the easiest reason to stop using a gateway.
 
 Staying native avoids this whole class of problem. New provider features usually work on the day they ship, because new fields and beta headers pass through without the gateway knowing about them. Provider errors keep their status, body and headers, so an agent's retry logic works unchanged. Claude Code, Codex, OpenCode, Pi and GitHub Copilot need only a base URL and a key.
 
