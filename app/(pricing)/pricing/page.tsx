@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   // Self-referencing canonical so query-param variants (e.g. ?calculatorOpen=true) consolidate to /pricing
   alternates: {
     canonical: "/pricing",
+    // Markdown mirror from md-override/pricing.md.
+    types: { "text/markdown": "https://langfuse.com/pricing.md" },
   },
 };
 
