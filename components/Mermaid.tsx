@@ -44,6 +44,8 @@ function getMermaidConfig(
   return {
     startOnLoad: false,
     securityLevel: "strict",
+    layout: "dagre",
+    look: "classic",
     theme: "base",
     htmlLabels: true,
     fontFamily: "var(--font-sans)",
@@ -222,7 +224,7 @@ export function Mermaid({ chart }: { chart: string }) {
   }
 
   return (
-    <div className="mermaid-diagram my-4 overflow-x-auto border p-4 not-prose rounded-none">
+    <div className="mermaid-diagram my-4 overflow-hidden border p-4 not-prose rounded-none">
       {visibleSvg === null && (
         <div
           aria-hidden="true"

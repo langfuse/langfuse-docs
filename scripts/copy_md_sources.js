@@ -39,13 +39,8 @@ const SELF_HOSTING_FOOTER_PATH = path.join(
 // API / SDK reference for implementation. See CHANGELOG_AGENT_NOTICE below.
 const CHANGELOG_URL_PREFIX = "changelog";
 
-// Legal and policy pages are human- and compliance-facing artifacts, not part
-// of the agent docs surface. A privacy policy whose last section is curl
-// examples, MCP connection details, and "found an error? open a GitHub issue"
-// reads as a copy-paste error to anyone who scrolls to the end — and these are
-// exactly the pages that expose a "download as PDF" link. The PDF route strips
-// the footer as a second line of defense (app/api/md-to-pdf/route.ts), but
-// these pages should never carry it in the first place.
+// Legal and policy pages exclude the agent footer's curl examples, MCP
+// connection details, and GitHub feedback instructions.
 const AGENT_FOOTER_EXCLUDED_PAGES = new Set(["privacy.md", "cookie-policy.md"]);
 
 /**
@@ -214,9 +209,7 @@ function copyAll() {
     const inlined = replaceComponentsWithMarkdown(
       inlineComponentsMdx(contentWithSharedFooter, file),
     );
-    let processed = stripMdxForPlainMarkdown(inlined, {
-      unwrapCalloutsForPlainMd: true,
-    });
+    let processed = stripMdxForPlainMarkdown(inlined);
 
     // For changelog entries, prepend an AI-agent notice so models use the page
     // to confirm a feature exists rather than copying release-time examples.

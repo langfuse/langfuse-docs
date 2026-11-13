@@ -9,6 +9,7 @@ import { BulletList } from "./BulletList";
 import securityVisual from "./img/visuals/visual-security.svg";
 import {
   formatCompanyCount,
+  formatObservationsPerMonth,
   formatSdkInstallsPerMonth,
 } from "@/lib/usage-stats";
 
@@ -36,7 +37,7 @@ const openApis = [
     label: `${formatSdkInstallsPerMonth()} SDK installs/month`,
     href: "/careers#public-metrics",
   },
-  { label: "90B+ observations processed per month" },
+  { label: `${formatObservationsPerMonth()} observations processed per month` },
   {
     label: `${formatCompanyCount()} companies using Langfuse`,
     href: "/handbook/chapters/why",

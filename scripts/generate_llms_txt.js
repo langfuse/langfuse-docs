@@ -122,6 +122,7 @@ const IGNORED_SECTION_PATHS = new Set([
   "enterprise",
   "startups",
   "non-profit",
+  "hackathons",
   "talk-to-us",
   "watch-demo",
   "demo",

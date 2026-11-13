@@ -66,6 +66,27 @@ export function HorizontalArrow({
   );
 }
 
+export function StackArrow({
+  step,
+  dashed,
+  children,
+}: {
+  step: number;
+  dashed?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1 py-1.5">
+      <Label step={step} className="px-1 text-center">
+        {children}
+      </Label>
+      <div className="h-5">
+        <VerticalArrow dashed={dashed} />
+      </div>
+    </div>
+  );
+}
+
 export function VerticalArrow({
   direction = "down",
   dashed,

@@ -90,6 +90,7 @@ test("rewrites site links onto the local checker base URL", () => {
     "http://127.0.0.1:3333/docs",
     "http://127.0.0.1:3333/blog",
     "http://127.0.0.1:3333/faq",
+    "http://127.0.0.1:3333/api/md-to-pdf?path=/docs",
   ]);
 });
 
