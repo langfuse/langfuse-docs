@@ -1,0 +1,103 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Observability for EmpirioLabs AI with Langfuse
+sidebarTitle: EmpirioLabs AI
+logo: /images/integrations/empiriolabs_icon.png
+description: Learn how to trace EmpirioLabs AI model calls with Langfuse using the OpenAI drop-in replacement.
+category: Integrations
+---
+
+# Observability for EmpirioLabs AI with Langfuse
+
+This guide shows you how to integrate EmpirioLabs AI with Langfuse. The EmpirioLabs AI API is compatible with the OpenAI SDK, so you can use the Langfuse OpenAI drop-in replacement to trace your EmpirioLabs AI model calls.
+
+> **What is EmpirioLabs AI?** [EmpirioLabs AI](https://empiriolabs.ai) is specialized AI model hosting for open, proprietary, and custom stacks. It runs open-source models on GPU infrastructure it manages, serves optimized endpoints for proprietary models, and helps teams deploy their own models to real users.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace API calls, monitor performance, and debug issues in their AI applications. Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting) it.
+
+<Steps>
+## Step 1: Install Dependencies
+
+```python
+%pip install openai langfuse
+```
+
+## Step 2: Set Up Environment Variables
+
+Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting). Create an EmpirioLabs AI API key on the [API keys page](https://platform.empiriolabs.ai/dashboard/api-keys).
+
+```python
+import os
+
+# Get keys for your project from the project settings page: https://langfuse.com/cloud
+os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
+os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
+os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region (API host)
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+# Get your EmpirioLabs AI API key from https://platform.empiriolabs.ai/dashboard/api-keys
+os.environ.setdefault("EMPIRIOLABS_API_KEY", "...");
+```
+
+## Step 3: Use Langfuse OpenAI Drop-in Replacement
+
+Instead of importing `openai` directly, import it from `langfuse.openai`, the [OpenAI drop-in replacement](https://langfuse.com/integrations/model-providers/openai-py). Requests made through this client are automatically traced in Langfuse. Point the client at the EmpirioLabs AI base URL, `https://api.empiriolabs.ai/v1`, and authenticate with your EmpirioLabs AI API key.
+
+```python
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+  api_key=os.environ.get("EMPIRIOLABS_API_KEY"),
+  base_url="https://api.empiriolabs.ai/v1",
+)
+```
+
+<Callout type="info" emoji="ℹ️">
+**Note:** The OpenAI drop-in replacement is fully compatible with the [Langfuse Python SDK](https://langfuse.com/docs/observability/sdk/overview) and the [`@observe()` decorator](https://langfuse.com/docs/observability/sdk/instrumentation#observe-wrapper) to trace all parts of your application.
+
+</Callout>
+
+## Step 4: Run an Example
+
+The following cell calls an EmpirioLabs AI chat model through the traced OpenAI client. To use another model, replace `qwen3-8-flash` with any chat model ID from the [EmpirioLabs AI model catalog](https://docs.empiriolabs.ai/models-pricing).
+
+```python
+response = client.chat.completions.create(
+  model="qwen3-8-flash",
+  messages=[
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Why is open source important?"},
+  ],
+  name="EmpirioLabs-AI-Trace" # name of the trace
+)
+print(response.choices[0].message.content)
+```
+
+If you are running a short-lived application, flush Langfuse before it exits so every trace is sent:
+
+```python
+from langfuse import get_client
+
+get_client().flush()
+```
+
+## Step 5: View Traces in Langfuse
+
+After running the example, open [Langfuse Cloud](https://langfuse.com/cloud) to see the trace. Each EmpirioLabs AI call is recorded with:
+
+- Request parameters (model, messages, temperature, etc.)
+- Response content
+- Token usage statistics
+- Latency metrics
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
+
+## Resources
+
+- Browse the [EmpirioLabs AI model catalog](https://docs.empiriolabs.ai/models-pricing) for model IDs and capabilities.
+- Read the [EmpirioLabs AI documentation](https://docs.empiriolabs.ai) for the API reference and guides.
+- Visit [Langfuse](https://langfuse.com) to learn more about monitoring and tracing capabilities for your LLM applications.
