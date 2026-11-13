@@ -12,7 +12,7 @@ The fastest way to roll out a coding agent is to paste one OpenAI or Anthropic A
 
 <SignupCTA className="my-6" />
 
-**TL;DR:** With the [Langfuse AI Gateway](/docs/gateway/overview), admins store provider credentials once, and clients get gateway keys. **User keys** belong to one developer, record that developer on every call, and stop working when they leave the organization. **Service account keys** belong to the organization, for CI and shared services. Keys can expire, are revoked immediately, can carry team or cost-center metadata, and can't read any other Langfuse data. Creating and revoking keys is recorded in the audit log.
+**TL;DR:** With the [Langfuse AI Gateway](/docs/gateway/overview), admins store provider connections once, and clients get gateway keys. **User keys** belong to one developer, record that developer on every call, and stop working when they leave the organization. **Service account keys** belong to the organization, for CI and shared services. Keys can expire, are revoked immediately, can carry team or cost-center metadata, and can't read any other Langfuse data. Creating and revoking keys is recorded in the audit log.
 
 <Frame fullWidth>
   ![Create gateway key dialog with the Issued as choice, name, expiration, and metadata fields](/images/docs/ai-gateway/create-key.png)
@@ -24,11 +24,11 @@ The gateway separates the key that reaches the provider from the keys clients ho
 
 | Key                 | Held by               | Purpose                                                        |
 | ------------------- | --------------------- | -------------------------------------------------------------- |
-| Provider credential | Only the gateway      | Calls OpenAI, Anthropic, or Amazon Bedrock on your account     |
+| Provider connection | Only the gateway      | Calls your model provider on your account                      |
 | User key            | One developer         | Coding agents and local development                            |
 | Service account key | A CI job or a service | Pipelines and shared services that must outlive any one person |
 
-Because clients never see the provider credential, you can rotate it without touching any client, and revoke one person's access without affecting anyone else. The provider still bills model usage to your provider account. See [credential types](/docs/gateway/concepts#credential-types).
+Because clients never see the provider connection's API key, you can rotate it without touching any client, and revoke one person's access without affecting anyone else. The provider still bills model usage to your provider account. See [keys and connections](/docs/gateway/concepts#credential-types).
 
 ## Per-developer keys for coding agents [#user-keys]
 
@@ -64,18 +64,18 @@ Use one service account key per pipeline or service. That keeps cost per service
 
 ## Attribute keys to teams and cost centers [#metadata]
 
-When you create a key, add metadata such as `team: platform` or `cost_center: 4711`. The gateway attaches it to every generation recorded with that key, under `langfuse.gateway.api_key.metadata.<key>`, and clients can't change it. Filter traces and [custom dashboards](/docs/metrics/features/custom-dashboards) on it to see cost per team.
+When you create a key, add metadata such as `team: platform` or `cost_center: 4711`. The gateway attaches it to every generation recorded with that key, under `langfuse.gateway.api_key.metadata.<key>`, and request headers can't override it. Filter traces and [custom dashboards](/docs/metrics/features/custom-dashboards) on it to see cost per team.
 
-Metadata can only be set at creation. To change it, issue a new key and revoke the old one. For a full cost-attribution setup, see [FinOps for AI](/resources/engineering/finops-for-ai).
+To change metadata later, select **Edit key** in **AI Gateway → Gateway keys**. Whoever manages a key can edit it, so developers set the metadata on their own user keys. For cost centers that must be admin-approved, use service account keys, which only admins and owners create, or review the metadata on user keys. For a full cost-attribution setup, see [FinOps for AI](/resources/engineering/finops-for-ai).
 
 ## Limit which models keys can call [#models]
 
-Every key can call every model your provider credentials allow. To keep expensive or unapproved models out, turn them off per credential. See [control which models your company can use](/resources/engineering/ai-model-allowlist).
+By default, a key can call every model enabled on your provider connections. To keep expensive or unapproved models out for everyone, turn them off per connection. To narrow one key, add model patterns such as `openai-prod:*` when you create it or with **Edit key**. See [restrict models per API key](/docs/gateway/features/models#restrict-models-per-key) and [control which models your company can use](/resources/engineering/ai-model-allowlist).
 
 ## A rollout checklist [#checklist]
 
-1. Add provider credentials and choose the [ingestion mode](/docs/gateway/features/tracing#ingestion-modes) in **AI Gateway → Overview**.
-2. Turn off models you don't want used.
+1. Add provider connections and choose the [ingestion mode](/docs/gateway/features/tracing#ingestion-modes) in **AI Gateway → Overview**.
+2. Turn off models you don't want used, and plan which keys get model patterns.
 3. Invite developers with the AI Gateway role, and ask each to create their own key.
 4. Issue one service account key per CI pipeline and shared service, with team metadata.
 5. Remove any shared provider keys from wikis, `.env` files, and CI secrets, and rotate the provider key once everyone has moved.
@@ -94,7 +94,7 @@ It stops working as soon as they lose gateway access, for example when they are 
 <Details id="can-i-rotate-provider-keys">
 <Summary>How do I rotate the OpenAI or Anthropic key?</Summary>
 
-Update the provider credential in **AI Gateway → Providers & Models → Providers**. Clients hold gateway keys, not the provider key, so no client configuration changes.
+Update the provider connection in **AI Gateway → Connections & Models → Connections**. Clients hold gateway keys, not the provider key, so no client configuration changes.
 
 </Details>
 

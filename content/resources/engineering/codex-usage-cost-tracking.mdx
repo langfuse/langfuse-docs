@@ -39,7 +39,7 @@ These views report totals. They don't show what happened inside a turn: which mo
 
 ## Track Codex with the Langfuse AI Gateway [#gateway]
 
-The [Langfuse AI Gateway](/docs/gateway/overview) gives each developer a gateway key and forwards Codex's requests to OpenAI with a credential your organization stores in Langfuse. Every turn becomes a trace.
+The [Langfuse AI Gateway](/docs/gateway/overview) gives each developer a gateway key and forwards Codex's requests to OpenAI with a provider connection your organization stores in Langfuse. Every turn becomes a trace.
 
 Add a provider to `~/.codex/config.toml` and export the key:
 
@@ -67,7 +67,7 @@ Codex sends its own turn ID, so the gateway groups all model rounds of one turn 
 - **Prompts and code are optional.** The default `USAGE` mode stores tokens, cost, and latency only. `FULL` mode adds the input and output of every round.
 
 <Callout type="warning">
-  Through the gateway, Codex uses your organization's OpenAI credential at API
+  Through the gateway, Codex uses your organization's OpenAI connection at API
   pricing instead of a ChatGPT plan's included usage. Codex replays the whole
   conversation on every round, so very long sessions can exceed the gateway's 5
   MiB input capture limit. Tokens and cost are still recorded. See [known
@@ -112,7 +112,7 @@ On a ChatGPT plan, Codex is included in the plan price, within the plan's usage 
 <Details id="does-the-gateway-work-with-chatgpt-sign-in">
 <Summary>Does the Langfuse AI Gateway work with Codex signed in to ChatGPT?</Summary>
 
-No. The gateway forwards requests with an OpenAI API credential, so Codex is configured with a custom provider and a gateway key instead of ChatGPT sign-in. To trace Codex while it runs on a ChatGPT plan, use the Codex plugin.
+No. The gateway forwards requests with an OpenAI provider connection, so Codex is configured with a custom provider and a gateway key instead of ChatGPT sign-in. To trace Codex while it runs on a ChatGPT plan, use the Codex plugin.
 
 </Details>
 

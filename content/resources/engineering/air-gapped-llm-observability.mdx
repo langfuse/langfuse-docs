@@ -61,9 +61,11 @@ Tracing, prompt management, datasets, dashboards, annotation queues, and scores 
 LLM connections accept a custom base URL, so an internally hosted model behind an OpenAI-compatible API can power them. Langfuse blocks private IP ranges for these URLs by default, so allow the internal host with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST` or a related variable. See [blocked IP addresses](/docs/administration/llm-connection#blocked-ip-address). [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score traces without calling a model.
 
 <Callout type="info">
-  The self-hosted Langfuse AI Gateway calls the providers' public API URLs
-  directly and ignores egress proxies, so it isn't suitable for fully
-  air-gapped networks today. See [self-host an open source AI
+  The self-hosted Langfuse AI Gateway ignores egress proxies, so it can't
+  reach public provider APIs from an isolated network. It can route to an
+  internal OpenAI- or Anthropic-compatible endpoint through a [custom base
+  URL](/docs/gateway/features/models#custom-base-url), once its host is
+  allowed on web and the gateway. See [self-host an open source AI
   gateway](/resources/engineering/self-hosted-ai-gateway).
 </Callout>
 

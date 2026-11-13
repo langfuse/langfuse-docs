@@ -20,20 +20,20 @@ Adding an observability SDK means touching code, getting a review, and deploying
 
 ## How it works [#how-it-works]
 
-The gateway accepts the native OpenAI and Anthropic APIs, so the app keeps using its existing client library. It forwards each request to the provider with the organization's provider credential, streams the response back, and records the call. The app doesn't know it is being traced, apart from the different base URL and key.
+The gateway accepts the native OpenAI and Anthropic APIs, so the app keeps using its existing client library. It forwards each request to the provider with the organization's provider connection, streams the response back, and records the call. The app doesn't know it is being traced, apart from the different base URL and key.
 
 | You change            | To                                                                           |
 | --------------------- | ---------------------------------------------------------------------------- |
 | OpenAI base URL       | `https://gateway.cloud.langfuse.com/openai/v1`                               |
 | Anthropic base URL    | `https://gateway.cloud.langfuse.com/anthropic`                               |
 | API key               | A gateway key from **AI Gateway → Gateway keys**                             |
-| Model name, if needed | A [model ID](/docs/gateway/features/models#model-ids) your credentials allow |
+| Model name, if needed | A [model ID](/docs/gateway/features/models#model-ids) your connections allow |
 
 The hosts above are for the EU region. Use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts) for US, Japan, HIPAA, or a self-hosted deployment.
 
 ## Set it up [#setup]
 
-1. An admin adds a provider credential once. See [admin setup](/docs/gateway/get-started/admin-setup).
+1. An admin adds a provider connection once. See [admin setup](/docs/gateway/get-started/admin-setup).
 2. Create a gateway key. For a service, ask an admin for a **service account** key named after the app, so the app shows up as its own trace user. See [gateway API keys](/resources/engineering/ai-gateway-api-keys).
 3. Change the app's configuration. Many OpenAI clients read `OPENAI_BASE_URL` and `OPENAI_API_KEY` from the environment:
 
@@ -53,8 +53,8 @@ In the default `USAGE` [ingestion mode](/docs/gateway/features/tracing#ingestion
 To add context without code, send optional [request headers](/docs/gateway/features/tracing#request-headers) if your client supports default headers: `langfuse-environment`, `langfuse-tags`, `langfuse-metadata`, `langfuse-session-id`, or `langfuse-trace-name`.
 
 <Callout type="info">
-  The gateway supports OpenAI, Anthropic, and Amazon Bedrock, as of November
-  2026. It does not translate between API formats, so an app keeps calling the
+  Check the [supported providers](/docs/gateway/features/models#supported-providers)
+  before you switch. The gateway does not translate between API formats, so an app keeps calling the
   provider API it was written for. Retries, fallbacks, and caching are not
   part of the gateway during the beta. See [known
   limitations](/faq/all/ai-gateway-known-limitations).

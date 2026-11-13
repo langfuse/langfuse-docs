@@ -49,7 +49,7 @@ Pick the dimensions your finance team reports on, then make sure every call carr
 | Feature           | `langfuse-tags` or `langfuse-metadata` request header                                    | Trace name or tag per feature                                   |
 | Customer          | `langfuse-user-id` header with a service account key                                     | User ID set to the customer, or customer metadata               |
 
-Key metadata is the strongest option for cost centers: it is set by an admin when the key is created, and clients can't change it. Request headers and SDK tags are set by the client, so they suit feature-level detail that engineers own.
+Key metadata is the strongest option for cost centers: it is stored on the key, so request headers can't override it. Whoever manages a key can edit its metadata, so put admin-approved cost centers on service account keys, which only admins and owners create, and review the metadata developers set on their own user keys. Request headers and SDK tags are set by the client, so they suit feature-level detail that engineers own.
 
 ## Step 3: report spend [#report]
 

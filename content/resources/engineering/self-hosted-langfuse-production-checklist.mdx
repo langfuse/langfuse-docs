@@ -35,7 +35,7 @@ A Docker Compose trial of Langfuse runs in minutes. A production deployment need
 ## Security [#security]
 
 - [ ] **HTTPS** terminated at the load balancer or Ingress. See [encryption](/self-hosting/configuration/encryption#https).
-- [ ] **`ENCRYPTION_KEY`** set and stored in your secrets manager. It encrypts stored LLM connections and gateway provider credentials, and changing it makes them unreadable.
+- [ ] **`ENCRYPTION_KEY`** set and stored in your secrets manager. It encrypts stored LLM connections and gateway provider connections, and changing it makes them unreadable.
 - [ ] **Encryption at rest** on the databases and blob storage. See [encryption at rest](/self-hosting/configuration/encryption#encryption-at-rest).
 - [ ] **Sign-in:** disable open sign-up, configure SSO, and enforce SSO for your email domains. See [hardening](/self-hosting/configuration/hardening#access) and [authentication and SSO](/self-hosting/security/authentication-and-sso).
 - [ ] **Network exposure:** keep databases private, and expose only the web container and, if you use it, the AI Gateway. See [networking](/self-hosting/security/networking).

@@ -37,7 +37,7 @@ Every request through the gateway becomes a [generation](/docs/observability/dat
 - token usage, including cached and reasoning tokens, plus cost, latency, and time to first token;
 - level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations;
 - the trace user, which for a user key is always the key owner's email;
-- the gateway key, its metadata, and the provider credential that served the call;
+- the gateway key, its metadata, and the provider connection that served the call;
 - request IDs, so a single call can be found from the gateway's response headers or the provider's own request ID.
 
 `FULL` mode adds the full input (system prompt, tool definitions, messages, tool results) and the streamed output. Choose `USAGE` when prompts must not be stored outside your applications, and `FULL` when you also want to investigate content, run [evaluations](/docs/evaluation/get-started/online), or build datasets. The mode applies to the whole organization.
@@ -46,10 +46,10 @@ Every request through the gateway becomes a [generation](/docs/observability/dat
 
 A gateway only produces a complete audit trail if traffic can't go around it:
 
-- **Keep provider keys in the gateway only.** Store OpenAI, Anthropic, and Bedrock credentials as gateway provider credentials and remove them from applications, CI secrets, and developer machines.
+- **Keep provider keys in the gateway only.** Store provider API keys in gateway provider connections and remove them from applications, CI secrets, and developer machines.
 - **Give every person their own key.** User keys record their owner and stop working when that person leaves. See [gateway API keys](/resources/engineering/ai-gateway-api-keys).
 - **Give every service its own key.** Service account keys carry their own name as the trace user, so each pipeline shows up separately.
-- **Restrict models.** Only approved models can be called when you [use a model allowlist](/resources/engineering/ai-model-allowlist).
+- **Restrict models.** Only approved models can be called when you [use a model allowlist](/resources/engineering/ai-model-allowlist), per connection and per key.
 
 Key creation and revocation are written to [audit logs](/docs/administration/audit-logs) with the acting user, so the trail also covers who had access and when.
 

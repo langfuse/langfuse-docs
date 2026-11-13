@@ -46,7 +46,7 @@ The native reports tell you who spent how much. They don't show what a session d
 
 ## Option 1: route Claude Code through the Langfuse AI Gateway [#gateway]
 
-The [Langfuse AI Gateway](/docs/gateway/overview) sits between Claude Code and Anthropic. Each developer gets their own gateway key, and the gateway forwards requests with a provider credential your organization stores in Langfuse. Every model call becomes a trace with tokens, cost, and latency.
+The [Langfuse AI Gateway](/docs/gateway/overview) sits between Claude Code and Anthropic. Each developer gets their own gateway key, and the gateway forwards requests with a provider connection your organization stores in Langfuse. Every model call becomes a trace with tokens, cost, and latency.
 
 Setup per developer is three environment variables:
 
@@ -69,7 +69,8 @@ What you get:
 
 <Callout type="warning">
   The gateway route uses API billing through your organization's provider
-  credential (Anthropic or Amazon Bedrock), not a claude.ai subscription.
+  connection, such as Anthropic or Amazon Bedrock, not a claude.ai
+  subscription.
   Developers must log out of their subscription first. The gateway is in public
   beta, and Anthropic 1-hour cache writes are currently priced at the 5-minute
   rate. See [known limitations](/faq/all/ai-gateway-known-limitations).
@@ -85,7 +86,7 @@ Cost in this setup is computed from token usage and Langfuse's [model prices](/d
 
 | Question                                   | AI Gateway                                   | Hooks                                 |
 | ------------------------------------------ | -------------------------------------------- | ------------------------------------- |
-| Billing                                    | API, through your provider credential        | Unchanged (subscription or API)       |
+| Billing                                    | API, through your provider connection        | Unchanged (subscription or API)       |
 | Can a developer turn tracking off locally? | No, the gateway is the only way to the model | Yes, by removing the hook             |
 | Who holds the Anthropic key?               | Only the gateway                             | Each developer                        |
 | Cost figure                                | Cost of the actual API calls                 | API-equivalent estimate from tokens   |
@@ -125,7 +126,7 @@ Run `/usage` in Claude Code to see the current session's tokens and an estimated
 <Details id="can-i-use-the-gateway-with-a-claude-subscription">
 <Summary>Can I use the Langfuse AI Gateway with a Claude Pro or Max subscription?</Summary>
 
-No. The gateway forwards requests with your organization's provider credential, so calls are billed per token through the API. To keep subscription billing and still trace sessions, use the hooks integration instead.
+No. The gateway forwards requests with your organization's provider connection, so calls are billed per token through the API. To keep subscription billing and still trace sessions, use the hooks integration instead.
 
 </Details>
 

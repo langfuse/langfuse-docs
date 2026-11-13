@@ -12,7 +12,7 @@ Some companies can't send prompts, keys, or usage records through a third-party 
 
 <SignupCTA className="my-6" />
 
-**TL;DR:** The [self-hosted Langfuse AI Gateway](/self-hosting/configuration/ai-gateway) is a stateless container that runs next to self-hosted Langfuse. It accepts native OpenAI, Anthropic, and Amazon Bedrock requests, replaces gateway keys with your provider credentials, streams responses back, and records every call as a Langfuse generation in your own database. It needs Langfuse `v4.75.0` or later on the v4 data model, a DNS name with TLS, and direct outbound HTTPS to the providers. It is in beta, as of November 2026.
+**TL;DR:** The [self-hosted Langfuse AI Gateway](/self-hosting/configuration/ai-gateway) is a stateless container that runs next to self-hosted Langfuse. It accepts native OpenAI and Anthropic API requests, replaces gateway keys with your provider connections' API keys, streams responses back, and records every call as a Langfuse generation in your own database. It needs Langfuse `v4.75.0` or later on the v4 data model, a DNS name with TLS, and direct outbound HTTPS to your providers or to an internal endpoint. It is in beta, as of November 2026.
 
 <Frame fullWidth>
   ![Langfuse AI Gateway overview with ingestion mode setting and setup steps](/images/docs/ai-gateway/setup-ingestion-mode.png)
@@ -23,7 +23,7 @@ Some companies can't send prompts, keys, or usage records through a third-party 
 The self-hosted gateway has the same features as the gateway on Langfuse Cloud:
 
 - **Gateway keys instead of provider keys**, per developer and per service, with expiry and immediate revocation. See [gateway API keys](/resources/engineering/ai-gateway-api-keys).
-- **A model allowlist** per provider credential. See [control which AI models your company can use](/resources/engineering/ai-model-allowlist).
+- **A model allowlist** per provider connection, and model patterns per key. See [control which AI models your company can use](/resources/engineering/ai-model-allowlist).
 - **A trace for every call**, with model, tokens, cost, latency, errors, and the caller. See [AI audit trail](/resources/engineering/ai-audit-trail).
 - **Coding agent support** for Claude Code, Codex, GitHub Copilot with your own key, and other agents. See [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking).
 
@@ -34,25 +34,30 @@ Self-hosting adds one ingestion mode that Cloud doesn't have: `NONE`, which rout
 | Component                              | Role                                                                                       | State                         |
 | -------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------- |
 | Gateway                                | Receives client requests, calls the provider, streams the response, uploads the generation | Stateless, no database access |
-| Langfuse Web                           | Resolves gateway keys, stores encrypted provider credentials, ingests generations          | Uses your Postgres            |
+| Langfuse Web                           | Resolves gateway keys, stores encrypted provider connections, ingests generations          | Uses your Postgres            |
 | Langfuse Worker, ClickHouse, Redis, S3 | Store and serve traces, like any other Langfuse trace                                      | Your existing stack           |
 
-The gateway has no database, Redis, ClickHouse, or S3 credentials. It only talks to Langfuse Web and to the providers. Keep the connection between gateway and web on a private network or encrypted, because web's responses contain provider credentials.
+The gateway has no database, Redis, ClickHouse, or S3 credentials. It only talks to Langfuse Web and to the providers. Keep the connection between gateway and web on a private network or encrypted, because web's responses contain provider API keys.
 
 ## Requirements [#requirements]
 
 - The [Helm chart](/self-hosting/deployment/kubernetes-helm#ai-gateway) in a release after `2.2.0`, or the [Docker Compose](/self-hosting/deployment/docker-compose#ai-gateway) setup.
-- Langfuse `v4.75.0` or later, with the same version for web and the gateway.
+- Langfuse `v4.75.0` or later, with the same version for web and the gateway. With Docker Compose, use a release newer than `v4.75.0`.
 - The v4 data model: `LANGFUSE_MIGRATION_V4_WRITE_MODE` must not be `legacy`.
 - A DNS name for the gateway with a TLS certificate, terminated at your Ingress or load balancer.
-- `ENCRYPTION_KEY` set on web, because provider credentials are stored encrypted with it.
+- `ENCRYPTION_KEY` set on web, because provider connections are stored encrypted with it.
 
 <Callout type="warning">
-  The gateway calls the providers' official API URLs directly and ignores
-  `HTTP_PROXY` and `HTTPS_PROXY`. Networks that only allow egress through a
-  proxy, Azure OpenAI endpoints, and internal LLM proxies are not supported
-  today. Amazon Bedrock is available in releases after `v4.77.0`. See the
-  [self-hosting requirements](/self-hosting/configuration/ai-gateway#requirements).
+  The gateway ignores `HTTP_PROXY`, `HTTPS_PROXY`, and other egress proxy
+  settings, so networks that only allow egress through a forward proxy can't
+  reach the public provider APIs. To use an internal OpenAI- or
+  Anthropic-compatible endpoint instead, such as an internal LLM proxy, set a
+  [custom base URL](/docs/gateway/features/models#custom-base-url) on the
+  connection and allow its host on both web and the gateway, as described in
+  [Gateway to LLM
+  providers](/self-hosting/configuration/ai-gateway#gateway-to-providers). See
+  the [self-hosting requirements](/self-hosting/configuration/ai-gateway#requirements)
+  for the hosts each provider needs.
 </Callout>
 
 ## Sizing and operations [#operations]
@@ -81,14 +86,14 @@ Yes. It is part of open source Langfuse and deploys with the same Helm chart and
 <Details id="air-gapped-gateway">
 <Summary>Does the self-hosted gateway work in an air-gapped network?</Summary>
 
-Only if the network allows direct outbound HTTPS to the provider APIs you use. The gateway can't reach providers through an egress proxy, and it doesn't support self-hosted models today.
+Yes, if the models are reachable inside the network. Point an OpenAI or Anthropic connection at an internal endpoint with a [custom base URL](/docs/gateway/features/models#custom-base-url), and allow its host on web and the gateway. The gateway can't reach public provider APIs through an egress proxy.
 
 </Details>
 
 <Details id="without-langfuse">
 <Summary>Can I run the gateway without the rest of Langfuse?</Summary>
 
-No. The gateway resolves keys and stores credentials through Langfuse Web, and records generations into Langfuse. With the `NONE` ingestion mode, it only routes requests and records nothing, but it still needs Langfuse Web.
+No. The gateway resolves keys and stores provider connections through Langfuse Web, and records generations into Langfuse. With the `NONE` ingestion mode, it only routes requests and records nothing, but it still needs Langfuse Web.
 
 </Details>
 

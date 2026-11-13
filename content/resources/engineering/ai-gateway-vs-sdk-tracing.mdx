@@ -20,15 +20,15 @@ There are two ways to get LLM calls into an observability tool. A gateway sits b
 
 ## How they compare [#comparison]
 
-| Question                               | AI gateway                                             | SDK or OpenTelemetry                          |
-| -------------------------------------- | ------------------------------------------------------ | --------------------------------------------- |
-| Code change needed?                    | No, change the base URL and key                        | Yes, add the SDK or an instrumentation        |
-| What is recorded?                      | Model calls                                            | Model calls plus any span you add             |
-| Covers uninstrumented apps and agents? | Yes, anything that goes through it                     | Only code you instrument                      |
-| Who is the caller?                     | Set by the gateway key, can't be spoofed by a user key | Set by the app                                |
-| Controls access to providers?          | Yes: keys, revocation, model allowlist                 | No                                            |
-| Providers                              | OpenAI, Anthropic, Amazon Bedrock (Nov 2026)           | Any provider or framework with an integration |
-| Works with coding agents?              | Yes, the main use case                                 | Through hooks or native OpenTelemetry exports |
+| Question                               | AI gateway                                                                   | SDK or OpenTelemetry                          |
+| -------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------- |
+| Code change needed?                    | No, change the base URL and key                                              | Yes, add the SDK or an instrumentation        |
+| What is recorded?                      | Model calls                                                                  | Model calls plus any span you add             |
+| Covers uninstrumented apps and agents? | Yes, anything that goes through it                                           | Only code you instrument                      |
+| Who is the caller?                     | Set by the gateway key, can't be spoofed by a user key                       | Set by the app                                |
+| Controls access to providers?          | Yes: keys, revocation, model allowlist                                       | No                                            |
+| Providers                              | The [supported providers](/docs/gateway/features/models#supported-providers) | Any provider or framework with an integration |
+| Works with coding agents?              | Yes, the main use case                                                       | Through hooks or native OpenTelemetry exports |
 
 ## When to start with the gateway [#gateway-first]
 

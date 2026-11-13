@@ -76,7 +76,7 @@ The [Copilot gateway guide](/integrations/developer-tools/github-copilot-gateway
 | Your organization pays for models through its own provider key        | AI Gateway           |
 | You need one place that holds the provider key and records every call | AI Gateway           |
 
-Both paths can run side by side: OpenTelemetry for hosted models and the gateway for BYOK models, in the same Langfuse project.
+Both paths can send data to the same Langfuse project, but Copilot's OpenTelemetry export also records BYOK model calls. Before combining them, filter out the OpenTelemetry model-call spans that the gateway also records. Otherwise, tokens and cost are counted twice. If you can't filter those spans, choose one tracing path for BYOK calls.
 
 ## What to look at first [#first-questions]
 
@@ -108,7 +108,7 @@ No. Langfuse records tokens and computes cost from model prices. AI credit consu
 <Details id="byok-billing">
 <Summary>Who bills BYOK models used in Copilot?</Summary>
 
-The model provider. GitHub states that BYOK usage is billed directly by your chosen provider and doesn't count against Copilot request quotas. Routing BYOK models through the Langfuse AI Gateway doesn't change that: the gateway forwards requests with your organization's provider credential.
+The model provider. GitHub states that BYOK usage is billed directly by your chosen provider and doesn't count against Copilot request quotas. Routing BYOK models through the Langfuse AI Gateway doesn't change that: the gateway forwards requests with your organization's provider connection.
 
 </Details>
 
