@@ -17,11 +17,37 @@ description: Networking details for Langfuse Cloud.
   }}
 />
 
-Langfuse Cloud uses public regional endpoints by default. AWS PrivateLink is an optional feature available to Enterprise customers with a committed contract, subject to regional availability and onboarding requirements. [Talk to our sales team](/talk-to-us) to discuss availability for your region.
+Langfuse Cloud is reached over public regional endpoints by default. Enterprise customers with a committed contract can also connect from their own AWS VPC through [AWS PrivateLink](https://aws.amazon.com/privatelink/), so requests from their systems to Langfuse stay on the AWS network instead of the public internet. PrivateLink is enabled per [data region](/security/data-regions) during onboarding. [Talk to our sales team](/talk-to-us) to get started.
+
+### How it works
+
+1. You share the AWS account ID and the AWS region of the VPC that will connect.
+2. We allow your account on the endpoint service for your data region and send you its service name.
+3. You create an interface VPC endpoint to that service and enable private DNS on it. The regional hostname, for example `jp.cloud.langfuse.com`, then resolves to the endpoint inside your VPC.
+4. We accept the connection and run a test request with you.
+
+SDKs, API keys, and OpenTelemetry exporters keep their existing configuration because the hostname does not change. The interface endpoint runs in your AWS account, and AWS bills its hourly and data processing charges to you.
+
+### What PrivateLink covers
+
+- Requests your systems send to Langfuse Cloud: SDK and OpenTelemetry ingestion, the public API, and the web app.
+- VPCs in the same AWS region as your Langfuse data region, and VPCs in other AWS regions through cross-region PrivateLink where AWS supports it.
+
+<Callout type="warning">
+
+**Scope limits**
+
+- PrivateLink adds a private path but does not close the public one. Your organization stays reachable on the public regional endpoint.
+- It covers requests to Langfuse only. Requests Langfuse Cloud makes on your behalf, such as LLM-as-a-judge calls, webhooks, and blob storage exports, are not sent through PrivateLink. See the [egress IP addresses](#langfuse-cloud-egress-ip-addresses) for those.
+- Media uploads and downloads use presigned object storage URLs, and the web app loads some resources from public endpoints. Neither goes through the endpoint.
+- Browser access to the web app over PrivateLink requires your users' DNS to resolve the regional hostname to the endpoint.
+- PrivateLink is available on AWS only. VPC peering is not offered.
+
+</Callout>
 
 If you require private connectivity and infrastructure fully controlled by your organization, consider [self-hosting Langfuse](/self-hosting). [Book time with us](/talk-to-us) to discuss the best solution for your security needs.
 
-## Langfuse Cloud Egress IP Addresses
+## Langfuse Cloud Egress IP Addresses [#langfuse-cloud-egress-ip-addresses]
 
 Langfuse Cloud makes outbound API calls from our infrastructure on behalf of users for features like LLM-as-a-judge evaluations or blob storage exports. For enhanced security, you may want to whitelist these IP addresses in your firewall or security group settings to allow these specific connections.
 

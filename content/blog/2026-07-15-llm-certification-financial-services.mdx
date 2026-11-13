@@ -43,7 +43,7 @@ flowchart LR
     PM["Prompt management<br/>versioned prompts"] --> RUN
     RUN --> EV["Evaluators<br/>deterministic + LLM-as-a-judge"]
     EV --> GATE{"Run-level gate"}
-    GATE -->|PASS / FAIL| OUT["Portal · exports · CI exit code"]
+    GATE -->|PASS / FAIL| OUT["Portal, exports, CI exit code"]
     PROD["Production traces"] --> AQ["Annotation queue<br/>human review"]
     AQ -->|promote reviewed failures| DS
 ```

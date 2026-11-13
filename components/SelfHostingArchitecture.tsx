@@ -297,7 +297,7 @@ function DesktopDiagram() {
         Model requests
       </text>
       <text x="154" y="318" className={styles.detail}>
-        Resolve · traces
+        Resolve + traces
       </text>
       <text x="48" y="96" className={styles.detail}>
         Requests
@@ -315,7 +315,7 @@ function DesktopDiagram() {
         x={LEFT}
         y={GATEWAY_Y}
         name="AI Gateway"
-        detail="Optional · beta"
+        detail="Optional (beta)"
         image="langfuse/ai-gateway"
         icon={Waypoints}
         path="ai-gateway"
@@ -371,7 +371,7 @@ function DesktopDiagram() {
           LLM providers
         </text>
         <text x="298" y={LLM_Y + 52} className={styles.detail}>
-          Optional · bring your own
+          Optional (bring your own)
         </text>
       </a>
     </svg>
@@ -397,13 +397,13 @@ function MobileDiagram() {
         </div>
         <MobileCard
           name="AI Gateway"
-          detail="Optional · beta"
+          detail="Optional (beta)"
           image="langfuse/ai-gateway"
           icon={Waypoints}
           href="/self-hosting/configuration/ai-gateway"
           accent="gateway"
         />
-        <MobileConnector label="Resolve · traces" kind="optional" />
+        <MobileConnector label="Resolve + traces" kind="optional" />
         <MobileCard
           name="Langfuse Web"
           detail="UI & API server"
@@ -434,10 +434,10 @@ function MobileDiagram() {
           accent="worker"
         />
       </div>
-      <MobileConnector label="Playground · evaluations" kind="optional" />
+      <MobileConnector label="Playground + evaluations" kind="optional" />
       <MobileCard
         name="LLM providers"
-        detail="Optional · bring your own"
+        detail="Optional (bring your own)"
         icon={Sparkles}
         href={`${infrastructure}/llm-api`}
       />

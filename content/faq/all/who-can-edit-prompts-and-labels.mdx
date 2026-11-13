@@ -1,0 +1,22 @@
+---
+title: Which roles can edit prompts and change prompt labels?
+seoTitle: "Prompt Permissions and Protected Labels by Role"
+description: Members and above can create prompts and move labels. Only Owners and Admins can change protected labels such as production.
+tags: [prompt-management, administration]
+---
+
+# Which roles can edit prompts and change prompt labels?
+
+| Action                                                                                                                                                                                                     | Minimum project role                             |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| View prompts                                                                                                                                                                                               | `Viewer`                                         |
+| Create, edit, and delete prompts; add or move labels that are not protected                                                                                                                                | `Member` (`prompts:CUD`)                         |
+| Add or remove a [protected label](/docs/prompt-management/features/prompt-version-control#protected-prompt-labels) on a version, delete a prompt that carries one, and manage the list of protected labels | `Admin` or `Owner` (`promptProtectedLabels:CUD`) |
+
+Manage protected labels in **Project Settings → Protected Labels**. The `latest` label cannot be protected. Protected labels are available on the Teams add-on and Enterprise plans on Langfuse Cloud, and on Enterprise self-hosted.
+
+<Callout type="info">
+  Protected labels restrict users in the UI. Project API keys with write access to prompts can still move a protected label, for example from a CI pipeline. Treat those secret keys accordingly.
+</Callout>
+
+For all roles and scopes, see [Role-based access control](/docs/administration/rbac).

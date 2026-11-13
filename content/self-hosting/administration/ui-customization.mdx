@@ -30,18 +30,29 @@ You can customize the links highlighted in the screenshot below:
 | 3      | `LANGFUSE_UI_SUPPORT_HREF`       | Customize the support link reference in the menu and settings to point to your internal support.                                                                                 |
 | 4      | `LANGFUSE_UI_API_HOST`           | Customize the hostname that is referenced in the Langfuse project settings. Defaults to `window.origin`. Useful if Langfuse is deployed behind a reverse proxy for API requests. |
 
-## Co-branding
+## Custom logo [#custom-logo]
 
-Co-brand the Langfuse interface with your own logo.
+<a id="co-branding"></a>
 
-<Frame>![UI Customization Logo](/images/docs/ui-customization-logo.png)</Frame>
+Replace the Langfuse mark in the sidebar with your organization's logo.
 
-Langfuse adapts to the logo width, with a maximum aspect ratio of 1:3. Narrower ratios (e.g., 2:3, 1:1) also work. The logo is fitted into a bounding box, so there are no specific pixel constraints. For reference, the example logo shown above is 160px x 400px.
+<div className="grid grid-cols-3 gap-4 items-start">
+  <Frame className="col-span-2">
+    ![Custom logo in the sidebar](/images/docs/ui-customization-logo.png)
+  </Frame>
+  <Frame>
+    ![Custom logo in the collapsed sidebar](/images/docs/ui-customization-logo-collapsed.png)
+  </Frame>
+</div>
 
-| Variable                           | Description                    | Example                                                                |
-| ---------------------------------- | ------------------------------ | ---------------------------------------------------------------------- |
-| `LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | URL to the logo in light mode. | `https://static.langfuse.com/langfuse-dev/example-logo-light-mode.png` |
-| `LANGFUSE_UI_LOGO_DARK_MODE_HREF`  | URL to the logo in dark mode.  | `https://static.langfuse.com/langfuse-dev/example-logo-dark-mode.png`  |
+- Square (1:1), shown at 28 × 28px. Wider logos are scaled down to fit.
+- At least 112 × 112px PNG, or SVG.
+- One file each for light and dark mode.
+
+| Variable                           | Description                    | Example                                                               |
+| ---------------------------------- | ------------------------------ | --------------------------------------------------------------------- |
+| `LANGFUSE_UI_LOGO_LIGHT_MODE_HREF` | URL to the logo in light mode. | `https://langfuse.com/images/docs/example-logo-square-light-mode.png` |
+| `LANGFUSE_UI_LOGO_DARK_MODE_HREF`  | URL to the logo in dark mode.  | `https://langfuse.com/images/docs/example-logo-square-dark-mode.png`  |
 
 ## Instance switcher [#instance-switcher]
 

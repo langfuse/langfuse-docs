@@ -12,7 +12,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 The **Analytics** page shows what your organization spends on the gateway and who uses it.
 
-You can find it under **Organization settings → AI Gateway → Analytics**. What you see depends on your role:
+You can find it under **AI Gateway → Overview**. What you see depends on your role:
 
 - **Owners and admins** see all gateway usage in the organization, including the **User** filter and cost and requests per user.
 - **People with the AI Gateway role** see only requests made with their own gateway keys.
@@ -39,3 +39,13 @@ Gateway traces are regular Langfuse traces, so admins and owners can build their
 
 - To limit a chart to gateway traffic, filter on the metadata key `langfuse.gateway.api_key.id`.
 - To chart a single team or cost center, add [key metadata](/docs/gateway/features/api-keys#key-metadata) when you create keys and filter on `langfuse.gateway.api_key.metadata.<key>`.
+
+## Alert on gateway spend [#alerts]
+
+You can create [alerts](/docs/observability/features/alerts) in the [ingestion project](/docs/gateway/get-started/admin-setup#configure-the-gateway) on cost or request count. Filter by user, model, gateway key (`langfuse.gateway.api_key.id`), or [key metadata](/docs/gateway/features/api-keys#key-metadata) such as a team or cost center.
+
+<Callout type="info">
+  Alerts notify you when a threshold is crossed. They do not stop traffic. Hard
+  spend caps that block requests are on the
+  [roadmap](/docs/gateway/overview#roadmap).
+</Callout>

@@ -100,7 +100,7 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | [Native framework integrations](/integrations)                                                                     | Yes                 | Yes                          | Yes                          | Yes                                              |
 | [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                                      | Yes                 | Yes                          | Yes                          | Yes                                              |
 | [OpenTelemetry (Java, Go, custom)](/integrations/native/opentelemetry)                                             | Yes                 | Yes                          | Yes                          | Yes                                              |
-| [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                                | Yes                 | Yes                          | Yes                          | Yes                                              |
+| [Proxy-based logging (via Langfuse AI Gateway, LiteLLM, etc.)](/integrations/gateways/litellm)                     | Yes                 | Yes                          | Yes                          | Yes                                              |
 | [Custom via API](/docs/api-and-data-platform/features/public-api)                                                  | Yes                 | Yes                          | Yes                          | Yes                                              |
 | [Included usage](/docs/administration/billable-units)                                                              | 50k units           | 100k units                   | 100k units                   | 100k units                                       |
 | [Additional usage](/docs/administration/billable-units)                                                            | --                  | $8/100k units                | $8/100k units                | $8/100k units                                    |
@@ -140,6 +140,8 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 | **Collaboration**                                                                                                  |                     |                              |                              |                                                  |
 | Projects                                                                                                           | Unlimited           | Unlimited                    | Unlimited                    | Unlimited                                        |
 | Users                                                                                                              | 2                   | Unlimited                    | Unlimited                    | Unlimited                                        |
+| **AI Gateway**                                                                                                     |                     |                              |                              |                                                  |
+| AI Gateway                                                                                                         | Yes                 | Yes                          | Yes                          | Yes                                              |
 | **API**                                                                                                            |                     |                              |                              |                                                  |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                                            | Yes                 | Yes                          | Yes                          | Yes                                              |
 | [Rate limit (General API)](/faq/all/api-limits)                                                                    | 30 req/min          | 100 req/min                  | 1,000 req/min                | Custom                                           |
@@ -257,6 +259,7 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 | Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups)   |
 | Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research)   |
 | Non-profits          | $199 in credits / month             | [Learn more and apply](/non-profit) |
+| Hackathons           | $100 in credits / month, 3 months   | [Learn more and apply](/hackathons) |
 | Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com        |
 
 ## Frequently Asked Questions

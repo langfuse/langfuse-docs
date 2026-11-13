@@ -31,7 +31,7 @@ export const CustomerStoryCTA = ({
   secondaryCtaHref = "/docs",
   contactLabel = "Talk to an expert",
   contactHref = "/talk-to-us",
-  footnote = "No credit card required · Free tier available · Self-hosting option",
+  footnote = "No credit card required, free tier available, self-hosting option",
   headingAs = "h3",
   titleId,
   className,

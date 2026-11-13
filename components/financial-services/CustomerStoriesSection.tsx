@@ -178,7 +178,7 @@ export function CustomerStoriesSection({
               const body = (
                 <>
                   <p className={cn(controlTextClassName, "text-text-tertiary")}>
-                    Customer story · {card.category}
+                    Customer story: {card.category}
                   </p>
                   <StoryLogo
                     logo={logo}

@@ -1,0 +1,18 @@
+---
+title: How often do the Langfuse SDKs send data, and how do I change it?
+seoTitle: "Langfuse SDK Batching Defaults: flush_at and flush_interval"
+description: The Python and JS/TS SDKs batch spans and export them every 5 seconds or every 512 spans by default. How to change flush_at and flush_interval, and when to call flush().
+tags: [observability, sdk]
+---
+
+# How often do the Langfuse SDKs send data, and how do I change it?
+
+The Python and JS/TS SDKs use the OpenTelemetry batch span processor. By default they export a batch every **5 seconds** or as soon as **512 spans** are queued, whichever comes first.
+
+To change the batch size or interval, set `flush_at` / `flush_interval` (Python) or `flushAt` / `flushInterval` (JS/TS), or the `LANGFUSE_FLUSH_AT` and `LANGFUSE_FLUSH_INTERVAL` environment variables. See [Queuing and batching](/docs/observability/features/queuing-batching#configuration) for the full configuration and code examples.
+
+In short-lived processes such as scripts, serverless functions, or notebooks, flush queued spans before the process exits or the function returns. See [Queuing and batching](/docs/observability/features/queuing-batching#manual-flushing) and [AWS Lambda and serverless functions](/faq/all/aws-lambda-and-serverless-functions).
+
+<Callout type="info">
+  In JS/TS, `LangfuseClient.flush()` sends only pending scores, not tracing spans. Call `await langfuseSpanProcessor.forceFlush()` (or `await sdk.shutdown()`) to export spans. The JS/TS span processor can also export every span right away with `exportMode: "immediate"`.
+</Callout>

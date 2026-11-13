@@ -1,0 +1,40 @@
+.figure {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.desktop {
+  min-width: 0;
+}
+
+.mobile {
+  display: none;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+@container (max-width: 559px) {
+  .desktop {
+    display: none;
+  }
+
+  .mobile {
+    display: block;
+  }
+}
+
+/* Background-run's five-column grid needs more than 560px before labels fit. */
+@container (max-width: 639px) {
+  .wide .desktop {
+    display: none;
+  }
+
+  .wide .mobile {
+    display: block;
+  }
+}
