@@ -170,6 +170,10 @@ The Langfuse JS/TS SDK is designed to be modular. Install the relevant packages 
 npm install @langfuse/tracing @langfuse/otel @opentelemetry/sdk-node
 ```
 
+<Callout type="info">
+  Your app already uses OpenTelemetry JS SDK 2.x, directly or through a library such as `@vercel/otel`? Install with the [2.x peer pins](/docs/observability/sdk/upgrade-path/js-v5-to-v6#opentelemetry-sdk) instead. Without them, npm installs OpenTelemetry 3.x peers, which can't be mixed with 2.x packages.
+</Callout>
+
 <JSSDKPackages />
 
 </Tab>
@@ -219,7 +223,7 @@ Learn more in the [OpenTelemetry JS getting-started guide](https://opentelemetry
 <Callout type="info">
 **Next.js users:**
 
-If you are using Next.js, you can register the `LangfuseSpanProcessor` via `registerOTel` from `@vercel/otel` as long as you are on `@vercel/otel` v2 or later. [Earlier versions did not support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based; this was resolved in `@vercel/otel` v2. The `NodeSDK` setup described above also works and carries no version requirement.
+If you are using Next.js, you can register the `LangfuseSpanProcessor` via `registerOTel` from `@vercel/otel` as long as you are on `@vercel/otel` v2 or later. [Earlier versions did not support the OpenTelemetry JS SDK v2](https://github.com/vercel/otel/issues/154) on which the `@langfuse/tracing` and `@langfuse/otel` packages are based; this was resolved in `@vercel/otel` v2. `@vercel/otel` v2 requires OpenTelemetry JS SDK 2.x, so install `@langfuse/otel` with the [2.x peer pins](/docs/observability/sdk/upgrade-path/js-v5-to-v6#opentelemetry-sdk). The `NodeSDK` setup described above also works and carries no version requirement.
 
 [See here for a full example for the Vercel AI SDK with NextJS on Vercel](/docs/observability/sdk/typescript/instrumentation#native-instrumentation).
 
