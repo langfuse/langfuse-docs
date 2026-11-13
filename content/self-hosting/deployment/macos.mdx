@@ -42,67 +42,17 @@ Wait for the node to show `Ready`.
 
 ## 2. Install Langfuse
 
-Save the following as `values-local.yaml`. It uses one replica per service, local persistent storage, and no ingress or AI Gateway.
-
-<Details>
-<Summary>values-local.yaml</Summary>
-
-```yaml filename="values-local.yaml"
-langfuse:
-  replicas: 1
-  nextauth:
-    url: http://localhost:3000
-  ingress:
-    enabled: false
-  gateway:
-    enabled: false
-  additionalEnv:
-    - name: LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT
-      value: http://langfuse-s3-all-in-one:8333
-    - name: LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT
-      value: http://localhost:8333
-
-postgresql:
-  storage:
-    requestedSize: 5Gi
-    className: local-path
-
-redis:
-  dataStorage:
-    enabled: true
-    requestedSize: 1Gi
-    className: local-path
-
-clickhouse:
-  cluster:
-    replicas: 1
-    storage:
-      size: 20Gi
-      className: local-path
-  keeper:
-    enabled: true
-    replicas: 1
-    storage:
-      size: 1Gi
-      className: local-path
-
-s3:
-  mediaUpload:
-    endpoint: http://localhost:8333
-  allInOne:
-    data:
-      type: persistentVolumeClaim
-      size: 10Gi
-      storageClass: local-path
-```
-
-</Details>
+Download the [local values](https://github.com/langfuse/langfuse-k8s/blob/0936e2dcb00e24cc7b4eb4e139654edc11aea9d3/examples/macos-local/values.yaml) for chart `2.2.3`. They use one replica per service, local persistent storage, and no ingress or AI Gateway.
 
 The browser uses `localhost:8333` for media and batch downloads; server-side requests use the internal SeaweedFS service. See [blob storage configuration](/self-hosting/deployment/infrastructure/blobstorage).
 
 Install storage, cert-manager, the ClickHouse operator, and Langfuse in order. Keep the release name `langfuse`, which the values reference.
 
 ```bash
+curl --fail --location \
+  https://raw.githubusercontent.com/langfuse/langfuse-k8s/0936e2dcb00e24cc7b4eb4e139654edc11aea9d3/examples/macos-local/values.yaml \
+  --output values-local.yaml
+
 kubectl --context langfuse-local apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.37/deploy/local-path-storage.yaml
 kubectl --context langfuse-local -n local-path-storage rollout status deployment/local-path-provisioner --timeout=180s
 
