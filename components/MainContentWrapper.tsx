@@ -58,6 +58,7 @@ const pathsWithoutFooterWidgets = [
   "/japan",
   "/kr",
   "/oss-friends",
+  "/reinvent",
   "/privacy",
   "/research",
   "/terms",
