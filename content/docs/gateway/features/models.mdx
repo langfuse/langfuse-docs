@@ -63,6 +63,24 @@ Coding agents that send plain model names also work for OpenAI (`gpt-`, `codex-`
   doesn't retry the request with another connection.
 </Callout>
 
+## Restrict models per API key [#restrict-models-per-key]
+
+You can limit each [gateway API key](/docs/gateway/features/api-keys) to some of the models. Add model patterns under **More options → Models** when you create a key, or select **Edit key** in **AI Gateway → Gateway keys** to change them later.
+
+Patterns only narrow what admins [enabled for a connection](#manage-models); they never turn a model on. A key without patterns can call every enabled model, including ones enabled later. A pattern matches the [model ID](#model-ids) `<connection>:<model>`, ignoring case. `*` matches any characters, and a leading `-` excludes the matching models:
+
+| Patterns                                   | The key can call                                                |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| `openai-prod:*`                            | Every enabled model of the `openai-prod` connection             |
+| `openai-prod:*`, `anthropic-prod:claude-*` | Those models plus the Claude models of `anthropic-prod`         |
+| `-openrouter:*`                            | Every enabled model except those of the `openrouter` connection |
+
+<Callout type="info">
+  Patterns refer to connections by name. Renaming a connection updates patterns
+  that start with its exact name, but not patterns with a wildcard in the
+  connection part, such as `open*:*`.
+</Callout>
+
 ## Advanced connection settings [#advanced-connection-settings]
 
 Most connections don't need these. Use them when you add or edit an OpenAI or Anthropic connection and want to send requests through your own endpoint or attach extra HTTP headers.
