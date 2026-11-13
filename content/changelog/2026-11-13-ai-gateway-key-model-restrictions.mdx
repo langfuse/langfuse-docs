@@ -1,0 +1,40 @@
+---
+date: 2026-11-13
+title: Restrict models per AI Gateway key
+description: Decide per Langfuse AI Gateway API key which models it can call.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, KeyRound } from "lucide-react";
+
+<ChangelogHeader />
+
+You now get more control over your [Langfuse AI Gateway](/docs/gateway/overview) keys: decide per [API key](/docs/gateway/features/api-keys#model-restrictions) which models it can access. Set [model patterns](/docs/gateway/features/models#restrict-models-per-key) such as `openai-prod:*` when you create a key, or edit them later.
+
+<Cards num={2}>
+  <Card
+    title="AI Gateway overview"
+    href="/docs/gateway/overview"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Send your first request"
+    href="/docs/gateway/get-started/first-request"
+    icon={<KeyRound />}
+    arrow
+  />
+  <Card
+    title="Models and providers"
+    href="/docs/gateway/features/models#restrict-models-per-key"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Authentication"
+    href="/docs/gateway/features/api-keys#model-restrictions"
+    icon={<KeyRound />}
+    arrow
+  />
+</Cards>
