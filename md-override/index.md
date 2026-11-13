@@ -8,7 +8,7 @@ description: Langfuse is one open platform for every AI call your company makes 
 
 Langfuse is one [open](https://github.com/langfuse/langfuse) platform for every AI call your company makes and every agent your teams build. Track usage and costs, trace and evaluate agents, and use production logs to ship better AI. Cloud or self-hosted.
 
-Used by 21 of the Fortune 50. 100,000+ engineers build on Langfuse, and the platform processes 90B+ observations per month.
+Used by 21 of the Fortune 50. 100,000+ engineers build on Langfuse, and the platform processes 110B+ observations per month.
 
 [Start free](/cloud), [Documentation](/docs), [Watch demo](/watch-demo), [Interactive demo](/docs/demo)
 
@@ -76,7 +76,7 @@ Markdown versions of any page on this site are available by appending `.md` to t
 Traditional observability handles many small spans. LLM systems run differently: every step carries rich, verbose I/O that legacy platforms cannot handle at scale. Langfuse ingests and queries LLM traces reliably at enterprise scale while following strict compliance frameworks.
 
 - **Architecture** — ClickHouse OLAP database, async ingestion via Redis queue, S3/blob storage for large payloads, and edge-cached prompts.
-- **Reliability at scale** — 65M+ SDK installs per month, 90B+ observations processed per month, 50,000+ companies using Langfuse, 99.9% uptime.
+- **Reliability at scale** — 65M+ SDK installs per month, 110B+ observations processed per month, 50,000+ companies using Langfuse, 99.9% uptime.
 - **Security and compliance** — [SOC 2 Type II & ISO 27001](/security), [EU, US, and Japan data regions](/security/data-regions), [FIPS 140-3 & Iron Bank-hardened images for Gov](/self-hosting/configuration/hardening#hardening-for-government), a [HIPAA-ready region](/security/hipaa), and [GDPR](/security/gdpr). See the [security overview](/security).
 
 [Enterprise](/enterprise), [Talk to us](/talk-to-us)
