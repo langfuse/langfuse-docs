@@ -138,66 +138,116 @@ function slugFromFileName(fileName) {
   return fileName.replace(/\.md$/i, "");
 }
 
+function isLessonFile(entry) {
+  return isMarkdownFile(entry) && entry.name !== "README.md";
+}
+
+// Sub-pages appear in the order the lesson links to them; unlinked ones
+// follow by name.
+function orderByFirstLink(subPages, lessonMarkdown, lessonSlug) {
+  const position = (entry) => {
+    const index = lessonMarkdown.indexOf(`${lessonSlug}/${entry.name}`);
+    return index === -1 ? Number.POSITIVE_INFINITY : index;
+  };
+  return sortByName(subPages).sort((a, b) => position(a) - position(b));
+}
+
+// A lesson `NN-name.md` with a sibling `NN-name/` folder becomes a sidebar
+// folder: the lesson is the folder index and each Markdown file inside is a
+// nested page.
+async function collectSection(repoDir, section) {
+  const sectionDir = `docs/${section}`;
+  const entries = await listDirectory(repoDir, sectionDir);
+  const lessons = sortByName(entries.filter(isLessonFile));
+  const folders = new Map(
+    entries
+      .filter((entry) => entry.type === "dir")
+      .map((entry) => [entry.name, entry]),
+  );
+
+  if (
+    !lessons.some(
+      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
+    )
+  ) {
+    throw new Error(
+      `Expected ${sectionDir}/${WORKSHOP_DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
+    );
+  }
+
+  const files = [];
+  const folderMetas = [];
+
+  for (const lesson of lessons) {
+    const slug = slugFromFileName(lesson.name);
+    const route = `/workshop/${section}/${slug}`;
+    const folder = folders.get(slug);
+    const subPages = folder
+      ? (await listDirectory(repoDir, folder.path)).filter(isLessonFile)
+      : [];
+
+    if (subPages.length === 0) {
+      files.push({
+        sourcePath: lesson.path,
+        outputPath: `${section}/${slug}.mdx`,
+        route,
+      });
+      continue;
+    }
+
+    const ordered = orderByFirstLink(
+      subPages,
+      await readMarkdown(repoDir, lesson.path),
+      slug,
+    );
+    files.push({
+      sourcePath: lesson.path,
+      outputPath: `${section}/${slug}/index.mdx`,
+      route,
+    });
+    for (const subPage of ordered) {
+      const subSlug = slugFromFileName(subPage.name);
+      files.push({
+        sourcePath: subPage.path,
+        outputPath: `${section}/${slug}/${subSlug}.mdx`,
+        route: `${route}/${subSlug}`,
+      });
+    }
+    // `index` stays out of `pages` so fumadocs uses it as the folder's own page.
+    folderMetas.push({
+      outputPath: `${section}/${slug}/meta.json`,
+      pages: ordered.map((entry) => slugFromFileName(entry.name)),
+    });
+  }
+
+  return {
+    files,
+    folderMetas,
+    pages: lessons.map((entry) => slugFromFileName(entry.name)),
+  };
+}
+
 async function collectWorkshopFiles(repoDir) {
-  const [learnerEntries, instructorEntries] = await Promise.all([
-    listDirectory(repoDir, "docs/learner"),
-    listDirectory(repoDir, "docs/instructor"),
+  const [learner, instructor] = await Promise.all([
+    collectSection(repoDir, "learner"),
+    collectSection(repoDir, "instructor"),
   ]);
 
-  const learnerFiles = sortByName(
-    learnerEntries.filter(
-      (entry) => isMarkdownFile(entry) && entry.name !== "README.md",
-    ),
-  );
-  const instructorFiles = sortByName(
-    instructorEntries.filter(
-      (entry) => isMarkdownFile(entry) && entry.name !== "README.md",
-    ),
-  );
-
-  if (
-    !learnerFiles.some(
-      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
-    )
-  ) {
-    throw new Error(
-      `Expected docs/learner/${WORKSHOP_DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
-    );
-  }
-  if (
-    !instructorFiles.some(
-      (entry) => slugFromFileName(entry.name) === WORKSHOP_DEFAULT_CHAPTER,
-    )
-  ) {
-    throw new Error(
-      `Expected docs/instructor/${WORKSHOP_DEFAULT_CHAPTER}.md in ${REPO_SLUG}@${REF}`,
-    );
-  }
-
-  return [
-    {
-      sourcePath: "README.md",
-      outputPath: "index.mdx",
-      route: "/workshop",
-      shortTitle: "Overview",
-    },
-    ...learnerFiles.map((entry) => {
-      const slug = slugFromFileName(entry.name);
-      return {
-        sourcePath: entry.path,
-        outputPath: `learner/${slug}.mdx`,
-        route: `/workshop/learner/${slug}`,
-      };
-    }),
-    ...instructorFiles.map((entry) => {
-      const slug = slugFromFileName(entry.name);
-      return {
-        sourcePath: entry.path,
-        outputPath: `instructor/${slug}.mdx`,
-        route: `/workshop/instructor/${slug}`,
-      };
-    }),
-  ];
+  return {
+    files: [
+      {
+        sourcePath: "README.md",
+        outputPath: "index.mdx",
+        route: "/workshop",
+        shortTitle: "Overview",
+      },
+      ...learner.files,
+      ...instructor.files,
+    ],
+    folderMetas: [...learner.folderMetas, ...instructor.folderMetas],
+    learnerPages: learner.pages,
+    instructorPages: instructor.pages,
+  };
 }
 
 function stripFrontmatter(markdown) {
@@ -737,14 +787,14 @@ function buildGeneratedPage(markdown, file, routeBySourcePath) {
   })}${body.trimEnd()}\n`;
 }
 
-async function writeJson(relativePath, data) {
-  const targetPath = path.join(OUTPUT_DIR, relativePath);
+async function writeJson(outputDir, relativePath, data) {
+  const targetPath = path.join(outputDir, relativePath);
   await fs.mkdir(path.dirname(targetPath), { recursive: true });
   await fs.writeFile(targetPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 
-async function writePage(file, content) {
-  const targetPath = path.join(OUTPUT_DIR, file.outputPath);
+async function writePage(outputDir, file, content) {
+  const targetPath = path.join(outputDir, file.outputPath);
   await fs.mkdir(path.dirname(targetPath), { recursive: true });
   await fs.writeFile(targetPath, content, "utf8");
 }
@@ -758,14 +808,15 @@ async function main() {
   }
 }
 
-async function syncFromRepo(repoDir) {
-  const files = await collectWorkshopFiles(repoDir);
+async function syncFromRepo(repoDir, outputDir = OUTPUT_DIR) {
+  const { files, folderMetas, learnerPages, instructorPages } =
+    await collectWorkshopFiles(repoDir);
   const routeBySourcePath = new Map(
     files.map((file) => [file.sourcePath, file.route]),
   );
 
-  await fs.rm(OUTPUT_DIR, { recursive: true, force: true });
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
+  await fs.rm(outputDir, { recursive: true, force: true });
+  await fs.mkdir(outputDir, { recursive: true });
 
   const pages = await Promise.all(
     files.map(async (file) => {
@@ -778,26 +829,25 @@ async function syncFromRepo(repoDir) {
   );
 
   for (const page of pages) {
-    await writePage(page.file, page.content);
+    await writePage(outputDir, page.file, page.content);
   }
 
-  const learnerPages = files
-    .filter((file) => file.outputPath.startsWith("learner/"))
-    .map((file) => path.basename(file.outputPath, ".mdx"));
-  const instructorPages = files
-    .filter((file) => file.outputPath.startsWith("instructor/"))
-    .map((file) => path.basename(file.outputPath, ".mdx"));
+  for (const folderMeta of folderMetas) {
+    await writeJson(outputDir, folderMeta.outputPath, {
+      pages: folderMeta.pages,
+    });
+  }
 
-  await writeJson("meta.json", {
+  await writeJson(outputDir, "meta.json", {
     title: "Workshop",
     pages: ["index", "learner", "instructor"],
   });
-  await writeJson("learner/meta.json", {
+  await writeJson(outputDir, "learner/meta.json", {
     title: "Lessons",
     defaultOpen: true,
     pages: learnerPages,
   });
-  await writeJson("instructor/meta.json", {
+  await writeJson(outputDir, "instructor/meta.json", {
     title: "For Instructors",
     pages: instructorPages,
   });
@@ -817,4 +867,4 @@ if (
   });
 }
 
-export { downloadRepo, rewriteMarkdownReferences };
+export { downloadRepo, rewriteMarkdownReferences, syncFromRepo };

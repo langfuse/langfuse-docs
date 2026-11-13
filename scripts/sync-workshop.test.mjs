@@ -4,7 +4,11 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { downloadRepo, rewriteMarkdownReferences } from "./sync-workshop.mjs";
+import {
+  downloadRepo,
+  rewriteMarkdownReferences,
+  syncFromRepo,
+} from "./sync-workshop.mjs";
 
 const SOURCE_PATH = "docs/learner/04-monitoring.md";
 const RAW_IMAGE_BASE =
@@ -180,4 +184,86 @@ test("downloadRepo does not retry a missing repository", async () => {
 
   assert.equal(calls, 1);
   await fs.rm(targetDir, { recursive: true, force: true });
+});
+
+async function writeFixture(repoDir, files) {
+  for (const [relativePath, content] of Object.entries(files)) {
+    const target = path.join(repoDir, relativePath);
+    await fs.mkdir(path.dirname(target), { recursive: true });
+    await fs.writeFile(target, content);
+  }
+}
+
+async function readJson(filePath) {
+  return JSON.parse(await fs.readFile(filePath, "utf8"));
+}
+
+test("syncFromRepo nests a lesson folder's pages under the lesson", async () => {
+  const repoDir = await makeTempDir();
+  const outputDir = await makeTempDir();
+  await writeFixture(repoDir, {
+    "README.md": "# Workshop\n",
+    "docs/learner/00-setup.md": "# 00 Setup\n",
+    "docs/learner/04-monitoring.md": [
+      "# 04 Monitoring",
+      "",
+      "Start with [4.1](./04-monitoring/error-analysis.md), then [4.2](./04-monitoring/capturing-signals.md).",
+      "",
+    ].join("\n"),
+    "docs/learner/04-monitoring/capturing-signals.md":
+      "# 4.2 Capturing signals\n\nBack to [05](../05-dataset.md).\n",
+    "docs/learner/04-monitoring/error-analysis.md": "# 4.1 Error analysis\n",
+    "docs/learner/05-dataset.md":
+      "# 05 Dataset\n\nSee [4.1](./04-monitoring/error-analysis.md#seed).\n",
+    "docs/instructor/00-setup.md":
+      "# 00 Setup\n\nSee [4.2](../learner/04-monitoring/capturing-signals.md).\n",
+  });
+
+  await syncFromRepo(repoDir, outputDir);
+
+  const learnerDir = path.join(outputDir, "learner");
+  assert.deepEqual((await readJson(path.join(learnerDir, "meta.json"))).pages, [
+    "00-setup",
+    "04-monitoring",
+    "05-dataset",
+  ]);
+  assert.deepEqual(
+    await readJson(path.join(learnerDir, "04-monitoring", "meta.json")),
+    { pages: ["error-analysis", "capturing-signals"] },
+  );
+  await fs.access(path.join(learnerDir, "04-monitoring", "index.mdx"));
+  await assert.rejects(fs.access(path.join(learnerDir, "04-monitoring.mdx")));
+
+  const lesson = await fs.readFile(
+    path.join(learnerDir, "04-monitoring", "index.mdx"),
+    "utf8",
+  );
+  assert.match(
+    lesson,
+    /\[4\.1\]\(\/workshop\/learner\/04-monitoring\/error-analysis\)/,
+  );
+  const subPage = await fs.readFile(
+    path.join(learnerDir, "04-monitoring", "capturing-signals.mdx"),
+    "utf8",
+  );
+  assert.match(subPage, /\[05\]\(\/workshop\/learner\/05-dataset\)/);
+  const dataset = await fs.readFile(
+    path.join(learnerDir, "05-dataset.mdx"),
+    "utf8",
+  );
+  assert.match(
+    dataset,
+    /\(\/workshop\/learner\/04-monitoring\/error-analysis#seed\)/,
+  );
+  const instructor = await fs.readFile(
+    path.join(outputDir, "instructor", "00-setup.mdx"),
+    "utf8",
+  );
+  assert.match(
+    instructor,
+    /\(\/workshop\/learner\/04-monitoring\/capturing-signals\)/,
+  );
+
+  await fs.rm(repoDir, { recursive: true, force: true });
+  await fs.rm(outputDir, { recursive: true, force: true });
 });
