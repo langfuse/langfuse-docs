@@ -101,7 +101,6 @@ export async function DocsChromePage({
   return (
     <DocsPage
       toc={toc}
-      lastUpdate={lastModified}
       breadcrumb={{ component: <DocsBreadcrumb /> }}
       tableOfContent={{
         footer: (
