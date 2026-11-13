@@ -400,12 +400,13 @@ API keys authenticate calls to the [public API](/docs/api-and-data-platform/feat
 
 Choose a set of permissions under **Permissions** when creating a project API key to limit what the key can do. Give each integration the narrowest set of permissions that covers its job:
 
-| Permissions      | Access                                              | Typical use                                                                |
-| ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------- |
-| Full access      | All read and write privileges within the project.   | SDKs that also fetch prompts or datasets, admin scripts                    |
-| Viewer           | Read-only access to the project's data.             | Reporting, exports, dashboards built on the public API                     |
-| Ingestion        | Create traces, scores, and media; cannot read data. | Application tracing via the SDKs or OpenTelemetry                          |
-| Scores ingestion | Submit scores only.                                 | [User feedback from a web app](/docs/observability/features/user-feedback) |
+| Permissions      | Access                                                                                  | Typical use                                                                  |
+| ---------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Full access      | All read and write privileges within the project.                                       | SDKs that also fetch datasets, admin scripts                                 |
+| Developer        | Same access as the [`Member` role](#project-level-roles); cannot read traces or scores. | Agents and automations that manage prompts, skills, datasets, and evaluators |
+| Viewer           | Read-only access to the project's data.                                                 | Reporting, exports, dashboards built on the public API                       |
+| Application      | Create traces, scores, and media, and fetch prompts and skills; cannot read other data. | Deployed applications and agents traced via the SDKs or OpenTelemetry        |
+| Scores ingestion | Submit scores only.                                                                     | [User feedback from a web app](/docs/observability/features/user-feedback)   |
 
 <Callout type="info">
 Keys created before these permissions were available keep their existing access. A key's set of permissions cannot be changed after creation. Create a new key with a different set of permissions instead.
