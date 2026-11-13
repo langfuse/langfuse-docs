@@ -57,7 +57,7 @@ Published averages describe other teams. To decide for yours, run both agents on
 2. **Tag the work.** Add a tag per task type (`bugfix`, `feature`, `refactor`) through [request headers](/docs/gateway/features/tracing#request-headers), so you compare like with like.
 3. **Compare cost per session, not per call.** Agents differ in how many model rounds a task takes. A cheaper call means little if the task needs three times as many.
 4. **Read the outliers.** Open the most expensive sessions for each agent. Repeated file reads, failing test loops, and long replayed histories explain most of the gap.
-5. **Check quality too.** Cost per session only matters for tasks that succeed. [Evaluate coding agent sessions](/resources/engineering/evaluate-coding-agent-sessions) with a judge or human review to compare outcomes.
+5. **Check quality too.** Cost per session only matters for tasks that succeed. Score sessions with an [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluator or human review to compare outcomes.
 
 Running both through the [Langfuse AI Gateway](/docs/gateway/overview) also means one key per developer for both agents, and one analytics page for both vendors.
 
