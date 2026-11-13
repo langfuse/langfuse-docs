@@ -1,133 +1,430 @@
 ---
-source: ⚠️ Jupyter Notebook
 title: Integrate Langfuse with Strands Box
 sidebarTitle: Strands Box
 logo: /images/integrations/strands-box_icon.svg
-description: Trace Strands agents running in Box with Langfuse through an operator-owned OpenTelemetry Collector, locally and on AgentCore Runtime.
-category: Integrations
+description: Trace Strands agents running inside Strands Box with Langfuse via OpenTelemetry, locally or on Amazon Bedrock AgentCore Runtime.
 ---
 
 # Integrate Langfuse with Strands Box
 
-This guide sends native Strands agent traces through **Strands Box** to **Langfuse**, with Langfuse credentials kept in an operator-owned OpenTelemetry Collector.
+This guide shows you how to trace a Strands agent running inside **Strands Box** with **Langfuse**. You can inspect its model calls, tool calls, answers and token usage while Box keeps the Langfuse credential outside the agent process.
 
-> **What is Strands Box?** [Strands Box](https://strandsagents.com/docs/user-guide/box/) runs an agent with declared filesystem, network and credential access.
+> **What is Strands Box?** [Strands Box](https://strandsagents.com/docs/user-guide/box/) runs an agent in a contained process with declared file, network and credential access.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform for tracing and debugging AI applications.
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It provides tracing, debugging, evaluation, and monitoring capabilities for AI agents and LLM applications. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+[Strands Agents](/integrations/frameworks/strands-agents) records the agent's work as OpenTelemetry traces. Box forwards those traces to Langfuse using your project secret key.
 
 <Frame>
-![A Box-contained Strands agent in Langfuse, with two model calls and a README tool call](/images/cookbook/integration-strands-box/box-readme-trace.jpg)
-
+  ![A Strands README agent in Langfuse, showing its native invocation, two model calls and a file-reading tool](/images/cookbook/integration-strands-box/box-readme-agent-trace.png)
 </Frame>
 
-The trace retains the original messages, tool results, token usage and Box run metadata. The screenshot shows a synthetic README task on AgentCore; it also preserves extra model text that failed the application's strict answer-format check.
+## Setup steps [#setup]
 
-<Callout type="info">
-Start with a working Box configuration for your Python Strands agent, including its interpreter, dependency and file grants, policy, model egress and operator-held model credential. Follow the [Box Python agent guide](https://strandsagents.com/docs/user-guide/box/guides/run-strands-harness/) first. This notebook adds observability to that configuration; it does not generate a containment policy.
+The steps below add tracing to the agent from the [Box Python agent setup](https://strandsagents.com/docs/user-guide/box/guides/run-strands-harness/) and use its `~/box-tutorial` folder. They are all you need to see traces in Langfuse.
 
-</Callout>
-
-## How traces travel
-
-```text
-Contained Strands agent → Box loopback receiver
-                          ↓
-                  Operator-owned Collector
-                  agent spans + Basic auth
-                          ↓
-                       Langfuse
-```
-
-Box supplies the workload's OTLP endpoint and stamps relayed resources with its run ID. The Collector selects agent spans, adds Langfuse authentication and forwards traces. Local Box policy/control records can stay in the operator's record file.
-
-<Callout type="warning">
-This recipe was qualified with Box revision `e4ca8b80359b2213d684de31cd6ef32e0d61478a`, Strands 1.63.0 and Collector Contrib 0.164.0. The tested native Box exporter prefixes Authorization secrets with `Bearer ` and cannot add the v4 header. Langfuse requires Basic authentication, so use the Collector route below for this version. Langfuse accepts both OTLP/HTTP JSON and protobuf; protobuf support is not the missing piece. Recheck compatibility when upgrading Box.
-
-</Callout>
+The sections after the steps are optional: deploying to [AgentCore Runtime](#agentcore), inspecting [Box lifecycle traces](#box-lifecycle-traces), and [exporting through a Collector](#export-headers-and-filtering).
 
 <Steps>
-## Step 1: Install dependencies
 
-Use Python 3.11 or later for this notebook. Install the same Strands version into the environment that your Box workload uses; installing it in the operator notebook alone does not grant the contained process access to it.
+### Add tracing to the agent
 
-```python
-%pip install -U langfuse "strands-agents[otel]==1.63.0" tomli-w
+Install tracing support in the agent's Python environment:
+
+```bash
+cd ~/box-tutorial
+strands-agent/runtime/.venv/bin/python3 -m pip install -U "strands-agents[otel]"
 ```
 
-## Step 2: Set up the operator environment
+Replace `strands-agent/agent.py` with this agent, which has one tool, `read_readme`:
 
-Get your Langfuse keys from the project settings in [Langfuse Cloud](https://langfuse.com/cloud) or set up [self-hosting](https://langfuse.com/self-hosting).
-
-```python
+```python filename="agent.py"
+"""A native Strands README agent, launched by Box."""
 import os
+from pathlib import Path
+import sys
 
-# Get keys for your project from the project settings page: https://langfuse.com/cloud
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region (API host)
-# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-
-os.environ.setdefault("BOX_BIN", "/absolute/path/to/box");
-os.environ.setdefault("BOX_CONFIG_PATH", "/absolute/path/to/your/box.toml");
-os.environ.setdefault("OTELCOL_BIN", "/absolute/path/to/otelcol-contrib");
-```
-
-With the environment variables set, initialize the Langfuse client. `get_client()` picks up the env vars above and returns a client bound to your project.
-
-```python
-from langfuse import get_client
-
-langfuse = get_client()
-
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
-```
-
-## Step 3: Initialize tracing inside the contained agent
-
-Add this code to the existing Python entrypoint that your Box configuration launches. The `agent` and `prompt` below are your application's existing objects. Do not run the agent in the operator notebook process.
-
-```python
-# In the Python entrypoint launched by Box, around your existing agent call:
+from strands import Agent, tool
+from strands.models import BedrockModel
 from strands.telemetry import StrandsTelemetry
 
+
+@tool
+def read_readme() -> str:
+    """Read README.md from the agent's workspace."""
+    return Path("README.md").read_text()
+
+
 telemetry = StrandsTelemetry().setup_otlp_exporter(timeout=5)
+agent = Agent(
+    name="readme-assistant",
+    model=BedrockModel(
+        model_id=os.environ["MODEL_ID"],
+        region_name=os.environ["AWS_REGION"],
+        max_tokens=256,
+    ),
+    tools=[read_readme],
+    system_prompt="Use read_readme to answer questions about README.md. Reply briefly.",
+    callback_handler=None,
+)
 try:
-    result = agent(prompt)  # Your existing Strands Agent and task.
+    result = agent(" ".join(sys.argv[1:]))
+    print(str(result))
 finally:
     if not telemetry.tracer_provider.force_flush(timeout_millis=10000):
-        raise RuntimeError("The agent trace exporter did not flush")
+        raise RuntimeError("The trace exporter did not flush")
     telemetry.tracer_provider.shutdown()
 ```
 
-Do not initialize a Langfuse SDK client or configure a Langfuse OTLP destination inside the contained agent. Box owns `OTEL_EXPORTER_OTLP_*` and supplies its loopback receiver. Keep the agent's declared environment free of Langfuse keys and Runtime-role credentials. The operator client above is only an authentication check.
+Two parts of this file are for tracing: `StrandsTelemetry().setup_otlp_exporter()` turns on trace export, and the `finally` block sends the trace before the process exits. Add the same two parts to trace your own agent.
 
-## Step 4: Start an operator-owned Collector
+### Set the Langfuse secret key
 
-Install [OpenTelemetry Collector Contrib](https://github.com/open-telemetry/opentelemetry-collector-releases/releases/tag/v0.164.0) 0.164.0 for your operating system and architecture. This recipe requires the OTLP receiver/exporter, filter and batch processors, health-check extension, and nop exporter.
+Get a project secret key from [API keys](https://cloud.langfuse.com/project/~/settings/api-keys). Set it in the operator environment, which is the shell that launches Box:
 
-The following helper binds loopback ports and waits for readiness. It uses a clean Collector environment. The Collector configuration stays in an operator-only temporary directory that is removed when the helper stops. The Collector log is kept, mode 0600, and the helper prints its path. The trace filter drops Box records from this destination; the logs and metrics pipelines terminate locally. It does not rewrite Strands messages, usage or parent IDs.
+```bash
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+```
+
+Use the raw `sk-lf-...` value. Box sends it as `Authorization: Bearer ...`; this OTLP route does not require a public key or a Base64-encoded key pair.
+
+<Callout type="info">
+  Bearer authentication with the secret key is a **preview capability**. It is
+  available on Langfuse Cloud; self-hosted deployments need a recent Langfuse
+  version.
+</Callout>
+
+### Configure Box export
+
+Add these values to the agent's existing environment in `box.toml`:
+
+```toml filename="box.toml"
+[agent.env]
+OTEL_TRACES_EXPORTER = "otlp"
+OTEL_SERVICE_NAME = "box-readme-agent"
+OTEL_SEMCONV_STABILITY_OPT_IN = "gen_ai_latest_experimental,gen_ai_span_attributes_only"
+```
+
+The Box setup guide's `box.toml` defines the environment as an inline `env = { ... }` table under `[agent]`. In that case, add the three values inside that table instead, and keep its existing model and runtime settings.
+
+`OTEL_SEMCONV_STABILITY_OPT_IN` makes Strands record model inputs and outputs as structured messages, including tool calls and tool results. Without it, Langfuse receives the same messages as JSON-encoded strings.
+
+Add a Langfuse telemetry target:
+
+```toml filename="box.toml"
+[telemetry.langfuse]
+kind = "otlp"
+destination = "https://cloud.langfuse.com/api/public/otel"
+secret.ref = "env://LANGFUSE_SECRET_KEY"
+include = ["trace"]
+```
+
+This URL uses **Langfuse Cloud EU**. Use your project's [regional host](/security/data-regions) for another region. Box resolves the secret from the operator environment and forwards the agent's traces directly.
+
+<Callout type="info">
+  Keep Langfuse keys and `OTEL_EXPORTER_OTLP_*` settings out of `[agent.env]`.
+  Box sets the contained agent's OTLP endpoint to its own loopback receiver.
+  Adding a telemetry target replaces Box's default local file target; retain an
+  explicit file target if you need local policy and lifecycle records, as
+  described in [Box
+  telemetry](https://strandsagents.com/docs/user-guide/box/guides/record-telemetry/).
+</Callout>
+
+### Run the task
+
+Put these lines in `~/box-tutorial/my-project/README.md`:
+
+```text filename="README.md"
+Project Atlas
+Owner: Maya
+Release day: Tuesday
+```
+
+In `strands-agent/box.toml`, add `"~/box-tutorial/my-project/README.md"` to the `read_file` list under `[agent.filesystem]`, so the agent can read the file.
+
+Run Box in the shell that holds `LANGFUSE_SECRET_KEY` and your model credential:
+
+```bash
+cd ~/box-tutorial
+./box-core/box run --config strands-agent/box.toml -- "Who owns Project Atlas, and when is the release?"
+```
+
+The answer names **Maya** and **Tuesday**.
+
+### View the trace
+
+Open [Tracing](https://cloud.langfuse.com/project/~/traces) in your Langfuse project and find the new `invoke_agent readme-assistant` observation. Expect two `chat` model calls and one `read_readme` tool call, with the model input, tool result, answer and token usage.
+
+Box also sends its own lifecycle spans, such as `control box_started`, as a separate trace. See [Box lifecycle traces](#box-lifecycle-traces) to match the two or keep them out of Langfuse.
+
+<Callout type="info">
+  Box sends these traces without the `x-langfuse-ingestion-version: 4` header,
+  so there might be a slight delay before they appear. To see them in real time, add the
+  header with a Collector as described in [export headers and
+  filtering](#export-headers-and-filtering).
+</Callout>
+
+</Steps>
+
+## Run on AgentCore Runtime [#agentcore]
+
+This section is optional. Box runs wherever you start it: on your machine, as in the steps above, or in a cloud environment. [Amazon Bedrock AgentCore Runtime](/integrations/frameworks/amazon-agentcore) is one such environment; the [Box documentation](https://strandsagents.com/docs/user-guide/box/) covers others.
+
+On AgentCore Runtime, the agent and the Langfuse settings stay the same. Three things change: `box.toml` uses the Runtime's Linux paths, an entrypoint starts Box for each request, and the Langfuse key becomes a Runtime environment variable.
+
+The example is a direct code deployment on the Runtime's Python 3.13 environment, which unpacks the package to `/var/task`.
+
+<Steps>
+
+### Configure Box for the Runtime
+
+Create a `box.toml` for the package. It has the same `OTEL_*` values and `[telemetry.langfuse]` target as the local setup; the paths and filesystem grants are the Runtime's.
+
+<Details>
+<Summary>Complete box.toml for AgentCore Runtime</Summary>
+
+```toml filename="box.toml"
+name = "readme-agent"
+box_dir = "/var/tmp/box-readme/state"
+policy = "policy.dw"
+
+[agent]
+command = ["/usr/bin/python3.13", "/var/task/agent.py"]
+workspace = "/var/task/workspace"
+
+[agent.env]
+AWS_REGION = "us-west-2"
+AWS_EC2_METADATA_DISABLED = "true"
+MODEL_ID = "your-model-id"
+PATH = "/usr/bin:/bin"
+HOME = "/var/tmp/box-readme/tmp"
+TMPDIR = "/var/tmp/box-readme/tmp"
+PYTHONPATH = "/var/task/vendor"
+PYTHONDONTWRITEBYTECODE = "1"
+OTEL_TRACES_EXPORTER = "otlp"
+OTEL_SERVICE_NAME = "box-readme-agent"
+OTEL_SEMCONV_STABILITY_OPT_IN = "gen_ai_latest_experimental,gen_ai_span_attributes_only"
+
+[agent.filesystem]
+read = [
+  "/usr/lib",
+  "/usr/lib64",
+  "/var/task/vendor",
+  "/var/task/workspace",
+  "/var/tmp/box-readme/tmp",
+]
+read_file = ["/var/task/agent.py"]
+exec = ["/var/task/vendor", "/usr/lib/python3.13/lib-dynload"]
+write = ["/var/tmp/box-readme/tmp"]
+
+[egress.model]
+destinations = ["bedrock-runtime.us-west-2.amazonaws.com"]
+secret.ref = "env://AWS_BEARER_TOKEN_BEDROCK"
+
+[telemetry.langfuse]
+kind = "otlp"
+destination = "https://cloud.langfuse.com/api/public/otel"
+secret.ref = "env://LANGFUSE_SECRET_KEY"
+include = ["trace"]
+```
+
+</Details>
+
+Set `MODEL_ID` to your model. If you use another AWS Region, change `AWS_REGION`, the egress destination and the model host in `policy.dw` together.
+
+### Add the entrypoint
+
+Save this entrypoint as `main.py`. It passes the request's prompt to Box:
+
+```python filename="main.py"
+import datetime
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT / "vendor"))
+
+from aws_bedrock_token_generator import provide_token
+from bedrock_agentcore.runtime import BedrockAgentCoreApp
+
+WORK = Path("/var/tmp/box-readme")
+app = BedrockAgentCoreApp()
+
+@app.entrypoint
+def invoke(payload):
+    for name in ("state", "tmp", "home"):
+        (WORK / name).mkdir(mode=0o700, parents=True, exist_ok=True)
+    operator_env = os.environ.copy()
+    operator_env["HOME"] = str(WORK / "home")
+    operator_env["EXPERIMENTAL_LINUX_SUPPORT"] = "TRUE"
+    operator_env["AWS_BEARER_TOKEN_BEDROCK"] = provide_token(
+        region=os.environ["AWS_REGION"],
+        expiry=datetime.timedelta(minutes=5),
+    )
+    result = subprocess.run(
+        [
+            str(ROOT / "box-core/box"), "run", "--config", str(ROOT / "box.toml"),
+            "--", payload["prompt"],
+        ],
+        env=operator_env, check=True, capture_output=True, text=True, timeout=120,
+    )
+    return {"output": result.stdout}
+
+if __name__ == "__main__":
+    if os.getuid() == 0:
+        os.setgroups([])
+        os.setgid(991)
+        os.setuid(991)
+    app.run()
+```
+
+Besides starting Box, the entrypoint switches to a non-root user, creates writable directories under `/var/tmp`, turns on Box's Linux support and creates a short-lived model token from the execution role.
+
+### Build the package
+
+Put the files in one folder:
+
+```text
+main.py              # the entrypoint
+agent.py             # the agent from the setup steps
+box.toml             # the Runtime configuration
+policy.dw            # the policy from your Box setup
+workspace/README.md  # the README from the setup steps
+box-core/            # Box binaries for Linux ARM64
+vendor/              # Python dependencies for Linux ARM64
+```
+
+Unpack the Linux ARM64 archive of a [Box release](https://github.com/strands-agents/box/releases) into `box-core/`. Then install the dependencies into `vendor/` and zip the folder's contents, so that `main.py` sits at the archive root:
+
+```bash
+pip install --target vendor --platform manylinux2014_aarch64 --python-version 3.13 --only-binary=:all: \
+  "strands-agents[otel]" bedrock-agentcore aws-bedrock-token-generator
+zip -r ../box-readme-agent.zip .
+```
+
+### Deploy and invoke
+
+Create the Runtime as a direct code deployment with the Python 3.13 runtime and `main.py` as its entrypoint. The [Box AgentCore deployment guide](https://strandsagents.com/docs/user-guide/box/guides/deploy-to-agentcore-runtime/) shows a complete deployment, including the execution-role permissions for model access.
+
+Set two environment variables on the Runtime: `LANGFUSE_SECRET_KEY`, and `DISABLE_ADOT_OBSERVABILITY=true` to turn off the Runtime's built-in telemetry export.
+
+After the Runtime and its DEFAULT endpoint are ready, invoke it with a `prompt` payload. The new trace has the same agent, model and tool structure as the local run.
+
+<Details>
+<Summary>Invoke the Runtime with boto3</Summary>
 
 ```python
-"""Notebook helper: launch an operator-owned Collector for an existing Box workload."""
-from contextlib import contextmanager
-from pathlib import Path
-import base64
+import json
 import os
-import socket
-import subprocess
-import tempfile
-import time
-from urllib.request import urlopen
+import uuid
+import boto3
 
-COLLECTOR_YAML = r'''receivers:
+client = boto3.client("bedrock-agentcore", region_name=os.environ["AWS_REGION"])
+response = client.invoke_agent_runtime(
+    agentRuntimeArn=os.environ["AGENT_RUNTIME_ARN"],
+    runtimeSessionId="box-readme-" + uuid.uuid4().hex,
+    contentType="application/json",
+    payload=json.dumps({
+        "prompt": "Who owns Project Atlas, and when is the release?"
+    }).encode(),
+)
+print(json.loads(response["response"].read())["output"])
+```
+
+</Details>
+
+</Steps>
+
+## Box lifecycle traces [#box-lifecycle-traces]
+
+With the setup above, each Box run sends two traces to Langfuse: the agent trace and a Box lifecycle trace with spans such as `control box_started` and `control box_stopped`. They have different trace IDs; the `strands.box.run.id` resource attribute connects them to the same run.
+
+<Details>
+<Summary>Record and inspect lifecycle traces</Summary>
+
+A local record file lists every span of a run with its origin and Box run ID. It also holds Box's policy records, which are not sent to Langfuse.
+
+**1. Keep a local record file.** Add this target alongside `[telemetry.langfuse]` in `box.toml`. If you already have a file target, reuse its path instead:
+
+```toml filename="box.toml"
+[telemetry.records]
+kind = "file"
+destination = "~/box-langfuse/records.jsonl"
+```
+
+Create the directory before running Box:
+
+```bash
+mkdir -p ~/box-langfuse
+```
+
+<Callout type="info">
+  The file belongs to the operator. Choose a location outside the agent's
+  writable paths. On AgentCore, replace the example path with writable operator
+  storage from your deployment and update `records_path` in the script below to
+  match.
+</Callout>
+
+**2. Inspect one run.** Run the README task again, then save this script as `inspect_records.py`. It reads the recorded spans and prints their origin, Box run ID, trace ID and name:
+
+```python filename="inspect_records.py"
+import json
+from pathlib import Path
+
+records_path = Path.home() / "box-langfuse" / "records.jsonl"
+
+for line in records_path.read_text().splitlines():
+    batch = json.loads(line)
+    for group in batch.get("resourceSpans", []):
+        attributes = {
+            item["key"]: item["value"].get("stringValue")
+            for item in group.get("resource", {}).get("attributes", [])
+        }
+        for scope in group.get("scopeSpans", []):
+            for span in scope.get("spans", []):
+                print(
+                    attributes.get("strands.box.source"),
+                    attributes.get("strands.box.run.id"),
+                    span["traceId"],
+                    span["name"],
+                )
+```
+
+```bash
+python3 inspect_records.py
+```
+
+**3. Match the records to Langfuse.** Open the agent observation's **Metadata** and find `resourceAttributes.strands.box.run.id`. Match that value to the printed rows: `agent` identifies relayed Strands spans, and `box` identifies Box-generated spans such as `control box_started` and `policy http:request`.
+
+After one run, expect both origins with the same Box run ID. To keep Box records locally while sending only agent traces to Langfuse, use the [Collector configuration](#export-headers-and-filtering).
+
+</Details>
+
+## Export headers and filtering with a Collector [#export-headers-and-filtering]
+
+Put an OpenTelemetry Collector between Box and Langfuse to see traces in real time, export only agent traces, or add an export queue with retries.
+
+<Details>
+<Summary>Set up the Collector</Summary>
+
+Box's OTLP target sends only the `Authorization` header. Use a Collector when you need one of these export controls:
+
+- Add `x-langfuse-ingestion-version: 4`, which selects Langfuse's v4 ingestion path. Without this header, traces [might appear with a slight delay](/integrations/native/opentelemetry#real-time-ingestion).
+- Send agent traces to Langfuse, with Box lifecycle and policy records kept in the local file.
+- Configure an export queue and retries for temporary connection failures.
+
+The flow becomes **agent → Box → Collector → Langfuse**. The agent code stays the same. The Collector sends Bearer authentication and the ingestion-version header. Box also sends log payloads; this configuration accepts them locally and discards them because Langfuse ingests traces.
+
+**1. Configure the Collector.** Install the `otelcol` or `otelcol-contrib` distribution, version 0.164.0 or later, from an [official OpenTelemetry Collector release](https://github.com/open-telemetry/opentelemetry-collector-releases/releases) for your operator's platform. Save this configuration as `collector.yaml` in `~/box-tutorial`:
+
+```yaml filename="collector.yaml"
+receivers:
   otlp:
     protocols:
       http:
-        endpoint: 127.0.0.1:${env:BOX_COLLECTOR_PORT}
+        endpoint: 127.0.0.1:4318
 processors:
   filter/agent_only:
     error_mode: propagate
@@ -137,11 +434,9 @@ processors:
     timeout: 1s
 exporters:
   otlp_http/langfuse:
-    endpoint: ${env:LANGFUSE_OTLP_ENDPOINT}
-    encoding: json
-    compression: none
+    endpoint: ${env:LANGFUSE_BASE_URL}/api/public/otel
     headers:
-      Authorization: ${env:LANGFUSE_OTLP_AUTH}
+      Authorization: "Bearer ${env:LANGFUSE_SECRET_KEY}"
       x-langfuse-ingestion-version: "4"
     timeout: 10s
     retry_on_failure:
@@ -155,7 +450,7 @@ exporters:
   nop:
 extensions:
   health_check:
-    endpoint: 127.0.0.1:${env:BOX_HEALTH_PORT}
+    endpoint: 127.0.0.1:13133
 service:
   extensions: [health_check]
   pipelines:
@@ -169,285 +464,124 @@ service:
     metrics:
       receivers: [otlp]
       exporters: [nop]
-'''
+```
 
+The filter drops spans from resources whose `strands.box.source` is not `agent`. The `nop` exporter discards logs and metrics. The Collector resolves the Langfuse host and key from its own environment.
 
-def free_ports():
-    sockets = [socket.socket() for _ in range(2)]
-    try:
-        for item in sockets:
-            item.bind(("127.0.0.1", 0))
-        return [item.getsockname()[1] for item in sockets]
-    finally:
-        for item in sockets:
-            item.close()
+If you want the v4 header while keeping lifecycle traces in Langfuse, change `service.pipelines.traces.processors` to `[batch]`. This bypasses the agent-only filter; local recording is unaffected.
 
+**2. Point Box at the Collector.** Replace the entire `[telemetry.langfuse]` block with this block, removing its `secret.ref` entry. Keep `[telemetry.records]` if you configured local records:
 
-def collector_log_tail(path, limit=40):
-    """Return a short log excerpt with credential-bearing lines removed."""
-    try:
-        text = path.read_text(errors="replace")
-    except OSError:
-        return ""
-    kept = []
-    for line in text.splitlines():
-        lowered = line.lower()
-        if any(
-            token in lowered
-            for token in (
-                "authorization",
-                "langfuse_otlp_auth",
-                "langfuse_secret_key",
-                "sk-lf-",
-                "pk-lf-",
-            )
-        ):
-            kept.append("[redacted line]")
-        else:
-            kept.append(line)
-    return "\n".join(kept[-limit:])
+```toml filename="box.toml"
+[telemetry.langfuse]
+kind = "otlp"
+destination = "http://127.0.0.1:4318"
+include = ["trace"]
+```
+
+**3. Start the Collector.** In the shell where `LANGFUSE_SECRET_KEY` is set, add your project's host, validate the configuration and start the Collector. The example uses **Langfuse Cloud EU**; use your project's [regional host](/security/data-regions) for another region:
+
+```bash
+cd ~/box-tutorial
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com"
+otelcol validate --config collector.yaml
+otelcol --config collector.yaml
+```
+
+If `otelcol` is not on your `PATH`, call the downloaded binary by its path.
+
+**4. Run Box.** The Collector keeps running in its shell. In a second shell that holds your model credential, check that the Collector is ready and run the task. This shell does not need `LANGFUSE_SECRET_KEY`:
+
+```bash
+cd ~/box-tutorial
+curl --fail http://127.0.0.1:13133/
+./box-core/box run --config strands-agent/box.toml -- "Who owns Project Atlas, and when is the release?"
+```
+
+After Box exits, stop the Collector with `Ctrl+C`.
+
+<Callout type="info">
+  Ports `4318` and `13133` must be free in the operator's network namespace. If
+  you change them, update the Collector receiver, the Box destination and the
+  health URL together. The health endpoint confirms that the Collector is
+  running, not that Langfuse accepted the data; export and authentication errors
+  appear in the Collector's output. The queue is in memory and retries expire
+  after 30 seconds; it does not provide durable delivery.
+</Callout>
+
+**5. Verify the result.** Open the new native agent trace in Langfuse and check its model and tool observations. For the README task, expect six agent observations. If you kept a local record file, Box-generated records remain there and are not exported by this Collector pipeline.
+
+**On AgentCore:** the entrypoint starts and stops the Collector around each Box run. Change the [AgentCore package](#agentcore) as follows:
+
+- Add a Linux ARM64 Collector binary as `otelcol/otelcol` and add `collector.yaml`.
+- In the packaged `box.toml`, replace the `[telemetry.langfuse]` block with the Collector block from step 2.
+- Set `LANGFUSE_BASE_URL` to your project's regional host on the Runtime, next to `LANGFUSE_SECRET_KEY`.
+
+Add this helper to `main.py`. It validates the configuration, waits for the local health endpoint and stops the Collector after Box finishes, including if the task fails:
+
+```python
+from contextlib import contextmanager
+from pathlib import Path
+import subprocess
+import tempfile
+import time
+from urllib.error import URLError
+from urllib.request import urlopen
 
 
 @contextmanager
-def start_collector(*, destination=None, authorization=None):
-    """Keep credentials in the operator's Collector process, outside the agent."""
-    port, health_port = free_ports()
-    if authorization is None:
-        encoded = base64.b64encode(
-            f"{os.environ['LANGFUSE_PUBLIC_KEY']}:{os.environ['LANGFUSE_SECRET_KEY']}".encode()
-        ).decode()
-        authorization = f"Basic {encoded}"
-    destination = destination or os.environ["LANGFUSE_BASE_URL"].rstrip("/") + "/api/public/otel"
-    # mkstemp creates the log as 0600 and does not delete it when this helper exits.
-    descriptor, log_name = tempfile.mkstemp(prefix="box-langfuse-collector-", suffix=".log")
-    os.close(descriptor)
-    log_path = Path(log_name)
-    startup_error = None
-    try:
-        with tempfile.TemporaryDirectory(prefix="box-langfuse-") as directory:
-            config = Path(directory) / "collector.yaml"
-            config.write_text(COLLECTOR_YAML)
-            child_env = {key: os.environ[key] for key in ("HOME", "PATH", "TMPDIR") if key in os.environ}
-            child_env.update({
-                "BOX_COLLECTOR_PORT": str(port),
-                "BOX_HEALTH_PORT": str(health_port),
-                "LANGFUSE_OTLP_ENDPOINT": destination,
-                "LANGFUSE_OTLP_AUTH": authorization,
-            })
-            # Keep the log after this helper exits. Do not print its contents.
-            with log_path.open("w") as log:
-                process = subprocess.Popen(
-                    [os.environ["OTELCOL_BIN"], "--config", str(config)],
-                    env=child_env, stdout=log, stderr=log,
-                )
-                try:
-                    deadline = time.monotonic() + 30
-                    while True:
-                        if process.poll() is not None:
-                            startup_error = RuntimeError("Collector exited before becoming ready")
-                            break
-                        try:
-                            with urlopen(f"http://127.0.0.1:{health_port}/", timeout=0.2) as response:
-                                if response.status == 200:
-                                    break
-                        except OSError:
-                            pass
-                        if time.monotonic() >= deadline:
-                            startup_error = TimeoutError("Collector did not become ready")
-                            break
-                        time.sleep(0.1)
-                    if startup_error is None:
-                        yield f"http://127.0.0.1:{port}"
-                finally:
-                    if process.poll() is None:
-                        process.terminate()
-                    try:
-                        process.wait(timeout=45)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait()
-                    log.flush()
-    finally:
-        print(f"Collector log: {log_path}")
-    if startup_error is not None:
-        tail = collector_log_tail(log_path)
-        message = f"{startup_error}\nCollector log: {log_path}"
-        if tail:
-            message += f"\n{tail}"
-        raise type(startup_error)(message) from startup_error
-
-
-```
-
-## Step 5: Connect Box and run your existing workload
-
-The helper below creates a temporary copy beside your base configuration, preserving relative paths and existing containment grants. It adds the Collector target, retains the default local record file when no targets were declared, and passes only explicitly referenced egress secrets to the Box process. Your existing operator model credential must already be available; the notebook does not create it.
-
-For Linux, complete Box's documented platform prerequisites and set `EXPERIMENTAL_LINUX_SUPPORT=TRUE` in the operator environment when required by the tested version. Run as a non-root operator. The two-port allocation is suitable for this single-run example; production supervisors should manage endpoints and concurrency.
-
-```python
-"""Add telemetry to a working Box config without changing its containment grants."""
-from pathlib import Path
-import os
-import subprocess
-import tempfile
-import tomllib
-import tomli_w
-
-
-def run_box_with_collector(config_path, collector_endpoint):
-    config_path = Path(config_path).resolve()
-    config = tomllib.loads(config_path.read_text())
-    agent_env = config["agent"].setdefault("env", {})
-    if any(key.startswith(("LANGFUSE_", "OTEL_EXPORTER_OTLP_")) for key in agent_env):
-        raise ValueError("Remove Langfuse credentials and OTLP endpoints/headers from agent.env")
-    agent_env["OTEL_TRACES_EXPORTER"] = "otlp"
-    agent_env.setdefault("OTEL_SERVICE_NAME", "strands-box-example")
-    targets = config.setdefault("telemetry", {})
-    if not targets:
-        # An explicit target replaces Box's default file target. Retain that file.
-        targets["local"] = {
-            "kind": "file",
-            "destination": str(Path(config["box_dir"]).expanduser() / "private/telemetry/records.jsonl"),
-        }
-    if "langfuse_collector" in targets:
-        raise ValueError("Use a base config without a langfuse_collector target")
-    targets["langfuse_collector"] = {
-        "kind": "otlp", "destination": collector_endpoint, "include": ["trace"],
-    }
-    box_env = {key: os.environ[key] for key in ("HOME", "PATH", "TMPDIR", "EXPERIMENTAL_LINUX_SUPPORT") if key in os.environ}
-    missing = []
-    for egress in config.get("egress", {}).values():
-        reference = egress.get("secret", {}).get("ref", "")
-        if reference.startswith("env://"):
-            name = reference.removeprefix("env://")
-            if name not in os.environ:
-                missing.append(name)
-            else:
-                box_env[name] = os.environ[name]
-    if missing:
-        raise KeyError(
-            "Missing operator environment variables for Box egress: " + ", ".join(missing)
+def run_collector(binary, config_path):
+    config_path = str(Path(config_path).resolve())
+    subprocess.run([binary, "validate", "--config", config_path], check=True)
+    with tempfile.NamedTemporaryFile(
+        prefix="box-collector-", suffix=".log", mode="w", delete=False
+    ) as log:
+        log_path = Path(log.name)
+        process = subprocess.Popen(
+            [binary, "--config", config_path],
+            stdout=log, stderr=subprocess.STDOUT,
         )
-    # Preserve the config directory so relative policy/command paths still resolve.
-    # Create the overlay only after egress secrets resolve, and always remove it.
-    with tempfile.NamedTemporaryFile(dir=config_path.parent, suffix=".toml", delete=False) as file:
-        overlay = Path(file.name)
     try:
-        overlay.write_bytes(tomli_w.dumps(config).encode())
-        result = subprocess.run(
-            [os.environ["BOX_BIN"], "run", "--config", str(overlay)],
-            env=box_env, timeout=120, check=True,
-        )
-        return result.returncode
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                raise RuntimeError(f"Collector exited; inspect {log_path}")
+            try:
+                with urlopen("http://127.0.0.1:13133/", timeout=1) as response:
+                    if response.status == 200:
+                        break
+            except URLError:
+                time.sleep(0.1)
+        else:
+            raise TimeoutError(f"Collector did not become ready; inspect {log_path}")
+        print("Collector ready. Log:", log_path)
+        yield
     finally:
-        overlay.unlink(missing_ok=True)
-
-with start_collector() as collector_endpoint:
-    exit_code = run_box_with_collector(os.environ["BOX_CONFIG_PATH"], collector_endpoint)
-print("Box workload exit code:", exit_code)
-
+        if process.poll() is None:
+            process.terminate()
+        try:
+            process.wait(timeout=45)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait()
 ```
 
-## Step 6: View traces in Langfuse
-
-Open [your project's tracing view](https://cloud.langfuse.com/project/~/traces). Inspect the agent, model calls and tools, then open Metadata to inspect Box provenance. The exact number of observations depends on the workload.
-
-</Steps>
-
-## Run the same pattern on AgentCore Runtime [#agentcore]
-
-Keep the three components in one Runtime session: the operator entrypoint, Box's contained agent process, and the operator-owned Collector. Our reference deployment used Runtime V2, a non-root operator, Linux ARM64 and Python 3.13. Build native dependencies for the selected Runtime architecture and Python version.
-
-Use the [official Box AgentCore deployment guide](https://strandsagents.com/docs/user-guide/box/guides/deploy-to-agentcore-runtime/) for platform setup and the [Langfuse AgentCore guide](https://langfuse.com/integrations/frameworks/amazon-agentcore) for external telemetry configuration. The Box guide's Python 3.12 shipment example is a different workload from the README tracing example shown here.
-
-1. Package the Box binary and required helpers, your contained agent, Python dependencies, policy/configuration, and the Collector binary/configuration. Keep credentials out of the package.
-2. Start the Runtime's operator as a non-root user. Retain model permissions in its execution role and resolve the model credential outside the agent. Our Bedrock route used a short-lived bearer token referenced by Box egress; the contained workload received Box's replacement credential.
-3. Set `DISABLE_ADOT_OBSERVABILITY=true` for the external telemetry setup used here. Supply Langfuse settings to the operator/Collector, with network access to the correct Langfuse regional host. Do not copy Runtime-role credentials, Langfuse headers or operator OTLP variables into `[agent.env]`.
-4. Start the Collector and check readiness before invoking Box. Keep it running until agent flush and Collector shutdown complete. Construct fresh Box state for each isolated task where your application requires it.
-5. Test a fresh Runtime session and a repeated invocation. Verify the DEFAULT endpoint points at the new version before judging a test result.
-
-<Callout type="warning">
-The tested Collector binary is about 168 MB. Its initial read/startup was slow in our S3 ZIP deployment. An invocation-time sequential read and checksum verification avoided the observed readiness failure. Measure cold-session behavior and restored sessions with your package; a warm local process does not qualify Runtime startup. This guide does not establish the underlying platform cause.
-
-</Callout>
-
-### Include caller context and the outer request [#request-context]
-
-The inner `invoke_agent` duration covers the agent workflow. Add an operator span if you also need package preparation, Collector startup, Box launch, validation, and the Runtime's final error in the same trace.
-
-Use an operator-owned tracer/exporter with Langfuse Basic authentication. Extract the caller's W3C `traceparent`/`tracestate`, start `invoke-runtime`, and inject that current context into the explicitly declared agent environment:
+Then wrap the entrypoint's existing Box subprocess call:
 
 ```python
-from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-
-propagator = TraceContextTextMapPropagator()
-# In your Runtime handler; `tracer` belongs to the operator's provider.
-parent = propagator.extract(payload.get("trace_context", {}))
-with tracer.start_as_current_span("invoke-runtime", context=parent) as runtime_span:
-    carrier = {}
-    propagator.inject(carrier)
-    agent_env.update({
-        "TRACEPARENT": carrier["traceparent"],
-        "TRACESTATE": carrier.get("tracestate", ""),
-    })
-    # Launch Box with this agent_env, record the response/error on runtime_span,
-    # and end the span after request validation and cleanup.
+# Inside invoke(payload), after constructing operator_env:
+with run_collector(
+    str(ROOT / "otelcol/otelcol"), str(ROOT / "collector.yaml")
+):
+    result = subprocess.run(
+        [
+            str(ROOT / "box-core/box"), "run", "--config", str(ROOT / "box.toml"),
+            "--", payload["prompt"],
+        ],
+        env=operator_env, check=True, capture_output=True, text=True, timeout=120,
+    )
 ```
 
-In the contained Python entrypoint, attach that context before calling the agent:
+Keep the handler's existing return after this block. This example handles one task at a time; a concurrent deployment needs a supervised shared Collector or separate ports and configuration per invocation.
 
-```python
-import os
-from opentelemetry import context
-from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
-
-parent = TraceContextTextMapPropagator().extract({
-    "traceparent": os.environ.get("TRACEPARENT", ""),
-    "tracestate": os.environ.get("TRACESTATE", ""),
-})
-token = context.attach(parent)
-try:
-    result = agent(prompt)
-finally:
-    context.detach(token)
-    # Force-flush the provider as in the native agent setup above.
-```
-
-W3C trace context contains correlation identifiers, not credentials or authorization. Validate the caller payload according to your application.
-
-<Callout type="info">
-This context pattern passed local ARM64 tests using the actual AgentCore HTTP application and Box with fixed model responses. It also passed API readback for two real AgentCore invocations: eight observations without an upstream caller, and nine with explicitly forwarded caller context. The caller in the latter test was a manually timed console-test driver, not automatic AWS client instrumentation. Both cloud tasks returned HTTP 500 for the strict answer-format check, and their complete traces and request errors arrived. The HTTP-200 path was qualified locally.
-
-</Callout>
-
-<Callout type="warning">
-The operator span begins after the Runtime framework parses the JSON request. It covers preparation and failures inside the application handler; it does not cover invalid-JSON rejection, platform authentication, or process startup before the handler. Add server middleware or platform telemetry for those boundaries.
-
-</Callout>
-
-## Check delivery and representation [#verification]
-
-Use a known trace ID and [query observations through the API](https://langfuse.com/docs/api-and-data-platform/features/query-via-sdk). Include input/output, model, usage and expanded resource metadata. Poll within a bounded interval while ingestion completes; a single immediate empty response is inconclusive.
-
-- Check all expected observation IDs and parent links. For the two-model-call README example, expect one AGENT, two SPANs, two GENERATIONs and one TOOL.
-- Match tool-use and tool-result IDs, and confirm the second generation received the actual tool result.
-- Sum usage on GENERATION observations. Do not add the agent's aggregate usage again.
-- Check `strands.box.source=agent`, `strands.box.run.id`, and `strands.box.name` under resource metadata. These are Box-stamped correlation attributes, not a cryptographic attestation.
-- Open the Collector log path printed when the helper stops. Check export errors as well as counters, and read back the observations. Leave credential-bearing lines out of anything you share. HTTP acceptance or a sent-span counter alone does not prove that every span was ingested.
-
-<Callout type="warning">
-Tracing success and task success are separate. The screenshot's six agent observations arrived even though the Runtime rejected extra answer text with HTTP 500. Preserve that raw output and record the request outcome separately. The queue in this recipe is in memory and retries expire after 30 seconds; it does not provide durable or exactly-once delivery.
-
-</Callout>
-
-## References
-
-- [Box telemetry guide](https://strandsagents.com/docs/user-guide/box/guides/record-telemetry/)
-- [Box configuration reference](https://strandsagents.com/docs/user-guide/box/reference/configuration/)
-- [Strands integration](https://langfuse.com/integrations/frameworks/strands-agents)
-- [Langfuse native OpenTelemetry integration](https://langfuse.com/integrations/native/opentelemetry)
-
-import LearnMore from "@/components-mdx/integration-learn-more.mdx";
-
-<LearnMore />
+</Details>
