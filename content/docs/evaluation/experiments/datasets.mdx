@@ -338,6 +338,12 @@ Optionally add JSON Schema validation to your datasets to ensure all dataset ite
 
 You can define JSON schemas for `input` and/or `expectedOutput` fields when creating or updating a dataset. Once set, all dataset items are automatically validated against these schemas. Valid items are accepted, invalid items are rejected with detailed error messages showing the validation issue.
 
+<Callout type="warning">
+
+Each dataset JSON Schema is limited to 10,000 characters, measured from its serialized JSON representation. Schemas over this limit are rejected with a size-specific validation error. This is separate from whether the schema itself is valid.
+
+</Callout>
+
 <LangTabs items={["Python SDK", "JS/TS SDK", "Langfuse UI"]}>
 <Tab>
 
