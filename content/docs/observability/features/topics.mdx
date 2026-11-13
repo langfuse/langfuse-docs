@@ -1,0 +1,130 @@
+---
+title: Topics
+description: Discover recurring intents, sentiment, outcomes, and issues across your traces, then inspect the conversations behind each topic.
+---
+
+import { Steps, Step } from "@/components/docs";
+
+# Topics
+
+Topics groups similar traces so you can see what users ask for, how interactions go, and where your application struggles. Open **Topics** in your project to explore recurring patterns and inspect the traces behind them.
+
+For example, use Topics to find the most common support requests, investigate unsuccessful interactions, or identify recurring tool failures to add to your [evaluation datasets](/docs/evaluation/experiments/datasets).
+
+## How Topics works [#how-it-works]
+
+A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
+
+| Facet     | Question                                         |
+| --------- | ------------------------------------------------ |
+| Intent    | What is the user trying to do?                   |
+| Sentiment | How does the user feel about the interaction?    |
+| Outcome   | What was delivered, and is the result confirmed? |
+| Issues    | What went wrong during the interaction?          |
+
+A **scan** defines which traces and facets to analyze. Use separate scans for different applications, environments, or workflows so unrelated traffic does not dominate the results. Topics are discovered from your data; you do not need to define categories or tag traces beforehand.
+
+## Get started [#get-started]
+
+The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
+
+<Steps>
+
+<Step>
+
+### Connect your models
+
+Add an [LLM connection](/docs/administration/llm-connection) under **Settings > LLM Connections**, or use an existing project or inherited organization connection. Open [Topics](https://cloud.langfuse.com/project/~/topics) and select your facets and models:
+
+- **Summaries**: a fast, cost-efficient text model that analyzes each trace.
+- **Embeddings**: an embedding model that represents the summaries for similarity comparisons.
+- **Grouping**: a text model that names and describes the discovered groups. A stronger model can produce clearer topic names.
+
+You can use the same text model for summaries and grouping. Embeddings require an embedding model; a chat model cannot fill that role.
+
+<Callout type="info">
+  Members, Admins, and Owners can configure Topics; Viewers can explore results.
+  Adding an LLM connection requires an Admin or Owner.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Select your traces
+
+Choose filters and a sampling rate. Start with one workflow and a small sample if you want to check relevance and provider costs before analyzing more traffic.
+
+<Callout type="info">
+  Topics needs recorded model conversations: capture generation observations with
+  inputs and outputs. A trace containing only a root span's input and output is
+  not enough. Follow the [tracing guide](/docs/observability/get-started) if your
+  model calls are not recorded yet.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Start the scan
+
+Review the selection and start processing. Setup reuses existing summaries and analyzes up to 500 recent matching traces to build the first topics. It looks further back, up to 30 days, when there is not enough recent data.
+
+Processing continues in the background; use **History** to check progress and errors. Open a topic once results appear to check that its traces match the pattern you expected.
+
+</Step>
+
+</Steps>
+
+## Live and one-off scans [#scans]
+
+Choose **New scan** to analyze another part of your traffic. **Auto-analyze** determines whether the scan keeps processing new traces.
+
+| Scan    | Use it for                     | Behavior                                                                                             |
+| ------- | ------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Live    | Following a workflow over time | Summarizes new matching traces and assigns them to topics; updates topics daily as new data arrives. |
+| One-off | Exploring a specific subset    | Groups already summarized traces from the past seven days once; leaves live scans unchanged.         |
+
+Live scans wait for a trace to become idle before analyzing it. The default is five minutes after the last event; adjust **Wait before summarizing** in **Topics > ⋮ > Settings** for long-running workflows.
+
+Use **Edit scan** to change filters, facets, or sampling, or turn off **Auto-analyze** to pause the scan while retaining its results. A project supports up to five live scans.
+
+<Callout type="info">
+  A one-off scan does not summarize previously unprocessed traces. It needs at
+  least 100 summarized traces per selected facet and groups a random sample of
+  at most 20,000. Sampling and filters mean topic counts describe the analyzed
+  subset, not all project traffic.
+</Callout>
+
+## Explore your topics [#explore]
+
+Select a scan and facet, then use **Treemap** to see the largest topics, **List** to browse them, or **Map** to explore similar traces spatially. Select a topic to read its description and facet summaries, then open an individual trace to inspect the conversation and model calls.
+
+Each trace can belong to one topic per facet. **Unassigned** includes traces that do not fit a discovered topic, are awaiting an update, or lack enough applicable content.
+
+Treat topics as starting points for investigation. Similar conversations can have different outcomes, and a generated label may not describe every trace in a group. Review examples before turning a pattern into an evaluation or product decision.
+
+<Callout type="info">
+  The map represents the traces used in the last grouping. New traces can appear
+  in topic trace lists before the next update adds them to the map. Topic groups
+  and names can change when topics are rebuilt.
+</Callout>
+
+## Models, data, and costs [#models-and-costs]
+
+On Cloud and self-hosted deployments, Topics calls the providers configured in your LLM connections. The summary model receives trace conversation content and execution context; embedding and grouping models receive generated summaries. Apply [masking](/docs/observability/features/masking) before ingestion if content must not reach those providers. Summarization does not guarantee anonymization.
+
+Your provider charges for summarization, embeddings, and topic naming. Reduce processing costs with narrower filters, a lower sampling rate, or a less expensive summary model.
+
+<Callout type="info">
+  **Estimated processing cost** covers stored summaries and embeddings where
+  pricing is available. It excludes topic naming and failed calls, and can change
+  when summaries are replaced or deleted. Use your provider's billing for the
+  total cost.
+</Callout>
+
+<Callout type="warning">
+  The embedding model and dimensions are shared by every scan in a project and
+  cannot change once summaries have been embedded. Choose them before starting,
+  because embeddings from different models cannot be compared.
+</Callout>
