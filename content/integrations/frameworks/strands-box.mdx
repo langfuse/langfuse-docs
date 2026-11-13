@@ -21,9 +21,9 @@ This guide shows you how to trace a Strands agent running inside **Strands Box**
 
 ## Setup steps [#setup]
 
-The steps below add tracing to the agent from the [Box Python agent setup](https://strandsagents.com/docs/user-guide/box/guides/run-strands-harness/) and use its `~/box-tutorial` folder. They are all you need to see traces in Langfuse.
+In this tutorial, we will use the [Box Python agent setup](https://strandsagents.com/docs/user-guide/box/guides/run-strands-harness/) and use its `~/box-tutorial` folder. The steps below add tracing.
 
-The sections after the steps are optional: deploying to [AgentCore Runtime](#agentcore), inspecting [Box lifecycle traces](#box-lifecycle-traces), and [exporting through a Collector](#export-headers-and-filtering).
+Deploying to [AgentCore Runtime](#agentcore), inspecting [Box lifecycle traces](#box-lifecycle-traces), and [exporting through a Collector](#export-headers-and-filtering) are optional.
 
 <Steps>
 
@@ -159,7 +159,7 @@ Box also sends its own lifecycle spans, such as `control box_started`, as a sepa
 
 <Callout type="info">
   Box sends these traces without the `x-langfuse-ingestion-version: 4` header,
-  so there might be a slight delay before they appear. To see them in real time, add the
+  so there might be a [delay](/integrations/native/opentelemetry#real-time-ingestion) in some versions before they appear. You can add the
   header with a Collector as described in [export headers and
   filtering](#export-headers-and-filtering).
 </Callout>
@@ -411,7 +411,7 @@ Put an OpenTelemetry Collector between Box and Langfuse to see traces in real ti
 
 Box's OTLP target sends only the `Authorization` header. Use a Collector when you need one of these export controls:
 
-- Add `x-langfuse-ingestion-version: 4`, which selects Langfuse's v4 ingestion path. Without this header, traces [might appear with a slight delay](/integrations/native/opentelemetry#real-time-ingestion).
+- Add `x-langfuse-ingestion-version: 4`, which selects Langfuse's v4 ingestion path. Without this header, traces [might appear with a delay](/integrations/native/opentelemetry#real-time-ingestion) in early versions.
 - Send agent traces to Langfuse, with Box lifecycle and policy records kept in the local file.
 - Configure an export queue and retries for temporary connection failures.
 
