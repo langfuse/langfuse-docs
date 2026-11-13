@@ -117,12 +117,24 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines
 
+### No internal ticket ids
+
+This repo and the site are public. Never put an internal ticket id (any Linear team prefix, for example `LFE-1234`, `LFINT-1234`, `LFMKT-1234`) or a Linear URL in page content, commit messages, PR titles, or PR descriptions. This includes closing lines such as `Fixes LFMKT-1234` or `Closes LFE-1234`, even when a task, issue, or template hands you the id. Describe the change on its own terms instead. A ticket-prefixed branch name is the one place the identifier belongs.
+
+- Bad PR description: `Fixes LFMKT-2732. Adds IAM role docs.`
+- Good PR description: `Documents IAM role authentication for customer S3 storage.`
+
+### Style and content
+
 - Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
 - Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
-- Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
+- Give prominent, current behavior an evergreen home. Blog posts and changelog entries are tied to a date, so a fact most users of a feature need (how it works, a default, a limit, a pricing rule) must also live on a docs page. Integration pages and FAQ entries count as evergreen homes too. Scope:
+  - Migration guidance for an older Langfuse or SDK version stays on its migration guide or FAQ. A current docs page gets at most a one-line link to it, not the guidance itself.
+  - A niche caveat (one SDK, one protocol, one edge case) may live only on the integration page or FAQ where people run into it.
+  - A changelog entry whose main claim has a docs home sets frontmatter `canonical` to that page.
 
 ### Documentation pages
 
@@ -178,7 +190,10 @@ Changelog entries live in `content/changelog/`.
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section. Flag new or edited entries that skip the use cases.
+- Follow the intro immediately with 2-3 concrete example use cases when the entry adds a new capability or workflow (for example API key permissions, a PagerDuty integration, a redesigned view). Don't put them in a separate section.
+- Skip the use cases when the entry only extends an existing feature to another provider, model, endpoint, or SDK, or changes API behavior or a config option. The parent feature's use cases already apply. Say in the intro what is now covered and how to turn it on, then link the docs. Never pad with generic use cases to reach a count.
+  - Needs use cases: "You can now set an expiration date on API keys" (a temporary integration key, a 90-day rotation).
+  - Fine without: "You can now send OpenAI Embeddings requests through the AI Gateway at `POST /openai/v1/embeddings`."
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
 - Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Do not invent visuals.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
@@ -188,6 +203,7 @@ Changelog entries live in `content/changelog/`.
 
 Please check the following:
 
+- Flag any internal ticket id (`LFE-`, `LFINT-`, `LFMKT-`, or any other Linear prefix) or Linear URL in page content, commit messages, the PR title, or the PR description, including `Fixes <ticket>` / `Closes <ticket>` lines. Only the branch name may carry it. See "No internal ticket ids" above.
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
@@ -203,14 +219,16 @@ Please check the following:
   - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
   - `<FaqPreview tags={[...]} />` from `components/faq/FaqPreview.tsx`: the list of links to that area's FAQ articles. Keep this component. Do not replace it with a hand-written link list or inline Q&A.
   - `<GhDiscussionsPreview labels={[...]} />` from `components/gh-discussions/GhDiscussionsPreview.tsx`: the GitHub Discussions component already on these pages. Keep this component. Do not replace it with a prose link to GitHub Issues.
+- Flag a blog post or changelog entry that states a prominent, current behavior (how a feature works, a default, a limit, a pricing rule) that no docs, integration, or FAQ page states, and a changelog whose main claim has a docs home but no frontmatter `canonical`. Do not flag migration guidance for an older version that lives only on its migration guide or FAQ, a niche caveat that lives only on the integration page or FAQ where people hit it, or historical context ("starting today", "previously") that only makes sense in the post.
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
+- Flag duplication only when the PR creates a new copy. A PR that restores a removed page or section, reverts an earlier change, or moves content (deleting the old copy) puts back or relocates the one existing version, so do not flag it as duplication even when the added lines match text on another page. For example, restoring the original Prompt & Skill Management overview content is a restore, not a copy of `prompt-management/overview`. Raise any overlap that predates the PR as a separate cleanup note, not as a rule violation of that PR.
 - Avoid specific model names in documentation; they go stale quickly. Prefer generic phrasing such as "your model" or the provider family, and flag new or edited docs that pin a versioned model name unless the page is specifically about that model.
 - In documentation tables, every column must add enough value on its own. Prefer fewer columns: merge or remove any column that does not help the reader, and flag tables that would stay clear with fewer columns.
 - Put failure modes, scope limits, and similar caveats in a `<Callout>` so they stand out. Flag new or edited docs that bury these in body copy.
 - Order sections by audience. Flag a new or edited page that leads with optional, advanced, or edge-case details (for example a custom endpoint or extra headers) ahead of the sections most readers of that page need (for example managing models or choosing a model ID).
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
-- When a PR adds or edits a changelog entry in `content/changelog/`, flag it if the intro is not immediately followed by 2-3 concrete example use cases, or if a UI change has no screenshot or `.mp4` video that readers see on the page. Frontmatter `ogImage` / `ogVideo` counts only when `showOgInHeader` is not `false`; if that flag is `false`, the visual must be in the body. A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
+- When a PR adds or edits a changelog entry in `content/changelog/`, flag it if an entry that adds a new capability or workflow does not follow its intro immediately with 2-3 concrete example use cases (do not flag entries that only add a provider, model, endpoint, or SDK to an existing feature, or change API behavior or a config option), or if a UI change has no screenshot or `.mp4` video that readers see on the page. Frontmatter `ogImage` / `ogVideo` counts only when `showOgInHeader` is not `false`; if that flag is `false`, the visual must be in the body. A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
 - Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.

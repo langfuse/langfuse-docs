@@ -44,6 +44,9 @@ Each changelog post should define the following frontmatter fields:
 - **gif** (string, optional):
   URL for an animated GIF. This can be used in place of a static image if desired.
 
+- **canonical** (string, optional):
+  Set this to the docs page that documents the entry's main claim (for example `canonical: /docs/evaluation/experiments/experiments-ci-cd`). Add it whenever that page exists. If the entry states a prominent, current behavior that no docs, integration, or FAQ page covers yet, add it to the docs page first. Do not copy dated or migration-only sentences ("starting today", what changed from the old version) onto the docs page.
+
 _Note_: The display components (`ChangelogHeader.tsx` and `ChangelogIndex.tsx`) use these options in the following priority order:
 
 1. Fallback Video (`ogVideo`)
@@ -60,7 +63,7 @@ _Note_: The display components (`ChangelogHeader.tsx` and `ChangelogIndex.tsx`) 
   <ChangelogHeader />;
   ```
 
-- After the header, write a short intro that leads with what is now possible, then immediately follow it with 2-3 concrete example use cases. Do not put the use cases in a separate section. A one-sentence changelog that only restates the title and links to docs is incomplete.
+- After the header, write a short intro that leads with what is now possible, then, if the entry adds a new capability or workflow, immediately follow it with 2-3 concrete example use cases. Do not put the use cases in a separate section. Skip them when the entry only adds a provider, model, endpoint, or SDK to an existing feature, or changes API behavior or a config option; say what is now covered and how to turn it on instead. Never pad with generic use cases. A one-sentence changelog that only restates the title and links to docs is incomplete.
 - For UI changes, include a screenshot (`ogImage`) or `.mp4` video (`ogVideo`) that readers see on the page. Frontmatter media counts only when `showOgInHeader` is not `false`; if that flag is `false`, put the visual in the body. Interleave additional visuals with the body text. Do not invent screenshots or other visuals; leave media unset and flag the gap if no real visual is available. We never use `.gif` files.
 - Use bullet points and concise paragraphs for readability.
 - Keep the tone helpful and conversational. No filler headings like "Why This Matters" or "Key Benefits."
@@ -70,8 +73,9 @@ _Note_: The display components (`ChangelogHeader.tsx` and `ChangelogIndex.tsx`) 
 
 When reviewing a changelog PR, flag the entry to the author before merge if:
 
-- The intro is not immediately followed by 2-3 concrete example use cases
+- A new capability or workflow entry's intro is not immediately followed by 2-3 concrete example use cases (coverage additions to an existing feature and API or config changes are exempt)
 - A UI change has no screenshot or `.mp4` video that readers see on the page (frontmatter `ogImage` / `ogVideo` only count when `showOgInHeader` is not `false`; otherwise the visual must be in the body)
+- The main claim has a docs page but frontmatter `canonical` is missing, or the entry states a prominent, current behavior that no docs, integration, or FAQ page states (niche caveats and migration-only guidance are exempt)
 
 Do not invent screenshots to satisfy the visual check. Flag the missing visual so a maintainer can add one.
 
