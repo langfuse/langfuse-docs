@@ -124,9 +124,14 @@ A Microsoft Azure connection takes the name of a [Microsoft Foundry](https://ai.
 <Details id="vertex-models">
 <Summary>Which Google Vertex AI models can I call?</Summary>
 
-A Google Vertex AI connection takes a [service account key](https://cloud.google.com/iam/docs/keys-create-delete) (JSON) with the Vertex AI User role and a location, for example `global` or `us-central1`. The gateway calls Vertex AI's OpenAI-compatible Chat Completions endpoint, so it supports the models served there: Gemini and the open models Google hosts, such as Llama, DeepSeek, Qwen, and gpt-oss. Claude on Vertex AI isn't supported.
+A Google Vertex AI connection takes a [service account key](https://cloud.google.com/iam/docs/keys-create-delete) (JSON) with the Vertex AI User role and a location, for example `global` or `us-central1`. The gateway calls Vertex AI's OpenAI-compatible Chat Completions endpoint, so it supports the models served there: Gemini and the open models Google hosts, such as Llama, DeepSeek, Qwen, and gpt-oss.
 
 The connection lists Gemini models as `google/<model>`, for example `vertex-prod:google/<model>`. Add open models as custom models on the connection's models page, using their Vertex AI model ID, for example `<publisher>/<model>`.
+
+<Callout type="info">
+  Claude on Vertex AI isn't served by the Chat Completions endpoint, so a Vertex
+  AI connection can't call Claude models.
+</Callout>
 
 </Details>
 
