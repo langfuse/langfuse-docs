@@ -75,20 +75,18 @@ The docs site uses [Inkeep](https://inkeep.com/) for two separate embeds:
 
 ## LLM Features
 
-The docs site includes four interconnected features designed to make documentation accessible to LLMs and AI tools:
+The docs site includes three interconnected features designed to make documentation accessible to LLMs and AI tools:
 
 1. **Markdown URL endpoints** (`.md` suffix): Append `.md` to any URL (e.g., `/docs.md`) to get raw markdown. Built at compile time via `scripts/copy_md_sources.js` which copies all `.mdx`/`.md` files from `content/` to `public/md-src/` as static `.md` files with inlined MDX components.
 
 2. **Copy as Markdown button**: UI button on docs pages that fetches the `.md` endpoint and copies to clipboard for pasting into ChatGPT/Claude/Cursor.
 
-3. **Export as PDF links**: API endpoint `/api/md-to-pdf` that fetches markdown from `.md` URLs and converts to PDF using Puppeteer. Used on legal pages (terms, privacy, DPA, etc.).
-
-4. **MCP Server**: Model Context Protocol server at `/api/mcp` with three tools:
+3. **MCP Server**: Model Context Protocol server at `/api/mcp` with three tools:
    - `searchLangfuseDocs`: RAG search via Inkeep API
    - `getLangfuseDocsPage`: Fetches specific page markdown from `.md` URLs
    - `getLangfuseOverview`: Returns `llms.txt` overview
 
-All three user-facing features (Copy, PDF, MCP) depend on the same foundation of pre-built static markdown files, making them fast, cacheable, and reliable. See [RESEARCH-LLM-FEATURES.md](./RESEARCH-LLM-FEATURES.md) for detailed implementation details.
+Copy and MCP use the same pre-built static Markdown files.
 
 ## Bundle analysis
 

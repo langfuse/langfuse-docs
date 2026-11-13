@@ -275,7 +275,7 @@ function StationRow({
                     lineHeight: 1.5,
                   }}
                 >
-                  {s.meta.join(" · ")}
+                  {s.meta.join(", ")}
                 </div>
               </Link>
 

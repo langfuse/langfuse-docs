@@ -8,8 +8,8 @@ export function Banner() {
       className="bg-black px-2 text-white sm:px-4 [&_a]:text-white"
     >
       <Link href="/blog/introducing-gateway">
-        Langfuse launches AI Gateway ·{" "}
-        <span className="underline underline-offset-2">Read more</span>
+        Langfuse launches AI Gateway <span aria-hidden>→</span>{" "}
+        <span className="underline underline-offset-2">Learn more</span>
       </Link>
     </FumadocsBanner>
   );

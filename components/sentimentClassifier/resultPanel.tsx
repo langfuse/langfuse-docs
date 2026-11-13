@@ -155,11 +155,11 @@ export const SentimentResultPanel = ({
           <span className="tabular-nums">
             {usage.inputTokens.toLocaleString()} in
             {usage.outputTokens > 0
-              ? ` · ${usage.outputTokens.toLocaleString()} out`
+              ? `, ${usage.outputTokens.toLocaleString()} out`
               : ""}
             {typeof usage.reasoningTokens === "number" &&
             usage.reasoningTokens > 0
-              ? ` · ${usage.reasoningTokens.toLocaleString()} reasoning`
+              ? `, ${usage.reasoningTokens.toLocaleString()} reasoning`
               : ""}
           </span>
         </div>

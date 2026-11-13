@@ -39,7 +39,7 @@ Managing AI usage within a company is becoming its own discipline:
 
 ## Langfuse is uniquely positioned for this
 
-Langfuse is the [leading open source project](/adoption) for AI observability and evals (35k+ GitHub stars, 90B+ observations/month, 90M+ package downloads/month). 21 of the Fortune 50 and leading AI-native businesses like Ramp, Hugging Face, and Canva rely on Langfuse to understand and improve their AI agents. Open source is important here as an AI gateway needs to be scalable, reliable, and self-hosting it air-gapped can solve many security concerns in regulated industries.
+Langfuse is the [leading open source project](/adoption) for AI observability and evals (35k+ GitHub stars, 110B+ observations/month, 90M+ package downloads/month). 21 of the Fortune 50 and leading AI-native businesses like Ramp, Hugging Face, and Canva rely on Langfuse to understand and improve their AI agents. Open source is important here as an AI gateway needs to be scalable, reliable, and self-hosting it air-gapped can solve many security concerns in regulated industries.
 
 Adding a gateway was widely requested by our users. To get a complete picture of your company's AI usage, you need to see every model call. Our [100+ integrations](/integrations) already cover many of the AI agents you build, but much of a company's AI usage happens in tools nobody instruments, like coding agents, internal assistants, and scripts. A gateway sits centrally, where every call passes, so nothing is missed. And unlike a standalone gateway, which can only count tokens and cost, Langfuse turns each call into a full trace you can search, evaluate, and improve. This is why adding a native gateway is a natural next step for Langfuse.
 
@@ -47,7 +47,7 @@ Adding a gateway was widely requested by our users. To get a complete picture of
 
 Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because every call through it becomes a full Langfuse trace (opt-in).
 
-**See your spend.** Cost and usage for every call land in one AI spend [dashboard](/docs/metrics/overview), by model and provider. Set spend limits per key and get [alerted](/docs/observability/features/alerts) before anyone runs into a surprise bill.
+**See your spend.** Cost and usage for every call land in one AI spend [dashboard](/docs/gateway/features/analytics), by model and provider. Get [alerted](/docs/gateway/features/analytics#alerts) before anyone runs into a surprise bill.
 
 <Video
   src="https://static.langfuse.com/docs-videos/20261109_analytics.mp4"
@@ -90,14 +90,14 @@ Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because 
 ## Fully open source
 
 - **Open source.** Like the rest of Langfuse, the core gateway is MIT-licensed. [Run it in your own infrastructure](/self-hosting/configuration/ai-gateway), or use it fully managed in Langfuse Cloud.
-- **Easy to self-host.** Deploy it as a single 22MB Docker image alongside your existing Langfuse instance, with no extra dependencies. [Read the docs](/self-hosting/configuration/ai-gateway).
+- **Easy to self-host.** Deploy it as a single 22 MB Docker image alongside your existing Langfuse instance, with no extra dependencies. [Read the docs](/self-hosting/configuration/ai-gateway#scaling).
 - **Your keys, no markup.** You keep your contracts, rates, and compliance agreements, such as zero data retention, with model/cloud providers. We don't resell tokens.
 
 ## Built for maximum performance and predictable scaling
 
 - **Built in Rust.** We built the gateway in Rust for high performance, availability, and reliability, even during usage peaks.
 - **High speed.** \<3ms median latency with tracing on.
-- **High reliability.** 1,000+ concurrent streams on a single 2 vCPU node.
+- **High reliability.** 1,000+ concurrent streams on a single 2 vCPU node. See [scaling](/self-hosting/configuration/ai-gateway#scaling).
 - **Predictable scaling.** Memory footprint scales in line with load.
 
 ## What's next
@@ -156,7 +156,7 @@ No. Change the base URL and use a gateway key. Requests and responses stay in th
 <Details>
 <Summary>Does Langfuse record my prompts?</Summary>
 
-Only if you opt in. By default, the gateway records metadata, usage, and cost, not content. Pass-through mode records nothing, and self-hosting keeps all data on your infrastructure. Turn on full logging, and every request becomes a complete Langfuse trace you can debug, evaluate, and turn into datasets, all without touching your code.
+Only if you opt in. By default, the gateway records metadata, usage, and cost, not content. On self-hosted Langfuse, the `NONE` ingestion mode records nothing. Self-hosting keeps all data on your infrastructure. Turn on full logging, and every request becomes a complete Langfuse trace you can debug, evaluate, and turn into datasets, all without touching your code.
 
 </Details>
 

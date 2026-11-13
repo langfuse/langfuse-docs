@@ -11,8 +11,6 @@ minimumReleaseAgeExclude:
   - "hls.js@1.7.2"
   - "react-aria@3.52.0"
   - "react-stately@3.50.0"
-  - "undici@6.28.1"
-  - "undici@7.29.1"
   # First-party Langfuse JS SDK v6 release.
   - "@langfuse/browser@6.0.0"
   - "@langfuse/client@6.0.0"
@@ -21,18 +19,26 @@ minimumReleaseAgeExclude:
   - "@langfuse/otel@6.0.0"
   - "@langfuse/tracing@6.0.0"
   - "@langfuse/vercel-ai-sdk@6.0.0"
+  # Agent traffic classifier used by proxy.ts. Zero dependencies, no install
+  # scripts; the published dist matches a build of the GitHub source.
+  - "@mintlify/agent-traffic@0.1.0"
 
 enablePrePostScripts: true
 
 overrides:
+  # The adapter's exact peer requires an SDK version with security advisories.
+  "mcp-handler@1.1.0>@modelcontextprotocol/sdk": "1.32.2"
   "@types/react": "^19.2.18"
   "@types/react-dom": "^19.2.7"
+  # These Markdown math renderers declare the vulnerable KaTeX 0.16 line.
+  "rehype-katex@7.0.1>katex": "0.18.2"
+  "micromark-extension-math@3>katex": "0.18.2"
+  # Satori pins fflate 0.7.3, which lacks the decompression security fix.
+  "satori@0.33.5>fflate": "0.7.5"
 
 allowBuilds:
   # Funding message only; no build output.
   core-js: false
   esbuild: true
   protobufjs: true
-  # Downloads the browser used by local PDF exports.
-  puppeteer: true
   sharp: true

@@ -37,7 +37,7 @@ export function BlogHighlightCards({ posts }: { posts: BlogPageItem[] }) {
                 {post.frontMatter?.author && (
                   <>
                     <span className="text-[12px] text-text-tertiary md:hidden">
-                      ·
+                      by
                     </span>
                     <Text
                       size="s"

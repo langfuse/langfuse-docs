@@ -1,5 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { createMcpHandler } from "@vercel/mcp-adapter";
+import { createMcpHandler } from "mcp-handler";
+import type { McpServerOptions } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v3";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
@@ -114,6 +115,12 @@ const MCP_SERVER_INSTRUCTIONS = [
   "Inspect the available tools and their schemas dynamically; do not assume a fixed tool list.",
   "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission and show the exact payload; if they want a reply, include only an email address they explicitly provide in the feedback text; exclude secrets, customer/project data, trace payloads, and unrelated context, then use submitFeedback.",
 ].join("\n");
+
+const mcpServerOptions: McpServerOptions = {
+  instructions: MCP_SERVER_INSTRUCTIONS,
+  // Docs tools accept at most five flat fields; reject excessive nested input.
+  maxToolInputElements: 16,
+};
 
 export const mcpHandler = createMcpHandler(
   (server) => {
@@ -313,6 +320,6 @@ export const mcpHandler = createMcpHandler(
       },
     );
   },
-  { instructions: MCP_SERVER_INSTRUCTIONS },
+  mcpServerOptions,
   { basePath: "/api", maxDuration: 60, verboseLogs: true },
 );

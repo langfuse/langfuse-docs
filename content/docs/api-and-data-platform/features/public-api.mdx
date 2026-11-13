@@ -391,18 +391,28 @@ Everything else — tags, cost, latency, token counts, model, prompt, input/outp
 
 Each condition is `{"type", "column", "operator", "value"}` (plus `"key"` for metadata). Columns include `id`, `type`, `name`, `traceId`, `traceName`, `startTime`, `endTime`, `environment`, `level`, `statusMessage`, `version`, `userId`, `sessionId`, `isRootObservation`, `tags`, `latency`, `timeToFirstToken`, `tokensPerSecond`, `inputTokens`, `outputTokens`, `totalTokens`, `inputCost`, `outputCost`, `totalCost`, `model`, `promptName`, `promptVersion`, `input`, `output`, and `metadata`. The operators depend on the condition type:
 
-| `type`          | Operators                                                                         | Typical columns                                        |
-| --------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `string`        | `=`, `contains`, `does not contain`, `starts with`, `ends with`                   | `name`, `traceName`, `userId`, `sessionId`, `model`, … |
-| `stringOptions` | `any of`, `none of`                                                               | `type`, `level`, `environment`, `promptName`           |
-| `arrayOptions`  | `any of`, `none of`, `all of`                                                     | `tags`                                                 |
-| `number`        | `=`, `>`, `<`, `>=`, `<=`                                                         | `latency`, `totalCost`, `totalTokens`, …               |
-| `datetime`      | `>`, `<`, `>=`, `<=`                                                              | `startTime`, `endTime`                                 |
-| `boolean`       | `=`, `<>`                                                                         | `isRootObservation`                                    |
-| `stringObject`  | as `string`, with `key` naming the metadata field; values are compared as strings | `metadata`                                             |
-| `null`          | `is null`, `is not null`                                                          | any nullable column                                    |
+| `type`          | Operators                                                                                                                     | Typical columns                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `string`        | `=`, `contains`, `does not contain`, `starts with`, `ends with`, `is not empty`                                               | `name`, `traceName`, `userId`, `sessionId`, `model`, … |
+| `stringOptions` | `any of`, `none of`                                                                                                           | `type`, `level`, `environment`, `promptName`           |
+| `arrayOptions`  | `any of`, `none of`, `all of`                                                                                                 | `tags`                                                 |
+| `number`        | `=`, `>`, `<`, `>=`, `<=`                                                                                                     | `latency`, `totalCost`, `totalTokens`, …               |
+| `datetime`      | `>`, `<`, `>=`, `<=`                                                                                                          | `startTime`, `endTime`                                 |
+| `boolean`       | `=`, `<>`                                                                                                                     | `isRootObservation`                                    |
+| `stringObject`  | `=`, `contains`, `does not contain`, `starts with`, `ends with`, `is set`, `is not set`, with `key` naming the metadata field | `metadata`                                             |
+| `null`          | `is null`, `is not null`                                                                                                      | any nullable column                                    |
 
-`input` and `output` conditions support `=` or `matches` (full-text search); substring operators such as `contains`, `starts with`, and `ends with` are rejected for these columns. Each request that filters these fields must include at least one `=` or `matches` condition. There is no fixed `tags` parameter: filter tags with `{"type":"arrayOptions","column":"tags","operator":"any of","value":["prod"]}`. A filter-bar expression such as _name does not contain "healthcheck"_ translates to:
+<Callout type="info">
+
+Each column accepts only the condition types and value formats below; anything else returns `400`.
+
+- `number` values must be JSON numbers: `"value": 0.5`, not `"value": "0.5"`.
+- `metadata` accepts only `stringObject`; `numberObject`, `booleanObject`, and `categoryOptions` are rejected. Values are compared as strings, so match numbers and booleans with `=` and a string value, e.g. `{"type":"stringObject","column":"metadata","key":"cached","operator":"=","value":"true"}`.
+- `input` and `output` accept only the `string` type (not `stringOptions` or `null`) and support `=` or `matches` (full-text search). Substring operators such as `contains`, `starts with`, and `ends with` work only when the same request also has an `=` or `matches` condition on `input` or `output`; on their own, they are rejected.
+
+</Callout>
+
+There is no fixed `tags` parameter: filter tags with `{"type":"arrayOptions","column":"tags","operator":"any of","value":["prod"]}`. A filter-bar expression such as _name does not contain "healthcheck"_ translates to:
 
 ```bash
 curl -G \

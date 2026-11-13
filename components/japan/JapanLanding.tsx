@@ -60,7 +60,7 @@ function Hero() {
         className={`${cornerBoxBase} no-bl no-br flex flex-wrap items-center justify-center gap-x-[18px] gap-y-2 px-5 py-[10px] text-[13px] text-text-secondary`}
       >
         <span className="font-mono text-[11px] uppercase tracking-[.08em] text-text-tertiary whitespace-nowrap">
-          新 · NEW REGION
+          新 / NEW REGION
         </span>
         <span className="japan-dot" />
         <span className="whitespace-nowrap">
@@ -72,7 +72,7 @@ function Hero() {
         </span>
         <span className="japan-dot" />
         <span className="whitespace-nowrap">
-          トレース · プロンプト · 評価 — すべて日本国内
+          トレース、プロンプト、評価 — すべて日本国内
         </span>
         <span className="japan-dot" />
         <span className="font-mono text-[12px] text-text-primary whitespace-nowrap">
@@ -96,7 +96,7 @@ function Hero() {
 
         <div className="relative flex flex-col gap-6">
           <div className="japan-eyebrow">
-            Langfuse Cloud · ap-northeast-1 · 東京
+            Langfuse Cloud: ap-northeast-1 (東京)
           </div>
           <h1 className="japan-h1">
             Langfuse Cloud、
@@ -143,8 +143,8 @@ function Hero() {
         {[
           ["機能はグローバル版と同じ", "機能差なし"],
           ["AWS + ClickHouse", "東京でホスト"],
-          ["エンタープライズ対応", "SOC 2 · ISO 27001"],
-          ["オープンソース", "MIT · いつでもセルフホスト"],
+          ["エンタープライズ対応", "SOC 2, ISO 27001"],
+          ["オープンソース", "MIT、いつでもセルフホスト"],
         ].map(([top, bot], i) => (
           <div
             key={top}
@@ -480,7 +480,7 @@ function GetStarted() {
       className="japan-section pt-[120px] pb-10 scroll-mt-24"
     >
       <div className="flex flex-col items-start gap-3.5 mb-10">
-        <div className="japan-eyebrow">始め方 · GET STARTED</div>
+        <div className="japan-eyebrow">始め方 / GET STARTED</div>
         <h2 className="japan-h2 max-w-[26ch]">
           ゼロから初回トレースまで、
           <br />
@@ -599,7 +599,7 @@ function Customers() {
   return (
     <section className="japan-section pt-[120px] pb-10">
       <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="japan-eyebrow">お客様 · CUSTOMERS</div>
+        <div className="japan-eyebrow">お客様 / CUSTOMERS</div>
         <h2 className="japan-h2 max-w-[28ch]">
           世界中のチームが本番のLLMアプリで
           <br />
@@ -674,7 +674,7 @@ function Customers() {
           rel="noopener noreferrer"
           className="japan-chip-card flex flex-col gap-3 p-7 no-underline"
         >
-          <div className="japan-eyebrow">パートナー · PARTNER</div>
+          <div className="japan-eyebrow">パートナー / PARTNER</div>
           <div className="font-analog text-[24px] leading-[1.35] text-text-primary font-medium">
             GAO, Inc.{" "}
             <span className="text-text-tertiary text-[18px]">（ガオ）</span>
@@ -761,7 +761,7 @@ function Compliance() {
               <span className="font-analog text-[18px] text-text-primary font-medium">
                 主要サブプロセッサー
               </span>
-              <span className="japan-eyebrow">リージョン内 · 日本</span>
+              <span className="japan-eyebrow">リージョン内 / 日本</span>
             </div>
             <table className="japan-table">
               <thead>
@@ -839,7 +839,7 @@ function Migration() {
         className={`${cornerBoxBase} grid gap-10 items-center px-8 py-9 md:grid-cols-[1fr_1.3fr]`}
       >
         <div>
-          <div className="japan-eyebrow mb-2.5">移行 · MIGRATION</div>
+          <div className="japan-eyebrow mb-2.5">移行 / MIGRATION</div>
           <h2
             className="japan-h2 max-w-[20ch] mb-3.5"
             style={{ fontSize: "clamp(28px, 3vw, 40px)" }}
@@ -987,7 +987,7 @@ function FAQ() {
     <section className="japan-section pt-[120px] pb-10">
       <div className="grid gap-10 md:grid-cols-[1fr_2fr]">
         <div className="md:sticky md:top-22 md:self-start">
-          <div className="japan-eyebrow mb-2.5">FAQ · よくある質問</div>
+          <div className="japan-eyebrow mb-2.5">FAQ / よくある質問</div>
           <h2
             className="japan-h2 max-w-[16ch]"
             style={{ fontSize: "clamp(28px, 3vw, 44px)" }}
@@ -1028,7 +1028,7 @@ function Community() {
     <section className="japan-section pt-20 pb-10">
       <div className="grid gap-2 md:grid-cols-3">
         <CommunityCard
-          eyebrow="Twitter · X"
+          eyebrow="Twitter / X"
           title="@LangfuseJP"
           body="プロダクトのアップデート、イベント、お知らせを日本語で発信しています。"
           cta={["フォローする", "https://x.com/LangfuseJP"]}
@@ -1043,7 +1043,7 @@ function Community() {
         />
         <CommunityCard
           eyebrow="リソース"
-          title="Docs · 日本語対応"
+          title="Docs: 日本語対応"
           body="英語が一次情報のドキュメントですが、AI翻訳でも読みやすく構成されています。skillsやllms.txtも公開しています。"
           cta={["Docsを見る", "/docs"]}
           glyph="文"
@@ -1096,7 +1096,7 @@ function CTABanner() {
         className={`${cornerBoxBase} japan-stripes-bg px-8 py-[72px] text-center flex flex-col items-center gap-[22px]`}
       >
         <div className="japan-eyebrow">
-          Langfuse Cloud Japan · 今すぐ始めましょう
+          Langfuse Cloud Japan: 今すぐ始めましょう
         </div>
         <h2 className="japan-h2 max-w-[26ch]">
           LLMアプリを、
