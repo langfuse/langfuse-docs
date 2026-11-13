@@ -1,5 +1,5 @@
 ---
-title: "Building the Langfuse AI Gateway"
+title: "Designing the Langfuse AI Gateway"
 date: 2026/11/11
 description: "We wanted a gateway that is stable to run and invisible to the agents that call it. Here is what we learned designing it: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them."
 tag: engineering
@@ -9,7 +9,7 @@ author: Hassieb, Tobias
 import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
-  title="Building the Langfuse AI Gateway"
+  title="Designing the Langfuse AI Gateway"
   description="We wanted a gateway that is stable to run and invisible to the agents that call it. Here is what we learned designing it: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them."
   authors={["hassiebpakzad", "tobiaswochinger"]}
   date="November 11, 2026"
@@ -79,11 +79,27 @@ Rust addresses each of these problems in the language and its runtime:
 - **A single compact binary.** The gateway compiles to one native binary. There is no interpreter or runtime to install, so the container image is small and simple to run.
 - **Vertical and horizontal scaling.** One process uses every core it's given, so an instance with more CPU and memory carries more traffic. And because the gateway keeps no state, you can also add instances behind a load balancer.
 
-This has a cost. Rust is a different language from the rest of our TypeScript codebase, it compiles more slowly, and fewer of us write it every day. For a component in the path of every model call, we decided it was worth it.
-
 ## Designing for operators
 
-We run Langfuse Cloud ourselves, and many teams self-host Langfuse. For both, we wanted a gateway that is simple to run and scales predictably.
+We run Langfuse Cloud ourselves, and many teams self-host Langfuse. For both, we wanted a gateway that is simple to run and scales predictably. To check that the design delivers, we ran the same workload through our Rust gateway running on axum, a Node.js gateway running on Hono and a Python gateway running on FastAPI, each on two vCPUs and 4 GiB of memory.[^benchmark] The Node.js and Python gateways are open-source projects, configured to do the same work per request as ours, or less.
+
+### Using every core
+
+Because the gateway runs requests on every core, one instance carries a lot of traffic, and capacity grows with the CPU you give it.
+
+<Frame fullWidth>
+  ![Highest sustained streaming requests per second with under 0.1% errors. Rust 964, Node.js 127, Python 100](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/throughput.png)
+</Frame>
+
+The Rust gateway sustained 964 requests per second, the Node.js gateway 127 and the Python gateway 100. A single Node.js process runs its JavaScript on one of the two cores; run as two replicas with one vCPU each, it reached 211 requests per second. The Python gateway's two workers were limited by CPU from about 50 concurrent requests. The Rust gateway used both cores for every request, and CPU was its limit too, at a much higher rate.
+
+Using every core also keeps the gateway's overhead flat as load grows, because CPU work on one request doesn't make the others wait.
+
+<Frame fullWidth>
+  ![Added time to first token at 100 concurrent streams versus calling the upstream directly. Median: Rust 3.2 ms, Node.js 734 ms, Python 729 ms. Slowest 1%: Rust 15.7 ms, Node.js 1,166 ms, Python 1,668 ms](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/latency-overhead.png)
+</Frame>
+
+At 100 concurrent streams, Rust added 3.2 ms to the median time to first token and 15.7 ms at the 99th percentile. Node.js added 734 ms and 1,166 ms, and Python 729 ms and 1,668 ms. With one request at a time, all three stayed between 6 and 17 ms. Each request needs the same work at both levels; the extra time is waiting in line, behind the event loop in Node.js and behind the GIL and the busy workers in Python. A model takes hundreds of milliseconds to seconds to answer, so a few milliseconds disappear in that. Hundreds of milliseconds on every request don't.
 
 ### Memory as a budget
 
@@ -92,6 +108,14 @@ Because Rust frees memory when a request ends, we can account for it. The gatewa
 We chose a fast `503` over a queue on purpose. A queue holds memory for requests it isn't serving and turns overload into latency for everyone. A `503` tells the client at once, a load balancer can send the retry to another instance, and the provider SDKs that coding agents use already retry a `503` with backoff. An instance at capacity stays healthy and keeps serving the requests it accepted, instead of running out of memory and dropping all of them.
 
 Responses stream straight through without being buffered, so a long response costs no more memory than a short one.
+
+This is what keeps an instance up during a spike. We sent five rounds of 1,000 simultaneous requests to each gateway.
+
+<Frame fullWidth>
+  ![Container memory during five rounds of 1,000 simultaneous requests. Rust peaks at 1.7 GiB and serves all 5,000 requests in 7 seconds. Node.js serves 88% and finishes at 47 seconds. Python fills the 4 GiB limit, has a worker killed for running out of memory at 34 seconds, and serves 96% by 61 seconds](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/memory-during-spikes.png)
+</Frame>
+
+The Rust gateway served all 5,000 requests in 7 seconds, and its memory peaked at 1.7 GiB. Its memory follows the requests in flight, because each request's memory is freed when it ends. The Node.js gateway dropped 12% of the connections and took 47 seconds. The Python gateway's memory climbed to the 4 GiB limit within 15 seconds and stayed there until, 34 seconds in, the kernel killed a worker for running out of memory, which cut off every stream on that worker. It finished after 61 seconds with 96% of requests served. For operators, this decides how many instances you need to get through a spike, and how confidently you can pick that number.
 
 ### No state in the gateway
 
@@ -129,64 +153,10 @@ The cost is that you can't switch providers by changing a model string, and ther
 
 The rest of the caller-side design follows from the same goal. The gateway forwards each streamed chunk as it arrives. It reads every event to pick up token usage, but never holds one back, so the first token reaches the agent as soon as the provider sends it. Telemetry stays off the request path: traces go into a bounded buffer and are uploaded in the background, and if ingestion falls behind, the gateway drops traces rather than slowing down requests. And when the gateway is at capacity, it says so right away with a `503` that agents already know how to retry.
 
-## Benchmarking the design
-
-To check these decisions against the alternatives, we ran the same workload through three gateways: our Rust gateway running on axum, a Node.js gateway running on Hono, and a Python gateway running on FastAPI. The Node.js and Python gateways are open-source projects. We configured both to do the same work per request as ours, or less.
-
-This is how the benchmark was set up:
-
-- **Machine.** One 8 vCPU virtual machine. Each gateway ran alone on two dedicated vCPUs, with a 4 GiB memory limit and no swap. The load generator and a mock upstream ran on two other vCPUs, and Langfuse Web with its datastores, which our gateway uses for key lookups and traces, ran on the remaining four.
-- **Upstream.** A mock of the OpenAI API, reached over TLS, the same for all three gateways. A mock removes the provider's own variance, so the numbers show only what each gateway adds.
-- **Request.** A 517,708-byte Chat Completions request taken from a long coding-agent turn, with streaming and usage reporting on. That's larger than our production median of about 290 KB, so body handling is a bigger share of the work than it usually is.
-- **Processes.** The Rust gateway ran as one process. The Node.js gateway (Node.js 20.19) ran as one process, the way its published image ships. We also ran it as two replicas with one vCPU each, so it could use both cores. The Python gateway (Python 3.13) ran on Uvicorn with two worker processes, one per vCPU.
-- **Work per request.** Our gateway checked every key through the control plane, enforced its memory budget, parsed the body once for the trace while forwarding the original bytes, read every streamed event for usage, and sent a usage-only trace to Langfuse. The Node.js gateway did no key check and no admission control; it parsed each body, built a new request and serialized it again. The Python gateway ran on its pass-through route, compared one static key in memory, capped in-flight requests per worker, and sent no traces; it parsed each body into Python objects. In both, we turned off token counting, cost calculation, guardrails, rate limits, database logging and response caching. Our gateway did strictly more work than either one, in the key lookup and the trace.
-- **What couldn't be turned off.** The Python gateway keeps every streamed response in memory until the stream ends, for its own logging. The Node.js gateway serializes each request's options, including the body, for an internal log.
-
-We measured three things:
-
-- **Throughput:** clients send requests back to back at increasing concurrency, and we report the highest rate with fewer than 0.1% errors.
-- **Overhead:** time to first token through the gateway minus time to first token calling the mock directly, at the same concurrency, as the median over 30 seconds per level.
-- **Memory during a spike:** five rounds of 1,000 simultaneous requests, each round starting when the previous one finished, with streams of about 210 ms. We sampled the container's memory every 250 ms and chart the peak per second. This case ran in an earlier session of the same benchmark, in which the Python gateway used its default setup: its standard route, which translates each request through the provider SDK, plus key checks against Postgres, token counting, tracing and spend logging. The other two gateways were set up as above.
-
-### Throughput
-
-<Frame fullWidth>
-  ![Highest sustained streaming requests per second with under 0.1% errors. Rust 1,016, Node.js 132, Python 97](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/throughput.png)
-</Frame>
-
-The Rust gateway sustained 1,016 requests per second, the Node.js gateway 132 and the Python gateway 97. This is the runtime model showing through. A single Node.js process runs its JavaScript on one of the two cores; with two replicas it reached 224 requests per second. The Python gateway's two workers were limited by CPU from about 50 concurrent requests. The Rust gateway used both cores for every request, and CPU was its limit too, at a much higher rate.
-
-### Overhead
-
-<Frame fullWidth>
-  ![Added time to first token versus calling the upstream directly, p50. With one request at a time, Rust adds 4.5 ms, Node.js 12.8 ms and Python 18.9 ms. At 100 concurrent streams, Rust adds 2.9 ms, Node.js 753 ms and Python 738 ms](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/latency-overhead.png)
-</Frame>
-
-With one request at a time, the gateways are close: Rust added 4.5 ms to the time to first token, Node.js 12.8 ms and Python 18.9 ms. Most of that difference is handling the 500 KB body. At 100 concurrent streams, Rust added 2.9 ms, while Node.js added 753 ms and Python 738 ms. Each request needs the same work as before; the extra time is waiting in line, behind the event loop in Node.js and behind the GIL and the busy workers in Python. The Rust gateway stayed this flat until its two cores were saturated, at close to 1,000 requests per second.
-
-On an ordinary day, none of this makes an agent feel faster: a model takes hundreds of milliseconds to seconds to answer, and a few milliseconds disappear in that. Overhead matters under load, which is where the difference is.
-
-### Memory during a spike
-
-<Frame fullWidth>
-  ![Container memory during five rounds of 1,000 simultaneous requests. Rust peaks at 1.7 GiB and serves all 5,000 requests in 8 seconds. Node.js serves 97%, drops connections from 12 seconds in and finishes at 54 seconds. Python fills the 4 GiB limit, has a worker killed for running out of memory and serves 64% by 227 seconds](/images/blog/2026-11-11-building-the-langfuse-ai-gateway/memory-during-spikes.png)
-</Frame>
-
-The Rust gateway served all 5,000 requests in 8 seconds, and its memory peaked at 1.7 GiB. Its memory follows the requests in flight, because each request's memory is freed when it ends. The Node.js gateway served 97%. It started dropping connections 12 seconds in, at the end of each round, and finished after 54 seconds. The Python gateway's memory climbed to the 4 GiB limit in about a minute and stayed there. At about 150 seconds the kernel killed a worker for running out of memory, which cut off every stream on that worker. It finished after 227 seconds with 64% of requests served.
-
-For operators, this is the result that matters most. It decides how many instances you need to get through a spike, and how confidently you can pick that number.
-
-<Callout type="info">
-  These results are directional, not a ranking of gateways. They come from one
-  machine with a mock upstream, and absolute numbers will differ on other
-  hardware. The Python gateway's pass-through route skips its routing features,
-  such as model aliases and fallbacks, and its docs recommend 4 GiB per worker,
-  while its two workers shared 4 GiB here. With smaller request bodies, the
-  gateways that parse the body would close some of the gap.
-</Callout>
-
 ## What's next
 
 The gateway is in public beta on [Langfuse Cloud](https://cloud.langfuse.com), and you can [self-host it](/self-hosting/configuration/ai-gateway) next to your own Langfuse. Every call it routes becomes a Langfuse trace, grouped into [sessions](/docs/observability/features/sessions) for Claude Code, Codex, OpenCode and Pi, and shows up in [gateway analytics](/docs/gateway/features/analytics). If one of our decisions gets in your way, tell us in the [feedback discussion](https://github.com/orgs/langfuse/discussions/19686). The code is open source, in [`ai-gateway/`](https://github.com/langfuse/langfuse/tree/main/ai-gateway), and if you like working on this kind of problem, [we are hiring](/careers).
 
 [^issues]: From public issues in open-source AI gateways and SDKs, filed between July and November 2026.
+
+[^benchmark]: All three charts come from one benchmark session on one 8 vCPU virtual machine. Each gateway ran alone on two dedicated vCPUs with a 4 GiB memory limit and no swap; the load generator and a mock of the OpenAI API, reached over TLS, shared two other vCPUs, and Langfuse Web (five replicas) and its datastores ran on the remaining four. Every request was the same 517,708-byte streaming Chat Completions request from a long coding-agent turn, with usage reporting on; the mock answered with 20 content chunks 10 ms apart, so each stream lasted about 210 ms. The Rust and Node.js gateways ran as one process and the Python gateway as two Uvicorn workers. Our gateway checked every key through the control plane, enforced its memory budget, parsed each body once and sent a usage-only trace to Langfuse. The Node.js gateway parsed and re-serialized each body; the Python gateway ran on its pass-through route with one static key and no traces. In both, token counting, cost calculation, guardrails, rate limits, database logging and caching were off. Throughput is the highest rate with under 0.1% errors in a concurrency sweep from 1 to 1,000 clients, 30 seconds per level. Overhead is time to first token through the gateway minus time to first token sent directly to the mock, at 100 concurrent clients. The spike is five rounds of 1,000 simultaneous requests, each round starting when the previous one finished, with container memory sampled every 250 ms and charted as the peak per second. These results are directional, not a ranking of gateways: absolute numbers differ on other hardware, the Python gateway's docs recommend 4 GiB per worker, and with smaller bodies the gateways that parse them would close some of the gap.
