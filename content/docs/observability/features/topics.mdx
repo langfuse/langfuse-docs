@@ -11,6 +11,13 @@ Topics groups similar traces so you can see what users ask for, how interactions
 
 For example, use Topics to find the most common support requests, investigate unsuccessful interactions, or identify recurring tool failures to add to your [evaluation datasets](/docs/evaluation/experiments/datasets).
 
+<Frame fullWidth>
+  ![Topics treemap with a selected intent topic and its matching trace
+  summaries](/images/docs/topics/treemap.png)
+</Frame>
+
+_Topics treemap and trace summaries, shown with synthetic example data._
+
 ## How Topics works [#how-it-works]
 
 A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
@@ -27,6 +34,14 @@ A **scan** defines which traces and facets to analyze. Use separate scans for di
 ## Get started [#get-started]
 
 The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
+
+<Callout type="warning">
+  Topics sends conversation content and execution context from selected traces to
+  the summary model configured in your LLM connections. Embedding and grouping
+  models receive generated summaries. Apply
+  [masking](/docs/observability/features/masking) before ingestion if content must
+  not reach those providers. Summarization does not guarantee anonymization.
+</Callout>
 
 <Steps>
 
@@ -110,9 +125,7 @@ Treat topics as starting points for investigation. Similar conversations can hav
   and names can change when topics are rebuilt.
 </Callout>
 
-## Models, data, and costs [#models-and-costs]
-
-On Cloud and self-hosted deployments, Topics calls the providers configured in your LLM connections. The summary model receives trace conversation content and execution context; embedding and grouping models receive generated summaries. Apply [masking](/docs/observability/features/masking) before ingestion if content must not reach those providers. Summarization does not guarantee anonymization.
+## Models and costs [#models-and-costs]
 
 Your provider charges for summarization, embeddings, and topic naming. Reduce processing costs with narrower filters, a lower sampling rate, or a less expensive summary model.
 
