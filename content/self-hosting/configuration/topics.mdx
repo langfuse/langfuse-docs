@@ -1,0 +1,51 @@
+---
+title: Topics (self-hosted)
+sidebarTitle: Topics
+description: Configure model access, workers, and storage for Topics on a self-hosted Langfuse deployment.
+label: "Version: v4"
+---
+
+# Topics
+
+Topics runs on your existing Langfuse web and worker services, using Postgres, ClickHouse, Redis, and blob storage. Clustering runs inside the worker; the official worker image includes the required native module.
+
+This page covers infrastructure configuration. For project setup and usage, see the [Topics guide](/docs/observability/features/topics).
+
+## Configure model access [#model-access]
+
+Create [LLM connections](/docs/administration/llm-connection) for the models you want to use, then select the summary, embedding, and grouping models in Topics. Topics uses project connections and inherited organization connections. The instance-wide `LANGFUSE_AI_*` configuration for Halo does not configure Topics.
+
+Both **web and worker** need access to the configured provider endpoints: web validates model configuration, and worker processes traces and names topics. Keep `ENCRYPTION_KEY` consistent across both services so they can read the stored credentials; see [encryption configuration](/self-hosting/configuration/encryption).
+
+For a private model endpoint or gateway, configure the [LLM connection outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) on both services.
+
+### Embedding compatibility
+
+The embedding connection can use OpenAI or an OpenAI-compatible endpoint, Azure OpenAI, Amazon Bedrock, Google AI Studio, or Google Vertex AI. Anthropic can supply text models but does not supply an embedding adapter.
+
+Choose a dimension count supported by your embedding model. Langfuse accepts **64–4,096 dimensions**, with **1,024** as the default. The model must return the configured number of dimensions. See [model selection and costs](/docs/observability/features/topics#models-and-costs) before processing your first traces.
+
+## Configure storage retention [#storage-retention]
+
+Automatic trace processing stages assembled transcripts in the existing event-upload bucket under `${LANGFUSE_S3_EVENT_UPLOAD_PREFIX}trace-batch/trace/`. Configure a [blob storage lifecycle policy](/self-hosting/deployment/infrastructure/blobstorage) to expire objects under that full prefix. Include noncurrent versions if bucket versioning is enabled.
+
+<Callout type="warning">
+  These temporary objects contain trace content. Deleting a trace or project does
+  not immediately delete them; their removal depends on the bucket lifecycle
+  policy.
+</Callout>
+
+## Start processing
+
+Follow the [Topics setup steps](/docs/observability/features/topics#get-started) with a small sample. Confirm that the initial scan finishes and that you can open a topic and its source traces. This exercises model access and the worker's clustering runtime.
+
+## Tune worker load [#worker-load]
+
+Use these optional worker environment variables when provider rate limits or worker capacity require lower concurrency:
+
+| Variable                                             | Default | Controls                                               |
+| ---------------------------------------------------- | ------- | ------------------------------------------------------ |
+| `LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` | `20`    | Concurrent per-trace jobs, per worker and queue shard. |
+| `LANGFUSE_TOPICS_TRACE_CONCURRENCY`                  | `20`    | Concurrent trace processing within batch jobs.         |
+
+Clustering also consumes worker CPU and memory. Allow headroom alongside ingestion and evaluation jobs; the clustering input-size limit is not a cap on total process memory. See [sizing and scaling](/self-hosting/configuration/scaling) for worker deployment options.
