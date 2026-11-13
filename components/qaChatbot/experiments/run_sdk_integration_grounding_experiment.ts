@@ -42,15 +42,20 @@ const DEFAULT_MAX_CONCURRENCY = 3;
 const DEFAULT_MCP_URL = "https://langfuse.com/api/mcp";
 
 const IN_APP_EVALUATORS = [
-  "sdk-integration-docs-groundedness",
-  "sdk-integration-docs-citation-completeness",
-  "sdk-integration-package-version-completeness",
+  "sdk-integration-questions-groundedness",
+  "sdk-integration-questions-completeness",
 ];
 
 type ExperimentTelemetry = Parameters<
   typeof generateText
 >[0]["experimental_telemetry"];
 type ExperimentTelemetryMetadata = Record<string, string | number | boolean>;
+type ExperimentMessages = Parameters<typeof generateText>[0]["messages"];
+
+type CompiledExperimentPrompt = {
+  instructions?: string;
+  messages: ExperimentMessages;
+};
 
 function makeExperimentTelemetry(
   metadata: ExperimentTelemetryMetadata,
@@ -218,7 +223,7 @@ function isReasoningModel(model: string) {
 function compileExperimentMessages(
   prompt: Awaited<ReturnType<LangfuseClient["prompt"]["get"]>>,
   input: unknown,
-): Parameters<typeof generateText>[0]["messages"] {
+): CompiledExperimentPrompt {
   const chatHistory = getChatHistory(input);
   const fallbackUserMessage = getLastUserMessage(input);
   const datasetMessages: Array<{ role: string; content: string }> =
@@ -260,7 +265,18 @@ function compileExperimentMessages(
     compiledMessages.push(...datasetMessages);
   }
 
-  return compiledMessages as Parameters<typeof generateText>[0]["messages"];
+  const instructions = compiledMessages
+    .filter((message) => message.role === "system")
+    .map((message) => message.content)
+    .join("\n\n");
+  const modelMessages = compiledMessages.filter(
+    (message) => message.role !== "system",
+  );
+
+  return {
+    instructions: instructions || undefined,
+    messages: modelMessages as ExperimentMessages,
+  };
 }
 
 async function runOneExperiment(
@@ -302,7 +318,7 @@ async function runOneExperiment(
   const dataset = await langfuse.dataset.get(args.datasetName);
 
   const task = async (item: { input: unknown }): Promise<string> => {
-    const compiledMessages = compileExperimentMessages(prompt, item.input);
+    const compiledPrompt = compileExperimentMessages(prompt, item.input);
     const transport = new StreamableHTTPClientTransport(new URL(args.mcpUrl), {
       sessionId: `sdk-integration-grounding-${crypto.randomUUID()}`,
     }) as unknown as Parameters<typeof createMCPClient>[0]["transport"];
@@ -324,7 +340,8 @@ async function runOneExperiment(
               },
             }
           : {}),
-        messages: compiledMessages,
+        instructions: compiledPrompt.instructions,
+        messages: compiledPrompt.messages,
         tools: tools as Parameters<typeof generateText>[0]["tools"],
         stopWhen: stepCountIs(10),
         experimental_telemetry: makeExperimentTelemetry({
@@ -352,7 +369,7 @@ async function runOneExperiment(
     name: `${args.runSeries}-${params.model}`,
     runName,
     description:
-      "SDK integration docs-grounding experiment using the product QA chatbot prompt and Langfuse docs MCP. Langfuse in-app evaluators score docs groundedness, citation completeness, and package/version completeness.",
+      "SDK integration docs-grounding experiment using the product QA chatbot prompt and Langfuse docs MCP. Langfuse in-app evaluators score groundedness and completeness.",
     task,
     maxConcurrency: args.maxConcurrency,
     metadata: {
