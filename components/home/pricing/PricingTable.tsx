@@ -288,8 +288,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom Pricing",
       mainFeatures: [
         "Everything in Enterprise",
-        "FIPS 140-3 validated cryptographic modules operated in approved mode",
-        "Iron Bank-hardened UBI 9 base images",
+        "Use of FIPS 140-3 validated modules",
+        "Hardened images",
         "Air-gapped deployment",
       ],
       cta: "Talk to sales",
@@ -1633,19 +1633,8 @@ const sections: Section[] = [
         },
       },
       {
-        name: "FIPS 140-3 validated cryptographic modules operated in approved mode",
-        href: "/self-hosting/configuration/fips-mode",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
-      {
-        name: "Iron Bank-hardened UBI 9 base images",
-        href: "/self-hosting/configuration/hardening#hardened-images",
+        name: "Use of FIPS 140-3 validated modules & hardened images",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
         tiers: {
           selfHosted: {
             "Open Source": false,
