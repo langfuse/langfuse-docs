@@ -1,0 +1,127 @@
+---
+title: "Run Langfuse locally on macOS"
+description: "Run Langfuse on Apple silicon with Apple's container runtime and the Langfuse Helm chart."
+label: "Version: v4"
+sidebarTitle: "macOS (Apple container)"
+---
+
+# Run Langfuse locally on macOS
+
+Run Langfuse and its data stores on Apple silicon using Apple's `container` runtime and the [Langfuse Helm chart](/self-hosting/deployment/kubernetes-helm).
+
+<Callout type="warning">
+  For local evaluation. Restarting the runtime or your Mac may require recreating
+  the cluster, which deletes its data. See the [cluster lifecycle
+  limitations](https://github.com/apple/container/issues/2440).
+</Callout>
+
+## Requirements
+
+- An Apple silicon Mac running macOS 26 or later.
+- [Apple `container` 1.7.1](https://github.com/apple/container/releases/tag/1.7.1).
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/) 1.34–1.36.
+- [Helm](https://helm.sh/docs/intro/install/) 3.17 or later.
+
+The cluster uses 6 CPUs and 16 GiB of memory. Leave memory for macOS and disk space for images and trace data.
+
+## 1. Create the cluster
+
+Run steps 1–2 in the same terminal to use the dedicated kubeconfig. Accept the recommended kernel download and allow the macOS **Local Network** permission when prompted.
+
+```bash
+container system start
+
+mkdir -p "$HOME/.kube"
+export KUBECONFIG="$HOME/.kube/langfuse-local"
+
+container cluster create --name langfuse-local --cpus 6 --memory 16g
+kubectl --context langfuse-local get nodes
+```
+
+Wait for the node to show `Ready`.
+
+## 2. Install Langfuse
+
+Download the [local values](https://github.com/langfuse/langfuse-k8s/blob/0936e2dcb00e24cc7b4eb4e139654edc11aea9d3/examples/macos-local/values.yaml) for chart `2.2.3`. They use one replica per service, local persistent storage, and no ingress or AI Gateway.
+
+The browser uses `localhost:8333` for media and batch downloads; server-side requests use the internal SeaweedFS service. See [blob storage configuration](/self-hosting/deployment/infrastructure/blobstorage).
+
+Install storage, cert-manager, the ClickHouse operator, and Langfuse in order. Keep the release name `langfuse`, which the values reference.
+
+```bash
+curl --fail --location \
+  https://raw.githubusercontent.com/langfuse/langfuse-k8s/0936e2dcb00e24cc7b4eb4e139654edc11aea9d3/examples/macos-local/values.yaml \
+  --output values-local.yaml
+
+kubectl --context langfuse-local apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.37/deploy/local-path-storage.yaml
+kubectl --context langfuse-local -n local-path-storage rollout status deployment/local-path-provisioner --timeout=180s
+
+helm --kube-context langfuse-local upgrade --install cert-manager \
+  oci://quay.io/jetstack/charts/cert-manager \
+  --version v1.20.2 \
+  --namespace cert-manager --create-namespace \
+  --set crds.enabled=true --wait --timeout 5m
+
+kubectl --context langfuse-local wait --for=condition=Established \
+  crd/certificates.cert-manager.io crd/issuers.cert-manager.io --timeout=120s
+
+helm --kube-context langfuse-local upgrade --install clickhouse-operator \
+  oci://ghcr.io/clickhouse/clickhouse-operator-helm \
+  --version 0.0.8 \
+  --namespace clickhouse-operator --create-namespace \
+  --wait --timeout 5m
+
+kubectl --context langfuse-local wait --for=condition=Established \
+  crd/clickhouseclusters.clickhouse.com crd/keeperclusters.clickhouse.com --timeout=120s
+
+helm --kube-context langfuse-local upgrade --install langfuse \
+  oci://ghcr.io/langfuse/langfuse-k8s/charts/langfuse \
+  --version 2.2.3 \
+  --namespace langfuse --create-namespace \
+  -f "values-local.yaml" --wait --timeout 20m
+
+kubectl --context langfuse-local -n langfuse get pods,pvc
+```
+
+Expect the web, worker, and data services to become ready, with five PVCs `Bound`. Initial database-related restarts are normal.
+
+## 3. Open Langfuse
+
+Run each port-forward in a separate terminal and leave both running. Access is limited to this Mac.
+
+```bash
+kubectl --kubeconfig "$HOME/.kube/langfuse-local" --context langfuse-local \
+  -n langfuse port-forward --address 127.0.0.1 svc/langfuse-web 3000:3000
+```
+
+```bash
+kubectl --kubeconfig "$HOME/.kube/langfuse-local" --context langfuse-local \
+  -n langfuse port-forward --address 127.0.0.1 svc/langfuse-s3-all-in-one 8333:8333
+```
+
+Open [localhost:3000](http://localhost:3000), click **Sign up**, and create an organization and project. There is no default login.
+
+Follow the [SDK quickstart](/docs/observability/sdk/overview) with `LANGFUSE_BASE_URL=http://localhost:3000` and your project's API keys.
+
+## Shutdown
+
+Press **Ctrl+C** in both port-forward terminals to close access; the cluster stays running. To delete the cluster and its data:
+
+```bash
+KUBECONFIG="$HOME/.kube/langfuse-local" container cluster delete --name langfuse-local
+```
+
+## Troubleshooting
+
+- **Port 3000 in use:** use `3030:3000` for the web port-forward and `http://localhost:3030` for `langfuse.nextauth.url` and `LANGFUSE_BASE_URL`. Reapply Helm if already installed.
+- **Connection reset or `No route to host`:** allow `container-runti` / `container-runtime-linux` under **System Settings → Privacy & Security → Local Network**.
+- **Port-forward disconnects:** restart it after its selected pod is replaced, for example after a Helm upgrade.
+- **Missing `docker-credential-desktop`:** retry the public chart commands with an empty Docker configuration in the installation terminal:
+
+  ```bash
+  export DOCKER_CONFIG="$(mktemp -d)"
+  ```
+
+  Run `unset DOCKER_CONFIG` when finished.
+
+- **Service remains unready:** run `kubectl --context langfuse-local -n langfuse describe pod <pod-name>` and `kubectl --context langfuse-local -n langfuse logs <pod-name>` in the installation terminal.
