@@ -9,6 +9,7 @@ export function Hero() {
   return (
     <WrappedSection
       id="overview"
+      reveal={false}
       className="pt-5 sm:pt-8 md:pt-[60px] lg:pt-[60px]"
     >
       <CornerBox className="flex flex-col gap-4 sm:gap-6 items-center px-4 py-10 sm:px-8 sm:py-14">

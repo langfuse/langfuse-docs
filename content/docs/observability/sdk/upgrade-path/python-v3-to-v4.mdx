@@ -245,7 +245,7 @@ Observations are the primary concept in the new model. The unified `start_observ
 | `span.start_generation(name="x")`                               | `span.start_observation(name="x", as_type="generation")`                               |
 | `span.start_as_current_generation(name="x")`                    | `span.start_as_current_observation(name="x", as_type="generation")`                    |
 
-### `DatasetItemClient.run()` removed → use [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk)
+### `DatasetItemClient.run()` removed → use Experiment SDK
 
 The [Experiment SDK](/docs/evaluation/experiments/experiments-via-sdk) (`dataset.run_experiment()`) handles propagation of experiment attributes (run metadata, dataset item linking) under the hood.
 
@@ -273,9 +273,9 @@ dataset.run_experiment(name="my-run", task=my_task)
 
 The `DatasetItem` objects still have the same data attributes (`id`, `input`, `expected_output`, `metadata`, etc.) but the `run()` method is removed.
 
-### [LangChain](/integrations/frameworks/langchain) `CallbackHandler`: `update_trace` parameter removed
+### LangChain `CallbackHandler`: `update_trace` parameter removed
 
-The handler now uses `propagate_attributes()` internally. The `update_trace` parameter no longer exists — passing it raises a `TypeError`.
+The [LangChain](/integrations/frameworks/langchain) handler now uses `propagate_attributes()` internally. The `update_trace` parameter no longer exists — passing it raises a `TypeError`.
 
 **v3:**
 

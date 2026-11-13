@@ -70,9 +70,9 @@ const vendors = [
     ],
     compare: "/compare/arize-phoenix",
     migrate: "/resources/engineering/migrate-from-arize-ax",
-    migrateLabel: "AX",
+    migrateLabel: "AX guide",
     migrate2: "/resources/engineering/migrate-from-phoenix",
-    migrate2Label: "Phoenix",
+    migrate2Label: "Phoenix guide",
   },
   {
     name: "Datadog Agent Observability",
