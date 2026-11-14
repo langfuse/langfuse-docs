@@ -1,7 +1,7 @@
 ---
 title: Writing good evaluators
 sidebarTitle: Writing good evaluators
-description: "How to write evaluators you can trust: verifiable checks where possible, one binary judge per failure mode, prompts built from labeled examples, and validation against your own labels."
+description: "How to write evaluators you can trust: verifiable checks where possible, a decision model or LLM judge where you need a model, one binary verdict per failure mode, and validation against your own labels."
 ---
 
 export const references = [
@@ -76,9 +76,9 @@ The two are not exclusive. You can measure the same metric in your experiments d
 
 ### Prefer deterministic evaluators where you can [#make-it-verifiable]
 
-There are two main categories of evaluators: code evaluators (deterministic) and LLM-as-a-judge evaluators (nondeterministic). Both have their trade-offs.
+There are deterministic evaluators (code-based evaluators) and nondeterministic evaluators (LLM-as-a-judge, decision models). Both have their trade-offs:
 
-|                    | Code evaluator                                                        | LLM-as-a-judge                                                                    |
+|                    | Deterministic (code evaluator)                                        | Nondeterministic (LLM-as-a-judge, decision model)                                 |
 | ------------------ | --------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | Cost               | cheap                                                                 | expensive                                                                         |
 | Speed              | milliseconds                                                          | seconds to minutes                                                                |
@@ -90,11 +90,11 @@ If the thing you want to evaluate is
 - visible in your system (a row was written, a ticket was closed, an order was placed), or
 - comparable against an expected output you saved ahead of time
 
-a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can often settle the question exactly, and is faster and a lot cheaper to run. Prefer these over LLM-as-a-judge evaluators where you can.
+a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can often settle the question exactly, and is faster and a lot cheaper to run. Prefer these over model-based evaluators where you can.
 
 An example: an invoice-processing tool that extracts structured fields (vendor, total, due date) from PDFs, evaluated both ways:
 
-<Tabs items={["LLM-as-a-judge without expected output", "Code evaluator with expected output"]}>
+<Tabs items={["Nondeterministic without expected output", "Deterministic with expected output"]}>
 <Tab>
 
 Nothing exists to compare against, so an LLM-as-a-judge has to do the reading: it receives the invoice text and the extracted fields, and decides for each field whether it appears as that field in the document. This works, but it costs a model call per invoice, and the verdict can differ between runs.
@@ -114,6 +114,13 @@ Many things are hard to produce but cheap to check, once someone has done the pr
 
 </Callout>
 
+### Decision model or LLM-as-a-judge [#decision-model-or-judge]
+
+Whether a decision model or LLM evaluator is better for your use case depends on what you need back:
+
+- **Pick a [decision model](/docs/evaluation/evaluation-methods/decision-models)** when the possible answers are known up front and the verdict is all you need downstream, for a dashboard, an alert, or a filter. Its low cost makes it the natural fit for high-volume checks, like scoring every production trace instead of a sample.
+- **Pick an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)** when you need to read why a case failed, to debug it or to act on it, or when the criterion takes several reasoning steps to check.
+
 ## Translating a metric into inputs and outputs [#inputs-and-outputs]
 
 Once you know what kind of evaluator to use, you'll need to decide what data you're going to serve as input, and what its output will be. While this depends a lot on your use case, a couple of guiding principles apply.
@@ -122,7 +129,7 @@ Once you know what kind of evaluator to use, you'll need to decide what data you
 
 It might be tempting to create a single judge that rates accuracy, tone of voice, and completeness together on a 1-10 scale. This is sometimes also called a _God Evaluator_<Ref refs={references} id="yan-product-evals" />. The problem with this is that your resulting score does not tell you what to fix.
 
-For LLM-as-a-judge evaluators specifically, narrow ones are also easier to build. Getting a judge to agree with you on one specific criterion is a much lower bar than agreeing on "quality".
+For model-based evaluators specifically, narrow ones are also easier to build. Getting a model to agree with you on one specific criterion is a much lower bar than agreeing on "quality". Decision models are built around this: each question asks for one decision.
 
 ### Input → actions over words [#outcome-not-claim]
 
@@ -197,9 +204,9 @@ Beware of the _criteria drift_ that was [mentioned before](#label-first). Someti
 
 1. Do [error analysis](/academy/monitoring/error-analysis) if you haven't already, and pick one failure mode from it.
 2. Check whether a state or a stored expected output can settle it. If yes, write a [code evaluator](/docs/evaluation/evaluation-methods/code-evaluators) and stop here.
-3. If you need an LLM-as-a-judge, label 10-20 cases with how you'd expect the judge to score them.
-4. Write the judge prompt: context, one precise criterion, a few of your labeled examples, reasoning before verdict.
-5. Run the judge on the remaining labeled cases, compare, and iterate on it until your judge is aligned with how you judge the cases.
+3. Otherwise, label 10-20 cases with how you'd expect the evaluator to score them.
+4. If the possible answers are known up front and the verdict is all you need, set up a [decision model](/docs/evaluation/evaluation-methods/decision-models). If you need the reasoning, write a judge prompt: context, one precise criterion, a few of your labeled examples, reasoning before verdict.
+5. Run the evaluator on the remaining labeled cases, compare, and iterate on it until it is aligned with how you judge the cases.
 6. Ship it, and keep reviewing a sample of its verdicts.
 
 ## References

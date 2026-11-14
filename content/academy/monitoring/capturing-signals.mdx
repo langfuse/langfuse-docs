@@ -128,6 +128,8 @@ Separate steering from correction. In this [music DJ example](/academy/examples/
 
 _Amazon used rephrase and follow-up patterns to curate training data for Alexa's language understanding from live traffic.<Ref refs={references} id="park-alexa" /> Microsoft's SPUR goes a step further: an LLM learns satisfaction and dissatisfaction patterns from the small slice of thumbs-labeled conversations, condenses them into a rubric, and scores the unlabeled majority with it.<Ref refs={references} id="spur" />_
 
+Conversation signals live in free text, so detecting them takes a model. A [decision model](/docs/evaluation/evaluation-methods/decision-models) can check a message for several of them in a single call, cheaply enough to cover all production traffic rather than a sample. [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse) walks through a ready-made template.
+
 ### Outcome signals [#outcome-signals]
 
 Outcome signals tell you what the environment did with the output: a draft was sent unedited, a ticket was closed, etc. **They are the strongest kind because they are grounded in the environment rather than in someone's opinion.**
