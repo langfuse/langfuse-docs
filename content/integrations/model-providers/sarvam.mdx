@@ -2,6 +2,7 @@
 title: Observability for Sarvam AI with Langfuse
 sidebarTitle: Sarvam AI
 logo: /images/integrations/sarvam_icon.svg
+logoAppearance: dark
 description: Trace Sarvam AI chat, speech-to-text, and text-to-speech calls in Langfuse from Vercel AI SDK apps and LiveKit voice agents.
 category: Integrations
 ---
@@ -122,9 +123,11 @@ Run it with `npx tsx app.ts`. In a long-running server, such as a Next.js route 
 
 ### View the trace in Langfuse
 
-Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). The trace shows one generation per model step, with the Hindi prompt and response, token usage, and cost, plus a tool observation for `getWeather`.
+Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). The trace has an agent observation for the `generateText` call, a `sarvam-105b` generation with input, output, and token usage for each model step, and a tool observation for `getWeather`.
 
-{/* TODO: Vercel AI SDK trace screenshot and example trace link */}
+{/* TODO: Vercel AI SDK trace screenshot */}
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ee23df279a66f645196922daaef5685b)
 
 </Steps>
 
@@ -215,7 +218,8 @@ async def entrypoint(ctx: JobContext):
 
     session = AgentSession(
         stt=sarvam.STT(language="unknown"),  # auto-detect the spoken language
-        llm=sarvam.LLM(model="sarvam-105b"),
+        # Use the /v1 endpoint: the plugin's default (/v2) can repeat tool calls
+        llm=sarvam.LLM(model="sarvam-105b", base_url="https://api.sarvam.ai/v1"),
         tts=sarvam.TTS(target_language_code="hi-IN", model="bulbul:v3"),
         vad=silero.VAD.load(),
     )
@@ -239,11 +243,17 @@ To connect it to a LiveKit room instead, run `python agent.py dev` and join the 
 
 ### View the trace in Langfuse
 
-Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). Each conversation turn is a trace with spans for speech-to-text, the `sarvam-105b` generation with its token usage, the `get_weather` tool call, and text-to-speech. Open **Sessions** to see all turns of one call together.
+Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). Each conversation turn is an `agent_turn` observation with spans for speech-to-text and text-to-speech, `sarvam-105b` generations with token usage, and a tool observation for `get_weather`. Open **Sessions** to see all traces of one call together.
 
-{/* TODO: LiveKit trace screenshot and example trace link */}
+{/* TODO: LiveKit trace screenshot */}
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/008c7eeb6c6bcc2ff0c73c1b823ba9fd)
 
 </Steps>
+
+## Track cost [#cost]
+
+Langfuse records token usage for Sarvam models out of the box. To see cost, add a [custom model definition](/docs/observability/features/token-and-cost-tracking#custom-model-definitions) for each Sarvam model you use, with Sarvam's [per-token prices](https://www.sarvam.ai/api-pricing). Langfuse then calculates cost for every Sarvam generation, in both integrations.
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
