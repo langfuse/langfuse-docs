@@ -1,0 +1,126 @@
+---
+title: "Codex usage dashboard for teams: cost per developer and model"
+description: "Track OpenAI Codex usage and cost per developer, team, and model. How Codex is billed, what OpenAI's admin analytics show, and how to trace every Codex turn."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Codex usage dashboard for teams: cost per developer and model
+
+Most people who search for "Codex usage" want to know how much of their plan's limit is left. Individual developers find that in their ChatGPT account. Teams have a different question: what Codex costs across all developers, which model and which repository drive it, and what the expensive sessions did. This guide covers both, with a focus on the team view.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Codex runs either on a ChatGPT plan, with usage limits over a 5-hour and a weekly window, or with an API key at standard API pricing. ChatGPT Business and Enterprise admins get Codex analytics in the admin console. To see cost per developer next to the full turn (model rounds, tool calls, tokens), route the Codex CLI through the [Langfuse AI Gateway](/docs/gateway/overview), or keep your setup and trace it with the [Codex plugin](/integrations/developer-tools/codex).
+
+<Frame fullWidth>
+  ![Langfuse session view of a Codex conversation recorded by the gateway, with messages, tool calls, cost, and token usage](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## How Codex is billed [#how-codex-is-billed]
+
+As of November 2026, OpenAI's [Codex pricing page](https://developers.openai.com/codex/pricing) describes two billing paths:
+
+| Path         | How it works                                                                                                            | Limits                                                   |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| ChatGPT plan | Codex is included in ChatGPT Free, Go, Plus, Pro, Business, Edu, and Enterprise. You sign in with your ChatGPT account. | Usage allowance over a 5-hour window and a weekly window |
+| API key      | Codex sends requests with an OpenAI API key, billed per token at standard API pricing.                                  | Your API organization's rate limits                      |
+
+On plans, you need allowance left in both windows to keep working, so a long task can hit the 5-hour cap while weekly usage remains. Usage depends on the model, reasoning level, context size, and tools, so the same task can cost very different amounts.
+
+## Where to see Codex usage today [#native-usage]
+
+- **Individual developers** see their remaining allowance in their ChatGPT account and in the Codex app.
+- **ChatGPT Business and Enterprise admins** get Codex analytics in the admin console: active users, credits and tokens, threads and turns, per-user leaderboards, and model usage, with per-user CSV export. A Codex analytics API key gives programmatic access.
+- **API-key users** see cost in the OpenAI API platform's usage pages.
+
+These views report totals. They don't show what happened inside a turn: which model rounds ran, which tool calls failed, or why one task used ten times the tokens of a similar one.
+
+## Track Codex with the Langfuse AI Gateway [#gateway]
+
+The [Langfuse AI Gateway](/docs/gateway/overview) gives each developer a gateway key and forwards Codex's requests to OpenAI with a provider connection your organization stores in Langfuse. Every turn becomes a trace.
+
+Add a provider to `~/.codex/config.toml` and export the key:
+
+```toml filename="~/.codex/config.toml"
+model_provider = "langfuse"
+
+[model_providers.langfuse]
+name = "Langfuse AI Gateway"
+base_url = "https://gateway.cloud.langfuse.com/openai/v1"
+env_key = "LANGFUSE_GATEWAY_KEY"
+wire_api = "responses"
+```
+
+```sh
+export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+codex
+```
+
+The [Codex gateway guide](/integrations/developer-tools/codex-gateway) lists the version requirements and other regions.
+
+Codex sends its own turn ID, so the gateway groups all model rounds of one turn into a single trace with no extra setup, and each Codex thread becomes one session. On top of that:
+
+- **Cost per developer** comes from the key: a user key always records its owner.
+- **Cost per team or cost center** comes from [key metadata](/docs/gateway/features/api-keys#key-metadata) set when the key is created.
+- **Prompts and code are optional.** The default `USAGE` mode stores tokens, cost, and latency only. `FULL` mode adds the input and output of every round.
+
+<Callout type="warning">
+  Through the gateway, Codex uses your organization's OpenAI connection at API
+  pricing instead of a ChatGPT plan's included usage. Codex replays the whole
+  conversation on every round, so very long sessions can exceed the gateway's 5
+  MiB input capture limit. Tokens and cost are still recorded. See [known
+  limitations](/faq/all/ai-gateway-known-limitations).
+</Callout>
+
+## Track Codex with the plugin instead [#plugin]
+
+The [Codex integration](/integrations/developer-tools/codex) uses plugin hooks: after each turn it uploads the turn's transcript, model calls, tool calls, and token usage to Langfuse. Codex keeps its existing sign-in, so it works with ChatGPT plans. Cost is computed from token usage and Langfuse's [model prices](/docs/observability/features/token-and-cost-tracking), which for plan users is an API-equivalent estimate rather than an invoice.
+
+Choose the gateway when one organization pays for Codex through the API and wants every call recorded centrally. Choose the plugin when developers use their ChatGPT plans and you want visibility without changing how Codex is billed.
+
+## A Codex usage dashboard in Langfuse [#dashboard]
+
+Gateway admins get the [analytics page](/docs/gateway/features/analytics) with total cost, requests, and tokens, cost over time, and the top users, keys, and models. For a Codex-specific view, build a [custom dashboard](/docs/metrics/features/custom-dashboards) with:
+
+1. **Cost per user per week**, filtered to traces named `codex`.
+2. **Cost per model**, to see whether a larger model is worth it for routine tasks.
+3. **Cost per team**, using the `team` key metadata.
+4. **Top sessions by cost**, linking to the sessions view so you can read the most expensive work.
+
+For the same setup across Claude Code, Copilot, and Cursor, see [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking). For a side-by-side of the two agents, see [Claude Code vs Codex](/resources/engineering/claude-code-vs-codex).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="how-do-i-check-codex-usage">
+<Summary>How do I check my Codex usage limits?</Summary>
+
+On a ChatGPT plan, your remaining allowance for the 5-hour and weekly windows is shown in your ChatGPT account and the Codex app. Business and Enterprise admins see usage for the whole workspace in the admin console. With an API key, usage appears in the OpenAI API platform.
+
+</Details>
+
+<Details id="how-much-does-codex-cost">
+<Summary>How much does Codex cost?</Summary>
+
+On a ChatGPT plan, Codex is included in the plan price, within the plan's usage limits. With an API key, it costs standard API rates for the tokens it sends and receives. Check OpenAI's Codex pricing page for current plan prices.
+
+</Details>
+
+<Details id="does-the-gateway-work-with-chatgpt-sign-in">
+<Summary>Does the Langfuse AI Gateway work with Codex signed in to ChatGPT?</Summary>
+
+No. The gateway forwards requests with an OpenAI provider connection, so Codex is configured with a custom provider and a gateway key instead of ChatGPT sign-in. To trace Codex while it runs on a ChatGPT plan, use the Codex plugin.
+
+</Details>
+
+<Details id="is-codex-open-source">
+<Summary>Is the Codex CLI open source?</Summary>
+
+Yes. The [Codex CLI repository](https://github.com/openai/codex) is licensed under Apache-2.0. The models it calls are not.
+
+</Details>
+
+</FaqDetails>

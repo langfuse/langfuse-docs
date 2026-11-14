@@ -1,0 +1,101 @@
+---
+title: "ClickHouse for self-hosted Langfuse: sizing and operations"
+description: "How to run ClickHouse for self-hosted Langfuse: deployment options, minimum sizing, versions, disk growth, system log tables, retention, backups, and read isolation."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+# ClickHouse for self-hosted Langfuse: sizing and operations
+
+ClickHouse stores the traces, observations, and scores in Langfuse, and it is the component self-hosters spend the most operations time on. Most of that time goes to a short list of problems that show up in a predictable order: picking a deployment, getting the version right, then disk growth. This guide covers each one and links to the configuration reference.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Use ClickHouse Cloud or BYOC for larger deployments, or the official ClickHouse Kubernetes Operator if you run ClickHouse yourself. Langfuse v4 needs ClickHouse 25.12 or later, and you should run a release that still gets security patches. Start with at least 2 CPUs and 8 GiB of memory. Most disk problems come from missing retention and from ClickHouse system log tables, which have no TTL by default and which Langfuse never reads.
+
+<ArchitectureDiagram />
+
+## Choose a deployment [#deployment]
+
+| Option                             | Support level | Good for                                                                       |
+| ---------------------------------- | ------------- | ------------------------------------------------------------------------------ |
+| ClickHouse Cloud                   | Official      | Most production deployments; managed scaling and backups                       |
+| ClickHouse BYOC                    | Official      | Managed ClickHouse with the data plane in your own cloud account               |
+| ClickHouse Kubernetes Operator     | Official      | Running ClickHouse yourself on Kubernetes, with upgrades and high availability |
+| Bundled in the Langfuse Helm chart | Community     | Getting started on Kubernetes; uses the operator from chart `v2.0.0`           |
+| Single Docker container            | Community     | Local development only                                                         |
+
+ClickHouse Cloud and BYOC separate storage from compute, so storage can grow without resizing compute, and they support separate compute groups for reads and writes. Self-managed ClickHouse means you own disk expansion, replicas, and merge behavior. See [ClickHouse deployment options](/self-hosting/deployment/infrastructure/clickhouse#support).
+
+## Get the version right [#versions]
+
+Each Langfuse major release sets a minimum ClickHouse version: 25.12 for v4 and 24.3 for v3, as of November 2026. Minor and patch releases of Langfuse never raise it.
+
+<Callout type="warning">
+  The minimum version is a compatibility guarantee, not a security
+  recommendation. ClickHouse patches only its recent releases, so pick a
+  version the [ClickHouse security
+  policy](https://github.com/ClickHouse/ClickHouse/security/policy) lists as
+  supported, such as the latest LTS. See [supported
+  versions](/self-hosting/deployment/infrastructure/clickhouse#supported-versions).
+</Callout>
+
+## Size it [#sizing]
+
+Start at the [minimum](/self-hosting/configuration/scaling#minimum-infrastructure-requirements) of 2 CPUs and 8 GiB of memory, and grow from measurements. Trace volume depends on how many observations each trace contains and how large inputs and outputs are, not on request count. A single ClickHouse shard can hold multiple terabytes of tracing data before horizontal scaling becomes a question.
+
+Signs you need more:
+
+- **Slow dashboards or API reads during ingestion peaks.** On ClickHouse Cloud or BYOC, route reads to a separate compute group with [`CLICKHOUSE_READ_ONLY_URL`](/self-hosting/configuration/scaling#clickhouse-read-only-url).
+- **Ingestion backlog in the worker.** Scale the worker containers first, see [ingestion throughput](/self-hosting/configuration/scaling).
+- **Steady disk growth.** See the next section.
+
+## Keep disk usage under control [#disk]
+
+Three settings cover most disk problems:
+
+1. **Data retention.** A [data retention](/docs/administration/data-retention) policy per project deletes old traces in ClickHouse and blob storage consistently. It needs an Enterprise license on self-hosted deployments. Without it, ClickHouse [TTL](/self-hosting/configuration/scaling) on the tracing tables is the alternative.
+2. **System log tables.** Tables such as `trace_log`, `text_log`, and `metric_log` have no TTL by default and can use more disk than your traces. Langfuse doesn't read them, so disable or cap them. See [ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables).
+3. **Lightweight deletes.** On ClickHouse 25.7 and later, lightweight deletes and updates reduce background merge work on deletion-heavy workloads. See [slow or timing-out deletions](/self-hosting/configuration/scaling#clickhouse-deletion-timeouts).
+
+## Back it up [#backups]
+
+ClickHouse Cloud and BYOC back up automatically. For self-managed ClickHouse, use volume snapshots or a backup tool on Kubernetes, and test restores. See [backup strategies](/self-hosting/configuration/backups). Langfuse also writes incoming events to blob storage first, which helps if ClickHouse is briefly unavailable.
+
+## Other things to configure [#configuration]
+
+- **Timezone:** ClickHouse must run in UTC. See [timezones](/self-hosting/deployment/infrastructure/clickhouse#timezones).
+- **User permissions:** the Langfuse user needs specific grants, including on system tables. See [user permissions](/self-hosting/deployment/infrastructure/clickhouse#user-permissions).
+- **Encryption at rest:** use encrypted disks or blob storage as a disk. See [ClickHouse encryption](/self-hosting/deployment/infrastructure/clickhouse).
+- **Direct access:** you can query Langfuse tables for custom tools, but don't change the schema. See [direct ClickHouse access](/self-hosting/deployment/infrastructure/clickhouse#direct-clickhouse-access).
+
+For how Langfuse Cloud runs ClickHouse at scale, see [How Langfuse runs ClickHouse at agent scale](/resources/engineering/clickhouse-at-agent-scale).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="why-clickhouse">
+<Summary>Why does Langfuse need ClickHouse?</Summary>
+
+Traces are large, append-heavy, and queried with aggregations across millions of rows. ClickHouse stores them in columns and aggregates them quickly, which Postgres alone can't do at that volume. Postgres still stores transactional data such as users, projects, and prompts.
+
+</Details>
+
+<Details id="other-managed-clickhouse">
+<Summary>Can I use another managed ClickHouse service?</Summary>
+
+Yes, as a community-supported option. It needs to meet the minimum version, support the required settings and grants, and run in UTC.
+
+</Details>
+
+<Details id="disk-full">
+<Summary>ClickHouse disk is filling up. What should I check first?</Summary>
+
+Run the query on the [scaling page](/self-hosting/configuration/scaling) to list the largest tables. If system log tables are near the top, disable or cap them. If tracing tables are, set a retention policy or a TTL.
+
+</Details>
+
+</FaqDetails>

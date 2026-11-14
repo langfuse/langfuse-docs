@@ -1,0 +1,101 @@
+---
+title: "AI audit trail: log every model call your company makes"
+description: "Build an AI audit trail: record which person or service called which model, when, at what cost, and optionally with what input, by routing calls through a gateway."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# AI audit trail: log every model call your company makes
+
+When security, legal, or finance asks "who used which AI model, for what, and what did it cost?", most companies can't answer for all of their traffic. Some apps are instrumented, some aren't, and coding agents call providers directly from laptops. An AI audit trail closes that gap by recording every model call at one choke point, attributed to a person or service, with enough detail to investigate later.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Route model traffic through the [Langfuse AI Gateway](/docs/gateway/overview) and remove direct provider keys. Every call is recorded as a Langfuse generation with the model, tokens, cost, latency, errors, the caller's identity, and the gateway key, even in the default `USAGE` mode, which stores no prompts. `FULL` mode adds input and output. Key creation and revocation appear in [audit logs](/docs/administration/audit-logs). Export everything to your own storage for long-term retention.
+
+<Frame fullWidth>
+  ![Langfuse session view of a model conversation recorded by the gateway, with messages, tool calls, cost, and token usage](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## What an AI audit trail needs to answer [#requirements]
+
+An audit trail is useful when it answers four questions for any call, months later:
+
+1. **Who** made the call: a named person or a named service, not a shared key.
+2. **What** was called: the provider, the model, and the parameters.
+3. **When and how it went**: timestamp, latency, and whether it failed.
+4. **What it cost**, and optionally **what was sent and returned**.
+
+Application-level tracing answers these for the apps you instrumented. It misses the apps nobody instrumented and every developer tool that calls providers directly. A gateway answers them for all traffic that passes through it, which is why it is the usual place for an audit trail.
+
+## What the gateway records for every call [#recorded-fields]
+
+Every request through the gateway becomes a [generation](/docs/observability/data-model) in the project you choose. In the default `USAGE` [ingestion mode](/docs/gateway/features/tracing#ingestion-modes), each generation records:
+
+- the model, matched to model prices, and scalar parameters such as `temperature`;
+- token usage, including cached and reasoning tokens, plus cost, latency, and time to first token;
+- level `ERROR` with the provider's status and message for failed calls, and `WARNING` for client cancellations;
+- the trace user, which for a user key is always the key owner's email;
+- the gateway key, its metadata, and the provider connection that served the call;
+- request IDs, so a single call can be found from the gateway's response headers or the provider's own request ID.
+
+`FULL` mode adds the full input (system prompt, tool definitions, messages, tool results) and the streamed output. Choose `USAGE` when prompts must not be stored outside your applications, and `FULL` when you also want to investigate content, run [evaluations](/docs/evaluation/get-started/online), or build datasets. The mode applies to the whole organization.
+
+## Make the gateway the only path [#enforcement]
+
+A gateway only produces a complete audit trail if traffic can't go around it:
+
+- **Keep provider keys in the gateway only.** Store provider API keys in gateway provider connections and remove them from applications, CI secrets, and developer machines.
+- **Give every person their own key.** User keys record their owner and stop working when that person leaves. See [gateway API keys](/resources/engineering/ai-gateway-api-keys).
+- **Give every service its own key.** Service account keys carry their own name as the trace user, so each pipeline shows up separately.
+- **Restrict models.** Only approved models can be called when you [use a model allowlist](/resources/engineering/ai-model-allowlist), per connection and per key.
+
+Key creation and revocation are written to [audit logs](/docs/administration/audit-logs) with the acting user, so the trail also covers who had access and when.
+
+## Retention and export [#retention]
+
+Audit requirements usually define how long records must be kept. Two Langfuse features cover this:
+
+- **[Data retention](/docs/administration/data-retention)** deletes data older than a configured number of days per project, so you can match a policy exactly.
+- **[Blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage)** writes observations and scores on a schedule to S3, GCS, or Azure Blob Storage that you own, for retention beyond Langfuse and for analysis in your data warehouse.
+
+<Callout type="warning">
+  Check the beta limits before you rely on gateway traces for audits. Recording
+  is best-effort, so in rare cases a call has no stored trace. Input over 5 MiB
+  is not recorded, and output over 1 MiB is recorded partially. See [known
+  limitations](/faq/all/ai-gateway-known-limitations). Audit logs require
+  Langfuse Enterprise on Cloud or an Enterprise license when self-hosted, and
+  data retention requires the Pro plan or higher.
+</Callout>
+
+## Self-hosting the audit trail [#self-hosting]
+
+When records must stay in your own infrastructure, run the [open-source gateway](/self-hosting/configuration/ai-gateway) next to self-hosted Langfuse. The trail then lives in your own database and storage. See [self-host an open source AI gateway](/resources/engineering/self-hosted-ai-gateway).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="does-usage-mode-store-prompts">
+<Summary>Does the audit trail store prompts and responses?</Summary>
+
+Only in `FULL` ingestion mode. In the default `USAGE` mode, the gateway records the model, tokens, cost, latency, errors, and the caller, without input or output.
+
+</Details>
+
+<Details id="can-users-hide-their-calls">
+<Summary>Can a user hide their calls from the audit trail?</Summary>
+
+Not through the gateway: a user key always records its owner, and clients can't override the trace user. Calls that go directly to a provider are outside the trail, so remove direct provider keys.
+
+</Details>
+
+<Details id="is-this-an-audit-log">
+<Summary>What is the difference between the AI audit trail and Langfuse audit logs?</Summary>
+
+The gateway trail records model calls. Langfuse [audit logs](/docs/administration/audit-logs) record changes inside Langfuse, such as creating or revoking a gateway key, with the acting user and the before and after state. Together they show who had access and what they did with it.
+
+</Details>
+
+</FaqDetails>
