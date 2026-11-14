@@ -1,0 +1,124 @@
+---
+title: Read-access audit logs
+description: Record who read traces, observations, scores, sessions and experiments on a self-hosted Langfuse instance, so you can review access to sensitive data.
+sidebarTitle: Read-access audit logs
+---
+
+# Read-access audit logs
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "not-available",
+    selfHosted: "ee",
+  }}
+/>
+
+[Audit logs](/docs/administration/audit-logs) record changes. Read-access audit logs also record reads. Whenever a user or API key views, lists, searches, exports or downloads traces, observations, scores, sessions or experiments, Langfuse records an access event. Use these events to answer questions such as "who opened this trace?" or "which traces did this user see in a search?".
+
+Read-access logging is off by default. It is available on self-hosted instances with an Enterprise or Government license key.
+
+## Requirements [#requirements]
+
+- Langfuse `v4.79.0` or later on the web and worker containers.
+- An Enterprise or Government [license key](/self-hosting/license-key) (`LANGFUSE_EE_LICENSE_KEY`) on the web and worker containers.
+- The v4 write mode `events_only`, which is the v4 default. In the `legacy` and `dual` write modes, the v3 trace and session views are not recorded. See [cutting over to the v4 defaults](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
+- A running worker. It moves access events from Postgres into ClickHouse.
+
+## Turn on read-access logging [#activate]
+
+Set this variable on the web container and restart it:
+
+```bash
+LANGFUSE_AUDIT_LOG_ACCESS_EVENTS=enforced
+```
+
+Langfuse then records reads in every organization on the instance. Reads from before you turned it on are not recorded.
+
+If Langfuse runs behind a load balancer or reverse proxy, also set `LANGFUSE_TRUSTED_PROXY_COUNT` to the number of proxies in front of it. Otherwise access events from the Langfuse UI carry no client IP address.
+
+| Variable                               | Default | Container | Description                                                                                                                                                                                                                              |
+| -------------------------------------- | ------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS`     | `org`   | web       | `enforced`: record reads in every organization. `disabled`: never record reads. `org`: record reads only in organizations that turn on access logging in their settings. That setting is not available in the UI yet, so use `enforced`. |
+| `LANGFUSE_TRUSTED_PROXY_COUNT`         | `0`     | web       | Number of proxies in front of Langfuse. The client IP is taken from the N-th `X-Forwarded-For` entry from the right. `0` ignores `X-Forwarded-For`.                                                                                      |
+| `LANGFUSE_AUDIT_LOG_STAGING_ENABLED`   | `true`  | web       | Kill switch. `false` stops recording access events, and reads then succeed without being recorded.                                                                                                                                       |
+| `LANGFUSE_AUDIT_LOG_RELAY_ENABLED`     | `true`  | worker    | Moves recorded events from Postgres into ClickHouse. While it is `false`, events wait in Postgres.                                                                                                                                       |
+| `LANGFUSE_AUDIT_LOG_RELAY_INTERVAL_MS` | `10000` | worker    | How often, in milliseconds, the worker moves events into ClickHouse.                                                                                                                                                                     |
+
+## How it works [#how-it-works]
+
+- **Recorded before data is returned.** Langfuse writes the access event to Postgres before it returns any data. If that write fails, the read fails with an error, so no data is returned without a record. A batch export whose event cannot be written is marked as failed and does not run.
+- **Moved to ClickHouse.** The worker moves events into the ClickHouse `audit_logs` table every 10 seconds. It deletes them from Postgres only after ClickHouse has stored them.
+- **One event per request.** Opening a trace sends several requests, so one trace view produces several events.
+- **Lists record what was shown.** A list or search records its request parameters, the number of rows returned and the id of every returned row, up to 10,000 ids per event.
+- **Refused reads.** A read in the Langfuse UI that is refused for missing permissions is recorded with the outcome `denied`. Public API and MCP calls are recorded only when they succeed.
+- **Retention.** Langfuse does not delete access events. The `audit_logs` table is partitioned by month.
+
+Change events are written to the same table with `event_kind = 'change'`, in addition to the existing audit log.
+
+## What is recorded [#coverage]
+
+| Surface     | Recorded reads                                                                                                                                                                                                             |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Langfuse UI | Trace and observation detail views, including input and output; the tracing, sessions, scores and experiments tables; session, score and experiment detail views; trace and observation downloads; creating a batch export |
+| Public API  | `GET /api/public/traces/{traceId}`, `GET /api/public/v2/observations`, `GET /api/public/v3/scores`, `GET /api/public/experiments`, `GET /api/public/experiment-items`                                                      |
+| MCP server  | `getObservation`, `getScore`, `listObservations`, `listScores`, `listExperiments`, `listExperimentItems`                                                                                                                   |
+
+Not recorded:
+
+- Aggregates: counts, filter options, metrics and dashboards, including the metrics API and the MCP tool `queryMetrics`.
+- Prompts, datasets, comments and media.
+- Other public API routes.
+
+Downloading the file of a finished batch export is recorded as a change event in the regular audit log.
+
+## Event fields [#fields]
+
+| Column                                | Content                                                                                                         |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `timestamp`                           | When the read happened.                                                                                         |
+| `org_id`, `project_id`                | The organization and project that were read.                                                                    |
+| `event_kind`                          | `access` for reads, `change` for changes.                                                                       |
+| `actor_type`, `user_id`, `api_key_id` | Who read the data: `USER`, `API_KEY` or `SYSTEM`.                                                               |
+| `actor_name`, `actor_email`           | The user's name and email at the time of the read. They remain after the user leaves the organization.          |
+| `user_org_role`, `user_project_role`  | The user's roles at the time of the read.                                                                       |
+| `surface`                             | `trpc` (Langfuse UI), `public-api`, `mcp`, or `internal-api` (trace and observation downloads).                 |
+| `route`                               | The UI procedure, API route or MCP tool, for example `GET /api/public/v2/observations`.                         |
+| `resource_type`, `action`             | What was read and how, for example `trace` and `read`, `observation` and `list`, or `batchExport` and `export`. |
+| `resource_refs`                       | Typed ids of the returned rows: `trace:<id>`, `observation:<id>`, `score:<id>` and `session:<id>`.              |
+| `params`                              | The request's filters, search and pagination as JSON, cut at 2 KB. A cut value ends in `...[truncated]`.        |
+| `result_count`                        | The number of rows returned.                                                                                    |
+| `outcome`, `outcome_reason`           | `success`, or `denied` with `UNAUTHORIZED` or `FORBIDDEN`.                                                      |
+| `ip`, `user_agent`                    | The client's IP address and user agent.                                                                         |
+| `request_id`                          | The OpenTelemetry trace id of the request, if it was sampled.                                                   |
+
+## Query access events [#query]
+
+The audit log viewer and export in the Langfuse UI do not show access events yet. Query the `audit_logs` table in your ClickHouse database directly, for example with `clickhouse client`. Use `FINAL`: a retried move can store an event twice, and `FINAL` collapses the copies.
+
+Who accessed a trace:
+
+```sql
+SELECT timestamp, actor_type, actor_email, api_key_id, surface, route, action, outcome
+FROM audit_logs FINAL
+WHERE org_id = '<org-id>'
+  AND project_id = '<project-id>'
+  AND event_kind = 'access'
+  AND has(resource_refs, 'trace:<trace-id>')
+ORDER BY timestamp DESC;
+```
+
+What a user read during a period:
+
+```sql
+SELECT timestamp, route, resource_type, action, result_count, params
+FROM audit_logs FINAL
+WHERE org_id = '<org-id>'
+  AND event_kind = 'access'
+  AND user_id = '<user-id>'
+  AND timestamp >= '2026-11-01 00:00:00'
+  AND timestamp < '2026-11-08 00:00:00'
+ORDER BY timestamp;
+```

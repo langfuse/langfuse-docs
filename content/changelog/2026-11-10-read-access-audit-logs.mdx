@@ -1,0 +1,31 @@
+---
+date: 2026-11-10
+title: Read-access audit logs for self-hosted Enterprise
+description: Self-hosted Langfuse can record every read of traces, observations, scores, sessions and experiments as an audit event, so you can review who accessed sensitive data.
+author: Steffen
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Self-hosted Langfuse can now record who read your data, not only who changed it. With read-access logging on, Langfuse records an access event for every view, list, search, export and download of traces, observations, scores, sessions and experiments. That covers the Langfuse UI, the public API and the MCP server. Each event records:
+
+- the user or API key;
+- the request parameters;
+- the number of rows returned;
+- the ids of the returned rows.
+
+This helps you answer questions such as "who opened this trace?" or "which traces did this user see in a search?" during a compliance review. If an event cannot be recorded, the read fails, so no data is returned without a record.
+
+To turn it on, set `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS=enforced` on the web container. You need an Enterprise or Government license key and the v4 `events_only` write mode. Access events are stored in the ClickHouse `audit_logs` table. The audit log viewer in the UI does not show them yet.
+
+<Cards num={1}>
+  <Card
+    title="Turn on read-access audit logs"
+    href="/docs/administration/access-audit-logs#activate"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
