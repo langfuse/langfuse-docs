@@ -1,0 +1,250 @@
+---
+title: Observability for Sarvam AI with Langfuse
+sidebarTitle: Sarvam AI
+logo: /images/integrations/sarvam_icon.svg
+description: Trace Sarvam AI chat, speech-to-text, and text-to-speech calls in Langfuse from Vercel AI SDK apps and LiveKit voice agents.
+category: Integrations
+---
+
+# Observability for Sarvam AI with Langfuse
+
+This guide shows how to trace **Sarvam AI** models with **Langfuse** from two places: a TypeScript app built with the **Vercel AI SDK**, and a real-time voice agent built with **LiveKit Agents**.
+
+> **What is Sarvam AI?** [Sarvam AI](https://www.sarvam.ai) builds models for Indian languages: the `sarvam-30b` and `sarvam-105b` chat models, Saaras speech-to-text, Bulbul text-to-speech, and translation and transliteration APIs.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor cost and latency. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+{/* TODO: opening screenshot of a Sarvam trace */}
+
+Both integrations use OpenTelemetry. The framework emits spans for each model call, and the Langfuse SDK exports them to your Langfuse project. Pick the section that matches your stack:
+
+- [Vercel AI SDK](#vercel-ai-sdk): text generation, streaming, and tool calls with the `sarvam-ai-sdk` provider.
+- [LiveKit Agents](#livekit-agents): voice agents that use Sarvam for speech-to-text, the LLM, and text-to-speech.
+
+## Vercel AI SDK [#vercel-ai-sdk]
+
+The community-maintained [`sarvam-ai-sdk`](https://github.com/sarvamai/sarvam-ai-sdk) package adds Sarvam as a Vercel AI SDK provider. Langfuse captures every AI SDK call that uses it through the [Langfuse Vercel AI SDK integration](/integrations/frameworks/vercel-ai-sdk).
+
+<Steps>
+
+### Install dependencies
+
+_**Requires** Node.js 22 or later and AI SDK 7._
+
+```bash
+npm install ai@7 sarvam-ai-sdk @langfuse/vercel-ai-sdk @langfuse/otel @langfuse/tracing @opentelemetry/sdk-trace-node zod
+```
+
+<Callout type="info">
+  Each `sarvam-ai-sdk` minor version targets one AI SDK major version (`0.4.x` targets AI SDK 7). Keep `ai` on the major version your `sarvam-ai-sdk` release expects. See the [version table](https://github.com/sarvamai/sarvam-ai-sdk#version-compatibility).
+</Callout>
+
+### Configure credentials
+
+Get Langfuse API keys from your project settings in [Langfuse Cloud](/cloud) or your [self-hosted](/self-hosting) instance, and a Sarvam API key from the [Sarvam dashboard](https://dashboard.sarvam.ai/).
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+SARVAM_API_KEY = "..."
+```
+
+### Register the Langfuse integration
+
+Create an `instrumentation.ts` file that sets up the `LangfuseSpanProcessor` and registers the Langfuse integration with the AI SDK once at startup.
+
+```ts filename="instrumentation.ts"
+import { registerTelemetry } from "ai";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+
+export const langfuseSpanProcessor = new LangfuseSpanProcessor();
+
+const tracerProvider = new NodeTracerProvider({
+  spanProcessors: [langfuseSpanProcessor],
+});
+tracerProvider.register();
+
+registerTelemetry(new LangfuseVercelAiSdkIntegration());
+```
+
+### Call a Sarvam model
+
+Import `instrumentation.ts` before any other module, then use `sarvam(...)` as the model in any AI SDK function. `propagateAttributes` sets the trace name, user, and session on every span the call creates.
+
+```ts filename="app.ts"
+import { langfuseSpanProcessor } from "./instrumentation";
+
+import { generateText, stepCountIs, tool } from "ai";
+import { propagateAttributes } from "@langfuse/tracing";
+import { sarvam } from "sarvam-ai-sdk";
+import { z } from "zod";
+
+const { text } = await propagateAttributes(
+  {
+    traceName: "sarvam-weather-assistant",
+    userId: "user-123",
+    sessionId: "session-456",
+  },
+  () =>
+    generateText({
+      model: sarvam("sarvam-105b"),
+      prompt: "बेंगलुरु में आज मौसम कैसा है? हिंदी में जवाब दें।",
+      tools: {
+        getWeather: tool({
+          description: "Get the current weather in a city",
+          inputSchema: z.object({
+            city: z.string().describe("The city to get the weather for"),
+          }),
+          execute: async ({ city }) => ({
+            city,
+            temperatureC: 27,
+            condition: "partly cloudy",
+          }),
+        }),
+      },
+      stopWhen: stepCountIs(3),
+      telemetry: { functionId: "sarvam-weather-assistant" },
+    }),
+);
+
+console.log(text);
+
+// Flush buffered spans before a short-lived script exits
+await langfuseSpanProcessor.forceFlush();
+```
+
+Run it with `npx tsx app.ts`. In a long-running server, such as a Next.js route handler, you don't need the `forceFlush()` call.
+
+### View the trace in Langfuse
+
+Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). The trace shows one generation per model step, with the Hindi prompt and response, token usage, and cost, plus a tool observation for `getWeather`.
+
+{/* TODO: Vercel AI SDK trace screenshot and example trace link */}
+
+</Steps>
+
+## LiveKit Agents [#livekit-agents]
+
+The [`livekit-plugins-sarvam`](https://docs.livekit.io/agents/models/llm/plugins/sarvam/) plugin provides Sarvam speech-to-text, LLM, and text-to-speech for LiveKit Agents. LiveKit Agents has built-in OpenTelemetry support, so you pass it a `TracerProvider` that the Langfuse SDK exports from. The [LiveKit integration guide](/integrations/frameworks/livekit) covers the same setup for other providers and for Node.js.
+
+<Steps>
+
+### Install dependencies
+
+_**Requires** Python 3.10 or later. Connecting the agent to a room also requires a [LiveKit](https://livekit.io) server, either LiveKit Cloud or self-hosted._
+
+```bash
+pip install "livekit-agents[sarvam,silero]~=1.8" langfuse opentelemetry-sdk python-dotenv
+```
+
+### Configure credentials
+
+Add your Langfuse, Sarvam, and LiveKit credentials to a `.env` file next to your agent.
+
+```bash filename=".env"
+LANGFUSE_SECRET_KEY = "sk-lf-..."
+LANGFUSE_PUBLIC_KEY = "pk-lf-..."
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+SARVAM_API_KEY = "..."
+
+LIVEKIT_URL = "wss://<your-project>.livekit.cloud"
+LIVEKIT_API_KEY = "..."
+LIVEKIT_API_SECRET = "..."
+```
+
+### Create a traced voice agent
+
+`setup_langfuse()` creates a `TracerProvider`, passes it to LiveKit, and attaches the Langfuse exporter. `should_export_span=lambda span: True` exports LiveKit's speech-to-text, text-to-speech, and turn spans as well as the LLM calls. The room name becomes the Langfuse session ID, so all turns of one call are grouped together.
+
+```python filename="agent.py"
+from dotenv import load_dotenv
+from langfuse import Langfuse
+from opentelemetry.sdk.trace import TracerProvider
+
+from livekit.agents import Agent, AgentServer, AgentSession, JobContext, cli, function_tool
+from livekit.agents.telemetry import set_tracer_provider
+from livekit.plugins import sarvam, silero
+
+load_dotenv()
+
+
+def setup_langfuse(ctx: JobContext) -> TracerProvider:
+    tracer_provider = TracerProvider()
+    # Group all turns of one call into a Langfuse session
+    set_tracer_provider(tracer_provider, metadata={"langfuse.session.id": ctx.room.name})
+
+    # Reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY and LANGFUSE_BASE_URL
+    Langfuse(
+        tracer_provider=tracer_provider,
+        # Export LiveKit's STT, TTS and turn spans, not only LLM spans
+        should_export_span=lambda span: True,
+    )
+    return tracer_provider
+
+
+class Assistant(Agent):
+    def __init__(self) -> None:
+        super().__init__(
+            instructions="You are a friendly voice assistant. Reply in the language the user speaks, in one or two short sentences.",
+        )
+
+    @function_tool
+    async def get_weather(self, city: str) -> dict:
+        """Get the current weather in a city."""
+        return {"city": city, "temperature_c": 27, "condition": "partly cloudy"}
+
+
+server = AgentServer()
+
+
+@server.rtc_session()
+async def entrypoint(ctx: JobContext):
+    tracer_provider = setup_langfuse(ctx)
+
+    async def flush_traces():
+        tracer_provider.force_flush()
+
+    ctx.add_shutdown_callback(flush_traces)
+
+    session = AgentSession(
+        stt=sarvam.STT(language="unknown"),  # auto-detect the spoken language
+        llm=sarvam.LLM(model="sarvam-105b"),
+        tts=sarvam.TTS(target_language_code="hi-IN", model="bulbul:v3"),
+        vad=silero.VAD.load(),
+    )
+    await session.start(agent=Assistant(), room=ctx.room)
+
+
+if __name__ == "__main__":
+    cli.run_app(server)
+```
+
+### Run the agent
+
+Download the voice activity detection model files once, then start the agent and talk to it in your terminal:
+
+```bash
+python agent.py download-files
+python agent.py console
+```
+
+To connect it to a LiveKit room instead, run `python agent.py dev` and join the room from the [Agents Playground](https://agents-playground.livekit.io).
+
+### View the trace in Langfuse
+
+Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). Each conversation turn is a trace with spans for speech-to-text, the `sarvam-105b` generation with its token usage, the `get_weather` tool call, and text-to-speech. Open **Sessions** to see all turns of one call together.
+
+{/* TODO: LiveKit trace screenshot and example trace link */}
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
