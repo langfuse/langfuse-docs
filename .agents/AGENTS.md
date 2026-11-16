@@ -142,7 +142,7 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 
 - Open with one sentence on what the reader will accomplish, a link to the Concepts page, and, when admins and users have separate guides, a link to the other guide.
 - Put the steps under a `## Setup steps` heading inside `<Steps>`. Each step is one task; fold small actions, such as exporting the key the reader just created, into the step that produces the value.
-- Don't add a "Before you begin" or prerequisites section. Put each requirement (role, plan, deployment type, prior setup) in the step where the reader would hit it, as an info callout at the end of that step. Caveats that apply to the whole procedure go above `<Steps>`. This applies to get-started pages in `content/docs/` and `content/integrations/`, not to self-hosting guides.
+- Don't add a "Before you begin" or prerequisites section. Put each requirement (role, plan, deployment type, prior setup) in the step where the reader would hit it, as an info callout at the end of that step. Caveats that apply to the whole procedure go above `<Steps>`.
 - When setup differs per tool, client, or language, give each its own tab with everything needed to finish there: an italic requirements line such as `_**Requires** <tool> <version> or later and <prerequisite>._`, the minimal configuration, a command that confirms it works, and a card that links to the full guide. A tab that only links to another page is not enough. Also use tabs for alternative ways to do one step, such as the Langfuse UI and the API.
 - End with a "Not seeing what you expected?" section that uses `<FaqPreview>` with the area's get-started tag and, if there is an obvious next guide, a "Next steps" list with just that link.
 
@@ -172,12 +172,6 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 - Link the key word or short phrase, not a whole sentence or bullet. Link text names its target, for example "trace user ID" or "Concepts". Put "See X" references in the sentence they support, not on a line of their own.
 - Use relative links to langfuse.com pages. Never link to preview deployments (`*.vercel.app`) or leave placeholder link targets.
 
-### Self-hosting pages
-
-These rules cover pages in `content/self-hosting/`.
-
-- A self-hosting guide may use a standalone **Requirements** or **Prerequisites** section when it lists unique setup facts the reader needs before starting, such as OS, hardware, tool versions, cluster resources, or licenses. Don't repeat those facts as prose in later steps; use them in commands and configuration, and link to another page instead of restating a requirement that already lives there.
-
 ### Changelog entries
 
 Changelog entries live in `content/changelog/`.
@@ -199,7 +193,7 @@ Please check the following:
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
 - When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
-- Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines, and self-hosting pages against "Self-hosting pages". In addition:
+- Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines. In addition:
   - Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
   - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
   - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, or troubleshooting kept inline instead of in FAQ pages.
