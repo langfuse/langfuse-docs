@@ -187,38 +187,76 @@ Changelog entries live in `content/changelog/`.
 
 ## Review guidelines
 
-Please check the following:
+Review added and changed content in two gates. Read the surrounding docs, and what the product and screenshots already show, before you judge an addition. Run gate 1 first. One gate 1 failure ends the review: say what to remove or which home it belongs in, and stop. Do not comment on wording, headings, callouts, or structure until gate 1 is clean. Do not rewrite an addition that should be cut, and do not paste it into the destination.
+
+Judge the change in the context of the existing docs. Also flag existing text when the change makes that text a duplicate, something the open screen now shows, or a job the page no longer has. Name the passage and why the change removed its reason to stay. Leave every other existing sentence alone. Pages the diff does not edit are context only.
+
+### Gate 1: Necessity and place
+
+#### Necessity
+
+Keep a fact only when a reader with that screen open still could not know it.
+
+Cut catalogs the product maintains, such as model definitions, fields, options, and providers. Cut toggles, button names, and steps the reader can take on the open screen, such as turning a model off. Cut a prose list when a screenshot on the page already shows it. Cut a page or section that would only describe the open screen.
+
+Keep a consequence, a decision, or a behavior the screen does not show. Keep the single opening `<Frame>` or `<Video>`.
+
+Apply this test to prose, examples, callouts, tables, screenshots beyond that opening visual, and new pages.
+
+Flag a versioned model name, or a list of today's providers, in an intro, heading, or step-by-step guide, unless the page is about that model or provider. Prefer "your model" or "a connection". Flag provider-specific setup that restates what the UI shows. A short provider note belongs at the bottom of the feature page. A longer one belongs in a linked FAQ.
+
+#### Already written
+
+Search the existing docs before you treat an addition as new. Fail it only when it is a second procedure, a second reference list, or an explanation longer than a sentence, on a page that does not own that fact. Leave one sentence and a link to the owning page.
+
+Keep a sentence or a short table that points at the owning page. Overview, Concepts, and Get started pages may do this. Keep a sentence that names the fact while doing a different job and does not explain it again. Keep the full version on the page that owns the fact. When another page has copied it, that copy becomes the sentence and the link.
+
+#### Place
+
+The addition has to match the page type and the section on that page. The hierarchy is Overview, Get started, Concepts, Features, Integrations, then Troubleshooting and FAQ. The default path comes before optional, advanced, or edge-case settings. Flag a page that leads with those settings, for example a custom endpoint or extra headers ahead of managing models or choosing a model ID.
+
+Match that hierarchy. An area that has drifted is not the template. Flag a missing Getting started section, a missing "Not seeing what you expected?" section, or troubleshooting kept on a feature, get-started, or self-hosting page. Troubleshooting belongs in `content/faq/all/`, one file per problem, tagged for `<FaqPreview>`.
+
+A new feature, or a page that makes the reader get through a second job before reaching the job of that page, is a reason to restructure. Name one of these homes, in order. Do not paste the text there.
+
+1. Delete it, when the open screen or an existing page already covers it.
+2. A section of the current page.
+3. A collapsible `<Details>` block on that page, for a long reference.
+4. A new file in `content/faq/all/`, for one problem or question.
+5. A new file in `content/guides/`, for a worked workflow that is not the product reference.
+6. An existing docs page that already owns that job.
+7. A new docs page, only in a sidebar slot the area already has.
+
+Where a new page lives is its folder and its position in `meta.json`. A new sidebar entry is allowed only when that new page is allowed. Do not add a sidebar group. Leave `lib/nav-links` unchanged unless this is a new product area.
+
+### Gate 2: How it is written
+
+Run this gate only after gate 1 is clean. Do not repeat the necessity test. Check form against Get started pages, Wording and structure, Formatting, and Changelog entries in the writing guidelines, and check the following:
 
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
-- When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
-- Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines. In addition:
-  - Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
-  - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
-  - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, or troubleshooting kept inline instead of in FAQ pages.
-  - On get-started pages, check that a reader can reach a working setup using only that page, and using only the tab they selected.
-  - Flag leftover TODOs, placeholder link targets, and links to preview deployments.
+- Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
+- On get-started pages, check that a reader can reach a working setup using only that page, and using only the tab they selected.
+- Flag leftover TODOs, placeholder link targets, and links to preview deployments.
 - A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
   - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
   - `<FaqPreview tags={[...]} />` from `components/faq/FaqPreview.tsx`: the list of links to that area's FAQ articles. Keep this component. Do not replace it with a hand-written link list or inline Q&A.
   - `<GhDiscussionsPreview labels={[...]} />` from `components/gh-discussions/GhDiscussionsPreview.tsx`: the GitHub Discussions component already on these pages. Keep this component. Do not replace it with a prose link to GitHub Issues.
 - If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
-- Avoid specific model names and enumerations of today's supported providers in documentation; they go stale quickly. Prefer generic phrasing such as "your model" or "a connection", and flag new or edited docs that pin a versioned model name or list providers in an intro, heading, or step-by-step guide unless the page is specifically about that model or provider. Flag new provider-specific setup that restates what the UI already shows; only keep guidance the reader cannot figure out on their own. Short provider notes belong at the bottom of the feature page; longer ones can be a linked FAQ.
 - In documentation tables, every column must add enough value on its own. Prefer fewer columns: merge or remove any column that does not help the reader, and flag tables that would stay clear with fewer columns, unless the column keeps the table consistent with similar tables on the same page.
 - Put failure modes, scope limits, and similar caveats in a `<Callout>` so they stand out. Flag new or edited docs that bury these in body copy.
-- Order sections by audience. Flag a new or edited page that leads with optional, advanced, or edge-case details (for example a custom endpoint or extra headers) ahead of the sections most readers of that page need (for example managing models or choosing a model ID).
 - Flag examples that hard-code a regional Cloud or gateway URL without in-snippet comments that name EU and list the other region URLs. A sentence after the snippet that only names the region and links to another page is not enough. Copy the comment shape from `components-mdx/env-python.mdx` or, for gateway hosts, from [Send your first request](/docs/gateway/get-started/first-request).
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
 - When a PR adds or edits a changelog entry in `content/changelog/`, flag it if the intro is not immediately followed by 2-3 concrete example use cases, or if a UI change has no screenshot or `.mp4` video that readers see on the page. Frontmatter `ogImage` / `ogVideo` counts only when `showOgInHeader` is not `false`; if that flag is `false`, the visual must be in the body. A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
 - Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
-- Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
+- Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.). Do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
 - When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
 - For every edited page or route, check `md-override/` for a corresponding Markdown source. When one exists, verify the rendered page and override remain synchronized; a top-of-file comment is helpful but not required for this rule to apply.
-- When linking to a Langfuse app page from docs, use `https://cloud.langfuse.com/project/~/[path]` — the `~` sentinel redirects to the reader's last-used project and region automatically.
+- When linking to a Langfuse app page from docs, use `https://cloud.langfuse.com/project/~/[path]`. The `~` sentinel redirects to the reader's last-used project and region automatically.
 - External `/users` adopters-table references must include a Wayback `[Archive](...)` link. Request a Save Page Now snapshot when none exists; do not omit the archive.
 
 ## Cursor Cloud specific instructions
