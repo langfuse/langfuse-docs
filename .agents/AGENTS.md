@@ -123,7 +123,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
-- Key facts in blog or changelog posts also belong in docs or FAQ pages.
+- Prominent, current behavior in a blog or changelog post must also be on a docs, integration, or FAQ page. Migration guidance stays in its migration FAQ, and niche caveats may live only where people hit them.
 
 ### Documentation pages
 
