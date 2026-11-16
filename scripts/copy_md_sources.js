@@ -341,8 +341,12 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
         "g",
       );
 
-      finalContent = finalContent.replace(selfClosing, `\n${childInlined}\n`);
-      finalContent = finalContent.replace(paired, `\n${childInlined}\n`);
+      finalContent = finalContent.replace(selfClosing, (_, attrs) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, "")}\n`;
+      });
+      finalContent = finalContent.replace(paired, (_, attrs, children) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, children)}\n`;
+      });
     }
 
     return finalContent;
@@ -353,6 +357,25 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
     );
     return fileContent;
   }
+}
+
+/**
+ * Substitute `{props.children}` and `{props.attr}` in an imported MDX snippet
+ * so parameterized components keep their page-level content in Markdown output.
+ */
+function interpolateImportedMdxProps(source, attrs, children) {
+  let result = source;
+  const inner = (children ?? "").trim();
+  result = result.replace(/\{props\.children\}/g, () => inner);
+  result = result.replace(/\{children\}/g, () => inner);
+  const attrPattern = /\b([A-Za-z_][\w]*)="((?:\\.|[^"\\])*)"/g;
+  let match;
+  while ((match = attrPattern.exec(attrs ?? "")) !== null) {
+    const name = match[1];
+    const value = match[2].replace(/\\"/g, '"');
+    result = result.split(`{props.${name}}`).join(value);
+  }
+  return result;
 }
 
 function resolveComponentPath(rootDir, relImport) {
