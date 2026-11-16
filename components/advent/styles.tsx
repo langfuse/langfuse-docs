@@ -138,7 +138,8 @@ export function AdventStyles() {
         transition: transform 1s cubic-bezier(.3, 1.3, .5, 1);
         z-index: 1;
       }
-      .adv-door-leaf.is-open { transform: rotateY(-108deg); }
+      /* Past ~100deg the swung-open leaf would cover the neighboring door. */
+      .adv-door-leaf.is-open { transform: rotateY(-97deg); }
       .adv-door:hover .adv-door-leaf:not(.is-open):not(.is-locked) { transform: rotateY(-14deg); }
       .adv-door-face, .adv-door-back {
         position: absolute;
