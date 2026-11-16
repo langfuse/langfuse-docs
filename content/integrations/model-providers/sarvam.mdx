@@ -87,41 +87,49 @@ import { propagateAttributes } from "@langfuse/tracing";
 import { sarvam } from "sarvam-ai-sdk";
 import { z } from "zod";
 
-const { text } = await propagateAttributes(
-  {
-    traceName: "sarvam-weather-assistant",
-    userId: "user-123",
-    sessionId: "session-456",
-  },
-  () =>
-    generateText({
-      model: sarvam("sarvam-105b"),
-      prompt: "बेंगलुरु में आज मौसम कैसा है? हिंदी में जवाब दें।",
-      tools: {
-        getWeather: tool({
-          description: "Get the current weather in a city",
-          inputSchema: z.object({
-            city: z.string().describe("The city to get the weather for"),
+async function main() {
+  const { text } = await propagateAttributes(
+    {
+      traceName: "sarvam-weather-assistant",
+      userId: "user-123",
+      sessionId: "session-456",
+    },
+    () =>
+      generateText({
+        model: sarvam("sarvam-105b"),
+        prompt: "बेंगलुरु में आज मौसम कैसा है? हिंदी में जवाब दें।",
+        tools: {
+          getWeather: tool({
+            description: "Get the current weather in a city",
+            inputSchema: z.object({
+              city: z.string().describe("The city to get the weather for"),
+            }),
+            execute: async ({ city }) => ({
+              city,
+              temperatureC: 27,
+              condition: "partly cloudy",
+            }),
           }),
-          execute: async ({ city }) => ({
-            city,
-            temperatureC: 27,
-            condition: "partly cloudy",
-          }),
-        }),
-      },
-      stopWhen: stepCountIs(3),
-      telemetry: { functionId: "sarvam-weather-assistant" },
-    }),
-);
+        },
+        stopWhen: stepCountIs(3),
+        telemetry: { functionId: "sarvam-weather-assistant" },
+      }),
+  );
 
-console.log(text);
+  console.log(text);
+}
 
 // Flush buffered spans before a short-lived script exits
-await langfuseSpanProcessor.forceFlush();
+main().finally(() => langfuseSpanProcessor.forceFlush());
 ```
 
-Run it with `npx tsx app.ts`. In a long-running server, such as a Next.js route handler, you don't need the `forceFlush()` call.
+Run it with `--env-file` so the keys in `.env` are loaded before `instrumentation.ts` runs:
+
+```bash
+npx tsx --env-file=.env app.ts
+```
+
+In a long-running server, the span processor exports spans in the background and you don't need `forceFlush()`. In serverless functions, such as a Next.js route handler on Vercel, call `after(() => langfuseSpanProcessor.forceFlush())` from `next/server` so spans are sent before the function stops.
 
 ### View the trace in Langfuse
 
