@@ -348,7 +348,9 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
         // MDX snippets that accept children (e.g. `{props.children}`) must
         // keep the inner markdown so .md consumers still see the tool intro.
         const withChildren = /\{\s*props\.children\s*\}/.test(childInlined)
-          ? childInlined.replace(/\{\s*props\.children\s*\}/, inner.trim())
+          ? childInlined.replace(/\{\s*props\.children\s*\}/, () =>
+              inner.trim(),
+            )
           : childInlined;
         return `\n${withChildren}\n`;
       });

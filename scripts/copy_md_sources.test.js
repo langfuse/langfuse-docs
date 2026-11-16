@@ -29,3 +29,24 @@ test("paired AiGatewayIntegrationIntro keeps both intros in order", () => {
   assert.doesNotMatch(markdown, /props\.children/);
   assert.doesNotMatch(markdown, /AiGatewayIntegrationIntro/);
 });
+
+test("paired snippet children keep dollar sequences literal", () => {
+  const source = [
+    'import AiGatewayIntegrationIntro from "@/components-mdx/ai-gateway-integration-intro.mdx";',
+    "",
+    "<AiGatewayIntegrationIntro>",
+    "",
+    "> Cost is $$10 using $& and $' here.",
+    "",
+    "</AiGatewayIntegrationIntro>",
+  ].join("\n");
+
+  const markdown = stripMdxForPlainMarkdown(
+    inlineComponentsMdx(source, "dollar-gateway.mdx"),
+  );
+
+  assert.ok(markdown.includes("$$10"));
+  assert.ok(markdown.includes("$&"));
+  assert.ok(markdown.includes("$'"));
+  assert.doesNotMatch(markdown, /props\.children/);
+});
