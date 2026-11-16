@@ -342,7 +342,14 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
       );
 
       finalContent = finalContent.replace(selfClosing, `\n${childInlined}\n`);
-      finalContent = finalContent.replace(paired, `\n${childInlined}\n`);
+      finalContent = finalContent.replace(paired, (_, _attrs, inner) => {
+        // MDX snippets that accept children (e.g. `{props.children}`) must
+        // keep the inner markdown so .md consumers still see the tool intro.
+        const withChildren = /\{\s*props\.children\s*\}/.test(childInlined)
+          ? childInlined.replace(/\{\s*props\.children\s*\}/, inner.trim())
+          : childInlined;
+        return `\n${withChildren}\n`;
+      });
     }
 
     return finalContent;
