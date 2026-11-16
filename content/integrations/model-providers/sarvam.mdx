@@ -15,7 +15,9 @@ This guide shows how to trace **Sarvam AI** models with **Langfuse** from two pl
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor cost and latency. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
-{/* TODO: opening screenshot of a Sarvam trace */}
+<Frame>
+  ![Vercel AI SDK trace in Langfuse with two sarvam-105b generations and a getWeather tool call](/images/cookbook/integration-sarvam/sarvam-vercel-ai-sdk-trace.png)
+</Frame>
 
 Both integrations use OpenTelemetry. The framework emits spans for each model call, and the Langfuse SDK exports them to your Langfuse project. Pick the section that matches your stack:
 
@@ -124,8 +126,6 @@ Run it with `npx tsx app.ts`. In a long-running server, such as a Next.js route 
 ### View the trace in Langfuse
 
 Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). The trace has an agent observation for the `generateText` call, a `sarvam-105b` generation with input, output, and token usage for each model step, and a tool observation for `getWeather`.
-
-{/* TODO: Vercel AI SDK trace screenshot */}
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ee23df279a66f645196922daaef5685b)
 
@@ -245,7 +245,9 @@ To connect it to a LiveKit room instead, run `python agent.py dev` and join the 
 
 Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). Each conversation turn is an `agent_turn` observation with spans for speech-to-text and text-to-speech, `sarvam-105b` generations with token usage, and a tool observation for `get_weather`. Open **Sessions** to see all traces of one call together.
 
-{/* TODO: LiveKit trace screenshot */}
+<Frame>
+  ![LiveKit agent trace in Langfuse with sarvam-105b LLM requests and a get_weather tool call](/images/cookbook/integration-sarvam/sarvam-livekit-trace.png)
+</Frame>
 
 [Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/008c7eeb6c6bcc2ff0c73c1b823ba9fd)
 
