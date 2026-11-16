@@ -255,6 +255,10 @@ const symlinkOutputs = [
     target: resolve(repoRoot, ".agents/AGENTS.md"),
   },
   {
+    path: resolve(repoRoot, "review-guidelines.md"),
+    target: resolve(repoRoot, ".agents/review-guidelines.md"),
+  },
+  {
     path: resolve(repoRoot, "CLAUDE.md"),
     target: resolve(repoRoot, "AGENTS.md"),
   },

@@ -9,6 +9,7 @@ tools. Do not keep durable shared guidance only in `.claude/` or `.cursor/`.
 ## Layout
 
 - `AGENTS.md`: canonical shared root instructions
+- `review-guidelines.md`: pull request review checks. `AGENTS.md` links here.
 - `config.json`: shared bootstrap and MCP configuration used to generate
   tool-specific shims
 - `skills/`: shared, tool-neutral implementation guidance projected into
@@ -88,6 +89,7 @@ The repo root discovery files remain committed as symlinks:
 
 - `AGENTS.md` -> `.agents/AGENTS.md`
 - `CLAUDE.md` -> `AGENTS.md`
+- `review-guidelines.md` -> `.agents/review-guidelines.md`
 
 This keeps provider discovery stable while `.agents/` remains the source of
 truth.
