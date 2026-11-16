@@ -18,7 +18,7 @@ The processor recognises a tool-call span by one of three conventions: OpenTelem
 
 ## Python
 
-Use the tracer provider that the Langfuse SDK sets up, here with [Pydantic AI](/integrations/frameworks/pydantic-ai).
+Use the tracer provider that the Langfuse SDK sets up, here with [Pydantic AI](/integrations/frameworks/pydantic-ai). In both examples `model` is the model you already use.
 
 ```bash
 pip install "signafaide[otel]"
@@ -36,7 +36,7 @@ trace.get_tracer_provider().add_span_processor(
 )  # the one line
 
 Agent.instrument_all()  # Langfuse's own line
-agent = Agent(model)
+agent = Agent(model)  # model: the model you already use
 
 @agent.tool_plain
 def refund(order: str, amount: float) -> str:
@@ -71,18 +71,22 @@ const sdk = new NodeSDK({
 sdk.start();
 registerTelemetry(new LangfuseVercelAiSdkIntegration()); // Langfuse's own line
 
-await generateText({
-  model,
-  prompt: "Refund order A1, 5 pounds",
-  stopWhen: stepCountIs(3),
-  tools: {
-    refund: tool({
-      description: "Refund an order.",
-      inputSchema: z.object({ order: z.string(), amount: z.number() }),
-      execute: async ({ order, amount }) => `refunded ${amount} on ${order}`,
-    }),
-  },
-});
+try {
+  await generateText({
+    model, // the model you already use
+    prompt: "Refund order A1, 5 pounds",
+    stopWhen: stepCountIs(3),
+    tools: {
+      refund: tool({
+        description: "Refund an order.",
+        inputSchema: z.object({ order: z.string(), amount: z.number() }),
+        execute: async ({ order, amount }) => `refunded ${amount} on ${order}`,
+      }),
+    },
+  });
+} finally {
+  await sdk.shutdown(); // sends the buffered spans before the script exits
+}
 ```
 
 ## Verify the records
