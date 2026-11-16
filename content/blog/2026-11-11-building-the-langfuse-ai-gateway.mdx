@@ -1,7 +1,7 @@
 ---
 title: "Designing the Langfuse AI Gateway"
 date: 2026/11/11
-description: "We wanted a gateway that is stable to run and invisible to the agents that call it. Here is what we learned designing it: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them."
+description: "Users want a gateway that is stable to run and invisible to the agents that call it. Here is what we learned designing it: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them."
 tag: engineering
 author: Hassieb, Tobias
 ---
@@ -10,7 +10,7 @@ import { BlogHeader } from "@/components/blog/BlogHeader";
 
 <BlogHeader
   title="Designing the Langfuse AI Gateway"
-  description="We wanted a gateway that is stable to run and invisible to the agents that call it. Here is what we learned designing it: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them."
+  description="Users want a gateway that is stable to run and invisible to the agents that call it. Here is what we learned designing it: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them."
   authors={["hassiebpakzad", "tobiaswochinger"]}
   date="November 11, 2026"
 />
@@ -25,7 +25,7 @@ A gateway that sits in front of every model call has to be stable before anythin
 
 ## What a gateway has to handle
 
-Before we picked a language, we wrote down what the workload looks like. A gateway is mostly a proxy: it receives a request, checks the key, forwards the request to the provider and streams the response back. That sounds cheap. Coding-agent traffic makes it demanding in four ways.
+Before we picked a language, we wrote down what the workload looks like. A gateway is mostly a proxy: it receives a request, checks the key, forwards the request to the provider and streams the response back. Coding-agent traffic makes it demanding in four ways.
 
 **Large requests.** An agent resends the whole conversation on every turn: the system prompt, tool definitions, earlier messages, file contents and tool output. A single request is often a few hundred kilobytes and can grow to several megabytes. In production, the median request through our gateway is about 290 KB.
 
@@ -43,7 +43,7 @@ From that we took three properties to design and measure for:
 
 ## Picking a runtime
 
-The Langfuse platform is written in TypeScript and runs on Node.js. Python is the other language much of AI engineering happens in. We know both well, so both were natural candidates. For this workload, both work against us, and understanding why was the most useful lesson of the project.
+The Langfuse platform is written in TypeScript and runs on Node.js. Python is the other language much of AI engineering happens in. We know both well, so both were natural candidates. For this workload, both work against us.
 
 ### Node.js: one thread runs all JavaScript
 
@@ -140,7 +140,6 @@ The alternative is a translating gateway, where one format is converted to and f
 - **Prompt caching** makes each turn cheaper, but providers cache differently, so a translator that gets it wrong silently bills the full input price. If the cache markers are dropped, every turn of a long session sends the whole conversation uncached, which costs more and makes the first token arrive later.
 - **Extended thinking** carries the model's reasoning between turns as provider-signed data that can't be converted, so losing it weakens the agent or breaks its next request. Without the signed blocks, the model starts each turn without its earlier reasoning, or the provider rejects the next request in a tool-use loop with an error.
 - **Strict tool schemas** keep tool calls in the shape the agent expects, but not every format has one, so translated calls can arrive malformed. The agent then can't parse the arguments of a file edit or shell command, and spends a turn retrying the call or abandons the step.
-- **Cache and reasoning usage** decides the bill, but providers report it differently, so flattening it makes your usage and cost numbers wrong. Cached input counted as regular input inflates the cost of every turn, and reasoning tokens that go missing make it look too low.
 - **Errors and retries** tell the agent whether to wait or stop, and mapping them onto one common set makes agents give up early or retry when asked to wait. An overloaded provider's error with a retry delay can turn into a generic server error that the agent retries at once, and a request that is too long for the model can turn into one it retries even though it will never succeed.
 
 Most of these don't fail loudly. The agent keeps working, just more expensively or a little worse, which is the hardest kind of problem to notice and the easiest reason to stop using a gateway.
