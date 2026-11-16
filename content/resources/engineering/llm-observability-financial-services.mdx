@@ -1,0 +1,101 @@
+---
+title: "LLM observability for financial services: self-hosting, audit trails, and evidence"
+description: "How banks, insurers, and fintechs run LLM observability: deployment options including self-hosting, access control, PII masking, retention, and evidence for model risk reviews."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+# LLM observability for financial services: self-hosting, audit trails, and evidence
+
+AI teams at banks, insurers, and brokers face the same engineering problems as everyone else, plus three more: customer data usually can't leave approved infrastructure, model changes go through risk review, and supervisors may ask what a system did months after the fact. LLM observability helps with all three, if it is deployed where the data is allowed to live and keeps the right records.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Run Langfuse on [Langfuse Cloud](/security/data-regions) in the EU, US, or Japan, or [self-host](/self-hosting) it in your own VPC or an air-gapped network. Langfuse traces asynchronously and is not in the request path of your application. Use SSO and role-based access, mask PII before it is stored, set retention per project, and turn on audit logs. Evaluate model and prompt changes against datasets before release, and keep the results as evidence for model risk reviews.
+
+<ArchitectureDiagram />
+
+## Pick a deployment that matches your data rules [#deployment]
+
+| Requirement                                        | Option                                                                                                                      |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Data may go to an approved SaaS vendor in a region | Langfuse Cloud in the EU, US, or Japan, with SOC 2 Type II and ISO 27001                                                    |
+| Data must stay in your cloud account               | Self-hosted Langfuse in your VPC, optionally with ClickHouse BYOC                                                           |
+| No internet access                                 | Self-hosted in an isolated network, see [air-gapped LLM observability](/resources/engineering/air-gapped-llm-observability) |
+| FIPS 140-3 validated cryptography                  | Self-hosted with a Government license                                                                                       |
+
+For the trade-offs between these options, see [self-hosted vs Cloud](/resources/engineering/self-hosted-vs-cloud). For EU residency, see [EU data residency and GDPR](/resources/engineering/langfuse-eu-data-residency-gdpr).
+
+<Callout type="info">
+  Langfuse doesn't proxy your model calls. The SDKs send traces in the
+  background, so an outage of Langfuse doesn't stop your application. The
+  optional [AI Gateway](/docs/gateway/overview) is the exception: it is in the
+  request path by design, for teams that want central keys and an audit trail
+  for model access.
+</Callout>
+
+## Control who sees what [#access]
+
+- **SSO** with your identity provider, enforced for your email domains. See [authentication and SSO](/self-hosting/security/authentication-and-sso).
+- **Roles** per organization and project, so a team only sees its own traces. Project-level roles need an Enterprise license when self-hosted. See [RBAC](/docs/administration/rbac).
+- **Separate projects** for sensitive workloads, or a separate deployment per business unit. See [deployment strategies](/self-hosting/security/deployment-strategies).
+
+## Keep sensitive data out of traces [#pii]
+
+Mask account numbers, names, and other PII before data is stored:
+
+- **Client-side masking** in the SDKs removes data before it leaves your application. See [masking](/docs/observability/features/masking).
+- **Server-side masking** on self-hosted Enterprise applies a central policy at ingestion. See [data masking](/self-hosting/security/data-masking).
+
+For masking patterns, see [PII masking for LLM applications](/resources/engineering/pii-masking-llm-applications).
+
+## Keep records for reviews [#records]
+
+- **Traces** record each model call, tool call, and retrieval with inputs, outputs, model, and timestamps, so a decision can be reconstructed later.
+- **Data retention** per project deletes data after a set number of days, so you keep records as long as policy requires and no longer. See [data retention](/docs/administration/data-retention).
+- **Audit logs** record changes inside Langfuse, such as prompt releases and permission changes, with the acting user. See [audit logs](/docs/administration/audit-logs).
+- **Export** to your own storage for long-term archives with [blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage).
+
+## Gate changes with evaluations [#evaluation]
+
+Risk teams usually want evidence before a new model, prompt, or agent version goes live. A common setup:
+
+1. Keep a [golden dataset](/resources/engineering/golden-dataset-evaluation) of representative and high-risk cases, reviewed by domain experts.
+2. Run each candidate version against it as an [experiment](/docs/evaluation/experiments/datasets), scored by evaluators for accuracy and policy compliance.
+3. Block the release in CI when scores fall below a threshold. See [experiments in CI/CD](/docs/evaluation/experiments/experiments-ci-cd).
+4. Protect production prompt labels so only approved people can release. See [protected prompt labels](/docs/prompt-management/features/prompt-version-control#protected-prompt-labels).
+
+For a complete walkthrough, see [certifying LLM applications in financial services](/blog/2026-07-15-llm-certification-financial-services) and [how regulated teams get AI agents into production](/blog/2026-11-04-regulated-industries-ai-agents-production).
+
+## Track AI spend per business unit [#cost]
+
+Cost is tracked per trace and model. Attribute it to teams and cost centers with tags or metadata, or through [gateway key metadata](/resources/engineering/ai-gateway-api-keys#metadata). See [FinOps for AI](/resources/engineering/finops-for-ai).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="regulatory-compliance">
+<Summary>Does using Langfuse make an AI system compliant?</Summary>
+
+No tool does that on its own. Langfuse produces records, evaluations, and access controls that your compliance and model risk processes can use as evidence. Map them to your own requirements with your risk and legal teams.
+
+</Details>
+
+<Details id="self-hosted-certifications">
+<Summary>Do Langfuse's SOC 2 and ISO 27001 reports cover self-hosted deployments?</Summary>
+
+They cover Langfuse Cloud and Langfuse as a company. In a self-hosted deployment, you operate the infrastructure, so it falls under your own controls. Enterprise customers receive the reports as part of their plan.
+
+</Details>
+
+<Details id="industry-page">
+<Summary>Where can I learn more about Langfuse for financial services?</Summary>
+
+See [Langfuse for financial services](/financial-services) or [talk to us](/talk-to-us).
+
+</Details>
+
+</FaqDetails>
