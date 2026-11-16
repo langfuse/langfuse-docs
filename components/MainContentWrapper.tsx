@@ -56,6 +56,7 @@ const pathsWithoutFooterWidgets = [
   "/cookie-policy",
   "/find-us",
   "/japan",
+  "/advent",
   "/kr",
   "/oss-friends",
   "/privacy",

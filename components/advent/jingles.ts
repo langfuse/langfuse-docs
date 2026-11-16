@@ -1,0 +1,351 @@
+// Public-domain carols, synthesized in the browser so no recording rights apply.
+// Each bar is "pitch:beats" tokens; "r" is a rest. `chords` holds one bass
+// root per bar (or null for none).
+type Song = {
+  name: string;
+  bpm: number;
+  bars: string[];
+  chords: (string | null)[];
+  sleighBells?: boolean;
+};
+
+const SONGS: Song[] = [
+  {
+    name: "Jingle Bells",
+    bpm: 168,
+    sleighBells: true,
+    bars: [
+      "E4:1 E4:1 E4:2",
+      "E4:1 E4:1 E4:2",
+      "E4:1 G4:1 C4:1.5 D4:0.5",
+      "E4:4",
+      "F4:1 F4:1 F4:1.5 F4:0.5",
+      "F4:1 E4:1 E4:1 E4:0.5 E4:0.5",
+      "E4:1 D4:1 D4:1 E4:1",
+      "D4:2 G4:2",
+      "E4:1 E4:1 E4:2",
+      "E4:1 E4:1 E4:2",
+      "E4:1 G4:1 C4:1.5 D4:0.5",
+      "E4:4",
+      "F4:1 F4:1 F4:1.5 F4:0.5",
+      "F4:1 E4:1 E4:1 E4:0.5 E4:0.5",
+      "G4:1 G4:1 F4:1 D4:1",
+      "C4:4",
+    ],
+    chords: [
+      "C3",
+      "C3",
+      "C3",
+      "C3",
+      "F2",
+      "C3",
+      "D3",
+      "G2",
+      "C3",
+      "C3",
+      "C3",
+      "C3",
+      "F2",
+      "C3",
+      "G2",
+      "C3",
+    ],
+  },
+  {
+    name: "We Wish You a Merry Christmas",
+    bpm: 150,
+    bars: [
+      "D4:1",
+      "G4:1 G4:0.5 A4:0.5 G4:0.5 F#4:0.5",
+      "E4:1 E4:1 E4:1",
+      "A4:1 A4:0.5 B4:0.5 A4:0.5 G4:0.5",
+      "F#4:1 D4:1 D4:1",
+      "B4:1 B4:0.5 C5:0.5 B4:0.5 A4:0.5",
+      "G4:1 E4:1 D4:0.5 D4:0.5",
+      "E4:1 A4:1 F#4:1",
+      "G4:3",
+    ],
+    chords: [null, "G2", "C3", "A2", "D3", "B2", "E3", "C3", "G2"],
+  },
+  {
+    name: "Deck the Halls",
+    bpm: 132,
+    bars: [
+      "G4:1.5 F4:0.5 E4:1 D4:1",
+      "C4:1 D4:1 E4:1 C4:1",
+      "D4:0.5 E4:0.5 F4:0.5 D4:0.5 E4:1.5 D4:0.5",
+      "C4:1 B3:1 C4:2",
+      "G4:1.5 F4:0.5 E4:1 D4:1",
+      "C4:1 D4:1 E4:1 C4:1",
+      "D4:0.5 E4:0.5 F4:0.5 D4:0.5 E4:1.5 D4:0.5",
+      "C4:1 B3:1 C4:2",
+      "D4:1.5 E4:0.5 F4:1 D4:1",
+      "E4:1.5 F4:0.5 G4:1 D4:1",
+      "E4:0.5 F#4:0.5 G4:1 A4:0.5 B4:0.5 C5:1",
+      "B4:1 A4:1 G4:2",
+      "G4:1.5 F4:0.5 E4:1 D4:1",
+      "C4:1 D4:1 E4:1 C4:1",
+      "A4:0.5 A4:0.5 A4:0.5 A4:0.5 G4:1.5 F4:0.5",
+      "E4:1 D4:1 C4:2",
+    ],
+    chords: [
+      "C3",
+      "C3",
+      "G2",
+      "C3",
+      "C3",
+      "C3",
+      "G2",
+      "C3",
+      "G2",
+      "C3",
+      "D3",
+      "G2",
+      "C3",
+      "C3",
+      "F2",
+      "C3",
+    ],
+  },
+];
+
+type NoteEvent = {
+  beat: number;
+  beats: number;
+  freq: number;
+  voice: "bell" | "bass" | "sleigh";
+};
+
+type CompiledSong = { bpm: number; length: number; events: NoteEvent[] };
+
+const NOTE_OFFSETS: Record<string, number> = {
+  C: 0,
+  D: 2,
+  E: 4,
+  F: 5,
+  G: 7,
+  A: 9,
+  B: 11,
+};
+
+function pitchToFreq(pitch: string): number {
+  const match = /^([A-G])(#|b)?(\d)$/.exec(pitch);
+  if (!match) throw new Error(`Invalid pitch ${pitch}`);
+  const [, letter, accidental, octave] = match;
+  const midi =
+    12 * (Number(octave) + 1) +
+    NOTE_OFFSETS[letter] +
+    (accidental === "#" ? 1 : accidental === "b" ? -1 : 0);
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function compileSong(song: Song): CompiledSong {
+  const events: NoteEvent[] = [];
+  let beat = 0;
+  song.bars.forEach((bar, i) => {
+    const barStart = beat;
+    for (const token of bar.split(/\s+/)) {
+      const [pitch, length] = token.split(":");
+      const beats = Number(length);
+      if (pitch !== "r") {
+        events.push({ beat, beats, freq: pitchToFreq(pitch), voice: "bell" });
+      }
+      beat += beats;
+    }
+    const barLength = beat - barStart;
+    const chord = song.chords[i];
+    if (chord) {
+      events.push({
+        beat: barStart,
+        beats: barLength,
+        freq: pitchToFreq(chord),
+        voice: "bass",
+      });
+    }
+    if (song.sleighBells) {
+      for (let b = 0; b < barLength; b += 0.5) {
+        events.push({
+          beat: barStart + b,
+          beats: 0.5,
+          freq: 0,
+          voice: "sleigh",
+        });
+      }
+    }
+  });
+  events.sort((a, b) => a.beat - b.beat);
+  return { bpm: song.bpm, length: beat, events };
+}
+
+const COMPILED = SONGS.map(compileSong);
+const LOOKAHEAD_SECONDS = 0.8;
+const SONG_GAP_BEATS = 2;
+
+export class JinglePlayer {
+  private ctx: AudioContext | null = null;
+  private master: GainNode | null = null;
+  private noise: AudioBuffer | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private songIndex = 0;
+  private eventIndex = 0;
+  private songStart = 0;
+
+  get state(): AudioContextState | "uninitialized" {
+    return this.ctx?.state ?? "uninitialized";
+  }
+
+  /** Starts playback. Resolves to false while the browser blocks autoplay. */
+  async start(): Promise<boolean> {
+    if (!this.ctx) {
+      const Ctx =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
+      if (!Ctx) return false;
+      this.ctx = new Ctx();
+      this.noise = this.createNoise(this.ctx);
+    }
+    const ctx = this.ctx;
+    if (ctx.state === "suspended") {
+      try {
+        await Promise.race([
+          ctx.resume(),
+          new Promise((resolve) => setTimeout(resolve, 300)),
+        ]);
+      } catch {
+        // Autoplay policies reject or ignore resume() until a user gesture.
+      }
+    }
+    if (ctx.state !== "running") return false;
+    if (this.timer) return true;
+
+    this.master = ctx.createGain();
+    this.master.gain.setValueAtTime(0, ctx.currentTime);
+    this.master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 1);
+    this.master.connect(ctx.destination);
+    this.eventIndex = 0;
+    this.songStart = ctx.currentTime + 0.15;
+    this.timer = setInterval(() => this.schedule(), 200);
+    this.schedule();
+    return true;
+  }
+
+  stop() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+    const ctx = this.ctx;
+    const master = this.master;
+    this.master = null;
+    if (!ctx || !master) return;
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+    master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+    setTimeout(() => master.disconnect(), 400);
+  }
+
+  dispose() {
+    this.stop();
+    void this.ctx?.close();
+    this.ctx = null;
+  }
+
+  private schedule() {
+    const ctx = this.ctx;
+    const master = this.master;
+    if (!ctx || !master) return;
+    const horizon = ctx.currentTime + LOOKAHEAD_SECONDS;
+    for (;;) {
+      const song = COMPILED[this.songIndex];
+      const secondsPerBeat = 60 / song.bpm;
+      const event = song.events[this.eventIndex];
+      if (!event) {
+        this.songStart += (song.length + SONG_GAP_BEATS) * secondsPerBeat;
+        this.songIndex = (this.songIndex + 1) % COMPILED.length;
+        this.eventIndex = 0;
+        continue;
+      }
+      const time = this.songStart + event.beat * secondsPerBeat;
+      if (time > horizon) break;
+      this.eventIndex++;
+      if (time < ctx.currentTime) continue;
+      const duration = event.beats * secondsPerBeat;
+      if (event.voice === "bell")
+        this.bell(ctx, master, event.freq, time, duration);
+      else if (event.voice === "bass")
+        this.bass(ctx, master, event.freq, time, duration);
+      else this.sleigh(ctx, master, time);
+    }
+  }
+
+  private bell(
+    ctx: AudioContext,
+    out: AudioNode,
+    freq: number,
+    time: number,
+    duration: number,
+  ) {
+    const gain = ctx.createGain();
+    const release = Math.max(0.5, duration * 1.8);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.28, time + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
+    gain.connect(out);
+    // Inharmonic upper partial gives the tone its glockenspiel shimmer.
+    for (const [ratio, level] of [
+      [1, 1],
+      [2, 0.3],
+      [4.07, 0.08],
+    ] as const) {
+      const osc = ctx.createOscillator();
+      const partial = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq * 2 * ratio, time);
+      partial.gain.value = level;
+      osc.connect(partial).connect(gain);
+      osc.start(time);
+      osc.stop(time + release + 0.05);
+    }
+  }
+
+  private bass(
+    ctx: AudioContext,
+    out: AudioNode,
+    freq: number,
+    time: number,
+    duration: number,
+  ) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, time);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.22, time + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration * 0.95);
+    osc.connect(gain).connect(out);
+    osc.start(time);
+    osc.stop(time + duration);
+  }
+
+  private sleigh(ctx: AudioContext, out: AudioNode, time: number) {
+    if (!this.noise) return;
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    source.buffer = this.noise;
+    filter.type = "highpass";
+    filter.frequency.value = 7000;
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.06, time + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.09);
+    source.connect(filter).connect(gain).connect(out);
+    source.start(time);
+    source.stop(time + 0.1);
+  }
+
+  private createNoise(ctx: AudioContext): AudioBuffer {
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    return buffer;
+  }
+}
