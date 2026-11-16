@@ -280,10 +280,12 @@ function applyOverrides() {
   }
 }
 
-cleanOutputDir();
-copyAll();
-applyOverrides();
-verifyFooterExclusions();
+if (require.main === module) {
+  cleanOutputDir();
+  copyAll();
+  applyOverrides();
+  verifyFooterExclusions();
+}
 
 /**
  * Inline imports of MDX components from the components-mdx directory.
@@ -372,3 +374,7 @@ function resolveComponentPath(rootDir, relImport) {
   if (fs.existsSync(withMd)) return withMd;
   return null;
 }
+
+module.exports = {
+  inlineComponentsMdx,
+};
