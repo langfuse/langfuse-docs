@@ -128,33 +128,15 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 These rules cover pages in `content/docs/` and integration guides in `content/integrations/`.
 
-#### Where content belongs [#where-content-belongs]
+#### Where content belongs
 
 - Before you add or restructure a page, open one or more equivalent pages in an established product area, such as `content/docs/observability/` or `content/docs/evaluation/`, and match their structure, components, and sidebar position. When a product area has these pages, keep this sidebar order: Overview, Get started, Concepts, Features, Integrations, Troubleshooting and FAQ.
-
-##### Overview [#overview-pages]
-
-Overview pages get readers excited about the product area and make clear why it is valuable to them. Use a short intro on the problem it solves and the value it adds, a list of capabilities that each link to their feature page, and a "Getting started" section near the end that links to the get-started guides, split by role when admins and users follow different guides. Leave anything that doesn't help the reader see that value, such as request formats, credentials, limitations, availability, pricing, and lists of next steps, to deeper pages.
-
-##### Concepts [#concepts-pages]
-
-Concepts pages explain how the product works at a high level: its components, the request or data flow, and the objects readers configure. Give each major concept a diagram or a table, and answer the questions a newcomer asks first, such as where the product runs and who sets it up. Keep the page conceptual: for configuration, options, and other details, link to the feature page that covers them instead of explaining them here. Leave out implementation details that don't change what the reader does.
-
-##### Feature [#feature-pages]
-
-Feature pages open with one or two sentences on what the feature does, who can use it, and where to find it in the UI, followed by a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`. Put long reference lists, such as every recorded field or response header, in a `<Details>` block whose `<Summary>` names the content. Put optional deep-dive topics in a closing `## FAQ` section that wraps question-titled `<Details>` blocks in `<FaqDetails>`.
-
-##### Integration [#integration-pages]
-
-Integration guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. Link an individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`, only when the integration is a prominent Langfuse feature in its own right, such as the PostHog and Mixpanel exports under Metrics. This is almost never the case. When the tool already has an integration page for another Langfuse product area, extend that page; one longer page is often the better choice. Add a sibling page only when the two product areas are very different, such as AI Gateway and Prompt Management. For example, `claude-code-gateway.mdx` (AI Gateway) sits next to `claude-code.mdx` (Observability).
-
-##### API reference [#api-reference-pages]
-
-API reference pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses.
-
-##### Troubleshooting [#troubleshooting-pages]
-
-Troubleshooting content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. Feature, get-started, and self-hosting pages link to those FAQ pages instead of keeping their own troubleshooting sections.
+- **Overview** pages get readers excited about the product area and make clear why it is valuable to them. Use a short intro on the problem it solves and the value it adds, a list of capabilities that each link to their feature page, and a "Getting started" section near the end that links to the get-started guides, split by role when admins and users follow different guides. Leave anything that doesn't help the reader see that value, such as request formats, credentials, limitations, availability, pricing, and lists of next steps, to deeper pages. [#overview-pages]
+- **Concepts** pages explain how the product works at a high level: its components, the request or data flow, and the objects readers configure. Give each major concept a diagram or a table, and answer the questions a newcomer asks first, such as where the product runs and who sets it up. Keep the page conceptual: for configuration, options, and other details, link to the feature page that covers them instead of explaining them here. Leave out implementation details that don't change what the reader does. [#concepts-pages]
+- **Feature** pages open with one or two sentences on what the feature does, who can use it, and where to find it in the UI, followed by a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`. Put long reference lists, such as every recorded field or response header, in a `<Details>` block whose `<Summary>` names the content. Put optional deep-dive topics in a closing `## FAQ` section that wraps question-titled `<Details>` blocks in `<FaqDetails>`. [#feature-pages]
+- **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. Link an individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`, only when the integration is a prominent Langfuse feature in its own right, such as the PostHog and Mixpanel exports under Metrics. This is almost never the case. When the tool already has an integration page for another Langfuse product area, extend that page; one longer page is often the better choice. Add a sibling page only when the two product areas are very different, such as AI Gateway and Prompt Management. For example, `claude-code-gateway.mdx` (AI Gateway) sits next to `claude-code.mdx` (Observability). [#integration-pages]
+- **API reference** pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses. [#api-reference-pages]
+- **Troubleshooting** content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. Feature, get-started, and self-hosting pages link to those FAQ pages instead of keeping their own troubleshooting sections. [#troubleshooting-pages]
 
 #### Get started pages [#get-started-pages]
 
