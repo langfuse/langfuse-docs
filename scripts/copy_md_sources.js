@@ -19,6 +19,9 @@ const {
 const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
+const {
+  interpolateImportedMdxProps,
+} = require("../lib/inline-components-mdx-props.js");
 
 const SITE_URL = "https://langfuse.com";
 
@@ -341,8 +344,12 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
         "g",
       );
 
-      finalContent = finalContent.replace(selfClosing, `\n${childInlined}\n`);
-      finalContent = finalContent.replace(paired, `\n${childInlined}\n`);
+      finalContent = finalContent.replace(selfClosing, (_, attrs) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, "")}\n`;
+      });
+      finalContent = finalContent.replace(paired, (_, attrs, children) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, children)}\n`;
+      });
     }
 
     return finalContent;
