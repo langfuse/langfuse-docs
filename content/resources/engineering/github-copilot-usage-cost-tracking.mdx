@@ -50,14 +50,17 @@ When your organization brings its own OpenAI or Anthropic key to Copilot, you ca
 For the Copilot CLI with an Anthropic credential:
 
 ```sh
+# 🇪🇺 EU region
 export COPILOT_PROVIDER_BASE_URL="https://gateway.cloud.langfuse.com/anthropic"
+# 🇺🇸 US region: https://gateway.us.cloud.langfuse.com
+# 🇯🇵 Japan region: https://gateway.jp.cloud.langfuse.com
+# ⚕️ HIPAA region: https://gateway.hipaa.cloud.langfuse.com
+# Self-hosted: the gateway URL of your deployment
 export COPILOT_PROVIDER_TYPE="anthropic"
 export COPILOT_PROVIDER_API_KEY="<your-gateway-key>"
 export COPILOT_MODEL="<model-id>"
 copilot
 ```
-
-_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts)._
 
 The [Copilot gateway guide](/integrations/developer-tools/github-copilot-gateway) covers the OpenAI route and the GitHub Copilot app.
 

@@ -48,7 +48,12 @@ model_provider = "langfuse"
 
 [model_providers.langfuse]
 name = "Langfuse AI Gateway"
+# 🇪🇺 EU region
 base_url = "https://gateway.cloud.langfuse.com/openai/v1"
+# 🇺🇸 US region: https://gateway.us.cloud.langfuse.com
+# 🇯🇵 Japan region: https://gateway.jp.cloud.langfuse.com
+# ⚕️ HIPAA region: https://gateway.hipaa.cloud.langfuse.com
+# Self-hosted: the gateway URL of your deployment
 env_key = "LANGFUSE_GATEWAY_KEY"
 wire_api = "responses"
 ```
@@ -57,8 +62,6 @@ wire_api = "responses"
 export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 codex
 ```
-
-_This example uses the EU host. If your organization is in another region, use your region's [gateway host](/docs/gateway/features/rest-api#gateway-hosts)._
 
 The [Codex gateway guide](/integrations/developer-tools/codex-gateway) lists the version requirements.
 
