@@ -197,7 +197,7 @@ Please check the following:
 - Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines. In addition:
   - Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
   - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
-  - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, a prerequisites section, or troubleshooting kept inline instead of in FAQ pages.
+  - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, or troubleshooting kept inline instead of in FAQ pages.
   - On get-started pages, check that a reader can reach a working setup using only that page, and using only the tab they selected.
   - Flag leftover TODOs, placeholder link targets, and links to preview deployments.
 - A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
