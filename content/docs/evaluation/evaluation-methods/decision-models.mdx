@@ -1,7 +1,7 @@
 ---
 title: Decision model evaluators
 sidebarTitle: Decision model evaluators
-description: Use OpenAI or TypeSafe decision models to ask typed questions about observations and write structured evaluation scores.
+description: Use OpenAI, Google AI Studio, or TypeSafe decision models to ask typed questions about observations and write structured evaluation scores.
 ---
 
 # Decision model evaluators
@@ -23,7 +23,7 @@ They are often cheaper to run than [LLM-as-a-Judge](/docs/evaluation/evaluation-
 
 ### Create a decision-model evaluator [#create-a-jev-evaluator]
 
-Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose **New decision model evaluator**, then select an [OpenAI](#connect-openai) or [TypeSafe](#connect-typesafe-jev) connection and model. Add the connection under **Settings → LLM Connections** if you do not have one yet.
+Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose **New decision model evaluator**, then select an [OpenAI](#connect-openai), [Google AI Studio](#connect-google-ai-studio), or [TypeSafe](#connect-typesafe-jev) connection and model. Add the connection under **Settings → LLM Connections** if you do not have one yet.
 
 <Frame fullWidth>
   ![New decision model evaluator in the template gallery, with a Yes / no question](/images/docs/evaluation/create-decision-model-evaluator.png)
@@ -77,6 +77,15 @@ Map observation data to the single state named `input`. Questions evaluate that 
 
 <Callout type="warning">
   If OpenAI refuses any question, the run fails and writes no scores.
+</Callout>
+
+### Google AI Studio [#connect-google-ai-studio]
+
+Add a **Google AI Studio** connection and select `gemini-decision-1`. Langfuse calls the [Gemini Decisions API](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/) through this connection. The input and questions work as for [OpenAI](#connect-openai): map observation data to the single state named `input`.
+
+<Callout type="info">
+  Google Vertex AI connections can't run decision models. Use a Google AI
+  Studio connection.
 </Callout>
 
 ### TypeSafe Jev [#connect-typesafe-jev]
@@ -148,7 +157,7 @@ Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in th
 
 Every run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. Internal environments are hidden from the default tracing view: filter by `environment = langfuse-llm-as-a-judge` or open the trace from a score.
 
-Probabilities and confidence are stored in score metadata (`metadata.openai` or `metadata.typesafe`) where the provider returns them, not in the score value.
+Probabilities and confidence are stored in score metadata (`metadata.openai`, `metadata.google-ai-studio`, or `metadata.typesafe`) where the provider returns them, not in the score value.
 
 </Details>
 
@@ -161,7 +170,7 @@ Probabilities and confidence are stored in score metadata (`metadata.openai` or 
 | Questions per evaluator | 1 to 50, all answered in one call.                                                                                                                                        |
 | Choice options          | 2 to 255 options with unique values.                                                                                                                                      |
 | Score levels            | 2 to 10 ordered levels.                                                                                                                                                   |
-| Input size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question. Keep either provider's input focused on the data needed for the decision.                    |
+| Input size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question, `gemini-decision-1` up to 256k. Keep the input focused on the data needed for the decision.  |
 | Refusals                | OpenAI can refuse a question; one refusal fails the run without writing scores. Jev always picks an answer, so add an `other` or `unclear` option when input may be thin. |
 | Data handling           | Input and questions are sent through the selected connection. Review your provider terms, and use [masking](/docs/observability/features/masking) where needed.           |
 

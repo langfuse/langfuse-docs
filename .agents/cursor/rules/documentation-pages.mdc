@@ -22,7 +22,7 @@ Each documentation page typically follows a structured format to ensure consiste
 
 2. **Introduction**: Start with a brief introduction that outlines what the document will cover and why it’s important. This section sets the context for the readers.
 
-3. **Prerequisites**: If applicable, list any prerequisites that readers need to fulfill before they can effectively use the documentation. This could include software installations, account setups, or background knowledge.
+3. **Requirements**: Don't add a separate prerequisites or "Before you begin" section. Put each requirement, such as a role, plan, or prior setup, in the step where the reader needs it, as an info callout at the end of that step. See "Get started pages" in `AGENTS.md`.
 
 4. **Step-by-Step Instructions**: Provide detailed, actionable steps for the users to follow. Use numbered lists for sequences that need to be followed in order.
 
@@ -43,13 +43,13 @@ Each documentation page typically follows a structured format to ensure consiste
    </Frame>
    ```
 
-7. **Tips and Notes**: Use callouts to highlight tips, warnings, or important notes. This can be done using markdown syntax or specific components if available.
+7. **Callouts**: Use the `<Callout>` component. Use `type="info"` for side notes, requirements, defaults, and pointers. Reserve `type="warning"` for things that expose or lose data, cost money unexpectedly, or break a setup.
 
-   ```markdown
-   > **Tip:** This is a helpful tip.
+   ```mdx
+   <Callout type="info">This is a helpful note.</Callout>
    ```
 
-8. **FAQs and Troubleshooting**: End the document with a FAQ or troubleshooting section to address common issues or questions related to the topic.
+8. **FAQs and Troubleshooting**: Don't add an inline troubleshooting section. Write each problem as its own FAQ page in `content/faq/all/` and link to it, for example with `<FaqPreview>`. Feature pages may end with a short `## FAQ` section for optional deep-dive topics. See "Documentation pages" in `AGENTS.md`.
 
 9. **Further Resources**: Provide links to related documents, external resources, or further reading to help users deepen their understanding.
 
