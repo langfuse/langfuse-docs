@@ -117,12 +117,13 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines
 
+- No internal ticket ids (`LFE-`, `LFMKT-`, any Linear prefix) or Linear URLs outside branch names, including `Fixes <ticket>` in PRs.
 - Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
 - Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
-- Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
+- Prominent, current behavior in a blog or changelog post must also be on a docs, integration, or FAQ page. Migration guidance and niche caveats may stay on their FAQ or integration page.
 
 ### Documentation pages
 
@@ -178,7 +179,7 @@ Changelog entries live in `content/changelog/`.
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section. Flag new or edited entries that skip the use cases.
+- Follow the intro immediately with 2-3 concrete use cases, not in a separate section. Skip them when the entry only adds a provider, model, endpoint, SDK, or config option to an existing feature. Set `canonical` to the docs page for the main claim, if any.
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
 - Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Do not invent visuals.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
@@ -192,8 +193,8 @@ Please check the following:
 - Edited text has consistent punctuation.
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
-- When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
-- Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines. In addition:
+- When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Restoring, reverting, or moving content is not duplication. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
+- Check edits against the Writing guidelines (ticket ids, evergreen claims, and the "Documentation pages" rules). For docs pages, also:
   - Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
   - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
   - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, a prerequisites section, or troubleshooting kept inline instead of in FAQ pages.
@@ -210,7 +211,7 @@ Please check the following:
 - Order sections by audience. Flag a new or edited page that leads with optional, advanced, or edge-case details (for example a custom endpoint or extra headers) ahead of the sections most readers of that page need (for example managing models or choosing a model ID).
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
 - Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
-- When a PR adds or edits a changelog entry in `content/changelog/`, flag it if the intro is not immediately followed by 2-3 concrete example use cases, or if a UI change has no screenshot or `.mp4` video that readers see on the page. Frontmatter `ogImage` / `ogVideo` counts only when `showOgInHeader` is not `false`; if that flag is `false`, the visual must be in the body. A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
+- When a PR adds or edits a changelog entry in `content/changelog/`, flag missing use cases or `canonical` (see Changelog entries) and UI changes with no screenshot or `.mp4` video that readers see on the page. Frontmatter `ogImage` / `ogVideo` counts only when `showOgInHeader` is not `false`; if that flag is `false`, the visual must be in the body. A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
 - Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
 - We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
