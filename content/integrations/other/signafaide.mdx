@@ -1,0 +1,110 @@
+---
+title: Signed audit records from Langfuse traces with signafAIde
+sidebarTitle: signafAIde
+logo: /images/integrations/signafaide_icon.svg
+description: Add the signafAIde span processor next to Langfuse so each tool call in a trace also becomes a signed, hash-chained record that an auditor can verify offline.
+category: Integrations
+---
+
+# signafAIde integration
+
+[signafAIde](https://signafaide.co.uk) writes a signed, hash-chained record for each tool call an AI agent makes, which an independent witness can co-sign and an auditor can verify offline. Its span processor reads the tool-call spans you already send to Langfuse, so one tracing set-up gives you both: traces in Langfuse for your team, and signed records for people outside it.
+
+The processor runs inside your process and exports nothing. Langfuse receives the same spans as before. The SDK is open source (Apache-2.0) and works with no account: [signafaide-sdk on GitHub](https://github.com/AIME-TECH-UK-LIMITED/signafaide-sdk).
+
+## How it works
+
+The processor recognises a tool-call span by one of three conventions: OpenTelemetry GenAI (`gen_ai.operation.name` is `execute_tool`), OpenInference (`openinference.span.kind` is `TOOL`) and OpenLLMetry (`traceloop.span.kind` is `tool`). For each one it writes a `decision` and an `outcome` record into `.signafaide/` in your project. Each record is signed with the agent's own key and holds the hash of the record before it.
+
+## Python
+
+Use the tracer provider that the Langfuse SDK sets up, here with [Pydantic AI](/integrations/frameworks/pydantic-ai).
+
+```bash
+pip install "signafaide[otel]"
+```
+
+```python
+from langfuse import get_client
+from opentelemetry import trace
+from pydantic_ai import Agent
+from signafaide.otel import SignafaideSpanProcessor
+
+langfuse = get_client()  # Langfuse's own line
+trace.get_tracer_provider().add_span_processor(
+    SignafaideSpanProcessor(agent="support-bot")
+)  # the one line
+
+Agent.instrument_all()  # Langfuse's own line
+agent = Agent(model)
+
+@agent.tool_plain
+def refund(order: str, amount: float) -> str:
+    """Refund an order."""
+    return f"refunded {amount} on {order}"
+
+agent.run_sync("Refund order A1, 5 pounds")
+```
+
+## JS/TS
+
+Add the processor to the list of span processors, here with the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk).
+
+```bash
+npm install signafaide
+```
+
+```ts
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { generateText, registerTelemetry, stepCountIs, tool } from "ai";
+import { SignafaideSpanProcessor } from "signafaide/otel";
+import { z } from "zod";
+
+const sdk = new NodeSDK({
+  spanProcessors: [
+    new LangfuseSpanProcessor(), // Langfuse's own line
+    new SignafaideSpanProcessor({ agent: "support-bot" }), // the one line
+  ],
+});
+sdk.start();
+registerTelemetry(new LangfuseVercelAiSdkIntegration()); // Langfuse's own line
+
+await generateText({
+  model,
+  prompt: "Refund order A1, 5 pounds",
+  stopWhen: stepCountIs(3),
+  tools: {
+    refund: tool({
+      description: "Refund an order.",
+      inputSchema: z.object({ order: z.string(), amount: z.number() }),
+      execute: async ({ order, amount }) => `refunded ${amount} on ${order}`,
+    }),
+  },
+});
+```
+
+## Verify the records
+
+Run the agent once, then check the records on your machine:
+
+```bash
+signafaide verify      # Python
+npx signafaide verify  # JS/TS
+```
+
+The output has one line per check, then a line that says how each tool is recorded:
+
+```text
+telemetry: _pending/nokey/support-bot: 1 tool is recorded from telemetry spans: refund (decision written before the tool ran)
+```
+
+## What to know
+
+- With Pydantic AI and the Vercel AI SDK the decision is written before the tool runs. Instrumentations that set a span's attributes after it has started, such as the LangChain instrumentations of OpenInference and OpenLLMetry, are recorded when the span ends, after the tool ran. Every record says which it was.
+- A span that Langfuse writes in its own convention, for example from `@observe(as_type="tool")`, is not recorded by the processor. Wrap that function with the signafAIde SDK instead.
+- A span the sampler drops never reaches the processor, so its tool call has no record.
+- Records prove integrity and timing. They do not say whether a decision was right.
+
+Full documentation: [Audit evidence from Langfuse traces](https://signafaide.co.uk/docs/tracing/langfuse).
