@@ -123,7 +123,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 - Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
-- Prominent, current behavior in a blog or changelog post must also be on a docs, integration, or FAQ page. Migration guidance stays in its migration FAQ, and niche caveats may live only where people hit them.
+- Current behavior in a blog or changelog post that engineers need to understand or implement a feature must also be on a docs, integration, or FAQ page. Marketing claims don't need a docs home. Migration guidance stays in its migration FAQ, and niche caveats may live only where people hit them.
 
 ### Documentation pages
 
@@ -193,7 +193,7 @@ Please check the following:
 - Edited text has consistent punctuation.
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
-- When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Restores aren't duplication. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
+- When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Restores aren't duplication, and `/resources/engineering` pages (GEO content) are exempt. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
 - Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines. In addition:
   - Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
   - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
