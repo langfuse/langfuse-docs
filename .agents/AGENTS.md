@@ -211,9 +211,9 @@ Judge the change in the context of the existing docs. Also flag existing text wh
 
 ### Gate 1: Necessity and place
 
-#### Necessity
+Gate 1 applies to pages in `content/docs/`, `content/integrations/`, `content/guides/`, and `content/faq/`. A changelog entry in `content/changelog/` is an announcement of a feature the docs may already explain. It is not a second copy, and it does not move into a docs home. Judge it with [Changelog entries](#changelog-entries) and the checks that always run.
 
-These cuts apply to pages in `content/docs/`, `content/integrations/`, `content/guides/`, and `content/faq/`. A changelog entry in `content/changelog/` follows [Changelog entries](#changelog-entries): name the filters, metrics, and commands, and interleave the visuals with the text. Do not apply the screen-open cuts or the single-opening-visual rule to a changelog entry.
+#### Necessity
 
 Keep a fact only when a reader with that screen open still could not know it. Also cut every category in [Cut what the reader doesn't need](#cut-what-the-reader-doesnt-need).
 
