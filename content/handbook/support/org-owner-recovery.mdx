@@ -41,7 +41,7 @@ If the customer controls the mailbox but cannot log in, send a one-time code to 
 
 ### Notify, wait, and promote
 
-1. Email all admins of the organization and the departed owner's address that an owner change was requested and by whom. Wait 72 hours for objections.
+1. Email all admins of the organization and the departed owner's address that an owner change was requested and by whom. Wait 24 hours for objections.
 2. Get approval from a second team member, who re-checks the evidence in the ticket.
 3. Escalate to engineering to promote the requester to `Owner`. Leave the departed owner's membership for the new owner to remove.
 4. Confirm to the requester and recommend keeping at least two owners.
@@ -55,9 +55,9 @@ Record every check and its evidence as internal notes on the Pylon ticket.
 Use this path only if the customer cannot receive email at the owner's address. It requires both of the following, plus the notification, waiting period, and second approval from the last step:
 
 - **Domain control**: the customer adds a DNS TXT record with a value we provide to the email domain of the requester. Verify it yourself with `dig TXT <domain>`.
-- **Authority over the account**: billing proof that matches Stripe (a recent invoice number and the last four digits of the card), or a signed letter from an executive of the company.
+- **Authority over the account**: billing proof that matches Stripe (a recent invoice number and the last four digits of the card).
 
-If the customer cannot provide these, for example because the organization is on the Hobby plan with a personal email domain, we do not transfer ownership.
+If the customer cannot provide both, for example because the organization has no paid plan or uses a personal email domain, we do not transfer ownership.
 
 ## Reply template
 
