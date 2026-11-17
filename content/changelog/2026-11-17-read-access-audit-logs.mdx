@@ -3,13 +3,19 @@ date: 2026-11-17
 title: Read-access audit logs
 description: Langfuse can now record reads of traces, observations, scores, sessions and experiments as audit events, so you can review who accessed sensitive data.
 author: Steffen
-ogImage: /images/changelog/2026-11-17-read-access-audit-logs.png
+ogImage: /images/changelog/2026-11-17-read-access-audit-logs-viewer.png
+showOgInHeader: false
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 import { Book } from "lucide-react";
 
 <ChangelogHeader />
+
+<Frame className="my-6" fullWidth>
+  ![Audit log viewer with Event and Outcome columns, including access and denied
+  reads](/images/changelog/2026-11-17-read-access-audit-logs-viewer.png)
+</Frame>
 
 Audit logs can record who read your data, not only who changed it. With read-access logging on, Langfuse records an access event when a user or API key opens, lists, searches, exports or downloads traces, observations, scores, sessions or experiments. This covers the Langfuse UI and the [public API routes and MCP tools](/docs/administration/audit-logs#read-access-coverage).
 
