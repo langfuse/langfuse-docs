@@ -137,6 +137,7 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 - **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. Link an individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`, only when the integration is a prominent Langfuse feature in its own right, such as the PostHog and Mixpanel exports under Metrics. This is almost never the case. When the tool already has an integration page for another Langfuse product area, extend that page; one longer page is often the better choice. Add a sibling page only when the two product areas are very different, such as AI Gateway and Prompt Management. For example, `claude-code-gateway.mdx` (AI Gateway) sits next to `claude-code.mdx` (Observability). [#integration-pages]
 - **API reference** pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses. [#api-reference-pages]
 - **Troubleshooting** content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. Feature, get-started, and self-hosting pages link to those FAQ pages instead of keeping their own troubleshooting sections. [#troubleshooting-pages]
+- A product area's Troubleshooting and FAQ page contains only an optional short intro, `<FaqPreview tags={[...]} />`, and `<GhDiscussionsPreview labels={[...]} />`. Keep those components. Do not add the "try Ask AI / open a GitHub issue / contact support" paragraph. This does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
 
 #### Get started pages [#get-started-pages]
 
@@ -144,6 +145,7 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 - Put the steps under a `## Setup steps` heading inside `<Steps>`. Each step is one task; fold small actions, such as exporting the key the reader just created, into the step that produces the value.
 - Don't add a "Before you begin" or prerequisites section. Put each requirement (role, plan, deployment type, prior setup) in the step where the reader would hit it, as an info callout at the end of that step. Caveats that apply to the whole procedure go above `<Steps>`.
 - When setup differs per tool, client, or language, give each its own tab with everything needed to finish there: an italic requirements line such as `_**Requires** <tool> <version> or later and <prerequisite>._`, the minimal configuration, a command that confirms it works, and a card that links to the full guide. A tab that only links to another page is not enough. Also use tabs for alternative ways to do one step, such as the Langfuse UI and the API.
+- A reader can finish setup from that page, and from the tab they selected.
 - End with a "Not seeing what you expected?" section that uses `<FaqPreview>` with the area's get-started tag and, if there is an obvious next guide, a "Next steps" list with just that link.
 
 #### Cut what the reader doesn't need [#cut-what-the-reader-doesnt-need]
@@ -179,9 +181,9 @@ Changelog entries live in `content/changelog/`.
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section. Flag new or edited entries that skip the use cases.
+- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section. Flag new or edited entries that skip the use cases. A one-sentence entry that restates the title and links to docs is incomplete.
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
-- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Do not invent visuals.
+- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Frontmatter `ogImage` or `ogVideo` counts only when `showOgInHeader` is not `false`. When that flag is `false`, the visual has to be in the body. Do not invent a visual.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
 - Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
 
