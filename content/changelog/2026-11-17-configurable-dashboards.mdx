@@ -1,0 +1,75 @@
+---
+date: 2026-11-17
+title: Build dashboards around your questions
+description: Compare independently filtered metrics, customize every chart, and give your dashboard context with text.
+author: Nikita Kabardin
+badge: Product proposal
+noindex: true
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+
+<ChangelogHeader />
+
+<Callout type="info">
+  This is a local product proposal, written in release-note form to review the
+  intended experience. The capabilities below have not been released. Product
+  screenshots will be added after the working prototype is agreed and built.
+</Callout>
+
+You can now build a dashboard around the questions you want to answer. Add a chart where you need it, compare metrics with their own filters, and explain what matters with text. The starting charts use the same editor as the charts you create yourself.
+
+- Compare how many observations contain `metadata.abc` with how many contain `metadata.bbc`, as two named bars.
+- Track input and output tokens together, or plot error percentage alongside request volume.
+- Give your team a quality dashboard with a definition of each score, a few headline numbers, and charts they can investigate.
+
+## Compare exactly the groups you choose
+
+Each chart can contain several named series. A series has its own data source, metric, aggregation, and filters. Add a breakdown when you want to split a series by a field such as model or environment.
+
+For the metadata comparison, add these two series:
+
+| Series  | Measure               | Filter                    |
+| ------- | --------------------- | ------------------------- |
+| Has abc | Count of observations | Metadata key `abc` exists |
+| Has bbc | Count of observations | Metadata key `bbc` exists |
+
+Choose **Bar chart** and leave the breakdown empty. You get two bars with the labels you chose. An observation containing both keys contributes to both bars. A key with an empty value still exists; use a value filter when you want a different condition.
+
+You can add, duplicate, rename, hide, and reorder series. For a model breakdown, choose the model values to include or use the top values. The chart tells you when it is showing a limited set.
+
+## Build and edit in the dashboard
+
+Choose **Add chart**, start with a question or a preset, and configure it next to a live preview. Choose your data, add the series you need, and pick the visualization. Saving returns you to the same place in your dashboard.
+
+Every chart shows what it counts. A count of observations, a distinct count of traces active in the selected period, and a count of scores have different labels. Scores identify their attachment scope, name, and type, so a quality chart is clear about which evaluations it includes.
+
+Presets are editable starting points. Open a cost preset to change its model breakdown, add a filter, or switch its visualization. Editing a chart on your dashboard changes that chart; publishing changes to a reusable chart is an explicit action.
+
+## Read the detail without losing the overview
+
+Show a headline total above a trend, then use the legend to focus on a series. Hiding a series changes what is visible. Choose **Filter dashboard** explicitly when you want an interaction to change the data in other charts.
+
+Totals cover the full filtered population, even when the chart shows only the top models or users. A total percentile is calculated from the underlying population. Charts do not average the percentiles of their groups.
+
+Switch between saved views of a chart with tabs. For example, a model usage chart can offer **Cost** and **Tokens** views that share the same filters. The tabs make their active metric and unit visible.
+
+Choose time series, category bars, a table, a number, a histogram, or a proportion chart. Set names, colors, units, precision, ordering, and the series shown by default. Charts with different units label their axes explicitly.
+
+## Calculate the metric you mean
+
+Add a formula using your named series. For example, with **Errors** and **All observations**, plot `Errors / All observations` and format the result as a percentage. Keep the input series available in the editor while showing only the result.
+
+You can set the percentile you need, including p90 or p99.9, and define histogram boundaries that match your operational thresholds. Formulas combine matching time buckets and breakdowns. Missing input or a zero denominator produces a gap with an explanation, rather than a misleading zero.
+
+## Give the dashboard a story
+
+Add Markdown text between charts for a title, a definition, a link, or an investigation note. Use sections to keep related charts together. Text moves and resizes alongside charts.
+
+Dashboard filters apply across compatible charts, with each chart showing its effective filters and any unsupported field. A local filter narrows one chart. A series filter narrows one comparison group. Temporary legend selections and tab choices do not rewrite the saved chart.
+
+## Bring your existing dashboards with you
+
+Your dashboards keep their layout and filters. Supported home cards become editable charts when their values and meaning match. For a card that needs a choice about its meaning, you can compare the existing card with its proposed replacement before applying it. You can restore the original during the migration period.
+
+New dashboards use configurable charts and editable presets. The default dashboard demonstrates what you can build: the same cost, latency, usage, and quality views, with visible definitions and a configuration you can inspect.
