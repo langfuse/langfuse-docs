@@ -1,10 +1,11 @@
 ---
 date: 2026-11-17
 title: Build dashboards around your questions
-description: Compare independently filtered metrics, customize every chart, and give your dashboard context with text.
+description: Compare independently filtered metrics, edit charts directly in your dashboard, and give the numbers context with Markdown.
 author: Nikita Kabardin
-badge: Product proposal
+badge: Working POC
 noindex: true
+ogImage: /images/changelog/2026-11-17-dashboard-studio-overview.png
 ---
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
@@ -12,64 +13,58 @@ import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 <ChangelogHeader />
 
 <Callout type="info">
-  This is a local product proposal, written in release-note form to review the
-  intended experience. The capabilities below have not been released. Product
-  screenshots will be added after the working prototype is agreed and built.
+  This is a working local prototype, presented as a proposed changelog. The
+  screenshots show the running product with synthetic data. These capabilities
+  have not been released; backend costs and rollout still need review.
 </Callout>
 
-You can now build a dashboard around the questions you want to answer. Add a chart where you need it, compare metrics with their own filters, and explain what matters with text. The starting charts use the same editor as the charts you create yourself.
+Build charts directly in your dashboard. Start with a familiar preset, change what it measures, and compare several populations in one widget. Add text to explain what your team should take away.
 
-- Compare how many observations contain `metadata.abc` with how many contain `metadata.bbc`, as two named bars.
-- Track input and output tokens together, or plot error percentage alongside request volume.
-- Give your team a quality dashboard with a definition of each score, a few headline numbers, and charts they can investigate.
+- Compare observations containing `metadata.abc` with observations containing `metadata.bbc`, as two named bars.
+- Plot p50 and p90 together, choose a custom percentile, or calculate the share of observations with errors.
+- Combine a quality overview with explicit score targets, distribution charts, and notes explaining how to read them.
 
-## Compare exactly the groups you choose
+## Two metadata keys, two series
 
-Each chart can contain several named series. A series has its own data source, metric, aggregation, and filters. Add a breakdown when you want to split a series by a field such as model or environment.
-
-For the metadata comparison, add these two series:
+Each series has its own source, measures, and filters. A breakdown splits that population by a field; another series lets you ask a different question.
 
 | Series  | Measure               | Filter                    |
 | ------- | --------------------- | ------------------------- |
 | Has abc | Count of observations | Metadata key `abc` exists |
 | Has bbc | Count of observations | Metadata key `bbc` exists |
 
-Choose **Bar chart** and leave the breakdown empty. You get two bars with the labels you chose. An observation containing both keys contributes to both bars. A key with an empty value still exists; use a value filter when you want a different condition.
+Choose a bar chart and leave the breakdown empty. An observation containing both keys contributes to both bars. An empty value still counts as a present key.
 
-You can add, duplicate, rename, hide, and reorder series. For a model breakdown, choose the model values to include or use the top values. The chart tells you when it is showing a limited set.
+The example dashboard contains 300,000 observations. The bars show 180,000 and 150,000 matches, including 60,000 observations that belong to both groups.
 
-## Build and edit in the dashboard
+![Edit independently filtered series beside a real chart preview](/images/changelog/2026-11-17-dashboard-studio-editor.png)
 
-Choose **Add chart**, start with a question or a preset, and configure it next to a live preview. Choose your data, add the series you need, and pick the visualization. Saving returns you to the same place in your dashboard.
+Use **Run preview** while editing, then **Apply widget** and **Save dashboard**. Reopen a saved widget to change its source, measures, conditions, breakdown, sorting, or visualization.
 
-Every chart shows what it counts. A count of observations, a distinct count of traces active in the selected period, and a count of scores have different labels. Scores identify their attachment scope, name, and type, so a quality chart is clear about which evaluations it includes.
+## Make every starting point editable
 
-Presets are editable starting points. Open a cost preset to change its model breakdown, add a filter, or switch its visualization. Editing a chart on your dashboard changes that chart; publishing changes to a reusable chart is an explicit action.
+The familiar Home cards have configurable replacements. Start with cost and tokens by model, user consumption, traffic, latency percentiles, or scores. Their configuration uses the same editor as a chart you create from scratch.
 
-## Read the detail without losing the overview
+Choose **Start from a familiar card** to compare an existing card with its proposed replacement. Keep both versions, or replace the old card and use **Undo** while editing to restore it. Score analytics expands into ordinary distribution and trend charts.
 
-Show a headline total above a trend, then use the legend to focus on a series. Hiding a series changes what is visible. Choose **Filter dashboard** explicitly when you want an interaction to change the data in other charts.
+![The existing root-latency card beside its editable replacement](/images/changelog/2026-11-17-dashboard-studio-migration.png)
 
-Totals cover the full filtered population, even when the chart shows only the top models or users. A total percentile is calculated from the underlying population. Charts do not average the percentiles of their groups.
+The comparison keeps important meanings visible: root-observation latency differs from reconstructed trace duration, and a count of observations differs from a distinct count of traces. Score queries explicitly select all targets, traces, observations, sessions, or experiments.
 
-Switch between saved views of a chart with tabs. For example, a model usage chart can offer **Cost** and **Tokens** views that share the same filters. The tabs make their active metric and unit visible.
+## Put the right numbers together
 
-Choose time series, category bars, a table, a number, a histogram, or a proportion chart. Set names, colors, units, precision, ordering, and the series shown by default. Charts with different units label their axes explicitly.
+Use several measures in one chart or table. Give a model table separate cost and token columns, and select the cost summary for its headline. Full-period summaries are queried independently of the visible top rows. Percentiles are calculated from the underlying population, rather than averaged across groups.
 
-## Calculate the metric you mean
+For a rate, add **Errors** and **All observations**, then use `Errors / All observations` with **Percent (0–1)** formatting. Keep the input series hidden while displaying the formula. Missing input or a zero denominator produces a gap.
 
-Add a formula using your named series. For example, with **Errors** and **All observations**, plot `Errors / All observations` and format the result as a percentage. Keep the input series available in the editor while showing only the result.
+Choose a percentile such as p10 or p99.9. Define exact histogram boundaries, including underflow, overflow, and missing values. Active-day counts use UTC calendar days.
 
-You can set the percentile you need, including p90 or p99.9, and define histogram boundaries that match your operational thresholds. Formulas combine matching time buckets and breakdowns. Missing input or a zero denominator produces a gap with an explanation, rather than a misleading zero.
+Compatible measures share a chart axis. Measures with different units use a table with individually formatted columns. Switch between **Chart**, **Data**, and **Inspect**; Inspect shows the actual query count, duration, rows and bytes read, and generated queries.
 
 ## Give the dashboard a story
 
-Add Markdown text between charts for a title, a definition, a link, or an investigation note. Use sections to keep related charts together. Text moves and resizes alongside charts.
+Add Markdown headings, explanations, lists, and links between charts. Text moves and resizes alongside widgets. Duplicate, copy, paste, remove, and undo dashboard items in place.
 
-Dashboard filters apply across compatible charts, with each chart showing its effective filters and any unsupported field. A local filter narrows one chart. A series filter narrows one comparison group. Temporary legend selections and tab choices do not rewrite the saved chart.
+Dashboard filters apply across compatible widgets. Each series can add its own conditions. A widget shows a filter-scope notice when a shared filter cannot apply to its source. Legend interactions change which series are visible; configured view selectors switch between questions such as model cost and token usage.
 
-## Bring your existing dashboards with you
-
-Your dashboards keep their layout and filters. Supported home cards become editable charts when their values and meaning match. For a card that needs a choice about its meaning, you can compare the existing card with its proposed replacement before applying it. You can restore the original during the migration period.
-
-New dashboards use configurable charts and editable presets. The default dashboard demonstrates what you can build: the same cost, latency, usage, and quality views, with visible definitions and a configuration you can inspect.
+The prototype dashboard pairs all twelve Home-card types with their replacements, then demonstrates the new capabilities with real data. It is also the review surface for the remaining backend decisions: keyed metadata breakdowns, relationships between observations and scores, cross-series alignment, scan sharing, and production limits.
