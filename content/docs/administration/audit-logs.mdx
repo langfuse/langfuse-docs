@@ -163,9 +163,7 @@ Instance administrators can set read-access logging for all organizations with `
 Requirements:
 
 - An Enterprise or Government [license key](/self-hosting/license-key) (`LANGFUSE_EE_LICENSE_KEY`) on the web and worker containers. Without one, nothing is recorded, even with `enforced`.
-- Langfuse `v4.79.0` or later to record access events, and `v4.82.0` or later to see them in the audit log viewer and export.
-- A running worker. It moves access events into the ClickHouse `audit_logs` table.
-- The v4 write mode `events_only`, which is the v4 default. Coverage follows the v4 views and APIs. In the `legacy` and `dual` write modes, the v3 trace and session tables and the v3 public API list routes return data without recording it. See [cutting over to the v4 defaults](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4#cutover).
+- Langfuse `v4.82.0` or later.
 
 If Langfuse runs behind a load balancer or reverse proxy, also set `LANGFUSE_TRUSTED_PROXY_COUNT` to the number of proxies in front of it. Otherwise access events from the Langfuse UI carry no client IP address, and events from the public API and MCP carry the address of your proxy.
 
@@ -173,9 +171,6 @@ If Langfuse runs behind a load balancer or reverse proxy, also set `LANGFUSE_TRU
 | -------------------------------------- | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS`     | `org`   | web       | `org`, `enforced` or `disabled`, see above.                                                                                                      |
 | `LANGFUSE_TRUSTED_PROXY_COUNT`         | `0`     | web       | Number of proxies in front of Langfuse that append to `X-Forwarded-For`. The client IP is the N-th entry from the right. `0` ignores the header. |
-| `LANGFUSE_AUDIT_LOG_STAGING_ENABLED`   | `true`  | web       | Kill switch. `false` stops recording access events, and reads then succeed without being recorded.                                               |
-| `LANGFUSE_AUDIT_LOG_RELAY_ENABLED`     | `true`  | worker    | Moves recorded events from Postgres into ClickHouse. While it is `false`, events wait in Postgres and do not appear in the audit log viewer.     |
-| `LANGFUSE_AUDIT_LOG_RELAY_INTERVAL_MS` | `10000` | worker    | How often, in milliseconds, the worker moves events into ClickHouse.                                                                             |
 
 ### How recording works [#read-access-how-it-works]
 
@@ -190,17 +185,15 @@ If Langfuse runs behind a load balancer or reverse proxy, also set `LANGFUSE_TRU
 | Surface     | Recorded reads                                                                                                                                                                                                             |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Langfuse UI | Trace and observation detail views, including input and output; the tracing, sessions, scores and experiments tables; session, score and experiment detail views; trace and observation downloads; creating a batch export |
-| Public API  | `GET /api/public/v2/observations`, `GET /api/public/v3/scores`, `GET /api/public/experiments`, `GET /api/public/experiment-items`, and `GET /api/public/traces/{traceId}` where that v3 route is still served              |
+| Public API  | `GET /api/public/v2/observations`, `GET /api/public/v3/scores`, `GET /api/public/experiments`, `GET /api/public/experiment-items`            |
 | MCP server  | `getObservation`, `getScore`, `listObservations`, `listScores`, `listExperiments`, `listExperimentItems`                                                                                                                   |
-
-`GET /api/public/traces/{traceId}` is a v3 route. On self-hosted instances in the `events_only` write mode it returns `404` and is not recorded.
 
 Not recorded:
 
 - Aggregates: counts, filter options, metrics and dashboards, including the metrics API and the MCP tool `queryMetrics`.
 - Prompts, datasets, comments and media.
 - Scheduled blob storage exports.
-- Other public API routes, including the v3 list routes.
+- Other public API routes.
 - Anonymous viewers of [public traces](/docs/observability/features/url).
 
 Downloading the file of a finished batch export is recorded as a change event in the regular audit log.
@@ -239,13 +232,13 @@ The client IP address, user agent and request id are recorded but not shown in t
 
 ### Self-hosted: query ClickHouse [#read-access-query]
 
-Self-hosted instances can query the `audit_logs` table in their ClickHouse database directly, for example with `clickhouse client`. Use `FINAL`: a retried move can store an event twice, and `FINAL` collapses the copies.
+Self-hosted instances can query the `audit_logs` table in their ClickHouse database directly, for example with `clickhouse client`.
 
 Who accessed a trace:
 
 ```sql
 SELECT timestamp, actor_type, actor_email, api_key_id, ip, surface, route, action, outcome
-FROM audit_logs FINAL
+FROM audit_logs
 WHERE org_id = '<org-id>'
   AND project_id = '<project-id>'
   AND event_kind = 'access'
@@ -257,7 +250,7 @@ What a user read during a period:
 
 ```sql
 SELECT timestamp, route, resource_type, action, result_count, params
-FROM audit_logs FINAL
+FROM audit_logs
 WHERE org_id = '<org-id>'
   AND event_kind = 'access'
   AND user_id = '<user-id>'

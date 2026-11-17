@@ -10,7 +10,7 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-Audit logs now record who read your data, not only who changed it. With read-access logging on, Langfuse records an access event when a user or API key opens, lists, searches, exports or downloads traces, observations, scores, sessions or experiments. This covers the Langfuse UI and the main v4 [public API routes and MCP tools](/docs/administration/audit-logs#read-access-coverage).
+Audit logs can record who read your data, not only who changed it. With read-access logging on, Langfuse records an access event when a user or API key opens, lists, searches, exports or downloads traces, observations, scores, sessions or experiments. This covers the Langfuse UI and the [public API routes and MCP tools](/docs/administration/audit-logs#read-access-coverage).
 
 Each event records:
 
@@ -20,14 +20,12 @@ Each event records:
 - whether the read succeeded or was denied;
 - the client IP address and user agent.
 
-This helps you answer questions such as "who opened this trace?" or "which traces did this user see in a search?" during a compliance review. If an event cannot be recorded, the read fails, so no data is returned without a record.
-
 Access events appear in the audit log viewer and its export, next to change events.
 
 **How to turn it on**
 
 - **Langfuse Cloud Enterprise:** go to **Organization settings** → **Audit Logs** and turn on **Access Logging**. On Langfuse Cloud HIPAA it is always on.
-- **Self-hosted Enterprise:** use the same organization setting, or set `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS=enforced` on the web container to record reads in every organization. This needs Langfuse `v4.82.0` or later, an Enterprise or Government license key and the v4 `events_only` write mode.
+- **Self-hosted Enterprise:** use the same organization setting, or set `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS=enforced` on the web container to record reads in every organization. This needs Langfuse `v4.82.0` or later, and an Enterprise or Government license key.
 
 <Cards num={1}>
   <Card
