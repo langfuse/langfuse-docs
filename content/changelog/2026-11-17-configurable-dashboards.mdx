@@ -41,7 +41,7 @@ The example dashboard contains 300,000 observations. The bars show 180,000 and 1
 
 Open a widget in a dedicated editor. The result stays above the query controls, with chart type, title, formatting, and displayed series together on the right. Resize the preview or scroll the queries independently. Each query combines a source, metrics, filters, and optional grouping; advanced settings stay out of the way until needed.
 
-A visible warning marks changes that have not been run, while the chart retains the last result. Use **Run preview**, then **Apply changes** and **Save dashboard**. Presentation settings update the existing result immediately; changes that need different data wait for the next run. The editor shows inherited dashboard filters alongside the query configuration.
+A visible warning marks changes that have not been run, while the chart retains the last result. Use **Run preview**, then **Apply changes** and **Save dashboard**. Presentation settings update the existing result immediately; changes that need different data wait for the next run. The editor shows inherited dashboard filters alongside the query configuration. Invalid formulas show guidance next to the expression. Apply becomes available after a successful preview, including a valid result with no matching rows.
 
 ## Make every starting point editable
 
@@ -61,13 +61,13 @@ For a rate, name query A **Errors** and query B **All observations**, then use `
 
 Choose a percentile such as p10 or p99.9. Define exact histogram boundaries, including underflow, overflow, and missing values. Active-day counts use UTC calendar days.
 
-Compatible measures share a chart axis. Measures with different units use a table with individually formatted columns. Choose **Displayed series** to save which model/metric series appear; legend clicks remain temporary exploration. A query filter changes the measured population. Display selection changes what is drawn, and partial selections suppress ambiguous full-population headlines.
+Compatible measures share a chart axis. Measures with different units use a table with individually formatted columns. Choose **Default view** to open a widget on one query, or **Displayed series** to save which model/metric series appear. Legend clicks remain temporary exploration. Series retain their colors after reloading or hiding another series; small desktop comparisons show every legend label. A query filter changes the measured population. Display selection changes what is drawn, and partial selections suppress ambiguous full-population headlines.
 
 Switch between **Chart**, **Data**, and **Inspect**; Inspect shows the actual query count, duration, rows and bytes read, and generated queries.
 
 ## Give the dashboard a story
 
-Choose **Add widget → Text** to place Markdown headings, explanations, lists, and links between charts. Text grows to fit its content and still supports manual resizing. New widgets fill available columns. Duplicate, copy, paste, remove, and undo dashboard items in place. Expand descriptions to read their full caveats.
+New dashboards open directly in editing mode. Save your changes, then choose **Done** to return to viewing. Choose **Add widget → Text** to place Markdown headings, explanations, lists, and links between charts. Text grows to fit its content and still supports manual resizing. New widgets fill available columns. Duplicate, copy, paste, remove, and undo dashboard items in place. Expand descriptions to read their full caveats.
 
 Dashboard filters apply across compatible widgets. Each series can add its own conditions. A widget shows a filter-scope notice when a shared filter cannot apply to its source. Legend interactions change which series are visible; configured view selectors switch between questions such as model cost and token usage.
 
