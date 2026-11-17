@@ -7,7 +7,7 @@ const marketplaceFaqByVariant: Record<"cloud" | "selfHosted", FAQItem> = {
   cloud: {
     question: MARKETPLACE_QUESTION,
     answer:
-      "Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.",
+      "Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available for Enterprise customers.",
   },
   selfHosted: {
     question: MARKETPLACE_QUESTION,
@@ -38,6 +38,11 @@ const faqs: FAQItem[] = [
       "Our graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for units 100k–1M, $7/100k for 1M–10M units, $6.5/100k for 10M–50M units, and $6/100k for 50M+ units. This ensures you get better rates as you scale up your usage. Use the pricing calculator to estimate your bill.",
   },
   {
+    question: "What is the difference between data access and data retention?",
+    answer:
+      "Data access is set by your plan and determines how many days of historic data you can view (Hobby: 30 days, Core: 90 days, Pro and Enterprise: 3 years). Older data is still stored and becomes accessible again when you upgrade. [Data retention](/docs/administration/data-retention) is a separate, opt-in feature on Pro and Enterprise that permanently deletes data after a custom period. See [data access vs. data retention](/faq/all/data-access-vs-data-retention).",
+  },
+  {
     question: "How can I reduce my Langfuse Cloud bill?",
     answer:
       "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable units that you ingest. We have summarized how this can be done [here](/faq/all/cutting-costs). Additionally, with our new graduated pricing model, you automatically get lower rates per 100k units as your volume increases.",
@@ -52,6 +57,11 @@ const faqs: FAQItem[] = [
     question: "When do I get billed?",
     answer:
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
+  },
+  {
+    question: "Can I choose a yearly commitment?",
+    answer:
+      "Yearly commitments are always available for Enterprise; Core, Pro, and Teams customers can also choose a yearly commitment if they meet the minimum contract value threshold.",
   },
   {
     question: "What are Langfuse Cloud Credits, and how do they affect me?",

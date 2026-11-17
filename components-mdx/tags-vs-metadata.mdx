@@ -1,9 +1,22 @@
-## Tags vs. metadata [#tags-vs-metadata]
+For new instrumentation, prefer **metadata for structured attributes**. Use **tags for a small, stable set of independent labels**. Both can help you filter observations, but their structure and aggregation behavior differ.
 
-Tags and metadata both let you attach extra information to traces and observations, but they serve different purposes and have different performance characteristics.
+|                      | Metadata                                                                          | Tags                                                                 |
+| -------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Structure            | Named key-value pairs                                                             | A set of string labels                                               |
+| Example              | `{"workflow": "checkout", "customer_id": "123"}`                                  | `["billing", "priority"]`                                            |
+| Choose it for        | Attributes with a clear name and value, including identifiers and request context | Membership in several categories                                     |
+| Design consideration | A field can have many distinct values, making some aggregations expensive         | Labels can overlap, making breakdowns and totals harder to interpret |
 
-**Use tags** for a small, known set of categorical labels that you want to filter or group by — for example the environment, the feature or API used, or a manual QA flag. Tags support **breakdown/group-by** in [Custom Dashboard](/docs/metrics/features/custom-dashboards) widgets, so you can chart metrics broken down by tag. Because tags are not indexed in the underlying storage, filtering by tag scans the full column, and the tag picker and other tag-list views in the UI only display a bounded number of distinct values. This works well for dozens to a few hundred distinct tags, but a use case that needs thousands of distinct values (for example, one tag per customer) will run into UI and query-performance friction well before hitting any hard limit. For that kind of high-cardinality data, use metadata instead.
+Use dedicated fields such as [environment](/docs/observability/features/environments), [user ID](/docs/observability/features/users), and [session ID](/docs/observability/features/sessions) when they match the information you are recording.
 
-**Use metadata** for arbitrary key/value data, including high-cardinality values such as customer IDs, request IDs, or other identifiers you mainly want to look up or filter on. Metadata keys and values are indexed for efficient equality lookups, so filtering traces or observations by a specific metadata key/value pair remains efficient even with a very large number of distinct values. The trade-off today is that metadata can only be used to **filter** dashboard widgets, not as a breakdown/group-by dimension — you can narrow a widget to `metadata.customer_id = "123"`, but you can't yet chart a metric broken down by every distinct metadata value. Using metadata as a breakdown dimension is an open, tracked feature request ([GitHub issue #12614](https://github.com/langfuse/langfuse/issues/12614)) without a committed timeline.
+### Filtering and grouping are different
 
-In short: reach for tags when you need dashboard breakdowns over a manageable set of categories, and for metadata when you need to store or filter on high-cardinality or free-form data.
+Filtering answers "show observations for customer 123." Grouping answers "show costs for every customer." A field can be useful for filtering without being available or efficient as a dashboard grouping dimension.
+
+Before choosing a field specifically for reporting, check the supported dimensions in [Custom dashboards](/docs/metrics/features/custom-dashboards) and the [Metrics API](/docs/metrics/features/metrics-api). Metadata filtering does not imply support for arbitrary metadata breakdowns.
+
+### Plan for distinct values and overlapping categories
+
+Cardinality is the number of distinct values. A workflow field might have ten values; a customer ID might have millions. Prefer metadata for such identifiers rather than creating a tag for each value. Metadata preserves their structure, but does not remove the cost of aggregating many distinct values.
+
+Tags introduce another consideration: one observation can belong to several categories. Grouping by individual labels and grouping by complete tag combinations answer different questions. Check the breakdown behavior before interpreting or adding together category totals.

@@ -51,9 +51,10 @@ export function Hero() {
         ></Heading>
         <div className="flex flex-col gap-6">
           <Text className="max-w-xl">
-            Trace, evaluate, and improve AI agents with one open platform. Use
-            production data to understand behavior, collaborate on fixes, and
-            ship better quality at lower cost and latency.
+            Langfuse is one open platform for every AI call your company makes
+            and every agent your teams build. Track usage and costs, trace and
+            evaluate agents, and use production logs to ship better AI. Cloud or
+            self-hosted.
           </Text>
           <HomeHeroCtaButtons />
         </div>

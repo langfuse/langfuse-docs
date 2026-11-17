@@ -436,26 +436,23 @@ langfuse = get_client()
 
 ### 1. Fetch traces from Langfuse
 
-We will fetch 15,000 messages sent to the demo application to create meaningful clusters.
+We will fetch up to 15,000 messages sent to the demo application to create meaningful clusters.
 
 
 ```python
-PAGES_TO_FETCH = 300
+OBSERVATIONS_TO_FETCH = 15_000
 
 root_observations = []
 cursor = None
-for _ in range(PAGES_TO_FETCH):
+while len(root_observations) < OBSERVATIONS_TO_FETCH:
     response = langfuse.api.observations.get_many(
-        limit=50,
+        limit=min(50, OBSERVATIONS_TO_FETCH - len(root_observations)),
         cursor=cursor,
         fields="core,basic,io,trace_context",
         is_root_observation=True,
     )
-    if not response.data:
-        break
-
-    root_observations.extend(response.data)
     cursor = getattr(response.meta, "cursor", None)
+    root_observations.extend(response.data)
     if not cursor:
         break
 ```

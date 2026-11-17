@@ -1,0 +1,64 @@
+---
+title: Overview
+seoTitle: Agent Skill Management
+description: Manage agent instructions and supporting files as versioned skills in Langfuse.
+---
+
+import { Details, Summary } from "@/components/Details";
+
+# Skill Management
+
+A skill is an instruction set to your agent. Similar to a prompt, but it can contain multiple files and more complex patterns. Learn more about skills [here](https://agentskills.io/home).
+
+You can now store and version agent skills in Langfuse. Each skill contains a `SKILL.md` file with task instructions and optional supporting files, such as reference documents or scripts.
+
+![A Skills list containing four support skills, with descriptions and version labels.](/images/changelog/2026-11-03-skill-management-list.png)
+
+## Publish and version skills [#manage-skills]
+
+Create skills in the UI, push a local folder with the CLI, or publish through the API. Each version saves the complete set of files. [Move labels such as `staging` and `production`](/docs/skill-management/version-control#labels) to promote or roll back a version without changing application code.
+
+## Load skills into your agent [#load-skills]
+
+[Install skill folders with the CLI or fetch files through the API](/docs/skill-management/get-started#load-your-skill). Your agent framework makes skills available to the model and controls file loading and script execution.
+
+## Trace skill usage [#trace-skills]
+
+[Report available skills and trace file-loading tools](/docs/skill-management/tracing) to see which versions a model could use and which files the agent loaded. Publishing or installing a skill does not trace its usage automatically.
+
+## Current limits [#limits]
+
+| Resource                       | Limit or requirement                                                                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Files per version              | Up to 200, including the root `SKILL.md`                                                                                               |
+| Total file content per version | Up to 1,000,000 UTF-8 bytes                                                                                                            |
+| File paths                     | Relative POSIX paths, up to 512 characters; no duplicates, absolute paths, backslashes, or `.` / `..` segments                         |
+| File types                     | Supported text extensions, including `.md`, `.txt`, `.json`, `.yaml`, `.py`, and `.sh`; binary and extensionless files are unsupported |
+| Skill name                     | 1–64 characters: lowercase letters, digits, and single hyphens; no leading, trailing, or consecutive hyphens                           |
+| Description                    | 1–1024 characters                                                                                                                      |
+| Tags                           | Up to 50 per skill, 1–100 characters each                                                                                              |
+| Local ZIP import               | Up to 3 MiB (3,145,728 bytes) per ZIP before extraction; imported skill files must fit the limits above                                |
+| Content fetch                  | 1–50 content hashes and up to 10,000,000 UTF-8 bytes of combined content per request                                                   |
+
+The [Agent Skills format](https://agentskills.io/specification) allows additional file types, including binary assets. Langfuse currently accepts supported text files only.
+
+<Details>
+<Summary>All supported file extensions</Summary>
+
+Extensions are matched without regard to case:
+
+```text
+.md .markdown .mdx .txt .rst .adoc .json .jsonc .jsonl .ndjson
+.yaml .yml .toml .xml .csv .tsv .ini .cfg .conf .properties
+.log .html .htm .css .scss .sass .less .js .jsx .mjs
+.cjs .ts .tsx .py .pyi .sh .bash .zsh .fish .ps1
+.rb .go .rs .java .c .h .cc .cpp .hpp .cs
+.swift .kt .kts .lua .r .pl .php .sql .graphql .gql
+.tex
+```
+
+</Details>
+
+## Get started [#get-started]
+
+[Create and load your first skill](/docs/skill-management/get-started). To bring existing skills, check the [file format](/docs/prompt-and-skill-management/concepts#skill-structure) and [current limits](#limits).

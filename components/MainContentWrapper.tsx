@@ -32,7 +32,6 @@ import { HoverCorners } from "./ui/corner-box";
 
 /** Paths where the page already shows feedback (DocBodyChrome); skip duplicate here. */
 const pathsWithoutFooterWidgets = [
-  "/imprint",
   "/blog",
   "/users",
   "/support",
@@ -47,6 +46,7 @@ const pathsWithoutFooterWidgets = [
   "/coding-agents",
   "/workflow-automation",
   "/financial-services",
+  "/healthcare",
   "/events",
   "/changelog",
   "/resources",
@@ -71,12 +71,12 @@ const pathsWithCopyAsMarkdownButton = [
   "/integrations",
   "/handbook",
   "/security",
-  "/library",
   "/enterprise",
   "/chat-agents",
   "/coding-agents",
   "/workflow-automation",
   "/financial-services",
+  "/healthcare",
   "/resources",
   "/compare",
   "/academy",

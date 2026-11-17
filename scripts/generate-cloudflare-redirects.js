@@ -72,8 +72,14 @@ function generateRedirectsContent(nonPermanentRedirects) {
   if (nonPermanentRedirects.length > 0) {
     lines.push("# All redirects (302)");
     nonPermanentRedirects.forEach(([source, destination]) => {
-      const convertedSource = convertPattern(source, false); // source pattern
-      const convertedDestination = convertPattern(destination, true); // destination pattern
+      const convertedSource = convertPattern(source, false).replace(
+        / /g,
+        "%20",
+      ); // source pattern
+      const convertedDestination = convertPattern(destination, true).replace(
+        / /g,
+        "%20",
+      ); // destination pattern
       lines.push(`${convertedSource} ${convertedDestination} 302`);
     });
     lines.push("");

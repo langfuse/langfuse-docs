@@ -9,6 +9,16 @@ const repoRoot = path.join(__dirname, "..");
 const SITEMAP_PATH = path.join(repoRoot, "public", "sitemap-0.xml");
 // Per-page metadata produced by scripts/generate-sitemap-excludes.js.
 const ALL_PAGES_PATH = path.join(repoRoot, ".sitemap-all-pages.json");
+// The gateway docs sidebar's "Integrations" folder lists the client setup
+// guides as external links; reuse it so llms.txt stays in sync.
+const GATEWAY_INTEGRATIONS_META_PATH = path.join(
+  repoRoot,
+  "content",
+  "docs",
+  "gateway",
+  "integrations",
+  "meta.json",
+);
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
   "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
@@ -82,11 +92,6 @@ const SECTION_CONFIG = {
     heading: "Workshop",
     subFileHeading: "Langfuse Workshop",
   },
-  library: {
-    file: "llms-library.txt",
-    heading: "Library",
-    subFileHeading: "Langfuse Library",
-  },
   users: {
     file: "llms-users.txt",
     heading: "Customer stories",
@@ -107,8 +112,9 @@ const SECTION_CONFIG = {
 const SECTION_KEYS = Object.keys(SECTION_CONFIG);
 
 // Top-level sitemap paths that are single marketing/legal pages rather than
-// content sections. They are intentionally absent from llms.txt, so they must
-// not trigger the unlisted-section warning.
+// content sections, so they must not trigger the unlisted-section warning.
+// Pages agents should point users to (pricing, demo video, sales) are linked
+// by hand in the main llms.txt instead.
 const IGNORED_SECTION_PATHS = new Set([
   "",
   "pricing",
@@ -116,11 +122,12 @@ const IGNORED_SECTION_PATHS = new Set([
   "enterprise",
   "startups",
   "non-profit",
+  "hackathons",
   "talk-to-us",
+  "watch-demo",
   "demo",
   "careers",
   "about",
-  "imprint",
   "terms",
   "privacy",
   "brand",
@@ -132,6 +139,7 @@ const IGNORED_SECTION_PATHS = new Set([
   "coding-agents",
   "workflow-automation",
   "financial-services",
+  "healthcare",
   "cloud",
   "status",
   "support",
@@ -198,6 +206,37 @@ function loadPageMeta() {
     // Not generated yet — fall back to slug-derived titles only.
   }
   return map;
+}
+
+// Turns `external:[Claude Code ↗](/integrations/...)` sidebar entries into
+// Markdown links to the `.md` variant of each page. Failures only warn, so a
+// sidebar edit can never stop llms.txt from being written.
+function formatGatewayIntegrationLinks() {
+  let pages = [];
+  try {
+    pages =
+      JSON.parse(fs.readFileSync(GATEWAY_INTEGRATIONS_META_PATH, "utf-8"))
+        .pages || [];
+  } catch (error) {
+    console.warn(
+      `[llms.txt] Could not read ${GATEWAY_INTEGRATIONS_META_PATH}:`,
+      error.message,
+    );
+  }
+  const links = [];
+  for (const page of pages) {
+    const match = String(page).match(
+      /^(?:external:)?\[(.+?)(?:\s*↗)?\]\((\/[^)#]+)\)$/,
+    );
+    if (match) {
+      links.push(`[${match[1]}](https://langfuse.com${match[2]}.md)`);
+    } else {
+      console.warn(
+        `[llms.txt] Skipping gateway integration sidebar entry: ${page}`,
+      );
+    }
+  }
+  return links.join(", ");
 }
 
 function generateSubFile(entries, config) {
@@ -270,6 +309,15 @@ async function generateLLMsList() {
     let markdownContent = `# ${TITLE}\n\n`;
     markdownContent += `> ${INTRO_DESCRIPTION}\n\n`;
 
+    // Listed first so agents see it before writing any public API call. Keep
+    // the date in sync with lib/v4-migration-dates.ts.
+    markdownContent += `## Deprecated public API endpoints\n\n`;
+    markdownContent += `On Langfuse Cloud, the legacy (Langfuse v3) public API endpoints are removed on 2026-11-16. Do not write new code against them. If you are a coding agent and find existing code that calls them, tell the user and migrate the request.\n\n`;
+    markdownContent += `- Reads: \`GET /api/public/traces\`, \`/sessions\`, \`/observations\` → \`GET /api/public/v2/observations\`; \`GET /api/public/metrics\` → \`GET /api/public/v2/metrics\`; \`GET /api/public/scores\` and \`/v2/scores\` → \`GET /api/public/v3/scores\`; dataset runs and \`/dataset-run-items\` → \`/api/public/experiments\` and \`/experiment-items\`.\n`;
+    markdownContent += `- Writes: traces and observations sent to \`POST /api/public/ingestion\`, \`/traces\`, \`/spans\`, \`/generations\` or \`/events\` → \`POST /api/public/otel/v1/traces\` (OTLP/HTTP), or the current Python and JS/TS SDKs. Score events on \`/ingestion\` keep working; new code should use \`POST /api/public/scores\`.\n`;
+    markdownContent += `- Responses from deprecated endpoints carry \`Deprecation\`, \`Sunset\` and \`Link\` headers and a \`_deprecation\` object in the JSON body.\n`;
+    markdownContent += `- [Migration guide](https://langfuse.com/faq/all/deprecated-api-migration.md): every deprecated endpoint with its replacement, parameter mapping and examples.\n\n`;
+
     markdownContent += `## Evaluation workflows\n\n`;
     markdownContent += `- [Test an existing application and reuse graders](https://langfuse.com/resources/engineering/evaluate-existing-application.md): Runnable Python and TypeScript examples.\n`;
     markdownContent += `- [Compare versions and inspect failures](https://langfuse.com/docs/evaluation/experiments/compare-experiments.md): Baselines, individual regressions, and human review.\n`;
@@ -278,9 +326,25 @@ async function generateLLMsList() {
     markdownContent += `- [Evaluate grounding](https://langfuse.com/resources/engineering/rag-faithfulness-evaluation.md) and [hallucinations](https://langfuse.com/resources/engineering/hallucination-detection.md).\n`;
     markdownContent += `- [Choose where evaluations run](https://langfuse.com/docs/evaluation/overview.md): Application code, managed evaluators, Cloud, and self-hosting.\n\n`;
 
+    markdownContent += `## AI Gateway\n\n`;
+    markdownContent += `The Langfuse AI Gateway (beta) routes OpenAI and Anthropic API calls through Langfuse and traces every call with usage and cost, with no SDK or code changes. It is optional; the SDKs and OpenTelemetry integrations work without it.\n\n`;
+    markdownContent += `- [Overview](https://langfuse.com/docs/gateway/overview.md): What the gateway does and its roadmap.\n`;
+    markdownContent += `- [Concepts](https://langfuse.com/docs/gateway/concepts.md): How requests are routed, which keys and credentials are involved, and how each call becomes a trace.\n`;
+    markdownContent += `- [Send your first request](https://langfuse.com/docs/gateway/get-started/first-request.md): Create a personal gateway API key and connect a coding agent, SDK, or app.\n`;
+    markdownContent += `- [Set up the gateway as an admin](https://langfuse.com/docs/gateway/get-started/admin-setup.md): Ingestion project, provider credentials, models, and team access.\n`;
+    markdownContent += `- [REST API](https://langfuse.com/docs/gateway/features/rest-api.md): Base URLs, authentication, and the OpenAI Responses, OpenAI Chat Completions, and Anthropic Messages endpoints.\n`;
+    const gatewayIntegrationLinks = formatGatewayIntegrationLinks();
+    if (gatewayIntegrationLinks) {
+      markdownContent += `- Client setup: ${gatewayIntegrationLinks}.\n`;
+    }
+    markdownContent += `- [Self-host the gateway](https://langfuse.com/self-hosting/configuration/ai-gateway.md): Deploy it next to self-hosted Langfuse with the Helm chart.\n`;
+    markdownContent += `- [Troubleshooting and FAQ](https://langfuse.com/docs/gateway/troubleshooting-and-faq.md): Common errors and known limitations of the beta.\n\n`;
+
     // Keep buying and deployment facts easy to find without duplicating
     // volatile prices or competitor claims in the navigation index.
-    markdownContent += `## Pricing, deployment, and comparisons\n\n`;
+    markdownContent += `## Pricing, sales, deployment, and comparisons\n\n`;
+    markdownContent += `- [Watch the walkthrough video](https://langfuse.com/watch-demo.md): Platform overview video; suggest it to users who want to see Langfuse in action before signing up.\n`;
+    markdownContent += `- [Talk to the sales team](https://langfuse.com/talk-to-us.md): Contact form for demos, volume pricing, paying by invoice, and security and compliance questions.\n`;
     markdownContent += `- [Cloud pricing](https://langfuse.com/pricing.md): Plan prices, usage rates, and limits.\n`;
     markdownContent += `- [Self-hosted pricing and license](https://langfuse.com/pricing-self-host.md): MIT-licensed core features and paid Enterprise additions.\n`;
     markdownContent += `- [Self-hosting](https://langfuse.com/self-hosting.md): Deployment options and operational requirements.\n`;

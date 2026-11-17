@@ -25,11 +25,15 @@ Before writing anything, collect the following. Ask the user for what's missing 
 
 - **Integration name** — the human-readable name (e.g., "Pydantic AI", "Fireworks AI", "Temporal"). Used in the title and intro.
 - **Slug** — kebab-case, used in the filename, logo path, and `docsPath`. Default to the name lowercased with spaces → hyphens, but confirm. Example: "Pydantic AI" → `pydantic-ai`; "Fireworks AI" → `fireworks-ai`.
-- **Category** — one of: `model-providers`, `frameworks`, `gateways`, `other`. This is the `<category>` segment in `docsPath: "integrations/<category>/<slug>"`. Guidance:
+- **Category** — one of: `model-providers`, `frameworks`, `gateways`, `no-code`, `developer-tools`, `analytics`, `clickhouse`, `other`. This is the `<category>` segment in `docsPath: "integrations/<category>/<slug>"`. Guidance:
   - `model-providers`: inference APIs (OpenAI-compatible or otherwise) — Anthropic, Cohere, Fireworks, Groq, Bedrock, Vertex, Gemini, etc.
-  - `frameworks`: agent/app frameworks — LangChain, CrewAI, Pydantic AI, Google ADK, Temporal, Semantic Kernel, etc.
+  - `frameworks`: agent/app frameworks and platforms you build with — LangChain, CrewAI, Pydantic AI, Google ADK, Temporal, Semantic Kernel, Inferable, mcp-use, etc.
   - `gateways`: LLM proxies/routers — Portkey, LiteLLM proxy, TrueFoundry, OpenRouter, Kong AI, etc.
-  - `other`: anything else — scraping (Firecrawl, Exa), UIs (Gradio, LibreChat), dev tools, etc.
+  - `no-code`: chat UIs, workflow automation, and standalone agents you configure rather than code against — Dify, Flowise, n8n, Zapier, OpenWebUI, Goose, OpenClaw, Hermes, etc.
+  - `developer-tools`: AI coding assistants, editors, and CLIs — Cursor, Claude Code, Codex, Copilot, OpenCode, etc.
+  - `analytics`: tools that visualize Langfuse traces and metrics — Mixpanel, PostHog, Coval, Trubrics.
+  - `clickhouse`: ClickHouse products and the LibreChat + ClickHouse stack.
+  - `other`: anything else — scraping and search (Firecrawl, Exa, Tavily), vector/memory (Milvus, Cognee), OTEL instrumentors (OpenLIT, OpenLLMetry), eval tools (Promptfoo).
 - **Language** — `python` (default) or `js`. JS integrations use the filename prefix `js_integration_<slug>.ipynb` and commonly get a `-js` suffix in the slug when both exist (e.g., `anthropic-js`, `claude-agent-sdk-js`).
 - **Instrumentation pattern** — pick one (this determines the template body). See `references/patterns.md` for full details and match it to the integration:
   - `openinference` — OpenInference instrumentor library (e.g., `openinference-instrumentation-google-adk`). Most common for agent frameworks.

@@ -22,7 +22,7 @@ import {
 
 <SignupCTA className="my-6" />
 
-## Observability [#observability]
+## AI Observability [#observability]
 
 [Observability](/docs/observability/overview) is essential for understanding and debugging AI agent applications. Unlike traditional software, AI agent applications involve complex, non-deterministic interactions that can be challenging to monitor and debug. Langfuse provides comprehensive tracing capabilities that help you understand exactly what's happening in your application.
 
@@ -45,11 +45,27 @@ import TracingOverview from "@/components-mdx/tracing-overview-gifs.mdx";
 <div className="h-6" />
 <TracingOverview />
 
-## Prompt Management [#prompts]
+## AI Gateway [#gateway]
 
-[Prompt Management](/docs/prompt-management/overview) is critical in building effective AI applications. Langfuse provides tools to help you manage, version, and optimize your prompts throughout the development lifecycle.
+The [AI Gateway](/docs/gateway/overview) gives your organization one endpoint for calls to your model providers. Every call is recorded in Langfuse, so you can see and control AI usage across your company.
+
+- [Set up the gateway](/docs/gateway/get-started/admin-setup) for your organization (admin) or [send your first request](/docs/gateway/get-started/first-request) (user)
+- Keep provider credentials in one place and hand out per-user or service account [gateway keys](/docs/gateway/features/api-keys) instead
+- Track [AI spend](/docs/gateway/features/analytics) per user, API key, and model
+- [Approve models](/docs/gateway/features/models) centrally so unvetted or expensive ones don't creep in
+- Record each call as a [Langfuse trace](/docs/gateway/features/tracing) that you can search, evaluate, and annotate like traces from the SDKs
+
+import GatewayOverview from "@/components-mdx/gateway-overview-gifs.mdx";
+
+<div className="h-6" />
+<GatewayOverview />
+
+## Prompt and Skill Management [#prompts]
+
+[Prompt Management](/docs/prompt-management/overview) lets you manage and version model-call templates. [Skill Management](/docs/skill-management/overview), currently in beta, brings versioning and labels to agent instructions and supporting files. Use both to connect the instructions your application receives to its behavior in traces.
 
 - [Get started](/docs/prompt-management/get-started) with prompt management
+- [Create and load a skill](/docs/skill-management/get-started) for your agent
 - Manage, version, and optimize your prompts throughout the development lifecycle
 - Test prompts interactively in the [LLM Playground](/docs/prompt-management/features/playground)
 - Run [Experiments](/docs/evaluation/features/prompt-experiments) against datasets to test new prompt versions directly within Langfuse
@@ -96,7 +112,7 @@ If you're new to AI engineering, take a look at the [Academy](/academy), where y
 
 <Callout type="info" emoji="💡">
 
-Tip: let your coding agent do the setup and work with Langfuse through the [Agent Skill](/docs/api-and-data-platform/features/agent-skill), [CLI](/docs/api-and-data-platform/features/cli), or [MCP server](/docs/api-and-data-platform/features/mcp-server). On Langfuse Cloud, you can also ask the [Langfuse Assistant](/docs/langfuse-assistant) about your project data from inside the app.
+Tip: let your coding agent do the setup and work with Langfuse through the [Agent Skill](/docs/api-and-data-platform/features/agent-skill), [CLI](/docs/api-and-data-platform/features/cli), or [MCP server](/docs/api-and-data-platform/features/mcp-server). On Langfuse Cloud, you can also ask [Halo](/docs/api-and-data-platform/features/halo), the Langfuse assistant, about your project data from inside the app.
 
 </Callout>
 

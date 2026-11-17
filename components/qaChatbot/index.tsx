@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import type { FormEvent, HTMLAttributes } from "react";
 import { useChat } from "@ai-sdk/react";
 import { getPersistedNanoId } from "./utils/persistedNanoId";
+import { getPresentationParts, isMessageSettled } from "./presentation";
 
 import {
   Conversation,
@@ -49,11 +50,25 @@ import type { UIMessage } from "ai";
 const TRACE_ID_PATTERN = /^[0-9a-f]{32}$/i;
 
 type ChatMessage = UIMessage;
+type ChatMessagePart = ChatMessage["parts"][number];
+
+const isThinkingPart = (part?: ChatMessagePart) =>
+  part?.type === "reasoning" || part?.type === "dynamic-tool";
+
+const isVisibleMessagePart = (part: ChatMessagePart) =>
+  isThinkingPart(part) || (part.type === "text" && part.text.trim().length > 0);
+
+const startsWithThinking = (message?: ChatMessage) =>
+  message?.role === "assistant" &&
+  isThinkingPart(message.parts.find(isVisibleMessagePart));
 
 type ChatProps = HTMLAttributes<HTMLDivElement>;
 
 export const Chat = ({ className, ...props }: ChatProps) => {
   const [input, setInput] = useState("");
+  const [completedMessageIds, setCompletedMessageIds] = useState<Set<string>>(
+    new Set(),
+  );
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   // Track negative_user_feedback per message (true/false, null = none)
   const [userFeedback, setUserFeedback] = useState<Map<string, boolean | null>>(
@@ -93,7 +108,29 @@ export const Chat = ({ className, ...props }: ChatProps) => {
         api: "/api/qa-chatbot",
         body: { chatId, userId },
       }),
+      onFinish: ({ message, isAbort, isDisconnect, isError }) => {
+        if (isAbort || isDisconnect || isError) return;
+        setCompletedMessageIds(
+          (previous) => new Set([...previous, message.id]),
+        );
+      },
     });
+
+  const presentedMessages = useMemo(
+    () =>
+      messages.map((message, index) =>
+        message.role === "assistant"
+          ? {
+              ...message,
+              parts: getPresentationParts(
+                message.parts,
+                isMessageSettled(status, index === messages.length - 1),
+              ),
+            }
+          : message,
+      ),
+    [messages, status],
+  );
 
   // Check if user has submitted any messages
   const hasUserMessages = messages.some((message) => message.role === "user");
@@ -108,6 +145,18 @@ export const Chat = ({ className, ...props }: ChatProps) => {
   const handleExampleQuestion = (question: string) => {
     if (!userId) return; // Don't send if userId is not ready
     sendMessage({ text: question });
+  };
+
+  const handleRegenerate = () => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.role === "assistant") {
+      setCompletedMessageIds((previous) => {
+        const next = new Set(previous);
+        next.delete(lastMessage.id);
+        return next;
+      });
+    }
+    regenerate();
   };
 
   const handleFeedback = (
@@ -131,9 +180,9 @@ export const Chat = ({ className, ...props }: ChatProps) => {
           {!hasUserMessages && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
               <h2 className="text-xl font-semibold text-foreground mb-6 pointer-events-none text-center">
-                👋 Do you have any questions about Langfuse?
+                Do you have any questions about Langfuse?
                 <br />
-                <span className="block mt-2">Ask me!</span>
+                <span className="block mt-2">Ask me 😊</span>
               </h2>
               <div className="flex gap-3 items-center flex-wrap justify-center">
                 <button
@@ -165,11 +214,15 @@ export const Chat = ({ className, ...props }: ChatProps) => {
               </div>
             </div>
           )}
-          <ConversationContent className="space-y-2">
-            {messages.map((message, messageIndex) => (
+          <ConversationContent className="space-y-2 pt-0">
+            {presentedMessages.map((message, messageIndex) => (
               <div key={message.id}>
                 {message.role === "assistant" && (
-                  <Sources>
+                  <Sources
+                    className={
+                      startsWithThinking(message) ? "empty:hidden" : undefined
+                    }
+                  >
                     {message.parts.map((part, i) => {
                       switch (part.type) {
                         case "source-url":
@@ -198,37 +251,45 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                 <Message
                   from={message.role}
                   key={message.id}
-                  className={
-                    message.role === "assistant"
-                      ? "[&>div]:max-w-full"
-                      : undefined
-                  }
+                  className={cn(
+                    message.role === "assistant" && "[&>div]:max-w-full",
+                    message.role === "user" && "pt-1",
+                    startsWithThinking(message) && "pt-1",
+                    message.role === "user" &&
+                      startsWithThinking(presentedMessages[messageIndex + 1]) &&
+                      "pb-1",
+                  )}
                 >
                   <MessageContent
                     className={
                       message.role === "assistant"
-                        ? "!bg-transparent px-0 rounded-none"
+                        ? cn(
+                            "!bg-transparent px-0 rounded-none",
+                            startsWithThinking(message) && "pt-0",
+                          )
                         : "!bg-[#403d391a] dark:!bg-[#b8b6a01a] !text-text-primary border border-line-structure rounded-[2px] px-3 py-2"
                     }
                   >
                     {message.parts.map((part, i) => {
                       if (part.type === "text") {
+                        if (!part.text.trim()) return null;
                         const isLastMessage =
                           messageIndex === messages.length - 1;
                         const isNotFirstMessage = messageIndex > 0;
                         // Find the index of the last text part
                         const textPartIndices = message.parts
-                          .map((p, idx) => (p.type === "text" ? idx : -1))
+                          .map((p, idx) =>
+                            p.type === "text" && p.text.trim() ? idx : -1,
+                          )
                           .filter((idx) => idx !== -1);
                         const lastTextPartIndex =
                           textPartIndices[textPartIndices.length - 1];
                         const isLastTextPart = i === lastTextPartIndex;
-                        // Per-message completeness: earlier replies keep their
-                        // Open-trace link while a later turn is streaming.
-                        const hasStreamingParts = message.parts.some(
-                          (p) => "state" in p && p.state === "streaming",
-                        );
-                        const isMessageComplete = !hasStreamingParts;
+                        // Text-end events also occur before tool calls. Only
+                        // the successful response-finish event completes a reply.
+                        const isMessageComplete =
+                          completedMessageIds.has(message.id) &&
+                          (!isLastMessage || status === "ready");
                         const isChatIdle =
                           status !== "submitted" && status !== "streaming";
                         const traceUrl = TRACE_ID_PATTERN.test(message.id)
@@ -259,11 +320,10 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                               isLastMessage &&
                               isNotFirstMessage &&
                               isLastTextPart &&
-                              isMessageComplete &&
                               isChatIdle && (
                                 <Actions className="mt-2">
                                   <Action
-                                    onClick={() => regenerate()}
+                                    onClick={handleRegenerate}
                                     label="Retry"
                                     tooltip="Retry"
                                   >
@@ -300,38 +360,53 @@ export const Chat = ({ className, ...props }: ChatProps) => {
                         );
                       }
                       if (part.type === "reasoning") {
-                        // Add spacing if next part is a different type (for consistent spacing between different types)
-                        const nextPart = message.parts[i + 1];
-                        const hasNextPartDifferentType =
-                          nextPart && nextPart.type !== "reasoning";
+                        const nextPart = message.parts
+                          .slice(i + 1)
+                          .find(isVisibleMessagePart);
+                        const hasNextThinkingStep = isThinkingPart(nextPart);
                         return (
                           <Reasoning
                             key={`${message.id}-${i}`}
-                            className={
-                              hasNextPartDifferentType
-                                ? "w-full"
-                                : "w-full mb-0"
+                            defaultOpen={false}
+                            className={cn(
+                              "w-full",
+                              hasNextThinkingStep
+                                ? "mb-1"
+                                : !nextPart
+                                  ? "mb-0"
+                                  : undefined,
+                            )}
+                            isStreaming={
+                              part.state === "streaming" &&
+                              !isMessageSettled(
+                                status,
+                                messageIndex === messages.length - 1,
+                              )
                             }
-                            isStreaming={part.state === "streaming"}
                           >
-                            <ReasoningTrigger />
+                            <ReasoningTrigger className="gap-1.5 text-xs font-normal leading-5 [&_p]:m-0 [&_svg]:size-3.5" />
                             <ReasoningContent>{part.text}</ReasoningContent>
                           </Reasoning>
                         );
                       }
                       if (part.type === "dynamic-tool") {
-                        // Add spacing if next part is a different type (for consistent spacing between different types)
-                        const nextPart = message.parts[i + 1];
-                        const hasNextPartDifferentType =
-                          nextPart && nextPart.type !== "dynamic-tool";
+                        const nextPart = message.parts
+                          .slice(i + 1)
+                          .find(isVisibleMessagePart);
+                        const hasNextThinkingStep = isThinkingPart(nextPart);
                         return (
                           <Tool
                             key={`${message.id}-${i}`}
                             className={
-                              hasNextPartDifferentType ? undefined : "mb-0"
+                              hasNextThinkingStep
+                                ? "mb-1"
+                                : !nextPart
+                                  ? "mb-0"
+                                  : undefined
                             }
                           >
                             <ToolHeader
+                              className="text-xs font-normal leading-5 [&>div]:gap-1.5 [&_span]:text-xs [&_span]:font-normal [&_svg]:size-3.5"
                               type={`tool-${part.toolName}` as const}
                               state={part.state}
                             />
@@ -348,6 +423,22 @@ export const Chat = ({ className, ...props }: ChatProps) => {
 
                       return null;
                     })}
+                    {message.role === "assistant" &&
+                      messageIndex === messages.length - 1 &&
+                      isMessageSettled(status, true) &&
+                      !message.parts.some(
+                        (part) => part.type === "text" && part.text.trim(),
+                      ) && (
+                        <Actions className="mt-2">
+                          <Action
+                            onClick={handleRegenerate}
+                            label="Retry"
+                            tooltip="Retry"
+                          >
+                            <RefreshCcwIcon className="size-3" />
+                          </Action>
+                        </Actions>
+                      )}
                   </MessageContent>
                 </Message>
               </div>

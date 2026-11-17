@@ -22,16 +22,9 @@ type ContentColumnsProps = {
  * Used inside PageChrome (or any wrapper that provides the outer chrome).
  * Pass `leftSidebar` / `rightSidebar` to swap the default sidebars.
  * Set `showLeftSidebar={false}` to drop the left column and give the page more width.
+ * Industry pages hide both sidebars and keep the content column flush with the
+ * navbar (`max-w-380`), so do not add side gutters there.
  */
-function SideGutter() {
-  return (
-    <div
-      aria-hidden
-      className="hidden shrink-0 bg-transparent lg:block w-8 xl:w-12 2xl:w-16"
-    />
-  );
-}
-
 function AsideEdge() {
   return (
     <div
@@ -50,10 +43,10 @@ export function ContentColumns({
   className,
   footerClassName,
 }: ContentColumnsProps) {
-  // Wide gutters only when both sidebars are off (e.g. financial-services).
-  // Pages that only hide the aside keep the previous 1px structural edge.
-  const rightFallback =
-    showLeftSidebar === false ? <SideGutter /> : <AsideEdge />;
+  // Pages that only hide the aside keep a 1px structural edge.
+  // Pages that hide both sidebars (financial-services, healthcare) stay flush
+  // with the navbar instead of insetting the column.
+  const rightFallback = showLeftSidebar ? <AsideEdge /> : null;
 
   return (
     <div
@@ -63,7 +56,7 @@ export function ContentColumns({
         className,
       )}
     >
-      {showLeftSidebar ? (leftSidebar ?? <HomeSidebar />) : <SideGutter />}
+      {showLeftSidebar ? (leftSidebar ?? <HomeSidebar />) : null}
       <HomeMainArea>
         {children}
         <Footer className={footerClassName} />

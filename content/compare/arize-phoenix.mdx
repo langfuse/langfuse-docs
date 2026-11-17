@@ -13,7 +13,7 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 # Langfuse vs. Arize AX / Arize Phoenix
 
-This guide compares **[Langfuse](/)**, **[Arize Phoenix](https://phoenix.arize.com)**, and **[Arize AX](https://arize.com/products/ax/)**. Arize facts were checked against public Arize sources in October 2026.
+**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide compares it with **[Arize Phoenix](https://phoenix.arize.com)** and **[Arize AX](https://arize.com/products/ax/)**. Arize facts were checked against public Arize sources in October 2026.
 
 Arize is part of Dynatrace following the [acquisition completed on October 1, 2026](https://ir.dynatrace.com/news-events/press-releases/detail/439/dynatrace-completes-acquisition-of-arize-extending-ai-observability-across-the-full-development-lifecycle). This page compares Arize AX and Phoenix as they ship today.
 
@@ -74,7 +74,7 @@ The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retent
 | Warehouse sync          | [Scheduled blob exports](/docs/api-and-data-platform/features/export-to-blob-storage) (Teams add-on, Enterprise, or self-hosted) | Data Fabric: Enterprise-only, currently waitlisted                                                                       |
 | SQL access              | Direct ClickHouse SQL when self-hosting                                                                                          | Via Data Fabric sync to your warehouse (Enterprise)                                                                      |
 
-**Sources:** [ClickHouse 10 years open source (Jun 15, 2016; 2,000+ contributors)](https://clickhouse.com/blog/open-source-10) · [adb announcement](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/) · [Arize June 2025 release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025)
+**Sources:** [ClickHouse 10 years open source (Jun 15, 2016; 2,000+ contributors)](https://clickhouse.com/blog/open-source-10), [adb announcement](https://arize.com/blog/introducing-adb-arizes-proprietary-olap-database/), [Arize June 2025 release notes](https://arize.com/docs/ax/release-notes/history/2025/06-2025)
 
 ---
 
@@ -101,7 +101,7 @@ Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a
 
 ### Worked example [#worked-example]
 
-500,000 traces/month · 10 spans (observations) per trace · 1 score per trace · 5 KB average span size · 5 users.
+500,000 traces/month, 10 spans (observations) per trace, 1 score per trace, 5 KB average span size, 5 users.
 
 |                                     | Base    | Usage     | Retention                      | **Total/month** |
 | ----------------------------------- | ------- | --------- | ------------------------------ | --------------- |
@@ -138,7 +138,7 @@ Langfuse records a [trace](/docs/observability/data-model) per request with type
 
 ## Evaluation and experiments [#evaluation-and-experiments]
 
-[Langfuse evaluations](/docs/evaluation/overview) include [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on live observations and experiments, custom scores via SDK/API, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and dataset experiments, Cloud and self-hosted. [CI/CD gates](/docs/evaluation/experiments/experiments-ci-cd) fail a pipeline on experiment results. Coding agents can run the same loop through the [CLI, MCP server, and agent skill](/docs/evaluation/agentic-access).
+[Langfuse evaluations](/docs/evaluation/overview) include [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge), [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on live observations and experiments, custom scores via SDK/API, [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and dataset experiments, Cloud and self-hosted. [CI/CD gates](/docs/evaluation/experiments/experiments-ci-cd) fail a pipeline on experiment results. Coding agents can run the same loop through the [CLI, MCP server, and agent skill](/docs/evaluation/more/agentic-access).
 
 Arize AX includes unlimited online and offline evaluations, human annotations, and labeling queues on all plans. The [Arize pricing page](https://arize.com/pricing/) lists agent-as-a-judge on all plans, plus session- and trajectory-level judges. Langfuse LLM-as-a-Judge targets observations (recommended) or traces (deprecated). For a multi-turn conversation, evaluate the observation that holds the history. The pattern is in [evaluating sessions](/resources/engineering/evaluating-sessions-conversations). Session scores and session annotation queues still apply.
 

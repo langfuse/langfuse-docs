@@ -1,0 +1,16 @@
+---
+title: How do I report an AI Gateway issue?
+description: Find the AI Gateway request ID and trace ID needed to diagnose a failed call or report a persistent problem.
+tags: [ai-gateway]
+---
+
+# How do I report an AI Gateway issue?
+
+Quote the **gateway request ID** when you report a problem. It identifies one call across the gateway logs and the recorded generation.
+
+- Every response carries it in the `langfuse-request-id` header, including errors and streams. Print it with `curl -si … | grep -i '^langfuse-'`.
+- Gateway error bodies also contain it as a top-level `request_id` field.
+- If a generation was recorded, include the `langfuse-trace-id` header too, or the trace URL.
+- In Langfuse, the same ID is stored on the generation as the metadata key `langfuse.gateway.request.id`.
+
+Most coding agents don't show response headers. To get the request ID for an agent's call, open the generation in Langfuse and copy `langfuse.gateway.request.id` from its metadata, or reproduce the call with `curl`. See [response headers](/docs/gateway/features/tracing#response-headers).

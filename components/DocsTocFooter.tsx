@@ -28,7 +28,6 @@ const getGithubEditUrl = (path: string): string | null => {
     handbook: "content/handbook",
     integrations: "content/integrations",
     "self-hosting": "content/self-hosting",
-    library: "content/library",
     academy: "content/academy",
     resources: "content/resources",
     compare: "content/compare",

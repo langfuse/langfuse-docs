@@ -4,7 +4,6 @@ import { z } from "zod";
 import {
   observe,
   propagateAttributes,
-  setActiveTraceIO,
   getActiveTraceId,
   updateActiveObservation,
 } from "@langfuse/tracing";
@@ -148,7 +147,6 @@ const handler = async (req: Request) => {
         text,
       };
 
-      setActiveTraceIO({ input });
       updateActiveObservation({ input }, { asType: "generation" });
 
       try {
@@ -168,7 +166,6 @@ const handler = async (req: Request) => {
           answers,
         };
 
-        setActiveTraceIO({ output: payload });
         updateActiveObservation(
           {
             input,

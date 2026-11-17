@@ -1,7 +1,7 @@
 ---
 title: Tracing using the OpenInference SDK
 sidebarTitle: OpenInference (Arize)
-logo: /images/integrations/opentelemetry_icon.svg
+logo: /images/integrations/openinference_icon.svg
 description: Example cookbook on using the OpenInference SDK by Arize to trace your application to Langfuse.
 ---
 

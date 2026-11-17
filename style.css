@@ -225,19 +225,19 @@
   background-color: transparent !important;
 }
 
-/* Inside the centered flex layout the SVG's width:auto can't resolve and the
-   diagram collapses to 0x0. Give it a definite width so it renders at its
-   natural size (capped by the inline max-width Mermaid sets). */
-.embedded-mermaid .mermaid-diagram svg {
-  width: 100%;
-  height: auto;
-}
-
+/* Mermaid sets inline width/max-width to the chart's natural pixel size.
+   !important on max-width beats that so charts scale down instead of clipping.
+   Standalone charts keep their natural width when the container is wider.
+   Embedded charts need width:100% so they don't collapse in a flex layout. */
 .mermaid-diagram svg {
   display: block;
-  width: auto;
+  max-width: 100% !important;
+  height: auto !important;
   margin-inline: auto;
-  max-width: none;
+}
+
+.embedded-mermaid .mermaid-diagram svg {
+  width: 100% !important;
 }
 
 /* CSS custom properties for shadcn/ui color system */
@@ -620,7 +620,8 @@
 .link-box:hover,
 .box-custom-hover:after,
 .card-hover-stripes:after,
-.corner-box-hover-stripes:hover {
+.corner-box-hover-stripes:hover,
+.button-wrapper:hover > .corner-box-hover-stripes {
   --stripe-mix: 20%;
   --stripe-base: var(--color-surface-bg);
   --stripe-line: var(--stripe-color, rgba(108, 103, 96, 0.1));
@@ -649,7 +650,8 @@
 /* Richer stripe tint from theme border + base (OK Lab); falls back to rgba above. */
 @supports (color: color-mix(in lab, red, red)) {
   .bg-stripe-pattern,
-  .corner-box-hover-stripes:hover {
+  .corner-box-hover-stripes:hover,
+  .button-wrapper:hover > .corner-box-hover-stripes {
     --stripe-line: color-mix(
       in oklab,
       var(--stripe-color, var(--color-fd-border)) var(--stripe-mix),

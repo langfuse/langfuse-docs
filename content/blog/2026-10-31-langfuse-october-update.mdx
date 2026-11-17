@@ -1,0 +1,124 @@
+---
+title: "Langfuse October Update"
+description: "Skill management, redesigned session view, scoped API keys, Python SDK v5 and JS/TS SDK v6, Langfuse Government and more"
+ogImage: /images/blog/2026-10-31-langfuse-october-update/skill-management.png
+tag: update
+date: 2026/10/31
+author: "Marc"
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+
+<BlogHeader
+  title="Langfuse October Update"
+  description="Skill management, redesigned session view, scoped API keys, Python SDK v5 and JS/TS SDK v6, Langfuse Government and more"
+  authors={["marcklingen"]}
+  date="October 31, 2026"
+/>
+
+October brought skill management to Langfuse: store, version, and trace agent skills the way you already manage prompts. Alongside it, a new session view and API keys you can scope and expire.
+
+🥁 Join us on Thursday, November 12, for the Langfuse Community Town Hall. We'll talk about a big release coming next week and the updated roadmap we're finalizing right now. As always, we'll also demo all the new capabilities we've shipped since the last Town Hall.
+
+→ [Sign up for the Town Hall](https://luma.com/lvp5fx33)
+
+## Skill management
+
+<Frame>
+  ![Skill management](/images/blog/2026-10-31-langfuse-october-update/skill-management.png)
+</Frame>
+
+Next to prompts, you can now store and version agent skills in Langfuse. A skill is a `SKILL.md` with task instructions plus optional supporting files. Create skills in the UI, push a local folder, or publish through the API, CLI, MCP, and SDKs. Each version saves the complete set of files, and labels let you promote or roll back a version without changing application code.
+
+With skill tracing configured, generations show which skills have been used. The skill's usage tab combines usage counts, file loads, and linked observations.
+
+→ [Read more](/docs/skill-management/overview)
+
+## Redesigned session view
+
+<Frame>
+  ![Redesigned session view](/images/blog/2026-10-31-langfuse-october-update/session-view.png)
+</Frame>
+
+The session view now shows user and assistant messages across traces as one continuous conversation. A sidebar navigates messages, traces, and tool usage, so you can follow where an interaction went off track and jump to the trace behind it.
+
+→ [Read more](/changelog/2026-10-13-redesigned-session-view)
+
+→ [Post feedback here](https://github.com/orgs/langfuse/discussions/18687)
+
+## Scoped API keys and expiration dates
+
+<Frame>
+  ![Scoped API keys and expiration dates](/images/blog/2026-10-31-langfuse-october-update/scoped-api-keys.png)
+</Frame>
+
+Project API keys now carry permissions: Full access, Viewer, Ingestion, or Scores ingestion. Instrument an application with a key that can send traces but cannot read your prompts or datasets, or collect user feedback from a web app with a key that can only submit scores.
+
+You can also now set an expiration date for your keys. Existing keys keep working as they are.
+
+→ [Read more](/changelog/2026-10-16-project-api-key-permissions)
+
+## More decision models: OpenAI and System One
+
+<Frame>
+  ![More decision models: OpenAI and System One](/images/blog/2026-10-31-langfuse-october-update/decision-models.png)
+</Frame>
+
+Decision-model evaluators now run on OpenAI's gpt-6-luna through the Decisions API, and on any model that serves TypeSafe's System One API, such as Subquadratic's SubQ Snap or the open-weights Strands Decider you host yourself.
+
+Choice, Score, and Yes/no questions work unchanged, so you can use whichever model fits your cost and latency budget. The Langfuse MCP server also supports decision-model evaluators (API/CLI coming soon).
+
+→ [Read more](/docs/evaluation/evaluation-methods/decision-models)
+
+## Python SDK v5 and JS/TS SDK v6
+
+<Frame>
+  ![Python SDK v5 and JS/TS SDK v6](/images/blog/2026-10-31-langfuse-october-update/sdk-majors.png)
+</Frame>
+
+Both majors are built for Langfuse v4 and mostly remove APIs that were already deprecated, so for most users the upgrade is a version bump.
+
+New: `experiment_url` / `experimentUrl` links straight to the comparison view, nested metadata becomes filterable dotted paths, span batches are gzip-compressed, and scores are created in batches. If you self-host, both need Langfuse v4.59.0 or later.
+
+→ [Read more](/changelog/2026-10-14-python-sdk-v5-js-sdk-v6)
+
+## Langfuse Government
+
+For government and other highly regulated environments, Langfuse Self-Hosted Government offers a FIPS mode that runs on FIPS 140-3 validated cryptographic modules and hardened images built on Iron Bank's Red Hat UBI 9.
+
+→ [Read more](/self-hosting/configuration/hardening)
+
+→ [Talk to us](/talk-to-us)
+
+## New integrations
+
+- Claude Platform: trace the Messages API and Managed Agents with native OpenTelemetry export ([docs](/integrations/model-providers/claude-platform))
+- Cursor: trace Cursor agent sessions, including prompts, tool calls, subagents, and token usage ([docs](/integrations/developer-tools/cursor))
+- Slack: The Langfuse Slack app is now listed in the Slack Marketplace and lets you get notified for alerts or prompt changes ([changelog](/changelog/2026-10-30-slack-marketplace))
+
+## Fixes & improvements
+
+- Feat: The Experiments page now shows the trade-off between quality, cost, and latency across your runs ([changelog](/changelog/2026-10-19-experiments))
+- Feat: Configure LLM connections once at the organization level and share them with every project; a project connection with the same name takes precedence ([changelog](/changelog/2026-10-14-organization-llm-connections))
+- Feat: Usage breakdown chart by project or type with CSV export, on the Billing page on Cloud and a new Usage page when self-hosting ([changelog](/changelog/2026-10-06-organization-usage-breakdown))
+- Data: Scheduled blob storage exports can include score metadata and provenance, such as the evaluator, annotation queue, and execution trace behind each score ([changelog](/changelog/2026-10-22-blob-storage-score-field-groups))
+- Data: Google Cloud Storage as an export target, with a service account key or ADC ([docs](/docs/api-and-data-platform/features/export-to-blob-storage))
+- Cost: Prompt cache hit rate shown on traces ([v4.60.0](https://github.com/langfuse/langfuse/releases/tag/v4.60.0))
+- UX: Cmd+K jumps to prompts, datasets, annotation queues, and evaluators, and offers create actions and recent picks ([v4.70.0](https://github.com/langfuse/langfuse/releases/tag/v4.70.0))
+- API: `POST /api/public/scores` accepts batches ([v4.55.0](https://github.com/langfuse/langfuse/releases/tag/v4.55.0))
+- Evals: Evaluator gallery restyled with score previews; evaluator status shows seven-day execution health ([v4.60.0](https://github.com/langfuse/langfuse/releases/tag/v4.60.0))
+- Self-hosting: Outbound host allowlists for LLM connections, webhooks, media, and blob storage endpoints ([docs](/self-hosting/configuration/hardening#outbound-url-allowlists))
+- Self-hosting: Guide to export application logs to ClickStack ([docs](/guides/export-self-hosted-langfuse-logs-to-clickstack))
+- and many more!
+
+## Blog
+
+- [How we built Halo](/blog/2026-10-21-building-the-langfuse-assistant): Ben on building our in-app assistant on the MCP server, why the agent runs outside its sandbox, and how background runs work
+- [Customer story: DKB](/users/dkb): how DKB keeps an AI banking assistant for around 6 million customers accurate and compliant with self-hosted Langfuse, with engineers and customer service experts working in the same place
+- Two guides for platform teams: [Provisioning and governing Langfuse across teams](/blog/2026-10-22-provisioning-and-governing-langfuse-across-teams) and [Operating Langfuse as an internal service](/blog/2026-10-22-operating-langfuse-as-an-internal-service)
+
+## Reminder: Langfuse v4 cutover on November 16
+
+Langfuse Cloud becomes v4-only on November 16, 2026. Open the Migration Assistant in the sidebar; if it lists required actions for your project, finish them before the cutover.
+
+→ [Upgrade guide](/faq/all/upgrade-to-langfuse-v4)

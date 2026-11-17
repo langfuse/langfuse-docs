@@ -11,6 +11,8 @@ The filter search bar lets you filter and search the Observations and Traces tab
 <Video
   src="https://static.langfuse.com/docs-videos/2026-06-19-filter-search-bar.mp4"
   aspectRatio={16 / 9}
+  title="Filter with the search bar"
+  description="Tracing page, search bar above the table. Type “level:” and pick WARNING from the observed values, add “metadata.scenario” with the value refund-request from the suggestions, then run a full-text search for “Happy to help” scoped to output. Each filter shows as a chip and narrows the table; clearing the bar restores the unfiltered table."
 />
 
 ```
@@ -113,8 +115,8 @@ If you don't know a project's field names yet, click **Ask AI**, describe the fi
 <Callout type="info">
   Ask AI is in beta and **off by default**, until an organization owner or admin
   [enables it](/security/ai-features). On self-hosted deployments it uses the
-  same instance Langfuse AI model as the Assistant, see [self-hosted Assistant
-  setup](/self-hosting/configuration/langfuse-assistant).
+  same instance Langfuse AI model as [Halo](/docs/api-and-data-platform/features/halo), see [self-hosted Halo
+  setup](/self-hosting/configuration/halo).
 </Callout>
 
 Ask AI is **project-aware**: the request carries a compact, client-side snapshot of the columns, values, and metadata keys already loaded in the table, so natural language maps to your project's real schema rather than a generic guess. "enterprise customers in the membership-support queue", for example, resolves to the actual `metadata.*` keys your traces use.
