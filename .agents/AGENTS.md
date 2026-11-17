@@ -47,6 +47,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - **Blog**: `content/blog/`
 - **Guides**: `content/guides/`
 - **FAQ**: `content/faq/`
+- **Handbook**: `content/handbook/`
 
 ## Important workflow rules
 
@@ -117,6 +118,8 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines
 
+Handbook pages in `content/handbook/` are internal company docs, separate from customer-facing product docs. The Documentation pages rules and the docs-oriented review checks (sentence case, troubleshooting-in-FAQ, opening visual, product-area page shape) do not apply to them. CI checks (format, H1, middle dot) still do.
+
 - Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
 - Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
@@ -126,7 +129,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ### Documentation pages
 
-These rules cover pages in `content/docs/` and integration guides in `content/integrations/`.
+These rules cover customer-facing product docs: pages in `content/docs/` and integration guides in `content/integrations/`. They do not apply to handbook pages in `content/handbook/`, which are internal company docs and keep their own structure, titles, and inline procedures.
 
 #### Where content belongs
 
@@ -134,7 +137,7 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 - **Overview** pages get readers excited about the product area and make clear why it is valuable to them. Use a short intro on the problem it solves and the value it adds, a list of capabilities that each link to their feature page, and a "Getting started" section near the end that links to the get-started guides, split by role when admins and users follow different guides. Leave anything that doesn't help the reader see that value, such as request formats, credentials, limitations, availability, pricing, and lists of next steps, to deeper pages.
 - **Concepts** pages explain how the product works at a high level: its components, the request or data flow, and the objects readers configure. Give each major concept a diagram or a table, and answer the questions a newcomer asks first, such as where the product runs and who sets it up. Keep the page conceptual: for configuration, options, and other details, link to the feature page that covers them instead of explaining them here. Leave out implementation details that don't change what the reader does.
 - **Feature** pages open with one or two sentences on what the feature does, who can use it, and where to find it in the UI, followed by a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`. Put long reference lists, such as every recorded field or response header, in a `<Details>` block whose `<Summary>` names the content. Put optional deep-dive topics in a closing `## FAQ` section that wraps question-titled `<Details>` blocks in `<FaqDetails>`.
-- **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. Link an individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`, only when the integration is a prominent Langfuse feature in its own right, such as the PostHog and Mixpanel exports under Metrics. This is almost never the case. When the tool already has an integration page for another Langfuse product area, extend that page; one longer page is often the better choice. Add a sibling page only when the two product areas are very different, such as AI Gateway and Prompt Management. For example, `claude-code-gateway.mdx` (AI Gateway) sits next to `claude-code.mdx` (Observability).
+- **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. Link an individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`, only when the integration is a prominent Langfuse feature in its own right, such as the PostHog and Mixpanel exports under Metrics. This is almost never the case. When the tool already has an integration page for another Langfuse product area, extend that page; one longer page is often the better choice. Add a sibling page only when the two product areas are very different, such as AI Gateway and Prompt Management. For example, `claude-code-gateway.mdx` (AI Gateway) sits next to `claude-code.mdx` (Observability). Integration pages do not need an opening screenshot or video after the intro. Put visuals with the example they illustrate, such as next to a "View the trace in Langfuse" step.
 - **API reference** pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses.
 - **Troubleshooting** content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. Feature, get-started, and self-hosting pages link to those FAQ pages instead of keeping their own troubleshooting sections.
 
@@ -187,14 +190,14 @@ Changelog entries live in `content/changelog/`.
 
 ## Review guidelines
 
-Please check the following:
+Please check the following. Skip the Documentation pages rules and the docs-oriented checks (sentence case, troubleshooting-in-FAQ, opening visual, product-area page shape) for handbook pages in `content/handbook/`.
 
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
 - Flag any middle dot (U+00B7) used as a separator, including in UI strings and code.
 - Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
 - When documentation is added or expanded, do not repeat the same information on a page or across a product area's pages. Each fact or explanation should appear once; other sections and pages link to it instead of restating it. Overview, Concepts, and Get started pages may summarize a feature in a sentence or a short table before linking to it.
-- Check new or edited docs pages against the "Documentation pages" rules under Writing guidelines. In addition:
+- Check new or edited pages in `content/docs/` and `content/integrations/` against the "Documentation pages" rules under Writing guidelines. In addition:
   - Read the page as a first-time reader. Flag references the reader can't resolve, headings the section doesn't deliver on, lists without context, and obvious newcomer questions the page leaves open, such as where the product runs or who sets it up.
   - For each sentence, ask whether the reader would miss it if it were gone. Suggest cutting sentences that fail this test instead of rewording them.
   - Compare the page with its equivalent in another product area and flag structural differences, such as a missing "Getting started" or "Not seeing what you expected?" section, or troubleshooting kept inline instead of in FAQ pages.
@@ -211,7 +214,7 @@ Please check the following:
 - Order sections by audience. Flag a new or edited page that leads with optional, advanced, or edge-case details (for example a custom endpoint or extra headers) ahead of the sections most readers of that page need (for example managing models or choosing a model ID).
 - Flag examples that hard-code a regional Cloud or gateway URL without in-snippet comments that name EU and list the other region URLs. A sentence after the snippet that only names the region and links to another page is not enough. Copy the comment shape from `components-mdx/env-python.mdx` or, for gateway hosts, from [Send your first request](/docs/gateway/get-started/first-request).
 - When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
-- Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
+- Every page in `content/docs/` should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited `content/docs/` pages that have no opening visual. Integration pages in `content/integrations/` do not need an opening visual; put screenshots with the example they illustrate. Do not flag handbook pages for a missing opening visual.
 - When a PR adds or edits a changelog entry in `content/changelog/`, flag it if the intro is not immediately followed by 2-3 concrete example use cases, or if a UI change has no screenshot or `.mp4` video that readers see on the page. Frontmatter `ogImage` / `ogVideo` counts only when `showOgInHeader` is not `false`; if that flag is `false`, the visual must be in the body. A one-sentence changelog that only restates the title and links to docs is incomplete. Flag the changelog even when the rest of the PR (docs, code samples) is complete. Do not invent screenshots or other visuals to fill the gap; flag the missing visual so a maintainer can add it.
 - Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
 - Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
