@@ -2,8 +2,11 @@
 title: "Trace Eden AI with Langfuse"
 sidebarTitle: Eden AI
 logo: /images/integrations/edenai_icon.svg
+logoAppearance: dark
 description: "Learn how to trace Eden AI calls with Langfuse using the OpenAI SDK wrapper."
 ---
+
+import AiGatewayCallout from "@/components-mdx/ai-gateway-callout.mdx";
 
 # Eden AI Integration
 
@@ -11,7 +14,9 @@ In this guide, we'll show you how to integrate [Langfuse](/) with [Eden AI](http
 
 > **What is Eden AI?** [Eden AI](https://www.edenai.co/) is a European unified API that gives you access to models from many providers (Mistral, OpenAI, Anthropic, Google, Cohere, DeepSeek, and more) through a single OpenAI-compatible endpoint and one API key. It also offers a dedicated EU endpoint with GDPR-aligned data handling, which is useful for teams with European data-residency requirements.
 
-> **What is Langfuse?** [Langfuse](/) is an open source AI engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications.
+> **What is Langfuse?** [Langfuse](/) is an open source AI engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+<AiGatewayCallout />
 
 Because Eden AI exposes an OpenAI-compatible API, you can trace it with the [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py), available in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js). The wrapper automatically logs every Eden AI call as a generation in Langfuse, with support for nested tracing, custom metadata, and full control over trace data.
 
@@ -40,7 +45,7 @@ os.environ["EDENAI_API_KEY"] = "<YOUR_EDEN_AI_API_KEY>"
 Since Eden AI provides an OpenAI-compatible API, we can use the [Langfuse OpenAI SDK wrapper](/integrations/model-providers/openai-py) to automatically log Eden AI calls as generations in Langfuse.
 
 - The `base_url` is set to Eden AI's endpoint, `https://api.edenai.run/v3`.
-- Models are namespaced by their underlying provider, e.g. `mistral/mistral-small-latest` or `openai/gpt-5-mini`. See the [Eden AI documentation](https://www.edenai.co/docs) for the full list.
+- Models are addressed by their plain name, e.g. `mistral-large-4` or `claude-haiku-5.5`, and Eden AI routes the call to the underlying provider. Call `GET /v3/models` or see the [Eden AI documentation](https://www.edenai.co/docs) for the full list.
 
 ```python
 # Import the Langfuse OpenAI SDK wrapper
@@ -54,7 +59,7 @@ client = openai.OpenAI(
 
 # Make a chat completion request
 response = client.chat.completions.create(
-    model="mistral/mistral-small-latest",
+    model="mistral-large-4",
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "Tell me a fun fact about space."},
@@ -104,7 +109,7 @@ def analyze_text(text: str):
 @observe()  # Nested function to be traced
 def summarize_text(text: str):
     return client.chat.completions.create(
-        model="mistral/mistral-small-latest",
+        model="mistral-large-4",
         messages=[
             {"role": "system", "content": "You summarize texts in a concise manner."},
             {"role": "user", "content": f"Summarize the following text:\n{text}"},
@@ -115,7 +120,7 @@ def summarize_text(text: str):
 @observe()  # Nested function to be traced
 def analyze_sentiment(summary: str):
     return client.chat.completions.create(
-        model="openai/gpt-5-mini",
+        model="claude-haiku-5.5",
         messages=[
             {"role": "system", "content": "You analyze the sentiment of texts."},
             {"role": "user", "content": f"Analyze the sentiment of the following summary:\n{summary}"},
@@ -143,7 +148,7 @@ The EU endpoint serves the subset of the catalog that is available in the EU, so
 
 ## Cost Tracking
 
-Langfuse captures the token usage returned by Eden AI for each call. To attribute a monetary [cost](/docs/observability/features/token-and-cost-tracking) to those tokens, make sure the model you use is defined in your Langfuse [model list](/docs/observability/features/token-and-cost-tracking#custom-model-definitions). You can add a custom model definition (matching the Eden AI model name, e.g. `mistral/mistral-small-latest`) with its per-token prices so Langfuse computes cost automatically.
+Langfuse captures the token usage returned by Eden AI for each call. To attribute a monetary [cost](/docs/observability/features/token-and-cost-tracking) to those tokens, make sure the model you use is defined in your Langfuse [model list](/docs/observability/features/token-and-cost-tracking#custom-model-definitions). You can add a custom model definition (matching the Eden AI model name, e.g. `mistral-large-4`) with its per-token prices so Langfuse computes cost automatically.
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
