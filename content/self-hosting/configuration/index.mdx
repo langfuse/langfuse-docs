@@ -89,7 +89,11 @@ Langfuse (self-hosted) has extensive configuration options via environment varia
 
 ## IAM role authentication for customer S3 [#cross-account-role]
 
-On self-hosted Enterprise, Langfuse can assume an intermediate IAM role, then assume a role in the customer's AWS account. Use this for [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth) and [External Media Storage](/docs/observability/features/multi-modality#external-s3-media) instead of storing access keys. Configure the variable on both the web and worker containers. If it is unset, the IAM role option is hidden.
+On self-hosted Enterprise, Langfuse can assume an intermediate IAM role, then assume a role in the customer's AWS account. Use this for [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth) and [External Media Storage](/docs/observability/features/multi-modality#external-s3-media) instead of storing access keys. Configure the variable on both the web and worker containers.
+
+<Callout type="info">
+  If `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` is unset, the IAM role option is hidden.
+</Callout>
 
 The IAM role the Langfuse containers use to access Langfuse's own buckets is documented on the [blob storage](/self-hosting/deployment/infrastructure/blobstorage#amazon-s3) page. `LANGFUSE_CROSS_ACCOUNT_ROLE_ARN` is a separate intermediate role that customer storage roles trust.
 
