@@ -78,12 +78,12 @@ function EventCard({ event }: { event: LumaEvent }) {
 
       <div className="flex min-h-[154px] flex-1 flex-col p-4">
         <div className="mb-3 flex flex-wrap items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.06em] text-text-tertiary">
-          <span>{event.format === "virtual" ? "Virtual" : "In person"}</span>
+          <span>
+            {event.format === "virtual" ? "Virtual" : "In person"}
+            {showLocation ? "," : null}
+          </span>
           {showLocation ? (
-            <>
-              <span aria-hidden>·</span>
-              <span className="truncate">{event.locationLabel}</span>
-            </>
+            <span className="truncate">{event.locationLabel}</span>
           ) : null}
         </div>
         <h3 className="text-left font-analog text-[19px] font-medium leading-[1.2] text-text-primary">
@@ -101,7 +101,7 @@ function EventCard({ event }: { event: LumaEvent }) {
               </span>
             </div>
             <span className="pb-1 text-[12px] text-text-tertiary">
-              {weekday} · {time}
+              {weekday}, {time}
             </span>
           </div>
           <span className="shrink-0 text-[12px] font-[450] text-text-secondary underline-offset-2 group-hover:text-text-primary group-hover:underline">

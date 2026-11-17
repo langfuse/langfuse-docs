@@ -14,8 +14,14 @@ const {
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 const { hasResourceSignupCta } = require("../lib/resource-signup-cta.js");
 const {
+  injectIntegrationSignupCta,
+} = require("../lib/integration-signup-cta.js");
+const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
+const {
+  interpolateImportedMdxProps,
+} = require("../lib/inline-components-mdx-props.js");
 
 const SITE_URL = "https://langfuse.com";
 
@@ -36,13 +42,8 @@ const SELF_HOSTING_FOOTER_PATH = path.join(
 // API / SDK reference for implementation. See CHANGELOG_AGENT_NOTICE below.
 const CHANGELOG_URL_PREFIX = "changelog";
 
-// Legal and policy pages are human- and compliance-facing artifacts, not part
-// of the agent docs surface. A privacy policy whose last section is curl
-// examples, MCP connection details, and "found an error? open a GitHub issue"
-// reads as a copy-paste error to anyone who scrolls to the end — and these are
-// exactly the pages that expose a "download as PDF" link. The PDF route strips
-// the footer as a second line of defense (app/api/md-to-pdf/route.ts), but
-// these pages should never carry it in the first place.
+// Legal and policy pages exclude the agent footer's curl examples, MCP
+// connection details, and GitHub feedback instructions.
 const AGENT_FOOTER_EXCLUDED_PAGES = new Set(["privacy.md", "cookie-policy.md"]);
 
 /**
@@ -110,7 +111,11 @@ function appendAgentInstructionsFooter(markdown, destRel) {
 
 // Mirror layout-level CTAs before appending the Markdown-only agent footer.
 // Also applies to Markdown overrides and notebook-generated resource pages.
-function appendPageFooters(markdown, destRel) {
+// Integration pages get the same banner the LangChain page renders after the
+// intro. `sourceHasSignupCta` skips pages whose MDX already includes it, so
+// the component renderer and this injector do not both emit the line.
+function appendPageFooters(markdown, destRel, options) {
+  markdown = injectIntegrationSignupCta(markdown, destRel, options);
   const pathname = `/${destRel.replace(/\.md$/, "")}`;
   if (hasResourceSignupCta(pathname)) {
     const cta = replaceComponentsWithMarkdown("<SignupCTA />").trim();
@@ -207,9 +212,7 @@ function copyAll() {
     const inlined = replaceComponentsWithMarkdown(
       inlineComponentsMdx(contentWithSharedFooter, file),
     );
-    let processed = stripMdxForPlainMarkdown(inlined, {
-      unwrapCalloutsForPlainMd: true,
-    });
+    let processed = stripMdxForPlainMarkdown(inlined);
 
     // For changelog entries, prepend an AI-agent notice so models use the page
     // to confirm a feature exists rather than copying release-time examples.
@@ -220,7 +223,9 @@ function copyAll() {
       processed = injectChangelogAgentNotice(processed, originalContent);
     }
 
-    processed = appendPageFooters(processed, destRel);
+    processed = appendPageFooters(processed, destRel, {
+      sourceHasSignupCta: /<SignupCTA\b/.test(originalContent),
+    });
 
     fs.writeFileSync(dest, processed, "utf8");
     copied += 1;
@@ -339,8 +344,12 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
         "g",
       );
 
-      finalContent = finalContent.replace(selfClosing, `\n${childInlined}\n`);
-      finalContent = finalContent.replace(paired, `\n${childInlined}\n`);
+      finalContent = finalContent.replace(selfClosing, (_, attrs) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, "")}\n`;
+      });
+      finalContent = finalContent.replace(paired, (_, attrs, children) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, children)}\n`;
+      });
     }
 
     return finalContent;

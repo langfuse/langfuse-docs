@@ -98,18 +98,6 @@ const nextConfig = {
   },
   transpilePackages: ["react-tweet", "react-syntax-highlighter", "geist"],
 
-  // Sparticuz Chromium ships brotli-compressed binaries under `bin/`; Next's file tracer
-  // often omits them from the serverless bundle, breaking `executablePath()` on Vercel.
-  // Keys are matched with picomatch against normalized app routes (e.g. `/app/api/md-to-pdf`
-  // matches `/api/md-to-pdf` via `contains: true`).
-  outputFileTracingIncludes: {
-    "/api/md-to-pdf": [
-      "./lib/stripMdxForPlainMarkdown.js",
-      "./node_modules/@sparticuz/chromium/**",
-      "./node_modules/.pnpm/@sparticuz+chromium@*/node_modules/@sparticuz/chromium/**",
-    ],
-  },
-
   webpack(config, { isServer, webpack }) {
     config.resolve = config.resolve ?? {};
     // Prevent recharts (and its exclusive deps: redux toolkit, immer, etc.) from

@@ -428,7 +428,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Proxy-based Logging (via LiteLLM)",
+        name: "Proxy-based Logging (via Langfuse AI Gateway, LiteLLM, etc.)",
         href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -508,6 +508,23 @@ const sections: Section[] = [
           },
           selfHosted: {
             "Open Source": true,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "External media storage (S3)",
+        href: "/docs/observability/features/multi-modality#external-s3-media",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
             Enterprise: true,
             Government: true,
           },
@@ -941,6 +958,23 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "AI Gateway",
+    href: "/docs/gateway/overview",
+    features: [
+      {
+        name: "AI Gateway",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "API",
     href: "/docs/api-and-data-platform/features/public-api",
     features: [
@@ -1314,15 +1348,16 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Response time SLO",
+        name: "Response time SLO (Severity 1)",
+        href: "https://clickhouse.com/legal/support-services-policy",
         description:
-          "Target response time for support requests via supported channels",
+          "Target initial response time for critical production issues. The 1-hour target applies 24/7 to committed Enterprise customers.",
         tiers: {
           cloud: {
-            Hobby: "n/a",
-            Core: "48h",
-            Pro: "48h, Teams add-on: 24h",
-            Enterprise: "Custom",
+            Hobby: "Best effort",
+            Core: "Best effort",
+            Pro: "Best effort",
+            Enterprise: "Committed: 1h (24/7); pay-as-you-go: Best effort",
           },
         },
       },
@@ -1559,6 +1594,23 @@ const sections: Section[] = [
         },
       },
       {
+        name: "IAM role authentication for Amazon S3",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
@@ -1644,8 +1696,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "Monthly",
-            Pro: "Monthly",
+            Core: "Monthly or " + YEARLY_COMMITMENT,
+            Pro: "Monthly or " + YEARLY_COMMITMENT,
             Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
@@ -1660,8 +1712,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
+            Core: YEARLY_COMMITMENT,
+            Pro: YEARLY_COMMITMENT,
             Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
@@ -1818,8 +1870,7 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available when committing to a yearly contract on the Enterprise
-              plan.
+              Available when committing to a yearly contract.
             </HoverCardContent>
           </HoverCard>
         )}

@@ -4,7 +4,7 @@ import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { MediaPlayer, MediaProvider } from "@vidstack/react";
 import "@vidstack/react/player/styles/base.css";
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 
 // Vidstack types mediaProps as HTMLAttributes<HTMLMediaElement>, which
 // omits video-only playsInline. Cast so the attributes still land on
@@ -13,6 +13,53 @@ const INLINE_MEDIA_PROPS = {
   playsInline: true,
   "webkit-playsinline": "",
 } as HTMLAttributes<HTMLMediaElement>;
+
+function LoopingVideo({
+  src,
+  poster,
+  aspectRatio,
+  className,
+  onCanPlay,
+  title,
+  describedBy,
+}: {
+  src: string;
+  poster?: string;
+  aspectRatio?: number;
+  className?: string;
+  onCanPlay?: () => void;
+  title?: string;
+  describedBy?: string;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  // React sets `muted` as a property after the element is created, so the
+  // browser's own autoplay check sees an unmuted video and refuses to start it.
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    video.muted = true;
+    video.play().catch(() => {});
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      poster={poster}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      aria-label={title}
+      aria-describedby={describedBy}
+      style={aspectRatio ? { aspectRatio: `${aspectRatio}` } : undefined}
+      className={cn("mx-auto block w-full", className)}
+      onCanPlay={onCanPlay}
+    />
+  );
+}
 
 /**
  * `title` and `description` say what the video shows in the UI. They give the
@@ -31,6 +78,7 @@ export const Video = ({
   onCanPlay,
   title,
   description,
+  controls = true,
 }: {
   src: string;
   aspectRatio?: number;
@@ -42,8 +90,33 @@ export const Video = ({
   onCanPlay?: () => void;
   title?: string;
   description?: string;
+  /**
+   * Set to false for short, silent product loops that should read as part of
+   * the page: renders a bare native <video> that autoplays muted on a loop.
+   */
+  controls?: boolean;
 }) => {
   const descriptionId = useId();
+  if (!controls) {
+    return (
+      <>
+        <LoopingVideo
+          src={src}
+          poster={poster}
+          aspectRatio={aspectRatio}
+          className={className}
+          onCanPlay={onCanPlay}
+          title={title}
+          describedBy={description ? descriptionId : undefined}
+        />
+        {description ? (
+          <p id={descriptionId} className="sr-only">
+            {description}
+          </p>
+        ) : null}
+      </>
+    );
+  }
   return (
     <>
       <MediaPlayer

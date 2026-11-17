@@ -1,0 +1,25 @@
+---
+title: Does Langfuse support OpenTelemetry logs, metrics, or span links?
+seoTitle: "OpenTelemetry Signals Supported by Langfuse"
+description: Langfuse ingests OpenTelemetry traces over OTLP/HTTP. OTel logs and metrics are not ingested, and span links are not displayed.
+tags: [observability, opentelemetry, integration]
+---
+
+# Does Langfuse support OpenTelemetry logs, metrics, or span links?
+
+Langfuse ingests **traces only**, at `/api/public/otel/v1/traces` over OTLP/HTTP with protobuf or JSON payloads. gRPC is not supported.
+
+| Signal                             | Supported                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Traces (spans, attributes, events) | Yes                                                                                                     |
+| Metrics                            | No. `/api/public/otel/v1/metrics` accepts requests so exporters do not fail, but the data is discarded. |
+| Logs                               | No. There is no logs endpoint.                                                                          |
+| Span links                         | No. Links on spans are ignored during ingestion and are not shown in the UI.                            |
+
+Any language with an OpenTelemetry SDK, for example Java, Go, or .NET, can send traces to Langfuse with an OTLP/HTTP exporter. To show token usage, cost, and model information, set the attributes described in [OpenTelemetry](/integrations/native/opentelemetry). Langfuse calculates metrics such as cost and latency from the ingested traces; see [Metrics](/docs/metrics/overview).
+
+## Send logs and metrics to ClickStack
+
+For OpenTelemetry logs and metrics, use [ClickStack](https://clickhouse.com/clickstack), the open-source observability stack built on ClickHouse. ClickStack ingests logs, metrics, and traces for operational monitoring, while Langfuse focuses on inspecting, evaluating, and improving your AI application.
+
+Both accept OpenTelemetry, so you can export the same traces to Langfuse and ClickStack and keep sending logs and metrics to ClickStack only. See [Langfuse and ClickStack](/integrations/clickhouse/observability) for the setup.
