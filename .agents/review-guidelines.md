@@ -14,13 +14,14 @@ Writing rules these checks use: [AGENTS.md](AGENTS.md).
 
 ### Necessity
 
+Apply this test to prose, examples, callouts, tables, and new pages.
+
 - Keep a fact only when a reader with that screen open still could not know it.
 - Also cut every category in [Cut what the reader doesn't need](AGENTS.md#cut-what-the-reader-doesnt-need).
 - Cut catalogs the open screen already shows, such as model definitions, options, and providers.
 - A reference the screen does not show, such as recorded fields or response headers, stays in a `<Details>` block.
 - Cut toggles, button names, and on-screen steps, such as turning a model off.
 - Cut a prose list when a screenshot on the page already shows it.
-- Apply this test to prose, examples, callouts, tables, and new pages.
 - Flag a versioned model name, or a list of today's providers, in an intro, heading, or step-by-step guide, unless the page is about that model or provider. Prefer "your model" or "a connection".
 - Flag provider-specific setup that restates the UI. A short note belongs at the bottom of the feature page. A longer one belongs in a linked FAQ.
 
