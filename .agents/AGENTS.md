@@ -188,7 +188,7 @@ Changelog entries live in `content/changelog/`.
 
 ## Review guidelines
 
-Please check the following. Skip the Documentation pages rules and the docs-oriented checks (sentence case, troubleshooting-in-FAQ, opening visual, product-area page shape) for handbook pages in `content/handbook/`.
+Please check the following:
 
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
