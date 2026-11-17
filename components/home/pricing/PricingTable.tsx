@@ -38,7 +38,7 @@ const GraduatedPricingText = () => {
   return (
     <>
       $8/100k units. Lower with volume (
-      <Link href="#pricing-calculator" className="underline hover:text-primary">
+      <Link href="https://langfuse.com/pricing#pricing-calculator" className="underline hover:text-primary">
         pricing calculator
       </Link>
       )
