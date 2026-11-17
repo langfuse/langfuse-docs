@@ -60,28 +60,24 @@ const HALO_USE_CASES = [
   },
 ];
 
-function ToolCard({ tool, index }: { tool: ToolItem; index: number }) {
+function ToolCard({ tool }: { tool: ToolItem }) {
   return (
     <CornerBox
       hoverStripes
       className="flex h-full min-h-[180px] flex-col gap-4 p-4 sm:p-5"
     >
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] tracking-[-0.2px] text-text-tertiary">
-          0{index + 1}
-        </span>
-        <span className="rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
-          {tool.eyebrow}
-        </span>
-      </div>
-
       <div className="flex flex-col gap-1.5">
-        <Link
-          href={tool.href}
-          className="text-left text-[17px] font-medium text-text-primary"
-        >
-          {tool.title}
-        </Link>
+        <div className="flex items-start justify-between gap-3">
+          <Link
+            href={tool.href}
+            className="text-left text-[17px] font-medium text-text-primary"
+          >
+            {tool.title}
+          </Link>
+          <span className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
+            {tool.eyebrow}
+          </span>
+        </div>
         <Text size="s" className="max-w-[38ch] text-left">
           {tool.description}
         </Text>
@@ -139,20 +135,16 @@ function HaloFeature() {
   return (
     <CornerBox className="flex flex-col overflow-hidden">
       <div className="flex flex-col gap-5 p-4 sm:p-6">
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-[10px] tracking-[-0.2px] text-text-tertiary">
-            00
-          </span>
-          <span className="rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
-            In-app
-          </span>
-        </div>
-
-        <div className="flex max-w-[58ch] flex-col gap-3">
-          <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
-            <Link href={HALO_HREF}>Halo</Link>, the Langfuse Assistant
-          </h3>
-          <Text className="text-left">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-left font-sans text-[17px] font-medium text-text-primary">
+              <Link href={HALO_HREF}>Halo</Link>, the Langfuse Assistant
+            </h3>
+            <span className="shrink-0 rounded-[2px] border border-line-structure bg-surface-1 px-2 py-0.5 font-sans text-[11px] text-text-tertiary">
+              In-app
+            </span>
+          </div>
+          <Text className="max-w-[58ch] text-left">
             Automate the AI engineering loop: investigate production data,
             understand what happened, and turn findings into approved actions
             without leaving Langfuse.
@@ -231,7 +223,7 @@ export const DeveloperTools = () => {
                     : "-mt-px sm:-ml-px lg:-ml-px"
                 }
               >
-                <ToolCard tool={tool} index={index} />
+                <ToolCard tool={tool} />
               </div>
             ))}
           </div>

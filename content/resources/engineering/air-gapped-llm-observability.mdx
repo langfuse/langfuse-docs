@@ -1,0 +1,107 @@
+---
+title: "Air-gapped LLM observability for government and regulated environments"
+description: "Run Langfuse without internet access: self-hosting in isolated networks, FIPS 140-3 mode, Iron Bank-hardened images, no telemetry, and what still needs a model endpoint."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+# Air-gapped LLM observability for government and regulated environments
+
+Government agencies, defense contractors, and some banks run AI systems in networks that can't reach the internet. Their observability tooling has to work under the same rules: no outbound connections, no vendor-operated services, and cryptography that passes a security assessment. Langfuse is open source and self-hostable, and it does not require internet access, so it can run inside such networks.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** [Self-host Langfuse](/self-hosting) inside the isolated network, with its dependencies (Postgres, ClickHouse, Redis, S3-compatible storage) running there too. Langfuse does not require internet access. The **Langfuse Government** license adds [FIPS mode](/self-hosting/configuration/fips-mode), which runs Langfuse's cryptography on FIPS 140-3 validated modules in approved mode, images built on Iron Bank's hardened UBI 9, and no telemetry. Features that call a model, such as LLM-as-a-Judge and the Playground, need a model endpoint reachable inside the network.
+
+<ArchitectureDiagram />
+
+## What runs where [#components]
+
+Every component of a Langfuse deployment can run in your network:
+
+| Component                 | In an isolated network                                            |
+| ------------------------- | ----------------------------------------------------------------- |
+| Langfuse Web and Worker   | Container images mirrored to your internal registry               |
+| Postgres, Redis or Valkey | Self-managed or a managed service available in your environment   |
+| ClickHouse                | Self-managed, for example with the ClickHouse Kubernetes Operator |
+| Blob storage              | Any S3-compatible store inside the network                        |
+| SDKs and OpenTelemetry    | Your applications send traces to the internal Langfuse URL        |
+| LLM API for evaluations   | Optional; a model endpoint inside the network or a peered VPC     |
+
+Langfuse checks a cached GitHub API for new releases. Without internet access, that check fails gracefully. See [networking](/self-hosting/security/networking) and the [list of hostnames Langfuse contacts](/self-hosting/security/telemetry#hostnames), which you can use to configure an egress firewall.
+
+## Langfuse Government [#government]
+
+The Government license, a key starting with `lf_gov_`, includes everything in Enterprise and adds:
+
+- **FIPS mode.** Langfuse runs its cryptography on FIPS 140-3 validated modules operated in approved mode, and refuses to start when it can't. It is available from Langfuse v4.71.0. See [FIPS mode](/self-hosting/configuration/fips-mode).
+- **Hardened images.** From v4.55.0, the web and worker images are built on Iron Bank's hardened Red Hat UBI 9, run as a non-root user, and ship no package manager, `curl`, or Python. See [hardened images](/self-hosting/configuration/hardening#hardened-images).
+- **No telemetry.** Deployments with a Government license send no telemetry to Langfuse, whatever `TELEMETRY_ENABLED` is set to.
+
+<Callout type="warning">
+  Langfuse holds no FIPS 140-3 certificate of its own. The Cryptographic
+  Module Validation Program validates modules, not products, and Langfuse uses
+  validated modules in approved mode. The host must boot in FIPS mode, and you
+  are responsible for running Postgres, ClickHouse, Redis, blob storage, and
+  TLS termination with validated modules. End-to-end documentation for a
+  complete air-gapped stack is still in progress, as of November 2026. [Talk
+  to us](/talk-to-us?deployment=self-hosted) about your requirements.
+</Callout>
+
+## What needs a model endpoint [#model-endpoint]
+
+Tracing, prompt management, datasets, dashboards, annotation queues, and scores from your own code work without any model access. These features call a model and need an [LLM connection](/self-hosting/deployment/infrastructure/llm-api) that is reachable inside the network:
+
+- [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators.
+- The [Playground](/docs/prompt-management/features/playground) and prompt experiments.
+- [Halo](/self-hosting/configuration/halo), which needs an instance-wide model.
+
+LLM connections accept a custom base URL, so an internally hosted model behind an OpenAI-compatible API can power them. Langfuse blocks private IP ranges for these URLs by default, so allow the internal host with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST` or a related variable. See [blocked IP addresses](/docs/administration/llm-connection#blocked-ip-address). [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score traces without calling a model.
+
+<Callout type="info">
+  The self-hosted Langfuse AI Gateway ignores egress proxies, so it can't
+  reach public provider APIs from an isolated network. It can route to an
+  internal OpenAI- or Anthropic-compatible endpoint through a [custom base
+  URL](/docs/gateway/features/models#custom-base-url), once its host is
+  allowed on web and the gateway. See [self-host an open source AI
+  gateway](/resources/engineering/self-hosted-ai-gateway).
+</Callout>
+
+## Hardening checklist [#hardening]
+
+- [ ] Mirror the Langfuse images to your internal registry, or [build them yourself](/self-hosting/deployment/infrastructure/containers#build-from-source).
+- [ ] Disable open sign-up and enforce SSO with your identity provider. See [hardening](/self-hosting/configuration/hardening#access).
+- [ ] Use `scram-sha-256` authentication on Postgres when running in FIPS mode.
+- [ ] Keep databases on private networks, and expose only the web container. See [network exposure](/self-hosting/configuration/hardening#network-exposure).
+- [ ] Turn on [audit logs](/docs/administration/audit-logs) and [data retention](/docs/administration/data-retention), both included in Enterprise and Government.
+
+For the full go-live list, see the [production checklist for self-hosted Langfuse](/resources/engineering/self-hosted-langfuse-production-checklist).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="internet-required">
+<Summary>Does Langfuse need internet access?</Summary>
+
+No. Langfuse does not require internet access. The release check fails gracefully, and OSS telemetry can be turned off with `TELEMETRY_ENABLED=false`. Government deployments send no telemetry.
+
+</Details>
+
+<Details id="fedramp">
+<Summary>Is Langfuse FedRAMP authorized?</Summary>
+
+FedRAMP authorizes cloud services. Langfuse Government is self-hosted software that runs in your own authorized environment, so it becomes part of your system's authorization boundary. For the certifications of Langfuse Cloud, see the [security page](/security).
+
+</Details>
+
+<Details id="arm64">
+<Summary>Are the hardened images available for arm64?</Summary>
+
+Yes, the images are published for `linux/amd64` and `linux/arm64`. The FIPS certificate's tested environments list Red Hat Enterprise Linux 9 on x86_64 and IBM platforms, so confirm other hosts and arm64 with your assessor.
+
+</Details>
+
+</FaqDetails>

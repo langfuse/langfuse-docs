@@ -46,8 +46,11 @@ const textButtonBaseClasses =
 const buttonBaseClasses =
   "inline-flex w-full min-w-0 max-w-full items-center justify-center no-underline gap-[6px] overflow-hidden py-0.75 shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer";
 
-const labelTypographyClasses =
-  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal] p-0";
+/** Type style for buttons, tabs, and small UI labels. Use instead of mono/uppercase eyebrows. */
+export const controlTextClassName =
+  "font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] [font-variant-numeric:ordinal]";
+
+const labelTypographyClasses = cn(controlTextClassName, "p-0");
 
 function isEditableElement(el: Element | null): boolean {
   if (!el) return false;
@@ -177,6 +180,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     React.useEffect(() => {
       if (!hasShortcut || disabled || !keyLetter) return;
       const handler = (e: KeyboardEvent) => {
+        // A page can render the same shortcut twice (hero and closing CTA); only the first fires.
+        if (e.defaultPrevented) return;
         if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
         if (e.key.toLowerCase() !== keyLetter) return;
         if (isEditableTarget(e.target)) return;
@@ -368,7 +373,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <div
         className={cn(
-          "relative flex items-center p-1 group button-wrapper cursor-pointer has-[:disabled]:cursor-not-allowed",
+          "relative flex w-fit max-w-full items-center p-1 group button-wrapper cursor-pointer has-[:disabled]:cursor-not-allowed",
           wrapperClassName,
           size === "small" ? "max-h-[34px]" : "max-h-[40px]",
         )}

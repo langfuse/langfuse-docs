@@ -60,14 +60,20 @@ _Note_: The display components (`ChangelogHeader.tsx` and `ChangelogIndex.tsx`) 
   <ChangelogHeader />;
   ```
 
-- After the header, write your post content in Markdown.
-- Structure your content with clear headings and sections, such as:
-  - New Features
-  - Improvements
-  - Bug Fixes
-  - Miscellaneous
+- After the header, write a short intro that leads with what is now possible, then immediately follow it with 2-3 concrete example use cases. Do not put the use cases in a separate section. A one-sentence changelog that only restates the title and links to docs is incomplete.
+- For UI changes, include a screenshot (`ogImage`) or `.mp4` video (`ogVideo`) that readers see on the page. Frontmatter media counts only when `showOgInHeader` is not `false`; if that flag is `false`, put the visual in the body. Interleave additional visuals with the body text. Do not invent screenshots or other visuals; leave media unset and flag the gap if no real visual is available. We never use `.gif` files.
 - Use bullet points and concise paragraphs for readability.
+- Keep the tone helpful and conversational. No filler headings like "Why This Matters" or "Key Benefits."
 - Maintain a consistent tone and style that aligns with existing changelog examples.
+
+## Review checklist
+
+When reviewing a changelog PR, flag the entry to the author before merge if:
+
+- The intro is not immediately followed by 2-3 concrete example use cases
+- A UI change has no screenshot or `.mp4` video that readers see on the page (frontmatter `ogImage` / `ogVideo` only count when `showOgInHeader` is not `false`; otherwise the visual must be in the body)
+
+Do not invent screenshots to satisfy the visual check. Flag the missing visual so a maintainer can add one.
 
 ## Examples in Use
 

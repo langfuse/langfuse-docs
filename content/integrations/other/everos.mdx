@@ -52,7 +52,7 @@ Each EverOS API call becomes one Langfuse trace, with the server-side pipeline s
 
 | EverOS operation                     | Langfuse observation                                                                   | What becomes visible                                       |
 | ------------------------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `POST /api/v2/memory/add` · `flush`  | span `everos.memory.add` / `everos.memory.flush`                                       | the whole write in one trace, with its total time and cost |
+| `POST /api/v2/memory/add`, `flush`   | span `everos.memory.add` / `everos.memory.flush`                                       | the whole write in one trace, with its total time and cost |
 | memcell boundary detection (LLM)     | generation `everos.memcell.boundary`                                                   | model + tokens spent finding a memory's edges              |
 | episode extraction (LLM)             | generation `everos.extract`                                                            | the memory that was written, model + tokens                |
 | Markdown persistence                 | span `everos.persist.markdown`                                                         | the `.md` file it landed in                                |

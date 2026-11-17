@@ -5,6 +5,8 @@ import type { StaticImageData } from "next/image";
 import { Fan, ListTree, MoveHorizontal } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { controlTextClassName } from "@/components/ui/button";
+import { TabButton } from "@/components/ui/tab-button";
 import { TextHighlight } from "@/components/ui/text-highlight";
 import { cn } from "@/lib/utils";
 
@@ -77,7 +79,7 @@ function referenceCtaLabel(adopter: Adopter) {
 function AdopterReference({ adopter }: { adopter: Adopter }) {
   if (!adopter.referenceHref) {
     return (
-      <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-text-tertiary">
+      <span className={cn(controlTextClassName, "text-text-tertiary")}>
         {adopter.referenceLabel || "Public reference"}
       </span>
     );
@@ -89,7 +91,10 @@ function AdopterReference({ adopter }: { adopter: Adopter }) {
       href={adopter.referenceHref}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer" : undefined}
-      className="font-mono text-[10px] uppercase tracking-[0.1em] text-text-secondary no-underline transition-colors hover:text-text-primary"
+      className={cn(
+        controlTextClassName,
+        "text-text-secondary no-underline transition-colors hover:text-text-primary",
+      )}
     >
       {referenceCtaLabel(adopter)} <span aria-hidden>→</span>
     </a>
@@ -138,7 +143,7 @@ function TracePreview({
       </div>
 
       <div className="min-h-0 flex-1 py-3">
-        <p className="m-0 font-mono text-[9px] uppercase tracking-[0.12em] text-text-tertiary">
+        <p className={cn("m-0", controlTextClassName, "text-text-tertiary")}>
           Trace
         </p>
         <div className="mt-2 min-w-0 font-mono text-[11px] leading-[1.45] text-text-secondary">
@@ -167,7 +172,11 @@ function TracePreview({
         <button
           type="button"
           onClick={onClose}
-          className="cursor-pointer font-mono text-[9px] uppercase tracking-[0.1em] text-text-tertiary transition-colors hover:text-text-primary"
+          className={cn(
+            "cursor-pointer transition-colors hover:text-text-primary",
+            controlTextClassName,
+            "text-text-tertiary",
+          )}
         >
           Close <span aria-hidden>×</span>
         </button>
@@ -223,7 +232,12 @@ function AdopterCard({
               {adopter.name}
             </span>
           )}
-          <span className="mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span
+            className={cn(
+              "mt-auto flex w-full items-center justify-between gap-3 border-t border-dashed border-line-structure pt-2.5 text-text-tertiary",
+              controlTextClassName,
+            )}
+          >
             <span className="truncate">{adopter.companyDescription}</span>
             <span className="shrink-0 text-text-primary">
               Trace <span aria-hidden>→</span>
@@ -259,7 +273,12 @@ function AdoptersTable({ adopters }: { adopters: Adopter[] }) {
   return (
     <div className="overflow-x-auto border border-line-structure bg-surface-bg">
       <table className="w-full min-w-[720px] border-collapse text-left text-[13px]">
-        <thead className="bg-surface-2 font-mono text-[10px] uppercase tracking-[0.1em] text-text-tertiary">
+        <thead
+          className={cn(
+            "bg-surface-2 text-text-tertiary",
+            controlTextClassName,
+          )}
+        >
           <tr>
             <th className="border-b border-line-structure px-4 py-3 font-normal">
               Company
@@ -299,6 +318,11 @@ function AdoptersTable({ adopters }: { adopters: Adopter[] }) {
   );
 }
 
+const VIEW_OPTIONS = [
+  { value: "wall", label: "Wall" },
+  { value: "table", label: "Table" },
+] as const;
+
 function ViewToggle({
   view,
   onChange,
@@ -308,25 +332,20 @@ function ViewToggle({
 }) {
   return (
     <div
-      className="inline-flex border border-line-structure bg-surface-bg p-1"
+      className="inline-flex items-center"
       role="group"
       aria-label="Adopters view"
     >
-      {(["wall", "table"] as const).map((option) => (
-        <button
-          key={option}
-          type="button"
-          aria-pressed={view === option}
-          onClick={() => onChange(option)}
-          className={cn(
-            "min-w-16 cursor-pointer px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            view === option
-              ? "bg-text-primary text-surface-bg"
-              : "text-text-tertiary hover:bg-surface-1 hover:text-text-primary",
-          )}
+      {VIEW_OPTIONS.map((option) => (
+        <TabButton
+          key={option.value}
+          active={view === option.value}
+          aria-pressed={view === option.value}
+          onClick={() => onChange(option.value)}
+          className="min-w-16"
         >
-          {option}
-        </button>
+          {option.label}
+        </TabButton>
       ))}
     </div>
   );
@@ -350,7 +369,9 @@ export function AdoptersExplorer({
       <header className="border-b border-line-structure px-4 py-10 sm:px-8 sm:py-14 lg:px-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <p className="m-0 font-mono text-[11px] uppercase tracking-[0.14em] text-text-tertiary">
+            <p
+              className={cn("m-0", controlTextClassName, "text-text-tertiary")}
+            >
               — Adopters
             </p>
             <HeadingTag
@@ -378,7 +399,12 @@ export function AdoptersExplorer({
       </header>
 
       <div className="px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
-        <div className="mb-4 flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.1em] text-text-tertiary">
+        <div
+          className={cn(
+            "mb-4 flex items-center justify-between gap-4 text-text-tertiary",
+            controlTextClassName,
+          )}
+        >
           <span>{view === "wall" ? "Adopter wall" : "Simple table"}</span>
           <span>{adopters.length} companies</span>
         </div>
