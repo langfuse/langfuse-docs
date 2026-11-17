@@ -148,7 +148,9 @@ The EU endpoint serves the subset of the catalog that is available in the EU, so
 
 ## Cost Tracking
 
-Langfuse captures the token usage returned by Eden AI for each call. To attribute a monetary [cost](/docs/observability/features/token-and-cost-tracking) to those tokens, make sure the model you use is defined in your Langfuse [model list](/docs/observability/features/token-and-cost-tracking#custom-model-definitions). You can add a custom model definition (matching the Eden AI model name, e.g. `mistral-large-4`) with its per-token prices so Langfuse computes cost automatically.
+Langfuse captures the token usage returned by Eden AI for each call. To attribute a monetary [cost](/docs/observability/features/token-and-cost-tracking) to those tokens, add a [custom model definition](/docs/observability/features/token-and-cost-tracking#custom-model-definitions) with its per-token prices.
+
+Match that definition on the model name Eden AI **returns**, not the one you requested. Eden AI resolves a plain name to a specific upstream model, so a call to `mistral-large-4` is traced as `mistral-large-4-0`, and a call to `claude-haiku-5.5` as `global.anthropic.claude-haiku-5-5`. The generation in Langfuse shows the resolved name, which is the one your model definition has to match.
 
 import LearnMore from "@/components-mdx/integration-learn-more.mdx";
 
