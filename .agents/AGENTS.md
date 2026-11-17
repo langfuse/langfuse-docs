@@ -127,7 +127,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ### Documentation pages
 
-These rules cover customer-facing product docs: pages in `content/docs/` and integration guides in `content/integrations/`. They do not apply to handbook pages in `content/handbook/`, which are internal company docs and keep their own structure, titles, and inline procedures.
+These rules cover pages in `content/docs/` and integration guides in `content/integrations/`.
 
 #### Where content belongs
 
