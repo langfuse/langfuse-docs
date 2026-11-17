@@ -101,3 +101,20 @@ curl http://localhost:3000/api/public/ready
 
 - `200 OK` - Application is ready to serve traffic
 - `500 Internal Server Error` - Application has received a shutdown signal (SIGTERM or SIGINT) and should not receive new traffic
+
+## Container health checks [#container-health-checks]
+
+The `curl` examples above run from outside the container. The Langfuse images do not include `curl`, so health checks that run inside the container (Docker Compose `healthcheck`, ECS `healthCheck`) need `wget`, which both images include. Probe `127.0.0.1` rather than `localhost`, so the check does not depend on how the container resolves `localhost`.
+
+```yaml
+# docker-compose.yml
+services:
+  langfuse-web:
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/public/health"]
+  langfuse-worker:
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3030/api/health"]
+```
+
+Kubernetes `httpGet` probes run outside the container and need no extra tools.

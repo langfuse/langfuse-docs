@@ -39,3 +39,34 @@ export function readAdvertisementConsent(): ConsentState {
   // Neither source could answer.
   return "unknown";
 }
+
+// CookieYes "analytics"-category consent as the visitor answered it, read by
+// the site's PostHog. Unlike the advertisement reader above, "denied" means the
+// visitor rejected: before any answer CookieYes already records every optional
+// category as off, and that reads "unknown" here, so the site's analytics keep
+// their pre-answer behaviour until the visitor actually decides.
+export function readAnalyticsConsent(): ConsentState {
+  if (typeof window === "undefined") return "unknown";
+
+  // The live API wins once it is conclusive, so an in-session revoke counts at
+  // once; before the banner has loaded it reads as "not answered".
+  try {
+    const consent = window.getCkyConsent?.();
+    if (consent?.categories?.analytics === true) return "granted";
+    if (
+      consent?.categories?.analytics === false &&
+      consent.isUserActionCompleted
+    )
+      return "denied";
+  } catch {
+    // an unavailable API is inconclusive — fall through
+  }
+
+  // The persisted cookie is the durable record of an earlier answer.
+  const consentCookie = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith("cookieyes-consent="));
+  if (!consentCookie) return "unknown";
+  if (consentCookie.includes("analytics:yes")) return "granted";
+  return consentCookie.includes("action:yes") ? "denied" : "unknown";
+}

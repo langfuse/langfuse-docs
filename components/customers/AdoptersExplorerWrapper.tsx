@@ -84,6 +84,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Fletch: "Security and threat intelligence platform",
   freee: "Cloud accounting and HR software company",
   GoodData: "Analytics and business intelligence platform",
+  "G-Research": "Quantitative research and technology company",
   Groupon: "Local commerce marketplace",
   HP: "Personal computing and printing technology company",
   "Hugging Face": "Open-source AI platform and model hub",
@@ -124,6 +125,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Swisscom: "Swiss communications, IT, and entertainment company",
   TELUS: "Telecommunications company",
   "The Weather Company": "Weather intelligence company",
+  Todoist: "Task and work management application",
   "Trade Republic": "European fintech bank",
   Twilio: "Customer communications platform",
 };
@@ -142,6 +144,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Equinix",
   "freee",
   "GoodData",
+  "G-Research",
   "Groupon",
   "HP",
   "Hugging Face",
@@ -165,6 +168,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Samsara",
   "Sanofi",
   "Slite",
+  "Todoist",
   "Twilio",
 ]);
 

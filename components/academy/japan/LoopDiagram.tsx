@@ -50,6 +50,30 @@ const ARROW_Y = BOX_TOP + BOX_H / 2; // 140
 const INNER_W = 1080;
 const INNER_H = 380;
 
+// Return paths drawn under the row, from a station's bottom edge back to an
+// earlier one. Vertical legs are offset from the card centers so the iterate
+// loops and the deploy loop never share a line.
+const RETURN_PATHS = [
+  {
+    d: "M 319 240 L 319 282 L 110 282 L 110 240",
+    label: "反復",
+    x: 214.5,
+    y: 282,
+  },
+  {
+    d: "M 970 240 L 970 282 L 761 282 L 761 240",
+    label: "反復",
+    x: 865.5,
+    y: 282,
+  },
+  {
+    d: "M 994 240 L 994 316 L 86 316 L 86 240",
+    label: "デプロイ",
+    x: INNER_W / 2,
+    y: 316,
+  },
+];
+
 // Synchronous estimate of the initial scale so the canvas is never shown at
 // native 1080px width before useLayoutEffect fires.
 // 0.56 is intentionally conservative (actual desktop scale is ~0.57–0.59),
@@ -189,48 +213,56 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
               />
             ))}
 
-            {/* Yellow U-loop — highlighter band */}
-            <path
-              d="M 982 240 L 982 310 L 98 310 L 98 240"
-              fill="none"
-              stroke="var(--surface-cta-primary)"
-              strokeWidth="11"
-              strokeLinecap="butt"
-              strokeLinejoin="miter"
-            />
-            {/* Thin dark line drawn on top of the yellow band, with arrow into Trace */}
-            <path
-              d="M 982 240 L 982 310 L 98 310 L 98 240"
-              fill="none"
-              stroke="var(--text-primary)"
-              strokeWidth="1.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              markerEnd="url(#lfd-arrow-dark)"
-            />
+            {/* Yellow highlighter bands, with a thin dark line and arrow on top */}
+            {RETURN_PATHS.map((p) => (
+              <path
+                key={`band-${p.d}`}
+                d={p.d}
+                fill="none"
+                stroke="var(--surface-cta-primary)"
+                strokeWidth="11"
+                strokeLinecap="butt"
+                strokeLinejoin="miter"
+              />
+            ))}
+            {RETURN_PATHS.map((p) => (
+              <path
+                key={`line-${p.d}`}
+                d={p.d}
+                fill="none"
+                stroke="var(--text-primary)"
+                strokeWidth="1.25"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                markerEnd="url(#lfd-arrow-dark)"
+              />
+            ))}
           </svg>
 
-          {/* DEPLOY label centered on the bottom of the U */}
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: 310,
-              transform: "translate(-50%, -50%)",
-              background: "var(--surface-bg)",
-              padding: "4px 12px",
-              fontFamily: "var(--font-mono)",
-              fontSize: 14,
-              color: "var(--text-secondary)",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              border: "1px solid var(--line-structure)",
-              borderRadius: 2,
-              zIndex: 5,
-            }}
-          >
-            デプロイ
-          </div>
+          {/* Labels centered on the bottom of each return path */}
+          {RETURN_PATHS.map((p) => (
+            <div
+              key={`label-${p.d}`}
+              style={{
+                position: "absolute",
+                left: p.x,
+                top: p.y,
+                transform: "translate(-50%, -50%)",
+                background: "var(--surface-bg)",
+                padding: "4px 12px",
+                fontFamily: "var(--font-mono)",
+                fontSize: 14,
+                color: "var(--text-secondary)",
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                border: "1px solid var(--line-structure)",
+                borderRadius: 2,
+                zIndex: 5,
+              }}
+            >
+              {p.label}
+            </div>
+          ))}
 
           {/* Station cards */}
           {STATIONS.map((station, i) => (

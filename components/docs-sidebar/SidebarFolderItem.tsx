@@ -13,6 +13,7 @@ import { useTreePath } from "fumadocs-ui/contexts/tree";
 import type * as PageTree from "fumadocs-core/page-tree";
 
 import { cn } from "@/lib/utils";
+import { SidebarLabel } from "./SidebarLabel";
 
 export const SIDEBAR_NAV_ROW_CLASS =
   "relative flex w-full max-w-[calc(100%-16px)] mx-auto flex-row items-center gap-2 rounded-lg p-2 text-start text-text-tertiary wrap-anywhere [&_svg]:size-4 [&_svg]:shrink-0 transition-colors hover:text-text-primary/80 hover:transition-none";
@@ -88,7 +89,7 @@ export function SidebarFolderItem({
           style={rowStyle}
         >
           {item.icon}
-          {item.name}
+          <SidebarLabel name={item.name} />
         </SidebarFolderLink>
       ) : (
         <SidebarFolderTrigger
@@ -97,7 +98,7 @@ export function SidebarFolderItem({
           style={rowStyle}
         >
           {item.icon}
-          {item.name}
+          <SidebarLabel name={item.name} />
         </SidebarFolderTrigger>
       )}
       <SidebarFolderBody>{children}</SidebarFolderBody>
