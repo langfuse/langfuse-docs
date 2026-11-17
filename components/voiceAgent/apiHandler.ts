@@ -1,6 +1,9 @@
 import { AccessToken } from "livekit-server-sdk";
 import { rateLimit } from "@/lib/rateLimit";
 
+// The demo UI sends a persisted nanoid such as `u-AbC123`.
+const USER_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+
 export const POST = async (req: Request) => {
   const { success } = rateLimit(req, { limit: 5, windowMs: 60_000 });
   if (!success) {
@@ -24,15 +27,34 @@ export const POST = async (req: Request) => {
     );
   }
 
-  const { userId, storeAudio }: { userId: string; storeAudio?: boolean } =
-    await req.json();
+  let body: { userId?: unknown; storeAudio?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
+  const { userId, storeAudio } = body;
+  if (typeof userId !== "string" || !USER_ID_PATTERN.test(userId)) {
+    return new Response(JSON.stringify({ error: "Invalid userId." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // A fresh, unguessable room per conversation: room names end up as the
+  // session ID on traces in the public demo project.
   const roomName = `voice-demo-${crypto.randomUUID()}`;
   const participantName = userId;
 
   const token = new AccessToken(apiKey, apiSecret, {
     identity: participantName,
     name: participantName,
+    // Only needed to join; LiveKit refreshes tokens for connected participants.
+    ttl: "10m",
     // Read by the agent to decide whether to record the conversation audio
     // and attach it to the Langfuse trace (defaults to true).
     attributes: { store_audio: String(storeAudio !== false) },
