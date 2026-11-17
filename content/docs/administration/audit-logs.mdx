@@ -167,10 +167,10 @@ Requirements:
 
 If Langfuse runs behind a load balancer or reverse proxy, also set `LANGFUSE_TRUSTED_PROXY_COUNT` to the number of proxies in front of it. Otherwise access events from the Langfuse UI carry no client IP address, and events from the public API and MCP carry the address of your proxy.
 
-| Variable                               | Default | Container | Description                                                                                                                                      |
-| -------------------------------------- | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS`     | `org`   | web       | `org`, `enforced` or `disabled`, see above.                                                                                                      |
-| `LANGFUSE_TRUSTED_PROXY_COUNT`         | `0`     | web       | Number of proxies in front of Langfuse that append to `X-Forwarded-For`. The client IP is the N-th entry from the right. `0` ignores the header. |
+| Variable                           | Default | Container | Description                                                                                                                                      |
+| ---------------------------------- | ------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_AUDIT_LOG_ACCESS_EVENTS` | `org`   | web       | `org`, `enforced` or `disabled`, see above.                                                                                                      |
+| `LANGFUSE_TRUSTED_PROXY_COUNT`     | `0`     | web       | Number of proxies in front of Langfuse that append to `X-Forwarded-For`. The client IP is the N-th entry from the right. `0` ignores the header. |
 
 ### How recording works [#read-access-how-it-works]
 
@@ -185,7 +185,7 @@ If Langfuse runs behind a load balancer or reverse proxy, also set `LANGFUSE_TRU
 | Surface     | Recorded reads                                                                                                                                                                                                             |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Langfuse UI | Trace and observation detail views, including input and output; the tracing, sessions, scores and experiments tables; session, score and experiment detail views; trace and observation downloads; creating a batch export |
-| Public API  | `GET /api/public/v2/observations`, `GET /api/public/v3/scores`, `GET /api/public/experiments`, `GET /api/public/experiment-items`            |
+| Public API  | `GET /api/public/v2/observations`, `GET /api/public/v3/scores`, `GET /api/public/experiments`, `GET /api/public/experiment-items`                                                                                          |
 | MCP server  | `getObservation`, `getScore`, `listObservations`, `listScores`, `listExperiments`, `listExperimentItems`                                                                                                                   |
 
 Not recorded:
