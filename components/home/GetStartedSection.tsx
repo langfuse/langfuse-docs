@@ -172,10 +172,10 @@ function NeedHelpFooter() {
       Need help? —{" "}
       <a href="/talk-to-us" className={linkClassName}>
         Talk to Sales
-      </a>
-      <span className="mx-1.5 text-text-tertiary">·</span>
+      </a>{" "}
+      or{" "}
       <a href="/support" className={linkClassName}>
-        Reach out to Support
+        reach out to Support
       </a>
     </Text>
   );
@@ -237,7 +237,7 @@ function ManualTab() {
           Quick start guides —{" "}
           {QUICKSTART_LINKS.map((link, i) => (
             <span key={link.href}>
-              {i > 0 && <span className="mx-1.5 text-text-tertiary">·</span>}
+              {i > 0 && <span className="mr-1.5 text-text-tertiary">,</span>}
               <a href={link.href} className={linkClassName}>
                 {link.label}
               </a>

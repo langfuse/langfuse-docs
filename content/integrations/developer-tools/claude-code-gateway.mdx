@@ -9,12 +9,17 @@ category: Integrations
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+import AiGatewayIntegrationIntro from "@/components-mdx/ai-gateway-integration-intro.mdx";
 
 # Claude Desktop and Claude Code with the Langfuse AI Gateway
 
 <AiGatewayBetaCallout />
 
-Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. Both require an `ANTHROPIC` provider credential.
+<AiGatewayIntegrationIntro title="What are Claude Desktop and Claude Code?">
+[Claude Desktop](https://claude.com/download) is Anthropic's desktop app for chatting and working with Claude. [Claude Code](https://claude.com/product/claude-code) is Anthropic's agentic coding tool that lives in your terminal. It can understand your codebase, help you write and edit code, execute commands, create and run tests, and help you accomplish complex coding tasks with natural language.
+</AiGatewayIntegrationIntro>
+
+Use the Langfuse AI Gateway with the Claude Desktop app or the Claude Code CLI. Both require an `ANTHROPIC` provider connection.
 
 <Callout type="info">
   This page routes Claude's model calls through the AI Gateway. For tracing
@@ -117,7 +122,7 @@ Alternatively, use `~/.claude/settings.json`:
 ```
 
 - `ANTHROPIC_CUSTOM_HEADERS` takes newline-separated `Name: value` pairs. See [request headers](/docs/gateway/features/tracing#request-headers).
-- Pick models with `--model` or `/model`, using IDs from [`/models`](/docs/gateway/get-started/first-request#list-models). Bare `claude-…` IDs and `<credential>:<model>` IDs both work, see [model IDs](/docs/gateway/features/models#model-ids).
+- Pick models with `--model` or `/model`, using IDs from [`/models`](/docs/gateway/get-started/first-request#list-models). Bare `claude-…` IDs and `<connection>:<model>` IDs both work, see [model IDs](/docs/gateway/features/models#model-ids).
 - MCP servers configured locally through the CLI remain available because Claude Code stores them in `.claude.json`.
 
 ### Verify [#verify]

@@ -19,6 +19,9 @@ const {
 const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
+const {
+  interpolateImportedMdxProps,
+} = require("../lib/inline-components-mdx-props.js");
 
 const SITE_URL = "https://langfuse.com";
 
@@ -39,13 +42,8 @@ const SELF_HOSTING_FOOTER_PATH = path.join(
 // API / SDK reference for implementation. See CHANGELOG_AGENT_NOTICE below.
 const CHANGELOG_URL_PREFIX = "changelog";
 
-// Legal and policy pages are human- and compliance-facing artifacts, not part
-// of the agent docs surface. A privacy policy whose last section is curl
-// examples, MCP connection details, and "found an error? open a GitHub issue"
-// reads as a copy-paste error to anyone who scrolls to the end — and these are
-// exactly the pages that expose a "download as PDF" link. The PDF route strips
-// the footer as a second line of defense (app/api/md-to-pdf/route.ts), but
-// these pages should never carry it in the first place.
+// Legal and policy pages exclude the agent footer's curl examples, MCP
+// connection details, and GitHub feedback instructions.
 const AGENT_FOOTER_EXCLUDED_PAGES = new Set(["privacy.md", "cookie-policy.md"]);
 
 /**
@@ -214,9 +212,7 @@ function copyAll() {
     const inlined = replaceComponentsWithMarkdown(
       inlineComponentsMdx(contentWithSharedFooter, file),
     );
-    let processed = stripMdxForPlainMarkdown(inlined, {
-      unwrapCalloutsForPlainMd: true,
-    });
+    let processed = stripMdxForPlainMarkdown(inlined);
 
     // For changelog entries, prepend an AI-agent notice so models use the page
     // to confirm a feature exists rather than copying release-time examples.
@@ -348,8 +344,12 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
         "g",
       );
 
-      finalContent = finalContent.replace(selfClosing, `\n${childInlined}\n`);
-      finalContent = finalContent.replace(paired, `\n${childInlined}\n`);
+      finalContent = finalContent.replace(selfClosing, (_, attrs) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, "")}\n`;
+      });
+      finalContent = finalContent.replace(paired, (_, attrs, children) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, children)}\n`;
+      });
     }
 
     return finalContent;

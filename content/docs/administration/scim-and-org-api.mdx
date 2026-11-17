@@ -126,6 +126,8 @@ The SSO settings on the SCIM/SAML application do not need to work; Langfuse uses
   src="https://static.langfuse.com/docs-videos/2025-08-06-okta-scim-setup.mov.mp4"
   aspectRatio={647 / 463}
   gifStyle
+  title="Set up Okta SCIM provisioning"
+  description="Okta Admin Console: create a SAML 2.0 app named Langfuse SCIM with the Audience URI langfuse, set Provisioning to SCIM, and enter the SCIM connection with the base URL ending in /api/public/scim, the unique identifier userName and Basic Auth. In Langfuse, Organization Settings > “API Keys” > “Create new API keys”; paste the public key as the username and the secret key as the password, then test the connector. Enable Create Users, Update User Attributes and Deactivate Users, add a roles attribute in the Profile Editor, and assign a user with the Member role. The user then appears under Organization Settings > “Members” in Langfuse."
 />
 
 Langfuse supports the SCIM 2.0 protocol for user provisioning.
@@ -147,8 +149,8 @@ After your OIDC SSO app is in place, create a second Okta application for SCIM:
      - **SCIM connector base URL**: `https://your-langfuse-domain.com/api/public/scim`
      - **Unique identifier field for users**: `userName`
      - **Supported provisioning actions**: `Import new Users and Profile Updates`, `Push New Users`, `Push Profile Updates`
-     - **Basic Auth - Username**: Use a public key from your Organization settings.
-     - **Basic Auth - Password**: Use a private key from your Organization settings.
+     - **Basic Auth - Username**: The public key of an organization API key. Create one in Langfuse under **Organization Settings** > **API Keys** > **Create new API keys**.
+     - **Basic Auth - Password**: The secret key of the same organization API key.
    - Test the API credentials and press **Save**.
 3. **Configure Provisioning**:
    - In the **Provisioning** tab, enable the following options:
