@@ -30,7 +30,6 @@ Apply this test to prose, examples, callouts, tables, and new pages.
 - Fail a second procedure, a second reference list, or an explanation longer than a sentence, including a second copy on the same page, when that page does not own the fact. Leave one sentence and a link to the owning page.
 - A get-started tab keeps the minimal configuration and the command that confirms it works, even when another page owns the full procedure. A tab that only links still fails [Get started pages](AGENTS.md#get-started-pages).
 - A snippet that is the same block on many pages, such as `components-mdx/env-python.mdx`, stays as that shared component. When it is still pasted on each page, move it into `components-mdx`.
-- Keep a sentence that names the fact while doing a different job. Keep the full version on the page that owns the fact.
 - When an edited page has copied a fact, that copy becomes the sentence and the link.
 
 ### Place
