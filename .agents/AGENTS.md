@@ -117,6 +117,8 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines
 
+Handbook pages in `content/handbook/` are internal team documentation, separate from the customer-facing docs. The writing and review guidelines below don't apply to them. The CI checks under "Passing CI checks on the first try" still do.
+
 - Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
 - Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
@@ -187,7 +189,7 @@ Changelog entries live in `content/changelog/`.
 
 ## Review guidelines
 
-Please check the following:
+Please check the following. Skip these checks for handbook pages in `content/handbook/`, as described under "Writing guidelines".
 
 - Edited text is grammatically correct (American English).
 - Edited text has consistent punctuation.
