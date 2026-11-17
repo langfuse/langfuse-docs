@@ -22,7 +22,6 @@ Apply this test to prose, examples, callouts, tables, and new pages.
 - A reference the screen does not show, such as recorded fields or response headers, stays in a `<Details>` block.
 - Cut toggles, button names, and on-screen steps, such as turning a model off.
 - Cut a prose list when a screenshot on the page already shows it.
-- Flag a versioned model name, or a list of today's providers, in an intro, heading, or step-by-step guide, unless the page is about that model or provider. Prefer "your model" or "a connection".
 - Flag provider-specific setup that restates the UI. A short note belongs at the bottom of the feature page. A longer one belongs in a linked FAQ.
 
 ### Already written
