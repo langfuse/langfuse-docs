@@ -1,6 +1,9 @@
 import { changelogSource } from "@/lib/source";
 import { getBlogIndexPages } from "@/lib/blog-index";
-import { parseCalendarDate } from "@/components/blog/utils";
+import {
+  formatShortRelativeDate,
+  parseCalendarDate,
+} from "@/components/blog/utils";
 import { getGitHubStars } from "@/lib/github-stars";
 import { getLatestGitHubReleaseDate } from "@/lib/github-releases";
 import { LinkBox } from "@/components/ui/link-box";
@@ -11,20 +14,6 @@ import { Link } from "@/components/ui/link";
 function formatCount(n: number): string {
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
   return n.toString();
-}
-
-function formatRelativeDate(isoDate: string): string {
-  const date = new Date(isoDate);
-  const dayDiff = (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24);
-  if (dayDiff < 1) return "today";
-  if (dayDiff < 14) return `${Math.round(dayDiff)} days ago`;
-  if (dayDiff < 30) return `${Math.round(dayDiff / 7)} weeks ago`;
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 }
 
 // ── Static data ───────────────────────────────────────────────────────────────
@@ -109,7 +98,7 @@ function RecentArticleList({ items }: { items: RecentArticle[] }) {
               size="xs"
               className="text-left no-underline group-hover:text-text-primary"
             >
-              {formatRelativeDate(item.date)}
+              {formatShortRelativeDate(item.date)}
             </Text>
           </div>
         </LinkBox>
@@ -124,28 +113,31 @@ export async function HomeSidebar() {
   const changelogItems: RecentArticle[] = changelogSource
     .getPages()
     .flatMap((p) => {
-      const parsed = parseCalendarDate(p.data.date as string | undefined);
-      if (!p.data.title || !parsed) return [];
+      const date = p.data.date as string | undefined;
+      const parsed = parseCalendarDate(date);
+      if (!p.data.title || !date || !parsed) return [];
       return [
         {
           route: p.url,
           title: p.data.title as string,
-          date: parsed.toISOString(),
+          date,
+          time: parsed.getTime(),
         },
       ];
     })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3);
+    .sort((a, b) => b.time - a.time)
+    .slice(0, 3)
+    .map(({ route, title, date }) => ({ route, title, date }));
 
   const blogItems: RecentArticle[] = getBlogIndexPages()
     .flatMap((p) => {
-      const parsed = parseCalendarDate(p.frontMatter?.date);
-      if (!p.title || !parsed) return [];
+      const date = p.frontMatter?.date;
+      if (!p.title || !date || !parseCalendarDate(date)) return [];
       return [
         {
           route: p.route,
           title: p.title,
-          date: parsed.toISOString(),
+          date,
         },
       ];
     })
@@ -213,7 +205,7 @@ export async function HomeSidebar() {
                     size="s"
                     className="text-right text-[13px] shrink-0 group-hover:text-text-primary"
                   >
-                    {formatRelativeDate(latestReleaseDate)}
+                    {formatShortRelativeDate(latestReleaseDate)}
                   </Text>
                 </div>
               </LinkBox>

@@ -208,7 +208,7 @@ function AskForm({
                 }
               }}
               className={cn(
-                "block h-[1lh] w-full resize-none overflow-hidden border-0 bg-transparent p-0 outline-none placeholder:text-text-tertiary caret-current focus:outline-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                "block h-[1lh] w-full resize-none overflow-hidden border-0 bg-transparent p-0 outline-none placeholder:text-text-tertiary caret-current focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0",
                 (showIdleCursor || showDraftCursor) &&
                   "caret-transparent text-transparent",
                 questionTypography,

@@ -13,7 +13,7 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 # Langfuse vs. LiteLLM Lens
 
-This guide outlines the key differences between **[Langfuse](/)** and **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in October 2026.
+**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide outlines how it differs from **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in October 2026.
 
 ## TL;DR
 
@@ -95,7 +95,7 @@ Lens investigations take a time window, a sample percentage, and a description o
 
 ## Using Langfuse and LiteLLM together [#coexistence]
 
-LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. The [Langfuse AI Gateway](/docs/gateway/overview) (beta) relays OpenAI and Anthropic calls with built-in tracing, but has no budgets, fallbacks, or other providers yet, so multi-provider routing stays with LiteLLM or another gateway.
+LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. The [Langfuse AI Gateway](/docs/gateway/overview) (public beta) calls [multiple LLM providers](/docs/gateway/features/models#supported-providers) with built-in tracing.
 
 If you trial Lens beside Langfuse, decide which store holds datasets and human labels before both accumulate a partial copy; running two investigators over the same traffic doubles analysis-model spend.
 

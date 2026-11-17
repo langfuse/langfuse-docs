@@ -91,7 +91,7 @@ export const healthcareDeploymentModes = [
     href: "/security/hipaa",
     flow: ["Your app", "OTel SDK", "HIPAA region"],
     specs: [
-      { k: "Region", v: "US · Oregon" },
+      { k: "Region", v: "US, Oregon" },
       { k: "Location", v: "AWS us-west-2" },
       { k: "Agreement", v: "BAA available" },
       // TODO(healthcare-review): (a) "Pro or higher" follows the HIPAA docs. See the file-level note.
@@ -103,11 +103,11 @@ export const healthcareDeploymentModes = [
     label: "Self-host",
     title: "Run Langfuse in your own network.",
     href: "/self-hosting",
-    flow: ["Your app", "OTel SDK", "Langfuse · your network"],
+    flow: ["Your app", "OTel SDK", "Langfuse (your network)"],
     specs: [
-      { k: "Infra", v: "Kubernetes · Docker" },
-      { k: "Storage", v: "ClickHouse · Postgres · S3" },
-      { k: "Access", v: "SSO · VPN-only" },
+      { k: "Infra", v: "Kubernetes, Docker" },
+      { k: "Storage", v: "ClickHouse, Postgres, S3" },
+      { k: "Access", v: "SSO, VPN-only" },
       { k: "Patient data", v: "Stays in your network" },
     ],
   },
@@ -116,7 +116,7 @@ export const healthcareDeploymentModes = [
     label: "Air-gapped",
     title: "No internet access. No vendor access.",
     href: "/self-hosting/security/networking",
-    flow: ["Your app", "OTel SDK", "Langfuse · isolated"],
+    flow: ["Your app", "OTel SDK", "Langfuse (isolated)"],
     specs: [
       { k: "Outbound traffic", v: "None" },
       { k: "Langfuse support access", v: "None" },
@@ -252,7 +252,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     icon: "mic",
     description:
       "Find where a voice conversation lost context and correct it. Evolve cut Rest's memory misses in half.",
-    proof: "Evolve · Rest sleep coach",
+    proof: "Evolve: Rest sleep coach",
     href: "/users/evolve",
     featured: true,
   },
@@ -262,7 +262,7 @@ export const healthcareUseCases: readonly HealthcareUseCase[] = [
     icon: "users",
     description:
       "Share traces, prompts, evaluations, and cost across teams, so the same platform works company-wide.",
-    proof: "Merck Group · 80+ use cases on Langfuse",
+    proof: "Merck Group: 80+ use cases on Langfuse",
     href: "/users/merckgroup",
     featured: true,
   },

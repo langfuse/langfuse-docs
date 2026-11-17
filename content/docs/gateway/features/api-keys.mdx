@@ -23,7 +23,7 @@ Every key is either a user key, which belongs to the person who creates it, or a
 | **Trace user**        | The key owner's email                                                 | The client's `langfuse-user-id`, otherwise the key name. See [trace user](#trace-user). |
 | **When it stops**     | When it is revoked or expires, or when its owner loses gateway access | When it is revoked or expires. Membership changes don't affect it.                      |
 
-Both key types can call every model the organization's [provider credentials](/docs/gateway/features/models) allow.
+Both key types can call every model the organization's [provider connections](/docs/gateway/features/models) allow, unless you [restrict the key's models](#model-restrictions).
 
 ## Create a key [#create-a-key]
 
@@ -50,10 +50,11 @@ Metadata on a key lets you segment and attribute gateway traffic. Add key-value 
 
 The gateway attaches them to every generation recorded with the key, under `langfuse.gateway.api_key.metadata.<key>`. Filter traces, observations, and [custom dashboard](/docs/metrics/features/custom-dashboards) charts on these keys to see usage and cost for one team, cost center, or service.
 
-<Callout type="info">
-  Metadata can only be set when you create a key. To change it, issue a new key
-  and revoke the old one.
-</Callout>
+To change metadata later, select **Edit key** on the key in **AI Gateway → Gateway keys**.
+
+## Model restrictions [#model-restrictions]
+
+You can limit a key to some of the enabled models with patterns such as `openai-prod:*` or `-openrouter:*`, when you create the key or later with **Edit key**. See [Restrict models per API key](/docs/gateway/features/models#restrict-models-per-key) for the pattern syntax.
 
 ## User ID [#trace-user]
 

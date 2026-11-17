@@ -9,10 +9,15 @@ category: Integrations
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+import AiGatewayIntegrationIntro from "@/components-mdx/ai-gateway-integration-intro.mdx";
 
 # GitHub Copilot with the Langfuse AI Gateway
 
 <AiGatewayBetaCallout />
+
+<AiGatewayIntegrationIntro title="What is GitHub Copilot?">
+[GitHub Copilot](https://github.com/features/copilot) is GitHub's AI coding assistant. Its agent mode in [VS Code](https://code.visualstudio.com/docs/copilot/overview) and the [Copilot CLI](https://github.com/github/copilot-cli) can understand your codebase, edit files, run commands, and complete multi-step coding tasks autonomously.
+</AiGatewayIntegrationIntro>
 
 Both Copilot surfaces support bring-your-own-key (BYOK) model providers. Only those models go through the gateway. GitHub-hosted models in the same picker are not traced.
 
@@ -20,8 +25,8 @@ Both Copilot surfaces support bring-your-own-key (BYOK) model providers. Only th
   For tracing GitHub Copilot without the gateway, see the [GitHub Copilot integration](/integrations/developer-tools/github-copilot).
 </Callout>
 
-- [Copilot CLI](#cli): `ANTHROPIC` or `OPENAI` provider credential.
-- [GitHub Copilot app](#app): `OPENAI` provider credential. BYOK in the app is in public preview.
+- [Copilot CLI](#cli): `ANTHROPIC` or `OPENAI` provider connection.
+- [GitHub Copilot app](#app): `OPENAI` provider connection. BYOK in the app is in public preview.
 
 ## Copilot CLI [#cli]
 
@@ -99,7 +104,7 @@ See GitHub's [guide to adding models to the Copilot app](https://docs.github.com
    }
    ```
 
-7. Select **Add provider**. The models of your `OPENAI` provider credential appear in the model picker alongside the GitHub-hosted models. Select one to start a session.
+7. Select **Add provider**. The models of your `OPENAI` provider connection appear in the model picker alongside the GitHub-hosted models. Select one to start a session.
 
 ### Verify [#app-verify]
 

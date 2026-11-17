@@ -106,6 +106,12 @@ If outbound LLM requests must go through a forward proxy, set `HTTPS_PROXY` (see
 
 <Callout type="warning">
 
+The [AI Gateway](/self-hosting/configuration/ai-gateway#gateway-to-providers) ignores `HTTPS_PROXY` and always connects to providers directly. In releases after `v4.76.0`, it applies the LLM connection variables too.
+
+</Callout>
+
+<Callout type="warning">
+
 The forward proxy resolves DNS for proxied requests, so Langfuse cannot re-check the resolved IP at connection time. It still validates the URL before each request and on every redirect hop. Hosts that match `NO_PROXY` connect directly and keep the connection-time IP checks.
 
 </Callout>

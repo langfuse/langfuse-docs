@@ -1,0 +1,173 @@
+.figure {
+  margin: 1.5rem 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.desktop {
+  min-width: 0;
+}
+
+.diagram {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.mobile {
+  display: none;
+}
+
+.clients {
+  display: grid;
+  gap: 8px;
+}
+
+.card {
+  border: 1px solid var(--line-structure);
+  border-radius: 2px;
+  background: var(--surface-bg);
+  padding: 14px 16px;
+}
+
+.raised {
+  box-shadow:
+    -1px 2px 5px rgba(0, 0, 0, 0.04),
+    -4px 8px 9px rgba(0, 0, 0, 0.03);
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.highlightTitle {
+  width: fit-content;
+  background: var(--surface-cta-primary);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.body {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.meta {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bullets li,
+.details li {
+  position: relative;
+  padding-left: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.bullets li::before,
+.details li::before {
+  position: absolute;
+  left: 0;
+  color: var(--text-tertiary);
+  content: "–";
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 4px 16px 8px;
+  list-style: none;
+}
+
+.boundary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed var(--line-cta);
+  border-radius: 2px;
+}
+
+.boundaryHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.connector {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 16px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.rail {
+  justify-self: center;
+  width: 1.5px;
+  height: 100%;
+  min-height: 20px;
+  background: var(--line-cta);
+  border-radius: 1px;
+}
+
+.dashedConnector .rail {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--text-tertiary) 0 4px,
+    transparent 4px 8px
+  );
+}
+
+@container (max-width: 559px) {
+  .desktop {
+    display: none;
+  }
+
+  .mobile {
+    display: block;
+  }
+}

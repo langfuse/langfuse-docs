@@ -56,7 +56,7 @@ function StepCard({
         {step.title}
       </span>
       <MonoLabel className="mt-2 leading-[1.5]">
-        {step.meta.join(" · ")}
+        {step.meta.join(", ")}
       </MonoLabel>
     </NextLink>
   );
