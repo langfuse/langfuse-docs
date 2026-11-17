@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { HorizontalArrow, VerticalArrow } from "./diagram-primitives";
 import { cn } from "@/lib/utils";
+import styles from "./diagram-fit.module.css";
 
 import { assistantArchitectureSteps as steps } from "@/lib/assistant-architecture-steps";
 
@@ -119,6 +120,109 @@ function Connection({
   );
 }
 
+function VerticalConnection({
+  children,
+  dashed,
+  continuous,
+  responseLabel,
+  responseDashed,
+  responseContinuous,
+  active,
+  responseActive,
+}: {
+  children: React.ReactNode;
+  dashed?: boolean;
+  continuous?: boolean;
+  responseLabel?: string;
+  responseDashed?: boolean;
+  responseContinuous?: boolean;
+  active: boolean;
+  responseActive?: boolean;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1 py-2">
+      <div
+        className={cn(
+          "px-1 text-center leading-snug",
+          !active && "halo-inactive",
+        )}
+      >
+        {children}
+      </div>
+      <div
+        className={cn(
+          "relative h-6",
+          active ? "halo-active-line" : "halo-inactive",
+        )}
+      >
+        <VerticalArrow dashed={dashed} />
+        {active && (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "halo-packet halo-packet-down",
+              !continuous && "halo-packet-once",
+            )}
+          />
+        )}
+      </div>
+      {responseLabel && (
+        <>
+          <div
+            className={cn(
+              "relative h-6",
+              responseActive ? "halo-active-line" : "halo-inactive",
+            )}
+          >
+            <VerticalArrow direction="up" dashed={responseDashed} />
+            {responseActive && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "halo-packet halo-packet-up",
+                  !responseContinuous && "halo-packet-once",
+                )}
+              />
+            )}
+          </div>
+          <div
+            className={cn(
+              "px-1 text-center leading-snug",
+              !responseActive && "halo-inactive",
+            )}
+          >
+            {responseLabel}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function WorkerBox({ active }: { active: boolean }) {
+  return (
+    <Box active={active}>
+      <div>
+        Langfuse worker
+        <div className="mt-1 font-normal text-text-secondary">Agent loop</div>
+      </div>
+    </Box>
+  );
+}
+
+function PostgresBox({ active }: { active: boolean }) {
+  return (
+    <Box active={active}>
+      <div>
+        Postgres
+        <div className="mt-1 font-normal text-text-secondary">
+          Run state + events
+        </div>
+      </div>
+    </Box>
+  );
+}
+
 export function AssistantArchitectureDiagram() {
   const [step, setStep] = useState(-1);
   const [playing, setPlaying] = useState(false);
@@ -178,7 +282,7 @@ export function AssistantArchitectureDiagram() {
   return (
     <figure
       aria-label="Halo high-level architecture, from browser through run management to model and tools"
-      className="halo-architecture not-prose"
+      className={`halo-architecture not-prose ${styles.figure}`}
       data-playing={playing}
       data-overview={overview}
       style={
@@ -186,12 +290,11 @@ export function AssistantArchitectureDiagram() {
       }
     >
       <div
-        className="overflow-x-auto pb-2"
+        className={`${styles.desktop} pb-2`}
         role="region"
         aria-label="Architecture diagram"
-        tabIndex={0}
       >
-        <div className="flex min-w-[560px] flex-col gap-4 text-xs leading-snug text-text-secondary">
+        <div className="flex flex-col gap-4 text-xs leading-snug text-text-secondary">
           <div
             className={cn(
               "border border-dashed border-line-divider-dash p-2",
@@ -379,6 +482,122 @@ export function AssistantArchitectureDiagram() {
                 </div>
               </Box>
             </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className={`${styles.mobile} pb-2 text-xs leading-snug text-text-secondary`}
+        role="region"
+        aria-label="Architecture diagram"
+      >
+        <div className={styles.stack}>
+          <div
+            className={cn(
+              "border border-dashed border-line-divider-dash p-2",
+              modelAndToolsActive && "halo-panel-muted",
+            )}
+          >
+            <h3 className="mb-2 font-medium text-text-tertiary">
+              Run management
+            </h3>
+            <Box active={activeNodes.has("browser")}>Browser</Box>
+            <VerticalConnection
+              active={flow === "start"}
+              responseActive={executing}
+              responseLabel="SSE"
+              responseDashed
+              responseContinuous
+            >
+              Start run
+            </VerticalConnection>
+            <Box active={activeNodes.has("web")}>Langfuse web</Box>
+            <VerticalConnection
+              active={flow === "save"}
+              responseActive={executing}
+              responseLabel="New events"
+              responseDashed
+              responseContinuous
+            >
+              Save run
+            </VerticalConnection>
+            <PostgresBox active={activeNodes.has("postgres")} />
+            <div className="mt-4">
+              <Box active={activeNodes.has("web")}>Langfuse web</Box>
+            </div>
+            <VerticalConnection active={flow === "enqueue"}>
+              Enqueue run ID
+            </VerticalConnection>
+            <Box active={activeNodes.has("queue")}>BullMQ</Box>
+            <VerticalConnection active={flow === "pickup"}>
+              Pick up run
+            </VerticalConnection>
+            <WorkerBox active={activeNodes.has("worker")} />
+            <VerticalConnection active={executing}>
+              Save progress and results
+            </VerticalConnection>
+            <PostgresBox active={activeNodes.has("postgres")} />
+          </div>
+          <div
+            className={cn(
+              "mt-4 border border-dashed border-line-divider-dash p-2",
+              runManagementActive && "halo-panel-muted",
+            )}
+          >
+            <h3 className="mb-2 font-medium text-text-tertiary">
+              Model and tools
+            </h3>
+            <WorkerBox active={activeNodes.has("worker")} />
+            <VerticalConnection
+              active={flow === "model-request"}
+              responseActive={flow === "model-response"}
+              responseLabel="Model responses"
+            >
+              Model calls
+            </VerticalConnection>
+            <Box active={activeNodes.has("model")}>Claude on Bedrock</Box>
+            <div className="mt-4">
+              <WorkerBox active={activeNodes.has("worker")} />
+            </div>
+            <VerticalConnection
+              active={flow === "mcp-request"}
+              responseActive={flow === "mcp-response"}
+              responseLabel="Tool results"
+            >
+              MCP request
+            </VerticalConnection>
+            <Box active={activeNodes.has("mcp")}>
+              <div>
+                Langfuse MCP server
+                <div className="mt-1 font-normal text-text-secondary">
+                  Project-scoped access
+                </div>
+              </div>
+            </Box>
+            <div className="mt-4">
+              <WorkerBox active={activeNodes.has("worker")} />
+            </div>
+            <VerticalConnection
+              active={flow === "sandbox-start" || flow === "sandbox-request"}
+              responseActive={flow === "sandbox-response"}
+              responseLabel="Files and script output"
+            >
+              {flow === "sandbox-start" ? (
+                "Start sandbox on first use"
+              ) : (
+                <span className="font-mono">read, write, edit, bash</span>
+              )}
+            </VerticalConnection>
+            <Box optional active={activeNodes.has("sandbox")}>
+              <div>
+                Lambda MicroVM{" "}
+                <span className="text-[10px] font-normal text-text-tertiary">
+                  (optional)
+                </span>
+                <div className="mt-1 font-normal text-text-secondary">
+                  No egress by default
+                </div>
+              </div>
+            </Box>
           </div>
         </div>
       </div>

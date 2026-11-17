@@ -1,7 +1,7 @@
 ---
-title: Why is my Vapi project still on the Langfuse v3 experience?
+title: How do I finish the Langfuse v4 upgrade for my Vapi project?
 sidebarTitle: Vapi and the v4 upgrade
-description: Projects ingesting via the Vapi integration stay on the Langfuse v3 experience until the integration is upgraded — what this means for dashboards, tables, and evaluators.
+description: The Vapi integration now ingests on the Langfuse v4 data model. What changed for Vapi projects and which evaluators, exports, and API calls you still need to migrate.
 tags: [observability, integration, vapi]
 ---
 
@@ -9,34 +9,31 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 
 # Vapi and the Langfuse v4 upgrade
 
-Vapi sends data to Langfuse through the [Vapi integration](/integrations/no-code/vapi), which the Vapi team operates. Projects relying on this integration are currently opted into the Langfuse v3 experience because the integration does not yet ingest data on the [Langfuse v4](/docs/v4) data model.
+Vapi sends data to Langfuse through the [Vapi integration](/integrations/no-code/vapi), which the Vapi team operates. The integration now sends data to the Langfuse [OpenTelemetry endpoint](/integrations/native/opentelemetry) on the [Langfuse v4](/docs/v4) data model, so Vapi projects use the v4 experience with real-time data.
 
-We are working with the Vapi team to upgrade the integration. As soon as the upgrade ships, affected projects see the v4 experience automatically — no action is needed on your side.
+You don't need to change anything in Vapi. Your saved Langfuse credentials keep working.
 
-## Switching to v4 early [#switch-early]
+## What you still need to migrate [#what-to-migrate]
 
-You can opt into the v4 experience yourself at any time via the **Langfuse v4 preview** toggle (bottom-left in the UI). This gives you the significantly faster dashboards and tables of the v4 experience. You may opt-out again at any time.
+Some project settings and your own code may still use the old data model. Open the **Migration status** page of your Langfuse Cloud region to see what is left for each project, for example [cloud.langfuse.com/v4-migration](https://cloud.langfuse.com/v4-migration) for EU. Other regions use the same path on [their own host](/security/data-regions).
 
-<Callout type="warning">
-  Until the Vapi integration is upgraded, data ingested via Vapi appears in the
-  v4 experience with a delay of approximately 15 minutes. If you need real-time
-  data, keep the toggle off and switch after the integration upgrade.
-</Callout>
-
-## Keep managing trace-level evaluators [#trace-level-evaluators]
-
-Trace-level LLM-as-a-Judge evaluators are deprecated as part of Langfuse v4, and most projects should [upgrade them to observation-level evaluators](/faq/all/llm-as-a-judge-migration). Observation-level evaluators require the upgraded ingestion path, so for projects ingesting via Vapi this upgrade is currently blocked until the Vapi integration upgrade ships.
-
-Continue creating and managing trace-level evaluators as before — they keep running while you wait for the Vapi integration upgrade. Once the integration is upgraded, follow the [evaluator upgrade guide](/faq/all/llm-as-a-judge-migration) to move to observation-level evaluators.
+| Item                                                            | What to do                                                                                                                                                                                                                                                       |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trace-level or dataset LLM-as-a-Judge evaluators                | [Upgrade to observation-level evaluators](/faq/all/llm-as-a-judge-migration). Since Vapi already sends v4 data, skip the SDK upgrade step.                                                                                                                       |
+| PostHog, Mixpanel, or blob storage exports on the legacy source | Switch to enriched observations: [PostHog](/integrations/analytics/posthog#migrate-export-source), [Mixpanel](/integrations/analytics/mixpanel#migrate-export-source), [blob storage](/docs/api-and-data-platform/features/export-to-blob-storage#upgrade-path). |
+| Your own code calling deprecated API endpoints                  | [Move to the v4 endpoints](/faq/all/deprecated-api-migration) or upgrade the Langfuse SDK.                                                                                                                                                                       |
 
 <Callout type="warning">
-  Trace-level evaluators stop producing results for **all** projects at the
-  Langfuse Cloud v4 cutover on <V4CutoverDate />. We expect Vapi to complete
-  its integration upgrade before then. Once Vapi has upgraded, you will be
-  informed, and the only action you will have to take is to upgrade your
-  evaluators before <V4CutoverDate />; see the [evaluator upgrade
-  guide](/faq/all/llm-as-a-judge-migration).
+  Trace-level evaluators stop producing results at the Langfuse Cloud v4
+  cutover on <V4CutoverDate />. Legacy exports switch to enriched observations
+  automatically at the cutover, which changes the event names your downstream
+  dashboards receive. If you received an email from us about your Vapi project,
+  follow the deadline given there.
 </Callout>
+
+An upgraded evaluator scores each matching observation instead of each trace. To keep one score per Vapi call, filter the evaluator on the root observation; the [evaluator upgrade guide](/faq/all/llm-as-a-judge-migration) explains this.
+
+For the complete checklist, see [prepare your project for the v4 upgrade](/faq/all/upgrade-to-langfuse-v4).
 
 ## Getting help
 

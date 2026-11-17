@@ -182,7 +182,7 @@ export function ObservationsTableDiagram() {
         }
 
         .obs-table__scroll {
-          overflow-x: auto;
+          overflow-x: hidden;
         }
 
         .obs-table table {
@@ -224,6 +224,15 @@ export function ObservationsTableDiagram() {
           border-radius: 9999px;
           background: var(--text-secondary);
           vertical-align: middle;
+        }
+
+        @container (max-width: 559px) {
+          .obs-table th,
+          .obs-table td {
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-break: break-word;
+          }
         }
       `}</style>
     </figure>

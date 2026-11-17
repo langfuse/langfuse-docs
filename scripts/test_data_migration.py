@@ -399,7 +399,8 @@ class Fixture:
             )
         if path == "/api/public/v2/observations":
             if "traceId" not in q:
-                assert json.loads(q["filter"])[0]["column"] == "isRootObservation"
+                assert q["isRootObservation"] == "true"
+                assert "filter" not in q
                 # Empty cursor pages and multiple app roots must not skip/duplicate traces.
                 if not q.get("cursor"):
                     return ok({"data": [], "meta": {"cursor": "root-page-2"}})

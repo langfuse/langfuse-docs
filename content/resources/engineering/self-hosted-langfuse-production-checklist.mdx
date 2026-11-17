@@ -1,0 +1,86 @@
+---
+title: "Production checklist for self-hosted Langfuse"
+description: "A go-live checklist for self-hosted Langfuse: infrastructure, sizing, TLS and encryption, sign-in and SSO, backups, monitoring, telemetry, data retention, and upgrades."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+# Production checklist for self-hosted Langfuse
+
+A Docker Compose trial of Langfuse runs in minutes. A production deployment needs a few more decisions: which managed services to use, how people sign in, how data is encrypted and backed up, and how you will notice problems. This checklist collects them in one place, with links to the configuration reference for each item.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Deploy with the Helm chart or a cloud Terraform module, not Docker Compose. Use managed Postgres, Redis, and S3, and ClickHouse Cloud, BYOC, or the ClickHouse Kubernetes Operator. Serve Langfuse over HTTPS, set `ENCRYPTION_KEY`, disable open sign-up, and configure SSO. Back up Postgres and ClickHouse, monitor health endpoints, set a retention policy, and plan a regular upgrade cadence.
+
+<ArchitectureDiagram />
+
+## Infrastructure [#infrastructure]
+
+- [ ] **Deployment method:** [Kubernetes with Helm](/self-hosting/deployment/kubernetes-helm), or the [AWS](/self-hosting/deployment/aws), [Azure](/self-hosting/deployment/azure), or [GCP](/self-hosting/deployment/gcp) Terraform modules. [Docker Compose](/self-hosting/deployment/docker-compose) has no high availability, scaling, or backups.
+- [ ] **Postgres:** a managed service with automated backups. See [Postgres](/self-hosting/deployment/infrastructure/postgres).
+- [ ] **ClickHouse:** ClickHouse Cloud, BYOC, or the ClickHouse Kubernetes Operator, on a supported version. See [ClickHouse for self-hosted Langfuse](/resources/engineering/clickhouse-for-self-hosted-langfuse).
+- [ ] **Redis or Valkey:** Redis 7 or later, with `maxmemory-policy=noeviction` so queue jobs aren't evicted. See [cache](/self-hosting/deployment/infrastructure/cache).
+- [ ] **Blob storage:** S3, GCS, Azure Blob Storage, or a compatible service. See [blob storage](/self-hosting/deployment/infrastructure/blobstorage).
+- [ ] **UTC everywhere:** Postgres and ClickHouse must run in UTC.
+
+## Sizing [#sizing]
+
+- [ ] **At least the minimums:** web and worker 2 CPU and 4 GiB each, Postgres 2 CPU and 4 GiB, Redis 1 CPU and 1.5 GiB, ClickHouse 2 CPU and 8 GiB. See [scaling](/self-hosting/configuration/scaling#minimum-infrastructure-requirements).
+- [ ] **More than one replica** of web and worker, so one restart doesn't stop ingestion or the UI.
+- [ ] **A load estimate** from a typical day of traces, counted in observations, not requests.
+
+## Security [#security]
+
+- [ ] **HTTPS** terminated at the load balancer or Ingress. See [encryption](/self-hosting/configuration/encryption#https).
+- [ ] **`ENCRYPTION_KEY`** set and stored in your secrets manager. It encrypts stored LLM connections and gateway provider connections, and changing it makes them unreadable.
+- [ ] **Encryption at rest** on the databases and blob storage. See [encryption at rest](/self-hosting/configuration/encryption#encryption-at-rest).
+- [ ] **Sign-in:** disable open sign-up, configure SSO, and enforce SSO for your email domains. See [hardening](/self-hosting/configuration/hardening#access) and [authentication and SSO](/self-hosting/security/authentication-and-sso).
+- [ ] **Network exposure:** keep databases private, and expose only the web container and, if you use it, the AI Gateway. See [networking](/self-hosting/security/networking).
+- [ ] **Outbound URL allowlists** for webhooks and LLM connections, to limit server-side requests. See [outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+- [ ] **PII:** mask data in the SDKs before it is sent, or with server-side masking on Enterprise. See [data masking](/self-hosting/security/data-masking).
+
+## Reliability [#reliability]
+
+- [ ] **Backups** for Postgres and ClickHouse, and a tested restore. See [backups](/self-hosting/configuration/backups).
+- [ ] **Health checks** on the readiness and liveness endpoints. See [health and readiness endpoints](/self-hosting/configuration/health-readiness-endpoints).
+- [ ] **Monitoring** of the Langfuse containers with OpenTelemetry. See [observability](/self-hosting/configuration/observability).
+- [ ] **Disk alerts** on ClickHouse and blob storage, and ClickHouse system log tables capped. See [ClickHouse system log tables](/self-hosting/configuration/scaling#clickhouse-system-log-tables).
+- [ ] **Data retention** per project, so storage doesn't grow forever. See [data retention](/docs/administration/data-retention) (Enterprise on self-hosted).
+
+## Operations [#operations]
+
+- [ ] **Upgrade cadence:** follow [the upgrade guide](/self-hosting/upgrade), and read the release notes before major versions. Subscribe to the [OSS newsletter](/self-hosting/oss-newsletter) for breaking changes.
+- [ ] **Telemetry decision:** OSS sends usage telemetry unless `TELEMETRY_ENABLED=false`. Enterprise sends license telemetry, Government sends none. See [telemetry](/self-hosting/security/telemetry).
+- [ ] **Headless setup:** create the first organization, project, and API keys from environment variables for repeatable deployments. See [headless initialization](/self-hosting/administration/headless-initialization).
+- [ ] **One deployment or several:** decide whether teams share one instance or get their own. See [deployment strategies](/self-hosting/security/deployment-strategies).
+- [ ] **Optional features:** LLM connections for the Playground and evaluations, [Halo](/self-hosting/configuration/halo), and the [AI Gateway](/self-hosting/configuration/ai-gateway).
+
+<Callout type="info">
+  Langfuse does not require internet access. Without it, the update check
+  fails gracefully. Features that call a model, such as LLM-as-a-Judge and the
+  Playground, need a reachable LLM API. See [air-gapped LLM
+  observability](/resources/engineering/air-gapped-llm-observability).
+</Callout>
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="minimum-production">
+<Summary>What is the smallest production-ready setup?</Summary>
+
+Two replicas each of the web and worker containers on Kubernetes, managed Postgres, managed Redis, S3, and a small ClickHouse Cloud service or an operator-managed ClickHouse with at least 2 CPUs and 8 GiB of memory.
+
+</Details>
+
+<Details id="enterprise-needed">
+<Summary>Do I need an Enterprise license for production?</Summary>
+
+No. Open source Langfuse runs in production without limits, including enterprise SSO and organization-level roles. An Enterprise license adds features such as audit logs, data retention, project-level roles, server-side masking, and support. See the [license key page](/self-hosting/license-key).
+
+</Details>
+
+</FaqDetails>

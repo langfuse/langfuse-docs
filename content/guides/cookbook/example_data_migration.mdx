@@ -809,17 +809,15 @@ failures = 0
 progress_every = 10  # print a progress line every N traces
 t_start = time.time()
 while True:
-    # The structured filter works with the minimum supported SDK (4.8.1).
-    # Multiple app roots can belong to one trace, so deduplicate trace IDs below.
+    # Use the first-class logical-root query parameter. Pass it via request_options
+    # because SDK 4.8.1 does not expose the is_root_observation keyword yet.
     listing = with_retries(lambda: src.api.observations.get_many(
         fields="core,basic,io,metadata,trace_context",
         limit=limit,
         cursor=cursor,
         from_start_time=FROM_TS,
         to_start_time=TO_TS,
-        filter=dumps([{
-            "type": "boolean", "column": "isRootObservation", "operator": "=", "value": True
-        }]),
+        request_options={"additional_query_parameters": {"isRootObservation": True}},
     ))
     cursor = getattr(listing.meta, "cursor", None)
     for t in listing.data:
