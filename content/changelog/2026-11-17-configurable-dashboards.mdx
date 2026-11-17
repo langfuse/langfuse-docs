@@ -26,7 +26,7 @@ Build charts directly in your dashboard. Start with a familiar preset, change wh
 
 ## Two metadata keys, two series
 
-Each series has its own source, measures, and filters. A breakdown splits that population by a field; another series lets you ask a different question.
+Each query defines a population with its own source, measures, and filters. Metrics and breakdown groups become the chart series. A second query lets you compare a different population.
 
 | Series  | Measure               | Filter                    |
 | ------- | --------------------- | ------------------------- |
@@ -37,19 +37,19 @@ Choose a bar chart and leave the breakdown empty. An observation containing both
 
 The example dashboard contains 300,000 observations. The bars show 180,000 and 150,000 matches, including 60,000 observations that belong to both groups.
 
-![Configure independently filtered series below a full-width chart preview](/images/changelog/2026-11-17-dashboard-studio-editor.png)
+![Keep the preview visible while editing queries and chart settings](/images/changelog/2026-11-17-dashboard-studio-editor.png)
 
-Open a widget in a full-width editor. Configure sources, measures, filters, and breakdowns in **Queries**; use **Visualization** for chart settings and **Details** for its title and description. The preview and query controls share the workspace, with **Run preview**, **Apply widget**, and Back always visible.
+Open a widget in a dedicated editor. The result stays above the query controls, with chart type, title, formatting, and displayed series together on the right. Resize the preview or scroll the queries independently. Each query combines a source, metrics, filters, and optional grouping; advanced settings stay out of the way until needed.
 
-Use **Run preview** while editing, then **Apply widget** and **Save dashboard**. Reopen a saved widget to change its configuration.
+A visible warning marks changes that have not been run, while the chart retains the last result. Use **Run preview**, then **Apply changes** and **Save dashboard**. Presentation settings update the existing result immediately; changes that need different data wait for the next run. The editor shows inherited dashboard filters alongside the query configuration.
 
 ## Make every starting point editable
 
 The familiar Home cards have configurable replacements. Start with cost and tokens by model, user consumption, traffic, latency percentiles, or scores. Their configuration uses the same editor as a chart you create from scratch.
 
-Choose **Start from a familiar card** to compare an existing card with its proposed replacement. Keep both versions, or replace the old card and use **Undo** while editing to restore it. Score analytics expands into ordinary distribution and trend charts.
+Choose **Add widget → From a template** to start a configurable chart. Choose **Legacy widgets** to compare an existing card with its replacement. Keep both versions, or replace the old card and use **Undo** while editing to restore it. Score analytics expands into ordinary distribution and trend charts.
 
-![The existing root-latency card beside its editable replacement](/images/changelog/2026-11-17-dashboard-studio-migration.png)
+![The existing traces card beside its editable replacement](/images/changelog/2026-11-17-dashboard-studio-migration.png)
 
 The comparison keeps important meanings visible: root-observation latency differs from reconstructed trace duration, and a count of observations differs from a distinct count of traces. Score queries explicitly select all targets, traces, observations, sessions, or experiments.
 
@@ -57,15 +57,17 @@ The comparison keeps important meanings visible: root-observation latency differ
 
 Use several measures in one chart or table. Give a model table separate cost and token columns, and select the cost summary for its headline. Full-period summaries are queried independently of the visible top rows. Percentiles are calculated from the underlying population, rather than averaged across groups.
 
-For a rate, add **Errors** and **All observations**, then use `Errors / All observations` with **Percent (0–1)** formatting. Keep the input series hidden while displaying the formula. Missing input or a zero denominator produces a gap.
+For a rate, name query A **Errors** and query B **All observations**, then use `a.count / b.count` with **Percent (0–1)** formatting. Choose **Hide from chart** on the inputs to display only the formula. **Data** retains exact input values, raw units, and formula definitions, with local controls to inspect a reference or full-period summaries. Inspecting these results does not rerun the queries. Missing count buckets use zero; missing non-count inputs or a zero denominator produce a gap.
 
 Choose a percentile such as p10 or p99.9. Define exact histogram boundaries, including underflow, overflow, and missing values. Active-day counts use UTC calendar days.
 
-Compatible measures share a chart axis. Measures with different units use a table with individually formatted columns. Switch between **Chart**, **Data**, and **Inspect**; Inspect shows the actual query count, duration, rows and bytes read, and generated queries.
+Compatible measures share a chart axis. Measures with different units use a table with individually formatted columns. Choose **Displayed series** to save which model/metric series appear; legend clicks remain temporary exploration. A query filter changes the measured population. Display selection changes what is drawn, and partial selections suppress ambiguous full-population headlines.
+
+Switch between **Chart**, **Data**, and **Inspect**; Inspect shows the actual query count, duration, rows and bytes read, and generated queries.
 
 ## Give the dashboard a story
 
-Add Markdown headings, explanations, lists, and links between charts. Text moves and resizes alongside widgets. Duplicate, copy, paste, remove, and undo dashboard items in place.
+Choose **Add widget → Text** to place Markdown headings, explanations, lists, and links between charts. Text grows to fit its content and still supports manual resizing. New widgets fill available columns. Duplicate, copy, paste, remove, and undo dashboard items in place. Expand descriptions to read their full caveats.
 
 Dashboard filters apply across compatible widgets. Each series can add its own conditions. A widget shows a filter-scope notice when a shared filter cannot apply to its source. Legend interactions change which series are visible; configured view selectors switch between questions such as model cost and token usage.
 
