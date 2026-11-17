@@ -1,0 +1,72 @@
+---
+title: Org Owner Recovery
+description: How Langfuse support handles requests to promote a new organization owner when the only owner has left the customer's company, without turning the request into an account takeover.
+---
+
+# Org Owner Recovery
+
+Sometimes the only `Owner` of a Langfuse Cloud organization leaves the customer's company, and an admin or member asks us to make them the new owner. An owner can delete the organization, manage billing, and create organization API keys, so a wrong promotion is a security incident. Treat every such request as a possible social engineering attempt, however plausible it sounds.
+
+<Callout type="warning">
+
+No verification, no change. Urgency, seniority, customer tier, or a convincing story never replace the checks below. If a check fails or you are unsure, stop and escalate to engineering.
+
+</Callout>
+
+## Process
+
+<Steps>
+
+### Check the request
+
+All of the following must be true before you continue:
+
+- The request is for Langfuse Cloud. Self-hosted customers control their own database and can change roles themselves.
+- The organization has no other owner. If it does, point the requester to that owner.
+- The requester is already a member of the organization. We only promote existing members, never a new email address.
+- The departed owner's email and the requester's email are on the same company domain. If the owner signed up with a personal address (for example Gmail), skip to [the fallback](#fallback).
+
+Do not share details about the organization, such as who its members are, with someone who is not a member.
+
+### Ask the customer to recover the owner account themselves
+
+Companies usually keep control of the mailboxes and SSO accounts of former employees. Ask the requester to have their IT team restore the departed owner's mailbox or identity provider account, log in to Langfuse as that user (resetting the password if needed), and promote a new owner under **Organization Settings → Members**. This needs no action from us and is the preferred outcome.
+
+### Send a one-time code to the owner's email
+
+If the customer controls the mailbox but cannot log in, send a one-time code to the owner's email address on file. The requester returns the code in the existing Pylon ticket within 24 hours.
+
+- Generate a random code per request and send it in a new email from Pylon. Never send it to the requester or to an address the requester supplies.
+- An email that arrives "from" the owner's address is not proof, because sender addresses can be spoofed. Only a returned code counts.
+
+### Notify, wait, and promote
+
+1. Email all admins of the organization and the departed owner's address that an owner change was requested and by whom. Wait 72 hours for objections.
+2. Get approval from a second team member, who re-checks the evidence in the ticket.
+3. Escalate to engineering to promote the requester to `Owner`. Leave the departed owner's membership for the new owner to remove.
+4. Confirm to the requester and recommend keeping at least two owners.
+
+Record every check and its evidence as internal notes on the Pylon ticket.
+
+</Steps>
+
+## Fallback when the mailbox cannot be restored [#fallback]
+
+Use this path only if the customer cannot receive email at the owner's address. It requires both of the following, plus the notification, waiting period, and second approval from the last step:
+
+- **Domain control**: the customer adds a DNS TXT record with a value we provide to the email domain of the requester. Verify it yourself with `dig TXT <domain>`.
+- **Authority over the account**: billing proof that matches Stripe (a recent invoice number and the last four digits of the card), or a signed letter from an executive of the company.
+
+If the customer cannot provide these, for example because the organization is on the Hobby plan with a personal email domain, we do not transfer ownership.
+
+## Reply template
+
+```
+Hi <name>,
+
+Thanks for reaching out. Because the Owner role controls billing, API keys, and deletion of your organization, we need to verify a request like this before changing it.
+
+The fastest way: ask your IT team to restore access to <owner email>, log in to Langfuse with that account, and promote a new owner under Organization Settings → Members.
+
+If logging in is not possible but your company can receive email at that address, let us know. We will send a one-time code there and continue once you share it in this thread.
+```
