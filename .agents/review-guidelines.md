@@ -20,7 +20,6 @@ Writing rules these checks use: [AGENTS.md](AGENTS.md).
 - A reference the screen does not show, such as recorded fields or response headers, stays in a `<Details>` block.
 - Cut toggles, button names, and on-screen steps, such as turning a model off.
 - Cut a prose list when a screenshot on the page already shows it.
-- Keep a consequence, a decision, or a behavior the screen does not show.
 - On a docs or integration page, keep the single opening `<Frame>` or `<Video>`. Further visuals fail when they show the same open screen.
 - Apply this test to prose, examples, callouts, tables, and new pages.
 - Flag a versioned model name, or a list of today's providers, in an intro, heading, or step-by-step guide, unless the page is about that model or provider. Prefer "your model" or "a connection".
