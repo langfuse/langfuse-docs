@@ -33,7 +33,7 @@ type ValueInsightsAccordionProps = {
 function InsightHeader({ index, title }: { index: number; title: string }) {
   return (
     <div className="grid w-full grid-cols-[26px_1fr_auto] items-start gap-3 py-5 text-left">
-      <span className="pt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+      <span className="pt-1 font-mono text-[10px] text-text-tertiary">
         {String(index + 1).padStart(2, "0")}
       </span>
       <h3 className="flex-1 text-[20px] leading-[1.12] text-text-primary sm:text-[24px]">
@@ -68,7 +68,7 @@ export function ValueInsightsAccordion({
   items = chatAgentsInsights,
   imageSrc = "/images/docs/observability/first-trace.png",
   imageAlt = "Langfuse trace screenshot",
-  caption = "trace · frustrated turn 3 of 7",
+  caption = "trace: frustrated turn 3 of 7",
   locked = false,
 }: ValueInsightsAccordionProps = {}) {
   const [activeItemId, setActiveItemId] = useState(items[0]?.id);
@@ -151,7 +151,7 @@ export function ValueInsightsAccordion({
         )}
       </div>
       {caption ? (
-        <p className="px-1 pt-2 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+        <p className="px-1 pt-2 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px] text-text-tertiary">
           {caption}
         </p>
       ) : null}
@@ -166,7 +166,7 @@ export function ValueInsightsAccordion({
     >
       <AccordionPrimitive.Header className="flex">
         <AccordionPrimitive.Trigger className="grid w-full grid-cols-[26px_1fr_auto] items-start gap-3 py-5 text-left [&[data-state=open]>svg]:rotate-45">
-          <span className="pt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-text-tertiary">
+          <span className="pt-1 font-mono text-[10px] text-text-tertiary">
             {String(index + 1).padStart(2, "0")}
           </span>
           <h3 className="flex-1 text-[20px] leading-[1.12] text-text-primary sm:text-[24px]">

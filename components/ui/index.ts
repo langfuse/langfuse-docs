@@ -12,8 +12,10 @@ export type { LinkProps, LinkVariants } from "./link";
 
 export { Image } from "./image";
 
-export { Button, buttonVariants } from "./button";
+export { Button, buttonVariants, controlTextClassName } from "./button";
 export type { ButtonProps } from "./button";
+export { TabButton } from "./tab-button";
+export type { TabButtonProps } from "./tab-button";
 
 export {
   CornerBox,

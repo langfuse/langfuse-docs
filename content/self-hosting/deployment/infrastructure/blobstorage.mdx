@@ -159,6 +159,8 @@ Ensure that both entities have the necessary permissions to access the bucket:
 
 The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider on self-hosted deployments. Exports then run with the role's full permissions, including access to the platform buckets, and project members choose the target bucket; a [dedicated IAM user scoped to the export prefix](/docs/api-and-data-platform/features/export-to-blob-storage#bucket-permissions) is safer. Google Cloud Storage has its own default-credentials option; see [Blob Storage Export integration](#gcs-export-credentials).
 
+To authenticate [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth) or [External Media Storage](/docs/observability/features/multi-modality#external-s3-media) with a dedicated customer IAM role (Enterprise), set [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role). That intermediate role is separate from the container role above, which accesses Langfuse's own buckets.
+
 <Callout type="info">
 
 To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.
@@ -601,13 +603,20 @@ Validation behavior:
 
 Set these on both the Langfuse Web and Worker containers if your internal blob storage endpoint resolves to a private address.
 
-| Variable                                                 | Required / Default | Description                                                                                                            |
-| -------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`. |
-| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                          |
-| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                    |
+| Variable                                                 | Required / Default | Description                                                                                                                                                                                                                   |
+| -------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_HOST`        |                    | Comma-separated list of hostnames that bypass the IP-range check. Example: `minio.internal,storage.svc.cluster.local`.                                                                                                        |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS`         |                    | Comma-separated list of individual IPs to allow. Example: `10.0.0.5,fd00::1`.                                                                                                                                                 |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS` |                    | Comma-separated list of CIDR ranges to allow. Example: `10.0.0.0/8,192.168.0.0/16`.                                                                                                                                           |
+| `LANGFUSE_BLOB_STORAGE_ENDPOINT_ALLOWED_HOSTS`           |                    | Available from `>=v4.69.0`. Comma-separated list of exact lowercase hostnames (no scheme or port). When set, **only** these hosts are allowed and all others, including public ones, are rejected. Example: `minio.internal`. |
 
-These mirror the existing `LANGFUSE_LLM_CONNECTION_WHITELISTED_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
+<Callout type="warning">
+
+Without **Force Path Style**, S3 connects to the bucket as a subdomain of the endpoint (`{bucket}.{host}`). That name passes `LANGFUSE_BLOB_STORAGE_ENDPOINT_ALLOWED_HOSTS`, but Langfuse still blocks it if it resolves to a private address. For a private MinIO at `minio.internal`, turn on Force Path Style or add the address to `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IPS` or `LANGFUSE_BLOB_STORAGE_ENDPOINT_WHITELISTED_IP_SEGMENTS`.
+
+</Callout>
+
+These mirror the existing `LANGFUSE_LLM_CONNECTION_*` variables used for user-configured LLM connections — see [Hardening → Outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists).
 
 <Callout type="info">
 

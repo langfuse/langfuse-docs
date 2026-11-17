@@ -2,14 +2,20 @@
 
 export const SDK_INSTALLS_PER_MONTH = 65_000_000;
 export const DOCKER_PULLS = 38_000_000;
-export const OBSERVATIONS_PER_MONTH = 90_000_000_000;
+export const OBSERVATIONS_PER_MONTH = 110_000_000_000;
 export const FORTUNE_500_COMPANIES = 129;
 export const FORTUNE_50_COMPANIES = 21;
 /** Companies using Langfuse (Cloud + self-hosted), not paying customers. */
 export const COMPANIES = 50_000;
+/** Native integrations listed under /integrations. */
+export const INTEGRATIONS = 100;
 
 export function formatCompanyCount() {
   return `${COMPANIES.toLocaleString("en-US")}+`;
+}
+
+export function formatIntegrations() {
+  return `${INTEGRATIONS}+`;
 }
 
 export function formatSdkInstallsPerMonth(): string {

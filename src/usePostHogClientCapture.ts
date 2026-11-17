@@ -50,6 +50,14 @@ interface EventDefinitions {
     source: "home_feature_tabs";
     path: string;
   };
+  "blog:sign_up_clicked": {
+    placement: "sidebar" | "article";
+    path: string;
+  };
+  "customer_story:sign_up_clicked": {
+    placement: "sidebar" | "article";
+    path: string;
+  };
 }
 
 type EventName = keyof EventDefinitions;

@@ -183,7 +183,7 @@ export default function CloudRegionSelectorPage() {
       <div className="flex w-full max-w-[480px] flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-8">
           <div className="flex flex-col items-center gap-1">
-            <Logo variant="byClickHouse" />
+            <Logo variant="hero" />
             <Text size="s" className="tracking-[0.01em]">
               Agent Observability and Evals
             </Text>
@@ -231,11 +231,7 @@ export default function CloudRegionSelectorPage() {
                       as="span"
                       className="block text-left leading-[150%] text-text-tertiary lg:leading-[150%]"
                     >
-                      {host}
-                      <span className="mx-1.5 text-text-disabled">
-                        &middot;
-                      </span>
-                      AWS {card.awsRegion}
+                      {host}, AWS {card.awsRegion}
                     </Text>
                   </div>
 

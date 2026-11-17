@@ -81,11 +81,11 @@ function Hero() {
       >
         <span className="lw5-pill">
           <span className="lw5-pulse" />
-          Live · May 25–29, 2026
+          Live: May 25–29, 2026
         </span>
         <span className="lw5-dot" />
         <span className="font-mono text-[11px] uppercase tracking-[.08em] text-text-tertiary whitespace-nowrap">
-          5 days · 5 drops
+          5 days, 5 drops
         </span>
         <span className="lw5-dot" />
         <span className="whitespace-nowrap">
@@ -116,7 +116,7 @@ function Hero() {
         />
 
         <div className="relative flex flex-col gap-6">
-          <div className="lw5-eyebrow">Langfuse · May 25–29, 2026</div>
+          <div className="lw5-eyebrow">Langfuse: May 25–29, 2026</div>
           <h1 className="lw5-h1">
             Launch Week <span className="lw5-highlight">#5</span>
           </h1>
@@ -135,7 +135,7 @@ function Hero() {
           </p>
           <div className="flex flex-col gap-3 mt-2">
             <div className="lw5-eyebrow">
-              Get every drop in your inbox · No spam
+              Get every drop in your inbox, no spam
             </div>
             <ProductUpdateSignup
               source="Launch Week 5 hero"
@@ -177,7 +177,7 @@ function Hero() {
         {[
           ["5 days", "5 feature drops"],
           ["Live demos", "ClickHouse OpenHouse"],
-          ["Open source", "MIT · self-host anytime"],
+          ["Open source", "MIT, self-host anytime"],
           ["Monday → Friday", "May 25–29, 2026"],
         ].map(([top, bot], i) => (
           <div
@@ -368,7 +368,7 @@ function Day1Unveiling() {
   return (
     <section id="day-1" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
       <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="lw5-eyebrow">Day 01 · Monday, May 25, 2026</div>
+        <div className="lw5-eyebrow">Day 01: Monday, May 25, 2026</div>
         <h2 className="lw5-h2 max-w-[26ch]">
           <span className="lw5-highlight">Experiments in CI/CD.</span>
         </h2>
@@ -429,7 +429,7 @@ function Day2Unveiling() {
   return (
     <section id="day-2" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
       <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="lw5-eyebrow">Day 02 · Tuesday, May 26, 2026</div>
+        <div className="lw5-eyebrow">Day 02: Tuesday, May 26, 2026</div>
         <h2 className="lw5-h2 max-w-[26ch]">
           <span className="lw5-highlight">Langfuse agent skill.</span>
         </h2>
@@ -507,7 +507,7 @@ function Day3Unveiling() {
   return (
     <section id="day-3" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
       <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="lw5-eyebrow">Day 03 · Wednesday, May 27, 2026</div>
+        <div className="lw5-eyebrow">Day 03: Wednesday, May 27, 2026</div>
         <h2 className="lw5-h2 max-w-[26ch]">
           <span className="lw5-highlight">Full-Text Search.</span>
         </h2>
@@ -591,7 +591,7 @@ function Day4Unveiling() {
   return (
     <section id="day-4" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
       <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="lw5-eyebrow">Day 04 · Thursday, May 28, 2026</div>
+        <div className="lw5-eyebrow">Day 04: Thursday, May 28, 2026</div>
         <h2 className="lw5-h2 max-w-[26ch]">
           <span className="lw5-highlight">Code evaluators.</span>
         </h2>
@@ -669,7 +669,7 @@ function Day5Unveiling() {
   return (
     <section id="day-5" className="lw5-section pt-[80px] pb-10 scroll-mt-24">
       <div className="flex flex-col items-start gap-3.5 mb-8">
-        <div className="lw5-eyebrow">Day 05 · Friday, May 29, 2026</div>
+        <div className="lw5-eyebrow">Day 05: Friday, May 29, 2026</div>
         <h2 className="lw5-h2 max-w-[26ch]">
           <span className="lw5-highlight">Langfuse MCP, expanded.</span>
         </h2>
@@ -806,7 +806,7 @@ function Schedule() {
       className="lw5-section pt-[100px] pb-10 scroll-mt-24"
     >
       <div className="flex flex-col items-start gap-3.5 mb-10">
-        <div className="lw5-eyebrow">The Week · May 25–29, 2026</div>
+        <div className="lw5-eyebrow">The Week: May 25–29, 2026</div>
         <h2 className="lw5-h2 max-w-[24ch]">
           One drop a day, every day.
           <br />

@@ -13,7 +13,7 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 # Langfuse vs. LiteLLM Lens
 
-This guide outlines the key differences between **[Langfuse](/)** and **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in October 2026.
+**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide outlines how it differs from **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in October 2026.
 
 ## TL;DR
 
@@ -78,7 +78,7 @@ See [Langfuse pricing](/pricing) or [talk to us](/talk-to-us) about Enterprise v
 
 ## The improvement loop [#improvement-loop]
 
-Langfuse runs the loop in one project. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score incoming observations and [backfill history](/docs/evaluation/core-concepts#batch-evaluation), [alerts](/docs/observability/features/alerts) fire on those metrics, and [Halo](/docs/halo) investigates traces and creates datasets, prompts, and dashboards on request; it is on every Cloud plan and in public beta for self-hosted. A failure becomes a [dataset](/docs/evaluation/experiments/datasets) item, a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui) in the UI or a full-application experiment through the [SDK](/docs/evaluation/experiments/experiments-via-sdk) that you [compare to a baseline](/docs/evaluation/experiments/compare-experiments), a row in an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), and a [prompt label](/docs/prompt-management/features/prompt-version-control) that carries [model and tool config](/docs/prompt-management/features/config) your application reads at runtime, with a [CI gate](/docs/evaluation/experiments/experiments-ci-cd) on the result.
+Langfuse runs the loop in one project. [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) score incoming observations and [backfill history](/docs/evaluation/core-concepts#batch-evaluation), [alerts](/docs/observability/features/alerts) fire on those metrics, and [Halo](/docs/api-and-data-platform/features/halo) investigates traces and creates datasets, prompts, and dashboards on request; it is on every Cloud plan and in public beta for self-hosted. A failure becomes a [dataset](/docs/evaluation/experiments/datasets) item, a [prompt experiment](/docs/evaluation/experiments/experiments-via-ui) in the UI or a full-application experiment through the [SDK](/docs/evaluation/experiments/experiments-via-sdk) that you [compare to a baseline](/docs/evaluation/experiments/compare-experiments), a row in an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), and a [prompt label](/docs/prompt-management/features/prompt-version-control) that carries [model and tool config](/docs/prompt-management/features/config) your application reads at runtime, with a [CI gate](/docs/evaluation/experiments/experiments-ci-cd) on the result.
 
 Lens investigations take a time window, a sample percentage, and a description of what the agent should do, send the selected traces to an analysis model, and group findings with quotes linked to the original step, on demand or on a schedule. Signals flag traces that match yes/no questions through a separate evaluation provider, saved runs become datasets, and the repository documents [PR evals](https://github.com/BerriAI/lens/blob/main/docs/github-evals.md) that run the agent in a GitHub Action and fail the check on a regression. Prompt management and annotation queues are not documented.
 
@@ -95,7 +95,7 @@ Lens investigations take a time window, a sample percentage, and a description o
 
 ## Using Langfuse and LiteLLM together [#coexistence]
 
-LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. A [Langfuse Gateway](/docs/roadmap#roadmap) is on the public roadmap; until it ships, routing stays with LiteLLM or another gateway.
+LiteLLM stays the gateway for routing, virtual keys, and budgets. The [LiteLLM integration](/integrations/gateways/litellm) records proxy traffic in Langfuse, and the Langfuse SDK or [OpenTelemetry](/integrations/native/opentelemetry) adds the retrieval, tool, and application spans the proxy does not see. The [Langfuse AI Gateway](/docs/gateway/overview) (public beta) calls [multiple LLM providers](/docs/gateway/features/models#supported-providers) with built-in tracing.
 
 If you trial Lens beside Langfuse, decide which store holds datasets and human labels before both accumulate a partial copy; running two investigators over the same traffic doubles analysis-model spend.
 

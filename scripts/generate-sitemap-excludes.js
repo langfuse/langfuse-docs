@@ -125,7 +125,6 @@ function contentPathToRoute(filePath) {
     guides: "guides",
     integrations: "integrations",
     "self-hosting": "self-hosting",
-    library: "library",
     changelog: "changelog",
     faq: "faq",
     handbook: "handbook",

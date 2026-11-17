@@ -57,8 +57,8 @@ langfuse = get_client()
 now = datetime.now(timezone.utc)
 
 # List one root observation per trace for review, e.g. all traces of a given name.
-# The advanced `filter` parameter takes precedence over the individual query
-# parameters, so the time window is expressed as filter conditions as well.
+# Each condition in the advanced `filter` parameter replaces the individual
+# query parameter for the same field; the other query parameters still apply.
 filters = json.dumps([
     {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
     {"type": "string", "column": "traceName", "operator": "=", "value": "support-conversation"},
@@ -91,8 +91,8 @@ const now = new Date();
 const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
 // List one root observation per trace for review, e.g. all traces of a given name.
-// The advanced `filter` parameter takes precedence over the individual query
-// parameters, so the time window is expressed as filter conditions as well.
+// Each condition in the advanced `filter` parameter replaces the individual
+// query parameter for the same field; the other query parameters still apply.
 const filter = JSON.stringify([
   { type: "boolean", column: "isRootObservation", operator: "=", value: true },
   { type: "string", column: "traceName", operator: "=", value: "support-conversation" },
@@ -125,7 +125,7 @@ curl -G https://cloud.langfuse.com/api/public/v2/observations \
   --data-urlencode "limit=50"
 ```
 
-The v2 API returns observation rows, not trace objects. Filtering on `isRootObservation` gives you one row per trace; render each row's input and output, and fetch all observations for a `traceId` when reviewers need the full trace. Because `filter` takes precedence over the individual query parameters, keep every condition — including the time window — inside the filter array. See [Migration of deprecated APIs](/faq/all/deprecated-api-migration#traces) for details.
+The v2 API returns observation rows, not trace objects. Filtering on `isRootObservation` gives you one row per trace; render each row's input and output, and fetch all observations for a `traceId` when reviewers need the full trace. A condition in `filter` replaces the query parameter for the same field, and the other query parameters still apply. See [Migration of deprecated APIs](/faq/all/deprecated-api-migration#traces) for details.
 
 _See the [API reference](https://api.reference.langfuse.com/#tag/observationsv2/GET/api/public/v2/observations)._
 

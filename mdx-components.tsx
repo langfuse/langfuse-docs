@@ -19,6 +19,7 @@ import {
 import { AvailabilityBanner } from "@/components/Availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
 import { Callout } from "@/components/ui/callout";
+import { SignupCTA } from "@/components/SignupCTA";
 import { Table } from "@/components/ui/table";
 import { LoopDiagram } from "@/components/academy/LoopDiagram";
 import { OnlineLoop, OfflineLoop } from "@/components/academy/LoopSubset";
@@ -72,6 +73,12 @@ const Video = dynamic(() =>
   import("@/components/Video").then((m) => ({ default: m.Video })),
 ) as typeof import("@/components/Video").Video;
 
+const VideoCarousel = dynamic(() =>
+  import("@/components/docs/VideoCarousel").then((m) => ({
+    default: m.VideoCarousel,
+  })),
+) as typeof import("@/components/docs/VideoCarousel").VideoCarousel;
+
 const BLOCK_TAGS = new Set([
   "div",
   "details",
@@ -104,6 +111,8 @@ function MdxParagraph({
   return <p {...props}>{children}</p>;
 }
 
+MdxParagraph.displayName = "MdxParagraph";
+
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
@@ -113,8 +122,10 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     p: MdxParagraph,
     Frame,
     Video,
+    VideoCarousel,
     LangTabs,
     Callout,
+    SignupCTA,
     Tabs: LangTabsWithTab,
     Tab: LangTab,
     table: Table,

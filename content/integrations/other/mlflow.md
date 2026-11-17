@@ -1,7 +1,7 @@
 ---
 title: MLflow Integration via OpenTelemetry
 sidebarTitle: MLflow
-logo: /images/integrations/opentelemetry_icon.svg
+logo: /images/integrations/mlflow_icon.svg
 description: Example cookbook for the MLflow Langfuse integration using OpenTelemetry.
 category: Integrations
 ---
