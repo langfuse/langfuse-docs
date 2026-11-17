@@ -7,6 +7,11 @@
 // renderAiGatewayOverviewDiagram in lib/markdown-component-renderers.js.
 
 import type { CSSProperties } from "react";
+import {
+  AiGatewayDiagramFigure,
+  AiGatewayOverviewMobile,
+} from "./AiGatewayDiagramShared";
+import styles from "./AiGatewayDiagram.module.css";
 
 const titleStyle = {
   fontFamily: "var(--font-sans)",
@@ -84,217 +89,220 @@ function Lines({
   );
 }
 
+const ARIA_LABEL =
+  "AI Gateway overview. Coding agents and AI applications send requests to the AI gateway, which runs in Langfuse. The gateway authorizes the user with the gateway key, maps the model name and URL to a valid model provider request, calls the external model provider (OpenAI or Anthropic), and returns the response. Langfuse tracing captures the request data, with different tracing options.";
+
 export function AiGatewayOverviewDiagram() {
   return (
-    <figure className="not-prose my-6 overflow-x-auto">
-      <svg
-        viewBox="0 0 800 540"
-        role="img"
-        aria-label="AI Gateway overview. Coding agents and AI applications send requests to the AI gateway, which runs in Langfuse. The gateway authorizes the user with the gateway key, maps the model name and URL to a valid model provider request, calls the external model provider (OpenAI or Anthropic), and returns the response. Langfuse tracing captures the request data, with different tracing options."
-        style={{
-          display: "block",
-          width: "100%",
-          minWidth: 560,
-          height: "auto",
-        }}
-      >
-        <defs>
-          <marker
-            id="ai-gateway-overview-arrow"
-            viewBox="0 0 8 10"
-            refX="7"
-            refY="5"
-            markerWidth="8"
-            markerHeight="10"
-            markerUnits="userSpaceOnUse"
-            orient="auto"
-          >
-            <path
-              d="M1 1 L7 5 L1 9"
-              fill="none"
-              style={{ stroke: "var(--line-cta)" }}
-              strokeWidth="1.25"
-              strokeLinejoin="round"
-              strokeLinecap="round"
+    <AiGatewayDiagramFigure
+      ariaLabel={ARIA_LABEL}
+      desktop={
+        <svg
+          viewBox="0 0 800 540"
+          className={styles.diagram}
+          role="img"
+          aria-label={ARIA_LABEL}
+        >
+          <defs>
+            <marker
+              id="ai-gateway-overview-arrow"
+              viewBox="0 0 8 10"
+              refX="7"
+              refY="5"
+              markerWidth="8"
+              markerHeight="10"
+              markerUnits="userSpaceOnUse"
+              orient="auto"
+            >
+              <path
+                d="M1 1 L7 5 L1 9"
+                fill="none"
+                style={{ stroke: "var(--line-cta)" }}
+                strokeWidth="1.25"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            </marker>
+            <filter
+              id="ai-gateway-overview-highlight"
+              x="-0.04"
+              y="-0.08"
+              width="1.08"
+              height="1.16"
+            >
+              <feFlood style={{ floodColor: "var(--surface-cta-primary)" }} />
+              <feComposite in="SourceGraphic" operator="over" />
+            </filter>
+          </defs>
+
+          {/* Langfuse boundary */}
+          <rect
+            x="296.5"
+            y="20.5"
+            width="223"
+            height="499"
+            rx="2"
+            fill="none"
+            style={{ stroke: "var(--line-cta)" }}
+            strokeDasharray="3 3"
+          />
+          <image
+            href="/langfuse-icon.svg"
+            x="310"
+            y="34"
+            width="16"
+            height="16"
+          />
+          <text x="332" y="47" style={titleStyle}>
+            Langfuse
+          </text>
+
+          {/* Arrows */}
+          {REQUESTS.map(([x1, y1, x2, y2]) => (
+            <line
+              key={`req-${x1}-${y1}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              style={solidLine}
+              markerEnd="url(#ai-gateway-overview-arrow)"
             />
-          </marker>
-          <filter
-            id="ai-gateway-overview-highlight"
-            x="-0.04"
-            y="-0.08"
-            width="1.08"
-            height="1.16"
+          ))}
+          {RESPONSES.map(([x1, y1, x2, y2]) => (
+            <line
+              key={`res-${x1}-${y1}`}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
+              style={dashedLine}
+              markerEnd="url(#ai-gateway-overview-arrow)"
+            />
+          ))}
+
+          {/* Clients */}
+          <rect
+            x="0.5"
+            y="141.5"
+            width="135"
+            height="55"
+            rx="2"
+            style={boxStyle}
+          />
+          <text x="16" y="174" style={titleStyle}>
+            Coding agent
+          </text>
+          <rect
+            x="0.5"
+            y="245.5"
+            width="135"
+            height="55"
+            rx="2"
+            style={boxStyle}
+          />
+          <text x="16" y="278" style={titleStyle}>
+            AI application
+          </text>
+
+          {/* AI gateway */}
+          <rect
+            x="308.5"
+            y="104.5"
+            width="199"
+            height="219"
+            rx="2"
+            style={{ ...boxStyle, filter: cardShadow }}
+          />
+          <text
+            x="326"
+            y="139"
+            filter="url(#ai-gateway-overview-highlight)"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontWeight: 600,
+              fontSize: 15,
+              fill: "var(--text-primary)",
+            }}
           >
-            <feFlood style={{ floodColor: "var(--surface-cta-primary)" }} />
-            <feComposite in="SourceGraphic" operator="over" />
-          </filter>
-        </defs>
-
-        {/* Langfuse boundary */}
-        <rect
-          x="296.5"
-          y="20.5"
-          width="223"
-          height="499"
-          rx="2"
-          fill="none"
-          style={{ stroke: "var(--line-cta)" }}
-          strokeDasharray="3 3"
-        />
-        <image
-          href="/langfuse-icon.svg"
-          x="310"
-          y="34"
-          width="16"
-          height="16"
-        />
-        <text x="332" y="47" style={titleStyle}>
-          Langfuse
-        </text>
-
-        {/* Arrows */}
-        {REQUESTS.map(([x1, y1, x2, y2]) => (
-          <line
-            key={`req-${x1}-${y1}`}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            style={solidLine}
-            markerEnd="url(#ai-gateway-overview-arrow)"
+            AI gateway
+          </text>
+          <text x="326" y="174.5" style={bulletStyle}>
+            –
+          </text>
+          <Lines
+            x={338}
+            y={174.5}
+            lines={["Authorize user with", "gateway key"]}
+            style={bodyStyle}
           />
-        ))}
-        {RESPONSES.map(([x1, y1, x2, y2]) => (
-          <line
-            key={`res-${x1}-${y1}`}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            style={dashedLine}
-            markerEnd="url(#ai-gateway-overview-arrow)"
+          <text x="326" y="222.5" style={bulletStyle}>
+            –
+          </text>
+          <Lines
+            x={338}
+            y={222.5}
+            lines={[
+              "Map model name and",
+              "URL to valid model",
+              "provider request",
+            ]}
+            style={bodyStyle}
           />
-        ))}
 
-        {/* Clients */}
-        <rect
-          x="0.5"
-          y="141.5"
-          width="135"
-          height="55"
-          rx="2"
-          style={boxStyle}
-        />
-        <text x="16" y="174" style={titleStyle}>
-          Coding agent
-        </text>
-        <rect
-          x="0.5"
-          y="245.5"
-          width="135"
-          height="55"
-          rx="2"
-          style={boxStyle}
-        />
-        <text x="16" y="278" style={titleStyle}>
-          AI application
-        </text>
+          {/* Langfuse tracing */}
+          <rect
+            x="308.5"
+            y="370.5"
+            width="199"
+            height="108"
+            rx="2"
+            style={{ ...boxStyle, filter: cardShadow }}
+          />
+          <text
+            x="326"
+            y="405"
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontWeight: 600,
+              fontSize: 15,
+              fill: "var(--text-primary)",
+            }}
+          >
+            Langfuse tracing
+          </text>
+          <Lines
+            x={326}
+            y={436.5}
+            lines={["Capture request data", "(different tracing options)"]}
+            style={bodyStyle}
+          />
 
-        {/* AI gateway */}
-        <rect
-          x="308.5"
-          y="104.5"
-          width="199"
-          height="219"
-          rx="2"
-          style={{ ...boxStyle, filter: cardShadow }}
-        />
-        <text
-          x="326"
-          y="139"
-          filter="url(#ai-gateway-overview-highlight)"
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontWeight: 600,
-            fontSize: 15,
-            fill: "var(--text-primary)",
-          }}
-        >
-          AI gateway
-        </text>
-        <text x="326" y="174.5" style={bulletStyle}>
-          –
-        </text>
-        <Lines
-          x={338}
-          y={174.5}
-          lines={["Authorize user with", "gateway key"]}
-          style={bodyStyle}
-        />
-        <text x="326" y="222.5" style={bulletStyle}>
-          –
-        </text>
-        <Lines
-          x={338}
-          y={222.5}
-          lines={[
-            "Map model name and",
-            "URL to valid model",
-            "provider request",
-          ]}
-          style={bodyStyle}
-        />
-
-        {/* Langfuse tracing */}
-        <rect
-          x="308.5"
-          y="370.5"
-          width="199"
-          height="108"
-          rx="2"
-          style={{ ...boxStyle, filter: cardShadow }}
-        />
-        <text
-          x="326"
-          y="405"
-          style={{
-            fontFamily: "var(--font-sans)",
-            fontWeight: 600,
-            fontSize: 15,
-            fill: "var(--text-primary)",
-          }}
-        >
-          Langfuse tracing
-        </text>
-        <Lines
-          x={326}
-          y={436.5}
-          lines={["Capture request data", "(different tracing options)"]}
-          style={bodyStyle}
-        />
-
-        {/* External model provider */}
-        <rect
-          x="664.5"
-          y="175.5"
-          width="135"
-          height="111"
-          rx="2"
-          style={boxStyle}
-        />
-        <Lines
-          x={680}
-          y={208}
-          lines={["External model", "provider"]}
-          style={titleStyle}
-        />
-        <Lines
-          x={680}
-          y={245.5}
-          lines={["OpenAI,", "Anthropic"]}
-          style={{ ...bodyStyle, fill: "var(--text-tertiary)" }}
-        />
-      </svg>
-    </figure>
+          {/* External model provider */}
+          <rect
+            x="664.5"
+            y="175.5"
+            width="135"
+            height="111"
+            rx="2"
+            style={boxStyle}
+          />
+          <Lines
+            x={680}
+            y={208}
+            lines={["External model", "provider"]}
+            style={titleStyle}
+          />
+          <Lines
+            x={680}
+            y={245.5}
+            lines={["OpenAI,", "Anthropic"]}
+            style={{ ...bodyStyle, fill: "var(--text-tertiary)" }}
+          />
+        </svg>
+      }
+    >
+      <AiGatewayOverviewMobile />
+    </AiGatewayDiagramFigure>
   );
 }

@@ -1,0 +1,29 @@
+---
+title: How do I check whether I am on Langfuse v4?
+seoTitle: "Check Whether Your Langfuse Instance or Project Runs v4"
+description: How to tell whether a Langfuse Cloud organization or a self-hosted instance runs Langfuse v4 and its observations-first data model.
+tags: [platform, self-hosting, v4]
+---
+
+# How do I check whether I am on Langfuse v4?
+
+## Langfuse Cloud
+
+- Organizations created on or after April 14, 2026 run [Langfuse v4](/docs/v4) and do not show a toggle.
+- Organizations created before that date show a **Langfuse v4 preview** toggle in the bottom-left corner of the UI until the v4 cutover. When the toggle is on, you see the v4 experience.
+- The **Migration Assistant** sidebar panel and the [Migration status page](https://cloud.langfuse.com/v4-migration) list the remaining actions for your projects.
+
+## Self-hosted Langfuse
+
+Two things decide whether your instance is on v4:
+
+1. **Server version.** `GET /api/public/health` returns the running version in the `version` field, for example `"version": "4.75.0"`. The version is also shown in the UI sidebar. Versions starting with `4.` are Langfuse v4.
+2. **Write mode.** A v4 server can still run in a migration mode. `LANGFUSE_MIGRATION_V4_WRITE_MODE` controls it:
+
+| `LANGFUSE_MIGRATION_V4_WRITE_MODE` | Meaning                                                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `events_only` (default)            | Fully on v4. All users see the v4 experience.                                                                                 |
+| `dual`                             | Migration in progress. Users can switch the v4 preview on and off, unless `LANGFUSE_MIGRATION_V4_ALLOW_PREVIEW_OPT_IN=false`. |
+| `legacy`                           | v3 behavior on a v4 server.                                                                                                   |
+
+For the migration steps, see [Migrate Langfuse v3 to v4](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4). To prepare a project, see [Make your project ready for the upgrade to Langfuse v4](/faq/all/upgrade-to-langfuse-v4).

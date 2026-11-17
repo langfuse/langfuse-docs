@@ -1,0 +1,30 @@
+---
+title: How do I export a single trace or session?
+seoTitle: "Download a Trace or Session as JSON"
+description: Download a single trace or session as JSON from the Langfuse UI, or fetch its observations with the Observations API v2.
+tags: [observability, export-data, public-api]
+---
+
+# How do I export a single trace or session?
+
+## In the UI
+
+- **Trace:** open the trace and click **Download JSON** in the header. The file (`trace-<traceId>.json`) contains the trace, its observations, and its scores.
+- **Session:** open the session and click the download icon (**Download session as JSON**). The file (`session-<sessionId>.json`) contains the session's traces and comments.
+
+Very large inputs or outputs can be left out of the trace download. To export many traces or observations at once as CSV, JSON, or JSONL, use the export button on the table instead. See [Export data from the UI](/docs/api-and-data-platform/features/export-from-ui).
+
+## Via the API
+
+Fetch all observations of one trace or session with the [Observations API v2](/docs/api-and-data-platform/features/public-api#v2):
+
+```bash
+curl -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
+  "https://cloud.langfuse.com/api/public/v2/observations?traceId=<traceId>&fields=core,basic,io,usage&limit=1000"
+```
+
+Use `sessionId=<sessionId>` instead of `traceId` for a session, and follow the `meta.cursor` value to fetch further pages. In the Python SDK: `langfuse.api.observations.get_many(trace_id="<traceId>", fields="core,basic,io,usage")`.
+
+<Callout type="warning">
+  `GET /api/public/traces/{traceId}` and `GET /api/public/sessions/{sessionId}` are deprecated. Use the Observations API v2 for new code. See [Migration of deprecated APIs](/faq/all/deprecated-api-migration#traces).
+</Callout>

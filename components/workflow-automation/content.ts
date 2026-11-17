@@ -11,7 +11,7 @@ export const invoiceIntakeTrace: {
   insight: string;
   steps: InvoiceIntakeStep[];
 } = {
-  insight: "one retry step · 66% of run cost",
+  insight: "one retry step, 66% of run cost",
   steps: [
     { name: "ingest_pdf", indent: false, offset: "6%", width: "16%" },
     { name: "ocr_pages ×14", indent: true, offset: "18%", width: "20%" },

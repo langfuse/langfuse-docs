@@ -677,8 +677,7 @@ progress_every = 10  # このトレース数ごとに進捗ログを出します
 t_start = time.time()
 while True:
     # `is_root_observation` は論理ルートを取得するための専用パラメータで、
-    # 1トレースにつき1行が返ります。高度な `filter` パラメータは他のすべての
-    # クエリパラメータより優先されるため、こちらを使います。
+    # 高度な `filter` パラメータなしで1トレースにつき1行が返ります。
     listing = with_retries(lambda: src.api.observations.get_many(
         fields="core,basic,io,metadata,trace_context",
         limit=limit,

@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export interface EvaluatorBlockEvaluator {
   name: string;
-  /** "LLM-as-a-judge" | "Code" | "Human" */
+  /** "LLM-as-a-judge" | "Decision model" | "Code" | "Human" */
   type: string;
   /** The one-line check, shown in the collapsed row. */
   check?: React.ReactNode;
@@ -111,7 +111,7 @@ export function EvaluatorBlock({
                 <div className="evaluator-block__details">
                   <div className="evaluator-block__detail-meta">
                     {evaluator.type}
-                    {evaluator.returns ? ` · returns ${evaluator.returns}` : ""}
+                    {evaluator.returns ? `, returns ${evaluator.returns}` : ""}
                   </div>
                   <div className="evaluator-block__narrative">
                     {evaluator.details}

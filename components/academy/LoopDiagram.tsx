@@ -368,7 +368,7 @@ export function LoopDiagram({ highlight }: { highlight?: string } = {}) {
                   lineHeight: 1.5,
                 }}
               >
-                {station.meta.join(" · ")}
+                {station.meta.join(", ")}
               </div>
             </Link>
           ))}

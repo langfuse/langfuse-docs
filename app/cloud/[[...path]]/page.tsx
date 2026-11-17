@@ -231,11 +231,7 @@ export default function CloudRegionSelectorPage() {
                       as="span"
                       className="block text-left leading-[150%] text-text-tertiary lg:leading-[150%]"
                     >
-                      {host}
-                      <span className="mx-1.5 text-text-disabled">
-                        &middot;
-                      </span>
-                      AWS {card.awsRegion}
+                      {host}, AWS {card.awsRegion}
                     </Text>
                   </div>
 

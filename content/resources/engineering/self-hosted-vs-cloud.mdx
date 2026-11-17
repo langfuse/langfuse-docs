@@ -1,0 +1,102 @@
+---
+title: "Langfuse self-hosted vs Cloud: how to choose"
+description: "Choose between Langfuse Cloud, self-hosted open source, self-hosted Enterprise, and Government: data location, compliance, operations work, features, and cost."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+import ArchitectureDiagram from "@/components-mdx/architecture-diagram-v3.mdx";
+
+# Langfuse self-hosted vs Cloud: how to choose
+
+Langfuse runs as a managed service, [Langfuse Cloud](https://cloud.langfuse.com), or in your own infrastructure under the MIT license. Both use the same code and the same architecture, so the choice is mostly about who operates the infrastructure and where the data lives, not about features.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** Start with **Langfuse Cloud** unless a hard requirement rules it out. Cloud runs in the EU, US, Japan, and a HIPAA region, with SOC 2 Type II and ISO 27001. **Self-host** when data may not leave your network, or when you already operate ClickHouse-class infrastructure. Open source self-hosting includes all core features without usage limits. Add an **Enterprise** license for features such as audit logs, data retention, and project-level roles, or a **Government** license for FIPS mode, Iron Bank images, and no telemetry.
+
+<ArchitectureDiagram />
+
+## The four options [#options]
+
+| Option                 | Who operates it | Where data lives                          | What you add                                                                                         |
+| ---------------------- | --------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Langfuse Cloud         | Langfuse        | EU, US, Japan, or HIPAA region            | Nothing to deploy; usage-based [pricing](/pricing)                                                   |
+| Self-hosted OSS        | You             | Your infrastructure                       | MIT license, all core features, enterprise SSO and organization roles, the AI Gateway                |
+| Self-hosted Enterprise | You             | Your infrastructure                       | Audit logs, data retention, project-level roles, server-side masking, SCIM, management APIs, support |
+| Self-hosted Government | You             | Your infrastructure, including air-gapped | Everything in Enterprise, FIPS 140-3 mode, Iron Bank-hardened images, no telemetry                   |
+
+Self-hosted Enterprise is bundled with ClickHouse Cloud, ClickHouse BYOC, or ClickHouse Private, and Langfuse pricing is added to your ClickHouse plan. See [self-hosted pricing](/pricing-self-host) and the [license key page](/self-hosting/license-key) for the current feature list.
+
+## The real trade-off [#trade-off]
+
+The decision comes down to which kind of work your organization is better set up for:
+
+- **Cloud means contractual work.** Security review, the [DPA](/dpa), and procurement. Langfuse runs upgrades, scaling, backups, and availability.
+- **Self-hosting means operational work.** Data stays in your environment, which can remove the vendor review. You deploy, monitor, upgrade, and scale Postgres, ClickHouse, Redis, blob storage, and the Langfuse containers.
+
+## Decide in order [#decision-guide]
+
+Work through these questions in order. The first hard constraint decides.
+
+1. **Is there a Cloud region for your regulated data?** Protected health information can go to the [HIPAA region](/security/hipaa) under a BAA. EU residency is covered by the EU region, see [EU data residency](/resources/engineering/langfuse-eu-data-residency-gdpr). Teams that need data in Japan have the Tokyo region.
+2. **May data leave your network at all?** If not, because of an air-gap, a VPC-only policy, or a regulator, self-host. Langfuse does not require internet access. See [air-gapped LLM observability](/resources/engineering/air-gapped-llm-observability).
+3. **Does someone own the infrastructure?** Running ClickHouse in production takes sizing, upgrades, backups, and disk management. Without an owner, choose Cloud.
+4. **Do you already run ClickHouse or a data platform?** Then self-hosting is a cost and control decision. See [ClickHouse for self-hosted Langfuse](/resources/engineering/clickhouse-for-self-hosted-langfuse).
+5. **None of the above?** Start on Cloud. Moving later is possible, see [Can I move between Cloud and self-hosted?](#move-between).
+
+## What self-hosting takes [#operations]
+
+- **Six components:** Langfuse Web and Worker, Postgres, ClickHouse, Redis or Valkey, and S3-compatible blob storage. Managed databases remove much of the work.
+- **ClickHouse needs an owner.** Disk growth, retention, and version upgrades are where most of the operations time goes. ClickHouse Cloud or BYOC is the recommended option for larger deployments.
+- **Upgrades are yours.** Langfuse ships often. Upgrade regularly and read the [upgrade guides](/self-hosting/upgrade) instead of jumping many versions.
+- **Sizing follows instrumentation.** Volume depends on observations per trace, not on requests. Measure a typical day before planning capacity, see [scaling](/self-hosting/configuration/scaling).
+
+For the steps before go-live, see the [production checklist for self-hosted Langfuse](/resources/engineering/self-hosted-langfuse-production-checklist).
+
+## Cost [#cost]
+
+- **Cloud** cost follows usage in [billable units](/docs/administration/billable-units), with no infrastructure or headcount line.
+- **Self-hosted** cost is infrastructure plus the share of an engineer who operates it. The software is free under the MIT license; operating it is not.
+- Self-hosting is cheapest when the platform already exists. Adding Langfuse to a well-run Kubernetes and data setup costs little extra. Building that setup only to avoid a SaaS bill rarely pays off.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="feature-limited">
+<Summary>Is self-hosted Langfuse limited compared to Cloud?</Summary>
+
+Not for core features. Tracing, evaluation, prompt management, datasets, dashboards, Halo, and the AI Gateway are in the open source version without usage limits. Some enterprise features need a license key on self-hosted deployments, listed on the [license key page](/self-hosting/license-key).
+
+</Details>
+
+<Details id="move-between">
+<Summary>Can I move between Cloud and self-hosted?</Summary>
+
+Yes. The [data migration cookbook](/guides/cookbook/example_data_migration) has scripts that copy traces, prompts, and datasets between projects, including between Cloud and a self-hosted instance. Many teams start tracing fresh on the new deployment and migrate prompts and datasets only.
+
+</Details>
+
+<Details id="scale">
+<Summary>Does self-hosted Langfuse scale to high volumes?</Summary>
+
+Yes. It uses the same architecture as Langfuse Cloud, with no scalability limits between editions. Scale depends on how you size ClickHouse, blob storage, and the worker containers.
+
+</Details>
+
+<Details id="byoc">
+<Summary>Is there a bring-your-own-cloud option?</Summary>
+
+ClickHouse BYOC runs managed ClickHouse in your own cloud account, and self-hosted Enterprise is bundled with it. The Langfuse containers then run in your account too, operated by you. [Talk to us](/talk-to-us?deployment=self-hosted) about the setup that fits your requirements.
+
+</Details>
+
+<Details id="kubernetes">
+<Summary>Do I need Kubernetes to self-host?</Summary>
+
+No, but most production deployments use the [Helm chart](/self-hosting/deployment/kubernetes-helm) or the AWS, Azure, or GCP Terraform modules. [Docker Compose](/self-hosting/deployment/docker-compose) is for local use and testing, without high availability or backups.
+
+</Details>
+
+</FaqDetails>

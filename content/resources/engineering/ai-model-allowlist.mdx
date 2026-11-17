@@ -1,0 +1,117 @@
+---
+title: "Control which AI models your company can use"
+description: "Approve AI models centrally with a model allowlist: turn models on or off per provider connection, limit individual keys to approved models, and keep new releases off until reviewed."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Control which AI models your company can use
+
+Without a central policy, the model mix in a company is whatever each developer and service picks. That makes cost unpredictable, because the most capable model is often the most expensive one, and it makes compliance reviews harder, because nobody can say which models process company data. A model allowlist at the gateway answers both: admins decide which models can be called, and every call goes through that decision.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** The [Langfuse AI Gateway](/docs/gateway/overview) controls models at two levels. Owners and admins turn models on or off per **provider connection**, which applies to every key. On top of that, each **gateway key** can be limited to some of the enabled models with patterns such as `openai-prod:*`. A connection with every model enabled also allows models the provider publishes later; once you turn one model off, the connection keeps an explicit list, so new models stay off until an admin enables them.
+
+<Frame fullWidth>
+  ![Connections and Models page with a searchable model list for one provider connection, an Enabled switch per model, and Enable all and Disable all buttons](/images/docs/ai-gateway/models-manage.png)
+</Frame>
+
+## Why approve models centrally [#why]
+
+Teams usually introduce a model allowlist for one of three reasons:
+
+1. **Cost control.** Large models cost an order of magnitude more per token than small ones. Restricting routine workloads to approved models keeps spend predictable.
+2. **Vendor and data review.** Security and legal teams approve specific providers and models for company data. An allowlist enforces that approval instead of documenting it.
+3. **Consistency.** When everyone uses the same set of models, cost and quality comparisons across teams mean something.
+
+## Turn models on or off per connection [#connections]
+
+The organization-wide policy is set on each provider connection, under **AI Gateway → Connections & Models → Models**:
+
+- **By default, a connection allows every model** the provider offers, including models released later.
+- **Turning a model off switches the connection to an explicit list.** From then on, only enabled models can be called, and new provider releases stay off until someone enables them.
+- **Enable all** returns the connection to allowing every model.
+- **Refresh models for this connection** fetches the provider's current list, so newly released models show up for review.
+
+No key can call a model that is turned off on its connection. See [manage models](/docs/gateway/features/models#manage-models) for the steps.
+
+## Limit individual keys [#per-key]
+
+To give a team, a service, or a contractor a narrower set of models, add model patterns to their gateway key under **More options → Models** when you create it, or later with **Edit key**. Patterns match the [model ID](/docs/gateway/features/models#model-ids) `<connection>:<model>`, `*` matches any characters, and a leading `-` excludes models:
+
+| Patterns                                   | The key can call                                        |
+| ------------------------------------------ | ------------------------------------------------------- |
+| `openai-prod:*`                            | Every enabled model of `openai-prod`                    |
+| `openai-prod:*`, `anthropic-prod:claude-*` | Those models plus the Claude models of `anthropic-prod` |
+| `-openrouter:*`                            | Every enabled model except those of `openrouter`        |
+
+Patterns only narrow what the connection allows; they never turn a model on. A key without patterns can call every enabled model. See [restrict models per API key](/docs/gateway/features/models#restrict-models-per-key).
+
+<Callout type="info">
+  Whoever manages a key can change its patterns with **Edit key**, including
+  developers on their own user keys. For limits developers can't change, turn
+  models off on the connection, or use service account keys, which only
+  admins and owners manage.
+</Callout>
+
+## Separate connections for separate policies [#multiple-connections]
+
+An organization can add several connections per provider, each with its own model list. Each connection's name becomes the prefix of its model IDs:
+
+| Connection         | Enabled models                        |
+| ------------------ | ------------------------------------- |
+| `anthropic-prod`   | The models approved for production    |
+| `anthropic-agents` | The models approved for coding agents |
+| `openai-research`  | A wider set for evaluation work       |
+
+Combine them with key patterns, for example by limiting CI service account keys to `anthropic-prod:*`, so each policy applies only to the keys it is meant for. Separate connections also separate cost per connection on the [analytics page](/docs/gateway/features/analytics).
+
+<Callout type="info">
+  Coding agents that send plain model names, such as names starting with
+  `gpt-` or `claude-`, are routed to the oldest OpenAI or Anthropic connection
+  that has the model enabled. Put your default policy on that connection. See
+  [model IDs](/docs/gateway/features/models#model-ids).
+</Callout>
+
+## Make the policy visible [#visibility]
+
+Everyone with gateway access, including Viewers and people with the AI Gateway role, can open the model list and see what is available. Developers find out what they can use before they hit an error, and reviewers can check the policy without admin rights.
+
+For a record of which key called which model, see [AI audit trail](/resources/engineering/ai-audit-trail). Every recorded generation stores the model and the provider connection that served it.
+
+## When a new model is released [#new-models]
+
+A practical review routine:
+
+1. Keep the production connection on an explicit list, so new models stay off.
+2. Enable the new model on a research connection, limit it to the evaluating team's keys, and compare cost and quality on real traffic with [experiments](/docs/evaluation/experiments/datasets).
+3. Enable it on the production connection once it is approved.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="why-cant-i-call-a-new-model">
+<Summary>Why can't I call a newly released model through the gateway?</Summary>
+
+Either the connection has an explicit model list because an admin turned at least one model off, or your key's model patterns don't match the new model. Admins enable new models under **AI Gateway → Connections & Models → Models**, and select **Refresh models for this connection** if the model doesn't appear yet. Key patterns are changed with **Edit key**.
+
+</Details>
+
+<Details id="per-team-model-restrictions">
+<Summary>Can I allow a model for one team but not another?</Summary>
+
+Yes. Enable the model on the connection, and limit the other team's keys with patterns that exclude it, such as `-openai-research:*`. Review per-team usage with key metadata on the analytics page.
+
+</Details>
+
+<Details id="which-providers">
+<Summary>Which providers does the allowlist apply to?</Summary>
+
+Every provider the gateway supports. Each connection has its own model list. See [supported providers](/docs/gateway/features/models#supported-providers) for the current list.
+
+</Details>
+
+</FaqDetails>
