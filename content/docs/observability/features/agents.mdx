@@ -137,6 +137,8 @@ When using raw OpenTelemetry, record these attributes:
 | `langfuse.agent.run_id`       | The owning AGENT observation's span ID on its model, tool, and other owned observations |
 | `deployment.environment.name` | The environment for the activity, such as `production`                                  |
 
+Set identity and ownership as span attributes, not as entries inside your application metadata.
+
 Langfuse also accepts `langfuse.agent.id` and `langfuse.agent.name`. When both conventions provide a nonempty string for a field, its `langfuse.agent.*` value takes precedence. You can set the environment through the [Langfuse environment configuration](/docs/observability/features/environments#configure-environments) instead.
 
 If your framework generates a new `gen_ai.agent.id` for every instance or process, set a stable `langfuse.agent.id` on the agent run and its owned observations. Langfuse preserves explicit IDs; it does not merge different IDs just because their display names match. Check this before comparing runs across deployments.
@@ -311,7 +313,7 @@ Use the activity pulse above a table to narrow a busy or quiet interval: click a
 Overview compares the selected period with the immediately preceding period of the same length. Dotted lines align the previous period to the selected timeline. Empty average values stay unknown; a measured zero remains zero.
 
 <Frame>
-  ![Product search Overview comparing agent runs, own cost per run, and cache hit rate with the preceding period.](/images/docs/agents/agents-overview.png)
+  ![Researcher Overview comparing agent runs, own cost per run, and cache hit rate with the preceding period.](/images/docs/agents/agents-overview.png)
 </Frame>
 
 The green activity indicator means the agent's latest recorded activity was less than an hour ago. It describes recent telemetry, not health or whether the agent is currently running. An older last-seen time is neutral: there may simply have been no work to do.
