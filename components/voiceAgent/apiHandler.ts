@@ -30,6 +30,9 @@ export const POST = async (req: Request) => {
   let body: { userId?: unknown; storeAudio?: unknown };
   try {
     body = await req.json();
+    if (typeof body !== "object" || body === null || Array.isArray(body)) {
+      throw new TypeError("Body must be a JSON object");
+    }
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON body." }), {
       status: 400,

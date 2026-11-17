@@ -155,7 +155,7 @@ export const VoiceAgent = ({ className, ...props }: VoiceAgentProps) => {
       setError(err instanceof Error ? err.message : "Failed to connect");
       setAgentState("error");
     }
-  }, [userId]);
+  }, [userId, storeAudio]);
 
   const disconnect = useCallback(() => {
     if (audioElementRef.current) {
