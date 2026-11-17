@@ -1,9 +1,8 @@
 # Review guidelines
 
 - read the surrounding docs, the product, and the screenshots before you judge a change
-- Run gate 1 first. One failure stops comments on wording. Say what to remove or which home it belongs in.
-- Run gate 2 only after gate 1 is clean.
-- [General checks](#checks-that-always-run) still run when gate 1 fails.
+- Run gate 1 first. Say what to remove or which home it belongs in. Then run gate 2.
+- [Then run the general check](#checks-that-always-run)
 
 ## Gate 1: Necessity and place
 
