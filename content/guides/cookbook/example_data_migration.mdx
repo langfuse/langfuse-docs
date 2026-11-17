@@ -560,6 +560,9 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor, SpanExportResult
 from opentelemetry.trace import NonRecordingSpan, SpanContext, TraceFlags
 
+# Reuse migrated/restored prompt versions; keep source versions if prompts were skipped.
+prompt_version_map = globals().get("prompt_version_map", {})
+
 # Force the IDs actually exported to match the score/dataset reference maps.
 _migration_trace_id = ContextVar("migration_trace_id", default=None)
 _migration_span_id = ContextVar("migration_span_id", default=None)

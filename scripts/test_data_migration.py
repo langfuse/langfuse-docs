@@ -579,11 +579,43 @@ def main():
         assert "eval-default" not in namespace["evaluator_id_map"]
         fixture.eval_failure = False
 
-        # Failed OTLP exports must stop the notebook before scores and datasets.
-        namespace["otlp_provider"].shutdown()
         obs_code = next(
             "".join(c["source"]) for c in notebook["cells"] if c["id"] == "41dd7648"
         )
+        # Observations can run after setup without executing the prompts cell,
+        # and must preserve a restored mapping when resuming a migration.
+        setup_ids = {"4db2f694", "a23782ff", "f74743d7"}
+        for restored_map, expected_version in [
+            (None, 1),
+            ({("folder/text", 1): 42}, 42),
+        ]:
+            standalone = {}
+            if restored_map is not None:
+                standalone["prompt_version_map"] = restored_map
+            for cell in notebook["cells"]:
+                if cell["id"] in setup_ids:
+                    exec("".join(cell["source"]), standalone)
+            before_spans = len(fixture.spans)
+            try:
+                exec(obs_code, standalone)
+                assert standalone["failures"] == 0, output.getvalue()
+                exported = fixture.spans[before_spans:]
+                assert len(exported) == len(OBSERVATIONS)
+                child = next(s for s in exported if s.span_id.hex() == ids[CHILD])
+                attrs = {a.key: a.value for a in child.attributes}
+                assert (
+                    attrs["langfuse.observation.prompt.version"].int_value
+                    == expected_version
+                )
+                if restored_map is None:
+                    assert standalone["prompt_version_map"] == {}
+                else:
+                    assert standalone["prompt_version_map"] is restored_map
+            finally:
+                standalone["otlp_provider"].shutdown()
+
+        # Failed OTLP exports must stop the notebook before scores and datasets.
+        namespace["otlp_provider"].shutdown()
         from opentelemetry.sdk.trace.export import SpanExportResult
 
         with patch.object(
