@@ -194,13 +194,14 @@ export class JinglePlayer {
   private techno = false;
   private drumStep = 0;
   private disposed = false;
+  private playbackGeneration = 0;
 
-  setTechno(techno: boolean) {
-    if (this.techno === techno) return;
+  setTechno(techno: boolean): Promise<boolean> | null {
+    if (this.techno === techno) return null;
     const wasPlaying = this.timer !== null;
     this.stop();
     this.techno = techno;
-    if (wasPlaying) void this.start();
+    return wasPlaying ? this.start() : null;
   }
 
   /** Envelope from the audio transport, shared by the visual renderer. */
@@ -217,6 +218,7 @@ export class JinglePlayer {
   /** Starts playback. Resolves to false while the browser blocks autoplay. */
   async start(): Promise<boolean> {
     if (this.disposed) return false;
+    const generation = this.playbackGeneration;
     const ctx = this.ensureContext();
     if (!ctx) return false;
     if (ctx.state === "suspended") {
@@ -229,7 +231,12 @@ export class JinglePlayer {
         // Autoplay policies reject or ignore resume() until a user gesture.
       }
     }
-    if (this.disposed || ctx.state !== "running") return false;
+    if (
+      this.disposed ||
+      generation !== this.playbackGeneration ||
+      ctx.state !== "running"
+    )
+      return false;
     if (this.timer) return true;
 
     this.master = ctx.createGain();
@@ -249,6 +256,7 @@ export class JinglePlayer {
   }
 
   stop() {
+    this.playbackGeneration++;
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
     const ctx = this.ctx;

@@ -177,7 +177,15 @@ function useJingles(techno: boolean) {
   }, []);
 
   useEffect(() => {
-    playerRef.current?.setTechno(techno);
+    let cancelled = false;
+    const restart = playerRef.current?.setTechno(techno);
+    if (restart)
+      void restart.then((started) => {
+        if (!cancelled) setPlaying(started);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [techno]);
 
   const toggle = useCallback(async () => {
@@ -382,7 +390,10 @@ function DoorDialog({
       open={activeDoor !== null}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent data-mode={techno ? "techno" : "winter"} className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6">
+      <DialogContent
+        data-mode={techno ? "techno" : "winter"}
+        className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6"
+      >
         {door ? (
           <div key={door.day} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5 pr-6">

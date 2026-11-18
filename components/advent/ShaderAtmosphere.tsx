@@ -66,7 +66,7 @@ float hexagon(vec2 p) {
 void main() {
   vec2 screen = gl_FragCoord.xy / u_resolution;
   vec2 css = vec2(screen.x, 1. - screen.y) * u_size;
-  vec2 uv = css / u_size.x;
+  vec2 uv = css / max(u_size.x, 900.);
   float unit = min(u_size.x, 1100.);
   vec2 p = (css - vec2(u_size.x * .5, 255.)) / unit;
   float side = smoothstep(.16, .48, abs(p.x));
