@@ -332,26 +332,28 @@ function DoorDialog({
                 {door.socialUrl ? "View the social post" : "Share on X"}
               </Button>
             </div>
-            <div className="flex items-center justify-between border-t border-line-structure pt-3 text-[12px]">
-              <button
-                type="button"
-                disabled={prev === null}
-                onClick={() => prev !== null && onNavigate(prev)}
-                className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary disabled:invisible"
-              >
-                <ChevronLeft className="size-3.5" />
-                Day {prev}
-              </button>
-              <button
-                type="button"
-                disabled={next === null}
-                onClick={() => next !== null && onNavigate(next)}
-                className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary disabled:invisible"
-              >
-                Day {next}
-                <ChevronRight className="size-3.5" />
-              </button>
-            </div>
+            {prev !== null || next !== null ? (
+              <div className="flex items-center justify-between border-t border-line-structure pt-3 text-[12px]">
+                <button
+                  type="button"
+                  disabled={prev === null}
+                  onClick={() => prev !== null && onNavigate(prev)}
+                  className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary disabled:invisible"
+                >
+                  <ChevronLeft className="size-3.5" />
+                  Day {prev}
+                </button>
+                <button
+                  type="button"
+                  disabled={next === null}
+                  onClick={() => next !== null && onNavigate(next)}
+                  className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary disabled:invisible"
+                >
+                  Day {next}
+                  <ChevronRight className="size-3.5" />
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </DialogContent>
