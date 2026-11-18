@@ -9,15 +9,6 @@ export type WinterCanvasHandle = {
   burst: (x: number, y: number) => void;
 };
 
-type Flake = {
-  x: number;
-  y: number;
-  r: number;
-  speed: number;
-  drift: number;
-  phase: number;
-};
-
 type Snowball = {
   sx: number;
   sy: number;
@@ -57,17 +48,17 @@ const SPLAT_DURATION = 1600;
 const SCREEN_SPLAT_DURATION = 2600;
 const SPARKLE_COLORS = ["#ffd66b", "#ffffff", "#ff8a7a", "#9be7c4"];
 
-export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
-  function WinterCanvas({ snow }, ref) {
+export const WinterCanvas = forwardRef<WinterCanvasHandle, { active: boolean }>(
+  function WinterCanvas({ active }, ref) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const snowballs = useRef<Snowball[]>([]);
     const particles = useRef<Particle[]>([]);
     const splats = useRef<Splat[]>([]);
-    const snowRef = useRef(snow);
-    snowRef.current = snow;
+    const wakeRef = useRef(() => {});
 
     useImperativeHandle(ref, () => ({
       throwSnowball(x, y) {
+        if (!active) return;
         const w = window.innerWidth;
         const h = window.innerHeight;
         const fromRight = x < w / 2;
@@ -85,8 +76,10 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
           spin: fromRight ? -1 : 1,
           incoming: false,
         });
+        wakeRef.current();
       },
       throwBack(fromX, fromY, toX, toY) {
+        if (!active) return;
         snowballs.current.push({
           sx: fromX,
           sy: fromY,
@@ -99,8 +92,10 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
           spin: toX < fromX ? -1 : 1,
           incoming: true,
         });
+        wakeRef.current();
       },
       burst(x, y) {
+        if (!active) return;
         for (let i = 0; i < 36; i++) {
           const angle = Math.random() * Math.PI * 2;
           const speed = 2 + Math.random() * 5;
@@ -116,6 +111,7 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
               SPARKLE_COLORS[Math.floor(Math.random() * SPARKLE_COLORS.length)],
           });
         }
+        wakeRef.current();
       },
     }));
 
@@ -123,20 +119,12 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext("2d");
       if (!canvas || !ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!active) return;
 
       let width = 0;
       let height = 0;
-      let flakes: Flake[] = [];
       let frame = 0;
-
-      const makeFlake = (y?: number): Flake => ({
-        x: Math.random() * width,
-        y: y ?? Math.random() * height,
-        r: 0.8 + Math.random() * 2.4,
-        speed: 0.3 + Math.random() * 0.9,
-        drift: 0.3 + Math.random() * 0.8,
-        phase: Math.random() * Math.PI * 2,
-      });
 
       const resize = () => {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -147,8 +135,6 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const count = Math.round(Math.min(140, (width * height) / 12000));
-        flakes = Array.from({ length: count }, () => makeFlake());
       };
       resize();
       window.addEventListener("resize", resize);
@@ -198,24 +184,8 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
       };
 
       const loop = (now: number) => {
+        frame = 0;
         ctx.clearRect(0, 0, width, height);
-
-        if (snowRef.current) {
-          ctx.fillStyle = "#ffffff";
-          ctx.strokeStyle = "rgba(110, 130, 160, 0.55)";
-          ctx.lineWidth = 0.8;
-          for (const f of flakes) {
-            f.y += f.speed;
-            f.x += Math.sin(now / 1600 + f.phase) * f.drift * 0.4;
-            if (f.y > height + 5) Object.assign(f, makeFlake(-5));
-            ctx.globalAlpha = 0.55 + f.r / 8;
-            ctx.beginPath();
-            ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          }
-          ctx.globalAlpha = 1;
-        }
 
         splats.current = splats.current.filter(
           (s) => now - s.start < s.duration,
@@ -302,15 +272,39 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
         });
         ctx.globalAlpha = 1;
 
-        frame = requestAnimationFrame(loop);
+        if (
+          snowballs.current.length ||
+          splats.current.length ||
+          particles.current.length
+        )
+          frame = requestAnimationFrame(loop);
       };
-      frame = requestAnimationFrame(loop);
+      wakeRef.current = () => {
+        if (!frame && !document.hidden) frame = requestAnimationFrame(loop);
+      };
+      const visibility = () => {
+        if (document.hidden) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+          snowballs.current = [];
+          particles.current = [];
+          splats.current = [];
+          ctx.clearRect(0, 0, width, height);
+        }
+      };
+      document.addEventListener("visibilitychange", visibility);
 
       return () => {
         cancelAnimationFrame(frame);
         window.removeEventListener("resize", resize);
+        document.removeEventListener("visibilitychange", visibility);
+        wakeRef.current = () => {};
+        snowballs.current = [];
+        particles.current = [];
+        splats.current = [];
+        ctx.clearRect(0, 0, width, height);
       };
-    }, []);
+    }, [active]);
 
     return (
       <canvas

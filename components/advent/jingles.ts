@@ -178,7 +178,8 @@ function compileSong(song: Song): CompiledSong {
 }
 
 const COMPILED = SONGS.map(compileSong);
-const LOOKAHEAD_SECONDS = 0.8;
+const LOOKAHEAD_SECONDS = 0.2;
+export const TECHNO_BPM = 138;
 const SONG_GAP_BEATS = 2;
 
 export class JinglePlayer {
@@ -189,6 +190,25 @@ export class JinglePlayer {
   private songIndex = 0;
   private eventIndex = 0;
   private songStart = 0;
+  private beatStart = 0;
+  private techno = false;
+  private drumStep = 0;
+  private disposed = false;
+
+  setTechno(techno: boolean) {
+    if (this.techno === techno) return;
+    const wasPlaying = this.timer !== null;
+    this.stop();
+    this.techno = techno;
+    if (wasPlaying) void this.start();
+  }
+
+  /** Envelope from the audio transport, shared by the visual renderer. */
+  getBeat = (): number => {
+    if (!this.techno || !this.master || this.ctx?.state !== "running") return 0;
+    const beats = ((this.ctx.currentTime - this.beatStart) * TECHNO_BPM) / 60;
+    return beats < 0 ? 0 : Math.exp(-(beats % 1) * 7);
+  };
 
   get state(): AudioContextState | "uninitialized" {
     return this.ctx?.state ?? "uninitialized";
@@ -196,6 +216,7 @@ export class JinglePlayer {
 
   /** Starts playback. Resolves to false while the browser blocks autoplay. */
   async start(): Promise<boolean> {
+    if (this.disposed) return false;
     const ctx = this.ensureContext();
     if (!ctx) return false;
     if (ctx.state === "suspended") {
@@ -208,16 +229,21 @@ export class JinglePlayer {
         // Autoplay policies reject or ignore resume() until a user gesture.
       }
     }
-    if (ctx.state !== "running") return false;
+    if (this.disposed || ctx.state !== "running") return false;
     if (this.timer) return true;
 
     this.master = ctx.createGain();
     this.master.gain.setValueAtTime(0, ctx.currentTime);
-    this.master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 1);
+    this.master.gain.linearRampToValueAtTime(
+      this.techno ? 0.25 : 0.32,
+      ctx.currentTime + 0.4,
+    );
     this.master.connect(ctx.destination);
     this.eventIndex = 0;
+    this.drumStep = 0;
     this.songStart = ctx.currentTime + 0.15;
-    this.timer = setInterval(() => this.schedule(), 200);
+    this.beatStart = this.songStart;
+    this.timer = setInterval(() => this.schedule(), 50);
     this.schedule();
     return true;
   }
@@ -236,6 +262,7 @@ export class JinglePlayer {
   }
 
   dispose() {
+    this.disposed = true;
     this.stop();
     void this.ctx?.close();
     this.ctx = null;
@@ -301,10 +328,13 @@ export class JinglePlayer {
     const horizon = ctx.currentTime + LOOKAHEAD_SECONDS;
     for (;;) {
       const song = COMPILED[this.songIndex];
-      const secondsPerBeat = 60 / song.bpm;
+      // The printed carol scores use quick subdivisions; winter plays them
+      // at half speed, while afterhours uses a straight club transport.
+      const secondsPerBeat = 60 / (this.techno ? TECHNO_BPM : song.bpm / 2);
       const event = song.events[this.eventIndex];
       if (!event) {
-        this.songStart += (song.length + SONG_GAP_BEATS) * secondsPerBeat;
+        this.songStart +=
+          (song.length + (this.techno ? 0 : SONG_GAP_BEATS)) * secondsPerBeat;
         this.songIndex = (this.songIndex + 1) % COMPILED.length;
         this.eventIndex = 0;
         continue;
@@ -315,11 +345,68 @@ export class JinglePlayer {
       if (time < ctx.currentTime) continue;
       const duration = event.beats * secondsPerBeat;
       if (event.voice === "bell")
-        this.bell(ctx, master, event.freq, time, duration);
-      else if (event.voice === "bass")
-        this.bass(ctx, master, event.freq, time, duration);
-      else this.sleigh(ctx, master, time);
+        this.bell(
+          ctx,
+          master,
+          this.techno ? event.freq / 2 : event.freq,
+          time,
+          duration,
+        );
+      else if (event.voice === "bass") {
+        if (this.techno) {
+          for (let beat = 0.5; beat < event.beats; beat += 0.5)
+            this.bass(
+              ctx,
+              master,
+              event.freq / 2,
+              time + beat * secondsPerBeat,
+              secondsPerBeat * 0.3,
+            );
+        } else this.bass(ctx, master, event.freq, time, duration);
+      } else if (!this.techno) this.sleigh(ctx, master, time);
     }
+    if (this.techno) {
+      const stepDuration = 60 / TECHNO_BPM / 4;
+      this.drumStep = Math.max(
+        this.drumStep,
+        Math.floor((ctx.currentTime - this.beatStart) / stepDuration),
+      );
+      while (this.beatStart + this.drumStep * stepDuration < horizon) {
+        const time = this.beatStart + this.drumStep * stepDuration;
+        if (time >= ctx.currentTime)
+          this.drums(ctx, master, time, this.drumStep);
+        this.drumStep++;
+      }
+    }
+  }
+
+  private drums(ctx: AudioContext, out: AudioNode, time: number, step: number) {
+    if (step % 4 === 0) {
+      const kick = ctx.createOscillator();
+      const gain = ctx.createGain();
+      kick.frequency.setValueAtTime(150, time);
+      kick.frequency.exponentialRampToValueAtTime(43, time + 0.12);
+      gain.gain.setValueAtTime(0.9, time);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
+      kick.connect(gain).connect(out);
+      kick.start(time);
+      kick.stop(time + 0.34);
+    }
+    if (!this.noise || step % 2 !== 0) return;
+    const noise = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    const clap = step % 8 === 4;
+    noise.buffer = this.noise;
+    filter.type = clap ? "bandpass" : "highpass";
+    filter.frequency.value = clap ? 1800 : 8500;
+    const offbeat = step % 4 === 2;
+    const release = clap ? 0.12 : offbeat ? 0.1 : 0.035;
+    gain.gain.setValueAtTime(clap ? 0.3 : offbeat ? 0.12 : 0.045, time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
+    noise.connect(filter).connect(gain).connect(out);
+    noise.start(time);
+    noise.stop(time + release + 0.01);
   }
 
   private bell(
@@ -330,7 +417,9 @@ export class JinglePlayer {
     duration: number,
   ) {
     const gain = ctx.createGain();
-    const release = Math.max(0.5, duration * 1.8);
+    const release = this.techno
+      ? Math.min(0.3, duration * 0.7)
+      : Math.max(0.5, duration * 1.8);
     gain.gain.setValueAtTime(0.0001, time);
     gain.gain.exponentialRampToValueAtTime(0.28, time + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
@@ -361,12 +450,16 @@ export class JinglePlayer {
   ) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = "triangle";
+    osc.type = this.techno ? "sawtooth" : "triangle";
     osc.frequency.setValueAtTime(freq, time);
     gain.gain.setValueAtTime(0.0001, time);
     gain.gain.exponentialRampToValueAtTime(0.22, time + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + duration * 0.95);
-    osc.connect(gain).connect(out);
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(this.techno ? 900 : 1200, time);
+    filter.frequency.exponentialRampToValueAtTime(120, time + duration * 0.9);
+    osc.connect(filter).connect(gain).connect(out);
     osc.start(time);
     osc.stop(time + duration);
   }

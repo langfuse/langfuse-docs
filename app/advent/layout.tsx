@@ -5,6 +5,7 @@ export default function AdventLayout({ children }: { children: ReactNode }) {
   return (
     <HomeLayout
       showAside={false}
+      showLeftSidebar={false}
       footerClassName="md:max-w-none xl:max-w-none px-4 sm:px-6 md:px-8"
     >
       {children}

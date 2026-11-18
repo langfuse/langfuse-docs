@@ -9,11 +9,15 @@ import {
   Lock,
   MousePointer2,
   Music,
+  AudioLines,
+  Moon,
+  Sun,
   Snowflake,
   Star,
   TreePine,
   VolumeX,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,7 +28,8 @@ import {
 import { cn } from "@/lib/utils";
 import { AdventStyles } from "./styles";
 import { DoorAnimation } from "./DoorAnimation";
-import { JinglePlayer } from "./jingles";
+import { JinglePlayer, TECHNO_BPM } from "./jingles";
+import { ShaderAtmosphere } from "./ShaderAtmosphere";
 import {
   SNOWBALL_DURATION,
   THROW_BACK_DURATION,
@@ -56,6 +61,8 @@ const DOOR_STYLES = ["adv-door-paper", "adv-door-red", "adv-door-forest"];
 const ORNAMENTS = [Snowflake, Star, Gift, TreePine];
 const OPENED_KEY = `langfuse-advent-${ADVENT_YEAR}-opened`;
 const MUSIC_KEY = "langfuse-advent-music";
+const MODE_KEY = "langfuse-advent-mode";
+
 const DOOR_OPEN_DELAY_MS = 800;
 const ALL_OPEN = 25;
 const CRUMBLE_MS = 750;
@@ -135,7 +142,7 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-function useJingles() {
+function useJingles(techno: boolean) {
   const playerRef = useRef<JinglePlayer | null>(null);
   const enabledRef = useRef(true);
   const [enabled, setEnabled] = useState(true);
@@ -169,6 +176,10 @@ function useJingles() {
     };
   }, []);
 
+  useEffect(() => {
+    playerRef.current?.setTechno(techno);
+  }, [techno]);
+
   const toggle = useCallback(async () => {
     const player = playerRef.current;
     if (!player) return;
@@ -190,7 +201,8 @@ function useJingles() {
     playerRef.current?.thud(delay);
   }, []);
 
-  return { enabled, playing, toggle, thud };
+  const getBeat = useCallback(() => playerRef.current?.getBeat() ?? 0, []);
+  return { enabled, playing, toggle, thud, getBeat };
 }
 
 function SnowballHint() {
@@ -208,16 +220,20 @@ function SnowballHint() {
 }
 
 function MusicToggle({
+  techno,
   enabled,
   playing,
   onToggle,
 }: {
+  techno: boolean;
   enabled: boolean;
   playing: boolean;
   onToggle: () => void;
 }) {
   const label = playing
-    ? "Jingles on"
+    ? techno
+      ? `Berlin live / ${TECHNO_BPM} BPM`
+      : "Jingles on"
     : enabled
       ? "Click anywhere for jingles"
       : "Jingles off";
@@ -332,11 +348,13 @@ function DoorTile({
 }
 
 function DoorDialog({
+  techno,
   door: activeDoor,
   openDays,
   onNavigate,
   onClose,
 }: {
+  techno: boolean;
   door: AdventDoor | null;
   openDays: number[];
   onNavigate: (day: number) => void;
@@ -364,7 +382,7 @@ function DoorDialog({
       open={activeDoor !== null}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogContent className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6">
+      <DialogContent data-mode={techno ? "techno" : "winter"} className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6">
         {door ? (
           <div key={door.day} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5 pr-6">
@@ -464,6 +482,7 @@ function StatusLine({
 }
 
 export function AdventCalendar() {
+  const [techno, setTechno] = useState(false);
   const [unlocked, setUnlocked] = useState<number | null>(null);
   const [opened, setOpened] = useState<Set<number>>(new Set());
   const [activeDay, setActiveDay] = useState<number | null>(null);
@@ -485,13 +504,14 @@ export function AdventCalendar() {
   const [throwing, setThrowing] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const reducedMotionRef = useRef(false);
-  const music = useJingles();
+  const music = useJingles(techno);
   const { thud } = music;
 
   dialogOpenRef.current = activeDay !== null;
   reducedMotionRef.current = reducedMotion;
 
   useEffect(() => {
+    setTechno(readStorage(MODE_KEY) === "techno");
     const update = () => {
       const now = new Date();
       setUnlocked(getPreviewDay(now) ?? getUnlockedDay(now));
@@ -513,7 +533,7 @@ export function AdventCalendar() {
     deepLinkHandled.current = true;
     const match = /^#day-(\d+)$/.exec(window.location.hash);
     const day = match ? Number(match[1]) : null;
-    if (!day) return;
+    if (!day || day > ADVENT_DOORS.length) return;
     const state = getDoorState(day, unlocked, opened);
     if (state === "today") {
       const next = new Set(opened).add(day);
@@ -681,13 +701,54 @@ export function AdventCalendar() {
   const todayOpened = unlocked !== null && opened.has(unlocked);
 
   return (
-    <div className="adv-page relative overflow-hidden">
+    <div
+      className="adv-page relative overflow-hidden"
+      data-mode={techno ? "techno" : "winter"}
+    >
+      <ShaderAtmosphere
+        techno={techno}
+        reducedMotion={reducedMotion}
+        getBeat={music.getBeat}
+      />
       <AdventStyles />
-      <WinterCanvas ref={canvasRef} snow={!reducedMotion} />
+      <WinterCanvas
+        ref={canvasRef}
+        active={!reducedMotion && activeDay === null}
+      />
 
-      <section className="relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-14 text-center sm:px-8 md:pt-20">
+      <section className="adv-hero relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-8 text-center sm:px-8 md:pt-10">
+        <div className="adv-mode-bar" data-no-snowball>
+          <span className="adv-location">
+            <span className="adv-live-dot" />{" "}
+            {techno ? "Berlin, afterhours" : "A little winter magic"}
+          </span>
+          <label className="adv-mode-control" htmlFor="advent-afterhours">
+            {techno ? <Moon className="size-4" /> : <Sun className="size-4" />}
+            <span>Berlin afterhours</span>
+            <Switch
+              id="advent-afterhours"
+              checked={techno}
+              onCheckedChange={(checked) => {
+                setTechno(checked);
+                writeStorage(MODE_KEY, checked ? "techno" : "winter");
+              }}
+            />
+          </label>
+        </div>
+        <div className="adv-scene-label" aria-hidden>
+          {techno ? (
+            <AudioLines className="size-3.5" />
+          ) : (
+            <Snowflake className="size-3.5" />
+          )}
+          <span>
+            {techno
+              ? `Christmas, remixed / ${TECHNO_BPM} BPM`
+              : "December 01—24 / The Advent edition"}
+          </span>
+        </div>
         <h1 className="max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
-          Gateway to Christmas
+          Gateway to <span className="adv-title-accent">Christmas</span>
         </h1>
         <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
           The Langfuse AI Gateway Advent Calendar. 24 doors, 24 features. From
@@ -710,8 +771,8 @@ export function AdventCalendar() {
         </Button>
         <SnowballHint />
         {/* In a row below the hint on small screens, free in the side space on wide ones. */}
-        <div className="flex w-full items-end justify-around pt-2 lg:contents">
-          <Santa className="w-32 sm:w-36 lg:absolute lg:left-[2%] lg:top-[10%] lg:w-36 lg:-rotate-6 xl:left-[5%] xl:w-48" />
+        <div className="adv-figures flex w-full items-end justify-around pt-2 lg:absolute lg:inset-x-8 lg:bottom-10 lg:w-auto lg:justify-between">
+          <Santa className="w-28 sm:w-32 lg:w-28 lg:-rotate-6" />
           <Snowman
             ref={snowmanRef}
             balls={snowmanBalls}
@@ -719,7 +780,7 @@ export function AdventCalendar() {
             hit={snowmanHit}
             annoyed={annoyed}
             throwing={throwing}
-            className="w-32 sm:w-36 lg:absolute lg:right-[2%] lg:top-[34%] lg:w-36 xl:right-[5%] xl:w-48"
+            className="w-28 sm:w-32 lg:w-28"
           />
         </div>
       </section>
@@ -759,12 +820,14 @@ export function AdventCalendar() {
       ) : null}
 
       <MusicToggle
+        techno={techno}
         enabled={music.enabled}
         playing={music.playing}
         onToggle={music.toggle}
       />
 
       <DoorDialog
+        techno={techno}
         door={activeDoor}
         openDays={openDays}
         onNavigate={showDoor}
