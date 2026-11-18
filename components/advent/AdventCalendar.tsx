@@ -25,7 +25,12 @@ import { cn } from "@/lib/utils";
 import { AdventStyles } from "./styles";
 import { DoorAnimation } from "./DoorAnimation";
 import { JinglePlayer } from "./jingles";
-import { WinterCanvas, type WinterCanvasHandle } from "./WinterCanvas";
+import {
+  SNOWBALL_DURATION,
+  WinterCanvas,
+  type WinterCanvasHandle,
+} from "./WinterCanvas";
+import { SNOWMAN_MAX_BALLS, Santa, Snowman } from "./HeroFigures";
 import {
   ADVENT_DOORS,
   ADVENT_URL,
@@ -45,6 +50,7 @@ const OPENED_KEY = `langfuse-advent-${ADVENT_YEAR}-opened`;
 const MUSIC_KEY = "langfuse-advent-music";
 const DOOR_OPEN_DELAY_MS = 800;
 const ALL_OPEN = 25;
+const CRUMBLE_MS = 750;
 const SNOWBALL_IGNORE =
   "a, button, input, textarea, select, label, summary, [role='dialog'], [data-no-snowball]";
 
@@ -403,6 +409,11 @@ export function AdventCalendar() {
   const canvasRef = useRef<WinterCanvasHandle>(null);
   const dialogOpenRef = useRef(false);
   const deepLinkHandled = useRef(false);
+  const snowmanRef = useRef<HTMLDivElement>(null);
+  const [snowmanBalls, setSnowmanBalls] = useState(0);
+  const [crumbling, setCrumbling] = useState(false);
+  const crumblingRef = useRef(false);
+  const snowmanBallsRef = useRef(0);
   const reducedMotion = usePrefersReducedMotion();
   const music = useJingles();
 
@@ -441,6 +452,32 @@ export function AdventCalendar() {
       const target = e.target as Element | null;
       if (target?.closest(SNOWBALL_IGNORE)) return;
       canvasRef.current?.throwSnowball(e.clientX, e.clientY);
+      const rect = snowmanRef.current?.getBoundingClientRect();
+      if (
+        rect &&
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom
+      ) {
+        setTimeout(hitSnowman, SNOWBALL_DURATION);
+      }
+    };
+    const hitSnowman = () => {
+      if (crumblingRef.current) return;
+      if (snowmanBallsRef.current < SNOWMAN_MAX_BALLS) {
+        snowmanBallsRef.current += 1;
+        setSnowmanBalls(snowmanBallsRef.current);
+        return;
+      }
+      crumblingRef.current = true;
+      setCrumbling(true);
+      setTimeout(() => {
+        crumblingRef.current = false;
+        snowmanBallsRef.current = 0;
+        setCrumbling(false);
+        setSnowmanBalls(0);
+      }, CRUMBLE_MS);
     };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
@@ -500,9 +537,18 @@ export function AdventCalendar() {
       <WinterCanvas ref={canvasRef} snow={!reducedMotion} />
 
       <section className="relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-14 text-center sm:px-8 md:pt-20">
-        <h1 className="max-w-[18ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-          Gateway to Christmas
-        </h1>
+        <div className="flex w-full items-end justify-center gap-2 sm:gap-6">
+          <Santa className="w-16 shrink-0 sm:w-24 md:w-28" />
+          <h1 className="mb-6 max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
+            Gateway to Christmas
+          </h1>
+          <Snowman
+            ref={snowmanRef}
+            balls={snowmanBalls}
+            crumbling={crumbling}
+            className="w-16 shrink-0 sm:w-24 md:w-28"
+          />
+        </div>
         <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
           The Langfuse AI Gateway Advent calendar: 24 doors, 24 features. From
           December 1 to 24, a new door opens every day. Behind each one: a

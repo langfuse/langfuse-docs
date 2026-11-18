@@ -494,6 +494,36 @@ export function AdventStyles() {
       }
 
 
+      /* Hero figures */
+      .adv-shadow { fill: rgba(0, 0, 0, .08); }
+      .adv-santa { animation: adv-bob 3s ease-in-out infinite; }
+      @keyframes adv-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+      .adv-santa-wave {
+        transform-box: view-box;
+        transform-origin: 84px 98px;
+        animation: adv-wave 1.6s ease-in-out infinite;
+      }
+      @keyframes adv-wave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-18deg); } }
+      .adv-snowman { cursor: crosshair; }
+      .adv-snowman-ball {
+        transform-box: fill-box;
+        transform-origin: 50% 100%;
+        animation: adv-ball-drop .55s cubic-bezier(.3, 1.5, .5, 1) both;
+      }
+      @keyframes adv-ball-drop {
+        from { opacity: 0; transform: translateY(-40px) scale(1.15, .85); }
+        to { opacity: 1; transform: none; }
+      }
+      .adv-snowman.is-crumbling .adv-snowman-ball {
+        animation: adv-crumble .7s ease-in forwards;
+      }
+      .adv-snowman.is-crumbling .adv-snowman-ball:nth-of-type(2) { animation-delay: .05s; }
+      .adv-snowman.is-crumbling .adv-snowman-ball:nth-of-type(3) { animation-delay: .1s; }
+      @keyframes adv-crumble {
+        30% { transform: rotate(8deg) scale(1.05, .95); }
+        to { opacity: 0; transform: translateY(24px) scale(1.4, .1); }
+      }
+
       /* Snowball hint: a cursor clicks, a snowball flies in and splats */
       .adv-hint {
         position: relative;

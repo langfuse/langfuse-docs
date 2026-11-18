@@ -41,7 +41,7 @@ type Particle = {
 
 type Splat = { x: number; y: number; start: number; seed: number };
 
-const SNOWBALL_DURATION = 650;
+export const SNOWBALL_DURATION = 650;
 const SPLAT_DURATION = 1600;
 const SPARKLE_COLORS = ["#ffd66b", "#ffffff", "#ff8a7a", "#9be7c4"];
 
