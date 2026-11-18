@@ -1,0 +1,28 @@
+---
+date: 2026-11-18
+title: Connect Amazon Bedrock with an IAM role
+description: Amazon Bedrock LLM connections can assume an IAM role in your AWS account instead of using stored access keys or API keys. Available on Enterprise.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Langfuse can now call your Amazon Bedrock models by assuming an IAM role in your AWS account, so you don't need to store long-lived AWS credentials in Langfuse. Use it for:
+
+- Testing prompts against Bedrock models in the [Playground](/docs/prompt-management/features/playground) and in prompt experiments.
+- [LLM-as-a-Judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) that score traces and experiments with Bedrock models.
+- [Organization connections](/docs/administration/llm-connection#organization-and-project-connections) that every project inherits, with one role and one external ID.
+
+Each connection gets its own external ID, and every session can only invoke Bedrock models, even if your role allows more. IAM role authentication is available on Langfuse Cloud Enterprise and on self-hosted Enterprise. Self-hosted deployments also need [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role) set.
+
+<Cards num={1}>
+  <Card
+    title="Authenticate Bedrock with an IAM role"
+    href="/docs/administration/llm-connection#bedrock-iam-role"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
