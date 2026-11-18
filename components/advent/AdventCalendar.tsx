@@ -51,6 +51,12 @@ const MUSIC_KEY = "langfuse-advent-music";
 const DOOR_OPEN_DELAY_MS = 800;
 const ALL_OPEN = 25;
 const CRUMBLE_MS = 750;
+const HIT_WOBBLE_MS = 350;
+
+/** Each snowman level takes two or three hits. */
+function nextHitsNeeded() {
+  return 2 + Math.round(Math.random());
+}
 const SNOWBALL_IGNORE =
   "a, button, input, textarea, select, label, summary, [role='dialog'], [data-no-snowball]";
 
@@ -414,6 +420,9 @@ export function AdventCalendar() {
   const [crumbling, setCrumbling] = useState(false);
   const crumblingRef = useRef(false);
   const snowmanBallsRef = useRef(0);
+  const snowmanHitsRef = useRef(0);
+  const hitsNeededRef = useRef(nextHitsNeeded());
+  const [snowmanHit, setSnowmanHit] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const music = useJingles();
 
@@ -463,8 +472,17 @@ export function AdventCalendar() {
         setTimeout(hitSnowman, SNOWBALL_DURATION);
       }
     };
+    let wobbleTimer: ReturnType<typeof setTimeout> | undefined;
     const hitSnowman = () => {
       if (crumblingRef.current) return;
+      clearTimeout(wobbleTimer);
+      setSnowmanHit(false);
+      requestAnimationFrame(() => setSnowmanHit(true));
+      wobbleTimer = setTimeout(() => setSnowmanHit(false), HIT_WOBBLE_MS);
+      snowmanHitsRef.current += 1;
+      if (snowmanHitsRef.current < hitsNeededRef.current) return;
+      snowmanHitsRef.current = 0;
+      hitsNeededRef.current = nextHitsNeeded();
       if (snowmanBallsRef.current < SNOWMAN_MAX_BALLS) {
         snowmanBallsRef.current += 1;
         setSnowmanBalls(snowmanBallsRef.current);
@@ -537,18 +555,9 @@ export function AdventCalendar() {
       <WinterCanvas ref={canvasRef} snow={!reducedMotion} />
 
       <section className="relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-14 text-center sm:px-8 md:pt-20">
-        <div className="flex w-full items-end justify-center gap-2 sm:gap-6">
-          <Santa className="w-16 shrink-0 sm:w-24 md:w-28" />
-          <h1 className="mb-6 max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
-            Gateway to Christmas
-          </h1>
-          <Snowman
-            ref={snowmanRef}
-            balls={snowmanBalls}
-            crumbling={crumbling}
-            className="w-16 shrink-0 sm:w-24 md:w-28"
-          />
-        </div>
+        <h1 className="max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
+          Gateway to Christmas
+        </h1>
         <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
           The Langfuse AI Gateway Advent calendar: 24 doors, 24 features. From
           December 1 to 24, a new door opens every day. Behind each one: a
@@ -570,6 +579,17 @@ export function AdventCalendar() {
           Get started with the AI Gateway
         </Button>
         <SnowballHint />
+        {/* In a row below the hint on small screens, free in the side space on wide ones. */}
+        <div className="flex w-full items-end justify-around pt-2 lg:contents">
+          <Santa className="w-32 sm:w-36 lg:absolute lg:left-[2%] lg:top-[10%] lg:w-36 lg:-rotate-6 xl:left-[5%] xl:w-48" />
+          <Snowman
+            ref={snowmanRef}
+            balls={snowmanBalls}
+            crumbling={crumbling}
+            hit={snowmanHit}
+            className="w-32 sm:w-36 lg:absolute lg:right-[2%] lg:top-[34%] lg:w-36 xl:right-[5%] xl:w-48"
+          />
+        </div>
       </section>
 
       <section className="relative mx-auto max-w-[1100px] px-3 pb-16 sm:px-8 md:pb-24">

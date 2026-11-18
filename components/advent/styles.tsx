@@ -504,7 +504,13 @@ export function AdventStyles() {
         animation: adv-wave 1.6s ease-in-out infinite;
       }
       @keyframes adv-wave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-18deg); } }
-      .adv-snowman { cursor: crosshair; }
+      .adv-snowman { cursor: crosshair; transform-origin: 50% 100%; }
+      .adv-snowman.is-hit { animation: adv-snowman-hit .35s ease-out; }
+      @keyframes adv-snowman-hit {
+        25% { transform: rotate(-5deg) scale(1.03, .97); }
+        60% { transform: rotate(4deg); }
+        100% { transform: none; }
+      }
       .adv-snowman-ball {
         transform-box: fill-box;
         transform-origin: 50% 100%;

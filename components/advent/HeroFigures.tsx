@@ -8,69 +8,87 @@ export const SNOWMAN_MAX_BALLS = 3;
 export function Santa({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 120 160"
+      viewBox="0 0 140 190"
       aria-hidden
       className={cn("adv-santa overflow-visible", className)}
     >
-      <ellipse cx="60" cy="154" rx="40" ry="5" className="adv-shadow" />
+      <ellipse cx="70" cy="184" rx="46" ry="5" className="adv-shadow" />
       {/* boots */}
-      <rect x="38" y="138" width="18" height="14" rx="4" fill="#1d1d1b" />
-      <rect x="64" y="138" width="18" height="14" rx="4" fill="#1d1d1b" />
-      {/* body */}
-      <path d="M32 140 Q30 96 60 88 Q90 96 88 140 Z" fill="#b3262e" />
-      <rect x="31" y="134" width="58" height="8" rx="4" fill="#fbf7ef" />
-      <rect x="34" y="114" width="52" height="8" fill="#1d1d1b" />
+      <rect x="44" y="166" width="22" height="16" rx="5" fill="#1d1d1b" />
+      <rect x="74" y="166" width="22" height="16" rx="5" fill="#1d1d1b" />
+      {/* sweater */}
+      <path d="M30 172 Q26 104 70 94 Q114 104 110 172 Z" fill="#b3262e" />
+      <rect x="28" y="162" width="84" height="11" rx="5.5" fill="#fbf7ef" />
+      <rect x="31" y="146" width="78" height="10" fill="#1d1d1b" />
       <rect
-        x="53"
-        y="112"
-        width="14"
-        height="12"
+        x="61"
+        y="143"
+        width="18"
+        height="16"
         rx="2"
         fill="none"
         stroke="#f2c14e"
-        strokeWidth="3"
+        strokeWidth="3.5"
       />
+      {/* Langfuse badge on the sweater */}
+      <circle
+        cx="70"
+        cy="121"
+        r="17"
+        fill="#fbf7ef"
+        stroke="#e5ddd0"
+        strokeWidth="1"
+      />
+      <image href="/langfuse-icon.svg" x="54" y="105" width="32" height="32" />
       {/* resting arm */}
       <path
-        d="M36 98 Q24 112 28 126"
+        d="M36 108 Q20 126 26 146"
         stroke="#b3262e"
-        strokeWidth="11"
+        strokeWidth="14"
         strokeLinecap="round"
         fill="none"
       />
-      <circle cx="28" cy="128" r="6" fill="#1f5c3f" />
+      <circle cx="26" cy="149" r="8" fill="#1f5c3f" />
       {/* waving arm */}
       <g className="adv-santa-wave">
         <path
-          d="M84 98 Q98 88 102 72"
+          d="M104 108 Q122 96 126 76"
           stroke="#b3262e"
-          strokeWidth="11"
+          strokeWidth="14"
           strokeLinecap="round"
           fill="none"
         />
-        <circle cx="102" cy="68" r="6" fill="#1f5c3f" />
+        <circle cx="126" cy="72" r="8" fill="#1f5c3f" />
       </g>
-      {/* beard */}
+      {/* face */}
+      <circle cx="70" cy="60" r="26" fill="#f6c9a4" />
+      <circle cx="56" cy="66" r="5" fill="#f19a8f" opacity="0.6" />
+      <circle cx="84" cy="66" r="5" fill="#f19a8f" opacity="0.6" />
+      <g className="adv-santa-eyes">
+        <circle cx="61" cy="56" r="2.6" fill="#1d1d1b" />
+        <circle cx="79" cy="56" r="2.6" fill="#1d1d1b" />
+      </g>
       <path
-        d="M34 62 Q36 100 60 104 Q84 100 86 62 Q60 74 34 62 Z"
+        d="M56 49 Q61 46 66 49 M74 49 Q79 46 84 49"
+        stroke="#fbf7ef"
+        strokeWidth="3"
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* beard and mustache */}
+      <path
+        d="M44 62 Q42 98 70 106 Q98 98 96 62 Q90 78 70 74 Q50 78 44 62 Z"
         fill="#fbf7ef"
         stroke="#e5ddd0"
         strokeWidth="1"
       />
-      {/* Langfuse head */}
-      <circle
-        cx="60"
-        cy="56"
-        r="25"
-        fill="#fbf7ef"
-        stroke="#e5ddd0"
-        strokeWidth="1"
-      />
-      <image href="/langfuse-icon.svg" x="38" y="34" width="44" height="44" />
+      <ellipse cx="62" cy="71" rx="9" ry="5" fill="#fbf7ef" />
+      <ellipse cx="78" cy="71" rx="9" ry="5" fill="#fbf7ef" />
+      <circle cx="70" cy="65" r="4.5" fill="#e58a7c" />
       {/* hat */}
-      <path d="M34 40 Q48 4 92 14 Q78 22 86 40 Z" fill="#b3262e" />
-      <circle cx="94" cy="16" r="7" fill="#fbf7ef" />
-      <rect x="31" y="34" width="58" height="10" rx="5" fill="#fbf7ef" />
+      <path d="M44 40 Q56 0 110 14 Q94 22 98 40 Z" fill="#b3262e" />
+      <circle cx="112" cy="16" r="8" fill="#fbf7ef" />
+      <rect x="40" y="33" width="60" height="12" rx="6" fill="#fbf7ef" />
     </svg>
   );
 }
@@ -78,15 +96,16 @@ export function Santa({ className }: { className?: string }) {
 type SnowmanProps = {
   balls: number;
   crumbling: boolean;
+  hit: boolean;
   className?: string;
 };
 
 export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
-  function Snowman({ balls, crumbling, className }, ref) {
+  function Snowman({ balls, crumbling, hit, className }, ref) {
     const label = crumbling
       ? "Oops!"
       : balls === 0
-        ? "Hit me with a snowball"
+        ? "Hit me with snowballs"
         : balls < SNOWMAN_MAX_BALLS
           ? `${balls} of ${SNOWMAN_MAX_BALLS}, keep going!`
           : "Done! Dare to hit me again?";
@@ -102,6 +121,7 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
           className={cn(
             "adv-snowman w-full overflow-visible",
             crumbling && "is-crumbling",
+            hit && "is-hit",
           )}
         >
           <ellipse cx="60" cy="154" rx="44" ry="5" className="adv-shadow" />
@@ -183,7 +203,7 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
             </g>
           ) : null}
         </svg>
-        <span className="text-center text-[10px] leading-tight text-text-tertiary sm:text-[11px]">
+        <span className="text-center text-[11px] leading-tight text-text-tertiary sm:text-[12px]">
           {label}
         </span>
       </div>
