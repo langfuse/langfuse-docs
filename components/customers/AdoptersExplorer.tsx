@@ -130,8 +130,8 @@ function TracePreview({
   onClose: () => void;
 }) {
   return (
-    <div className="flex h-full min-h-[240px] flex-col bg-surface-bg p-4">
-      <div className="border-b border-dashed border-line-structure pb-3">
+    <div className="flex h-auto min-h-full flex-col bg-surface-bg p-4">
+      <div className="shrink-0 border-b border-dashed border-line-structure pb-3">
         <a
           href={adopter.website}
           target="_blank"
@@ -142,7 +142,7 @@ function TracePreview({
         </a>
       </div>
 
-      <div className="min-h-0 flex-1 py-3">
+      <div className="py-3">
         <p className={cn("m-0", controlTextClassName, "text-text-tertiary")}>
           Trace
         </p>
@@ -168,7 +168,7 @@ function TracePreview({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4 border-t border-dashed border-line-structure pt-3">
+      <div className="mt-auto flex shrink-0 items-center justify-between gap-4 border-t border-dashed border-line-structure pt-3">
         <button
           type="button"
           onClick={onClose}
@@ -206,7 +206,7 @@ function AdopterCard({
       className={cn(
         "corner-box-corners relative min-h-[116px] overflow-hidden border border-line-structure bg-surface-bg",
         active &&
-          "z-10 min-h-[240px] border-text-secondary md:col-span-2 md:row-span-2",
+          "z-10 min-h-[240px] overflow-visible border-text-secondary md:col-span-2 md:row-span-2",
       )}
     >
       {active ? (
@@ -255,7 +255,7 @@ function AdoptersWall({ adopters }: { adopters: Adopter[] }) {
     setActiveId((current) => (current === id ? null : id));
 
   return (
-    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 p-2 md:auto-rows-[116px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 p-2 md:auto-rows-[minmax(116px,auto)] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {adopters.map((adopter, index) => (
         <AdopterCard
           key={adopter.id}
