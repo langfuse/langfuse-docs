@@ -23,7 +23,7 @@ const discounts = [
   },
   {
     name: "Non-profits",
-    description: "USD 199 in credits / month",
+    description: "USD 199 in credits / month, 12 months",
     cta: {
       text: "Learn more and apply",
       href: "/non-profit",
