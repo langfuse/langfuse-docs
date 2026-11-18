@@ -24,52 +24,7 @@ It helps to separate monitoring into two distinct activities, because they answe
 
 Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring.
 
-Beyond the built-in fields, you add evaluation — user feedback (explicit ratings or implicit signals like session abandonment), human annotation, and automated evaluator scores — by annotating traces manually or running evaluators where they apply. That data feeds into aggregate charts for tracking trends over time, and into signal rules so individual traces surface when something crosses a threshold you care about.
-
-### Explicit and implicit user feedback [#user-feedback]
-
-[User feedback](/docs/observability/features/user-feedback) is one of the richest sources of signal, but it comes in two forms with different tradeoffs.
-
-**Explicit feedback** is direct: a thumbs up or down, a star rating, a comment left by the user. The signal is unambiguous, but response rates are low and skewed — dissatisfied users respond more often than satisfied ones.
-
-**Implicit feedback** is derived from behavior: whether a user retried a query, disagreed with the system, copied a response, accepted a suggestion, or abandoned a conversation midway. It requires no user effort and generates high-volume data, but the signals are indirect and need interpretation. These can be surfaced using automated evaluators.
-
-To make this concrete, here are two example applications and how they balance explicit and implicit feedback:
-
-<Tabs items={["Customer support chatbot", "Document extraction tool"]}>
-<Tab>
-
-_A customer support chatbot embedded in a SaaS company's help center. Users can rate the conversation after it ends, and can request a human handoff at any point during the chat._
-
-The feedback the team captures:
-
-```
-Explicit:  thumbs up / thumbs down at the end of a conversation
-Implicit:  user requests human handoff mid-conversation
-```
-
-</Tab>
-<Tab>
-
-_An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. Each extraction is reviewed by a human in a downstream approval step before being written to the accounting system._
-
-The feedback the team captures:
-
-```
-Explicit:  none — there's no point in the workflow where a rating fits
-Implicit:  extracted field manually edited before approval
-```
-
-</Tab>
-</Tabs>
-
-Both register as [scores](/docs/evaluation/scores/overview), so they feed into the same [dashboards](/docs/metrics/features/custom-dashboards), trend charts, and signal rules as your other evaluation data. The page on [Capturing signals](/academy/monitoring/capturing-signals) dives deeper into the topic. To figure out which feedback signals are worth turning into automated evaluators in the first place, see our deeper dive into [Error analysis](/academy/monitoring/error-analysis).
-
-<ManualGuideCallout
-  href="/guides/user-feedback-loop"
-  topic="User feedback loop"
-  lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
-/>
+Beyond the built-in fields, you add [scores](/docs/evaluation/scores/overview) from two sources: [user signals](#user-signals) your application captures, and evaluation, through human annotation or automated evaluators. That data feeds into aggregate charts for tracking trends over time, and into [alerts](/docs/observability/features/alerts) and filtered views so individual traces surface when something crosses a threshold you care about.
 
 <Callout type="info">
 There are three types of automated evaluators to attach scores to traces:
@@ -80,6 +35,18 @@ There are three types of automated evaluators to attach scores to traces:
 More on all three can be found in the [Evaluate](/academy/evaluate) section.
 
 </Callout>
+
+### User signals [#user-signals]
+
+User signals are things users do or say that show how they perceived an output: a thumbs down, a retry, a request for a human, a draft sent without edits. Some are explicit ratings, but most are implicit in behavior, conversation, and outcomes. They are not evaluation: they measure perceived quality at the moment of use, not whether the output was correct.
+
+They matter for monitoring because they are the cheapest way to get a quality judgment on production traffic. Your users judge every output anyway, through what they do next, and they surface failures you didn't think to evaluate for. Negative signals point you to individual traces worth opening and are the natural entry points for [error analysis](/academy/monitoring/error-analysis), while signal rates on [dashboards](/docs/metrics/features/custom-dashboards) show whether the experience is improving. [Capturing user signals](/academy/monitoring/capturing-signals) covers the kinds of signals, how to read them, and their biases.
+
+<ManualGuideCallout
+  href="/guides/user-feedback-loop"
+  topic="User feedback loop"
+  lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
+/>
 
 ## Where to start
 
