@@ -372,7 +372,7 @@ export function AdoptersExplorer({
             <p
               className={cn("m-0", controlTextClassName, "text-text-tertiary")}
             >
-              — Adopters
+              Adopters
             </p>
             <HeadingTag
               aria-label="Langfuse is adopted by 100,000+ developers worldwide"
