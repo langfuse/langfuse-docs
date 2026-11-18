@@ -119,7 +119,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines: Read this every time you add or change content to a docs page
 
-- When changing something, always make the change considering the surrounding context. Prefer changing an existing sentence over adding an extra sentence or section somewhere. The less new sentences you introduce, the better.
+- When changing something, always make the change considering the surrounding page and what a first-time reader of that page already expects. Prefer the smallest edit that leaves the page accurate: delete an outdated clause before replacing it, and rewrite an existing sentence before adding a new one. The less new sentences you introduce, the better. Do not add a concept, history, or reassurance the rest of the page does not already rely on.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
 
 ### Documentation page-specific guidelines
@@ -151,6 +151,7 @@ Once you decide what type of page the content should be on, always read the sect
   - filler words and clauses, such as "also", "without changing any client", or "in the setup guide"
 - If a section is hard to write, decide the one thing the reader needs from it and say that. Most sections fit in three sentences. An edge case of a section, such as when a key stops working, is a short callout on that section, not a section of its own.
 - Introduce a list or a set of rules with a sentence that says what problem it solves. Bullets without that context read as noise.
+- When a fact is outdated, delete it. Add replacement text only if the remaining page would be false or incomplete for a reader who has never heard of the old fact. Do not introduce a retired product, template, or partnership just to explain that it is gone: if the rest of the page never mentioned it, nobody expects it. Put "this used to exist" history in the changelog.
 
 Once done with a first draft, look at what you've written again and aim to cut 50% of it. You will, in most cases, be able to do that. Seriously question whether you did a good review if you cut less than 50% and look again.
 

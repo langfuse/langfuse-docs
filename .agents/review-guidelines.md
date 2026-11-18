@@ -13,6 +13,7 @@
 
 - Keep a fact only when a reader with that screen open still could not know it. Don't list options, providers, etc. just for the sake of having them in the docs. less is more.
 - Also cut every category in [Cut what the reader doesn't need](AGENTS.md#cut-what-the-reader-doesnt-need)
+- When a PR corrects outdated copy, ask whether deleting the outdated clause would have been enough. Fail additions that explain the absence of something the rest of the page never mentions, or that restate a fact the page already demonstrates. Historical notices belong on changelog entries, not on the current-state page.
 - Flag provider-specific setup that restates the UI. In most cases these can be cut entirely. If not, add it as a short note at the bottom of the feature page of as a separate guide/FAQ that the feature page can link to at the bottom of the page.
 
 ### Duplication
