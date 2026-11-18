@@ -71,7 +71,7 @@ function PartnerIdentity({ profile }: { profile: PartnerProfile }) {
     <>
       <Image
         src={logo.src}
-        alt={logo.alt}
+        alt=""
         width={logo.width}
         height={logo.height}
         className="mt-3 h-8 w-auto max-w-40 object-contain object-left brightness-0 dark:invert"
