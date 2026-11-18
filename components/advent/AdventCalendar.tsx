@@ -515,13 +515,10 @@ export function AdventCalendar() {
   const [throwing, setThrowing] = useState(false);
   const throwEndTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reducedMotion = usePrefersReducedMotion();
-  const reducedMotionRef = useRef(false);
   const music = useJingles(techno);
   const { thud } = music;
 
   dialogOpenRef.current = activeDay !== null;
-  reducedMotionRef.current = reducedMotion;
-
   useEffect(() => {
     setTechno(readStorage(MODE_KEY) === "techno");
     const update = () => {
@@ -555,13 +552,13 @@ export function AdventCalendar() {
     if (state !== "locked") setActiveDay(day);
   }, [unlocked, opened]);
 
-  /** Throws a snowball at a point and returns the ms until it lands. */
+  /**
+   * Throws a snowball at a point and returns the ms until it lands. Throws run
+   * even with reduced motion: each one is the visitor's own click, not ambient
+   * motion.
+   */
   const throwAt = useCallback(
     (x: number, y: number) => {
-      if (reducedMotionRef.current) {
-        thud(0);
-        return 0;
-      }
       canvasRef.current?.throwSnowball(x, y);
       thud(SNOWBALL_DURATION / 1000);
       return SNOWBALL_DURATION;
@@ -589,10 +586,6 @@ export function AdventCalendar() {
       // Not at the pointer: that is usually on the snowman himself.
       const toX = window.innerWidth * (0.3 + Math.random() * 0.4);
       const toY = window.innerHeight * (0.3 + Math.random() * 0.3);
-      if (reducedMotionRef.current) {
-        thud(0);
-        return;
-      }
       canvasRef.current?.throwBack(fromX, fromY, toX, toY);
       thud(THROW_BACK_DURATION / 1000);
     }, SNOWMAN_RELEASE_MS);
@@ -727,10 +720,7 @@ export function AdventCalendar() {
         getBeat={music.getBeat}
       />
       <AdventStyles />
-      <WinterCanvas
-        ref={canvasRef}
-        active={!reducedMotion && activeDay === null}
-      />
+      <WinterCanvas ref={canvasRef} active={activeDay === null} />
 
       <section className="adv-hero relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-8 text-center sm:px-8 md:pt-10">
         <div className="adv-mode-bar" data-no-snowball>
