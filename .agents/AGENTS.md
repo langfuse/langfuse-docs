@@ -179,7 +179,7 @@ Once done with a first draft, look at what you've written again and aim to cut 5
 - App links from docs use `https://cloud.langfuse.com/project/~/[path]`. The `~` sentinel redirects to the reader's last-used project and region.
 - When embedding videos from YouTube, embed from `https://www.youtube-nocookie.com` and add `rel=0`.
 - Use `.mp4` files on `static.langfuse.com/docs-videos`. Do not use `.gif` files.
-- Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link. Do not use all caps eyebrows anywhere.
+- Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). Reuse `components/ui/button.tsx` for primary and secondary actions instead of restyling a one-off link. Do not use all caps eyebrows anywhere.
 - Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 
 ## Review guidelines
