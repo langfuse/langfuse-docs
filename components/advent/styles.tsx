@@ -540,6 +540,30 @@ export function AdventStyles() {
         30% { transform: rotate(8deg) scale(1.05, .95); }
         to { opacity: 0; transform: translateY(24px) scale(1.4, .1); }
       }
+      .adv-snowman.is-annoyed .adv-snowman-head {
+        transform-box: view-box;
+        transform-origin: 60px 66px;
+        animation: adv-fume .45s ease-in-out infinite;
+      }
+      @keyframes adv-fume {
+        0%, 100% { transform: rotate(-3deg); }
+        50% { transform: rotate(3deg); }
+      }
+      .adv-snowman-arm {
+        transform-box: view-box;
+        transform-origin: 78px 84px;
+      }
+      .adv-snowman.is-throwing .adv-snowman-arm { animation: adv-arm-throw .5s ease-in-out; }
+      @keyframes adv-arm-throw {
+        0%, 100% { transform: none; }
+        45% { transform: rotate(-65deg); }
+        62% { transform: rotate(18deg); }
+      }
+      .adv-snowman.is-throwing .adv-snowman-ammo { animation: adv-ammo-release .5s step-end forwards; }
+      @keyframes adv-ammo-release {
+        0% { opacity: 1; }
+        56%, 100% { opacity: 0; }
+      }
 
       /* Snowball hint: a cursor clicks, a snowball flies in and splats */
       .adv-hint {

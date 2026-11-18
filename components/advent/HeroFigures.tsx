@@ -93,22 +93,35 @@ export function Santa({ className }: { className?: string }) {
   );
 }
 
+/** Snowball in the throwing hand, in the snowman's SVG viewBox coordinates. */
+export const SNOWMAN_HAND = { x: 103, y: 68, width: 120, height: 160 };
+export const SNOWMAN_THROW_MS = 500;
+/** Point in the arm swing where the snowball leaves the hand. */
+export const SNOWMAN_RELEASE_MS = 280;
+
 type SnowmanProps = {
   balls: number;
   crumbling: boolean;
   hit: boolean;
+  annoyed: boolean;
+  throwing: boolean;
   className?: string;
 };
 
 export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
-  function Snowman({ balls, crumbling, hit, className }, ref) {
+  function Snowman(
+    { balls, crumbling, hit, annoyed, throwing, className },
+    ref,
+  ) {
     const label = crumbling
       ? "Oops!"
-      : balls === 0
-        ? "Hit me with snowballs"
-        : balls < SNOWMAN_MAX_BALLS
-          ? `${balls} of ${SNOWMAN_MAX_BALLS}, keep going!`
-          : "Done! Dare to hit me again?";
+      : annoyed
+        ? "Hey! Take that!"
+        : balls === 0
+          ? "Hit me with snowballs"
+          : balls < SNOWMAN_MAX_BALLS
+            ? `${balls} of ${SNOWMAN_MAX_BALLS}, keep going!`
+            : "Done! Dare to hit me again?";
     return (
       <div
         ref={ref}
@@ -122,6 +135,8 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
             "adv-snowman w-full overflow-visible",
             crumbling && "is-crumbling",
             hit && "is-hit",
+            annoyed && "is-annoyed",
+            throwing && "is-throwing",
           )}
         >
           <ellipse cx="60" cy="154" rx="44" ry="5" className="adv-shadow" />
@@ -148,11 +163,30 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
           {balls >= 2 ? (
             <g className="adv-snowman-ball">
               <path
-                d="M42 84 L18 70 M24 74 L16 78 M78 84 L102 70 M96 74 L104 78"
+                d="M42 84 L18 70 M24 74 L16 78"
                 stroke="#6b4a2b"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
+              <g className="adv-snowman-arm">
+                <path
+                  d="M78 84 L102 70 M96 74 L104 78"
+                  stroke="#6b4a2b"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                {annoyed ? (
+                  <circle
+                    cx="103"
+                    cy="68"
+                    r="5"
+                    fill="#fff"
+                    stroke="#c9d4e2"
+                    strokeWidth="1.2"
+                    className="adv-snowman-ammo"
+                  />
+                ) : null}
+              </g>
               <circle
                 cx="60"
                 cy="84"
@@ -167,39 +201,79 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
           ) : null}
           {balls >= 3 ? (
             <g className="adv-snowman-ball">
-              <circle
-                cx="60"
-                cy="52"
-                r="15"
-                fill="#fff"
-                stroke="#c9d4e2"
-                strokeWidth="1.5"
-              />
-              <circle cx="55" cy="49" r="1.8" fill="#1d1d1b" />
-              <circle cx="65" cy="49" r="1.8" fill="#1d1d1b" />
-              <path d="M60 53 L74 56 L60 57 Z" fill="#f08a24" />
-              <path
-                d="M54 59 Q60 63 66 59"
-                stroke="#1d1d1b"
-                strokeWidth="1.5"
-                fill="none"
-                strokeLinecap="round"
-              />
-              <path
-                d="M44 66 Q60 74 76 66 L76 71 Q60 79 44 71 Z"
-                fill="#b3262e"
-              />
-              <rect x="66" y="68" width="7" height="16" rx="2" fill="#b3262e" />
-              <rect x="46" y="36" width="28" height="4" rx="2" fill="#1d1d1b" />
-              <rect
-                x="50"
-                y="20"
-                width="20"
-                height="18"
-                rx="2"
-                fill="#1d1d1b"
-              />
-              <rect x="50" y="32" width="20" height="3" fill="#1f5c3f" />
+              <g className="adv-snowman-head">
+                <circle
+                  cx="60"
+                  cy="52"
+                  r="15"
+                  fill="#fff"
+                  stroke="#c9d4e2"
+                  strokeWidth="1.5"
+                />
+                {annoyed ? (
+                  <>
+                    <circle
+                      cx="51"
+                      cy="56"
+                      r="3"
+                      fill="#ff8a7a"
+                      opacity=".55"
+                    />
+                    <circle
+                      cx="69"
+                      cy="56"
+                      r="3"
+                      fill="#ff8a7a"
+                      opacity=".55"
+                    />
+                    <path
+                      d="M51 44 L58 47 M69 44 L62 47"
+                      stroke="#1d1d1b"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                  </>
+                ) : null}
+                <circle cx="55" cy="49" r="1.8" fill="#1d1d1b" />
+                <circle cx="65" cy="49" r="1.8" fill="#1d1d1b" />
+                <path d="M60 53 L74 56 L60 57 Z" fill="#f08a24" />
+                <path
+                  d={annoyed ? "M54 61 Q60 57 66 61" : "M54 59 Q60 63 66 59"}
+                  stroke="#1d1d1b"
+                  strokeWidth="1.5"
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M44 66 Q60 74 76 66 L76 71 Q60 79 44 71 Z"
+                  fill="#b3262e"
+                />
+                <rect
+                  x="66"
+                  y="68"
+                  width="7"
+                  height="16"
+                  rx="2"
+                  fill="#b3262e"
+                />
+                <rect
+                  x="46"
+                  y="36"
+                  width="28"
+                  height="4"
+                  rx="2"
+                  fill="#1d1d1b"
+                />
+                <rect
+                  x="50"
+                  y="20"
+                  width="20"
+                  height="18"
+                  rx="2"
+                  fill="#1d1d1b"
+                />
+                <rect x="50" y="32" width="20" height="3" fill="#1f5c3f" />
+              </g>
             </g>
           ) : null}
         </svg>

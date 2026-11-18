@@ -27,10 +27,18 @@ import { DoorAnimation } from "./DoorAnimation";
 import { JinglePlayer } from "./jingles";
 import {
   SNOWBALL_DURATION,
+  THROW_BACK_DURATION,
   WinterCanvas,
   type WinterCanvasHandle,
 } from "./WinterCanvas";
-import { SNOWMAN_MAX_BALLS, Santa, Snowman } from "./HeroFigures";
+import {
+  SNOWMAN_HAND,
+  SNOWMAN_MAX_BALLS,
+  SNOWMAN_RELEASE_MS,
+  SNOWMAN_THROW_MS,
+  Santa,
+  Snowman,
+} from "./HeroFigures";
 import {
   ADVENT_DOORS,
   ADVENT_URL,
@@ -73,11 +81,16 @@ function getUnlockedDay(now: Date): number {
 }
 
 /**
- * Outside production, `?day=N` simulates any day, and before December door 1
+ * In preview and dev builds, `?day=N` simulates any day, and before December door 1
  * is openable so the calendar can be reviewed.
  */
 function getPreviewDay(now: Date): number | null {
-  if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") return null;
+  if (
+    process.env.NEXT_PUBLIC_VERCEL_ENV !== "preview" &&
+    process.env.NODE_ENV !== "development"
+  ) {
+    return null;
+  }
   const param = new URLSearchParams(window.location.search).get("day");
   if (param === null) return getUnlockedDay(now) === 0 ? 1 : null;
   const day = Number(param);
@@ -211,7 +224,12 @@ function MusicToggle({
   return (
     <button
       type="button"
+      // The page starts the music on any gesture; this button's own gesture
+      // must only toggle, or keyboard Space would start and then stop it.
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerUp={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
       onClick={onToggle}
       aria-pressed={playing}
       aria-label={playing ? "Turn off the jingles" : "Turn on the jingles"}
@@ -314,7 +332,7 @@ function DoorTile({
 }
 
 function DoorDialog({
-  door,
+  door: activeDoor,
   openDays,
   onNavigate,
   onClose,
@@ -324,6 +342,10 @@ function DoorDialog({
   onNavigate: (day: number) => void;
   onClose: () => void;
 }) {
+  // Keep showing the last door while the dialog animates out.
+  const [lastDoor, setLastDoor] = useState(activeDoor);
+  if (activeDoor && activeDoor !== lastDoor) setLastDoor(activeDoor);
+  const door = activeDoor ?? lastDoor;
   const position = door ? openDays.indexOf(door.day) : -1;
   const prev = position > 0 ? openDays[position - 1] : null;
   const next =
@@ -338,7 +360,10 @@ function DoorDialog({
     : "";
 
   return (
-    <Dialog open={door !== null} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={activeDoor !== null}
+      onOpenChange={(open) => !open && onClose()}
+    >
       <DialogContent className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6">
         {door ? (
           <div key={door.day} className="flex flex-col gap-4">
@@ -455,6 +480,9 @@ export function AdventCalendar() {
   const snowmanHitsRef = useRef(0);
   const hitsNeededRef = useRef(nextHitsNeeded());
   const [snowmanHit, setSnowmanHit] = useState(false);
+  const [annoyed, setAnnoyed] = useState(false);
+  const annoyedRef = useRef(false);
+  const [throwing, setThrowing] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const reducedMotionRef = useRef(false);
   const music = useJingles();
@@ -509,11 +537,39 @@ export function AdventCalendar() {
     [thud],
   );
 
+  /** The snowman winds up and throws a snowball at the viewer. */
+  const throwBack = useCallback(() => {
+    setThrowing(false);
+    requestAnimationFrame(() => setThrowing(true));
+    setTimeout(() => setThrowing(false), SNOWMAN_THROW_MS);
+    setTimeout(() => {
+      const svg = snowmanRef.current?.querySelector("svg");
+      if (!svg) return;
+      const rect = svg.getBoundingClientRect();
+      const fromX =
+        rect.left + (SNOWMAN_HAND.x / SNOWMAN_HAND.width) * rect.width;
+      const fromY =
+        rect.top + (SNOWMAN_HAND.y / SNOWMAN_HAND.height) * rect.height;
+      // Not at the pointer: that is usually on the snowman himself.
+      const toX = window.innerWidth * (0.3 + Math.random() * 0.4);
+      const toY = window.innerHeight * (0.3 + Math.random() * 0.3);
+      if (reducedMotionRef.current) {
+        thud(0);
+        return;
+      }
+      canvasRef.current?.throwBack(fromX, fromY, toX, toY);
+      thud(THROW_BACK_DURATION / 1000);
+    }, SNOWMAN_RELEASE_MS);
+  }, [thud]);
+
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 || dialogOpenRef.current) return;
       const target = e.target as Element | null;
-      if (target?.closest(SNOWBALL_IGNORE)) return;
+      // Only the page itself is a target, not site chrome or overlays.
+      if (!target?.closest(".adv-page") || target.closest(SNOWBALL_IGNORE)) {
+        return;
+      }
       const landsIn = throwAt(e.clientX, e.clientY);
       const rect = snowmanRef.current?.getBoundingClientRect();
       if (
@@ -534,7 +590,10 @@ export function AdventCalendar() {
       requestAnimationFrame(() => setSnowmanHit(true));
       wobbleTimer = setTimeout(() => setSnowmanHit(false), HIT_WOBBLE_MS);
       snowmanHitsRef.current += 1;
-      if (snowmanHitsRef.current < hitsNeededRef.current) return;
+      if (snowmanHitsRef.current < hitsNeededRef.current) {
+        if (annoyedRef.current) setTimeout(throwBack, HIT_WOBBLE_MS);
+        return;
+      }
       snowmanHitsRef.current = 0;
       hitsNeededRef.current = nextHitsNeeded();
       if (snowmanBallsRef.current < SNOWMAN_MAX_BALLS) {
@@ -542,6 +601,15 @@ export function AdventCalendar() {
         setSnowmanBalls(snowmanBallsRef.current);
         return;
       }
+      // A full snowman fights back for one more round before crumbling.
+      if (!annoyedRef.current) {
+        annoyedRef.current = true;
+        setAnnoyed(true);
+        setTimeout(throwBack, HIT_WOBBLE_MS);
+        return;
+      }
+      annoyedRef.current = false;
+      setAnnoyed(false);
       crumblingRef.current = true;
       setCrumbling(true);
       setTimeout(() => {
@@ -553,7 +621,7 @@ export function AdventCalendar() {
     };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
-  }, [throwAt]);
+  }, [throwAt, throwBack]);
 
   useEffect(() => {
     if (!toast) return;
@@ -649,6 +717,8 @@ export function AdventCalendar() {
             balls={snowmanBalls}
             crumbling={crumbling}
             hit={snowmanHit}
+            annoyed={annoyed}
+            throwing={throwing}
             className="w-32 sm:w-36 lg:absolute lg:right-[2%] lg:top-[34%] lg:w-36 xl:right-[5%] xl:w-48"
           />
         </div>
