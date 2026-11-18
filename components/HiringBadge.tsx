@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import NextLink from "next/link";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "@/components/ui/corner-box";
 
@@ -25,8 +24,6 @@ export function HiringBadge({
    */
   adaptive?: boolean;
 }) {
-  const isAdvent = usePathname() === "/advent";
-  const icon = isAdvent ? "🎄" : "🐐";
   const [isHovered, setIsHovered] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [goats, setGoats] = useState<
@@ -43,13 +40,13 @@ export function HiringBadge({
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !isHovered) return;
     const now = Date.now();
-    if (now - lastSpawnTimeRef.current < (isAdvent ? 40 : 100)) return;
+    if (now - lastSpawnTimeRef.current < 100) return;
     lastSpawnTimeRef.current = now;
 
     const rect = containerRef.current.getBoundingClientRect();
     const newGoat = {
       id: goatIdRef.current++,
-      x: e.clientX - rect.left + (isAdvent ? (Math.random() - 0.5) * 40 : 0),
+      x: e.clientX - rect.left,
       y: e.clientY - rect.top,
       duration: 1.5 + Math.random() * 0.6,
     };
@@ -75,17 +72,14 @@ export function HiringBadge({
               return (
                 <span
                   key={goat.id}
-                  className={cn(
-                    "absolute animate-fall",
-                    isAdvent ? "text-xs" : "text-lg",
-                  )}
+                  className="absolute text-lg animate-fall"
                   style={{
                     left: `${rect.left + goat.x}px`,
                     top: `${rect.top + goat.y}px`,
                     animationDuration: `${goat.duration}s`,
                   }}
                 >
-                  {isAdvent ? "❄️" : "🐐"}
+                  🐐
                 </span>
               );
             })}
@@ -144,7 +138,7 @@ export function HiringBadge({
           )}
         >
           <span className="text-xs shrink-0" aria-hidden>
-            {icon}
+            🐐
           </span>
           <span className="text-left">
             <span className="block whitespace-nowrap">
