@@ -8,7 +8,10 @@ import { useState } from "react";
 import { controlTextClassName } from "@/components/ui/button";
 import { TabButton } from "@/components/ui/tab-button";
 import { TextHighlight } from "@/components/ui/text-highlight";
+import { formatDeveloperCount } from "@/lib/usage-stats";
 import { cn } from "@/lib/utils";
+
+const developerCount = formatDeveloperCount();
 
 export type Adopter = {
   id: string;
@@ -369,22 +372,17 @@ export function AdoptersExplorer({
       <header className="border-b border-line-structure px-4 py-10 sm:px-8 sm:py-14 lg:px-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div>
-            <p
-              className={cn("m-0", controlTextClassName, "text-text-tertiary")}
-            >
-              — Adopters
-            </p>
             <HeadingTag
-              aria-label="Langfuse is adopted by 100,000+ developers worldwide"
-              className="mt-5 max-w-[19ch] font-analog text-[38px] font-medium leading-[1.02] tracking-tight text-text-primary sm:text-[50px]"
+              aria-label={`Langfuse is adopted by ${developerCount} developers worldwide`}
+              className="max-w-[19ch] font-analog text-[38px] font-medium leading-[1.02] tracking-tight text-text-primary sm:text-[50px]"
             >
               Langfuse is adopted by{" "}
               <span className="sm:hidden">
-                <TextHighlight>100,000+</TextHighlight>{" "}
+                <TextHighlight>{developerCount}</TextHighlight>{" "}
                 <TextHighlight>developers</TextHighlight>
               </span>
               <span className="hidden sm:inline">
-                <TextHighlight>100,000+ developers</TextHighlight>
+                <TextHighlight>{developerCount} developers</TextHighlight>
               </span>{" "}
               worldwide
             </HeadingTag>

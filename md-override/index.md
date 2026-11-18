@@ -8,7 +8,7 @@ description: Langfuse is one open platform for every AI call your company makes 
 
 Langfuse is one [open](https://github.com/langfuse/langfuse) platform for every AI call your company makes and every agent your teams build. Track usage and costs, trace and evaluate agents, and use production logs to ship better AI. Cloud or self-hosted.
 
-Used by 21 of the Fortune 50. 100,000+ engineers build on Langfuse, and the platform processes 110B+ observations per month.
+Used by 21 of the Fortune 50. 200,000+ engineers build on Langfuse, and the platform processes 110B+ observations per month.
 
 [Start free](/cloud), [Documentation](/docs), [Watch demo](/watch-demo), [Interactive demo](/docs/demo)
 

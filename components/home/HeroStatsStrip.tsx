@@ -7,6 +7,7 @@ import { Dot } from "@/components/ui/dot";
 import { cn } from "@/lib/utils";
 import {
   FORTUNE_50_COMPANIES,
+  formatDeveloperCount,
   formatObservationsPerMonth,
 } from "@/lib/usage-stats";
 
@@ -34,7 +35,8 @@ function StatItems({ textSize }: { textSize: "s" | "m" }) {
       </Text>
       <Dot />
       <Text size={textSize} className="whitespace-nowrap shrink-0">
-        <b className="text-primary">100,000+</b> engineers building on Langfuse
+        <b className="text-primary">{formatDeveloperCount()}</b> engineers
+        building on Langfuse
       </Text>
     </>
   );
