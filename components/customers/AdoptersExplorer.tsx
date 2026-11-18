@@ -207,9 +207,10 @@ function AdopterCard({
       layout
       transition={{ layout: { duration: 0.32, ease: "easeInOut" } }}
       className={cn(
-        "corner-box-corners relative min-h-[116px] overflow-hidden border border-line-structure bg-surface-bg",
-        active &&
-          "z-10 min-h-[240px] border-text-secondary md:col-span-2 md:row-span-2",
+        "corner-box-corners relative overflow-hidden border border-line-structure bg-surface-bg",
+        active
+          ? "z-10 h-auto min-h-[240px] border-text-secondary md:col-span-2 md:row-span-2"
+          : "min-h-[116px]",
       )}
     >
       {active ? (
@@ -231,7 +232,7 @@ function AdopterCard({
           </span>
           <AdopterLogo adopter={adopter} />
           {!adopter.logo && (
-            <span className="pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
+            <span className="line-clamp-2 pr-10 font-analog text-[19px] font-medium leading-tight text-text-primary">
               {adopter.name}
             </span>
           )}
@@ -258,7 +259,7 @@ function AdoptersWall({ adopters }: { adopters: Adopter[] }) {
     setActiveId((current) => (current === id ? null : id));
 
   return (
-    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 p-2 md:auto-rows-[116px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-flow-row-dense grid-cols-1 gap-2 bg-surface-2 p-2 md:auto-rows-[minmax(116px,auto)] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {adopters.map((adopter, index) => (
         <AdopterCard
           key={adopter.id}
