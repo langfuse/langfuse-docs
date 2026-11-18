@@ -2,10 +2,6 @@ export function AdventStyles() {
   return (
     <style>{`
       .adv-page, .adv-dialog {
-        --adv-night-1: #0b1626;
-        --adv-night-2: #12253b;
-        --adv-ink: #f4efe3;
-        --adv-ink-muted: rgba(244, 239, 227, 0.72);
         --adv-paper: #f4ecd9;
         --adv-paper-shade: #e3d6b8;
         --adv-red: #b3262e;
@@ -15,31 +11,14 @@ export function AdventStyles() {
         --adv-gold: #f2c14e;
         --adv-gold-soft: rgba(242, 193, 78, 0.55);
         --adv-mint: #9be7c4;
-        /* Shared buttons read these tokens; use their dark-theme values on the night scene. */
-        --color-text-primary: #e8e8e4;
-        --color-text-secondary: #b4b4ae;
-        --color-text-tertiary: #7a7a74;
-        --color-surface-bg: #171714;
-        --color-line-structure: #2c2c29;
-        --color-line-cta: #b8b6a0;
+        --adv-accent-text: #b3262e;
+        --adv-gold-text: #8a5d00;
+        --adv-green-text: #1f7a4d;
       }
-      .adv-page {
-        background:
-          radial-gradient(ellipse 90% 60% at 50% 0%, rgba(80, 120, 170, 0.35), transparent 70%),
-          linear-gradient(180deg, var(--adv-night-2), var(--adv-night-1) 70%);
-        color: var(--adv-ink);
-      }
-
-      .adv-stars {
-        background-image:
-          radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.8), transparent),
-          radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,.6), transparent),
-          radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,.9), transparent),
-          radial-gradient(1px 1px at 75% 45%, rgba(255,255,255,.6), transparent),
-          radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,.8), transparent),
-          radial-gradient(1.5px 1.5px at 20% 40%, rgba(255,255,255,.7), transparent),
-          radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,.5), transparent);
-        background-size: 420px 300px;
+      :root.dark .adv-page, :root.dark .adv-dialog {
+        --adv-accent-text: #ff8a7a;
+        --adv-gold-text: #f2c14e;
+        --adv-green-text: #9be7c4;
       }
 
       .adv-eyebrow {
@@ -47,7 +26,7 @@ export function AdventStyles() {
         font-size: 11px;
         letter-spacing: .08em;
         text-transform: uppercase;
-        color: var(--adv-gold);
+        color: var(--adv-accent-text);
       }
 
       /* Garland of lights across the top of the board */
@@ -107,9 +86,9 @@ export function AdventStyles() {
         gap: 6px;
         padding: 8px;
         text-align: center;
-        background: radial-gradient(circle at 50% 35%, #2a4a6b, #0e1b2c 75%);
-        box-shadow: inset 0 4px 14px rgba(0,0,0,.6);
-        color: var(--adv-ink);
+        background: var(--surface-1);
+        box-shadow: inset 0 4px 12px rgba(0,0,0,.35);
+        color: var(--text-primary);
       }
       .adv-door-recess-title {
         font-size: 11px;
@@ -127,8 +106,8 @@ export function AdventStyles() {
         width: 34px;
         height: 34px;
         border-radius: 999px;
-        background: rgba(242, 193, 78, .16);
-        color: var(--adv-gold);
+        background: rgba(179, 38, 46, .1);
+        color: var(--adv-accent-text);
       }
       .adv-door-leaf {
         position: absolute;
@@ -229,31 +208,24 @@ export function AdventStyles() {
       @keyframes adv-toast-in { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
       .adv-music {
-        background: rgba(11, 22, 38, .85);
-        color: var(--adv-ink);
-        border: 1px solid rgba(242, 193, 78, .45);
-        backdrop-filter: blur(6px);
+        background: var(--surface-bg);
+        color: var(--text-primary);
+        border: 1px solid var(--line-structure);
       }
       .adv-music-bars { display: inline-flex; gap: 2px; align-items: flex-end; height: 12px; }
-      .adv-music-bars span { width: 2px; background: var(--adv-gold); animation: adv-eq 0.9s ease-in-out infinite; }
+      .adv-music-bars span { width: 2px; background: var(--adv-red); animation: adv-eq 0.9s ease-in-out infinite; }
       .adv-music-bars span:nth-child(2) { animation-delay: .2s; }
       .adv-music-bars span:nth-child(3) { animation-delay: .4s; }
       @keyframes adv-eq { 0%, 100% { height: 3px; } 50% { height: 12px; } }
 
-      /* Dialog */
-      .adv-dialog {
-        background: linear-gradient(180deg, #13263c, #0b1626);
-        color: var(--adv-ink);
-        border: 1px solid rgba(242, 193, 78, .4);
-      }
 
       /* Animation stage */
       .adv-stage {
         background:
-          radial-gradient(ellipse 70% 80% at 50% 0%, rgba(242,193,78,.12), transparent 70%),
-          linear-gradient(180deg, #0f2236, #0a1524);
-        border: 1px solid rgba(255,255,255,.08);
-        color: var(--adv-ink);
+          radial-gradient(ellipse 70% 80% at 50% 0%, rgba(242,193,78,.14), transparent 70%),
+          var(--surface-1);
+        border: 1px solid var(--line-structure);
+        color: var(--text-primary);
       }
 
       .adv-pop { animation: adv-pop .5s cubic-bezier(.3,1.6,.5,1) both; }
@@ -266,8 +238,8 @@ export function AdventStyles() {
         z-index: 1;
         padding: 10px 8px;
         border-radius: 6px;
-        background: rgba(255,255,255,.06);
-        border: 1px solid rgba(255,255,255,.14);
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
         font-size: 12px;
         text-align: center;
         line-height: 1.3;
@@ -307,7 +279,7 @@ export function AdventStyles() {
         position: absolute;
         top: 50%;
         height: 2px;
-        background: repeating-linear-gradient(90deg, rgba(255,255,255,.3) 0 6px, transparent 6px 10px);
+        background: repeating-linear-gradient(90deg, var(--line-cta) 0 6px, transparent 6px 10px);
       }
       .adv-wire-left { left: 16%; width: 22%; }
       .adv-wire-right { right: 16%; width: 22%; }
@@ -362,9 +334,9 @@ export function AdventStyles() {
       .adv-vault {
         display: flex; flex-direction: column; align-items: center; gap: 6px;
         padding: 14px 12px; border-radius: 8px;
-        background: rgba(255,255,255,.06);
-        border: 1px dashed rgba(242,193,78,.6);
-        color: var(--adv-gold);
+        background: var(--surface-bg);
+        border: 1px dashed var(--adv-gold);
+        color: var(--adv-gold-text);
         text-align: center;
       }
       .adv-key-chip {
@@ -387,8 +359,8 @@ export function AdventStyles() {
       .adv-provider {
         position: relative;
         padding: 6px 10px; border-radius: 999px; font-size: 12px;
-        background: rgba(255,255,255,.06);
-        border: 1px solid rgba(255,255,255,.14);
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
         animation: adv-pop .5s cubic-bezier(.3,1.6,.5,1) both;
       }
       .adv-provider-new {
@@ -404,7 +376,7 @@ export function AdventStyles() {
         background: var(--adv-red); color: var(--adv-paper);
       }
 
-      .adv-track { position: relative; height: 14px; border-radius: 3px; background: rgba(255,255,255,.05); }
+      .adv-track { position: relative; height: 14px; border-radius: 3px; background: var(--line-structure); }
       .adv-bar {
         position: absolute; top: 0; bottom: 0; border-radius: 3px;
         background: linear-gradient(90deg, #4f8fd8, #7fb4ff);
@@ -417,7 +389,8 @@ export function AdventStyles() {
       .adv-segmented {
         display: grid; grid-template-columns: repeat(2, 1fr);
         padding: 3px; border-radius: 999px;
-        background: rgba(255,255,255,.08);
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
         font-family: var(--font-geist-mono); font-size: 12px; text-align: center;
       }
       .adv-segmented span { padding: 6px 0; border-radius: 999px; transition: background .3s, color .3s; }
@@ -425,21 +398,21 @@ export function AdventStyles() {
       .adv-field {
         display: flex; align-items: center; gap: 8px;
         padding: 6px 10px; border-radius: 6px; font-size: 12px;
-        background: rgba(255,255,255,.06);
+        background: var(--surface-bg);
         transition: opacity .3s, background .3s, color .3s;
       }
       .adv-field-off { opacity: .4; text-decoration: line-through; }
-      .adv-field-match { background: rgba(155,231,196,.16); color: var(--adv-mint); }
+      .adv-field-match { background: rgba(31,122,77,.12); color: var(--adv-green-text); }
 
       .adv-trace-card {
         display: flex; flex-direction: column; gap: 8px;
         padding: 12px; border-radius: 8px;
-        background: rgba(255,255,255,.06);
-        border: 1px solid rgba(255,255,255,.14);
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
       }
       .adv-chip {
         padding: 2px 8px; border-radius: 999px; font-size: 11px;
-        background: rgba(155,231,196,.16); color: var(--adv-mint);
+        background: rgba(31,122,77,.12); color: var(--adv-green-text);
       }
 
       .adv-column {
@@ -449,7 +422,7 @@ export function AdventStyles() {
         animation: adv-rise .7s cubic-bezier(.3,1.4,.5,1) both;
       }
       @keyframes adv-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-      .adv-counter { animation: adv-pop .6s ease-out .9s both; color: var(--adv-gold); }
+      .adv-counter { animation: adv-pop .6s ease-out .9s both; color: var(--adv-gold-text); }
       .adv-legend::before {
         content: ""; display: inline-block; width: 8px; height: 8px;
         border-radius: 2px; margin-right: 4px;
@@ -486,38 +459,108 @@ export function AdventStyles() {
 
       .adv-switch {
         position: relative; width: 30px; height: 17px; border-radius: 999px;
-        background: rgba(255,255,255,.2); transition: background .3s;
+        background: var(--line-structure); transition: background .3s;
         flex-shrink: 0;
       }
       .adv-switch span {
         position: absolute; top: 2px; left: 2px; width: 13px; height: 13px;
         border-radius: 999px; background: #fff; transition: transform .3s cubic-bezier(.3,1.4,.5,1);
       }
-      .adv-switch-on { background: var(--adv-mint); }
+      .adv-switch-on { background: var(--adv-green-text); }
       .adv-switch-on span { transform: translateX(13px); }
 
       .adv-input {
         min-height: 36px; display: flex; align-items: center;
         padding: 6px 10px; border-radius: 6px;
-        background: #050b14; border: 1px solid rgba(242,193,78,.5);
-        color: var(--adv-gold);
+        background: var(--surface-bg); border: 1px solid var(--adv-gold);
+        color: var(--text-primary);
       }
 
       .adv-bubble { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 12.5px; line-height: 1.45; }
       .adv-bubble-user { align-self: flex-end; background: var(--adv-gold); color: #0b1626; border-bottom-right-radius: 3px; }
       .adv-bubble-typing {
         align-self: flex-start; display: inline-flex; gap: 4px;
-        background: rgba(255,255,255,.1); border-bottom-left-radius: 3px;
+        background: var(--surface-bg); border: 1px solid var(--line-structure); border-bottom-left-radius: 3px;
         animation: adv-typing-show 2.2s ease-in-out .6s both;
       }
-      .adv-bubble-typing span { width: 6px; height: 6px; border-radius: 999px; background: var(--adv-ink); animation: adv-dot 1s ease-in-out infinite; }
+      .adv-bubble-typing span { width: 6px; height: 6px; border-radius: 999px; background: var(--text-primary); animation: adv-dot 1s ease-in-out infinite; }
       .adv-bubble-typing span:nth-child(2) { animation-delay: .15s; }
       .adv-bubble-typing span:nth-child(3) { animation-delay: .3s; }
       @keyframes adv-dot { 0%, 100% { opacity: .3; transform: none; } 50% { opacity: 1; transform: translateY(-3px); } }
       @keyframes adv-typing-show { 0% { opacity: 0; } 10%, 90% { opacity: 1; } 100% { opacity: 0; height: 0; padding: 0; margin: -6px 0; } }
       .adv-bubble-halo {
-        align-self: flex-start; background: rgba(255,255,255,.1); border-bottom-left-radius: 3px;
+        align-self: flex-start; background: var(--surface-bg); border: 1px solid var(--line-structure); border-bottom-left-radius: 3px;
         animation: adv-pop .5s cubic-bezier(.3,1.6,.5,1) 2.8s both;
+      }
+
+
+      /* Snowball hint: a cursor clicks, a snowball flies in and splats */
+      .adv-hint {
+        position: relative;
+        display: inline-block;
+        width: 88px;
+        height: 44px;
+        flex-shrink: 0;
+      }
+      .adv-hint-cursor, .adv-hint-ring, .adv-hint-ball, .adv-hint-splat {
+        position: absolute; left: 0; top: 0;
+      }
+      .adv-hint-cursor {
+        color: var(--text-primary);
+        animation: adv-hint-cursor 3.2s ease-in-out infinite;
+      }
+      .adv-hint-ring {
+        width: 18px; height: 18px; margin: -9px 0 0 -9px;
+        border-radius: 999px; border: 2px solid var(--adv-red);
+        transform: translate(64px, 14px) scale(0); opacity: 0;
+        animation: adv-hint-ring 3.2s ease-out infinite;
+      }
+      .adv-hint-ball {
+        width: 14px; height: 14px; margin: -7px 0 0 -7px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 35%, #fff, #dfe7f1 70%, #aebcd0);
+        box-shadow: 0 1px 3px rgba(0,0,0,.25);
+        opacity: 0;
+        animation: adv-hint-ball 3.2s ease-in infinite;
+      }
+      .adv-hint-splat {
+        width: 22px; height: 22px; margin: -11px 0 0 -11px;
+        border-radius: 999px;
+        background: radial-gradient(circle, #fff 45%, rgba(255,255,255,0) 46%),
+          radial-gradient(circle at 15% 20%, #fff 18%, transparent 19%),
+          radial-gradient(circle at 85% 30%, #fff 16%, transparent 17%),
+          radial-gradient(circle at 30% 90%, #fff 15%, transparent 16%),
+          radial-gradient(circle at 80% 85%, #fff 17%, transparent 18%);
+        filter: drop-shadow(0 0 1px #aebcd0);
+        transform: translate(64px, 14px) scale(0); opacity: 0;
+        animation: adv-hint-splat 3.2s ease-out infinite;
+      }
+      @keyframes adv-hint-cursor {
+        0% { transform: translate(78px, 34px); opacity: 0; }
+        10% { opacity: 1; }
+        28% { transform: translate(64px, 14px); }
+        32% { transform: translate(64px, 14px) scale(.8); }
+        36% { transform: translate(64px, 14px) scale(1); }
+        80% { transform: translate(64px, 14px); opacity: 1; }
+        92%, 100% { transform: translate(64px, 14px); opacity: 0; }
+      }
+      @keyframes adv-hint-ring {
+        0%, 31% { transform: translate(64px, 14px) scale(0); opacity: 0; }
+        33% { opacity: 1; }
+        48%, 100% { transform: translate(64px, 14px) scale(1.6); opacity: 0; }
+      }
+      @keyframes adv-hint-ball {
+        0%, 34% { transform: translate(2px, 42px) scale(1.5); opacity: 0; }
+        36% { opacity: 1; }
+        46% { transform: translate(30px, 0px) scale(1.1); }
+        56% { transform: translate(64px, 14px) scale(.8); opacity: 1; }
+        57%, 100% { transform: translate(64px, 14px) scale(.8); opacity: 0; }
+      }
+      @keyframes adv-hint-splat {
+        0%, 55% { transform: translate(64px, 14px) scale(0); opacity: 0; }
+        58% { transform: translate(64px, 14px) scale(1); opacity: 1; }
+        85% { opacity: 1; }
+        100% { transform: translate(64px, 14px) scale(1.15); opacity: 0; }
       }
 
       @media (prefers-reduced-motion: reduce) {

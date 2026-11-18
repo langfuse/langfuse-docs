@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Gift,
   Lock,
+  MousePointer2,
   Music,
   Snowflake,
   Star,
@@ -59,11 +60,14 @@ function getUnlockedDay(now: Date): number {
   return now.getDate();
 }
 
-function getPreviewDay(): number | null {
-  // Lets reviewers check any day on local and preview deployments.
+/**
+ * Outside production, `?day=N` simulates any day, and before December door 1
+ * is openable so the calendar can be reviewed.
+ */
+function getPreviewDay(now: Date): number | null {
   if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production") return null;
   const param = new URLSearchParams(window.location.search).get("day");
-  if (param === null) return null;
+  if (param === null) return getUnlockedDay(now) === 0 ? 1 : null;
   const day = Number(param);
   return Number.isInteger(day) && day >= 0 && day <= ALL_OPEN ? day : null;
 }
@@ -142,6 +146,20 @@ function useJingles() {
   }, [playing]);
 
   return { enabled, playing, toggle };
+}
+
+function SnowballHint() {
+  return (
+    <p className="flex items-center gap-2 text-[13px] text-text-secondary">
+      <span className="adv-hint" aria-hidden>
+        <span className="adv-hint-ring" />
+        <span className="adv-hint-ball" />
+        <span className="adv-hint-splat" />
+        <MousePointer2 className="adv-hint-cursor size-4 fill-current" />
+      </span>
+      Click anywhere to throw a snowball
+    </p>
+  );
 }
 
 function MusicToggle({
@@ -270,14 +288,14 @@ function DoorDialog({
       : null;
   const shareUrl = door
     ? `https://x.com/intent/post?${new URLSearchParams({
-        text: `Day ${door.day} of the Langfuse AI Gateway Advent calendar: ${door.title}`,
+        text: `Day ${door.day} of Gateway to Christmas, the Langfuse AI Gateway Advent calendar: ${door.title}`,
         url: `${ADVENT_URL}#day-${door.day}`,
       })}`
     : "";
 
   return (
     <Dialog open={door !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6 [&>button:last-child]:text-[var(--adv-ink)]">
+      <DialogContent className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6">
         {door ? (
           <div key={door.day} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5 pr-6">
@@ -287,7 +305,7 @@ function DoorDialog({
               </DialogTitle>
             </div>
             <DoorAnimation spec={door.animation} />
-            <DialogDescription className="text-[14px] leading-relaxed text-[var(--adv-ink-muted)]">
+            <DialogDescription className="text-[14px] leading-relaxed text-text-secondary">
               {door.description}
             </DialogDescription>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -314,12 +332,12 @@ function DoorDialog({
                 {door.socialUrl ? "View the social post" : "Share on X"}
               </Button>
             </div>
-            <div className="flex items-center justify-between border-t border-white/10 pt-3 text-[12px]">
+            <div className="flex items-center justify-between border-t border-line-structure pt-3 text-[12px]">
               <button
                 type="button"
                 disabled={prev === null}
                 onClick={() => prev !== null && onNavigate(prev)}
-                className="inline-flex items-center gap-1 text-[var(--adv-ink-muted)] hover:text-[var(--adv-ink)] disabled:invisible"
+                className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary disabled:invisible"
               >
                 <ChevronLeft className="size-3.5" />
                 Day {prev}
@@ -328,7 +346,7 @@ function DoorDialog({
                 type="button"
                 disabled={next === null}
                 onClick={() => next !== null && onNavigate(next)}
-                className="inline-flex items-center gap-1 text-[var(--adv-ink-muted)] hover:text-[var(--adv-ink)] disabled:invisible"
+                className="inline-flex items-center gap-1 text-text-secondary hover:text-text-primary disabled:invisible"
               >
                 Day {next}
                 <ChevronRight className="size-3.5" />
@@ -389,8 +407,10 @@ export function AdventCalendar() {
   dialogOpenRef.current = activeDay !== null;
 
   useEffect(() => {
-    const update = () =>
-      setUnlocked(getPreviewDay() ?? getUnlockedDay(new Date()));
+    const update = () => {
+      const now = new Date();
+      setUnlocked(getPreviewDay(now) ?? getUnlockedDay(now));
+    };
     update();
     const id = setInterval(update, 60_000);
 
@@ -476,51 +496,32 @@ export function AdventCalendar() {
     <div className="adv-page relative overflow-hidden">
       <AdventStyles />
       <WinterCanvas ref={canvasRef} snow={!reducedMotion} />
-      <div
-        aria-hidden
-        className="adv-stars pointer-events-none absolute inset-0"
-      />
 
       <section className="relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-14 text-center sm:px-8 md:pt-20">
-        <span className="adv-eyebrow">Langfuse AI Gateway, December 2026</span>
         <h1 className="max-w-[18ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
-          The AI Gateway Advent calendar
+          Gateway to Christmas
         </h1>
-        <p className="max-w-[56ch] text-[16px] leading-relaxed text-[var(--adv-ink-muted)] sm:text-[17px]">
-          24 doors, 24 features of the Langfuse AI Gateway. From December 1 to
-          24, a new door opens every day. Behind each one: a feature, how it
-          works, and where to read more.
+        <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
+          The Langfuse AI Gateway Advent calendar: 24 doors, 24 features. From
+          December 1 to 24, a new door opens every day. Behind each one: a
+          feature, how it works, and where to read more.
         </p>
         <p
-          className="text-[14px] font-medium text-[var(--adv-gold)]"
+          className="text-[14px] font-medium text-[var(--adv-accent-text)]"
           aria-live="polite"
         >
           <StatusLine unlocked={unlocked} todayOpened={todayOpened} />
         </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            variant="primary"
-            size="default"
-            href="/docs/gateway/overview"
-            wrapperClassName="sm:w-auto"
-            className="px-4"
-          >
-            Get started with the AI Gateway
-          </Button>
-          <Button
-            variant="secondary"
-            size="default"
-            href="https://x.com/langfuse"
-            target="_blank"
-            rel="noopener noreferrer"
-            wrapperClassName="sm:w-auto"
-            className="px-4"
-            icon={<ArrowUpRight className="size-3.5" />}
-            iconPosition="end"
-          >
-            Follow @langfuse on X
-          </Button>
-        </div>
+        <Button
+          variant="primary"
+          size="default"
+          href="/docs/gateway/overview"
+          wrapperClassName="w-auto"
+          className="px-4"
+        >
+          Get started with the AI Gateway
+        </Button>
+        <SnowballHint />
       </section>
 
       <section className="relative mx-auto max-w-[1100px] px-3 pb-16 sm:px-8 md:pb-24">
@@ -546,9 +547,6 @@ export function AdventCalendar() {
             })}
           </div>
         </div>
-        <p className="mt-5 text-center text-[13px] text-[var(--adv-ink-muted)]">
-          Psst: click anywhere outside the doors to throw a snowball.
-        </p>
       </section>
 
       {toast ? (

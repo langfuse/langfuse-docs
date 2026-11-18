@@ -154,8 +154,8 @@ export const WinterCanvas = forwardRef<WinterCanvasHandle, { snow: boolean }>(
 
         if (snowRef.current) {
           ctx.fillStyle = "#ffffff";
-          ctx.strokeStyle = "rgba(110, 130, 160, 0.35)";
-          ctx.lineWidth = 0.6;
+          ctx.strokeStyle = "rgba(110, 130, 160, 0.55)";
+          ctx.lineWidth = 0.8;
           for (const f of flakes) {
             f.y += f.speed;
             f.x += Math.sin(now / 1600 + f.phase) * f.drift * 0.4;

@@ -4,10 +4,10 @@ import { buildDefaultSiteOgImageUrl } from "@/lib/og-url";
 
 const ogImageUrl = buildDefaultSiteOgImageUrl();
 const description =
-  "24 doors, 24 features of the Langfuse AI Gateway. A new door opens every day from December 1 to 24.";
+  "The Langfuse AI Gateway Advent calendar: 24 doors, 24 features. A new door opens every day from December 1 to 24.";
 
 export const metadata: Metadata = {
-  title: "Langfuse AI Gateway Advent calendar",
+  title: "Gateway to Christmas: the Langfuse AI Gateway Advent calendar",
   description,
   alternates: {
     canonical: "https://langfuse.com/advent",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   // layout's default `images` is dropped unless re-supplied here.
   openGraph: {
     type: "website",
-    title: "Langfuse AI Gateway Advent calendar",
+    title: "Gateway to Christmas: the Langfuse AI Gateway Advent calendar",
     description,
     url: "https://langfuse.com/advent",
     images: [{ url: ogImageUrl }],
