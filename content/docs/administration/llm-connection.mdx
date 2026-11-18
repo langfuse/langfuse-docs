@@ -90,9 +90,32 @@ The Langfuse platform is currently supporting the following LLM providers:
 
 When **Enable default models** is on, the provider's default models are available in the model selector of the Playground and evaluators. To use a model that is not in that list, e.g. a newer model, a fine-tuned model, or a model behind a proxy, add it under **Custom models** in the connection settings.
 
-For Amazon Bedrock, the AWS credentials need the `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` permissions.
-
 You may connect to third party LLM providers if their API schema implements the schema of one of our supported provider adapters. For example, you may connect to Mistral by using the OpenAI adapter in Langfuse to connect to Mistral's OpenAI compliant API.
+
+### Amazon Bedrock [#amazon-bedrock]
+
+Bedrock connections authenticate with AWS access keys, an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html), or an [IAM role](#bedrock-iam-role). The credentials need the `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` permissions.
+
+#### Authenticate with an IAM role [#bedrock-iam-role]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Langfuse can assume an IAM role in your AWS account instead of storing AWS credentials. Langfuse assumes your role through its own cross-account role and passes an external ID that is unique to the connection. Set **Authentication Method** to **IAM role** and enter your role ARN. The Langfuse UI then shows the external ID and the trust and permission policies to add to the role. IAM role connections can only be created in the UI, not through the [public API](/docs/api-and-data-platform/features/public-api).
+
+<Callout type="warning" title="Self-hosted: set the cross-account role">
+  On self-hosted deployments, an operator must set
+  [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role)
+  to the role Langfuse assumes before it assumes your role. Without it, the
+  **IAM role** option is disabled.
+</Callout>
 
 ## Advanced configurations
 
