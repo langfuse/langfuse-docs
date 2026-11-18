@@ -2,6 +2,12 @@ export const langfusePartnerProfiles = [
   {
     name: "GAO",
     url: "https://www.gao-ai.com/",
+    logo: {
+      src: "/images/partners/gao.png",
+      alt: "GAO",
+      width: 326,
+      height: 120,
+    },
     regions: ["Japan", "APAC"],
     capabilities: [
       "AI agent implementation",
@@ -15,6 +21,13 @@ export const langfusePartnerProfiles = [
   {
     name: "Bonneville Data",
     url: "https://bonnevilledata.com",
+    logo: {
+      src: "/images/partners/bonneville-data.svg",
+      alt: "Bonneville Data logo",
+      width: 56,
+      height: 20,
+      showName: true,
+    },
     regions: ["North America"],
     capabilities: [
       "AI agent implementation",
@@ -28,7 +41,13 @@ export const langfusePartnerProfiles = [
   {
     name: "Brainforge",
     url: "https://www.brainforge.ai",
-    regions: ["US"],
+    logo: {
+      src: "/images/partners/brainforge.svg",
+      alt: "Brainforge",
+      width: 174,
+      height: 46,
+    },
+    regions: ["North America"],
     capabilities: [
       "Enterprise AI adoption",
       "AI application and workflow deployment",
