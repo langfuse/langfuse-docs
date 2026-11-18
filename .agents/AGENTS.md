@@ -58,6 +58,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 6. **Always keep Markdown overrides synchronized.** Before changing a page or route, check whether its URL has a corresponding file in `md-override/`. If it does, treat the rendered page and the Markdown override as one source pair: mirror user-facing copy, links, structure, and factual changes in both files in the same change. Do this even when the page does not include a comment pointing to the override.
 7. **Preserve custom MDX components in Markdown output.** When creating or adding a custom MDX component that contains user-facing content or links, make sure that content is not removed when the page is converted to plain Markdown. If the content only exists in component props or rendered JSX, add a Markdown renderer in `lib/markdown-component-renderers.js`. Run `node scripts/copy_md_sources.js` and inspect the corresponding file in `public/md-src/` to verify that all content and links remain available to Markdown consumers.
 8. **Users / adopters table archives.** When adding or updating a row in `components-mdx/adopters-table.mdx` whose Reference cell is an external URL, always include a Wayback Machine `[Archive](...)` link. If no snapshot exists yet, request one (`https://web.archive.org/save/{url}`), wait until CDX returns a `200` capture, and cite `https://web.archive.org/web/{timestamp}/{url}`. Percent-encode the URL in CDX queries (`curl -G --data-urlencode`) so `&` in query strings is not parsed as another CDX parameter. Do not ship the row without that archive. Follow `.agents/skills/add-customer-to-user-list/SKILL.md`.
+9. Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 
 ## Passing CI checks on the first try
 
@@ -75,7 +76,7 @@ CI runs `pnpm run format:check`. To fix locally, run `pnpm run format` and commi
 
 ### 2. H1 heading check (`check_h1` job)
 
-CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc.
+CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc. Do not skip heading levels.
 
 ### 3. Middle dot check (`check_middle_dot` job)
 
@@ -115,38 +116,29 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
   - **Chat** — Fumadocs' built-in Inkeep chat integration (`ai-chat-shared.tsx`,
     `embedded-chat.tsx`, `ask-ai-button.tsx`).
 
-## Writing guidelines
+## Writing guidelines: Read this every time you add or change content to a docs page
 
-- Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
-- Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
-- Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
-- Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section and the section covers a substantial feature. For a small option within a page, mention availability in the text instead.
+- When changing something, always make the change considering the surrounding context. Prefer changing an existing sentence over adding an extra sentence or section somewhere. The less new sentences you introduce, the better.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
-- Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 
-### Documentation pages
+### Documentation page-specific guidelines
 
-These rules cover pages in `content/docs/` and integration guides in `content/integrations/`.
+These rules cover pages in `content/docs/`, integration guides in `content/integrations/`, and changelog entries in `content/changelog/`.
 
-#### Where content belongs [#where-content-belongs]
+#### Where content belongs: read this before adding anything [#where-content-belongs]
+
+- **Overview** pages get readers excited about the product area and make clear why it is valuable to them. Each item on this page should really earn their place. More often than not, you should not touch the overview page for a new feature addition.
+- **Concepts** pages explain how the product works at a high level: its components, the request or data flow, and the objects readers configure. This is a conceptual page.
+- **Feature** pages describe a specific feature of the product area. Anything feature-specific should be on a feature docs page or in an FAQ/troubleshooting page that's linked to from the feature docs page.
+- **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. If integration is a prominent Langfuse feature in its own right, link the individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`. This is almost never the case and using this should be an exception.
+- **API reference** pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses. [#api-reference-pages]
+- **Troubleshooting** content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. A very short note can stay at the bottom of a feature page. Longer troubleshooting on a feature, get-started, or self-hosting page is a link to those FAQ pages.
+- **Changelog** entries announce what a user can now do. They live in `content/changelog/`, including when the docs already explain the feature.
 
 - Before you add or restructure a page, open one or more equivalent pages in an established product area, such as `content/docs/observability/` or `content/docs/evaluation/`, and match their structure, components, and sidebar position. When a product area has these pages, keep this sidebar order: Overview, Get started, Concepts, Features, Integrations, Troubleshooting and FAQ.
-- **Overview** pages get readers excited about the product area and make clear why it is valuable to them. Use a short intro on the problem it solves and the value it adds, a list of capabilities that each link to their feature page, and a "Getting started" section near the end that links to the get-started guides, split by role when admins and users follow different guides. Leave anything that doesn't help the reader see that value, such as request formats, credentials, limitations, availability, pricing, and lists of next steps, to deeper pages. [#overview-pages]
-- **Concepts** pages explain how the product works at a high level: its components, the request or data flow, and the objects readers configure. Give each major concept a diagram or a table, and answer the questions a newcomer asks first, such as where the product runs and who sets it up. Keep the page conceptual: for configuration, options, and other details, link to the feature page that covers them instead of explaining them here. Leave out implementation details that don't change what the reader does. [#concepts-pages]
-- **Feature** pages open with one or two sentences on what the feature does, who can use it, and where to find it in the UI, followed by a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`. Put long reference lists, such as every recorded field or response header, in a `<Details>` block whose `<Summary>` names the content. Put optional deep-dive topics in a closing `## FAQ` section that wraps question-titled `<Details>` blocks in `<FaqDetails>`. [#feature-pages]
-- **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. Link an individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`, only when the integration is a prominent Langfuse feature in its own right, such as the PostHog and Mixpanel exports under Metrics. This is almost never the case. When the tool already has an integration page for another Langfuse product area, extend that page; one longer page is often the better choice. Add a sibling page only when the two product areas are very different, such as AI Gateway and Prompt Management. For example, `claude-code-gateway.mdx` (AI Gateway) sits next to `claude-code.mdx` (Observability). [#integration-pages]
-- **API reference** pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses. [#api-reference-pages]
-- **Troubleshooting** content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. A very short note can stay at the bottom of a feature page. Longer troubleshooting on a feature, get-started, or self-hosting page is a link to those FAQ pages. [#troubleshooting-pages]
-- A product area's Troubleshooting and FAQ page contains only an optional short intro, `<FaqPreview tags={[...]} />`, and `<GhDiscussionsPreview labels={[...]} />`. Keep those components. Do not add the "try Ask AI / open a GitHub issue / contact support" paragraph. This does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
+- each docs fact has 1 home (source of truth), if the fact is relevant on other pages, these pages link to that source of truth instead of replicating the content.
 
-#### Get started pages [#get-started-pages]
-
-- Open with one sentence on what the reader will accomplish, a link to the Concepts page, and, when admins and users have separate guides, a link to the other guide.
-- Put the steps under a `## Setup steps` heading inside `<Steps>`. Each step is one task; fold small actions, such as exporting the key the reader just created, into the step that produces the value.
-- Don't add a "Before you begin" or prerequisites section. Put each requirement (role, plan, deployment type, prior setup) in the step where the reader would hit it, as an info callout at the end of that step. Caveats that apply to the whole procedure go above `<Steps>`.
-- When setup differs per tool, client, or language, give each its own tab with everything needed to finish there: an italic requirements line such as `_**Requires** <tool> <version> or later and <prerequisite>._`, the minimal configuration, a command that confirms it works, and a card that links to the full guide. A tab that only links to another page is not enough. Also use tabs for alternative ways to do one step, such as the Langfuse UI and the API.
-- A reader can finish setup from that page, and from the tab they selected.
-- End with a "Not seeing what you expected?" section that uses `<FaqPreview>` with the area's get-started tag and, if there is an obvious next guide, a "Next steps" list with just that link.
+Once you decide what type of page the content should be on, always read the section about that page type in [Page type structure and content](page-types.md). It's imperative that you judge your change/addition with this context in mind.
 
 #### Cut what the reader doesn't need [#cut-what-the-reader-doesnt-need]
 
@@ -159,37 +151,38 @@ These rules cover pages in `content/docs/` and integration guides in `content/in
 - If a section is hard to write, decide the one thing the reader needs from it and say that. Most sections fit in three sentences. An edge case of a section, such as when a key stops working, is a short callout on that section, not a section of its own.
 - Introduce a list or a set of rules with a sentence that says what problem it solves. Bullets without that context read as noise.
 
+Once done with a first draft, look at what you've written again and aim to cut 50% of it. You will, in most cases, be able to do that. Seriously question whether you did a good review if you cut less than 50% and look again.
+
 #### Wording and structure [#wording-and-structure]
 
 - Name what you refer to. Write "the **Models**, **Gateway keys**, and **Analytics** tabs", not "the other pages", and link to the section that explains a term, not to the top of its page.
 - A heading must tell the reader what the section contains. Prefer short names for the concept, such as "Request flow", "Credential types", or "Model and key routing", over vague phrases such as "How a request reaches a model".
+- Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers").
+- Always preserve proper nouns, acronyms, and official product names.
+- Edited text is grammatically correct (American English) and has consistent punctuation.
 - Keep pages evergreen. Don't build an intro, heading, or step-by-step instruction around today's supported providers, endpoints, versions, or limits. Often the docs don't need to list them at all, because readers discover them while using the product. Don't enumerate providers in a setup step that works the same for every provider. When a list is still needed, keep it in one table, limitations page, or roadmap that is updated when they change.
 - Only add provider-specific guidance when the reader needs something they cannot figure out from the product. If that guidance is short, put it at the bottom of the feature page; if it is long, use a linked FAQ page. Push back on requests to add provider-specific setup that restates what the UI already shows.
 - Examples that hard-code a regional Langfuse Cloud or gateway URL put the region in the snippet, not in a sentence after it. Mark the live URL as EU and list the other region URLs as comments in the same snippet, matching the get-started env comments (`components-mdx/env-python.mdx`) or, for gateway hosts, the host comments on [Send your first request](/docs/gateway/get-started/first-request). Later snippets may reuse a host variable from that snippet. Do not add a post-snippet caveat that only names the region and links elsewhere.
 - When you rename a page, change its frontmatter `title` (the sidebar label) and its H1 together. Sidebar labels must fit on one line, about three or four words.
+- Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section and the section covers a substantial feature. For a small option within a page, mention availability in the text instead.
+- Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
 
 #### Formatting [#formatting]
 
-- Use `info` callouts for side notes, requirements, defaults, and pointers. Reserve `warning` for things that expose or lose data, cost money unexpectedly, or break a setup.
+- Use `info` callouts for side notes, requirements, defaults, pointers, failure modes, and scope limits. Reserve `warning` for things that expose or lose data, cost money unexpectedly, or break a setup.
 - Use a table when several items share the same attributes, such as key types, ingestion modes, or per-key-type behavior. Cut or merge as many columns as you can, and keep only the ones that add real value or match similar tables on the same page. Keep cells to a few words and put explanations in the surrounding text. Turn a sentence that lists three or more parallel items into a bulleted list.
+- Code blocks in core documentation include all imports. Notebooks and cookbooks are exempt.
 - Link the key word or short phrase, not a whole sentence or bullet. Link text names its target, for example "trace user ID" or "Concepts". Put "See X" references in the sentence they support, not on a line of their own.
-- Use relative links to langfuse.com pages. Never link to preview deployments (`*.vercel.app`) or leave placeholder link targets.
-
-### Changelog entries [#changelog-entries]
-
-Changelog entries live in `content/changelog/`.
-
-- Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
-- Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section. Flag new or edited entries that skip the use cases. A one-sentence entry that restates the title and links to docs is incomplete.
-- Keep it concise — every sentence should add new information. Don't repeat what was already said.
-- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Frontmatter `ogImage` or `ogVideo` counts only when `showOgInHeader` is not `false`. When that flag is `false`, the visual has to be in the body. Do not invent a visual.
-- Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
-- Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
+- Use relative links to langfuse.com pages. Never link to preview deployments (`*.vercel.app`) or leave placeholder link targets. Do not leave a TODO in a published page.
+- App links from docs use `https://cloud.langfuse.com/project/~/[path]`. The `~` sentinel redirects to the reader's last-used project and region.
+- When embedding videos from YouTube, embed from `https://www.youtube-nocookie.com` and add `rel=0`.
+- Use `.mp4` files on `static.langfuse.com/docs-videos`. Do not use `.gif` files.
+- Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link. Do not use all caps eyebrows anywhere.
+- Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 
 ## Review guidelines
 
-Read [Review guidelines](review-guidelines.md) before commenting on a pull request.
+Read [Review guidelines](review-guidelines.md) before commenting on a pull request. NEVER SKIP THIS, these are the only rules you should review against, don't come up with another set of rules instead of reading these.
 
 ## Cursor Cloud specific instructions
 

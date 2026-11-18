@@ -1,13 +1,12 @@
 # Review guidelines
 
-- read the surrounding docs, the product, and the screenshots before you judge a change
+- Always read the surrounding docs, the product, and the screenshots before you judge a change. Take a step back and think whether this is the most efficient, least invasive change possible given the importance of the feature for the user. More often than not, an extra sentence should actually be a rewrite of an existing sentence for example.
 - Run gate 1 first. Say what to remove or which home it belongs in. Then run gate 2.
-- [Then run the general check](#checks-that-always-run)
 
 ## Gate 1: Necessity and place
 
 - Applies to `content/docs/`, `content/integrations/`, `content/guides/`, and `content/faq/`.
-- A `content/changelog/` entry is an announcement, including when the docs already explain the feature. Judge it with [Changelog entries](AGENTS.md#changelog-entries) and the checks that always run.
+- A `content/changelog/` entry is an announcement, including when the docs already explain the feature. Judge it with [Changelog entries](page-types.md#changelog-entries), and with the workflow rules and CI checks in [AGENTS.md](AGENTS.md).
 
 ### Necessity
 
@@ -23,7 +22,7 @@
 
 ### Place
 
-- Read [Overview](AGENTS.md#overview-pages), [Get started](AGENTS.md#get-started-pages), [Concepts](AGENTS.md#concepts-pages), [Features](AGENTS.md#feature-pages), [Integrations](AGENTS.md#integration-pages), [Troubleshooting and FAQ](AGENTS.md#troubleshooting-pages). [API reference](AGENTS.md#api-reference-pages) and judge whether the placement of changes is correct against these specs.
+- Read [Overview](page-types.md#overview-pages), [Get started](page-types.md#get-started-pages), [Concepts](page-types.md#concepts-pages), [Features](page-types.md#feature-pages), [Integrations](page-types.md#integration-pages), [Troubleshooting and FAQ](page-types.md#troubleshooting-pages), and [Changelog](page-types.md#changelog-entries). [API reference](AGENTS.md#api-reference-pages) and judge whether the placement of changes is correct against these specs.
 - The page order is always according to how many users need something: default path -> advanced options -> or edge-cases -> troubleshooting
 - Troubleshooting belongs either in `content/faq/all/`, one file per problem, tagged for `<FaqPreview>`, or if it's very short, it can also live at the bottom of a feature page.
 - A new feature, or a page that makes the reader finish a second job before the job of that page, is a reason to restructure.
@@ -31,24 +30,6 @@
 
 ## Gate 2: How it is written
 
-- Check wording and formatting against these sections of [AGENTS.md](AGENTS.md): [Get started pages](AGENTS.md#get-started-pages), [Wording and structure](AGENTS.md#wording-and-structure), [Formatting](AGENTS.md#formatting), and [Changelog entries](AGENTS.md#changelog-entries).
-- Edited text is grammatically correct (American English) and has consistent punctuation.
-- Code blocks in core documentation include all imports. Notebooks and cookbooks are exempt.
+- Check the change against the writing guidelines in [AGENTS.md](AGENTS.md) and the matching page type in [page-types.md](page-types.md).
+- Also apply the workflow rules and CI checks in [AGENTS.md](AGENTS.md).
 - Read the page as a first-time reader. Flag a reference the reader can't resolve, a list without context, or a newcomer question left open, such as where the product runs or who sets it up.
-- In a documentation table, every column has to add enough value on its own. A column may stay to match a similar table on the same page. Cut or merge anything that doesn't really add value. Often you can just cut columns.
-- Put failure modes, scope limits, and similar caveats in a `<Callout>`. Also really think about whether these are actually necessary or already obvious for the user
-- A hard-coded regional Cloud or gateway URL names EU and lists the other region URLs in comments inside the snippet. A sentence after the snippet is not enough. Copy the comment shape from `components-mdx/env-python.mdx` or, for gateway hosts, from [Send your first request](/docs/gateway/get-started/first-request).
-- A documentation page includes a `<Frame>` or `<Video>` near the beginning, after the intro.
-- Never use horizontal scroll for a diagram. A diagram should always fit the page. Scale it until text becomes hard to read. Then switch to a stacked mobile layout.
-- Use one H1 per markdown file, with subsections in order (`##`, `###`). Do not skip heading levels.
-
-## General checks [#checks-that-always-run]
-
-- Flag leftover TODOs, placeholder link targets, and links to preview deployments.
-- When embedding videos from YouTube, embed from `https://www.youtube-nocookie.com` and add `rel=0`.
-- For every edited page or route, check `md-override/` for a matching Markdown source and keep it in sync with the page.
-- App links from docs use `https://cloud.langfuse.com/project/~/[path]`. The `~` sentinel redirects to the reader's last-used project and region.
-- External `/users` adopters-table references include a Wayback `[Archive](...)` link. Request a snapshot when none exists.
-- Flag a middle dot (U+00B7) used as a separator, including in UI strings and code.
-- A `#` link needs `[#anchor]` at the end of the target heading, for example `## Get Started [#get-started]`.
-- Use `.mp4` files on `static.langfuse.com/docs-videos`. Do not use `.gif` files.
