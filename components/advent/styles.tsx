@@ -21,6 +21,13 @@ export function AdventStyles() {
         --adv-green-text: #9be7c4;
       }
 
+      html:has(.adv-page) body {
+        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%23dde6f2' stroke='%2361779a' stroke-width='1.5'/%3E%3Ccircle cx='14.5' cy='14.5' r='8.6' fill='%23fff'/%3E%3Ccircle cx='19.5' cy='11.5' r='1.1' fill='%23c3d1e4'/%3E%3Ccircle cx='11.5' cy='18.5' r='1' fill='%23c3d1e4'/%3E%3Ccircle cx='16' cy='20' r='.8' fill='%23c3d1e4'/%3E%3C/svg%3E") 16 16, auto;
+      }
+      html:has(.adv-page) :is(a, button, summary, label, select, [role='button']) { cursor: pointer; }
+      html:has(.adv-page) :is(input, textarea, [contenteditable='true']) { cursor: text; }
+      html:has(.adv-page) [role='dialog'] { cursor: auto; }
+
       .adv-eyebrow {
         font-family: var(--font-geist-mono);
         font-size: 11px;
@@ -504,7 +511,7 @@ export function AdventStyles() {
         animation: adv-wave 1.6s ease-in-out infinite;
       }
       @keyframes adv-wave { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-18deg); } }
-      .adv-snowman { cursor: crosshair; transform-origin: 50% 100%; }
+      .adv-snowman { transform-origin: 50% 100%; }
       .adv-snowman.is-hit { animation: adv-snowman-hit .35s ease-out; }
       @keyframes adv-snowman-hit {
         25% { transform: rotate(-5deg) scale(1.03, .97); }
