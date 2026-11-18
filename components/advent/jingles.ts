@@ -196,16 +196,8 @@ export class JinglePlayer {
 
   /** Starts playback. Resolves to false while the browser blocks autoplay. */
   async start(): Promise<boolean> {
-    if (!this.ctx) {
-      const Ctx =
-        window.AudioContext ??
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      if (!Ctx) return false;
-      this.ctx = new Ctx();
-      this.noise = this.createNoise(this.ctx);
-    }
-    const ctx = this.ctx;
+    const ctx = this.ensureContext();
+    if (!ctx) return false;
     if (ctx.state === "suspended") {
       try {
         await Promise.race([
@@ -247,6 +239,59 @@ export class JinglePlayer {
     this.stop();
     void this.ctx?.close();
     this.ctx = null;
+  }
+
+  /** Plays a snowball impact `delay` seconds from now, independent of the music. */
+  thud(delay = 0) {
+    const ctx = this.ensureContext();
+    if (!ctx || !this.noise) return;
+    if (ctx.state === "suspended") void ctx.resume().catch(() => {});
+    const time = ctx.currentTime + delay;
+    const pitch = 0.85 + Math.random() * 0.3;
+
+    const out = ctx.createGain();
+    out.gain.value = 0.55;
+    out.connect(ctx.destination);
+    setTimeout(() => out.disconnect(), (delay + 0.5) * 1000);
+
+    const body = ctx.createOscillator();
+    const bodyGain = ctx.createGain();
+    body.type = "sine";
+    body.frequency.setValueAtTime(150 * pitch, time);
+    body.frequency.exponentialRampToValueAtTime(45 * pitch, time + 0.16);
+    bodyGain.gain.setValueAtTime(0.0001, time);
+    bodyGain.gain.exponentialRampToValueAtTime(0.9, time + 0.006);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.22);
+    body.connect(bodyGain).connect(out);
+    body.start(time);
+    body.stop(time + 0.25);
+
+    // Muffled noise burst gives the soft crunch of packed snow.
+    const crunch = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const crunchGain = ctx.createGain();
+    crunch.buffer = this.noise;
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(1400 * pitch, time);
+    filter.frequency.exponentialRampToValueAtTime(300, time + 0.12);
+    crunchGain.gain.setValueAtTime(0.0001, time);
+    crunchGain.gain.exponentialRampToValueAtTime(0.5, time + 0.004);
+    crunchGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.14);
+    crunch.connect(filter).connect(crunchGain).connect(out);
+    crunch.start(time);
+    crunch.stop(time + 0.16);
+  }
+
+  private ensureContext(): AudioContext | null {
+    if (this.ctx) return this.ctx;
+    const Ctx =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!Ctx) return null;
+    this.ctx = new Ctx();
+    this.noise = this.createNoise(this.ctx);
+    return this.ctx;
   }
 
   private schedule() {

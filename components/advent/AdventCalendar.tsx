@@ -157,7 +157,11 @@ function useJingles() {
     setPlaying(await player.start());
   }, [playing]);
 
-  return { enabled, playing, toggle };
+  const thud = useCallback((delay: number) => {
+    playerRef.current?.thud(delay);
+  }, []);
+
+  return { enabled, playing, toggle, thud };
 }
 
 function SnowballHint() {
@@ -425,6 +429,7 @@ export function AdventCalendar() {
   const [snowmanHit, setSnowmanHit] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
   const music = useJingles();
+  const { thud } = music;
 
   dialogOpenRef.current = activeDay !== null;
 
@@ -461,6 +466,7 @@ export function AdventCalendar() {
       const target = e.target as Element | null;
       if (target?.closest(SNOWBALL_IGNORE)) return;
       canvasRef.current?.throwSnowball(e.clientX, e.clientY);
+      thud(SNOWBALL_DURATION / 1000);
       const rect = snowmanRef.current?.getBoundingClientRect();
       if (
         rect &&
@@ -499,7 +505,7 @@ export function AdventCalendar() {
     };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
-  }, []);
+  }, [thud]);
 
   useEffect(() => {
     if (!toast) return;
