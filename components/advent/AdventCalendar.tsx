@@ -565,9 +565,8 @@ export function AdventCalendar() {
           Gateway to Christmas
         </h1>
         <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
-          The Langfuse AI Gateway Advent calendar: 24 doors, 24 features. From
-          December 1 to 24, a new door opens every day. Behind each one: a
-          feature, how it works, and where to read more.
+          The Langfuse AI Gateway Advent Calendar. 24 doors, 24 features. From
+          Dec 1 to 24, a new door opens every day.
         </p>
         <p
           className="text-[14px] font-medium text-[var(--adv-accent-text)]"
