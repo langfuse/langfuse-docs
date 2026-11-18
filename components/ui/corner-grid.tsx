@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 
-import { CornerBox, type CornerBoxProps } from "./corner-box";
+import { CornerBox } from "./corner-box";
 import { cn } from "@/lib/utils";
 
 export function CornerGrid({
@@ -19,7 +19,7 @@ export function CornerGridItem({
   index,
   className,
   ...props
-}: CornerBoxProps & { index: number }) {
+}: HTMLAttributes<HTMLDivElement> & { index: number }) {
   const withStripes = index % 3 === 1;
 
   return (
