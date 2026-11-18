@@ -20,6 +20,7 @@ import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
+import rubyLogo from "../home/img/ruby.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumUpLogo from "../home/img/sumup.svg";
 import swisscomLogo from "../home/img/swisscom.svg";
@@ -51,6 +52,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Pigment: { src: pigmentLogo },
   Ramp: { src: rampLogo },
   "Rocket Money": { src: rocketMoneyLogo },
+  Ruby: { src: rubyLogo },
   Samsara: { src: samsaraLogo },
   Slite: { src: "/images/customers/slite/slite-light.png" },
   SumUp: { src: sumUpLogo },
@@ -116,6 +118,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Posit: "Data science software company",
   Ramp: "Self-hosted agent observability",
   "Rocket Money": "Personal finance app",
+  Ruby: "AI sales assistant",
   Salesloft: "Sales engagement platform",
   Samsara: "Connected operations platform",
   Sanofi: "Healthcare and pharmaceutical company",
@@ -164,6 +167,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "NASA",
   "Pipedream",
   "Posit",
+  "Ruby",
   "Salesloft",
   "Samsara",
   "Sanofi",
