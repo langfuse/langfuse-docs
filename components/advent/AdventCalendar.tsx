@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   ArrowUpRight,
   ChevronLeft,
@@ -28,7 +34,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AdventStyles } from "./styles";
 import { DoorAnimation } from "./DoorAnimation";
-import { JinglePlayer, TECHNO_BPM } from "./jingles";
+import { JinglePlayer, TECHNO_BPM, type MusicFrame } from "./jingles";
 import { ShaderAtmosphere } from "./ShaderAtmosphere";
 import {
   SNOWBALL_DURATION,
@@ -177,15 +183,7 @@ function useJingles(techno: boolean) {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const restart = playerRef.current?.setTechno(techno);
-    if (restart)
-      void restart.then((started) => {
-        if (!cancelled) setPlaying(started);
-      });
-    return () => {
-      cancelled = true;
-    };
+    playerRef.current?.setTechno(techno);
   }, [techno]);
 
   const toggle = useCallback(async () => {
@@ -209,8 +207,18 @@ function useJingles(techno: boolean) {
     playerRef.current?.thud(delay);
   }, []);
 
-  const getBeat = useCallback(() => playerRef.current?.getBeat() ?? 0, []);
-  return { enabled, playing, toggle, thud, getBeat };
+  const getFrame = useCallback(
+    (): MusicFrame =>
+      playerRef.current?.getFrame() ?? {
+        mix: 0,
+        pulse: 0,
+        bpm: 168,
+        build: 0,
+        beat: 0,
+      },
+    [],
+  );
+  return { enabled, playing, toggle, thud, getFrame };
 }
 
 function SnowballHint() {
@@ -229,19 +237,39 @@ function SnowballHint() {
 
 function MusicToggle({
   techno,
+  getFrame,
   enabled,
   playing,
   onToggle,
 }: {
   techno: boolean;
+  getFrame: () => MusicFrame;
   enabled: boolean;
   playing: boolean;
   onToggle: () => void;
 }) {
+  const [transport, setTransport] = useState({ bpm: 168, moving: false });
+  useEffect(() => {
+    const update = () => {
+      const frame = getFrame();
+      const bpm = Math.round(frame.bpm);
+      const moving = frame.mix > 0.001 && frame.mix < 0.999;
+      setTransport((previous) =>
+        previous.bpm === bpm && previous.moving === moving
+          ? previous
+          : { bpm, moving },
+      );
+    };
+    update();
+    const timer = setInterval(update, 200);
+    return () => clearInterval(timer);
+  }, [getFrame]);
   const label = playing
-    ? techno
-      ? `Berlin live / ${TECHNO_BPM} BPM`
-      : "Jingles on"
+    ? transport.moving
+      ? `Morphing / ${transport.bpm} BPM`
+      : techno
+        ? `Berlin live / ${TECHNO_BPM} BPM`
+        : "Jingles on"
     : enabled
       ? "Click anywhere for jingles"
       : "Jingles off";
@@ -357,12 +385,14 @@ function DoorTile({
 
 function DoorDialog({
   techno,
+  sceneMix,
   door: activeDoor,
   openDays,
   onNavigate,
   onClose,
 }: {
   techno: boolean;
+  sceneMix: number;
   door: AdventDoor | null;
   openDays: number[];
   onNavigate: (day: number) => void;
@@ -391,6 +421,12 @@ function DoorDialog({
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
+        style={
+          {
+            "--adv-scene": sceneMix,
+            "--adv-ink": sceneMix > 0.5 ? 1 : 0,
+          } as CSSProperties
+        }
         data-mode={techno ? "techno" : "winter"}
         className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6"
       >
@@ -717,7 +753,7 @@ export function AdventCalendar() {
       <ShaderAtmosphere
         techno={techno}
         reducedMotion={reducedMotion}
-        getBeat={music.getBeat}
+        getFrame={music.getFrame}
       />
       <AdventStyles />
       <WinterCanvas ref={canvasRef} active={activeDay === null} />
@@ -740,6 +776,9 @@ export function AdventCalendar() {
               }}
             />
           </label>
+        </div>
+        <div className="adv-morph-track" aria-hidden>
+          <span />
         </div>
         <div className="adv-scene-label" aria-hidden>
           {techno ? (
@@ -826,6 +865,7 @@ export function AdventCalendar() {
       ) : null}
 
       <MusicToggle
+        getFrame={music.getFrame}
         techno={techno}
         enabled={music.enabled}
         playing={music.playing}
@@ -833,6 +873,7 @@ export function AdventCalendar() {
       />
 
       <DoorDialog
+        sceneMix={reducedMotion ? Number(techno) : music.getFrame().mix}
         techno={techno}
         door={activeDoor}
         openDays={openDays}

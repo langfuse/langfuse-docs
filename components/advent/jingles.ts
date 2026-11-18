@@ -178,44 +178,129 @@ function compileSong(song: Song): CompiledSong {
 }
 
 const COMPILED = SONGS.map(compileSong);
-const LOOKAHEAD_SECONDS = 0.2;
-export const TECHNO_BPM = 138;
+const LOOKAHEAD_SECONDS = 0.12;
 const SONG_GAP_BEATS = 2;
+export const TECHNO_BPM = 200;
+export const SCENE_TRANSITION_SECONDS = 24;
+
+export type MusicFrame = {
+  mix: number;
+  pulse: number;
+  bpm: number;
+  build: number;
+  beat: number;
+};
+
+type MusicGraph = {
+  winter: GainNode;
+  lead: GainNode;
+  rhythm: GainNode;
+  kick: GainNode;
+  rumble: GainNode;
+  echo: DelayNode;
+  feedback: GainNode;
+  leadFilter: BiquadFilterNode;
+  nodes: AudioNode[];
+};
+
+const clamp = (x: number) => Math.max(0, Math.min(1, x));
+const smooth = (a: number, b: number, x: number) => {
+  const t = clamp((x - a) / (b - a));
+  return t * t * (3 - 2 * t);
+};
+function saturation(drive: number) {
+  const curve = new Float32Array(2048);
+  for (let i = 0; i < curve.length; i++) {
+    const x = (i / (curve.length - 1)) * 2 - 1;
+    curve[i] = Math.tanh(x * drive) / Math.tanh(drive);
+  }
+  return curve;
+}
+const KICK_DRIVE = saturation(5);
+const SYNTH_DRIVE = saturation(9);
 
 export class JinglePlayer {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
+  private graph: MusicGraph | null = null;
   private noise: AudioBuffer | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
   private songIndex = 0;
   private eventIndex = 0;
-  private songStart = 0;
-  private beatStart = 0;
-  private techno = false;
-  private drumStep = 0;
+  private songStep = 0;
+  private absoluteStep = 0;
+  private nextStepTime = 0;
+  private root = pitchToFreq("C3");
+  private anchors: { beat: number; time: number }[] = [];
+  private audioOffset = 0;
+  private contextState: AudioContextState | null = null;
+  private transition = { from: 0, to: 0, at: 0, duration: 0 };
   private disposed = false;
   private playbackGeneration = 0;
 
-  setTechno(techno: boolean): Promise<boolean> | null {
-    if (this.techno === techno) return null;
-    const wasPlaying = this.timer !== null;
-    this.stop();
-    this.techno = techno;
-    return wasPlaying ? this.start() : null;
+  private now() {
+    return this.ctx?.state === "running"
+      ? this.ctx.currentTime + this.audioOffset
+      : performance.now() / 1000;
   }
 
-  /** Envelope from the audio transport, shared by the visual renderer. */
-  getBeat = (): number => {
-    if (!this.techno || !this.master || this.ctx?.state !== "running") return 0;
-    const beats = ((this.ctx.currentTime - this.beatStart) * TECHNO_BPM) / 60;
-    return beats < 0 ? 0 : Math.exp(-(beats % 1) * 7);
+  private mixAt(time: number) {
+    const { from, to, at, duration } = this.transition;
+    return duration === 0
+      ? to
+      : from + (to - from) * smooth(0, duration, time - at);
+  }
+
+  setTechno(techno: boolean) {
+    const target = techno ? 1 : 0;
+    if (this.transition.to === target) return;
+    const time = this.now();
+    const from = this.mixAt(time);
+    this.transition = {
+      from,
+      to: target,
+      at: time,
+      duration: SCENE_TRANSITION_SECONDS * Math.abs(target - from),
+    };
+  }
+
+  getFrame = (): MusicFrame => {
+    const now = this.now();
+    const mix = this.mixAt(now);
+    const bpm = COMPILED[this.songIndex].bpm * (1 - mix) + TECHNO_BPM * mix;
+    let beat = this.absoluteStep / 4;
+    for (let i = this.anchors.length - 1; i >= 0; i--) {
+      const a = this.anchors[i];
+      if (a.time > now) continue;
+      const next = this.anchors[i + 1];
+      beat =
+        a.beat +
+        (now - a.time) * (next ? 0.25 / (next.time - a.time) : bpm / 60);
+      break;
+    }
+    const progress =
+      this.transition.duration === 0
+        ? 1
+        : clamp((now - this.transition.at) / this.transition.duration);
+    return {
+      mix,
+      bpm,
+      beat,
+      pulse:
+        this.master && this.ctx?.state === "running"
+          ? Math.exp(-(beat % 1) * 8)
+          : 0,
+      build:
+        Math.sin(progress * Math.PI) *
+        Math.abs(this.transition.to - this.transition.from),
+    };
   };
 
   get state(): AudioContextState | "uninitialized" {
     return this.ctx?.state ?? "uninitialized";
   }
 
-  /** Starts playback. Resolves to false while the browser blocks autoplay. */
+  /** Playback resumes at the next subdivision of the existing phrase. */
   async start(): Promise<boolean> {
     if (this.disposed) return false;
     const generation = this.playbackGeneration;
@@ -228,7 +313,7 @@ export class JinglePlayer {
           new Promise((resolve) => setTimeout(resolve, 300)),
         ]);
       } catch {
-        // Autoplay policies reject or ignore resume() until a user gesture.
+        // Autoplay policies can reject resume until a user gesture.
       }
     }
     if (
@@ -238,19 +323,16 @@ export class JinglePlayer {
     )
       return false;
     if (this.timer) return true;
-
+    this.audioOffset = performance.now() / 1000 - ctx.currentTime;
+    this.contextState = ctx.state;
     this.master = ctx.createGain();
     this.master.gain.setValueAtTime(0, ctx.currentTime);
-    this.master.gain.linearRampToValueAtTime(
-      this.techno ? 0.25 : 0.32,
-      ctx.currentTime + 0.4,
-    );
+    this.master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.3);
     this.master.connect(ctx.destination);
-    this.eventIndex = 0;
-    this.drumStep = 0;
-    this.songStart = ctx.currentTime + 0.15;
-    this.beatStart = this.songStart;
-    this.timer = setInterval(() => this.schedule(), 50);
+    this.graph = this.createGraph(ctx, this.master);
+    this.anchors = [];
+    this.nextStepTime = this.now() + 0.08;
+    this.timer = setInterval(() => this.schedule(), 25);
     this.schedule();
     return true;
   }
@@ -261,12 +343,16 @@ export class JinglePlayer {
     this.timer = null;
     const ctx = this.ctx;
     const master = this.master;
+    const graph = this.graph;
     this.master = null;
+    this.graph = null;
     if (!ctx || !master) return;
     master.gain.cancelScheduledValues(ctx.currentTime);
-    master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-    master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
-    setTimeout(() => master.disconnect(), 400);
+    master.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
+    setTimeout(() => {
+      master.disconnect();
+      graph?.nodes.forEach((node) => node.disconnect());
+    }, 400);
   }
 
   dispose() {
@@ -274,6 +360,329 @@ export class JinglePlayer {
     this.stop();
     void this.ctx?.close();
     this.ctx = null;
+  }
+
+  private createGraph(ctx: AudioContext, out: AudioNode): MusicGraph {
+    const winter = ctx.createGain();
+    winter.connect(out);
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -12;
+    compressor.knee.value = 3;
+    compressor.ratio.value = 12;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.12;
+    const output = ctx.createGain();
+    output.gain.value = 1.3;
+    compressor.connect(output).connect(out);
+
+    const lead = ctx.createGain();
+    const leadFilter = ctx.createBiquadFilter();
+    leadFilter.type = "lowpass";
+    leadFilter.Q.value = 1;
+    const leadDrive = ctx.createWaveShaper();
+    leadDrive.curve = SYNTH_DRIVE;
+    leadDrive.oversample = "2x";
+    lead.connect(leadDrive).connect(leadFilter).connect(compressor);
+    const echo = ctx.createDelay(1);
+    const feedback = ctx.createGain();
+    const echoFilter = ctx.createBiquadFilter();
+    echoFilter.type = "highpass";
+    echoFilter.frequency.value = 650;
+    leadFilter
+      .connect(echo)
+      .connect(echoFilter)
+      .connect(feedback)
+      .connect(echo);
+    feedback.connect(compressor);
+
+    const rhythm = ctx.createGain();
+    rhythm.connect(compressor);
+    const kick = ctx.createGain();
+    const kickDrive = ctx.createWaveShaper();
+    kickDrive.curve = KICK_DRIVE;
+    kickDrive.oversample = "2x";
+    kick.connect(kickDrive).connect(compressor);
+    const rumble = ctx.createGain();
+    const rumbleDelay = ctx.createDelay(1);
+    rumbleDelay.delayTime.value = 0.18;
+    const rumbleFilter = ctx.createBiquadFilter();
+    rumbleFilter.type = "lowpass";
+    rumbleFilter.frequency.value = 190;
+    const rumbleFeedback = ctx.createGain();
+    rumbleFeedback.gain.value = 0.48;
+    kickDrive.connect(rumbleDelay).connect(rumbleFilter).connect(rumble);
+    rumble.connect(compressor);
+    rumbleFilter.connect(rumbleFeedback).connect(rumbleDelay);
+    const nodes: AudioNode[] = [
+      winter,
+      compressor,
+      output,
+      lead,
+      leadFilter,
+      leadDrive,
+      echo,
+      feedback,
+      echoFilter,
+      rhythm,
+      kick,
+      kickDrive,
+      rumble,
+      rumbleDelay,
+      rumbleFilter,
+      rumbleFeedback,
+    ];
+    const graph = {
+      winter,
+      lead,
+      rhythm,
+      kick,
+      rumble,
+      echo,
+      feedback,
+      leadFilter,
+      nodes,
+    };
+    this.updateGraph(ctx, graph);
+    return graph;
+  }
+
+  private updateGraph(ctx: AudioContext, g: MusicGraph) {
+    const { mix, bpm } = this.getFrame();
+    const time = ctx.currentTime;
+    g.winter.gain.setTargetAtTime(1 - smooth(0.05, 0.88, mix), time, 0.035);
+    g.lead.gain.setTargetAtTime(smooth(0.04, 0.8, mix) * 0.42, time, 0.035);
+    g.rhythm.gain.setTargetAtTime(smooth(0.18, 0.82, mix) * 0.85, time, 0.035);
+    g.kick.gain.setTargetAtTime(smooth(0.28, 0.94, mix) * 1.15, time, 0.035);
+    g.rumble.gain.setTargetAtTime(smooth(0.45, 1, mix) * 0.65, time, 0.035);
+    g.feedback.gain.setTargetAtTime(0.12 + mix * 0.25, time, 0.04);
+    g.echo.delayTime.setTargetAtTime((60 / bpm) * 0.75, time, 0.08);
+    g.leadFilter.frequency.setTargetAtTime(500 + mix * 10500, time, 0.05);
+  }
+
+  private ensureContext(): AudioContext | null {
+    if (this.disposed) return null;
+    if (this.ctx) return this.ctx;
+    const Ctx =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!Ctx) return null;
+    this.ctx = new Ctx();
+    this.audioOffset = performance.now() / 1000 - this.ctx.currentTime;
+    this.noise = this.createNoise(this.ctx);
+    const ctx = this.ctx;
+    this.contextState = ctx.state;
+    ctx.onstatechange = () => {
+      if (ctx.state === "running" && this.contextState !== "running")
+        this.audioOffset = performance.now() / 1000 - ctx.currentTime;
+      this.contextState = ctx.state;
+    };
+    return this.ctx;
+  }
+
+  private schedule() {
+    const ctx = this.ctx;
+    const g = this.graph;
+    if (!ctx || !g || ctx.state !== "running") return;
+    const now = this.now();
+    this.updateGraph(ctx, g);
+    // A suspended tab resumes its phrase instead of scheduling missed audio.
+    if (this.nextStepTime < now - 1) this.nextStepTime = now + 0.02;
+    while (this.nextStepTime < now + LOOKAHEAD_SECONDS) {
+      const song = COMPILED[this.songIndex];
+      if (this.songStep >= (song.length + SONG_GAP_BEATS) * 4) {
+        this.songIndex = (this.songIndex + 1) % COMPILED.length;
+        this.songStep = 0;
+        this.eventIndex = 0;
+        continue;
+      }
+      const at = this.nextStepTime;
+      const time = ctx.currentTime + at - now;
+      const mix = this.mixAt(at);
+      const bpm = song.bpm * (1 - mix) + TECHNO_BPM * mix;
+      const beatLength = 60 / bpm;
+      const beat = this.songStep / 4;
+      this.anchors.push({ time: at, beat: this.absoluteStep / 4 });
+      while (song.events[this.eventIndex]?.beat <= beat + 0.00001) {
+        const event = song.events[this.eventIndex++];
+        if (event.voice === "bell") {
+          if (mix < 0.999)
+            this.bell(
+              ctx,
+              g.winter,
+              event.freq,
+              time,
+              event.beats * beatLength,
+            );
+          if (mix > 0.001)
+            this.acid(
+              ctx,
+              g.lead,
+              event.freq,
+              time,
+              event.beats * beatLength,
+              mix,
+            );
+        } else if (event.voice === "bass") {
+          this.root = event.freq;
+          if (mix < 0.999)
+            this.bass(
+              ctx,
+              g.winter,
+              event.freq,
+              time,
+              event.beats * beatLength,
+            );
+        } else if (mix < 0.95) this.sleigh(ctx, g.winter, time);
+      }
+      if (mix > 0.005)
+        this.drums(ctx, g, time, this.absoluteStep, beatLength, mix);
+      this.absoluteStep++;
+      this.songStep++;
+      // Midpoint integration keeps the sixteenth-note grid continuous as tempo bends.
+      const midpoint = at + beatLength / 8;
+      const midMix = this.mixAt(midpoint);
+      this.nextStepTime += 15 / (song.bpm * (1 - midMix) + TECHNO_BPM * midMix);
+    }
+    this.anchors = this.anchors.filter((a) => a.time > now - 1);
+  }
+
+  private drums(
+    ctx: AudioContext,
+    g: MusicGraph,
+    time: number,
+    step: number,
+    beat: number,
+    mix: number,
+  ) {
+    if (step % 4 === 0) {
+      const body = ctx.createOscillator();
+      const gain = ctx.createGain();
+      body.frequency.setValueAtTime(190, time);
+      body.frequency.exponentialRampToValueAtTime(47, time + 0.095);
+      body.frequency.exponentialRampToValueAtTime(40, time + 0.24);
+      gain.gain.setValueAtTime(1.5, time);
+      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.29);
+      body.connect(gain).connect(g.kick);
+      body.start(time);
+      body.stop(time + 0.3);
+      body.onended = () => {
+        body.disconnect();
+        gain.disconnect();
+      };
+      this.noiseHit(ctx, g.kick, time, 0.018, 0.65, 1700, "highpass");
+    }
+    if (step % 2 === 0)
+      this.noiseHit(
+        ctx,
+        g.rhythm,
+        time,
+        step % 4 === 2 ? 0.13 : 0.035,
+        step % 4 === 2 ? 0.24 : 0.09,
+        7500,
+        "highpass",
+      );
+    if (step % 8 === 4) {
+      for (let i = 0; i < 3; i++)
+        this.noiseHit(
+          ctx,
+          g.rhythm,
+          time + i * 0.012,
+          0.09,
+          0.23,
+          1600,
+          "bandpass",
+        );
+    }
+    if (step % 4 === 2)
+      this.acid(ctx, g.rhythm, this.root / 2, time, beat * 0.34, mix, true);
+    const { build } = this.getFrame();
+    if (build > 0.25)
+      this.noiseHit(
+        ctx,
+        g.rhythm,
+        time,
+        0.055,
+        build * 0.07 * mix,
+        1000 + mix * 6500,
+        "highpass",
+      );
+    if (mix > 0.85 && step % 4 === 0)
+      this.noiseHit(ctx, g.rhythm, time, 0.18, 0.07, 9200, "bandpass");
+  }
+
+  private acid(
+    ctx: AudioContext,
+    out: AudioNode,
+    freq: number,
+    time: number,
+    duration: number,
+    mix: number,
+    bass = false,
+  ) {
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    const release = Math.max(
+      0.07,
+      Math.min(bass ? 0.16 : 0.38, duration * 0.8),
+    );
+    filter.type = "lowpass";
+    filter.Q.value = bass ? 7 : 11;
+    filter.frequency.setValueAtTime(
+      (bass ? 450 : 1100) + mix * (bass ? 1600 : 6500),
+      time,
+    );
+    filter.frequency.exponentialRampToValueAtTime(
+      bass ? 80 : 350,
+      time + release,
+    );
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(bass ? 0.38 : 0.25, time + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
+    filter.connect(gain).connect(out);
+    const oscillators = [-1, 1].map((direction) => {
+      const osc = ctx.createOscillator();
+      osc.type = direction < 0 ? "sawtooth" : "square";
+      osc.frequency.value = freq;
+      osc.detune.value = direction * (3 + mix * 13);
+      osc.connect(filter);
+      osc.start(time);
+      osc.stop(time + release + 0.02);
+      return osc;
+    });
+    oscillators[0].onended = () => {
+      oscillators.forEach((osc) => osc.disconnect());
+      filter.disconnect();
+      gain.disconnect();
+    };
+  }
+
+  private noiseHit(
+    ctx: AudioContext,
+    out: AudioNode,
+    time: number,
+    release: number,
+    level: number,
+    frequency: number,
+    type: BiquadFilterType,
+  ) {
+    if (!this.noise) return;
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+    source.buffer = this.noise;
+    filter.type = type;
+    filter.frequency.value = frequency;
+    gain.gain.setValueAtTime(Math.max(0.0001, level), time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
+    source.connect(filter).connect(gain).connect(out);
+    source.start(time);
+    source.stop(time + release + 0.01);
+    source.onended = () => {
+      source.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
   }
 
   /** Plays a snowball impact `delay` seconds from now, independent of the music. */
@@ -317,106 +726,6 @@ export class JinglePlayer {
     crunch.stop(time + 0.16);
   }
 
-  private ensureContext(): AudioContext | null {
-    if (this.ctx) return this.ctx;
-    const Ctx =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
-    if (!Ctx) return null;
-    this.ctx = new Ctx();
-    this.noise = this.createNoise(this.ctx);
-    return this.ctx;
-  }
-
-  private schedule() {
-    const ctx = this.ctx;
-    const master = this.master;
-    if (!ctx || !master) return;
-    const horizon = ctx.currentTime + LOOKAHEAD_SECONDS;
-    for (;;) {
-      const song = COMPILED[this.songIndex];
-      // The printed carol scores use quick subdivisions; winter plays them
-      // at half speed, while afterhours uses a straight club transport.
-      const secondsPerBeat = 60 / (this.techno ? TECHNO_BPM : song.bpm / 2);
-      const event = song.events[this.eventIndex];
-      if (!event) {
-        this.songStart +=
-          (song.length + (this.techno ? 0 : SONG_GAP_BEATS)) * secondsPerBeat;
-        this.songIndex = (this.songIndex + 1) % COMPILED.length;
-        this.eventIndex = 0;
-        continue;
-      }
-      const time = this.songStart + event.beat * secondsPerBeat;
-      if (time > horizon) break;
-      this.eventIndex++;
-      if (time < ctx.currentTime) continue;
-      const duration = event.beats * secondsPerBeat;
-      if (event.voice === "bell")
-        this.bell(
-          ctx,
-          master,
-          this.techno ? event.freq / 2 : event.freq,
-          time,
-          duration,
-        );
-      else if (event.voice === "bass") {
-        if (this.techno) {
-          for (let beat = 0.5; beat < event.beats; beat += 0.5)
-            this.bass(
-              ctx,
-              master,
-              event.freq / 2,
-              time + beat * secondsPerBeat,
-              secondsPerBeat * 0.3,
-            );
-        } else this.bass(ctx, master, event.freq, time, duration);
-      } else if (!this.techno) this.sleigh(ctx, master, time);
-    }
-    if (this.techno) {
-      const stepDuration = 60 / TECHNO_BPM / 4;
-      this.drumStep = Math.max(
-        this.drumStep,
-        Math.floor((ctx.currentTime - this.beatStart) / stepDuration),
-      );
-      while (this.beatStart + this.drumStep * stepDuration < horizon) {
-        const time = this.beatStart + this.drumStep * stepDuration;
-        if (time >= ctx.currentTime)
-          this.drums(ctx, master, time, this.drumStep);
-        this.drumStep++;
-      }
-    }
-  }
-
-  private drums(ctx: AudioContext, out: AudioNode, time: number, step: number) {
-    if (step % 4 === 0) {
-      const kick = ctx.createOscillator();
-      const gain = ctx.createGain();
-      kick.frequency.setValueAtTime(150, time);
-      kick.frequency.exponentialRampToValueAtTime(43, time + 0.12);
-      gain.gain.setValueAtTime(0.9, time);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.32);
-      kick.connect(gain).connect(out);
-      kick.start(time);
-      kick.stop(time + 0.34);
-    }
-    if (!this.noise || step % 2 !== 0) return;
-    const noise = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
-    const clap = step % 8 === 4;
-    noise.buffer = this.noise;
-    filter.type = clap ? "bandpass" : "highpass";
-    filter.frequency.value = clap ? 1800 : 8500;
-    const offbeat = step % 4 === 2;
-    const release = clap ? 0.12 : offbeat ? 0.1 : 0.035;
-    gain.gain.setValueAtTime(clap ? 0.3 : offbeat ? 0.12 : 0.045, time);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
-    noise.connect(filter).connect(gain).connect(out);
-    noise.start(time);
-    noise.stop(time + release + 0.01);
-  }
-
   private bell(
     ctx: AudioContext,
     out: AudioNode,
@@ -425,9 +734,7 @@ export class JinglePlayer {
     duration: number,
   ) {
     const gain = ctx.createGain();
-    const release = this.techno
-      ? Math.min(0.3, duration * 0.7)
-      : Math.max(0.5, duration * 1.8);
+    const release = Math.max(0.5, duration * 1.8);
     gain.gain.setValueAtTime(0.0001, time);
     gain.gain.exponentialRampToValueAtTime(0.28, time + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
@@ -458,16 +765,12 @@ export class JinglePlayer {
   ) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = this.techno ? "sawtooth" : "triangle";
+    osc.type = "triangle";
     osc.frequency.setValueAtTime(freq, time);
     gain.gain.setValueAtTime(0.0001, time);
     gain.gain.exponentialRampToValueAtTime(0.22, time + 0.02);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + duration * 0.95);
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(this.techno ? 900 : 1200, time);
-    filter.frequency.exponentialRampToValueAtTime(120, time + duration * 0.9);
-    osc.connect(filter).connect(gain).connect(out);
+    osc.connect(gain).connect(out);
     osc.start(time);
     osc.stop(time + duration);
   }

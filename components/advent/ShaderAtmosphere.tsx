@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { MusicFrame } from "./jingles";
 
 // Original procedural artwork: a single triangle, with no textures or assets.
 const VERTEX_SHADER = `
@@ -15,6 +16,8 @@ uniform vec2 u_size;
 uniform float u_time;
 uniform float u_mode;
 uniform float u_beat;
+uniform float u_build;
+uniform float u_travel;
 
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -39,7 +42,9 @@ float crystal(vec2 p, float aa) {
 }
 vec2 snow(vec2 uv, float scale, float speed, float depth) {
   vec2 q = uv * scale;
-  q.y -= u_time * speed * mix(1., 2.25, u_mode);
+  q.y -= u_travel * speed;
+  q.x += sin(uv.y * 9. - u_time * 1.4 + depth) * u_build * .65;
+  q.x += cos(uv.y * 14. + depth * 3. + u_time) * u_build * .18;
   q.x += u_time * .025 * depth + sin(u_time * .12) * .13;
   vec2 id = floor(q);
   float seed = hash(id + depth * 17.);
@@ -56,6 +61,8 @@ vec2 snow(vec2 uv, float scale, float speed, float depth) {
   } else {
     shape = 1. - smoothstep(radius * .4, radius + aa * 1.6, length(p));
   }
+  float filament = exp(-abs(p.x) * 110.) * exp(-p.y * p.y * 25.);
+  shape = mix(shape, max(shape * .6, filament), u_build * .7);
   float halo = exp(-dot(p, p) / max(.0001, radius * radius * 5.)) * .12;
   return vec2(shape, halo) * mix(.22, .9, depth / 2.);
 }
@@ -89,22 +96,29 @@ void main() {
   club += silver * exp(-dot(p - vec2(.55, -.05), p - vec2(.55, -.05)) * 4.) * .055;
   club += acid * exp(-dot(p + vec2(.6, -.2), p + vec2(.6, -.2)) * 5.) * .025;
 
-  vec2 portal = p;
+  float turn = u_build * sin(u_time * .28) * .55;
+  vec2 portal = mat2(cos(turn), -sin(turn), sin(turn), cos(turn)) * p;
   portal.x += sin(u_time * .09) * .008;
   float radius = hexagon(portal);
   float rings = 0.;
   for (int i = 0; i < 6; i++) {
-    float r = .35 + float(i) * .075;
+    float r = .24 + float(i) * .095 - fract(u_travel * .045 + float(i) * .14) * u_build * .12;
     float d = abs(radius - r);
-    rings += exp(-d * 950.) * (.16 + .08 * sin(float(i) + u_time * .3));
+    rings += exp(-d * 950.) * (.7 + .3 * sin(float(i) + u_time * .3));
     rings += exp(-d * 90.) * .012;
   }
   float sweep = .65 + .35 * sin(atan(portal.y, portal.x) * 3. - u_time * .18);
-  club += mix(acid, silver, smoothstep(-.4, .4, p.x)) * rings * side * hero * sweep * (1. + u_beat * .28);
+  club += mix(acid, silver, smoothstep(-.4, .4, p.x)) * rings * side * hero * sweep * (1. + u_beat * 1.1 + u_build * 1.5);
+
+  float pressure = sin(length(p) * 48. - u_travel * 2.2);
+  club += silver * pow(max(0., pressure), 16.) * side * hero * u_build * .10;
+  float ray = abs(sin(atan(portal.y, portal.x) * 9. + u_time * .08));
+  club += acid * exp(-ray * 110.) * side * hero * (.035 + u_beat * .06) * u_mode;
+  club += vec3(noise(css * .4) - .5) * .025;
 
   float horizon = p.y + .10;
   if (horizon > .04) {
-    vec2 grid = vec2(p.x / horizon * 2.5, 1. / horizon + u_time * .15);
+    vec2 grid = vec2(p.x / horizon * 2.5, 1. / horizon + u_travel * .15);
     vec2 cell = abs(fract(grid) - .5);
     float line = 1. - smoothstep(.008, .021, min(cell.x, cell.y));
     float fade = smoothstep(.04, .32, horizon) * exp(-horizon * 1.5);
@@ -130,7 +144,7 @@ void main() {
 type ShaderAtmosphereProps = {
   techno: boolean;
   reducedMotion: boolean;
-  getBeat: () => number;
+  getFrame: () => MusicFrame;
 };
 
 function compileShader(
@@ -150,12 +164,12 @@ function compileShader(
 export function ShaderAtmosphere({
   techno,
   reducedMotion,
-  getBeat,
+  getFrame,
 }: ShaderAtmosphereProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const inputRef = useRef({ techno, reducedMotion, getBeat });
+  const inputRef = useRef({ techno, reducedMotion, getFrame });
   const invalidateRef = useRef<() => void>(() => {});
-  inputRef.current = { techno, reducedMotion, getBeat };
+  inputRef.current = { techno, reducedMotion, getFrame };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -166,7 +180,7 @@ export function ShaderAtmosphere({
       stencil: false,
       powerPreference: "low-power",
     });
-    if (!canvas || !gl) return;
+    if (!canvas) return;
 
     let program: WebGLProgram | null = null;
     let buffer: WebGLBuffer | null = null;
@@ -174,6 +188,7 @@ export function ShaderAtmosphere({
     let frame = 0;
     let lastTime = 0;
     let elapsed = 12;
+    let travel = 12;
     let mode = inputRef.current.techno ? 1 : 0;
     let inView = true;
     let lost = false;
@@ -183,6 +198,7 @@ export function ShaderAtmosphere({
     let height = 1;
 
     function release() {
+      if (!gl) return;
       gl.useProgram(null);
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
       if (buffer) gl.deleteBuffer(buffer);
@@ -192,7 +208,7 @@ export function ShaderAtmosphere({
     }
     function initialize() {
       canvas.dataset.renderer = "fallback";
-      if (gl.isContextLost()) return false;
+      if (!gl || gl.isContextLost()) return false;
       const vertex = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
       const fragment = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER);
       const nextProgram = gl.createProgram();
@@ -230,18 +246,23 @@ export function ShaderAtmosphere({
       gl.enableVertexAttribArray(0);
       gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       uniforms = Object.fromEntries(
-        ["u_resolution", "u_size", "u_time", "u_mode", "u_beat"].map((name) => [
-          name,
-          gl.getUniformLocation(program, name),
-        ]),
+        [
+          "u_resolution",
+          "u_size",
+          "u_time",
+          "u_mode",
+          "u_beat",
+          "u_build",
+          "u_travel",
+        ].map((name) => [name, gl.getUniformLocation(program, name)]),
       );
       canvas.dataset.renderer = "webgl";
       return true;
     }
-    lost = !initialize();
+    initialize();
 
     function schedule() {
-      if (!frame && !disposed && !lost && inView && !document.hidden) {
+      if (!frame && !disposed && inView && !document.hidden) {
         frame = requestAnimationFrame(draw);
       }
     }
@@ -251,7 +272,7 @@ export function ShaderAtmosphere({
     }
     function draw(now: number) {
       frame = 0;
-      if (disposed || lost || !inView || document.hidden) {
+      if (disposed || !inView || document.hidden) {
         lastTime = 0;
         return;
       }
@@ -264,23 +285,37 @@ export function ShaderAtmosphere({
       lastTime = now;
       dirty = false;
       if (!input.reducedMotion) elapsed += dt;
+      const music = input.getFrame();
       const target = input.techno ? 1 : 0;
-      mode = input.reducedMotion
-        ? target
-        : mode + (target - mode) * Math.min(1, dt * 5);
-      if (Math.abs(mode - target) < 0.001) mode = target;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform2f(uniforms.u_resolution, canvas.width, canvas.height);
-      gl.uniform2f(uniforms.u_size, width, height);
-      gl.uniform1f(uniforms.u_time, elapsed);
-      gl.uniform1f(uniforms.u_mode, mode);
-      gl.uniform1f(
-        uniforms.u_beat,
-        input.reducedMotion ? 0 : Math.max(0, Math.min(1, input.getBeat())),
-      );
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if (!input.reducedMotion) schedule();
+      mode = input.reducedMotion ? target : music.mix;
+      const build = input.reducedMotion ? 0 : music.build;
+      const root = canvas.parentElement;
+      root?.style.setProperty("--adv-scene", mode.toFixed(4));
+      root?.style.setProperty("--adv-tension", build.toFixed(4));
+      root?.style.setProperty("--adv-ink", mode > 0.5 ? "1" : "0");
+      if (root) root.dataset.scenePhase = mode > 0.5 ? "berlin" : "winter";
+      const dialog = document.querySelector<HTMLElement>(".adv-dialog");
+      dialog?.style.setProperty("--adv-scene", mode.toFixed(4));
+      dialog?.style.setProperty("--adv-ink", mode > 0.5 ? "1" : "0");
+      if (!input.reducedMotion) travel += dt * (1 + mode * 3 + build * 4);
+      if (gl && program && !lost) {
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(uniforms.u_resolution, canvas.width, canvas.height);
+        gl.uniform2f(uniforms.u_size, width, height);
+        gl.uniform1f(uniforms.u_time, elapsed);
+        gl.uniform1f(uniforms.u_mode, mode);
+        gl.uniform1f(uniforms.u_build, build);
+        gl.uniform1f(uniforms.u_travel, travel);
+        gl.uniform1f(
+          uniforms.u_beat,
+          input.reducedMotion ? 0 : music.pulse * mode,
+        );
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      }
+      if (!input.reducedMotion && (program || Math.abs(mode - target) > 0.001))
+        schedule();
     }
+
     function resize() {
       const bounds = canvas.getBoundingClientRect();
       width = Math.max(1, bounds.width);
@@ -307,6 +342,7 @@ export function ShaderAtmosphere({
       canvas.dataset.renderer = "fallback";
       cancelAnimationFrame(frame);
       frame = 0;
+      invalidate();
     }
     function contextRestored() {
       lost = !initialize();
