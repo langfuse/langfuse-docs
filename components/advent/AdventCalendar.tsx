@@ -670,7 +670,7 @@ export function AdventCalendar() {
         rect.top + rect.height / 2,
       );
     }
-    setTimeout(() => showDoor(day), DOOR_OPEN_DELAY_MS);
+    setTimeout(() => showDoor(day), reducedMotion ? 0 : DOOR_OPEN_DELAY_MS);
   };
 
   const openDays = ADVENT_DOORS.filter(
