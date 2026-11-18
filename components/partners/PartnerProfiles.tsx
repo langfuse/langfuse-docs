@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
-import { controlTextClassName } from "@/components/ui/button";
+import { Button, controlTextClassName } from "@/components/ui/button";
+import { CornerGrid, CornerGridItem } from "@/components/ui/corner-grid";
 import { Image } from "@/components/ui/image";
 import { Input } from "@/components/ui/input";
 import { TabButton } from "@/components/ui/tab-button";
@@ -43,18 +44,18 @@ function matchesQuery(profile: PartnerProfile, query: string) {
 }
 
 const nameClassName =
-  "m-0 font-analog text-[22px] font-medium leading-tight text-text-primary";
+  "m-0 font-analog text-[20px] font-medium leading-[1.2] tracking-tight text-text-primary sm:text-[21px]";
 
 function PartnerIdentity({ profile }: { profile: PartnerProfile }) {
   const { logo } = profile;
 
   if (!logo) {
-    return <h3 className={cn(nameClassName, "mt-2")}>{profile.name}</h3>;
+    return <h3 className={nameClassName}>{profile.name}</h3>;
   }
 
   if (logo.showName) {
     return (
-      <div className="mt-3 flex h-8 items-center gap-2.5">
+      <div className="flex items-center gap-2.5">
         <Image
           src={logo.src}
           alt=""
@@ -74,7 +75,7 @@ function PartnerIdentity({ profile }: { profile: PartnerProfile }) {
         alt=""
         width={logo.width}
         height={logo.height}
-        className="mt-3 h-8 w-auto max-w-40 object-contain object-left brightness-0 dark:invert"
+        className="h-8 w-auto max-w-40 object-contain object-left brightness-0 dark:invert"
       />
       <h3 className="sr-only">{profile.name}</h3>
     </>
@@ -83,19 +84,15 @@ function PartnerIdentity({ profile }: { profile: PartnerProfile }) {
 
 function PartnerCard({ profile }: { profile: PartnerProfile }) {
   return (
-    <article className="corner-box-corners relative flex h-full w-full flex-col overflow-hidden border border-line-structure bg-surface-bg">
-      <span
-        aria-hidden="true"
-        className="bg-stripe-pattern pointer-events-none absolute right-0 top-0 h-12 w-12 opacity-70 [clip-path:polygon(0_0,100%_0,100%_100%)]"
-      />
-      <div className="flex flex-1 flex-col gap-4 p-4 sm:p-5">
-        <div className="pr-10">
-          <p className="m-0 font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
-            <span className="sr-only">Supported regions: </span>
-            {profile.regions.join(", ")}
-          </p>
-          <PartnerIdentity profile={profile} />
-        </div>
+    <article className="flex h-full flex-col">
+      <div className="mb-4 flex min-h-8 items-center">
+        <PartnerIdentity profile={profile} />
+      </div>
+      <div className="flex flex-1 flex-col gap-4">
+        <p className={cn(controlTextClassName, "m-0 text-text-tertiary")}>
+          <span className="sr-only">Supported regions: </span>
+          {profile.regions.join(", ")}
+        </p>
 
         <p className="m-0 text-[13px] leading-[1.55] text-text-secondary">
           {profile.summary}
@@ -105,7 +102,7 @@ function PartnerCard({ profile }: { profile: PartnerProfile }) {
           {profile.capabilities.map((capability) => (
             <li
               key={capability}
-              className="rounded-full border border-line-structure bg-surface-1 px-2.5 py-1 text-[11px] leading-none text-text-secondary"
+              className="rounded-full border border-line-structure px-2.5 py-1 text-[11px] leading-snug text-text-secondary"
             >
               {capability}
             </li>
@@ -113,49 +110,44 @@ function PartnerCard({ profile }: { profile: PartnerProfile }) {
         </ul>
       </div>
 
-      <a
-        href={profile.url}
-        target="_blank"
-        rel="noreferrer"
-        className={cn(
-          controlTextClassName,
-          "flex items-center justify-between gap-3 border-t border-dashed border-line-structure px-4 py-3 text-text-secondary no-underline transition-colors hover:bg-[#FBFF7A]/20 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-5",
-        )}
+      <Button
+        asChild
+        size="default"
+        className={cn(controlTextClassName, "mt-6 w-auto self-start px-[10px]")}
       >
-        <span>Visit {profile.name}</span>
-        <ArrowUpRight className="size-4" aria-hidden="true" />
-      </a>
+        <a href={profile.url} target="_blank" rel="noopener noreferrer">
+          Visit {profile.name}
+        </a>
+      </Button>
     </article>
   );
 }
 
 function BecomePartnerCard() {
   return (
-    <a
-      href="#become-delivery-ready"
-      className="group flex h-full min-h-[220px] w-full flex-col justify-between border border-dashed border-line-structure bg-surface-bg p-4 no-underline transition-colors hover:bg-[#FBFF7A]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:p-5"
-    >
-      <span className="font-mono text-[10px] uppercase tracking-wider text-text-tertiary">
-        Services firm?
-      </span>
-      <span>
-        <span className="block font-analog text-[22px] font-medium leading-tight text-text-primary">
-          Become a Langfuse partner
-        </span>
-        <span className="mt-2 block text-[13px] leading-[1.55] text-text-secondary">
-          See the path to delivery readiness and a directory listing.
-        </span>
-      </span>
-      <span
+    <article className="flex h-full flex-col">
+      <p
         className={cn(
           controlTextClassName,
-          "flex items-center justify-between gap-3 text-text-secondary group-hover:text-text-primary",
+          "m-0 mb-4 flex min-h-8 items-center text-text-tertiary",
         )}
       >
-        <span>See the partner path</span>
-        <ArrowRight className="size-4" aria-hidden="true" />
-      </span>
-    </a>
+        Services firm?
+      </p>
+      <h3 className={nameClassName}>Become a Langfuse partner</h3>
+      <p className="mb-0 mt-2 text-[13px] leading-[1.55] text-text-secondary">
+        See the path to delivery readiness and a directory listing.
+      </p>
+      <div className="mt-auto pt-6">
+        <Button
+          asChild
+          size="default"
+          className={cn(controlTextClassName, "w-auto px-[10px]")}
+        >
+          <a href="#become-delivery-ready">See the partner path</a>
+        </Button>
+      </div>
+    </article>
   );
 }
 
@@ -253,18 +245,18 @@ export function PartnerProfiles({
       </div>
 
       {visibleProfiles.length ? (
-        <ul className="m-0 grid list-none grid-cols-1 gap-2 bg-surface-2 p-2 @xl:grid-cols-2 @5xl:grid-cols-3">
-          {visibleProfiles.map((profile) => (
-            <li key={profile.name} className="flex">
+        <CornerGrid role="list">
+          {visibleProfiles.map((profile, index) => (
+            <CornerGridItem key={profile.name} index={index} role="listitem">
               <PartnerCard profile={profile} />
-            </li>
+            </CornerGridItem>
           ))}
           {!isFiltered ? (
-            <li className="flex">
+            <CornerGridItem index={visibleProfiles.length} role="listitem">
               <BecomePartnerCard />
-            </li>
+            </CornerGridItem>
           ) : null}
-        </ul>
+        </CornerGrid>
       ) : (
         <div className="border border-dashed border-line-structure bg-surface-bg px-4 py-10 text-center">
           <p className="m-0 text-[13px] text-text-secondary">
