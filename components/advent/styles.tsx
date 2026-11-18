@@ -115,6 +115,8 @@ export function AdventStyles() {
       .adv-page[data-mode="techno"] .adv-door-ornament { opacity: .2; }
       .adv-page[data-mode="techno"] .adv-music-bars span { background: var(--adv-gold); }
       .adv-dialog[data-mode="techno"] { border-color: var(--line-structure); }
+      /* The shared overlay uses the light site token; dim the dark scene instead. */
+      [data-state]:has(+ .adv-dialog[data-mode="techno"]) { background-color: rgb(5 7 6 / .72); }
       @media (max-width: 639px) {
         .adv-mode-bar { align-items: center; gap: 8px; margin-bottom: 24px; }
         .adv-location { max-width: 95px; text-align: left; font-size: 9px; letter-spacing: .03em; }
