@@ -166,7 +166,7 @@ function useJingles() {
 
 function SnowballHint() {
   return (
-    <p className="flex items-center gap-2 text-[13px] text-text-secondary">
+    <p className="adv-hint-row flex items-center gap-2 text-[13px] text-text-secondary">
       <span className="adv-hint" aria-hidden>
         <span className="adv-hint-ring" />
         <span className="adv-hint-ball" />

@@ -545,6 +545,22 @@ export function AdventStyles() {
         height: 44px;
         flex-shrink: 0;
       }
+      /* Hang the animation off the left so the text centers under the button. */
+      .adv-hint-row { position: relative; }
+      .adv-hint-row .adv-hint {
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        margin-right: 6px;
+        transform: translateY(-50%) scale(.8);
+        transform-origin: right center;
+      }
+      @media (min-width: 640px) {
+        .adv-hint-row .adv-hint {
+          margin-right: 8px;
+          transform: translateY(-50%);
+        }
+      }
       .adv-hint-cursor, .adv-hint-ring, .adv-hint-ball, .adv-hint-splat {
         position: absolute; left: 0; top: 0;
       }
