@@ -187,7 +187,9 @@ The same metrics run on live traffic. Because Ragas metrics are reference-free, 
 
 The [Ragas cookbook](/resources/engineering/evaluation-of-rag-with-ragas) walks through both variants end to end, including scoring individual traces at request time and batch-scoring a periodic sample.
 
-If you want RAG scoring on production traffic without operating an evaluation job at all, Langfuse's managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run server-side against sampled observations, and the managed evaluator catalog includes evaluators built in partnership with Ragas.
+If you want RAG scoring on production traffic without operating an evaluation job at all, Langfuse's managed [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators run server-side against sampled observations. Choose a Langfuse-maintained template from the current [evaluator template gallery](https://cloud.langfuse.com/project/~/evals) and adapt it to your data.
+
+The Ragas-branded evaluator templates were retired with the [August 2026 evaluator redesign](/changelog/2026-08-22-reusable-evaluators-and-rules). Running Ragas metrics through the Langfuse SDK remains supported, as shown in the experiment and production-trace examples above.
 
 ## Choose between Ragas metrics, managed evaluators, and code evaluators [#choose-evaluation-method]
 

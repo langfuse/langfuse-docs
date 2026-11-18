@@ -15,14 +15,14 @@ This guide shows how to trace **Sarvam AI** models with **Langfuse** from two pl
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It helps teams trace LLM applications, debug issues, evaluate quality, and monitor cost and latency. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
-<Frame>
-  ![Vercel AI SDK trace in Langfuse with two sarvam-105b generations and a getWeather tool call](/images/cookbook/integration-sarvam/sarvam-vercel-ai-sdk-trace.png)
-</Frame>
-
-Both integrations use OpenTelemetry. The framework emits spans for each model call, and the Langfuse SDK exports them to your Langfuse project. Pick the section that matches your stack:
+This page shows two example integrations. Both use OpenTelemetry: the framework emits spans for each model call, and the Langfuse SDK exports them to your Langfuse project.
 
 - [Vercel AI SDK](#vercel-ai-sdk): text generation, streaming, and tool calls with the `sarvam-ai-sdk` provider.
 - [LiveKit Agents](#livekit-agents): voice agents that use Sarvam for speech-to-text, the LLM, and text-to-speech.
+
+<Callout type="info">
+  These are examples, not the only way to trace Sarvam. You can trace Sarvam models with any Langfuse integration for the framework you already use. For example, use the [OpenAI SDK](/integrations/model-providers/openai-py) with Sarvam's OpenAI-compatible base URL `https://api.sarvam.ai/v1`, the Sarvam services in [Pipecat](/integrations/frameworks/pipecat), or a Sarvam model in [LangChain](/integrations/frameworks/langchain).
+</Callout>
 
 ## Vercel AI SDK [#vercel-ai-sdk]
 
@@ -135,7 +135,11 @@ In a long-running server, the span processor exports spans in the background and
 
 Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). The trace has an agent observation for the `generateText` call, a `sarvam-105b` generation with input, output, and token usage for each model step, and a tool observation for `getWeather`.
 
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/ee23df279a66f645196922daaef5685b)
+<Frame>
+  ![Vercel AI SDK trace in Langfuse with two sarvam-105b generations and a getWeather tool call](/images/cookbook/integration-sarvam/sarvam-vercel-ai-sdk-trace.png)
+</Frame>
+
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/fca085f66c4c0d0f8cbb16381662e9ed)
 
 </Steps>
 
@@ -257,7 +261,7 @@ Open your project in [Langfuse](https://cloud.langfuse.com/project/~/traces). Ea
   ![LiveKit agent trace in Langfuse with sarvam-105b LLM requests and a get_weather tool call](/images/cookbook/integration-sarvam/sarvam-livekit-trace.png)
 </Frame>
 
-[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/008c7eeb6c6bcc2ff0c73c1b823ba9fd)
+[Example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/0928a8a8f3cda1a3d13fdfd9df2f762e)
 
 </Steps>
 

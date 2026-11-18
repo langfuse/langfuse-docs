@@ -47,6 +47,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - **Blog**: `content/blog/`
 - **Guides**: `content/guides/`
 - **FAQ**: `content/faq/`
+- **Handbook**: `content/handbook/`
 
 ## Important workflow rules
 
