@@ -513,6 +513,7 @@ export function AdventCalendar() {
   const [annoyed, setAnnoyed] = useState(false);
   const annoyedRef = useRef(false);
   const [throwing, setThrowing] = useState(false);
+  const throwEndTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reducedMotion = usePrefersReducedMotion();
   const reducedMotionRef = useRef(false);
   const music = useJingles(techno);
@@ -572,7 +573,11 @@ export function AdventCalendar() {
   const throwBack = useCallback(() => {
     setThrowing(false);
     requestAnimationFrame(() => setThrowing(true));
-    setTimeout(() => setThrowing(false), SNOWMAN_THROW_MS);
+    clearTimeout(throwEndTimer.current);
+    throwEndTimer.current = setTimeout(
+      () => setThrowing(false),
+      SNOWMAN_THROW_MS,
+    );
     setTimeout(() => {
       const svg = snowmanRef.current?.querySelector("svg");
       if (!svg) return;
