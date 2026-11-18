@@ -428,7 +428,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Proxy-based Logging (via LiteLLM)",
+        name: "Proxy-based Logging (via Langfuse AI Gateway, LiteLLM, etc.)",
         href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -952,6 +952,23 @@ const sections: Section[] = [
             "Open Source": "Unlimited",
             Enterprise: "Unlimited",
             Government: "Unlimited",
+          },
+        },
+      },
+    ],
+  },
+  {
+    name: "AI Gateway",
+    href: "/docs/gateway/overview",
+    features: [
+      {
+        name: "AI Gateway",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+            Government: true,
           },
         },
       },

@@ -7,9 +7,9 @@ description: Govern coding agent spend centrally. See cost by team and developer
 
 Coding agents make engineers faster, but they also make AI spend unpredictable. Govern it centrally. See spend by team and by developer. Trace sessions to improve token efficiency.
 
-Engineering spend by task, last 30 days: Implementation $486, Code review $379, Planning $321, Bug fix $178, Documentation $104, Other $72. Total spend $1,540 · 4,812 sessions · 28% budget left.
+Engineering spend by task, last 30 days: Implementation $486, Code review $379, Planning $321, Bug fix $178, Documentation $104, Other $72. Total spend $1,540, 4,812 sessions, 28% budget left.
 
-[Start free](/cloud) · [Talk to sales](/talk-to-us)
+[Start free](/cloud), [Talk to sales](/talk-to-us)
 
 Pick the path that matches how your organization runs coding agents. Platform teams usually start with a **gateway**. Individual developers and team rollouts often start with **hooks**.
 

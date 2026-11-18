@@ -62,7 +62,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | [Native framework integrations](/integrations)                                                                     | Yes                         | Yes                                        | Yes                   |
 | [SDKs (Python, JavaScript)](/docs/observability/sdk/overview)                                                      | Yes                         | Yes                                        | Yes                   |
 | [OpenTelemetry (Java, Go, custom)](/integrations/native/opentelemetry)                                             | Yes                         | Yes                                        | Yes                   |
-| [Proxy-based logging (via LiteLLM)](/integrations/gateways/litellm)                                                | Yes                         | Yes                                        | Yes                   |
+| [Proxy-based logging (via Langfuse AI Gateway, LiteLLM, etc.)](/integrations/gateways/litellm)                     | Yes                         | Yes                                        | Yes                   |
 | [Custom via API](/docs/api-and-data-platform/features/public-api)                                                  | Yes                         | Yes                                        | Yes                   |
 | Included usage                                                                                                     | Unlimited                   | Unlimited                                  | Unlimited             |
 | [Multi-modal](/docs/observability/features/multi-modality)                                                         | Yes                         | Yes                                        | Yes                   |
@@ -97,6 +97,8 @@ Dedicated Langfuse deployment for government and regulated industries.
 | **Collaboration**                                                                                                  |                             |                                            |                       |
 | Projects                                                                                                           | Unlimited                   | Unlimited                                  | Unlimited             |
 | Users                                                                                                              | Unlimited                   | Unlimited                                  | Unlimited             |
+| **AI Gateway**                                                                                                     |                             |                                            |                       |
+| AI Gateway                                                                                                         | Yes                         | Yes                                        | Yes                   |
 | **API**                                                                                                            |                             |                                            |                       |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                                            | Yes                         | Yes                                        | Yes                   |
 | [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                                          | Langfuse v4+                | Langfuse v4+                               | Langfuse v4+          |
@@ -152,6 +154,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups)   |
 | Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research)   |
 | Non-profits          | $199 in credits / month             | [Learn more and apply](/non-profit) |
+| Hackathons           | $100 in credits / month, 3 months   | [Learn more and apply](/hackathons) |
 | Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com        |
 
 ## Frequently Asked Questions

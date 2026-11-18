@@ -159,6 +159,8 @@ Ensure that both entities have the necessary permissions to access the bucket:
 
 The same IAM role or user also works for the project-level [Blob Storage Export integration](/docs/api-and-data-platform/features/export-to-blob-storage#set-up-an-export). On self-hosted deployments, leave **Access Key ID** and **Secret Access Key** blank in that integration's Amazon S3 settings to use the IAM role instead of static credentials. This fallback only applies to the Amazon S3 provider on self-hosted deployments. Exports then run with the role's full permissions, including access to the platform buckets, and project members choose the target bucket; a [dedicated IAM user scoped to the export prefix](/docs/api-and-data-platform/features/export-to-blob-storage#bucket-permissions) is safer. Google Cloud Storage has its own default-credentials option; see [Blob Storage Export integration](#gcs-export-credentials).
 
+To authenticate [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth) or [External Media Storage](/docs/observability/features/multi-modality#external-s3-media) with a dedicated customer IAM role (Enterprise), set [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role). That intermediate role is separate from the container role above, which accesses Langfuse's own buckets.
+
 <Callout type="info">
 
 To use the [Data Retention](/docs/data-retention) feature in a self-hosted environment, you need to grant `s3:DeleteObject` to the Langfuse IAM role on all buckets.

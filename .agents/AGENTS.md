@@ -47,6 +47,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 - **Blog**: `content/blog/`
 - **Guides**: `content/guides/`
 - **FAQ**: `content/faq/`
+- **Handbook**: `content/handbook/`
 
 ## Important workflow rules
 
@@ -56,12 +57,13 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
 5. **Always run `pnpm run format` before committing or opening a PR if you edited any file Prettier formats** (see "Passing CI checks on the first try" below). The `format` CI job runs `pnpm run format:check` and fails the build on a single unformatted file.
 6. **Always keep Markdown overrides synchronized.** Before changing a page or route, check whether its URL has a corresponding file in `md-override/`. If it does, treat the rendered page and the Markdown override as one source pair: mirror user-facing copy, links, structure, and factual changes in both files in the same change. Do this even when the page does not include a comment pointing to the override.
-7. **Preserve custom MDX components in Markdown output.** When creating or adding a custom MDX component that contains user-facing content or links, make sure that content is not removed when the page is converted to plain Markdown. If the content only exists in component props or rendered JSX, add a Markdown renderer in `lib/markdown-component-renderers.js`. Run `node scripts/copy_md_sources.js` and inspect the corresponding file in `public/md-src/` to verify that all content and links remain available to Markdown and PDF consumers.
+7. **Preserve custom MDX components in Markdown output.** When creating or adding a custom MDX component that contains user-facing content or links, make sure that content is not removed when the page is converted to plain Markdown. If the content only exists in component props or rendered JSX, add a Markdown renderer in `lib/markdown-component-renderers.js`. Run `node scripts/copy_md_sources.js` and inspect the corresponding file in `public/md-src/` to verify that all content and links remain available to Markdown consumers.
 8. **Users / adopters table archives.** When adding or updating a row in `components-mdx/adopters-table.mdx` whose Reference cell is an external URL, always include a Wayback Machine `[Archive](...)` link. If no snapshot exists yet, request one (`https://web.archive.org/save/{url}`), wait until CDX returns a `200` capture, and cite `https://web.archive.org/web/{timestamp}/{url}`. Percent-encode the URL in CDX queries (`curl -G --data-urlencode`) so `&` in query strings is not parsed as another CDX parameter. Do not ship the row without that archive. Follow `.agents/skills/add-customer-to-user-list/SKILL.md`.
+9. Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 
 ## Passing CI checks on the first try
 
-CI runs three required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
+CI runs four required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
 
 ### 1. Prettier format (`format` job) — this is the check that most often fails
 
@@ -75,15 +77,19 @@ CI runs `pnpm run format:check`. To fix locally, run `pnpm run format` and commi
 
 ### 2. H1 heading check (`check_h1` job)
 
-CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc.
+CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc. Do not skip heading levels.
 
-### 3. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
+### 3. Middle dot check (`check_middle_dot` job)
+
+CI runs `node scripts/check-middle-dot.js` (locally: `pnpm run lint:middle-dot`). It fails if any tracked text file outside `public/` contains a middle dot (U+00B7) or its lookalikes, the bullet operator (U+2219) and the dot operator (U+22C5). It prints each hit as `path:line:col`. The only exceptions are proper nouns on the allowlist in the script (currently only the DALL-E product name). See the writing guidelines for what to use instead.
+
+### 4. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
 
 These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The full build is ~10 minutes locally — don't run it for routine edits. Instead, before pushing:
 
 - Check internal links you added/changed point to real pages or anchors.
 - For anchor links (`...#some-id`), make sure the target page defines the anchor explicitly with `[#some-id]` at the end of the heading line.
-- If you renamed or moved a page, also update any references and add a redirect in `next.config.mjs` if needed.
+- If you renamed, moved, or removed a page or section, search for links to its URL or anchor and repoint them. Add a redirect in `lib/redirects.js` only for URLs that have been live on langfuse.com; pages that were never published need no redirect.
 
 ## Styling and implementation guidelines
 
@@ -94,7 +100,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Key config files
 
-- `next.config.mjs` — Next.js config and redirects.
+- `next.config.mjs` — Next.js config; loads the redirects defined in `lib/redirects.js`.
 - `source.config.ts` — declares all Fumadocs content collections (docs, blog, changelog, integrations, marketing, …).
 - `lib/source.ts` — exports a `loader` for each collection.
 - `lib/section-registry.ts` — maps URL slugs to layout types; all derived routing sets live here. Do not hardcode slugs elsewhere.
@@ -111,50 +117,73 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
   - **Chat** — Fumadocs' built-in Inkeep chat integration (`ai-chat-shared.tsx`,
     `embedded-chat.tsx`, `ask-ai-button.tsx`).
 
-## Writing guidelines
+## Writing guidelines: Read this every time you add or change content to a docs page
 
-- Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers"). Always preserve proper nouns, acronyms, and official product names. Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). That treatment is for tiny mono eyebrows, not for actions. Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link.
+- When changing something, always make the change considering the surrounding context. Prefer changing an existing sentence over adding an extra sentence or section somewhere. The less new sentences you introduce, the better.
+- Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
+
+### Documentation page-specific guidelines
+
+These rules cover pages in `content/docs/`, integration guides in `content/integrations/`, and changelog entries in `content/changelog/`.
+
+#### Where content belongs: read this before adding anything [#where-content-belongs]
+
+- **Overview** pages get readers excited about the product area and make clear why it is valuable to them. Each item on this page should really earn their place. More often than not, you should not touch the overview page for a new feature addition.
+- **Concepts** pages explain how the product works at a high level: its components, the request or data flow, and the objects readers configure. This is a conceptual page.
+- **Feature** pages describe a specific feature of the product area. Anything feature-specific should be on a feature docs page or in an FAQ/troubleshooting page that's linked to from the feature docs page.
+- **Integration** guides for third-party tools (coding agents, SDKs, frameworks, model providers) live in `content/integrations/`, not in a product's docs folder. If integration is a prominent Langfuse feature in its own right, link the individual integration page from the docs sidebar, with an `external:[Name ↗](/integrations/...)` entry in a `meta.json`. This is almost never the case and using this should be an exception.
+- **API reference** pages for endpoints that relay a third-party API document only what Langfuse adds or changes: base URLs, authentication, the endpoint list, and deviations. Link each endpoint to the provider's reference instead of copying its request fields, response fields, or sample responses. [#api-reference-pages]
+- **Troubleshooting** content goes into one FAQ page per problem or question in `content/faq/all/`, tagged so `<FaqPreview>` lists it. A very short note can stay at the bottom of a feature page. Longer troubleshooting on a feature, get-started, or self-hosting page is a link to those FAQ pages.
+- **Changelog** entries announce what a user can now do. They live in `content/changelog/`, including when the docs already explain the feature.
+
+- Before you add or restructure a page, open one or more equivalent pages in an established product area, such as `content/docs/observability/` or `content/docs/evaluation/`, and match their structure, components, and sidebar position. When a product area has these pages, keep this sidebar order: Overview, Get started, Concepts, Features, Integrations, Troubleshooting and FAQ.
+- each docs fact has 1 home (source of truth), if the fact is relevant on other pages, these pages link to that source of truth instead of replicating the content.
+
+Once you decide what type of page the content should be on, always read the section about that page type in [Page type structure and content](page-types.md). It's imperative that you judge your change/addition with this context in mind.
+
+#### Cut what the reader doesn't need [#cut-what-the-reader-doesnt-need]
+
+- Keep a sentence only if the reader needs it and can't get it from the UI, the heading, or the previous sentence. Cut:
+  - descriptions of what the UI already shows, such as dialog fields, bulk-select buttons, default filter values, or "copy the key, it's shown only once"
+  - implementation details that don't change what the reader does, such as "the key is validated when you save it"
+  - remarks about the page itself, such as "Complete the steps in order" or "Each tab shows the minimal setup"
+  - generic security or best-practice warnings that aren't specific to the feature, such as "never commit keys to a repository"
+  - filler words and clauses, such as "also", "without changing any client", or "in the setup guide"
+- If a section is hard to write, decide the one thing the reader needs from it and say that. Most sections fit in three sentences. An edge case of a section, such as when a key stops working, is a short callout on that section, not a section of its own.
+- Introduce a list or a set of rules with a sentence that says what problem it solves. Bullets without that context read as noise.
+
+Once done with a first draft, look at what you've written again and aim to cut 50% of it. You will, in most cases, be able to do that. Seriously question whether you did a good review if you cut less than 50% and look again.
+
+#### Wording and structure [#wording-and-structure]
+
+- Name what you refer to. Write "the **Models**, **Gateway keys**, and **Analytics** tabs", not "the other pages", and link to the section that explains a term, not to the top of its page.
+- A heading must tell the reader what the section contains. Prefer short names for the concept, such as "Request flow", "Credential types", or "Model and key routing", over vague phrases such as "How a request reaches a model".
+- Use sentence case for user-facing headlines, section headings, hero copy, and controls people click. Keep title case for short standalone navigation labels where it reads more naturally (for example, paired nouns like "Questions & Answers").
+- Always preserve proper nouns, acronyms, and official product names.
+- Edited text is grammatically correct (American English) and has consistent punctuation.
+- Keep pages evergreen. Don't build an intro, heading, or step-by-step instruction around today's supported providers, endpoints, versions, or limits. Often the docs don't need to list them at all, because readers discover them while using the product. Don't enumerate providers in a setup step that works the same for every provider. When a list is still needed, keep it in one table, limitations page, or roadmap that is updated when they change.
+- Only add provider-specific guidance when the reader needs something they cannot figure out from the product. If that guidance is short, put it at the bottom of the feature page; if it is long, use a linked FAQ page. Push back on requests to add provider-specific setup that restates what the UI already shows.
+- Examples that hard-code a regional Langfuse Cloud or gateway URL put the region in the snippet, not in a sentence after it. Mark the live URL as EU and list the other region URLs as comments in the same snippet, matching the get-started env comments (`components-mdx/env-python.mdx`) or, for gateway hosts, the host comments on [Send your first request](/docs/gateway/get-started/first-request). Later snippets may reuse a host variable from that snippet. Do not add a post-snippet caveat that only names the region and links elsewhere.
+- When you rename a page, change its frontmatter `title` (the sidebar label) and its H1 together. Sidebar labels must fit on one line, about three or four words.
+- Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section and the section covers a substantial feature. For a small option within a page, mention availability in the text instead.
 - Route sales and Enterprise inquiries to the [sales form](/talk-to-us) instead of directing readers to `enterprise@langfuse.com`.
-- Add an `<AvailabilityBanner />` to a feature's docs page when the feature is not available on every Langfuse plan or deployment type. Place it directly below the relevant heading: usually the H1, or an H2/H3 when availability applies only to that section.
-- Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 
-### Changelog entries
+#### Formatting [#formatting]
 
-Changelog entries live in `content/changelog/`.
-
-- Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
-- Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
-- Follow the intro immediately with 2-3 concrete example use cases to show relevance. Don't put them in a separate section.
-- Keep it concise — every sentence should add new information. Don't repeat what was already said.
-- Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text.
-- Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
-- Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
+- Use `info` callouts for side notes, requirements, defaults, pointers, failure modes, and scope limits. Reserve `warning` for things that expose or lose data, cost money unexpectedly, or break a setup.
+- Use a table when several items share the same attributes, such as key types, ingestion modes, or per-key-type behavior. Cut or merge as many columns as you can, and keep only the ones that add real value or match similar tables on the same page. Keep cells to a few words and put explanations in the surrounding text. Turn a sentence that lists three or more parallel items into a bulleted list.
+- Code blocks in core documentation include all imports. Notebooks and cookbooks are exempt.
+- Link the key word or short phrase, not a whole sentence or bullet. Link text names its target, for example "trace user ID" or "Concepts". Put "See X" references in the sentence they support, not on a line of their own.
+- Use relative links to langfuse.com pages. Never link to preview deployments (`*.vercel.app`) or leave placeholder link targets. Do not leave a TODO in a published page.
+- App links from docs use `https://cloud.langfuse.com/project/~/[path]`. The `~` sentinel redirects to the reader's last-used project and region.
+- When embedding videos from YouTube, embed from `https://www.youtube-nocookie.com` and add `rel=0`.
+- Use `.mp4` files on `static.langfuse.com/docs-videos`. Do not use `.gif` files.
+- Do not set button or link labels in all caps (`uppercase` / `text-transform: uppercase`). Reuse `components/ui/button.tsx` for primary and secondary actions, including its shortcut chip, instead of restyling a one-off link. Do not use all caps eyebrows anywhere.
+- Never use the middle dot (U+00B7) as a separator, in copy, UI strings, eyebrows, or code (for example as the separator in `.join(...)`). Use a comma for lists, a colon or parentheses for a label and its qualifier (`Day 01: Monday`, `Optional (beta)`), and plain spacing or a divider element for purely visual separators. CI enforces this; see "Middle dot check" below.
 
 ## Review guidelines
 
-Please check the following:
-
-- Edited text is grammatically correct (American English).
-- Edited text has consistent punctuation.
-- Code blocks in core documentation include all imports to be self-contained (does not apply to notebooks/cookbooks).
-- When documentation is added or expanded, do not repeat the same information on a page. Each fact or explanation should appear once; later sections should link back instead of restating it.
-- A product area's Troubleshooting and FAQ page should contain only the pieces below. This applies to every page of this kind, including ones added later. Flag a new or edited page that adds any other section or body content. It does not apply to a feature page that ends with a short FAQ, or to a troubleshooting page whose job is inline answers.
-  - An optional short intro paragraph, and only when it adds something the components below do not. Do not add the repeated "try Ask AI / open a GitHub issue / contact support" paragraph.
-  - `<FaqPreview tags={[...]} />` from `components/faq/FaqPreview.tsx`: the list of links to that area's FAQ articles. Keep this component. Do not replace it with a hand-written link list or inline Q&A.
-  - `<GhDiscussionsPreview labels={[...]} />` from `components/gh-discussions/GhDiscussionsPreview.tsx`: the GitHub Discussions component already on these pages. Keep this component. Do not replace it with a prose link to GitHub Issues.
-- If blocks of text or code are largely repeated on multiple documentation pages, suggest consolidating them in `components-mdx` to improve maintainability and consistency.
-- Avoid specific model names in documentation; they go stale quickly. Prefer generic phrasing such as "your model" or the provider family, and flag new or edited docs that pin a versioned model name unless the page is specifically about that model.
-- In documentation tables, every column must add enough value on its own. Prefer fewer columns: merge or remove any column that does not help the reader, and flag tables that would stay clear with fewer columns.
-- Put failure modes, scope limits, and similar caveats in a `<Callout>` so they stand out. Flag new or edited docs that bury these in body copy.
-- When embedding videos from YouTube, make sure to embed from `https://www.youtube-nocookie.com` instead of `https://www.youtube.com` to avoid cookies and tracking. Always add `rel=0` to the embed URL so related videos are limited to the same channel.
-- Every documentation page should include a screenshot or screen recording of the feature near the beginning of the page, after the intro. Use a `<Frame>` screenshot or a `<Video>`. Flag new or edited docs pages that have no opening visual.
-- Flag diagrams that rely on horizontal scroll-to-explore instead of fitting the page, shrinking as needed, or switching to a mobile layout.
-- Use one H1 per markdown file, with subsections in order (`##`, `###`, etc.)—do not skip heading levels.
-- We never use `.gif` files, only `.mp4` files uploaded to `static.langfuse.com/docs-videos` to optimize for size and performance.
-- When deep-linking to a section via a link that uses the `#` anchor, make sure the anchor is explicitly defined in the source page via `[#anchor]` at the end of the header line, e.g. `## Get Started [#get-started]`.
-- For every edited page or route, check `md-override/` for a corresponding Markdown source. When one exists, verify the rendered page and override remain synchronized; a top-of-file comment is helpful but not required for this rule to apply.
-- When linking to a Langfuse app page from docs, use `https://cloud.langfuse.com/project/~/[path]` — the `~` sentinel redirects to the reader's last-used project and region automatically.
-- External `/users` adopters-table references must include a Wayback `[Archive](...)` link. Request a Save Page Now snapshot when none exists; do not omit the archive.
+Read [Review guidelines](review-guidelines.md) before commenting on a pull request. NEVER SKIP THIS, these are the only rules you should review against, don't come up with another set of rules instead of reading these.
 
 ## Cursor Cloud specific instructions
 

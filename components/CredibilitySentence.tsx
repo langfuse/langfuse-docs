@@ -1,3 +1,4 @@
+import { Link } from "@/components/ui/link";
 import { getGitHubStars } from "@/lib/github-stars";
 import {
   DOCKER_PULLS,
@@ -18,11 +19,19 @@ export const CredibilitySentence = ({
 }) => {
   const Metric = bold ? "strong" : "span";
   const metricClassName = bold ? "font-semibold" : "";
+  const claim = (
+    <>
+      Langfuse is the{" "}
+      <Link href="/adoption" variant="underline">
+        most widely adopted open-source LLM engineering platform
+      </Link>
+    </>
+  );
 
   if (style === "list") {
     return (
       <div className={className}>
-        <p>Langfuse is the most widely adopted LLM Engineering platform:</p>
+        <p>{claim}:</p>
         <ul className="mt-2 list-disc list-inside space-y-1">
           <li>
             Used by{" "}
@@ -58,7 +67,7 @@ export const CredibilitySentence = ({
 
   return (
     <p className={className}>
-      Langfuse is the most widely adopted LLM Engineering platform, used by{" "}
+      {claim}, used by{" "}
       <Metric className={metricClassName}>
         {formatCompanyCount()} companies
       </Metric>

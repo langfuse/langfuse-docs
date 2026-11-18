@@ -18,7 +18,9 @@ description: Use Python or TypeScript code in Langfuse to run deterministic eval
 <Callout type="info">
   **Self-hosted:** Code evaluators require a configured [code evaluator
   dispatcher](/self-hosting/configuration/code-evaluators). They are disabled
-  when no dispatcher is set.
+  when no dispatcher is set. To run evaluator code on your own sandboxed
+  executor instead of AWS Lambda, see [External HTTP
+  dispatcher](/self-hosting/configuration/code-evaluators#external-dispatcher).
 </Callout>
 
 <Callout type="info">
@@ -501,7 +503,7 @@ Code evaluators are intended for compact, deterministic checks that can run quic
 
 | Constraint        | Limit / guidance                                                                                                                                                                                                                                           |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Languages         | Write evaluators in Python or TypeScript. On self-hosted deployments, Python requires the `aws-lambda` dispatcher; `insecure-local` supports TypeScript/JavaScript only.                                                                                   |
+| Languages         | Write evaluators in Python or TypeScript. On self-hosted deployments, Python requires the `aws-lambda` or `external` dispatcher; `insecure-local` supports TypeScript/JavaScript only.                                                                     |
 | TypeScript syntax | Use [erasable TypeScript syntax](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-8.html#the---erasablesyntaxonly-option). Type annotations and interfaces are fine; avoid enums, namespaces, decorators, and parameter properties. |
 | Dependencies      | Use the language standard library ([Python](https://docs.python.org/3/library/index.html) & [TS/JS](https://nodejs.org/download/release/latest-v24.x/docs/api/all.html)). Third-party packages are not available in the evaluator runtime.                 |
 | Network access    | Evaluators run without network egress. Keep all required data in the observation or experiment context.                                                                                                                                                    |

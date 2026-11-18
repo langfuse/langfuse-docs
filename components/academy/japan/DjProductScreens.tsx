@@ -132,7 +132,7 @@ const SCREENS_HTML = `<div style="display:flex;flex-wrap:wrap;gap:44px;justify-c
                 <div style="width:3px;height:13px;background:var(--text-primary);transform-origin:bottom;animation:barDance 1.1s ease-in-out .3s infinite;"></div>
                 <div style="width:3px;height:9px;background:var(--text-primary);transform-origin:bottom;animation:barDance 1.1s ease-in-out .55s infinite;"></div>
               </div>
-              <span class="lf-eyebrow lf-highlight"><span>DJ · この曲を選んだ理由</span></span>
+              <span class="lf-eyebrow lf-highlight"><span>DJ: この曲を選んだ理由</span></span>
             </div>
             <p style="font-size:13px;color:var(--text-secondary);margin:0;line-height:1.5;">先週リピートしていたあのアルバムの流れで、少しマニアックな 1 曲を。ペースを上げる前に、ゆっくり入っていきましょう。</p>
           </div>
