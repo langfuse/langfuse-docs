@@ -7,6 +7,7 @@
 
 - Applies to `content/docs/`, `content/integrations/`, `content/guides/`, and `content/faq/`.
 - A `content/changelog/` entry is an announcement, including when the docs already explain the feature. Judge it with [Changelog entries](page-types.md#changelog-entries), and with the workflow rules and CI checks in [AGENTS.md](AGENTS.md).
+- `content/resources/engineering/` pages are marketing content and skip gate 1: they may repeat docs content and don't need a docs home. Flag only claims that contradict the docs, such as a stated default, limit, or permission the docs describe differently.
 
 ### Necessity
 
