@@ -27,6 +27,7 @@ export function AdventStyles() {
       html:has(.adv-page) :is(a, button, summary, label, select, [role='button']) { cursor: pointer; }
       html:has(.adv-page) :is(input, textarea, [contenteditable='true']) { cursor: text; }
       html:has(.adv-page) [role='dialog'] { cursor: auto; }
+      html:has(.adv-page) .adv-door.is-locked { cursor: inherit; }
 
       .adv-eyebrow {
         font-family: var(--font-geist-mono);
@@ -198,12 +199,15 @@ export function AdventStyles() {
         0%, 100% { opacity: .6; transform: scale(.98); }
         50% { opacity: 1; transform: scale(1.06); }
       }
-      .adv-door.is-wiggle .adv-door-leaf { animation: adv-wiggle .45s ease-in-out; }
-      @keyframes adv-wiggle {
-        0%, 100% { transform: rotate(0); }
-        25% { transform: rotate(-3deg); }
-        50% { transform: rotate(3deg); }
-        75% { transform: rotate(-2deg); }
+      .adv-door.is-wiggle .adv-door-leaf { animation: adv-rattle .55s ease-out; }
+      @keyframes adv-rattle {
+        0%, 100% { transform: none; }
+        10% { transform: translate(-3px, 1px) rotate(-4deg); }
+        22% { transform: translate(3px, -1px) rotate(3.5deg); }
+        36% { transform: translate(-2px, 1px) rotate(-3deg); }
+        50% { transform: translate(2px, 0) rotate(2deg); }
+        66% { transform: translate(-1px, 0) rotate(-1deg); }
+        82% { transform: translate(1px, 0) rotate(.5deg); }
       }
 
       .adv-toast-msg {

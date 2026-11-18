@@ -94,6 +94,22 @@ function getDoorState(
   return "today";
 }
 
+function readStorage(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeStorage(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage can be full or blocked; state then lives in memory only.
+  }
+}
+
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -115,7 +131,7 @@ function useJingles() {
   useEffect(() => {
     const player = new JinglePlayer();
     playerRef.current = player;
-    enabledRef.current = localStorage.getItem(MUSIC_KEY) !== "off";
+    enabledRef.current = readStorage(MUSIC_KEY) !== "off";
     setEnabled(enabledRef.current);
 
     const events = ["pointerdown", "pointerup", "keydown", "touchend"];
@@ -148,12 +164,12 @@ function useJingles() {
       setPlaying(false);
       enabledRef.current = false;
       setEnabled(false);
-      localStorage.setItem(MUSIC_KEY, "off");
+      writeStorage(MUSIC_KEY, "off");
       return;
     }
     enabledRef.current = true;
     setEnabled(true);
-    localStorage.setItem(MUSIC_KEY, "on");
+    writeStorage(MUSIC_KEY, "on");
     setPlaying(await player.start());
   }, [playing]);
 
@@ -228,7 +244,11 @@ function DoorTile({
   index: number;
   state: DoorState;
   wiggle: boolean;
-  onSelect: (day: number, element: HTMLElement) => void;
+  onSelect: (
+    day: number,
+    element: HTMLElement,
+    point: { x: number; y: number } | null,
+  ) => void;
 }) {
   const Ornament = ORNAMENTS[index % ORNAMENTS.length];
   const Icon = door.icon;
@@ -243,10 +263,18 @@ function DoorTile({
       type="button"
       data-advent-door
       aria-label={label}
-      onClick={(e) => onSelect(door.day, e.currentTarget)}
+      onClick={(e) =>
+        onSelect(
+          door.day,
+          e.currentTarget,
+          // detail is 0 for keyboard activation, which has no click point.
+          e.detail > 0 ? { x: e.clientX, y: e.clientY } : null,
+        )
+      }
       className={cn(
         "adv-door",
         state === "today" && "is-today",
+        state === "locked" && "is-locked",
         wiggle && "is-wiggle",
       )}
     >
@@ -428,10 +456,12 @@ export function AdventCalendar() {
   const hitsNeededRef = useRef(nextHitsNeeded());
   const [snowmanHit, setSnowmanHit] = useState(false);
   const reducedMotion = usePrefersReducedMotion();
+  const reducedMotionRef = useRef(false);
   const music = useJingles();
   const { thud } = music;
 
   dialogOpenRef.current = activeDay !== null;
+  reducedMotionRef.current = reducedMotion;
 
   useEffect(() => {
     const update = () => {
@@ -442,7 +472,7 @@ export function AdventCalendar() {
     const id = setInterval(update, 60_000);
 
     try {
-      const stored = JSON.parse(localStorage.getItem(OPENED_KEY) ?? "[]");
+      const stored = JSON.parse(readStorage(OPENED_KEY) ?? "[]");
       if (Array.isArray(stored)) setOpened(new Set(stored.map(Number)));
     } catch {
       // Ignore malformed storage and start with every door closed.
@@ -455,18 +485,36 @@ export function AdventCalendar() {
     deepLinkHandled.current = true;
     const match = /^#day-(\d+)$/.exec(window.location.hash);
     const day = match ? Number(match[1]) : null;
-    if (day && getDoorState(day, unlocked, opened) === "open") {
-      setActiveDay(day);
+    if (!day) return;
+    const state = getDoorState(day, unlocked, opened);
+    if (state === "today") {
+      const next = new Set(opened).add(day);
+      setOpened(next);
+      writeStorage(OPENED_KEY, JSON.stringify([...next]));
     }
+    if (state !== "locked") setActiveDay(day);
   }, [unlocked, opened]);
+
+  /** Throws a snowball at a point and returns the ms until it lands. */
+  const throwAt = useCallback(
+    (x: number, y: number) => {
+      if (reducedMotionRef.current) {
+        thud(0);
+        return 0;
+      }
+      canvasRef.current?.throwSnowball(x, y);
+      thud(SNOWBALL_DURATION / 1000);
+      return SNOWBALL_DURATION;
+    },
+    [thud],
+  );
 
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 || dialogOpenRef.current) return;
       const target = e.target as Element | null;
       if (target?.closest(SNOWBALL_IGNORE)) return;
-      canvasRef.current?.throwSnowball(e.clientX, e.clientY);
-      thud(SNOWBALL_DURATION / 1000);
+      const landsIn = throwAt(e.clientX, e.clientY);
       const rect = snowmanRef.current?.getBoundingClientRect();
       if (
         rect &&
@@ -475,7 +523,7 @@ export function AdventCalendar() {
         e.clientY >= rect.top &&
         e.clientY <= rect.bottom
       ) {
-        setTimeout(hitSnowman, SNOWBALL_DURATION);
+        setTimeout(hitSnowman, landsIn);
       }
     };
     let wobbleTimer: ReturnType<typeof setTimeout> | undefined;
@@ -505,7 +553,7 @@ export function AdventCalendar() {
     };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
-  }, [thud]);
+  }, [throwAt]);
 
   useEffect(() => {
     if (!toast) return;
@@ -521,16 +569,23 @@ export function AdventCalendar() {
     window.history.replaceState(null, "", url);
   }, []);
 
-  const handleSelect = (day: number, element: HTMLElement) => {
+  const handleSelect = (
+    day: number,
+    element: HTMLElement,
+    point: { x: number; y: number } | null,
+  ) => {
     const state = getDoorState(day, unlocked, opened);
     if (state === "locked") {
-      setWiggleDay(null);
-      requestAnimationFrame(() => setWiggleDay(day));
-      setToast(
-        unlocked === null
-          ? "Loading the calendar…"
-          : `Not yet! Door ${day} opens on December ${day}.`,
-      );
+      const landsIn = point ? throwAt(point.x, point.y) : 0;
+      setTimeout(() => {
+        setWiggleDay(null);
+        requestAnimationFrame(() => setWiggleDay(day));
+        setToast(
+          unlocked === null
+            ? "Loading the calendar…"
+            : `Not yet! Door ${day} opens on December ${day}.`,
+        );
+      }, landsIn);
       return;
     }
     if (state === "open") {
@@ -539,12 +594,14 @@ export function AdventCalendar() {
     }
     const next = new Set(opened).add(day);
     setOpened(next);
-    localStorage.setItem(OPENED_KEY, JSON.stringify([...next]));
-    const rect = element.getBoundingClientRect();
-    canvasRef.current?.burst(
-      rect.left + rect.width / 2,
-      rect.top + rect.height / 2,
-    );
+    writeStorage(OPENED_KEY, JSON.stringify([...next]));
+    if (!reducedMotion) {
+      const rect = element.getBoundingClientRect();
+      canvasRef.current?.burst(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+      );
+    }
     setTimeout(() => showDoor(day), DOOR_OPEN_DELAY_MS);
   };
 
