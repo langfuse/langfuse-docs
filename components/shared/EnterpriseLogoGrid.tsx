@@ -16,7 +16,6 @@ import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
-import rubyLogo from "../home/img/ruby.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
 import tradeRepublicLogo from "../home/img/trade-republic.svg";
@@ -52,7 +51,6 @@ const logosByName: Record<string, StaticImageData> = {
   "Magic Patterns": magicPatternsLogo,
   Cisco: ciscoLogo,
   "Rocket Money": rocketMoneyLogo,
-  Ruby: rubyLogo,
 };
 
 const companies: CompanyLogo[] = enterpriseLogoCompanies.map((company) => ({

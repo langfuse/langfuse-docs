@@ -29,5 +29,4 @@ export const enterpriseLogoCompanies: EnterpriseLogoCompany[] = [
   },
   { name: "Cisco" },
   { name: "Rocket Money" },
-  { name: "Ruby" },
 ];
