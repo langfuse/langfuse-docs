@@ -90,9 +90,78 @@ The Langfuse platform is currently supporting the following LLM providers:
 
 When **Enable default models** is on, the provider's default models are available in the model selector of the Playground and evaluators. To use a model that is not in that list, e.g. a newer model, a fine-tuned model, or a model behind a proxy, add it under **Custom models** in the connection settings.
 
-For Amazon Bedrock, the AWS credentials need the `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` permissions.
-
 You may connect to third party LLM providers if their API schema implements the schema of one of our supported provider adapters. For example, you may connect to Mistral by using the OpenAI adapter in Langfuse to connect to Mistral's OpenAI compliant API.
+
+### Amazon Bedrock [#amazon-bedrock]
+
+Bedrock connections authenticate with AWS access keys, an [Amazon Bedrock API key](https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys.html), or an [IAM role](#bedrock-iam-role). The credentials need the `bedrock:InvokeModel` and `bedrock:InvokeModelWithResponseStream` permissions.
+
+#### Authenticate with an IAM role [#bedrock-iam-role]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+With an IAM role, Langfuse stores no AWS credentials. It assumes its own cross-account role, then the role in your AWS account, and passes an external ID that belongs to the connection.
+
+1. Add a connection with the **Bedrock** adapter and set **Authentication Method** to **IAM role**. The form shows the Langfuse cross-account role ARN and the connection's external ID.
+2. In AWS, create a role that trusts the Langfuse cross-account role with that external ID:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": { "AWS": "<Langfuse cross-account role ARN>" },
+         "Action": "sts:AssumeRole",
+         "Condition": { "StringEquals": { "sts:ExternalId": "<external ID>" } }
+       },
+       {
+         "Effect": "Allow",
+         "Principal": { "AWS": "<Langfuse cross-account role ARN>" },
+         "Action": ["sts:TagSession", "sts:SetSourceIdentity"]
+       }
+     ]
+   }
+   ```
+
+3. Allow the role to invoke models. You can narrow `Resource` to specific models or inference profiles:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Action": [
+           "bedrock:InvokeModel",
+           "bedrock:InvokeModelWithResponseStream"
+         ],
+         "Resource": "*"
+       }
+     ]
+   }
+   ```
+
+4. Enter the **Role ARN** and **AWS Region** in Langfuse and save the connection.
+
+The external ID stays the same when you change the role ARN. An organization connection has one external ID for every project that inherits it. Langfuse limits each session to these two actions, even if your role allows more, and tags it with `langfuse-org-id` and, when a project makes the call, `langfuse-project-id`.
+
+<Callout type="info">
+  You can create IAM role connections only in the UI; the [public
+  API](/docs/api-and-data-platform/features/public-api) does not accept them. On self-hosted deployments, an operator
+  must set
+  [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role)
+  on the web and worker containers. Without it, the **IAM role** option is
+  disabled.
+</Callout>
 
 ## Advanced configurations
 
