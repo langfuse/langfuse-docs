@@ -13,7 +13,7 @@
 
 - Keep a fact only when a reader with that screen open still could not know it. Don't list options, providers, etc. just for the sake of having them in the docs. less is more.
 - Also cut every category in [Cut what the reader doesn't need](AGENTS.md#cut-what-the-reader-doesnt-need)
-- Flag provider-specific setup that restates the UI. In most cases these can be cut entirely. If not, add it as a short note at the bottom of the feature page of as a separate guide/FAQ that the feature page can link to at the bottom of the page.
+- Flag guidance for one provider, tool, or setup variant that restates the UI. Most of it can be cut; the rest belongs at the bottom of the feature page or in a linked FAQ page.
 
 ### Duplication
 
