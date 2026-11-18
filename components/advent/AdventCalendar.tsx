@@ -16,14 +16,11 @@ import {
   MousePointer2,
   Music,
   AudioLines,
-  Moon,
-  Sun,
   Snowflake,
   Star,
   TreePine,
   VolumeX,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -67,7 +64,6 @@ const DOOR_STYLES = ["adv-door-paper", "adv-door-red", "adv-door-forest"];
 const ORNAMENTS = [Snowflake, Star, Gift, TreePine];
 const OPENED_KEY = `langfuse-advent-${ADVENT_YEAR}-opened`;
 const MUSIC_KEY = "langfuse-advent-music";
-const MODE_KEY = "langfuse-advent-mode";
 
 const DOOR_OPEN_DELAY_MS = 800;
 const ALL_OPEN = 25;
@@ -148,11 +144,12 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-function useJingles(techno: boolean) {
+function useJingles() {
   const playerRef = useRef<JinglePlayer | null>(null);
   const enabledRef = useRef(true);
   const [enabled, setEnabled] = useState(true);
   const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     const player = new JinglePlayer();
@@ -171,6 +168,7 @@ function useJingles(techno: boolean) {
       if (started) {
         removeListeners();
         setPlaying(true);
+        setStarted(true);
       }
     }
     events.forEach((e) => window.addEventListener(e, tryStart));
@@ -181,10 +179,6 @@ function useJingles(techno: boolean) {
       player.dispose();
     };
   }, []);
-
-  useEffect(() => {
-    playerRef.current?.setTechno(techno);
-  }, [techno]);
 
   const toggle = useCallback(async () => {
     const player = playerRef.current;
@@ -200,7 +194,9 @@ function useJingles(techno: boolean) {
     enabledRef.current = true;
     setEnabled(true);
     writeStorage(MUSIC_KEY, "on");
-    setPlaying(await player.start());
+    const didStart = await player.start();
+    setPlaying(didStart);
+    if (didStart) setStarted(true);
   }, [playing]);
 
   const thud = useCallback((delay: number) => {
@@ -218,7 +214,7 @@ function useJingles(techno: boolean) {
       },
     [],
   );
-  return { enabled, playing, toggle, thud, getFrame };
+  return { enabled, playing, started, toggle, thud, getFrame };
 }
 
 function SnowballHint() {
@@ -236,28 +232,33 @@ function SnowballHint() {
 }
 
 function MusicToggle({
-  techno,
   getFrame,
   enabled,
   playing,
   onToggle,
 }: {
-  techno: boolean;
   getFrame: () => MusicFrame;
   enabled: boolean;
   playing: boolean;
   onToggle: () => void;
 }) {
-  const [transport, setTransport] = useState({ bpm: 168, moving: false });
+  const [transport, setTransport] = useState({
+    bpm: 168,
+    moving: false,
+    berlin: false,
+  });
   useEffect(() => {
     const update = () => {
       const frame = getFrame();
       const bpm = Math.round(frame.bpm);
       const moving = frame.mix > 0.001 && frame.mix < 0.999;
+      const berlin = frame.mix >= 0.999;
       setTransport((previous) =>
-        previous.bpm === bpm && previous.moving === moving
+        previous.bpm === bpm &&
+        previous.moving === moving &&
+        previous.berlin === berlin
           ? previous
-          : { bpm, moving },
+          : { bpm, moving, berlin },
       );
     };
     update();
@@ -267,7 +268,7 @@ function MusicToggle({
   const label = playing
     ? transport.moving
       ? `Morphing / ${transport.bpm} BPM`
-      : techno
+      : transport.berlin
         ? `Berlin live / ${TECHNO_BPM} BPM`
         : "Jingles on"
     : enabled
@@ -529,7 +530,6 @@ function StatusLine({
 }
 
 export function AdventCalendar() {
-  const [techno, setTechno] = useState(false);
   const [unlocked, setUnlocked] = useState<number | null>(null);
   const [opened, setOpened] = useState<Set<number>>(new Set());
   const [activeDay, setActiveDay] = useState<number | null>(null);
@@ -551,12 +551,12 @@ export function AdventCalendar() {
   const [throwing, setThrowing] = useState(false);
   const throwEndTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reducedMotion = usePrefersReducedMotion();
-  const music = useJingles(techno);
+  const music = useJingles();
+  const techno = music.started;
   const { thud } = music;
 
   dialogOpenRef.current = activeDay !== null;
   useEffect(() => {
-    setTechno(readStorage(MODE_KEY) === "techno");
     const update = () => {
       const now = new Date();
       setUnlocked(getPreviewDay(now) ?? getUnlockedDay(now));
@@ -761,36 +761,18 @@ export function AdventCalendar() {
       <section className="adv-hero relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-8 text-center sm:px-8 md:pt-10">
         <div className="adv-mode-bar" data-no-snowball>
           <span className="adv-location">
-            <span className="adv-live-dot" />{" "}
-            {techno ? "Berlin, afterhours" : "A little winter magic"}
+            <span className="adv-live-dot" /> Christmas in Berlin
           </span>
-          <label className="adv-mode-control" htmlFor="advent-afterhours">
-            {techno ? <Moon className="size-4" /> : <Sun className="size-4" />}
-            <span>Berlin afterhours</span>
-            <Switch
-              id="advent-afterhours"
-              checked={techno}
-              onCheckedChange={(checked) => {
-                setTechno(checked);
-                writeStorage(MODE_KEY, checked ? "techno" : "winter");
-              }}
-            />
-          </label>
+          <span className="adv-show-note">
+            <AudioLines className="size-4" /> Stay for the afterparty
+          </span>
         </div>
         <div className="adv-morph-track" aria-hidden>
           <span />
         </div>
         <div className="adv-scene-label" aria-hidden>
-          {techno ? (
-            <AudioLines className="size-3.5" />
-          ) : (
-            <Snowflake className="size-3.5" />
-          )}
-          <span>
-            {techno
-              ? `Christmas, remixed / ${TECHNO_BPM} BPM`
-              : "December 01—24 / The Advent edition"}
-          </span>
+          <Snowflake className="size-3.5" />
+          <span>December 01—24 / The Advent edition</span>
         </div>
         <h1 className="max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
           Gateway to <span className="adv-title-accent">Christmas</span>
@@ -866,7 +848,6 @@ export function AdventCalendar() {
 
       <MusicToggle
         getFrame={music.getFrame}
-        techno={techno}
         enabled={music.enabled}
         playing={music.playing}
         onToggle={music.toggle}

@@ -182,6 +182,7 @@ const LOOKAHEAD_SECONDS = 0.12;
 const SONG_GAP_BEATS = 2;
 export const TECHNO_BPM = 200;
 export const SCENE_TRANSITION_SECONDS = 24;
+const CUTE_INTRO_SECONDS = 4;
 
 export type MusicFrame = {
   mix: number;
@@ -236,6 +237,7 @@ export class JinglePlayer {
   private contextState: AudioContextState | null = null;
   private transition = { from: 0, to: 0, at: 0, duration: 0 };
   private disposed = false;
+  private showStarted = false;
   private playbackGeneration = 0;
 
   private now() {
@@ -251,7 +253,7 @@ export class JinglePlayer {
       : from + (to - from) * smooth(0, duration, time - at);
   }
 
-  setTechno(techno: boolean) {
+  setTechno(techno: boolean, delay = 0) {
     const target = techno ? 1 : 0;
     if (this.transition.to === target) return;
     const time = this.now();
@@ -259,7 +261,7 @@ export class JinglePlayer {
     this.transition = {
       from,
       to: target,
-      at: time,
+      at: time + delay,
       duration: SCENE_TRANSITION_SECONDS * Math.abs(target - from),
     };
   }
@@ -332,6 +334,10 @@ export class JinglePlayer {
     this.graph = this.createGraph(ctx, this.master);
     this.anchors = [];
     this.nextStepTime = this.now() + 0.08;
+    if (!this.showStarted) {
+      this.showStarted = true;
+      this.setTechno(true, CUTE_INTRO_SECONDS + 0.08);
+    }
     this.timer = setInterval(() => this.schedule(), 25);
     this.schedule();
     return true;

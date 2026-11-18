@@ -60,20 +60,16 @@ export function AdventStyles() {
         color: var(--text-secondary);
       }
       .adv-live-dot { width: 5px; height: 5px; background: var(--adv-green-text); border-radius: 50%; }
-      .adv-mode-control {
+      .adv-show-note {
         display: inline-flex; align-items: center; gap: 10px;
         color: var(--text-primary); font-size: 12px; min-height: 44px;
       }
-      .adv-mode-control [data-slot="switch"] { background: var(--line-structure); }
-      .adv-mode-control [data-slot="switch-thumb"] { background: var(--surface-bg); }
       .adv-scene-label { color: var(--adv-accent-text); margin-bottom: 2px; }
       .adv-title-accent { font-family: Georgia, serif; font-style: italic; font-weight: 400; }
       .adv-hero h1 { font-size: clamp(42px, 6.2vw, 82px); letter-spacing: -.055em; }
       .adv-hero > p { max-width: 47ch; }
       .adv-figures { filter: grayscale(var(--adv-scene)); transition: filter .2s; }
       .adv-page[data-scene-phase="berlin"], .adv-dialog[data-mode="techno"] { color-scheme: dark; }
-      .adv-page[data-scene-phase="berlin"] .adv-mode-control [data-slot="switch"] { background: var(--adv-gold); }
-      .adv-page[data-scene-phase="berlin"] .adv-mode-control [data-slot="switch-thumb"] { background: var(--surface-bg); }
       .adv-page[data-scene-phase="berlin"] .adv-title-accent { font: inherit; color: var(--adv-gold); }
       .adv-page[data-scene-phase="berlin"] .adv-hero h1 { font-weight: 750; letter-spacing: -.065em; }
       .adv-page[data-scene-phase="berlin"] .adv-figures { filter: grayscale(1) contrast(1.15); }
@@ -106,8 +102,8 @@ export function AdventStyles() {
       @media (max-width: 639px) {
         .adv-mode-bar { align-items: center; gap: 8px; margin-bottom: 24px; }
         .adv-location { max-width: 95px; text-align: left; font-size: 9px; letter-spacing: .03em; }
-        .adv-mode-control { gap: 7px; font-size: 11px; }
-        .adv-mode-control > svg { display: none; }
+        .adv-show-note { gap: 7px; font-size: 11px; }
+        .adv-show-note > svg { display: none; }
         .adv-scene-label { font-size: 9px; letter-spacing: .06em; }
       }
 
