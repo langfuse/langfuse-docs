@@ -88,7 +88,7 @@ export function SkillUniqueClonersChart() {
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "w-0.5 bg-line-cta transition-opacity",
+                          "w-px bg-line-cta transition-opacity",
                           isDimmed ? "opacity-35" : "opacity-100",
                         )}
                         style={{ height }}
@@ -96,7 +96,7 @@ export function SkillUniqueClonersChart() {
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 translate-y-1/2 rounded-full border border-line-cta bg-surface-cta-primary transition-opacity",
+                          "absolute left-1/2 h-[9px] w-[9px] -translate-x-1/2 translate-y-1/2 rounded-full border border-line-cta bg-surface-cta-primary transition-opacity",
                           isDimmed ? "opacity-35" : "opacity-100",
                         )}
                         style={{ bottom: height }}
