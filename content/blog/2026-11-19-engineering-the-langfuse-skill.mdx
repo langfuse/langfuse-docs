@@ -33,9 +33,7 @@ How do we, as an AI observability and evals company, measure and improve our age
 
 <SkillEngineeringLoopDiagram mode="internal" />
 
-## Let's discuss the architecture of this whole operation [#architecture]
-
-### Skills for your own agent vs. someone else's [#own-agent-vs-distributed]
+## Skills for your own agent vs. someone else's [#own-agent-vs-distributed]
 
 Before going into the complete setup, we should talk about the different ways skills are used, and how this influences how you evaluate them.
 
@@ -55,7 +53,7 @@ Once someone clones the skill on their machine, you have no control over the har
 
 The Langfuse skill sits in both camps. External developers clone it from [`langfuse/skills`](https://github.com/langfuse/skills) into their own coding agents, and we run the same `references/*.md` workflow files inside [Halo](/blog/2026-10-23-halo), our in-app assistant.
 
-### Skill feedback [#skill-feedback]
+## Skill feedback [#skill-feedback]
 
 Before Halo gave us live traces of the skill, we tried to get online signal directly from external coding agents by building an explicit feedback path into the skill itself.
 
@@ -65,7 +63,7 @@ This surfaced concrete bugs, such as CLI flag edge cases and overly broad `curl`
 
 The reason is the same one we cover in [Capturing user signals](/academy/monitoring/capturing-signals#explicit-ratings): explicit feedback carries friction at every step. For a report to reach us, the user has to recognize that suboptimal behavior came from the skill rather than the model, pause their own engineering task, review a feedback payload, and approve sending it. Most friction never clears that bar; developers correct the agent in their next message and move on. Nothing replaces seeing the trace.
 
-### Bringing everything together in one loop [#bringing-everything-together]
+## Bringing everything together in one loop [#bringing-everything-together]
 
 Combining both distribution paths with explicit agent feedback brings the whole operation into one loop. Everything starts from a single source of truth in [`langfuse/skills`](https://github.com/langfuse/skills) on GitHub, which ships to both [Langfuse Halo](/blog/2026-10-23-halo) (through [Langfuse Skill Management](/docs/skill-management/overview)) and external coding agents:
 
