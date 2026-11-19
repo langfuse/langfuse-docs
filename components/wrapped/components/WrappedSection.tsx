@@ -4,12 +4,18 @@ import { HomeSection } from "@/components/home/HomeSection";
 
 export const WrappedSection = forwardRef<
   HTMLElement,
-  { children: React.ReactNode; className?: string; id?: string }
+  {
+    children: React.ReactNode;
+    className?: string;
+    id?: string;
+    reveal?: boolean;
+  }
 >((props, ref) => {
   return (
     <HomeSection
       ref={ref}
       id={props.id}
+      reveal={props.reveal}
       className={cn("pt-16 lg:pt-24", props.className)}
     >
       {props.children}

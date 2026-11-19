@@ -10,7 +10,7 @@ import { HomeHeroCtaButtons } from "@/components/home/OnboardWithAIButton";
 
 export function Hero() {
   return (
-    <HomeSection className="pt-5 sm:pt-8 md:pt-[60px]">
+    <HomeSection reveal={false} className="pt-5 sm:pt-8 md:pt-[60px]">
       <CornerBox className="-mb-px -mt-px">
         <HeroStatsStrip />
       </CornerBox>

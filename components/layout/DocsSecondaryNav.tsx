@@ -72,7 +72,7 @@ export function DocsSecondaryNavMobile() {
       <button
         aria-label={open ? "Close Sidebar" : "Open Sidebar"}
         onClick={() => setOpen((prev) => !prev)}
-        className="text-text-secondary"
+        className="-m-2 inline-flex size-11 items-center justify-center text-text-secondary"
       >
         {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>

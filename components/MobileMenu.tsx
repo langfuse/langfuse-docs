@@ -35,7 +35,7 @@ export function MobileMenu({
     <>
       {/* Hamburger / close toggle — animated Menu ↔ X */}
       <button
-        className="relative p-1 lg:hidden text-text-primary"
+        className="relative -my-2 -mr-2 p-2 lg:hidden text-text-primary"
         onClick={() => setOpen((v) => !v)}
         aria-label="Toggle navigation menu"
         aria-expanded={open}

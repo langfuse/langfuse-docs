@@ -196,7 +196,7 @@ export function FeaturedCustomers({
             </a>
             <Text
               size="s"
-              className="text-left mt-0.5 line-clamp-2 min-h-[calc(2*1.5em)] lg:line-clamp-1 lg:min-h-0 text-text-tertiary"
+              className="text-left mt-0.5 line-clamp-2 min-h-[calc(2*1.5em)] xl:line-clamp-1 xl:min-h-0 text-text-tertiary"
             >
               {story.description}
             </Text>

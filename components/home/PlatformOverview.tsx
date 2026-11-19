@@ -299,12 +299,12 @@ function LangfuseNode({ className }: { className?: string }) {
       </LangfuseSection>
 
       <LangfuseSection title="every feature via" className="p-4">
-        <ul className="grid grid-cols-4 gap-1.5">
+        <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
           {ACCESS.map((item) => (
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="block bg-surface-code py-1.5 text-center font-mono text-[12px] font-medium text-text-code-secondary no-underline transition-colors hover:text-surface-bg dark:hover:text-text-primary"
+                className="block bg-surface-code py-2 text-center font-mono text-[12px] font-medium text-text-code-secondary no-underline transition-colors hover:text-surface-bg dark:hover:text-text-primary"
               >
                 {item.label}
               </Link>
