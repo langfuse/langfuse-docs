@@ -79,8 +79,16 @@ Choose **Read as report** to walk through saved charts and Markdown in order. A 
 
 ![A dashboard report compares recorded spend for three selected workloads.](/images/changelog/2026-11-19-dashboard-report.png)
 
-The sample report compares support, search and coding spend using three existing filtered queries. Its scores section plots a named numeric score alongside its evaluation count. Each point is the mean of score records received during the time bucket. A late batch can change the mean even when the application has stayed the same.
+The sample report compares support, search and coding spend using three existing filtered queries. Its scores section plots a named numeric score alongside its evaluation count. Each point averages evaluations whose score timestamps fall in the bucket. A late batch can change the mean even when the application has stayed the same.
 
 ![Average quality by week paired with the number of evaluations that contributed to each point.](/images/changelog/2026-11-19-dashboard-score-report.png)
 
 In **Replacing the Home cards**, choose one of twelve cards to inspect its result beside an editable recipe. The notes identify changes that affect migration, including full-period totals, score definitions and sampled latency percentiles. **Compare editors** lets you try the original form, a multi-query form using existing analytics, and proposed query-builder controls. Proposed relationship queries show their contract and have execution disabled.
+
+## Learn how a chart gets its numbers
+
+The companion report, **How Langfuse queries your data**, follows one request from its trace and child observations to a chart. Its eight chapters include runnable examples, the corresponding query shapes and exercises with worked answers. Open a real trace, compare the time of an operation with the time of its evaluation, or inspect how much data a query reads.
+
+In the metadata exercise, 181,800 observations carry one key and 151,500 carry the other. The third query finds the 60,600 observations that carry both. Subtract the overlap once to count the 272,700 observations that have either key. The guide then shows what the backend would have to do to discover unknown metadata values and rank them.
+
+![A teaching dashboard shows two metadata populations, their intersection and their union, with the calculation directly below the chart.](/images/changelog/2026-11-19-dashboard-learning-report.png)
