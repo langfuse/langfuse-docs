@@ -16,43 +16,39 @@ import { DesignSystemProgress } from "@/components/blog/DesignSystemProgress";
   authors={["benbachem"]}
 />
 
-A few months ago, we set out to redesign Langfuse’s dark mode. But improving the colors and contrast meant changing how we built the UI, not just how it looked. Langfuse hadn’t had a rigorous design system, and Trang was our first designer. Styling decisions were scattered between shared components and individual features, so even shared changes meant tracking down callers across the product. Much of the code-writing was already AI-assisted, which had contributed to the complexity.
+A few months ago, we set out to redesign Langfuse’s dark mode. But improving the colors and contrast meant changing how we built the UI, not just how it looked. Langfuse never had a rigorous design system, and Trang had only started as the first designer on the team. This meant styling decisions were scattered between shared components and individual features, so even shared changes meant tracking down callers across the product. Much of the code-writing was already AI-assisted, which had contributed to the complexity.
 
 So Trang and I started building a design system to improve the UI and make features easier to build and review. The question is which decisions it should make once, and which should stay with each feature. A feature author should spend their attention on what makes the feature different, not repeatedly settle how common interactions work. Reusing a component should mean reusing decisions we’ve already made together, not just saving some code.
 
-These principles aren’t specific to AI, but agents amplify the consequences of our API choices. An overly permissive API lets each caller introduce variations we never intended to support. Here’s how we’re choosing those boundaries, and what still needs human judgment.
+These principles aren’t specific to AI, but agents amplify the consequences of our API choices. An overly permissive API lets each caller introduce variations we never intended to support and with the amount of code growing quickly, keeping an eye on these cases becomes harder.
 
 ## Cheap code makes good abstractions more important
 
-If an agent can generate a select in seconds, why maintain a shared one?
+Before getting into those boundaries, it’s worth asking why we need shared components at all. If an agent can generate a select in seconds, why maintain a shared one?
 
-Shared components let us improve styling, keyboard navigation, focus handling, and accessibility across the product rather than in each feature separately.
+The first reason is consistent look and feel. Centralizing styling decisions lets us change them across the product rather than adjust each feature separately. Keyboard navigation, focus handling, and accessibility also need deliberate attention. With good shared primitives, we can do that work once and bring improvements to every feature using them.
 
-Documentation can describe these decisions, but it can’t enforce them reliably, and changing instructions leaves existing code unchanged. Shared code lets us apply changes to existing consumers.
+You could argue that documentation could enforce these decisions without centralizing the code. The problem is that documentation cannot do this **reliably**, and changing instructions leaves existing code unchanged. Shared code lets us enforce decisions and apply changes to existing consumers.
 
-But shared code alone isn’t enough. If a dropdown provides primitives but relies on documentation to explain icon spacing and shortcut placement, we still need to check those decisions at every call site. We want callers to choose the menu’s actions, not reconstruct its presentation. As agents produce more code, enforcing that distinction becomes more valuable than saving a few lines.
+But shared code alone isn’t enough. A dropdown can provide shared items, icons, and shortcuts while still asking every caller to assemble and style them. If documentation is what tells callers where the shortcut belongs or how far the icon sits from its label, those decisions still need checking at every call site.
 
-For enforcement, it’s **types first, lint rules second, and documentation third**, including skills and `AGENTS.md`. But which differences between existing components are intentional, and which should we get rid of?
+We want callers to choose the menu’s actions, not reconstruct its presentation. A typed `items` prop can preserve that distinction: the feature supplies labels, icons, and callbacks; the menu owns their arrangement and interactions.
 
 ## Deciding what belongs in a shared component
 
-I initially experimented with automatically cleaning up and migrating existing components. But many usages were additions bolted on over time. Should the shared component keep all that functionality, split into several components, or leave an unusual variant as a one-off?
+I initially experimented with automatically cleaning up and migrating existing components.
 
-Less code alone isn’t a good enough reason to create a shared component. Combining implementations with flags for every difference can make them harder to understand and maintain than keeping them separate.
+This didn't go well, many existing component APIs were awkward with props bolted on over time. I believe many of the bolted on props, came from agents making shared-code changes opt-in rather than migrate existing usages to a new default. I understand why: they can finish the feature without touching old code. Two badges might have different capitalization or padding because they serve different purposes, or simply because different people built them months apart. Preserving both through `uppercase={true}` or `padding="dense"` turns accidental history into a choice every future caller has to make.
 
-I’ve also found that agents often make shared-code changes opt-in rather than migrate existing usages to a new default. I understand why: they can finish the feature without touching old code. But did we actually want those usages to behave differently? This is the question I ask most often when reviewing contributions to the library.
+Should the shared component keep all that functionality, split into several components, or leave an unusual variant as a one-off? I found coding agents would not have good taste in these matters, especially since we had little documentation around it and existing code didn’t follow our larger vision. Therefore, I decided to first manually migrate some components with the intention of automating some of the work once a healthy baseline had been established.
 
-Two badges might have different capitalization or padding because they serve different purposes, or simply because different people built them months apart. Preserving both through `uppercase={true}` or `padding="dense"` turns accidental history into a choice every future caller has to make.
-
-I decided to build a new set of components and migrate usages over time, guided by the following principles.
+In the following I want to explore the principles we established for our new set of design-system components.
 
 ## Start narrow, expand deliberately
 
 We start with small APIs covering known needs. If we expose an option, we should expect people to use it, not tell them in review that they weren’t supposed to. With agents, that option can spread quickly.
 
-People have been asking to [restrict JSX composition at the type level for a decade](https://github.com/microsoft/TypeScript/issues/18357). Lint rules can help, but they can be brittle. Where we want to guarantee content structure, we’re replacing compound component APIs with strictly typed props.
-
-In the [legacy dropdown](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/dropdown-menu.stories.tsx), even a copy action includes caller-owned text sizing and icon spacing:
+Here's an example from our [legacy dropdown](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/dropdown-menu.stories.tsx) component:
 
 ```tsx
 <DropdownMenuItem className="text-xs" onSelect={handleCopyTraceId()}>
@@ -61,7 +57,9 @@ In the [legacy dropdown](https://github.com/langfuse/langfuse/blob/main/web/src/
 </DropdownMenuItem>
 ```
 
-With the design-system `DropdownMenu`, callers supply items instead of assembling their markup. This excerpt from the [Skills page](https://github.com/langfuse/langfuse/blob/main/web/src/features/skills/components/SkillsPage.tsx) shows the items API, with the second item and trigger omitted:
+The composite API requires even a copy action to decide on caller-owned text sizing and icon spacing. There's also nothing stopping anyone from putting an element inside the `DropdownMenuItem` that would spill over it's bounds. People have been asking to [restrict JSX composition at the type level for a decade](https://github.com/microsoft/TypeScript/issues/18357). Lint rules can help, but they can be brittle. Where we want to guarantee content structure, we’re replacing compound component APIs with strictly typed props.
+
+With the design-system `DropdownMenu`, callers supply items instead of assembling their markup. This excerpt shows the items API, with the second item and trigger omitted:
 
 ```tsx
 <DropdownMenu
@@ -87,7 +85,7 @@ The caller still chooses the actions, labels, icons, and trigger. The menu owns 
 
 Now, a strict API can be annoying to use. You have to construct exactly the object it expects instead of just writing some JSX. With coding agents, I’m less concerned about the extra typing. I still need to read and debug the result, but I’d rather review an explicit list of actions than check whether someone put the shortcut in the right place again. I’m happy to make the call site more cumbersome if that’s what it takes to get those menus right.
 
-Even typed props can expose more than we intend. Our `ControlledDropdownMenu` briefly exposed a `selected` property on all menu items even though it was only needed for special options in our Organization and Project switchers. Selection behavior quickly appeared elsewhere. We should have used a discriminated union separating entity rows from ordinary items and restricted `selected` to the former from the beginning.
+We still need to be very intentional with what props we expose. Our `ControlledDropdownMenu` briefly exposed a `selected` property on all menu items even though it was only needed for special options in our Organization and Project switchers. Selection behavior quickly appeared elsewhere. We should have used a discriminated union separating entity rows from ordinary items and restricted `selected` to the former from the beginning.
 
 We also separate public components, available to feature code, from internal implementation components. “Public” doesn’t mean published as a separate package.
 
@@ -109,9 +107,7 @@ flowchart TD
 
 The core supports several layouts, but callers choose a named component rather than configure those through flags. If I need a stacked chart, I can find `StackedBarChart` in autocomplete instead of looking through a general-purpose chart’s props to figure out how to configure one. Its props only cover relevant options, and I can tell which chart is being used later without checking a combination of flags. We share the implementation without exposing all of it.
 
-If I keep reviewing valid usages and explaining that, technically, they work but we don’t want people using them that way, I think we should fix the API.
-
-Starting narrow lets us learn before committing to a general abstraction. A focused one-off can show us what a feature needs without immediately turning that need into a promise to every other feature. With agents, adding a supported capability and updating callers later is cheaper. We have less reason to expose speculative flexibility up front.
+Starting narrow lets us learn before committing to a general abstraction. A focused one-off can show us what a feature needs without immediately turning that need into a promise to every other feature. With agents, adding a supported capability and updating callers later is cheaper, at least as long as components have good boundaries, but more on that later..
 
 ## Don’t expose className or style
 
@@ -121,13 +117,13 @@ Caller-supplied styles can conflict with the component’s own styles. This is w
 
 A `className` prop accepts any string; `variant` and `size` give us finite choices we can test and review. They also let a component coordinate changes: `size="small"` can reduce padding, text size, icon size, and gap together. Overriding the height through `className` leaves the caller responsible for adjusting everything else.
 
-This isn’t limited to the design system. Our [`no-style-props` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-style-props.ts) rejects raw styling related props. Supported presentation choices get dedicated props instead.
+This isn’t limited to the design system. Our [`no-style-props` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-style-props.ts) rejects raw styling related props.
 
 When props aren’t enough, is there a missing shared variant, a parent-layout concern, or genuinely a different component? Agents make local overrides cheap, but they also make implementing a shared variant cheaper. I’d rather fix the boundary than bypass it.
 
 ### Let the parent own layout
 
-Without style props, how do we position and size components? What has worked well for me is making them generally fill the available width, constrained by a wrapper, grid column, or flex container. Padding, height variants, borders, and focus treatment stay internal. Our [`no-margin-on-root-elements` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-margin-on-root-elements.ts) prevents components from adding margins to their root elements, keeping them composable. An input shouldn’t bring a bottom margin that suits one form but needs undoing in a toolbar.
+Without style props, how do we position and size components? What has worked well for me is making them generally fill the available width, constrained by a wrapper. Padding, height variants, borders, and focus treatment stay internal. Our [`no-margin-on-root-elements` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-margin-on-root-elements.ts) prevents components from adding margins to their root elements, keeping them composable. An input shouldn’t bring a bottom margin that suits one form but needs undoing in a toolbar.
 
 The parent sets the gap between the bounding boxes of its children; each component owns the spacing within itself. The parent knows which components it contains, while the input doesn’t need to know which layout it’s in.
 
