@@ -1,0 +1,71 @@
+---
+title: "What to evaluate in an agent skill"
+date: 2026/11/20
+description: "Once you have a harness to run coding agents against your skill, what should you actually measure? Here is how we test reference-file routing and stress-test full workflows before writing automated judges."
+tag: engineering, agents, evaluation
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { FileTree } from "@/components/docs";
+
+<BlogHeader
+  title="What to evaluate in an agent skill"
+  description="Once you have a harness to run coding agents against your skill, what should you actually measure? Here is how we test reference-file routing and stress-test full workflows before writing automated judges."
+  date="November 20, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+In [How to evaluate an agent skill](/blog/2026-11-19-engineering-the-langfuse-skill), we walked through the architecture we use to test and monitor the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) across isolated Modal sandboxes and live [Halo](/blog/2026-10-23-halo) traces.
+
+Once that harness is in place, the next question is what to actually measure. Within our offline harness, our datasets test two different layers of the skill: whether the agent opens the right instructions, and how it executes the workflow afterward.
+
+## 1. Testing reference-file routing [#testing-reference-file-routing]
+
+The Langfuse skill uses progressive disclosure so it does not dump every workflow into the model's context window on every turn. `SKILL.md` holds core principles and a routing list pointing to workflow-specific files under `references/`:
+
+<div>
+  <FileTree>
+    <FileTree.Folder name="skills/langfuse" defaultOpen>
+      <FileTree.File name="SKILL.md" />
+      <FileTree.Folder name="references" defaultOpen>
+        <FileTree.File name="cli.md" />
+        <FileTree.File name="instrumentation.md" />
+        <FileTree.File name="prompt-migration.md" />
+        <FileTree.File name="setting-up-evals.md" />
+        <FileTree.File name="user-feedback.md" />
+        <FileTree.File name="cost-optimization.md" />
+        <FileTree.File name="judge-calibration.md" />
+        <FileTree.File name="ci-cd.md" />
+        <FileTree.File name="..." />
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+For those best practices to help, the coding agent has to open the right reference file when a user asks a relevant question, and avoid reading extra files when `SKILL.md` alone is sufficient.
+
+We test this routing with a dedicated dataset. Each item's `input` is a user prompt, and `expected_output.invoked_reference_file` names the file we expect the agent to read:
+
+| Dataset item `input`                                                                      | `expected_output.invoked_reference_file` | Why                                                                       |
+| ----------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- |
+| `"I have traces flowing into Langfuse, how should I set up evals for my support agent?"`  | `"setting-up-evals.md"`                  | Needs the structured gap analysis across signals, monitors, and evals     |
+| `"Help me bring down the token cost of our coding agent without hurting answer quality."` | `"cost-optimization.md"`                 | Needs the cost levers and offline quality-check workflow                  |
+| `"Track thumbs-down clicks and message retries from our chat UI in Langfuse."`            | `"user-feedback.md"`                     | Needs the taxonomy and score-ingestion patterns for user signals          |
+| `"Fetch the specific docs page on Langfuse data retention as Markdown."`                  | `""` (empty string)                      | `SKILL.md` already covers `.md` doc fetching; opening more wastes context |
+
+You cannot score routing by checking the agent's final response, because agents rarely mention internal skill filenames in their answer to the user. Instead, our scorer (`score_reference_file`) inspects the tool observations on the trace (`Skill`, `Read`, and shell commands reading paths under `.agents/skills/langfuse/`), extracts the list of skill files opened during the run, and records `1` or `0` on `reference_file_invoked`. Setting `invoked_reference_file` to `""` inverts the check: opening any file beyond `SKILL.md` scores `0`.
+
+## 2. Stress-testing workflows before writing evaluators [#stress-testing-workflows]
+
+Opening the right file is only the first step. To test whether a reference file produces good engineering work, we build workflow datasets containing a mix of explicit prompts (`"migrate the hardcoded prompts in this repository to Langfuse"`) and indirect ones (`"every time someone tweaks our system prompt we break edge cases, help us stop shipping regressions"`).
+
+On these workflow datasets, we do not start by writing automated evaluators. When we [ran autoresearch on our prompt migration skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch), we saw how quickly an automated loop exploits gaps in an incomplete target function. As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your sense of what good looks like comes from inspecting real trajectories, not from guessing failure modes up front.
+
+Instead, we trigger an experiment run on Modal and read through the resulting traces in Langfuse manually, or ask a coding agent (using the Langfuse skill itself) to pull the experiment traces and walk through them with us in chat: where did the agent misread an instruction, which CLI commands failed first, and where did two agents interpret the same sentence differently? Once we iterate on the reference file until the traces consistently meet our bar, we turn the stable criteria into deterministic checks or [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) for regression testing.
+
+## Takeaways [#takeaways]
+
+**1. Test routing separately from workflow execution.** Once a skill splits into an entrypoint and reference files, test routing deterministically by inspecting traced file-read tool calls against expected filenames, including test cases where the agent should _not_ open any extra reference file.
+
+**2. Read traces before automating judges.** Inspect experiment traces manually (or with an agent) until your quality criteria stabilize, then lock in deterministic checks and LLM-as-a-judge evaluators for regression testing.
