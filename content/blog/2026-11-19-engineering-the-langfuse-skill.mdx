@@ -55,13 +55,7 @@ Once someone clones the skill on their machine, you have no control over the har
 
 <SkillEngineeringLoopDiagram mode="offline" />
 
-Before Halo gave us live traces of the skill, we tried to get online signal directly from external coding agents by building an explicit feedback path into the skill itself.
-
 We added `references/skill-feedback.md` and a section at the bottom of `SKILL.md` instructing coding agents to offer to send structured feedback whenever our instructions were outdated, inaccurate, or missing a workflow, after showing the exact payload to the user for approval. Depending on what tools the agent had connected, it could submit through a `submitFeedback` MCP tool, call our API via the CLI, or generate a prefilled GitHub issue or discussion link on `langfuse/skills`.
-
-This surfaced concrete bugs, such as CLI flag edge cases and overly broad `curl` allowlist globs, which we could feed directly into our datasets and experiments. Relative to over 2,000 unique daily cloners, however, the signal volume was small.
-
-The reason is the same one we cover in [Capturing user signals](/academy/monitoring/capturing-signals#explicit-ratings): explicit feedback carries friction at every step. For a report to reach us, the user has to recognize that suboptimal behavior came from the skill rather than the model, pause their own engineering task, review a feedback payload, and approve sending it. Most friction never clears that bar; developers correct the agent in their next message and move on. Nothing replaces seeing the trace.
 
 ## Bringing everything together in one loop [#bringing-everything-together]
 
