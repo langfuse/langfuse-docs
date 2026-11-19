@@ -25,7 +25,7 @@
 ### Place
 
 - Read [Overview](page-types.md#overview-pages), [Get started](page-types.md#get-started-pages), [Concepts](page-types.md#concepts-pages), [Features](page-types.md#feature-pages), [Integrations](page-types.md#integration-pages), [Troubleshooting and FAQ](page-types.md#troubleshooting-pages), and [Changelog](page-types.md#changelog-entries). [API reference](AGENTS.md#api-reference-pages) and judge whether the placement of changes is correct against these specs.
-- The page order is always according to how many users need something: what readers need to decide whether to take the default path -> default path -> advanced options -> edge cases -> troubleshooting
+- The page order is always according to how many users need something: default path (which may start with deciding between this feature and an adjacent one) -> advanced options -> edge cases -> troubleshooting
 - Troubleshooting belongs either in `content/faq/all/`, one file per problem, tagged for `<FaqPreview>`, or if it's very short, it can also live at the bottom of a feature page.
 - A new feature, or a page that makes the reader finish a second job before the job of that page, is a reason to restructure.
 - Be very conservative with adding things to the sidebar. Only give a new addition a prominent sidebar location if it's strictly necessary. This is almost never the case. Always opt for adding something as a FAQ/troubleshooting, integration, or product feature page (under a Features folder) first. Also consider whether it really needs to be a new, separate page, or if a short addition to an existing page is enough.

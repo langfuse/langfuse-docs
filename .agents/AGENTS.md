@@ -121,7 +121,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 ## Writing guidelines: Read this every time you add or change content to a docs page
 
 - When changing something, always make the change considering the surrounding page and what a first-time reader of that page already expects. Prefer the smallest edit that leaves the page accurate. The less new sentences you introduce, the better. Do not add a concept, history, or reassurance the rest of the page does not already rely on, unless readers would otherwise follow a dead path.
-- Order documentation sections by how many readers need them. The default path most people using the page should follow comes first, after only what readers need to decide whether to take it; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
+- Order documentation sections by how many readers need them. The default path most people using the page should follow comes first (could optionally include a step on deciding whether they need this feature or another, adjacent langfuse feature); optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
 
 ### Documentation page-specific guidelines
 
