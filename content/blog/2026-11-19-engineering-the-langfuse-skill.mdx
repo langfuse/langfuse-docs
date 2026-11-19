@@ -32,28 +32,37 @@ By now, a lot has changed, and our setup has matured significantly. We now have 
 
 ## Let's discuss the architecture of this whole operation [#architecture]
 
-Everything starts from a single source of truth: the [`langfuse/skills`](https://github.com/langfuse/skills) repository on GitHub, which holds `SKILL.md` and the workflow files under `references/`. From there, the skill ships to both external coding agents and [Halo](/blog/2026-10-23-halo) (through [Langfuse Skill Management](/docs/skill-management/overview)), and feeds back into one evaluation loop across [Langfuse datasets](/docs/evaluation/experiments/datasets) and [Modal](https://modal.com):
+### Both an external and internal skill [#both-external-and-internal]
+
+How you evaluate and improve an agent skill depends on whether you control the environment where it runs. In the [Langfuse Academy](/academy/ai-engineering-loop), we describe improving AI applications through the **AI engineering loop**: an online half (`Trace` and `Monitor` on live traffic) connected to an offline half (`Build datasets`, `Experiment`, and `Evaluate` before shipping).
+
+- **Internal skills** are built for use inside your own company or your own product. Because the coding agents or assistants using the skill run inside your organization, you can trace them in Langfuse, attach [skill metadata](/docs/skill-management/tracing), and observe when the skill is loaded and whether it helped. That gives you the full AI engineering loop, from production traces back into datasets and experiments.
+
+<SkillEngineeringLoopDiagram mode="internal" />
+
+- **External skills** are distributed publicly for other people to install into their own coding agents. Once a developer clones `langfuse/skills` onto their laptop, `Trace` and `Monitor` are unavailable: you have no visibility into how their agent runs, which files it reads, or where it gets stuck. You can still measure and improve skill quality by running the offline half of the loop: curating datasets of representative user tasks, running coding agents against them with a candidate version of the skill, evaluating the resulting traces, and publishing a new skill version.
+
+<SkillEngineeringLoopDiagram mode="offline" />
+
+The Langfuse skill is both. External developers clone it from [`langfuse/skills`](https://github.com/langfuse/skills) into their own coding agents, and we run the same `references/*.md` workflow files inside [Halo](/blog/2026-10-23-halo), our in-app assistant.
+
+### Skill feedback [#skill-feedback]
+
+Before Halo gave us live traces of the skill, we tried to get online signal directly from external coding agents by building an explicit feedback path into the skill itself.
+
+We added `references/skill-feedback.md` and a section at the bottom of `SKILL.md` instructing coding agents to offer to send structured feedback whenever our instructions were outdated, inaccurate, or missing a workflow, after showing the exact payload to the user for approval. Depending on what tools the agent had connected, it could submit through a `submitFeedback` MCP tool, call our API via the CLI, or generate a prefilled GitHub issue or discussion link on `langfuse/skills`.
+
+This surfaced concrete bugs, such as CLI flag edge cases and overly broad `curl` allowlist globs, which we could feed directly into our datasets and experiments. Relative to over 2,000 unique daily cloners, however, the signal volume was small.
+
+The reason is the same one we cover in [Capturing user signals](/academy/monitoring/capturing-signals#explicit-ratings): explicit feedback carries friction at every step. For a report to reach us, the user has to recognize that suboptimal behavior came from the skill rather than the model, pause their own engineering task, review a feedback payload, and approve sending it. Most friction never clears that bar; developers correct the agent in their next message and move on. Nothing replaces seeing the trace.
+
+### Bringing everything together in one loop [#bringing-everything-together]
+
+Combining both distribution paths with explicit agent feedback brings the whole operation into one loop. Everything starts from a single source of truth in [`langfuse/skills`](https://github.com/langfuse/skills) on GitHub, which ships to both [Langfuse Halo](/blog/2026-10-23-halo) (through [Langfuse Skill Management](/docs/skill-management/overview)) and external coding agents:
 
 <SkillOperationArchitectureDiagram />
 
-Sharing one set of workflow files across both paths is what makes this setup work. Halo gives us live production traces on the workflows it shares with external agents, while Modal sandboxes let us benchmark candidate skill commits across [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), and [Cursor](/integrations/developer-tools/cursor) before shipping.
-
-We did not build all of these pieces at once. The setup grew step by step out of a basic constraint of distributing skills publicly.
-
-## Two kinds of skills: internal and external [#internal-and-external-skills]
-
-How you improve an agent skill depends on whether you control the environment where it runs:
-
-- **Internal skills** are built for use inside your own company or your own product. Because the coding agents or internal assistants using the skill run inside your organization, you can trace them in Langfuse, attach [skill metadata](/docs/skill-management/tracing), and observe when the skill is loaded and whether it helped.
-- **External skills** are distributed publicly for other people to install into their own coding agents. Once a developer clones `langfuse/skills` onto their laptop, you have no visibility into how their agent runs, which files it reads, or where it gets stuck.
-
-## Engineering an external skill with the offline half of the loop [#offline-half-of-the-loop]
-
-In the [Langfuse Academy](/academy/ai-engineering-loop), we describe improving AI applications through the **AI engineering loop**: an online half (`Trace` and `Monitor` on live traffic) connected to an offline half (`Build datasets`, `Experiment`, and `Evaluate` before shipping).
-
-When you only distribute an external skill, `Trace` and `Monitor` are unavailable. You still have a reliable way to measure and improve skill performance: running the offline half of the loop. You curate datasets of representative user tasks, execute coding agents against them with a candidate version of the skill, evaluate the resulting traces, and publish a new skill version when quality improves.
-
-<SkillEngineeringLoopDiagram mode="offline" />
+Each side contributes different signal back into the same workflow. Halo feeds live production traces directly back into `Tracing` and `Monitoring` on the workflows it shares with external agents. External coding agents cannot send traces, so their explicit API/MCP feedback feeds into `Datasets` and `Experiment`. Offline, our [Langfuse datasets](/docs/evaluation/experiments/datasets) and [Modal](https://modal.com) sandboxes let us iterate across [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), and [Cursor](/integrations/developer-tools/cursor) before shipping the next commit to GitHub.
 
 ## How our offline coding-agent test harness works [#offline-test-harness]
 
@@ -137,16 +146,6 @@ Opening the right file is only the first step. To test whether a reference file 
 On these workflow datasets, we do not start by writing automated evaluators. When we [ran autoresearch on our prompt migration skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch), we saw how quickly an automated loop exploits gaps in an incomplete target function. As we argued in [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your sense of what good looks like comes from inspecting real trajectories, not from guessing failure modes up front.
 
 Instead, we trigger an experiment run on Modal and read through the resulting traces in Langfuse manually, or ask a coding agent (using the Langfuse skill itself) to pull the experiment traces and walk through them with us in chat: where did the agent misread an instruction, which CLI commands failed first, and where did two agents interpret the same sentence differently? Once we iterate on the reference file until the traces consistently meet our bar, we turn the stable criteria into deterministic checks or [LLM-as-a-judge evaluators](/docs/evaluation/evaluation-methods/llm-as-a-judge) for regression testing.
-
-## Why explicit feedback from external agents was not enough [#explicit-feedback-limitations]
-
-Even with a solid offline harness, offline datasets only test scenarios you thought to write down. Before Halo gave us live traces of the skill, we tried to get online signal from external coding agents by building a feedback path into the skill itself.
-
-We added `references/skill-feedback.md` and a section at the bottom of `SKILL.md` instructing coding agents to offer to send structured feedback whenever our instructions were outdated, inaccurate, or missing a workflow, after showing the exact payload to the user for approval. Depending on what tools the agent had connected, it could submit through a `submitFeedback` MCP tool, call our API via the CLI, or generate a prefilled GitHub issue or discussion link on `langfuse/skills`.
-
-This surfaced a handful of concrete bugs, such as CLI flag edge cases and overly broad `curl` allowlist globs. Relative to 22,000 unique clones every two weeks, however, the signal was tiny.
-
-The reason is the same one we cover in [Capturing user signals](/academy/monitoring/capturing-signals#explicit-ratings): explicit feedback carries friction at every step. For a report to reach us, the user has to recognize that suboptimal behavior came from the skill rather than the model, pause their own engineering task, review a feedback payload, and approve sending it. Most friction never clears that bar; developers correct the agent in their next message and move on. Nothing replaces seeing the trace.
 
 ## Closing the loop with Halo and Skill Management [#closing-the-loop-with-halo]
 

@@ -2,7 +2,7 @@
 
 import { useId, useLayoutEffect, useRef } from "react";
 
-type LoopMode = "offline" | "closed";
+type LoopMode = "offline" | "internal" | "closed";
 
 interface StationConfig {
   id: string;
@@ -11,6 +11,39 @@ interface StationConfig {
   note: string;
   dimmed?: boolean;
 }
+
+const INTERNAL_STATIONS: StationConfig[] = [
+  {
+    id: "trace",
+    phase: "Online",
+    title: "Trace",
+    note: "agent runs & skill loads",
+  },
+  {
+    id: "monitor",
+    phase: "Online",
+    title: "Monitor",
+    note: "trace review & user signals",
+  },
+  {
+    id: "dataset",
+    phase: "Offline",
+    title: "Build\ndatasets",
+    note: "production cases & tasks",
+  },
+  {
+    id: "experiment",
+    phase: "Offline",
+    title: "Experiment",
+    note: "skill & agent variants",
+  },
+  {
+    id: "eval",
+    phase: "Offline",
+    title: "Evaluate",
+    note: "trace checks & review",
+  },
+];
 
 const OFFLINE_STATIONS: StationConfig[] = [
   {
@@ -111,14 +144,23 @@ export function SkillEngineeringLoopDiagram({
   const arrowId = `seld-arrow-${uid}`;
   const arrowDarkId = `seld-arrow-dark-${uid}`;
 
-  const isClosed = mode === "closed";
-  const stations = isClosed ? CLOSED_STATIONS : OFFLINE_STATIONS;
-  const deployLabel = isClosed
-    ? "Publish to GitHub & Skill Management"
-    : "Publish new skill version";
-  const ariaLabel = isClosed
-    ? "The closed AI engineering loop for the Langfuse skill: Halo runs provide online tracing and monitoring, feeding into offline datasets, Modal experiments, evaluation, and publishing to GitHub and Skill Management"
-    : "The AI engineering loop for an external skill: Trace and Monitor are dimmed because external runs cannot be observed, while Build datasets, Experiment, Evaluate, and Publish new skill version are active";
+  const isClosed = mode !== "offline";
+  const stations =
+    mode === "closed"
+      ? CLOSED_STATIONS
+      : mode === "internal"
+        ? INTERNAL_STATIONS
+        : OFFLINE_STATIONS;
+  const deployLabel =
+    mode === "closed"
+      ? "Publish to GitHub & Skill Management"
+      : "Publish new skill version";
+  const ariaLabel =
+    mode === "closed"
+      ? "The closed AI engineering loop for the Langfuse skill: Halo runs provide online tracing and monitoring, feeding into offline datasets, Modal experiments, evaluation, and publishing to GitHub and Skill Management"
+      : mode === "internal"
+        ? "The full AI engineering loop for an internal skill: online tracing and monitoring of internal agent runs feed into offline datasets, experimentation, evaluation, and publishing a new skill version"
+        : "The AI engineering loop for an external skill: Trace and Monitor are dimmed because external runs cannot be observed, while Build datasets, Experiment, Evaluate, and Publish new skill version are active";
 
   useLayoutEffect(() => {
     const wrap = wrapRef.current;
