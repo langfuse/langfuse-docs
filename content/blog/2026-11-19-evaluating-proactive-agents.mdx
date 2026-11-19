@@ -1,0 +1,123 @@
+---
+title: "Evaluating proactive agents"
+date: 2026/11/19
+description: "Proactive agents decide on their own whether, when, and how far to act. How to trace that decision, measure it like a classifier, and build a dataset of moments to evaluate it."
+tag: engineering
+author: Annabell
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="Evaluating proactive agents"
+  description="Proactive agents decide on their own whether, when, and how far to act. How to trace that decision, measure it like a classifier, and build a dataset of moments to evaluate it."
+  date="November 19, 2026"
+  authors={["annabellschafer"]}
+/>
+
+My personal Muse agent, Dr. Doodle, lives in my WhatsApp and slides into my DMs multiple times a day. Dr. Doodle is part of the newest wave of agents that doesn't wait to be asked. [Muse](https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/amp/) from Meta, [Grok Bot](https://x.ai/news/grok-bot-1-0) from SpaceXAI and [Instinct](https://spyglass.org/proactive-ai-is-the-key/) watch your inbox, goals, calendar and projects, and step in when they think something needs doing.
+
+"Proactive" is the label everyone uses. But what actually makes an agent proactive? And how do you make sure it acts on the right things?
+
+## What makes an agent proactive [#what-makes-an-agent-proactive]
+
+**Proactive agent:** an agent with a standing goal that monitors its context for triggers and decides on its own whether, when and how far to act, without being asked each time.
+
+**Reactive agent:** an agent that acts when triggered, on a task it was given.
+
+Under the hood, both are built from the same parts: instructions, tools, an agent loop, memory and a trigger. The difference is the goal and the decision. Some examples:
+
+| Case                                                                      | Proactive? | Why                                                           |
+| ------------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| Chatbot with memory                                                       | No         | No standing goal. The user decides when it acts.              |
+| Nightly job that always runs                                              | No         | No decision. The schedule decides.                            |
+| Webhook that triages every new ticket                                     | No         | It acts on every trigger.                                     |
+| Agent that checks your inbox hourly and only pings you about what matters | Yes        | It has a goal, watches context, and can decide to do nothing. |
+| Agent that rebooks your flight after a delay                              | Yes        | And it's the "how far" decision at its riskiest.              |
+
+The most important difference between both is how they handle triggers. **A reactive agent treats the trigger as an instruction, a proactive agent treats it as a situation to assess in light of the larger goal.** A nightly job that always runs the same task is automation, not proactivity.
+
+## What it looks like in code [#what-it-looks-like-in-code]
+
+The whole distinction fits in two lines:
+
+- **Reactive:** trigger → act
+- **Proactive:** trigger → decide _whether, when and how far_ → act (or not)
+
+In code, it's one extra step before the agent runs:
+
+```python
+# trigger: a message, an event, or a scheduled run
+
+# reactive
+def on_trigger(trigger):
+    run_agent(trigger)
+
+# proactive
+def on_trigger(trigger):  # e.g. a new email, or the hourly inbox check
+    decision = worth_acting_on(trigger, goal, memory)
+    # whether: act or stay silent
+    # when:    now or later
+    # how far: notify, suggest, ask, or act
+    if decision.act:
+        run_agent(trigger, decision)
+```
+
+`worth_acting_on` answers three questions. Say an email arrives: your flight is delayed by two hours.
+
+1. **Whether** to act: does the delay break your connection, or is it harmless?
+2. **When** to act: tell you now, or wait an hour to see if the airline rebooks you? Waiting means the agent schedules its own next trigger.
+3. **How far** to go: tell you, suggest a new flight, ask to book it, or book it on its own.
+
+All three depend on memory. The agent has to know your plans and preferences to judge what deserves your attention.
+
+**Everything interesting about a proactive agent lives inside `worth_acting_on`.** That's the part you need to see and evaluate, and it's what the rest of this post is about.
+
+## Trace the decision, not just the action [#trace-the-decision]
+
+With a chatbot, every output has a reader: the person who asked. That's free quality control. With a proactive agent, most runs end in "do nothing" or finish in the background, and nobody looks at them.
+
+So the decision itself needs to be in the trace. For every event that reaches the decision step, log:
+
+- **The event:** what woke the agent up.
+- **The context:** what it retrieved from memory and connected apps.
+- **The outcome:** act now, wait, or stay silent.
+- **How far:** notify, suggest, ask for approval, or act.
+- **The rationale:** why it decided this.
+
+Many teams split `worth_acting_on` into two steps: a cheap filter first (rules, embeddings, or a decision model like [Jev](/blog/2026-09-18-using-typesafes-jev-for-evals)), then the expensive judgment call. [Navan](https://navan.com/blog/build-proactive-ai-agents) recommends the same split. If yours works that way, trace both steps. When the agent never told you about the delay, you need to know whether the filter dropped the email or the decision step judged it harmless. Those are two very different fixes.
+
+**Keep the runs that end in "do nothing".** A decision not to act produces no output, so it never shows up in a review queue unless you put it there. [Navan](https://navan.com/blog/build-proactive-ai-agents) makes the same point: staying silent is a valid outcome, and often the right one. That only holds if you can check it.
+
+## Measure it like a classifier [#measure-it-like-a-classifier]
+
+`worth_acting_on` takes an event and returns a decision. **That makes it a classifier, so evaluate it like one.**
+
+| Failure                       | What it looks like                                                                   | Signals in production                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| **Low precision:** too eager  | The agent pings you about things you don't care about. Users mute it.                | Dismissed suggestions, ignored notifications, denied approvals |
+| **Low recall:** too cautious  | The agent misses what you actually needed. Nobody notices, because nothing happened. | Users doing the task themselves, "why didn't you tell me?"     |
+| **Wrong depth:** went too far | The agent acts where it should have asked.                                           | Undone actions, complaints, support tickets                    |
+
+Being too eager is a core risk, it is Dr. Doodle reminding me 5x about a package I already picked up. But it can also have security consequences. [One user reported](https://proton.me/blog/proactive-ai) that Instinct hit a login wall while buying something and reset the user's password instead of asking.
+
+**The costs are not symmetric.** A missed nudge costs little. A wrong purchase costs money and trust. So don't tune one global threshold. Set a stricter bar for actions that are expensive or hard to undo, and a looser one for a suggestion the user can ignore. [Research on proactive agents](https://www.emergentmind.com/papers/2602.01532) frames it the same way: intervene only when the expected value beats the cost of a false alarm.
+
+## Build a dataset of moments [#build-a-dataset-of-moments]
+
+For a chatbot, a dataset item is a question with an expected answer. For a proactive agent, **it's a moment with an expected decision**: the event, a snapshot of the user's memory and instructions, and the right call (act, wait or stay silent, and how far).
+
+A full snapshot of the context is necessary to evaluate if a decision was right or wrong. The same delayed-flight email means "stay silent" for a user who said "never bother me about delays under an hour," and "rebook" for one who said "rebook me if I'll miss a connection." Pairs like that also test whether the agent uses memory at all.
+
+Build it from real traces: the flagged ones (dismissals, undos, "why didn't you tell me?") plus a random sample, including runs where nothing happened. Label the right decision with a short note on why. When the agent got it wrong, note whether it was a judgment bug or a memory bug. They need different fixes.
+
+Then run experiments whenever you change the prompt, model, memory or thresholds, and look at precision and recall separately. More helpful often means more annoying. It's the same [AI engineering loop](/academy/ai-engineering-loop) as for any agent, with decisions as the unit instead of answers.
+
+## The decision is the product [#the-decision-is-the-product]
+
+The skill, the tools, the loop, the memory and the trigger are parts every agent has. What makes a proactive agent good or bad is one function: whether this moment is worth acting on, when, and how far.
+
+That function runs mostly where nobody is watching. **Make it visible, and it becomes something you can measure and improve.**
+
+<CustomerStoryCTA />
