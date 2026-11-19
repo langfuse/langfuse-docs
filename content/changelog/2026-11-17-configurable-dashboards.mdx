@@ -63,7 +63,7 @@ Choose a percentile such as p10 or p99.9. Define exact histogram boundaries, inc
 
 Compatible measures share a chart axis. Measures with different units use a table with individually formatted columns. Choose **Default view** to open a widget on one query, or **Displayed series** to save which model/metric series appear. Legend clicks remain temporary exploration. Series retain their colors after reloading or hiding another series; small desktop comparisons show every legend label. A query filter changes the measured population. Display selection changes what is drawn, and partial selections suppress ambiguous full-population headlines.
 
-Switch between **Chart**, **Data**, and **Inspect**; Inspect shows the actual query count, duration, rows and bytes read, and generated queries.
+Use **Data** to inspect individual values. **Inspect** shows how many requests the existing API made. The experimental backend can also report duration, rows and bytes read, and its generated query.
 
 ## Give the dashboard a story
 
@@ -72,3 +72,15 @@ New dashboards open directly in editing mode. Save your changes, then choose **D
 Dashboard filters apply across compatible widgets. Each series can add its own conditions. A widget shows a filter-scope notice when a shared filter cannot apply to its source. Legend interactions change which series are visible; configured view selectors switch between questions such as model cost and token usage.
 
 The prototype dashboard pairs all twelve Home-card types with their replacements, then demonstrates the new capabilities with real data. It is also the review surface for the remaining backend decisions: keyed metadata breakdowns, relationships between observations and scores, cross-series alignment, scan sharing, and production limits.
+
+## Read a dashboard as a report
+
+Choose **Read as report** to walk through saved charts and Markdown in order. A top-level Markdown heading starts a section. You can edit a chart from its output, add a finding beneath it, and save that cell directly. The dashboard grid and the report share the same saved content.
+
+![A dashboard report compares recorded spend for three selected workloads.](/images/changelog/2026-11-19-dashboard-report.png)
+
+The sample report compares support, search and coding spend using three existing filtered queries. Its scores section plots a named numeric score alongside its evaluation count. Each point is the mean of score records received during the time bucket. A late batch can change the mean even when the application has stayed the same.
+
+![Average quality by week paired with the number of evaluations that contributed to each point.](/images/changelog/2026-11-19-dashboard-score-report.png)
+
+In **Replacing the Home cards**, choose one of twelve cards to inspect its result beside an editable recipe. The notes identify changes that affect migration, including full-period totals, score definitions and sampled latency percentiles. **Compare editors** lets you try the original form, a multi-query form using existing analytics, and proposed query-builder controls. Proposed relationship queries show their contract and have execution disabled.
