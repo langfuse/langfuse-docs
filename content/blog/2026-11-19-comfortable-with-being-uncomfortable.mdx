@@ -1,0 +1,113 @@
+---
+title: "Comfortable with being uncomfortable"
+date: 2026/11/19
+description: "What it means to be a designer in an AI-forward team"
+tag: engineering
+author: Trang
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { DesignPrStats } from "@/components/blog/DesignPrStats";
+
+<BlogHeader
+  title={
+    "Comfortable with being uncomfortable:\nWhat it means to be a designer in an AI-forward team"
+  }
+  authors={["trangnguyen"]}
+  date="November 19, 2026"
+/>
+
+Langfuse is the most widely adopted open-source platform for building AI apps, used by more than 50,000 companies and 21 of the Fortune 50 to see what their apps are doing: every prompt, every model call, every step an agent takes. For three years, a small team of engineers built it without a designer, and they built it well.
+
+This summer, I joined as their first designer.
+
+## Being the glue
+
+At my previous job at a large tech company, the responsibilities were clear. I helped balance ease of use with the increasing complexity in the product. As new features and products got added, the experience could sometimes feel disjointed from one team’s area to the next. My work was making sure we built the right things, seeing how pieces fit together across teams, spotting and connecting fragmented experiences. The kind of work Tanya Reilly calls [glue work](https://noidea.dog/glue).
+
+In a large organisation, getting stuff done involves building good relationships with people, getting them to rethink, and asking the right questions: Should we remove or consolidate this? Are we overcomplicating it? Are we choosing an easy happy path that won’t scale in the future? As one of my mentors put it, you build credit with the team, then you spend it. It works, but it’s slow. The product was mature, and since one wrong change could be expensive, the design process was naturally slower.
+
+## Not knowing where I fit
+
+One of the first things I noticed when joining Langfuse was how self-reliant everyone was. People work in micro teams of one or two, mostly one, so nobody gets blocked. Meetings are rare, and often only last fifteen minutes. Everyone ships features end to end, each orchestrating their own small army of agents.
+
+In those first weeks, I didn’t know where I fit. I could see that the traditional design process would not hold up here, and there was no process to follow either. The flip side was that everyone was learning the same new craft, so I threw myself into it too. I skipped Figma entirely and tried every tool I could. We used whatever worked, and people were always eager to share what they’d learned. My prompts grew longer and more precise. After a while you get a better feel for where the models really shine. Prompting and setting up good harnesses turned out to be a skill of its own, one that gets better with practice.
+
+## 8,000-line PR
+
+My first big project was updating the trace view. Initially I was implementing a lot of small, incremental changes, but quickly realised that this wasn’t working. You just can’t see where you are going with this approach. My designer instinct kicked in.
+
+Designers are trained to start from the ideal end state and walk back from there, and engineers slice it into smaller chunks to implement. So I thought it would be better to put all my changes into one PR, where I could see the end result. I handed it to the engineers, hoping it would somehow make it to production.
+
+It was 8,000+ lines of changes. Nobody could realistically test that.
+
+Splitting it wasn’t trivial either. My first attempt was too granular, twenty-something PRs. The second was five, but they were stacked and earlier PRs would rely on later PRs for fixes that were already known. Each change wasn’t sound on its own, and merging one could break the UI. Ben, an engineer on the team, gave me the feedback: _every change has to be fine on its own_. The third time, we split it into about fifteen changes, each safe to merge independently.
+
+## Learning a slightly different role
+
+My work now is understanding both the ideal state and how to break it down and get it over the line. In a way it means thinking like a designer and thinking like an engineer. Over time, I have become better at looking at the code myself and telling a safe change from a difficult change.
+
+Every PR now comes with before-and-after screenshots and videos with clear, concise descriptions of the changes. Reviewers shouldn’t have to read the code to understand what changed and spot where the slop is. Edge cases and variants are tested thoroughly in Storybook before anything goes out for review. The process of preparing this has made me a better designer too: it sharpens the instinct for whether a solution would hold up.
+
+Eventually, I taught my agent to do most of the ritual for me: the screenshots, the Linear ticket, messaging the reviewer, following up on bots’ comments, addressing feedback, and re-requesting review. A lot of it is automated now.
+
+<DesignPrStats />
+
+## The glue work hasn’t gone away
+
+Over time, I realised the glue work hadn’t gone away. If anything, it matters more. Even in a small team, with everyone working independently with their agents, it’s easy to focus on your own work and miss the bigger picture, how the user flows change as they move from one part of the product to another, or how a fix in one area makes another worse, even when each change is fine in isolation.
+
+The engineers design too now. I was worried at first that people might expect their prototypes to be treated as the final thing and shipped as they were, but that never really happened. The prototypes are starting points for a discussion, ideas expressed in a crude way. I love it when someone comes to me with concepts they put together in Claude Design. It makes it easy to understand what they envision and to work out what problems they are trying to solve. This is also particularly helpful if you often jump between projects and need to ramp up on the context fast! When receiving a prototype, I do a detailed critique of the UX gaps, and we iterate on it together, and the work is always better for that.
+
+<figure className="flex flex-col items-center text-center">
+  <Frame fullWidth className="w-full max-w-lg">
+    ![Slack message from Lysander inviting Trang to branch off his pull request and sharing a Claude Design prototype](/images/blog/2026-11-19-comfortable-with-being-uncomfortable/async-collab.png)
+  </Frame>
+  <figcaption className="mt-3 text-sm text-text-tertiary">
+    A typical async collab where I branch off Lysander’s PR and review some concepts he put together in Claude Design
+  </figcaption>
+</figure>
+
+## Add and subtract
+
+Most of my contribution now is thinking through the flow, and a lot of subtraction. Complexity emerges naturally. What’s new and exciting wants to rise to the surface, and when building is cheap, the natural outcome is more. More features, more buttons, more text, more options. But every feature, every piece of UI has a complexity cost, and that cost lands on the user. Reconciling the conflict between complexity and simplicity has always been the designer’s job, and it still is. So I ask:
+
+- What is the motivation behind adding this?
+- Can this go away?
+- Can it be revealed only once someone shows interest?
+
+Things shouldn’t scream for attention when nobody’s looking for them. I also suspect that people now have less patience for software that’s hard to figure out. Friction when navigating the product stands out more when you are used to just describing what you want in a chat interface and getting a result.
+
+When we were building Topics, for example, a feature that clusters traces by things like user intent, outcome or sentiment so you can spot patterns in large amounts of data, the first version had separate flows for setting up, adding a scan, editing it, and re-triggering it. Under the hood, they were nearly the same concept, but each looked completely different, so users would have had to learn four things instead of one. We ended up consolidating them. When you’re deep in the data model, making sure everything scales and performs, it takes effort to zoom out and sometimes you just need a second pair of eyes.
+
+## Protect the thinking
+
+The choice of tools comes with tradeoffs. Working in code, close to the material, pulls you toward existing patterns and past decisions, and AI makes copying them even easier. Consistency is rewarded and you are less likely to step back and rethink the architecture or the path you are taking. Finding the unconventional solution where innovation happens still happens. It just takes a conscious effort, spent on the right problems.
+
+I had to let go of some practices, too. At a bigger company you have time to think problems through in more detail. I sometimes miss the long exploration phase, writing design review docs, and obsessing over the finishing touches. The process of writing forced me to understand the problem thoroughly, and sometimes I’d start a project by writing the review doc as a way to clarify my thoughts.
+
+So I protect that thinking on purpose. I get involved earlier, which gives me enough time to think and let the problems simmer. I make an effort to review my work with people, not just agents, and seek opposing views. For zero-to-one work, I move away from the codebase into Claude Design or pen and paper. I switch tools, I leave and come back. It’s a messy process. I intentionally keep diverging until I’ve gone wide enough to then narrow down.
+
+## Building trust
+
+There wasn’t a single moment when it clicked. I just found my flow over time. People started pulling me into discussions earlier and asking me for feedback on their generated designs. My PRs started landing faster, with fewer comments. I could tell the engineers trusted me more when they saw a PR coming from me. I was still building credit, just in a different way.
+
+## Taking the leap
+
+One of my previous design directors used to say: _be comfortable with being uncomfortable._ I still think about that often. Change is good, and breaking out of the comfort zone is how we grow.
+
+The role is undoubtedly shifting. Embrace the tools for what they offer, but also stand firm on what you believe good design can bring, because design isn’t just output. [Good design is invisible](https://www.goodreads.com/quotes/7414060-good-design-is-actually-a-lot-harder-to-notice-than): things just work, which is why I think design is often misunderstood. It is how people feel when using the product, its personality, the sense that it was made with care. When building is cheap, intentional design is what makes a product feel substantial instead of shallow.
+
+If you’re considering making a similar jump, be ready for a lot more chaos and speed, for learning other disciplines, and for things not always being perfect. Allow yourself to grieve the old way of working too. It’s such an exciting place to be! I wouldn’t worry too much about AI taking your job. It just won’t be quite the same job.
+
+<figure className="flex flex-col items-center text-center">
+  <Frame fullWidth className="w-full">
+    ![Langfuse team members on a street in Amsterdam](/images/blog/2026-11-19-comfortable-with-being-uncomfortable/team-amsterdam.jpg)
+  </Frame>
+</figure>
+
+<div className="text-center">
+
+_We're hiring. If this sounds exciting to you, head over to [langfuse.com/careers](/careers)._
+
+</div>
