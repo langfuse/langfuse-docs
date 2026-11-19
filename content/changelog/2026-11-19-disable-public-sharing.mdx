@@ -1,0 +1,27 @@
+---
+date: 2026-11-19
+title: Disable public sharing of traces and sessions
+description: Organization admins can turn off public share links for traces and sessions, and self-hosted instances can turn them off for every organization.
+author: Nimar
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now stop traces and sessions from being shared via public links. While public sharing is off, nobody in the organization can make a trace or session public, and existing share links stop working. Turning it back on restores the links that were shared before.
+
+**How to turn it off**
+
+- **Langfuse Cloud Pro with the Teams add-on, and Enterprise:** go to **Organization settings** → **General** and turn off **Public sharing**.
+- **Self-hosted Enterprise:** use the same organization setting, or set `LANGFUSE_DISABLE_PUBLIC_SHARING=true` on the web container to turn off public sharing for every organization.
+
+<Cards num={1}>
+  <Card
+    title="Disable public sharing"
+    href="/docs/observability/features/url#disable-public-sharing"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
