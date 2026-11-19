@@ -67,9 +67,9 @@ Unit cost is the number that turns AI spend into a business conversation. A feat
 [Alerts](/docs/observability/features/alerts) watch a cost metric over a time window, filtered by model, tag, or user, and notify Slack, PagerDuty, a GitHub Action, or a webhook when it crosses a threshold. Typical alerts are hourly cost for one feature, daily cost per developer for coding agents, and cost per call for a new model.
 
 <Callout type="info">
-  Alerts notify, they don't block requests. Hard spend caps at the gateway are
-  on the [gateway roadmap](/docs/gateway/overview#roadmap), not available yet.
-  Until then, combine alerts with provider-side limits on your provider account.
+  Alerts notify, they don't block requests. To block requests once spend
+  reaches a budget, set [budgets](/docs/gateway/features/budgets) in
+  the Langfuse AI Gateway.
 </Callout>
 
 ## Step 5: export to the warehouse [#export]
@@ -103,7 +103,7 @@ Issue gateway keys per team or service with a cost-center metadata field, and re
 <Details id="can-i-set-budgets">
 <Summary>Can I set a budget that stops spending?</Summary>
 
-Not in the Langfuse AI Gateway today: hard spend caps are on the roadmap. You can set alerts on cost thresholds in Langfuse and spending limits on your provider account in the meantime.
+Yes. The Langfuse AI Gateway rejects requests once a [budget](/docs/gateway/features/budgets) is reached. You can set them per gateway key, per user, and for the whole organization.
 
 </Details>
 
