@@ -44,15 +44,17 @@ Everything you monitor ends up either as a standard field on your traces or as a
 - **With evaluators** that score production data automatically. There are [different kinds of evaluators](/academy/evaluate/writing-evaluators#what-kind-of-evaluator), and arriving at a good set of metrics to measure the quality of your application is extremely important. More on that in the [Evaluate](/academy/evaluate) section.
 - **Via the [API or SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)** when your application captures something, such as a thumbs-down click, an edited draft, or a support ticket that reopens. This is how most user signals are recorded.
 
-## What you do with it [#what-you-do-with-it]
+## Different monitoring practices [#what-you-do-with-it]
+
+There are different kinds of monitoring, and in a healthy setup, you should be doing a mix of these.
 
 ### Track aggregate metrics [#aggregate-metrics]
 
-Aggregates tell you whether things are getting better or worse. Chart cost, latency, quality scores, and signal rates on [dashboards](/docs/metrics/features/custom-dashboards) to answer questions like: Did last Tuesday's prompt change improve anything? Is quality drifting as usage grows? Set [alerts](/docs/observability/features/alerts) on the metrics where a spike needs attention right away, so you don't have to watch the dashboards to catch it.
+Aggregates tell you whether things are getting better or worse. Chart cost, latency, quality scores, and signal rates on [dashboards](/docs/metrics/features/custom-dashboards) to answer questions like: Did your latest prompt change improve anything? Is quality drifting as usage grows? Set [alerts](/docs/observability/features/alerts) on the metrics where a spike needs attention right away, so you don't have to watch the dashboards to catch it.
 
 ### Investigate traces with error analysis [#investigate-traces]
 
-Aggregates tell you that something changed, not why. For that, you need the individual traces behind the number. Errors, low quality scores, and negative user signals point you to the traces worth opening, and filtering on them gives you a list to work through. [Error analysis](/academy/monitoring/error-analysis) turns that reading into a structured process: it groups failures into categories and measures how often each one happens, so you know what to fix and what to keep monitoring.
+Looking at your traces yourself is the most important thing you can do to understand what is going on in your application. Dashboards and scores only measure what you already decided to measure; reading traces shows you how your agent actually behaves and where it goes wrong. Every decision you make, especially in the beginning, is downstream of this: which quality scores to set up, which user signals to capture, and what to fix first. Errors, low quality scores, and negative user signals point you to traces worth opening, and [error analysis](/academy/monitoring/error-analysis) turns that reading into a structured process that groups failures into categories and measures how often each one happens.
 
 ## Where to start
 
@@ -62,7 +64,7 @@ Start small and build your monitoring setup from real traces rather than abstrac
 
 2. **Use [error analysis](/academy/monitoring/error-analysis) to surface what's worth tracking.** Error analysis gives you a structured way to find patterns across your traces, the kinds of recurring issues worth turning into automated evaluators you can run continuously.
 
-3. **Think about how your specific application shows failure.** Application-specific implicit signals — a user disagreeing in a support chat, a correction in a process automation flow — are often more actionable than generic scores, and they surface issues without manual labeling.
+3. **Capture the user signals your application already produces.** Think about how your users show that something went wrong: a user disagreeing in a support chat, a correction in a process automation flow. These [user signals](/academy/monitoring/capturing-signals) are often more actionable than generic scores, are cheap to capture, and point you to traces worth reading without manual labeling.
 
 4. **Treat it as an iterative process.** A working monitoring setup isn't something you configure once and leave. Usage patterns shift, models get updated, new failure modes emerge. Keep refining your setup so you can cut through the noise and stay focused on what actually matters.
 
@@ -72,4 +74,3 @@ When monitoring surfaces something worth investigating, you have a few options: 
 
 - [Datasets](/academy/datasets): capturing production traces for evaluation
 - [Experiments](/academy/experiments): testing whether a fix actually worked
-- [Continuously Improving Agents With Langfuse](/guides/videos/continuously-improving-agents): a workshop on tracing a support agent, setting up online evaluators, and turning findings into datasets
