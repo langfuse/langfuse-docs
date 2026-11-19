@@ -1,50 +1,60 @@
 ---
 title: Monitoring
 sidebarTitle: Monitoring
-description: How to make sense of your traces through metrics tracking, signal detection, and quality evaluation.
+description: What to monitor in an LLM application (operational metrics, quality signals, and user feedback signals), how that data gets onto your traces, and how to use it to track trends and find the traces worth investigating.
 ---
 
 # Monitoring
 
 ## How monitoring fits into the loop
 
-[Tracing](/academy/tracing) provides a complete record of what your LLM app is doing — every request, every model call, every tool use. Monitoring is how you make sense of that data. It gives you two things: a continuous view of how your system performs over time, and a way to surface the specific traces worth investigating — errors, user behavior patterns, and cases where something went unexpectedly wrong. Together, they shift you from having data to actually understanding your system well enough to improve it.
+[Tracing](/academy/tracing) provides a complete record of what your LLM app is doing — every request, every model call, every tool use. Monitoring is how you make sense of that data: you decide what to watch, get that data onto your traces, and use it in two ways, to track how your system performs over time and to find the specific traces worth investigating. Together, they shift you from having data to actually understanding your system well enough to improve it.
 
 <LoopDiagram highlight="monitor" />
 
-## Metrics and signals [#metrics-and-signals]
+## What you monitor [#what-you-monitor]
 
-**[Aggregate metrics tracking](/docs/metrics/overview)** tells you whether things are getting better or worse over time. Cost, latency, evaluation scores — these become trends you can watch and reason about. Did that prompt change last Tuesday improve anything? Is quality drifting as usage grows?
+There are three kinds of things to monitor, and each answers a different question about your application.
 
-**Signal detection** tells you where to look right now. It surfaces individual traces that are worth investigating — an error, a cluster of retries, a user abandoning mid-conversation. The signal is only useful because it's attached to the specific trace that triggered it. That trace is your starting point for understanding what went wrong.
+### Operational metrics [#operational-metrics]
 
-## Where metrics and signals come from
+Cost, latency, token usage, and error rates tell you whether your application is healthy and affordable to run. They are the first to show when a model update, a prompt change, or a traffic spike makes your application slower, more expensive, or less reliable, and they are what you set budgets and service levels against. [Optimizing agent cost](/academy/experiments/cost-optimization) shows how to act on them.
 
-Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring.
+### Quality signals [#quality-signals]
 
-Beyond the built-in fields, you add [scores](/docs/evaluation/scores/overview) from two sources: [user signals](#user-signals) your application captures, and quality evaluation, through human annotation or automated evaluators. That data feeds into aggregate charts for tracking trends over time, and into [alerts](/docs/observability/features/alerts) and filtered views so individual traces surface when something crosses a threshold you care about.
+Operational metrics don't tell you whether an answer was right. Quality signals measure that against criteria you define for your application, such as whether a response is grounded in the retrieved documents or follows your support policy. They let you keep watching failure modes you already know about, and catch quality drifting as models and usage change. [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) covers which criteria deserve a standing metric.
 
-<Callout type="info">
-There are three types of automated evaluators to attach scores to traces:
-- [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) (for quality judgments where you want to read the reasoning behind each verdict)
-- [Decision models](/docs/evaluation/evaluation-methods/decision-models) (for high-volume signals or behavioral patterns with a fixed set of answers, like user disagreement)
-- [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) (for precise checks on observations or experiments, not traces, like whether the response contains a certain word or exceeds a length limit).
+### User feedback signals [#user-signals]
 
-More on all three can be found in the [Evaluate](/academy/evaluate) section.
-
-</Callout>
-
-### User signals [#user-signals]
-
-User signals are things users do or say that show how they perceived an output: a thumbs down, a retry, a request for a human, a draft sent without edits. Some are explicit ratings, but most are implicit in behavior, conversation, and outcomes. They are not evaluation: they measure perceived quality at the moment of use, not whether the output was correct.
-
-They matter for monitoring because they are the cheapest way to get a quality judgment on production traffic. Your users judge every output anyway, through what they do next, and they surface failures you didn't think to evaluate for. Negative signals point you to individual traces worth opening and are the natural entry points for [error analysis](/academy/monitoring/error-analysis), while signal rates on [dashboards](/docs/metrics/features/custom-dashboards) show whether the experience is improving. [Capturing user signals](/academy/monitoring/capturing-signals) covers the kinds of signals, how to read them, and their biases.
+User signals are things users do or say that show how they perceived an output: a thumbs down, a retry, a request for a human, a draft sent without edits. They are not quality evaluation: they measure perceived quality at the moment of use, not whether the output was correct. They matter because they are the cheapest way to get a judgment on all of your production traffic, and they surface failures you didn't think to evaluate for. [Capturing user signals](/academy/monitoring/capturing-signals) covers the kinds of signals, how to read them, and their biases.
 
 <ManualGuideCallout
   href="/guides/user-feedback-loop"
   topic="User feedback loop"
   lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
 />
+
+## How the data gets onto your traces [#how-data-gets-onto-traces]
+
+Everything you monitor ends up either as a standard field on your traces or as a [score](/docs/evaluation/scores/overview) attached to them.
+
+**Standard fields** come with instrumentation: latency, token usage and cost, model, and errors, plus the metadata, tags, users, and sessions you set when [tracing](/academy/tracing). Most operational metrics need nothing more.
+
+**Scores** hold everything that needs a judgment. You attach them in three ways:
+
+- **Manually**, by reviewing traces and [scoring them in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) or working through an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues). It's slow, but it's how you learn what good looks like, and it gives you labels to check automated evaluators against.
+- **With evaluators** that score production data automatically: [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for quality judgments with written reasoning, [decision models](/docs/evaluation/evaluation-methods/decision-models) for high-volume checks with a fixed set of answers, such as detecting conversation signals, and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks. This is how quality signals scale to all of your traffic. The [Evaluate](/academy/evaluate) section covers them in depth.
+- **Via the [API or SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)** when your application captures something, such as a thumbs-down click, an edited draft, or a support ticket that reopens. This is how most user signals are recorded.
+
+## What you do with it [#what-you-do-with-it]
+
+### Track aggregate metrics [#aggregate-metrics]
+
+Aggregates tell you whether things are getting better or worse. Chart cost, latency, quality scores, and signal rates on [dashboards](/docs/metrics/features/custom-dashboards) to answer questions like: Did last Tuesday's prompt change improve anything? Is quality drifting as usage grows? Set [alerts](/docs/observability/features/alerts) on the metrics where a spike needs attention right away, so you don't have to watch the dashboards to catch it.
+
+### Investigate traces with error analysis [#investigate-traces]
+
+Aggregates tell you that something changed, not why. For that, you need the individual traces behind the number. Errors, low quality scores, and negative user signals point you to the traces worth opening, and filtering on them gives you a list to work through. [Error analysis](/academy/monitoring/error-analysis) turns that reading into a structured process: it groups failures into categories and measures how often each one happens, so you know what to fix and what to keep monitoring.
 
 ## Where to start
 
