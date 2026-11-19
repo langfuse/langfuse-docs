@@ -86,7 +86,7 @@ Everything starts from a single source of truth in [`langfuse/skills`](https://g
 
 <SkillOperationArchitectureDiagram />
 
-Each side contributes different signal back into the same workflow. Halo feeds live production traces directly back into `Tracing` and `Monitoring` on the workflows it shares with external agents. External coding agents cannot send traces, so their explicit API/MCP feedback feeds into `Datasets` and `Experiment`. Offline, our [Langfuse datasets](/docs/evaluation/experiments/datasets) and [Modal](https://modal.com) sandboxes let us iterate across [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), and [Cursor](/integrations/developer-tools/cursor) before shipping the next commit to GitHub.
+Both contribute value to the overall loop: Halo feeds live production traces (tracing & monitoring), while external coding agents are used more broadly and can give feedback through the feedback endpoints, although this is less frequent. These then feed into the evals used for measuring experiment results.
 
 ## How our offline coding-agent test harness works [#offline-test-harness]
 
