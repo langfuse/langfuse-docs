@@ -86,7 +86,9 @@ So the decision itself needs to be in the trace. For every event that reaches th
 - **How far:** notify, suggest, ask for approval, or act.
 - **The rationale:** why it decided this.
 
-Many teams split `worth_acting_on` into two steps: a cheap filter first (rules, embeddings, or a decision model like [Jev](/blog/2026-09-18-using-typesafes-jev-for-evals)), then the expensive judgment call. [Navan](https://navan.com/blog/build-proactive-ai-agents) recommends the same split. If yours works that way, trace both steps. When the agent never told you about the delay, you need to know whether the filter dropped the email or the decision step judged it harmless. Those are two very different fixes.
+<Callout type="info">
+  Many teams split `worth_acting_on` into two steps: a cheap filter first (rules, embeddings, or a decision model like [Jev](/blog/2026-09-18-using-typesafes-jev-for-evals)), then the expensive judgment call. [Navan](https://navan.com/blog/build-proactive-ai-agents) recommends the same split. If yours works that way, trace both steps. When the agent never told you about the delay, you need to know whether the filter dropped the email or the decision step judged it harmless. Those are two very different fixes.
+</Callout>
 
 **Keep the runs that end in "do nothing".** A decision not to act produces no output, so it never shows up in a review queue unless you put it there. [Navan](https://navan.com/blog/build-proactive-ai-agents) makes the same point: staying silent is a valid outcome, and often the right one. That only holds if you can check it.
 
