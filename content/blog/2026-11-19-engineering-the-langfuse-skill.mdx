@@ -8,6 +8,7 @@ author: Lotte
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { SkillEngineeringLoopDiagram } from "@/components/blog/SkillEngineeringLoopDiagram";
+import { SkillOperationArchitectureDiagram } from "@/components/blog/SkillOperationArchitectureDiagram";
 import { SkillTestingHarnessDiagram } from "@/components/blog/SkillTestingHarnessDiagram";
 import { FileTree } from "@/components/docs";
 
@@ -18,24 +19,34 @@ import { FileTree } from "@/components/docs";
   authors={["lotteverheyden"]}
 />
 
-We started building the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) earlier this year as part of [making Langfuse accessible to external coding agents](/blog/2026-02-13-will-you-be-my-cli), alongside our [CLI](/docs/api-and-data-platform/features/cli), Markdown documentation endpoints, `llms.txt`, and [MCP servers](/docs/api-and-data-platform/features/mcp-server).
+We started building the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) earlier this year as part of [making Langfuse accessible to external coding agents](/blog/2026-02-13-will-you-be-my-cli), alongside our [CLI](/docs/api-and-data-platform/features/cli), Markdown documentation endpoints, `llms.txt`, and [MCP servers](/docs/api-and-data-platform/features/mcp-server). Today, the `langfuse/skills` repository gets 22,000 unique clones every two weeks.
 
-Today, the `langfuse/skills` repository gets 22,000 unique clones every two weeks. What started as short instructions for calling the CLI and looking up documentation has grown into an entrypoint (`SKILL.md`) that routes coding agents across a dozen workflow-specific reference files: instrumenting an application, migrating prompts, designing datasets, setting up evaluations, capturing user feedback signals, optimizing agent cost, and configuring CI/CD gates.
+I remember when this all started. [skills.sh](https://skills.sh) was big, and we were refreshing the page to see how many people had downloaded our skill, because that download counter was the full extent of the data we had on how users were interacting with it.
 
-At this scale, editing Markdown files by intuition stops working. A small edit to the entrypoint description can [stop agents from invoking the skill altogether](/blog/2026-02-26-evaluate-ai-agent-skills), and an ambiguous example can introduce extra retries across thousands of sessions. This post walks through how we engineer the Langfuse skill: how we run offline coding-agent experiments in Modal, why explicit feedback from external agents fell short, and how sharing the skill with [Halo](/blog/2026-10-23-halo) closed our engineering loop.
+By now, a lot has changed, and our setup has matured significantly. What started as short CLI instructions has grown into an entrypoint (`SKILL.md`) that routes agents across a dozen workflow-specific reference files, and we do a lot of structured engineering work to keep that skill high quality. We also have much more observability into what happens when agents use it, giving us concrete data we can act on to improve the skill.
+
+## Let's discuss the architecture of this whole operation [#architecture]
+
+Everything starts from a single source of truth: the [`langfuse/skills`](https://github.com/langfuse/skills) repository on GitHub, which holds `SKILL.md` and the workflow files under `references/`. From there, the skill ships to both external coding agents and [Halo](/blog/2026-10-23-halo) (through [Langfuse Skill Management](/docs/skill-management/overview)), and feeds back into one evaluation loop across [Langfuse datasets](/docs/evaluation/experiments/datasets) and [Modal](https://modal.com):
+
+<SkillOperationArchitectureDiagram />
+
+Sharing one set of workflow files across both paths is what makes this setup work. Halo gives us live production traces on the workflows it shares with external agents, while Modal sandboxes let us benchmark candidate skill commits across [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), and [Cursor](/integrations/developer-tools/cursor) before shipping.
+
+We did not build all of these pieces at once. The setup grew step by step out of a basic constraint of distributing skills publicly.
 
 ## Two kinds of skills: internal and external [#internal-and-external-skills]
 
 How you improve an agent skill depends on whether you control the environment where it runs:
 
-- **Internal skills** are built for use inside your own company or your own product. Engineers load them into [Claude Code](/integrations/developer-tools/claude-code), [Codex](/integrations/developer-tools/codex), or [Cursor](/integrations/developer-tools/cursor), or an internal agent loads them at runtime. Because those agents run inside your organization, you can trace them in Langfuse, attach [skill metadata](/docs/skill-management/tracing), and see when the skill is loaded and whether it helped.
-- **External skills** are distributed publicly for other people to install into their own coding agents. Once a developer clones `langfuse/skills` onto their machine, we have no visibility into how their agent runs, which files it reads, or where it gets stuck.
+- **Internal skills** are built for use inside your own company or your own product. Because the coding agents or internal assistants using the skill run inside your organization, you can trace them in Langfuse, attach [skill metadata](/docs/skill-management/tracing), and observe when the skill is loaded and whether it helped.
+- **External skills** are distributed publicly for other people to install into their own coding agents. Once a developer clones `langfuse/skills` onto their laptop, you have no visibility into how their agent runs, which files it reads, or where it gets stuck.
 
 ## Engineering an external skill with the offline half of the loop [#offline-half-of-the-loop]
 
 In the [Langfuse Academy](/academy/ai-engineering-loop), we describe improving AI applications through the **AI engineering loop**: an online half (`Trace` and `Monitor` on live traffic) connected to an offline half (`Build datasets`, `Experiment`, and `Evaluate` before shipping).
 
-When you distribute an external skill, `Trace` and `Monitor` are unavailable. You still have a reliable way to measure and improve skill performance: running the offline half of the loop. You curate datasets of representative user tasks, execute coding agents against them with a candidate version of the skill, evaluate the resulting traces, and publish a new skill version when quality improves.
+When you only distribute an external skill, `Trace` and `Monitor` are unavailable. You still have a reliable way to measure and improve skill performance: running the offline half of the loop. You curate datasets of representative user tasks, execute coding agents against them with a candidate version of the skill, evaluate the resulting traces, and publish a new skill version when quality improves.
 
 <SkillEngineeringLoopDiagram mode="offline" />
 
@@ -43,7 +54,7 @@ When you distribute an external skill, `Trace` and `Monitor` are unavailable. Yo
 
 You cannot test an agent skill in a standard prompt playground. A skill governs multi-turn behavior across tools and files: whether the agent recognizes the skill applies, which reference file it opens, which CLI flags it passes, how it edits an existing codebase, and how it recovers from errors. Testing that requires running real coding agents inside isolated repositories.
 
-Building on our [initial local evaluation script](/blog/2026-02-26-evaluate-ai-agent-skills), we moved to a shared service on [Modal](https://modal.com) connected directly to [Langfuse datasets](/docs/evaluation/experiments/datasets) through [remote experiment webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Datasets, experiment triggers, execution traces, and side-by-side run comparisons all stay in Langfuse.
+Building on our [initial local evaluation script](/blog/2026-02-26-evaluate-ai-agent-skills), we moved to a shared service on Modal connected directly to Langfuse datasets through [remote experiment webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Datasets, experiment triggers, execution traces, and side-by-side run comparisons all stay in Langfuse.
 
 <SkillTestingHarnessDiagram />
 
@@ -124,9 +135,9 @@ Instead, we trigger an experiment run on Modal and read through the resulting tr
 
 ## Why explicit feedback from external agents was not enough [#explicit-feedback-limitations]
 
-Even with a solid offline harness, offline datasets only test scenarios you thought to write down. Before we had any live traces of the skill, we tried to get online signal from external coding agents by building a feedback path into the skill itself.
+Even with a solid offline harness, offline datasets only test scenarios you thought to write down. Before Halo gave us live traces of the skill, we tried to get online signal from external coding agents by building a feedback path into the skill itself.
 
-We added `references/skill-feedback.md` and a section at the bottom of `SKILL.md` instructing coding agents to offer to send structured feedback whenever our instructions were outdated, inaccurate, or missing a workflow, after showing the exact payload to the user for approval. Depending on what tools the agent had connected, it could submit through a `submitFeedback` MCP tool, call our API via the CLI, or generate a prefilled GitHub issue or discussion link on [`langfuse/skills`](https://github.com/langfuse/skills).
+We added `references/skill-feedback.md` and a section at the bottom of `SKILL.md` instructing coding agents to offer to send structured feedback whenever our instructions were outdated, inaccurate, or missing a workflow, after showing the exact payload to the user for approval. Depending on what tools the agent had connected, it could submit through a `submitFeedback` MCP tool, call our API via the CLI, or generate a prefilled GitHub issue or discussion link on `langfuse/skills`.
 
 This surfaced a handful of concrete bugs, such as CLI flag edge cases and overly broad `curl` allowlist globs. Relative to 22,000 unique clones every two weeks, however, the signal was tiny.
 
@@ -134,13 +145,9 @@ The reason is the same one we cover in [Capturing user signals](/academy/monitor
 
 ## Closing the loop with Halo and Skill Management [#closing-the-loop-with-halo]
 
-What closed the online half of the loop for us was launching [Halo](/blog/2026-10-23-halo), our assistant inside the Langfuse UI.
+What closed the online half of the loop was [building Halo](/blog/2026-10-21-building-the-langfuse-assistant) on the same public [MCP server](/docs/api-and-data-platform/features/mcp-server), documentation endpoints, and `references/*.md` workflow files as external coding agents, rather than maintaining a separate, private prompt set for our in-app assistant.
 
-When we [built Halo](/blog/2026-10-21-building-the-langfuse-assistant), we decided it should share the same tools and workflow instructions as external coding agents rather than rely on a separate, private prompt set. Halo uses our public [MCP server](/docs/api-and-data-platform/features/mcp-server), our documentation endpoints, and the same `references/*.md` workflow files from `langfuse/skills`.
-
-To version and ship those files to Halo, we use [Langfuse Skill Management](/docs/skill-management/overview). A GitHub Action in `langfuse/skills` packages the `references/` directory alongside a generated `SKILL.md` routing table and pushes the bundle (`langfuse skills push --label production`) to our regional Langfuse projects with an `in-app-agent` tag.
-
-Because Halo runs on our infrastructure, we can trace its runs in Langfuse (for organizations with [AI feature telemetry](/docs/api-and-data-platform/features/halo#data-privacy-and-security) enabled). With [skill tracing](/docs/skill-management/tracing) configured on Halo's generations and skill-loading tool calls, every trace records which version of the `langfuse` skill was available and which reference files Halo loaded, alongside every MCP call, validation error, and user follow-up message.
+Under the hood, the GitHub Action in `langfuse/skills` packages the `references/` directory alongside a generated `SKILL.md` routing table and pushes the bundle (`langfuse skills push --label production`) to our regional Langfuse projects with an `in-app-agent` tag. For organizations with [AI feature telemetry](/docs/api-and-data-platform/features/halo#data-privacy-and-security) enabled, [skill tracing](/docs/skill-management/tracing) on Halo's generations and skill-loading tool calls records which version of the `langfuse` skill was available and which reference files Halo opened, right alongside every MCP call, validation error, and user follow-up message.
 
 <SkillEngineeringLoopDiagram mode="closed" />
 
