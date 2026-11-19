@@ -255,12 +255,11 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 
 ## Discounts
 
-| Program              | Discount                            | Details                             |
-| -------------------- | ----------------------------------- | ----------------------------------- |
-| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups)   |
-| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research)   |
-| Non-profits          | $199 in credits / month             | [Learn more and apply](/non-profit) |
-| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com        |
+| Program              | Discount                            | Details                           |
+| -------------------- | ----------------------------------- | --------------------------------- |
+| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups) |
+| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research) |
+| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com      |
 
 ## Frequently Asked Questions
 
