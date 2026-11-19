@@ -129,17 +129,22 @@ package com.langfuse.springai;
 import io.micrometer.common.KeyValue;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationFilter;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.observation.ChatModelObservationContext;
 import org.springframework.ai.content.Content;
-import org.springframework.ai.observation.ObservabilityHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ChatModelCompletionContentObservationFilter implements ObservationFilter {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
     public Observation.Context map(Observation.Context context) {
@@ -147,38 +152,70 @@ public class ChatModelCompletionContentObservationFilter implements ObservationF
             return context;
         }
 
-        var prompts = processPrompts(chatModelObservationContext);
+        var instructions = chatModelObservationContext.getRequest().getInstructions();
         var completions = processCompletion(chatModelObservationContext);
 
         chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
             @Override
             public String getKey() {
-                return "gen_ai.prompt";
+                return "gen_ai.input.messages";
             }
 
             @Override
             public String getValue() {
-                return ObservabilityHelper.concatenateStrings(prompts);
+                return toInputMessagesJson(instructions);
             }
         });
 
         chatModelObservationContext.addHighCardinalityKeyValue(new KeyValue() {
             @Override
             public String getKey() {
-                return "gen_ai.completion";
+                return "gen_ai.output.messages";
             }
 
             @Override
             public String getValue() {
-                return ObservabilityHelper.concatenateStrings(completions);
+                return toOutputMessagesJson(completions);
             }
         });
 
         return chatModelObservationContext;
     }
 
-    private List<String> processPrompts(ChatModelObservationContext chatModelObservationContext) {
-            return CollectionUtils.isEmpty((chatModelObservationContext.getRequest()).getInstructions()) ? List.of() : (chatModelObservationContext.getRequest()).getInstructions().stream().map(Content::getText).toList();
+    private String toInputMessagesJson(List<? extends Content> instructions) {
+        return writeMessagesJson(instructions.stream()
+                .filter(content -> StringUtils.hasText(content.getText()))
+                .map(content -> Map.of(
+                        "role", toGenAiRole(content),
+                        "content", content.getText()))
+                .toList());
+    }
+
+    private String toOutputMessagesJson(List<String> completions) {
+        return writeMessagesJson(completions.stream()
+                .filter(StringUtils::hasText)
+                .map(text -> Map.of("role", "assistant", "content", text))
+                .toList());
+    }
+
+    private String writeMessagesJson(Object messages) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(messages);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Failed to serialize chat messages", e);
+        }
+    }
+
+    private static String toGenAiRole(Content content) {
+        if (content instanceof Message message) {
+            return switch (message.getMessageType()) {
+                case SYSTEM -> "system";
+                case ASSISTANT -> "assistant";
+                case TOOL -> "tool";
+                default -> "user";
+            };
+        }
+        return "user";
     }
 
     private List<String> processCompletion(ChatModelObservationContext context) {
