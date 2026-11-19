@@ -88,7 +88,7 @@ export function SkillUniqueClonersChart() {
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "w-[1.5px] bg-line-cta transition-opacity",
+                          "w-0.5 bg-line-cta transition-opacity",
                           isDimmed ? "opacity-35" : "opacity-100",
                         )}
                         style={{ height }}
