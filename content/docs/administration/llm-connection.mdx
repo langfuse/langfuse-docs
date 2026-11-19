@@ -110,7 +110,7 @@ Bedrock connections authenticate with AWS access keys, an [Amazon Bedrock API ke
 
 Langfuse can assume an IAM role in your AWS account instead of storing AWS credentials. Langfuse assumes your role through its own cross-account role and passes an external ID that is unique to the connection. Set **Authentication Method** to **IAM role** and enter your role ARN. The Langfuse UI then shows the external ID and the trust and permission policies to add to the role. IAM role connections can only be created in the UI, not through the [public API](/docs/api-and-data-platform/features/public-api).
 
-<Callout type="warning" title="Self-hosted: set the cross-account role">
+<Callout type="info" title="Self-hosted: set the cross-account role">
   On self-hosted deployments, an operator must set
   [`LANGFUSE_CROSS_ACCOUNT_ROLE_ARN`](/self-hosting/configuration#cross-account-role)
   to the role Langfuse assumes before it assumes your role. Without it, the
