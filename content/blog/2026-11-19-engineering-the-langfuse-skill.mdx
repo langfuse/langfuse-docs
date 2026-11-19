@@ -37,15 +37,17 @@ By now, a lot has changed, and our setup has matured significantly. We now have 
 
 Before going into the complete setup, we should talk about the different ways skills are used, and how this influences how you evaluate them.
 
-<SkillBoundaryDiagram />
-
 **(1) Skills for an agent you build** act like a more complex, modular system prompt for an agent you own.
+
+<SkillBoundaryDiagram variant="own-agent" />
 
 Because you control the agent harness, tools, and environment, you can trace every run, so you have good observability into how the skill is used, and you can act on what you see. Your evals are informed by real usage, and you can reliably measure improvements with the exact harness the agent will use in production.
 
 <SkillEngineeringLoopDiagram mode="internal" />
 
 **(2) Distributed skills** are shipped for other people to install into their own coding agents.
+
+<SkillBoundaryDiagram variant="distributed" />
 
 Once someone clones the skill on their machine, you have no control over the harness and no direct observability into how the agent runs. Without this observability, you can only evaluate and improve the skill through the offline half of the loop: curating datasets of representative user tasks to the best of your abilities and running different coding agents against them.
 
