@@ -25,23 +25,14 @@ Quality scores measure the quality of your agent's execution according to criter
 ### User feedback signals [#user-signals]
 
 User signals are things users do or say that show you how they perceived an agent's output: a thumbs down, a retry, a request for a human, a draft sent without edits. They measure quality as perceived by the user rather than evaluating actual quality. They are useful because they are often cheap and straightforward to implement, and they surface failures you didn't think to evaluate for yourself. [Capturing user signals](/academy/monitoring/capturing-signals) covers the kinds of signals, how to read them, and their biases.
-
-<ManualGuideCallout
-  href="/guides/user-feedback-loop"
-  topic="User feedback loop"
-  lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
-/>
-
 ## Multiple ways of getting this data onto your traces [#how-data-gets-onto-traces]
-
-Everything you monitor ends up either as a standard field on your traces or as a [score](/docs/evaluation/scores/overview) attached to them.
 
 **Standard fields** come with instrumentation: latency, token usage and cost, model, and errors, plus the metadata, tags, users, and sessions you set when [tracing](/academy/tracing). Most operational metrics need nothing more.
 
 **Scores** hold everything else. You attach them in three ways:
 
 - **Manually**, by reviewing traces and [scoring them in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) or working through an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), for example during [error analysis](/academy/monitoring/error-analysis). It's how you learn what good looks like, and it gives you labels to check automated evaluators against.
-- **With evaluators** that score production data automatically. There are [different kinds of evaluators](/academy/evaluate/writing-evaluators#what-kind-of-evaluator), and arriving at a good set of metrics to measure the quality of your application is extremely important. More on that in the [Evaluate](/academy/evaluate) section.
+- **With evaluators** that score production data automatically. There are [different kinds of evaluators](/academy/evaluate/writing-evaluators#what-kind-of-evaluator), and arriving at a good set of metrics to measure the quality of your agent is extremely important. More on that in the [Evaluate](/academy/evaluate) section.
 - **Via the [API or SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)** when your application captures something, such as a thumbs-down click, an edited draft, or a support ticket that reopens. This is how most user signals are recorded.
 
 ## Different monitoring practices [#what-you-do-with-it]
@@ -54,7 +45,7 @@ Aggregates tell you whether things are getting better or worse. Chart cost, late
 
 ### Investigate traces with error analysis [#investigate-traces]
 
-Looking at your traces yourself is the most important thing you can do to understand what is going on in your application. Dashboards and scores only measure what you already decided to measure; reading traces shows you how your agent actually behaves and where it goes wrong. Every decision you make, especially in the beginning, is downstream of this: which quality scores to set up, which user signals to capture, and what to fix first. Errors, low quality scores, and negative user signals point you to traces worth opening, and [error analysis](/academy/monitoring/error-analysis) turns that reading into a structured process that groups failures into categories and measures how often each one happens.
+Looking at your traces yourself is the most important thing you can do to understand what is going on in your application. Every decision you make, especially in the beginning, is downstream of this: which quality scores to set up, which user signals to capture, and what to fix first. Errors, low quality scores, and negative user signals help you find interesting traces to look at, and you can do [error analysis](/academy/monitoring/error-analysis) on these to decide what you want to automatically evaluate.
 
 ## Where to start
 
