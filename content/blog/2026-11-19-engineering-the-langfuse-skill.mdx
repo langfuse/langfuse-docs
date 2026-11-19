@@ -6,6 +6,7 @@ tag: engineering, agents, evaluation
 author: Lotte
 ---
 
+import { Frame } from "@/components/Frame";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { SkillBoundaryDiagram } from "@/components/blog/SkillBoundaryDiagram";
 import { SkillEngineeringLoopDiagram } from "@/components/blog/SkillEngineeringLoopDiagram";
@@ -59,7 +60,9 @@ Once someone clones the skill on their machine, you have no control over the har
 
 We added both a `submitFeedback` MCP tool and an API endpoint to submit these. The feedback ends up in a Slack channel we monitor.
 
-<mark className="bg-yellow-200 dark:bg-yellow-900/60 px-1 italic">TODO: add screenshot</mark>
+<Frame fullWidth>
+  ![Langfuse Feedback Intake Slack message showing skill feedback submitted via the public API](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-feedback-slack.png)
+</Frame>
 
 <Callout type="warning">
 Be careful about users accidentally leaking information to you. We added instructions to ask the user for explicit permission before submitting feedback to us.
