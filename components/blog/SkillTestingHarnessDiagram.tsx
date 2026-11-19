@@ -47,7 +47,7 @@ export function SkillTestingHarnessDiagram() {
           <LabeledHorizontalArrow step={1}>
             Webhook POST with{" "}
             <code className="bg-surface-cta-primary px-1 font-mono">
-              skill.commit
+              skill.version
             </code>
           </LabeledHorizontalArrow>
         </div>
@@ -121,7 +121,7 @@ export function SkillTestingHarnessDiagram() {
           <StackArrow step={1}>
             Webhook POST with{" "}
             <code className="bg-surface-cta-primary px-1 font-mono">
-              skill.commit
+              skill.version
             </code>
           </StackArrow>
           <Box>Modal webhook &amp; orchestrator</Box>
