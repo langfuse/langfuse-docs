@@ -1,0 +1,186 @@
+/*
+ * Design mockup: Langfuse reskinned with the ClickHouse visual identity
+ * (https://clickhouse.design). Layout and components are unchanged; only
+ * tokens and a few surface-level treatments are overridden.
+ */
+
+:root,
+:root[class~="dark"] {
+  --ch-yellow: #faff69;
+  --ch-yellow-hover: #eef05a;
+  --ch-black: #151515;
+
+  --background: 0 0% 8%;
+  --foreground: 0 0% 100%;
+  --muted: 0 0% 16%;
+  --muted-foreground: 0 0% 63%;
+  --popover: 0 0% 11%;
+  --popover-foreground: 0 0% 100%;
+  --card: 0 0% 11%;
+  --card-foreground: 0 0% 100%;
+  --ring: 62 100% 71%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --primary: 62 100% 71%;
+  --primary-foreground: 0 0% 8%;
+  --secondary: 0 0% 16%;
+  --secondary-foreground: 0 0% 100%;
+  --accent: 0 0% 16%;
+  --radius: 0.25rem;
+
+  --line-structure: #323232;
+  --line-divider-dash: #2a2a2a;
+  --line-cta: #8a8a8a;
+  --line-code-border: #3a3a3a;
+
+  --surface-bg: #151515;
+  --surface-1: #1b1b1b;
+  --surface-2: #262626;
+  --surface-code: #0f0f0f;
+  --surface-cta-primary: var(--ch-yellow);
+  --surface-beige-accent: #262626;
+  --surface-button-grey: #ffffff1a;
+  --surface-code-grey: #262626;
+  --surface-code-button: #3a3a3a;
+
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-tertiary: #9a9a9a;
+  --text-disabled: #5a5a5a;
+  --text-code-secondary: #ffffff80;
+  --text-links: var(--ch-yellow);
+  --text-code-orange: #ffb86b;
+  --text-code-pink: #ff8ab4;
+  --text-code-blue: #8ab4ff;
+
+  --color-fd-background: #151515;
+  --color-fd-foreground: #ffffff;
+  --color-fd-card: #1b1b1b;
+  --color-fd-card-foreground: #ffffff;
+  --color-fd-popover: #1b1b1b;
+  --color-fd-popover-foreground: #ffffff;
+  --color-fd-muted: #262626;
+  --color-fd-muted-foreground: #9a9a9a;
+  --color-fd-accent: #262626;
+  --color-fd-accent-foreground: #ffffff;
+  --color-fd-primary: var(--ch-yellow);
+  --color-fd-primary-foreground: #151515;
+  --color-fd-secondary: #262626;
+  --color-fd-secondary-foreground: #ffffff;
+  --color-fd-ring: var(--ch-yellow);
+
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--surface-1) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Söhne is the ClickHouse display face; Inter at heavy weight with tight
+   tracking stands in for it where Söhne is not licensed. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Söhne", var(--font-inter), system-ui, sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.035em;
+}
+h1 {
+  letter-spacing: -0.045em;
+}
+
+::selection {
+  background: var(--ch-yellow);
+  color: var(--ch-black);
+}
+
+/* Yellow is the hero, not an accent: solid highlight bars, black type. */
+.bg-\[\#FBFF7A\],
+.bg-\[\#fbff7a\] {
+  background-color: var(--ch-yellow) !important;
+  mix-blend-mode: normal !important;
+  height: 1.04em !important;
+}
+.bg-\[\#FBFF7A\] + span,
+.bg-\[\#fbff7a\] + span,
+.bg-surface-cta-primary + span {
+  color: var(--ch-black);
+}
+.mix-blend-multiply {
+  mix-blend-mode: normal !important;
+}
+.bg-surface-cta-primary,
+.bg-surface-cta-primary * {
+  color: var(--ch-black) !important;
+}
+
+/* Primary buttons: yellow fill, black label. */
+[class~="bg-text-primary"][class~="text-surface-bg"] {
+  background-color: var(--ch-yellow) !important;
+  border-color: var(--ch-yellow) !important;
+  color: var(--ch-black) !important;
+}
+[class~="bg-text-primary"][class~="text-surface-bg"]:hover {
+  background-color: var(--ch-yellow-hover) !important;
+}
+[class~="bg-text-primary"][class~="text-surface-bg"] kbd,
+[class~="bg-text-primary"][class~="text-surface-bg"] span[class*="border"] {
+  border-color: rgba(21, 21, 21, 0.25) !important;
+  background-color: rgba(21, 21, 21, 0.12) !important;
+  color: var(--ch-black) !important;
+}
+
+/* Announcement bar flips to the brand yellow. */
+.bg-black.text-white,
+[class~="bg-text-primary"][class~="text-white"] {
+  background-color: var(--ch-yellow) !important;
+  color: var(--ch-black) !important;
+}
+.bg-black.text-white a {
+  color: var(--ch-black) !important;
+}
+
+/* Industrial grid instead of the light PNG pattern. */
+.pattern-bg,
+#nd-page {
+  background-color: var(--surface-bg) !important;
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+}
+.pattern-bg::before {
+  background: radial-gradient(
+    circle 50vmax at var(--cursor-x, 50%) var(--cursor-y, 50%),
+    rgb(21 21 21 / 0),
+    rgb(21 21 21 / 0.9)
+  ) !important;
+}
+
+/* Monochrome black integration marks without a dark variant. */
+img[src*="anthropic"],
+img[src*="xai_icon"],
+img[src*="vercel_ai_gateway"],
+img[src*="ollama"],
+img[src*="github_copilot"],
+img[src*="mastra"],
+img[src*="agno"] {
+  filter: brightness(0) invert(1);
+}
+
+/* Light-only feature illustrations: invert to line art on black. */
+img[src*="/media/observability."],
+img[src*="/media/evaluation."],
+img[src*="/media/prompt."],
+img[src*="/media/playground."],
+img[src*="/media/experiments."],
+img[src*="/media/human."],
+img[src*="/media/metrics."],
+img[src*="/media/visual-security."] {
+  filter: invert(1) hue-rotate(180deg) grayscale(1) contrast(1.1);
+  mix-blend-mode: screen;
+}
