@@ -20,7 +20,7 @@
 
 - Search the existing docs before you treat an addition as new.
 - Fail a duplicate procedure/reference list/explanation. These should be replaced by a short description linking to the page owning that item instead.
-- A snippet that is the same block on many pages, should be a shared component, such as `components-mdx/env-python.mdx`.
+- A snippet that is the same block on many pages, should be a shared component, such as `components-mdx/env-python.mdx`. A shared component is not duplication when its content matters equally on each page that embeds it.
 
 ### Place
 

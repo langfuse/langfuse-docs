@@ -138,7 +138,7 @@ These rules cover pages in `content/docs/`, integration guides in `content/integ
 - **Changelog** entries announce what a user can now do. They live in `content/changelog/`, including when the docs already explain the feature.
 
 - Before you add or restructure a page, open one or more equivalent pages in an established product area, such as `content/docs/observability/` or `content/docs/evaluation/`, and match their structure, components, and sidebar position. When a product area has these pages, keep this sidebar order: Overview, Get started, Concepts, Features, Integrations, Troubleshooting and FAQ.
-- each docs fact has 1 home (source of truth), if the fact is relevant on other pages, these pages link to that source of truth instead of replicating the content.
+- each docs fact has 1 home (source of truth), if the fact is relevant on other pages, these pages link to that source of truth instead of replicating the content. When the fact matters equally on several pages and no single page owns it, keep it in one shared component that each page embeds.
 
 Once you decide what type of page the content should be on, always read the section about that page type in [Page type structure and content](page-types.md). It's imperative that you judge your change/addition with this context in mind.
 
