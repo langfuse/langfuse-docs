@@ -81,17 +81,25 @@ export function SkillUniqueClonersChart() {
                             ? "opacity-100"
                             : "opacity-0 group-focus-visible:opacity-100",
                         )}
-                        style={{ bottom: `calc(${height} + 4px)` }}
+                        style={{ bottom: `calc(${height} + 10px)` }}
                       >
                         {formatNumber(day.unique)}
                       </span>
                       <span
                         aria-hidden="true"
                         className={cn(
-                          "w-full max-w-[26px] rounded-t bg-line-cta transition-opacity",
-                          isDimmed ? "opacity-45" : "opacity-100",
+                          "w-[1.5px] bg-line-cta transition-opacity",
+                          isDimmed ? "opacity-35" : "opacity-100",
                         )}
                         style={{ height }}
+                      />
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "absolute left-1/2 h-2.5 w-2.5 -translate-x-1/2 translate-y-1/2 rounded-full border border-line-cta bg-surface-cta-primary transition-opacity",
+                          isDimmed ? "opacity-35" : "opacity-100",
+                        )}
+                        style={{ bottom: height }}
                       />
                     </button>
                   </li>
