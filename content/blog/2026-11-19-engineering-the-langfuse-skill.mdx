@@ -32,19 +32,19 @@ By now, a lot has changed, and our setup has matured significantly. We now have 
 
 ## Let's discuss the architecture of this whole operation [#architecture]
 
-### Both an external and internal skill [#both-external-and-internal]
+### Two ways skills are used [#two-ways-skills-are-used]
 
-How you evaluate and improve an agent skill depends on whether you control the environment where it runs. In the [Langfuse Academy](/academy/ai-engineering-loop), we describe improving AI applications through the **AI engineering loop**: an online half (`Trace` and `Monitor` on live traffic) connected to an offline half (`Build datasets`, `Experiment`, and `Evaluate` before shipping).
+Before going into the complete setup, we should talk about the different ways skills are used, and how this influences how you evaluate them.
 
-- **Internal skills** are built for use inside your own company or your own product. Because the coding agents or assistants using the skill run inside your organization, you can trace them in Langfuse, attach [skill metadata](/docs/skill-management/tracing), and observe when the skill is loaded and whether it helped. That gives you the full AI engineering loop, from production traces back into datasets and experiments.
+- **Skills for an agent you build** act almost like a more complex, modular system prompt for an agent you own. Because you control the agent harness, tools, and environment, you can trace every run in Langfuse, attach [skill metadata](/docs/skill-management/tracing), and see when the skill loads and whether it helped. That gives you the full [AI engineering loop](/academy/ai-engineering-loop), from production traces back into datasets and experiments.
 
 <SkillEngineeringLoopDiagram mode="internal" />
 
-- **External skills** are distributed publicly for other people to install into their own coding agents. Once a developer clones `langfuse/skills` onto their laptop, `Trace` and `Monitor` are unavailable: you have no visibility into how their agent runs, which files it reads, or where it gets stuck. You can still measure and improve skill quality by running the offline half of the loop: curating datasets of representative user tasks, running coding agents against them with a candidate version of the skill, evaluating the resulting traces, and publishing a new skill version.
+- **Distributed skills** are shipped for other people to install into their own coding agents. Once someone clones `langfuse/skills` into Claude Code, Codex, or Cursor on their machine, you have no control over the harness and no direct observability into how the agent runs, which files it reads, or where it gets stuck. Without `Trace` and `Monitor`, you evaluate and improve the skill through the offline half of the loop: curating datasets of representative user tasks, running coding agents against them with a candidate version of the skill, inspecting the resulting traces, and publishing a new skill version.
 
 <SkillEngineeringLoopDiagram mode="offline" />
 
-The Langfuse skill is both. External developers clone it from [`langfuse/skills`](https://github.com/langfuse/skills) into their own coding agents, and we run the same `references/*.md` workflow files inside [Halo](/blog/2026-10-23-halo), our in-app assistant.
+The Langfuse skill sits in both camps. External developers clone it from [`langfuse/skills`](https://github.com/langfuse/skills) into their own coding agents, and we run the same `references/*.md` workflow files inside [Halo](/blog/2026-10-23-halo), our in-app assistant.
 
 ### Skill feedback [#skill-feedback]
 
