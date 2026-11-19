@@ -90,8 +90,6 @@ Both contribute value to the overall loop: Halo feeds live production traces (tr
 
 ## Offline evaluation setup for an agent skill [#offline-test-harness]
 
-You cannot test an agent skill in a standard prompt playground. A skill governs multi-turn behavior across tools and files: whether the agent recognizes the skill applies, which reference file it opens, which CLI flags it passes, how it edits an existing codebase, and how it recovers from errors. Testing that requires running real coding agents inside isolated repositories.
-
 Building on our [initial local evaluation script](/blog/2026-02-26-evaluate-ai-agent-skills), we moved to a shared service on Modal connected directly to Langfuse datasets through [remote experiment webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Datasets, versioned skills, experiment triggers, execution traces, and side-by-side run comparisons all stay in Langfuse.
 
 <SkillTestingHarnessDiagram />
