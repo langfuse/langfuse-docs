@@ -26,6 +26,10 @@ My personal Muse agent, Dr. Doodle, lives in my WhatsApp and slides into my DMs 
 
 **Reactive agent:** an agent that acts when triggered, on a task it was given.
 
+<Frame fullWidth className="w-full my-8">
+  ![Diagram comparing a reactive agent, where a trigger always leads to the agent acting, with a proactive agent, where a trigger and a standing goal feed into worth_acting_on(), which either acts (notify, suggest, ask or act), stays silent, or waits and schedules its own next trigger](/images/blog/2026-11-19-evaluating-proactive-agents/reactive-vs-proactive.png)
+</Frame>
+
 Under the hood, both are built from the same parts: instructions, tools, an agent loop, memory and a trigger. The difference is the goal and the decision. Some examples:
 
 | Case                                                                      | Proactive? | Why                                                           |
@@ -44,10 +48,6 @@ The whole distinction fits in two lines:
 
 - **Reactive:** trigger → act
 - **Proactive:** trigger → decide _whether, when and how far_ → act (or not)
-
-<Frame fullWidth className="w-full my-8">
-  ![Diagram comparing a reactive agent, where a trigger always leads to the agent acting, with a proactive agent, where a trigger and a standing goal feed into worth_acting_on(), which either acts (notify, suggest, ask or act), stays silent, or waits and schedules its own next trigger](/images/blog/2026-11-19-evaluating-proactive-agents/reactive-vs-proactive.png)
-</Frame>
 
 In code, it's one extra step before the agent runs:
 
@@ -108,7 +108,7 @@ So the decision itself needs to be in the trace. For every event that reaches th
 
 Being too eager is a core risk, it is Dr. Doodle reminding me 5x about a package I already picked up. But it can also have security consequences. [One user reported](https://proton.me/blog/proactive-ai) that Instinct hit a login wall while buying something and reset the user's password instead of asking.
 
-**The costs are not symmetric.** A missed nudge costs little. A wrong purchase costs money and trust. So don't tune one global threshold. Set a stricter bar for actions that are expensive or hard to undo, and a looser one for a suggestion the user can ignore. [Research on proactive agents](https://www.emergentmind.com/papers/2602.01532) frames it the same way: intervene only when the expected value beats the cost of a false alarm.
+**The costs are not symmetric.** A missed nudge costs little. A wrong purchase costs money and trust. So don't tune one global threshold. Set a stricter bar for actions that are expensive or hard to undo, and a looser one for a suggestion the user can ignore.
 
 ## Build a dataset of moments [#build-a-dataset-of-moments]
 
