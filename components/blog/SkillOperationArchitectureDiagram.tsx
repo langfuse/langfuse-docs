@@ -35,56 +35,42 @@ export function SkillOperationArchitectureDiagram() {
             <marker
               id={arrowId}
               viewBox="0 0 10 10"
-              refX="8.5"
+              refX="9"
               refY="5"
-              markerWidth="7"
-              markerHeight="7"
+              markerWidth="6"
+              markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path
-                d="M1 1.5 L8.5 5 L1 8.5"
-                fill="none"
-                stroke="var(--line-cta)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
             </marker>
             <marker
               id={arrowMutedId}
               viewBox="0 0 10 10"
-              refX="8.5"
+              refX="9"
               refY="5"
-              markerWidth="7"
-              markerHeight="7"
+              markerWidth="6"
+              markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path
-                d="M1 1.5 L8.5 5 L1 8.5"
-                fill="none"
-                stroke="var(--text-tertiary)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-tertiary)" />
             </marker>
           </defs>
 
           {/* Top dashed feedback loop from external coding agents into Datasets and Experiment */}
           <path
-            d="M 532 304 L 696 304 L 696 22 L 338 22 L 338 63"
+            d="M 532 304 L 696 304 L 696 22 L 338 22 L 338 65"
             fill="none"
             stroke="var(--text-tertiary)"
-            strokeWidth="1.4"
-            strokeDasharray="6 4"
+            strokeWidth="0.95"
+            strokeDasharray="4 4"
             markerEnd={`url(#${arrowMutedId})`}
           />
           <path
-            d="M 472 22 L 472 63"
+            d="M 472 22 L 472 65"
             fill="none"
             stroke="var(--text-tertiary)"
-            strokeWidth="1.4"
-            strokeDasharray="6 4"
+            strokeWidth="0.95"
+            strokeDasharray="4 4"
             markerEnd={`url(#${arrowMutedId})`}
           />
           <text
@@ -104,11 +90,11 @@ export function SkillOperationArchitectureDiagram() {
 
           {/* Left dashed feedback loop from Langfuse Halo into Tracing */}
           <path
-            d="M 176 304 L 70 304 L 70 143"
+            d="M 176 304 L 70 304 L 70 141"
             fill="none"
             stroke="var(--text-tertiary)"
-            strokeWidth="1.4"
-            strokeDasharray="6 4"
+            strokeWidth="0.95"
+            strokeDasharray="4 4"
             markerEnd={`url(#${arrowMutedId})`}
           />
 
@@ -123,7 +109,7 @@ export function SkillOperationArchitectureDiagram() {
                 rx="2"
                 fill="var(--surface-bg)"
                 stroke="var(--line-structure)"
-                strokeWidth="1.25"
+                strokeWidth="0.95"
               />
               <text
                 x={station.cx}
@@ -140,10 +126,10 @@ export function SkillOperationArchitectureDiagram() {
                 <line
                   x1={station.x + BOX_W}
                   y1={BOX_MID_Y}
-                  x2={STATIONS[index + 1].x - 3}
+                  x2={STATIONS[index + 1].x - 1}
                   y2={BOX_MID_Y}
-                  stroke="var(--line-cta)"
-                  strokeWidth="1.4"
+                  stroke="var(--text-secondary)"
+                  strokeWidth="0.95"
                   markerEnd={`url(#${arrowId})`}
                 />
               )}
@@ -152,10 +138,10 @@ export function SkillOperationArchitectureDiagram() {
 
           {/* Offline iterate arrow: Evaluate -> Experiment */}
           <path
-            d={`M 592 ${BOX_BOTTOM_Y} L 592 178 L 472 178 L 472 ${BOX_BOTTOM_Y + 3}`}
+            d={`M 592 ${BOX_BOTTOM_Y} L 592 178 L 472 178 L 472 ${BOX_BOTTOM_Y + 1}`}
             fill="none"
-            stroke="var(--line-cta)"
-            strokeWidth="1.4"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
           <text
@@ -170,10 +156,10 @@ export function SkillOperationArchitectureDiagram() {
 
           {/* Evaluate -> Ship to GitHub */}
           <path
-            d={`M 618 ${BOX_BOTTOM_Y} L 618 217 L 409 217`}
+            d={`M 618 ${BOX_BOTTOM_Y} L 618 217 L 407 217`}
             fill="none"
-            stroke="var(--line-cta)"
-            strokeWidth="1.4"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
 
@@ -185,8 +171,8 @@ export function SkillOperationArchitectureDiagram() {
             height="42"
             rx="2"
             fill="var(--surface-cta-primary)"
-            stroke="var(--line-cta)"
-            strokeWidth="1.25"
+            stroke="var(--line-structure)"
+            strokeWidth="0.95"
           />
           <text
             x="336"
@@ -205,8 +191,8 @@ export function SkillOperationArchitectureDiagram() {
             y1="238"
             x2="250"
             y2="284"
-            stroke="var(--line-cta)"
-            strokeWidth="1.4"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
           <line
@@ -214,8 +200,8 @@ export function SkillOperationArchitectureDiagram() {
             y1="238"
             x2="422"
             y2="284"
-            stroke="var(--line-cta)"
-            strokeWidth="1.4"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
 

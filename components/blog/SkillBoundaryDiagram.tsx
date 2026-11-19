@@ -6,8 +6,8 @@ type BoundaryVariant = "own-agent" | "distributed";
 function UserGlyph({ x, y }: { x: number; y: number }) {
   return (
     <g
-      stroke="var(--line-cta)"
-      strokeWidth="1.35"
+      stroke="var(--text-secondary)"
+      strokeWidth="0.95"
       fill="none"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -48,8 +48,8 @@ function HarnessBox({
         height={height}
         rx="2"
         fill="var(--surface-bg)"
-        stroke="var(--line-cta)"
-        strokeWidth="1.25"
+        stroke="var(--line-structure)"
+        strokeWidth="0.95"
       />
       <rect
         x={x + 10}
@@ -119,20 +119,13 @@ export function SkillBoundaryDiagram({
               <marker
                 id={arrowId}
                 viewBox="0 0 10 10"
-                refX="8.5"
+                refX="9"
                 refY="5"
-                markerWidth="7"
-                markerHeight="7"
+                markerWidth="6"
+                markerHeight="6"
                 orient="auto-start-reverse"
               >
-                <path
-                  d="M1 1.5 L8.5 5 L1 8.5"
-                  fill="none"
-                  stroke="var(--line-cta)"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
               </marker>
             </defs>
 
@@ -170,8 +163,8 @@ export function SkillBoundaryDiagram({
               x2="96"
               y2="344"
               stroke="var(--line-divider-dash)"
-              strokeWidth="1.4"
-              strokeDasharray="5 4"
+              strokeWidth="0.95"
+              strokeDasharray="4 4"
             />
             <line
               x1="232"
@@ -179,8 +172,8 @@ export function SkillBoundaryDiagram({
               x2="232"
               y2="344"
               stroke="var(--line-divider-dash)"
-              strokeWidth="1.4"
-              strokeDasharray="5 4"
+              strokeWidth="0.95"
+              strokeDasharray="4 4"
             />
 
             {/* Single skill fanning out to 3 external harnesses */}
@@ -200,10 +193,10 @@ export function SkillBoundaryDiagram({
                 <line
                   x1="60"
                   y1={180 + idx * 4}
-                  x2="272"
+                  x2="274"
                   y2={row.skillsY}
-                  stroke="var(--line-cta)"
-                  strokeWidth="1.35"
+                  stroke="var(--text-secondary)"
+                  strokeWidth="0.95"
                   markerEnd={`url(#${arrowId})`}
                 />
 
@@ -212,10 +205,10 @@ export function SkillBoundaryDiagram({
                 <line
                   x1="380"
                   y1={row.midY}
-                  x2="496"
+                  x2="498"
                   y2={row.midY}
-                  stroke="var(--line-cta)"
-                  strokeWidth="1.35"
+                  stroke="var(--text-secondary)"
+                  strokeWidth="0.95"
                   markerEnd={`url(#${arrowId})`}
                 />
                 <text
@@ -243,8 +236,8 @@ export function SkillBoundaryDiagram({
                   y1={row.midY}
                   x2="558"
                   y2={row.midY}
-                  stroke="var(--line-cta)"
-                  strokeWidth="1.35"
+                  stroke="var(--text-secondary)"
+                  strokeWidth="0.95"
                   markerEnd={`url(#${arrowId})`}
                 />
                 <UserGlyph x={718} y={row.midY} />
@@ -288,20 +281,13 @@ export function SkillBoundaryDiagram({
             <marker
               id={arrowId}
               viewBox="0 0 10 10"
-              refX="8.5"
+              refX="9"
               refY="5"
-              markerWidth="7"
-              markerHeight="7"
+              markerWidth="6"
+              markerHeight="6"
               orient="auto-start-reverse"
             >
-              <path
-                d="M1 1.5 L8.5 5 L1 8.5"
-                fill="none"
-                stroke="var(--line-cta)"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
             </marker>
           </defs>
 
@@ -339,8 +325,8 @@ export function SkillBoundaryDiagram({
             x2="96"
             y2="228"
             stroke="var(--line-divider-dash)"
-            strokeWidth="1.4"
-            strokeDasharray="5 4"
+            strokeWidth="0.95"
+            strokeDasharray="4 4"
           />
           <line
             x1="490"
@@ -348,8 +334,8 @@ export function SkillBoundaryDiagram({
             x2="490"
             y2="228"
             stroke="var(--line-divider-dash)"
-            strokeWidth="1.4"
-            strokeDasharray="5 4"
+            strokeWidth="0.95"
+            strokeDasharray="4 4"
           />
 
           {/* Skill -> harness -> agent inside Your environment */}
@@ -366,10 +352,10 @@ export function SkillBoundaryDiagram({
           <line
             x1="60"
             y1="84"
-            x2="210"
+            x2="212"
             y2="84"
-            stroke="var(--line-cta)"
-            strokeWidth="1.35"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
 
@@ -378,10 +364,10 @@ export function SkillBoundaryDiagram({
           <line
             x1="318"
             y1="84"
-            x2="424"
+            x2="426"
             y2="84"
-            stroke="var(--line-cta)"
-            strokeWidth="1.35"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
           <text
@@ -410,8 +396,8 @@ export function SkillBoundaryDiagram({
             y1="84"
             x2="486"
             y2="84"
-            stroke="var(--line-cta)"
-            strokeWidth="1.35"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
           <line
@@ -419,8 +405,8 @@ export function SkillBoundaryDiagram({
             y1="142"
             x2="486"
             y2="86"
-            stroke="var(--line-cta)"
-            strokeWidth="1.35"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
           <line
@@ -428,8 +414,8 @@ export function SkillBoundaryDiagram({
             y1="200"
             x2="486"
             y2="89"
-            stroke="var(--line-cta)"
-            strokeWidth="1.35"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.95"
             markerEnd={`url(#${arrowId})`}
           />
 
