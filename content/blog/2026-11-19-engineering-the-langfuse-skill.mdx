@@ -88,6 +88,25 @@ Everything starts from a single source of truth in [`langfuse/skills`](https://g
 
 Both contribute value to the overall loop: Halo feeds live production traces (tracing & monitoring), while external coding agents are used more broadly and can give feedback through the feedback endpoints, although this is less frequent. These then feed into the evals used for measuring experiment results.
 
+## Online observability and choosing what to improve [#online-observability]
+
+Before you can improve a skill, you need to see what happens during real agent runs. With [Langfuse skill tracing](/docs/skill-management/tracing), we attach the list of available skill versions to Halo's generations and skill-loading tool calls (`loadSkill`, `skill_read`, `Read`), alongside every MCP call, validation error, and user follow-up message.
+
+In a trace, a skill invocation shows up at two levels:
+
+- **On the generation:** you see which skill versions were **Available** to the model and whether it **Requested** a skill.
+- **On the skill-loading tool call:** you see the exact skill version and the specific files (`SKILL.md` and individual `references/*.md` files) that were **Loaded** into context.
+
+<mark className="bg-yellow-200 dark:bg-yellow-900/60 px-1 italic">TODO: add screenshot of a trace showing available skills and a skill invocation</mark>
+
+Across runs, each skill version's **Usage** view aggregates available vs. loaded counts and breaks down loads per file, making it easy to spot reference files that rarely trigger or jump straight to the traces that loaded a given file.
+
+<mark className="bg-yellow-200 dark:bg-yellow-900/60 px-1 italic">TODO: add screenshot of skill usage / loaded files across traces</mark>
+
+To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request. Reviewing those runs surfaces concrete failure modes: prompts where the agent never loaded the right reference file, instructions that led to repeated tool errors, or workflows the skill did not cover yet.
+
+Each recurring pattern becomes a test case in our offline datasets, giving us a clear target before we edit the skill. For a deeper dive into the specific metrics we track and which evaluations we prioritize from these signals, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
+
 ## Offline evaluation setup for an agent skill [#offline-test-harness]
 
 Building on our [initial local evaluation script](/blog/2026-02-26-evaluate-ai-agent-skills), we moved to a shared service on Modal connected directly to Langfuse datasets through [remote experiment webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Datasets, versioned skills, experiment triggers, execution traces, and side-by-side run comparisons all stay in Langfuse.
