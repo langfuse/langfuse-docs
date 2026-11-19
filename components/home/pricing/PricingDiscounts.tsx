@@ -22,14 +22,6 @@ const discounts = [
     },
   },
   {
-    name: "Non-profits",
-    description: "USD 199 in credits / month",
-    cta: {
-      text: "Learn more and apply",
-      href: "/non-profit",
-    },
-  },
-  {
     name: "Open-source projects",
     description: "USD 300 in credits / month, first year",
   },
@@ -41,7 +33,7 @@ export const PricingDiscounts = () => (
       <Heading as="h2" size="normal" className="text-left mb-4">
         Discounts
       </Heading>
-      <div className="grid grid-cols-1 mt-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 mt-3 sm:grid-cols-2 lg:grid-cols-3">
         {discounts.map((discount) => (
           <CornerBox
             key={discount.name}
@@ -76,9 +68,9 @@ export const PricingDiscounts = () => (
         <Link href="mailto:support@langfuse.com" className="underline">
           support@langfuse.com
         </Link>{" "}
-        to apply for a discount. We want all startups, educational users,
-        non-profits and open source projects to build with Langfuse and are
-        happy to work with you to make that happen.
+        to apply for a discount. We want all startups, educational users and
+        open source projects to build with Langfuse and are happy to work with
+        you to make that happen.
       </Text>
     </div>
   </div>
