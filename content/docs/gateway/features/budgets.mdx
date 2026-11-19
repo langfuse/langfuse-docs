@@ -12,7 +12,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 Budgets are spend limits: they cap what gateway traffic may cost in USD. Once a budget is reached, the gateway rejects new requests until the budget resets. Requests that are already in flight still complete.
 
-You manage budgets under **AI Gateway → Budgets**. The page shows spend over time and lists every user and gateway key with its budget.
+You manage budgets under **AI Gateway → Budgets**.
 
 <Frame fullWidth>
   ![Budgets page with the organization budget, spend over time, and a table of gateway keys with their spend against each budget](/images/docs/ai-gateway/budgets.png)
@@ -31,7 +31,7 @@ A request counts against every budget that applies to it: its key's budget, the 
 
 ## Set a budget [#set-a-budget]
 
-Select **Add budget**, or **Edit budget** on a row in the **Users** or **API keys** table. Select several rows to change their budgets at once. You can also set a budget when you [create a key](/docs/gateway/features/api-keys#create-a-key).
+Select **Add budget**, or **Edit budget** on a row in the **Users** or **API keys** table. You can also set a budget when you [create a key](/docs/gateway/features/api-keys#create-a-key).
 
 A budget resets daily (00:00 UTC), weekly (Monday), monthly (on the 1st), or never. It counts spend from when you set it. Changing the amount keeps the spend counted so far; changing the reset interval starts counting again.
 
@@ -45,7 +45,7 @@ A budget resets daily (00:00 UTC), weekly (Monday), monthly (on the 1st), or nev
 
 A default budget applies to every key, or every user, that has no budget of its own, including service account keys. Each key or user counts its own spend against the default; they don't share it. Admins and owners set one default for keys and one for users, from the **API keys** and **Users** tables.
 
-A key's or user's own budget replaces the default. Removing it puts the key or user back on the default. Rows on the default show a **Default** tag.
+A key's or user's own budget replaces the default. Removing it puts the key or user back on the default.
 
 ## Organization budget [#organization-budget]
 
