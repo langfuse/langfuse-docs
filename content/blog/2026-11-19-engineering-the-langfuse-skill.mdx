@@ -28,6 +28,12 @@ By now, a lot has changed, and our setup has matured significantly. We now have 
 
 <SkillUniqueClonersChart />
 
+<p className="italic">
+  <span className="bg-surface-cta-primary px-1 text-text-primary">
+    TODO: Add a section on &quot;why is this so complicated&quot; or describe that skills can be used in 2 ways (as a more complicated prompt for an agent you are building, or to distribute knowledge/&quot;skills&quot; across people who then use it with their own coding agent).
+  </span>
+</p>
+
 ## Let's discuss the architecture of this whole operation [#architecture]
 
 Everything starts from a single source of truth: the [`langfuse/skills`](https://github.com/langfuse/skills) repository on GitHub, which holds `SKILL.md` and the workflow files under `references/`. From there, the skill ships to both external coding agents and [Halo](/blog/2026-10-23-halo) (through [Langfuse Skill Management](/docs/skill-management/overview)), and feeds back into one evaluation loop across [Langfuse datasets](/docs/evaluation/experiments/datasets) and [Modal](https://modal.com):
