@@ -3,9 +3,6 @@ import stats from "./design-pr-stats.json";
 export function DesignPrStats() {
   return (
     <figure className="not-prose py-6">
-      <figcaption className="mb-4 text-center text-sm text-primary/60">
-        {stats.caption}
-      </figcaption>
       <div className="grid gap-3 md:grid-cols-3">
         {stats.metrics.map((metric) => {
           const max = Math.max(...metric.values);
@@ -55,9 +52,9 @@ export function DesignPrStats() {
           );
         })}
       </div>
-      <p className="mt-3 text-center text-sm leading-relaxed text-text-tertiary">
+      <figcaption className="mt-3 text-center text-sm leading-relaxed text-text-tertiary">
         {stats.note}
-      </p>
+      </figcaption>
     </figure>
   );
 }
