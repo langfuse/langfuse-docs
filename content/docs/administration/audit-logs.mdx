@@ -64,41 +64,44 @@ You can export audit logs directly from the UI. Thereby you can analyze your dat
 
 ## Event Types and Data Capture
 
-### Auditable Resources
+### Auditable Resources [#auditable-resources]
 
 Langfuse tracks specific actions across all system resources.
-The following table shows the exact resource types and actions that are logged:
+The following table shows the exact resource types and actions that are logged.
+When [read-access logging](#read-access) is on, access events add `list` and `read` on traces, observations, scores, sessions, and experiments; `download` on traces and observations; and `export` on batch exports.
 
-| Resource                     | Actions                                               |
-| ---------------------------- | ----------------------------------------------------- |
-| **Annotation Queue**         | create, delete, update                                |
-| **Annotation Queue Item**    | complete, create, delete                              |
-| **API Key**                  | create, delete, update                                |
-| **Batch Action**             | create, delete                                        |
-| **Batch Export**             | create                                                |
-| **Blob Storage Integration** | update                                                |
-| **Comment**                  | create, delete                                        |
-| **Dataset**                  | create, delete, update                                |
-| **Dataset Item**             | create, delete, update                                |
-| **Dataset Run**              | delete                                                |
-| **Evaluation Template**      | create                                                |
-| **Job**                      | create, delete, update                                |
-| **LLM API Key**              | create, delete                                        |
-| **Membership**               | create, delete                                        |
-| **Membership Invitation**    | create, delete                                        |
-| **Model**                    | create, delete, update                                |
-| **Organization**             | create, delete, update                                |
-| **Organization Membership**  | create, delete, update                                |
-| **PostHog Integration**      | delete, update                                        |
-| **Project**                  | create, delete, transfer, update                      |
-| **Project Membership**       | create, delete, update                                |
-| **Prompt**                   | create, delete, promote, setLabel, update, updateTags |
-| **Prompt Protected Label**   | create                                                |
-| **Score**                    | create, delete, update                                |
-| **Score Config**             | create, update                                        |
-| **Session**                  | bookmark, publish                                     |
-| **Stripe Checkout Session**  | create                                                |
-| **Trace**                    | bookmark, delete, publish, updateTags                 |
+| Resource                     | Actions                                                     |
+| ---------------------------- | ----------------------------------------------------------- |
+| **Annotation Queue**         | create, delete, update                                      |
+| **Annotation Queue Item**    | complete, create, delete                                    |
+| **API Key**                  | create, delete, update                                      |
+| **Batch Action**             | create, delete                                              |
+| **Batch Export**             | create, download, export                                    |
+| **Blob Storage Integration** | update                                                      |
+| **Comment**                  | create, delete                                              |
+| **Dataset**                  | create, delete, update                                      |
+| **Dataset Item**             | create, delete, update                                      |
+| **Dataset Run**              | delete                                                      |
+| **Evaluation Template**      | create                                                      |
+| **Experiment**               | list, read                                                  |
+| **Job**                      | create, delete, update                                      |
+| **LLM API Key**              | create, delete                                              |
+| **Membership**               | create, delete                                              |
+| **Membership Invitation**    | create, delete                                              |
+| **Model**                    | create, delete, update                                      |
+| **Observation**              | download, list, read                                        |
+| **Organization**             | create, delete, update                                      |
+| **Organization Membership**  | create, delete, update                                      |
+| **PostHog Integration**      | delete, update                                              |
+| **Project**                  | create, delete, transfer, update                            |
+| **Project Membership**       | create, delete, update                                      |
+| **Prompt**                   | create, delete, promote, setLabel, update, updateTags       |
+| **Prompt Protected Label**   | create                                                      |
+| **Score**                    | create, delete, list, read, update                          |
+| **Score Config**             | create, update                                              |
+| **Session**                  | bookmark, list, publish, read                               |
+| **Stripe Checkout Session**  | create                                                      |
+| **Trace**                    | bookmark, delete, download, list, publish, read, updateTags |
 
 ### State Capture
 
