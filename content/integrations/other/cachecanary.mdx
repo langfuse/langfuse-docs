@@ -1,0 +1,108 @@
+---
+title: "Prompt Cache Hit Rate on Amazon Bedrock with CacheCanary and Langfuse"
+sidebarTitle: CacheCanary
+logo: /images/integrations/cachecanary_icon.svg
+description: "Measure your Claude prompt cache hit rate on Amazon Bedrock, and what cache misses cost, from the generations Langfuse already records."
+category: Integrations
+---
+
+# Prompt cache hit rate with CacheCanary and Langfuse
+
+Prompt caching on Amazon Bedrock bills cached prompt text at a fraction of the normal input price. When caching stops working, nothing fails: requests still succeed and the input cost goes up. Langfuse records the cache read and cache write tokens of each generation when your integration reports them, so you can measure your cache hit rate from the traces you already have.
+
+[CacheCanary](https://github.com/Haarris/cachecanary) reads those token counts through the Langfuse public API and reports, per model, how much of your prompt was read from the cache and how much the misses cost. You don't need to turn on Bedrock model invocation logging.
+
+## What is CacheCanary?
+
+CacheCanary is an open-source (Apache-2.0) Python CLI and GitHub Action for Claude prompt caching on Amazon Bedrock. Besides reading Langfuse, it checks saved requests for things that stop caching, explains why one request missed the previous request's cache, and reads Bedrock model invocation logs. Install it with `pip install cachecanary` (Python 3.10 or later).
+
+## What is Langfuse?
+
+[Langfuse](https://langfuse.com) is the open-source platform for LLM observability, evaluation, and prompt management. It records token usage for every generation, including cache reads and writes for providers that report them. Use [Langfuse Cloud](/cloud) or [self-host](/self-hosting) it.
+
+## What you get
+
+- **Hit rate per model.** Cache reads, cache writes, and uncached input for each model over a time window, or grouped by generation name or environment.
+- **The cost of cache misses.** Input cost at Amazon Bedrock list prices, and how much of it was lost compared with a target hit rate. Pass `--price` if you pay a different rate.
+- **A check on usage that doesn't add up.** For some integrations, the token counts stored for a generation don't add up to its total, for example Strands Agents before 1.54 and LiteLLM's `langfuse` callback. When a generation carries a total that the integration sent, CacheCanary rebuilds the uncached input from it and tells you how many generations it corrected.
+- **An alert in CI.** `--min-hit` makes the command fail when a model's hit rate drops below your target, so a scheduled job can warn you.
+
+## How it reads your Langfuse data
+
+- It reads only generations. Agent and span observations can carry the summed usage of the calls nested under them, so counting them would count tokens twice.
+- It uses the token counts, model name, type, and timestamp of each generation. From the [observations API](https://api.reference.langfuse.com/#tag/observations/GET/api/public/v2/observations) (`/api/public/v2/observations`) it requests only the `core`, `basic`, `model`, and `usage` field groups, so inputs, outputs, and metadata are not downloaded. On self-hosted Langfuse versions without the v2 endpoint, it falls back to `/api/public/observations`, which returns whole observations; CacheCanary ignores everything except the fields above.
+- It reads the cache counts under the usage keys that Langfuse integrations store, such as `input_cached_tokens`, `input_cache_read`, `cache_read_input_tokens`, `input_cache_creation`, and `cache_creation_input_tokens`.
+- It runs on your machine or CI runner, and stores nothing. Your API keys and data are not sent anywhere else.
+
+## Get started
+
+<Steps>
+
+### Install CacheCanary
+
+```bash
+pip install cachecanary
+```
+
+### Set your Langfuse API keys
+
+Use the public and secret key of the project you want to check. You can find them in your project settings.
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+# Self-hosted: use the URL of your Langfuse instance
+```
+
+### Read your hit rate
+
+```bash
+cachecanary langfuse --since 7d --environment production --min-hit 0.8
+```
+
+This is the output on the sample records in the CacheCanary repository, which were traced into Langfuse by Strands Agents, LiteLLM, and LangChain, each making one call that writes the cache and one that reads it:
+
+```text
+$ cachecanary langfuse --file tests/fixtures/langfuse_observations_2026-10.json --min-hit 0.8
+us.anthropic.claude-sonnet-4-6: hit 50% over 10 calls (read 29240, write 29240, uncached 100, no usage 0)  <-- below threshold
+  input cost $0.13 at list price; about $0.07 of it lost to cache misses (target: 80% hit rate)
+List prices: Amazon Bedrock on-demand, Oct 2026 (global. IDs at list, others +10%). Use --price for your own rate.
+Read 10 generations.
+2 generation(s): Langfuse's input count did not add up with the total that was sent, so the uncached input was rebuilt from the total (seen with Strands before 1.54 and LiteLLM's langfuse callback).
+```
+
+Half of the cached prompt was read from the cache, which is below the 80% target, so the command exits with code 1.
+
+### Get an alert when the hit rate drops (optional)
+
+Run the check on a schedule with the CacheCanary GitHub Action, with your Langfuse keys stored as repository secrets:
+
+```yaml filename=".github/workflows/cache-hit-rate.yml"
+name: Prompt cache hit rate
+on:
+  schedule:
+    - cron: "0 6 * * 1" # every Monday
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Haarris/cachecanary@v0
+        env:
+          LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+          LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+          LANGFUSE_BASE_URL: https://cloud.langfuse.com
+        with:
+          command: langfuse
+          args: --since 7d --environment production --min-hit 0.8
+```
+
+</Steps>
+
+## Resources
+
+- [CacheCanary on GitHub](https://github.com/Haarris/cachecanary)
+- [Guide: what Langfuse stores for cached Bedrock calls, by integration](https://cachecanary.com/langfuse/)
+- [Langfuse token and cost tracking](/docs/observability/features/token-and-cost-tracking)
+- [Amazon Bedrock prompt caching](https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-caching.html)
