@@ -32,16 +32,16 @@ User signals are things users do or say that show you how they perceived an agen
   lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
 />
 
-## How the data gets onto your traces [#how-data-gets-onto-traces]
+## Multiple ways of getting this data onto your traces [#how-data-gets-onto-traces]
 
 Everything you monitor ends up either as a standard field on your traces or as a [score](/docs/evaluation/scores/overview) attached to them.
 
 **Standard fields** come with instrumentation: latency, token usage and cost, model, and errors, plus the metadata, tags, users, and sessions you set when [tracing](/academy/tracing). Most operational metrics need nothing more.
 
-**Scores** hold everything that needs a judgment. You attach them in three ways:
+**Scores** hold everything else. You attach them in three ways:
 
-- **Manually**, by reviewing traces and [scoring them in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) or working through an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues). It's slow, but it's how you learn what good looks like, and it gives you labels to check automated evaluators against.
-- **With evaluators** that score production data automatically: [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) for quality judgments with written reasoning, [decision models](/docs/evaluation/evaluation-methods/decision-models) for high-volume checks with a fixed set of answers, such as detecting conversation signals, and [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) for deterministic checks. This is how quality scores scale to all of your traffic. The [Evaluate](/academy/evaluate) section covers them in depth.
+- **Manually**, by reviewing traces and [scoring them in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) or working through an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), for example during [error analysis](/academy/monitoring/error-analysis). It's how you learn what good looks like, and it gives you labels to check automated evaluators against.
+- **With evaluators** that score production data automatically. There are [different kinds of evaluators](/academy/evaluate/writing-evaluators#what-kind-of-evaluator), and arriving at a good set of metrics to measure the quality of your application is extremely important. More on that in the [Evaluate](/academy/evaluate) section.
 - **Via the [API or SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)** when your application captures something, such as a thumbs-down click, an edited draft, or a support ticket that reopens. This is how most user signals are recorded.
 
 ## What you do with it [#what-you-do-with-it]
