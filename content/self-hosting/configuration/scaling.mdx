@@ -149,7 +149,7 @@ Langfuse stores observability data in the following ClickHouse tables, each part
 
 | Table | Timestamp column | Notes |
 | ----- | ---------------- | ----- |
-| `traces` | `timestamp` | Always populated |
+| `traces` | `timestamp` | Only in the legacy and dual write modes |
 | `scores` | `timestamp` | Always populated |
 | `events_full` | `start_time` | v4 default write path |
 | `events_core` | `start_time` | v4 default write path |
@@ -165,16 +165,16 @@ ALTER TABLE events_core MODIFY TTL start_time + INTERVAL 30 DAY;
 ALTER TABLE observations MODIFY TTL start_time + INTERVAL 30 DAY;
 ```
 
-On a clustered deployment, append `ON CLUSTER <cluster_name>` to each statement.
+On a clustered deployment, place `ON CLUSTER <cluster_name>` immediately after the table name, for example `ALTER TABLE traces ON CLUSTER <cluster_name> MODIFY TTL timestamp + INTERVAL 30 DAY;`.
 
-By default ClickHouse expires rows individually, which rewrites the affected data parts. On S3-backed storage this rewrite performs S3 I/O and can be slow. Because Langfuse tables are partitioned monthly, set `ttl_only_drop_parts = 1` so ClickHouse drops a whole partition as soon as every row in it has expired, avoiding per-row rewrites:
+By default ClickHouse expires rows individually, which rewrites the affected data parts. On S3-backed storage this rewrite performs S3 I/O and can be slow. Because Langfuse tables are partitioned monthly, set `ttl_only_drop_parts = 1` so ClickHouse drops each part as soon as every row in it has expired, avoiding per-row rewrites:
 
 ```sql
 ALTER TABLE traces MODIFY SETTING ttl_only_drop_parts = 1;
 -- repeat for each table above
 ```
 
-Keep two caveats in mind: with `ttl_only_drop_parts = 1` a part is dropped only once all of its rows have expired, so rows near a month boundary can linger until the whole partition ages out; and TTL expiry is asynchronous — the default four-hour TTL merge interval is a minimum interval, not a deletion deadline.
+Keep two caveats in mind: with `ttl_only_drop_parts = 1` a part is dropped only once every row in it has expired, so a part spanning a month boundary can linger until its newest row ages out; and TTL expiry is asynchronous — the default four-hour TTL merge interval is a minimum interval, not a deletion deadline.
 
 The following query helps to identify the largest tables in Clickhouse:
 
