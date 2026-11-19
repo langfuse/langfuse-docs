@@ -82,7 +82,7 @@ All three depend on memory. The agent has to know your plans and preferences to 
 
 With a chatbot, every output has a reader: the person who asked. That's free quality control. With a proactive agent, most runs end in "do nothing" or finish in the background, and nobody looks at them.
 
-So the decision itself needs to be in the trace. For every event that reaches the decision step, log:
+So the decision itself needs to be [in the trace](/docs/observability/best-practices). For every event that reaches the decision step, log:
 
 - **The event:** what woke the agent up.
 - **The context:** what it retrieved from memory and connected apps.
@@ -91,14 +91,14 @@ So the decision itself needs to be in the trace. For every event that reaches th
 - **The rationale:** why it decided this.
 
 <Callout type="info">
-  If you split `worth_acting_on` into a cheap filter (rules, embeddings, or a decision model like [Jev](/blog/2026-09-18-using-typesafes-jev-for-evals)) and an expensive judgment call, as [Navan](https://navan.com/blog/build-proactive-ai-agents) recommends, trace both steps. Otherwise you can't tell whether a missed alert was dropped by the filter or judged harmless.
+  If you split `worth_acting_on` into a cheap filter (rules, embeddings, or a decision model like [Jev](/blog/2026-09-18-using-typesafes-jev-for-evals)) and an expensive judgment call, as [Navan](https://navan.com/blog/build-proactive-ai-agents) recommends, [trace both steps](/docs/observability/features/observation-types). Otherwise you can't tell whether a missed alert was dropped by the filter or judged harmless.
 </Callout>
 
-**Keep the runs that end in "do nothing".** A decision not to act produces no output, so it never shows up in a review queue unless you put it there. [Navan](https://navan.com/blog/build-proactive-ai-agents) makes the same point: staying silent is a valid outcome, and often the right one. That only holds if you can check it.
+**Keep the runs that end in "do nothing".** A decision not to act produces no output, so it never shows up in a [review queue](/docs/evaluation/evaluation-methods/annotation-queues) unless you put it there. [Navan](https://navan.com/blog/build-proactive-ai-agents) makes the same point: staying silent is a valid outcome, and often the right one. That only holds if you can check it.
 
 ## Measure it like a classifier [#measure-it-like-a-classifier]
 
-`worth_acting_on` takes an event and returns a decision given the overall context. **That makes it a classifier, so evaluate it like one.**
+`worth_acting_on` takes an event and returns a decision given the overall context. **That makes it a classifier, so [evaluate it](/docs/evaluation/overview) like one.**
 
 | Failure                       | What it looks like                                                                   | Signals in production                                          |
 | ----------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
@@ -112,12 +112,12 @@ Being too eager is a core risk, it is Dr. Doodle reminding me 5x about a package
 
 ## Build a dataset of moments and run evals [#build-a-dataset-of-moments]
 
-For a chatbot, a dataset item is a question with an expected answer. For a proactive agent, **it's a moment with an expected decision**.
+For a chatbot, a [dataset](/docs/evaluation/experiments/datasets) item is a question with an expected answer. For a proactive agent, **it's a moment with an expected decision**.
 
 - **Input:** the trigger plus a snapshot of the user's memory and instructions. Without it, you can't judge the decision: the same flight delay means "stay silent" for one user and "rebook" for another.
 - **Expected output:** act, wait or stay silent, and how far, plus a short note on why.
-- **Sources** (if based on real failures): flagged traces (dismissals, undos, "why didn't you tell me?"), a random sample including runs where nothing happened, and pairs with the same trigger but different users.
-- **Experiments:** rerun on every change to prompt, model, memory or thresholds. Track precision and recall separately, since more helpful often means more annoying. When a run gets it wrong, check whether it's a judgment bug or a memory bug.
+- **Sources** (if based on real failures): flagged traces ([user feedback](/docs/observability/features/user-feedback) like dismissals, undos, "why didn't you tell me?"), a random sample including runs where nothing happened, and pairs with the same trigger but different users.
+- **Experiments:** [rerun](/docs/evaluation/experiments/experiments-via-sdk) on every change to prompt, model, memory or thresholds, or [in CI](/docs/evaluation/experiments/experiments-ci-cd). [Track precision and recall separately](/docs/evaluation/experiments/compare-experiments), since more helpful often means more annoying. When a run gets it wrong, check whether it's a judgment bug or a memory bug.
 
 It's the same [AI engineering loop](/academy/ai-engineering-loop) as for any agent, with decisions as the unit instead of answers.
 
@@ -126,5 +126,24 @@ It's the same [AI engineering loop](/academy/ai-engineering-loop) as for any age
 The skill, the tools, the loop, the memory and the trigger are parts every agent has. What makes a proactive agent good or bad is one function: whether this moment is worth acting on, when, and how far.
 
 That function runs mostly where nobody is watching. **Make it visible, and it becomes something you can measure and improve.**
+
+## Sources [#sources]
+
+- [Introducing Muse: The World's First Personal AI Agent Built for Everyone](https://about.fb.com/news/2026/09/introducing-muse-personal-ai-agent/amp/), Meta
+- [Introducing Grok Bot 1.0](https://x.ai/news/grok-bot-1-0), xAI
+- [Profoundly Proactive](https://spyglass.org/proactive-ai-is-the-key/), Spyglass
+- [How to build proactive AI agents that only act when needed](https://navan.com/blog/build-proactive-ai-agents), Navan
+- [What is proactive AI](https://proton.me/blog/proactive-ai), Proton
+
+## Further reading [#further-reading]
+
+- [Using TypeSafe's Jev for evals](/blog/2026-09-18-using-typesafes-jev-for-evals): a decision model for cheap classification and eval verdicts.
+- [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse): score every conversation for frustration, corrections and resolution with Jev.
+- [LLM evaluation: methods, best practices, and a practical roadmap](/blog/2025-11-12-evals): the evaluation methods behind this post.
+- [Steal our eval setup for chat agents](/blog/2026-07-16-steal-our-eval-setup): datasets, evaluators and experiments we run on our own agent.
+- [Systematic evaluation of AI agents](/blog/2025-11-06-experiment-interpretation): how to run and interpret experiments.
+- [Comparing open-source AI agent frameworks](/blog/2025-03-19-ai-agent-comparison): the harnesses proactive agents are built on, and how to trace them.
+- [We used autoresearch on our AI skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch): what an eval harness for an agent taught us about writing tests.
+- [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering): which parts of the loop to hand to agents.
 
 <CustomerStoryCTA />
