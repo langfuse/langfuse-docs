@@ -8,11 +8,10 @@ interface StationConfig {
   id: string;
   phase: "Online" | "Offline";
   title: string;
-  note?: string;
   dimmed?: boolean;
 }
 
-const INTERNAL_STATIONS: StationConfig[] = [
+const ACTIVE_STATIONS: StationConfig[] = [
   {
     id: "trace",
     phase: "Online",
@@ -40,73 +39,9 @@ const INTERNAL_STATIONS: StationConfig[] = [
   },
 ];
 
-const OFFLINE_STATIONS: StationConfig[] = [
-  {
-    id: "trace",
-    phase: "Online",
-    title: "Trace",
-    note: "no visibility into external runs",
-    dimmed: true,
-  },
-  {
-    id: "monitor",
-    phase: "Online",
-    title: "Monitor",
-    note: "no visibility into external runs",
-    dimmed: true,
-  },
-  {
-    id: "dataset",
-    phase: "Offline",
-    title: "Build\ndatasets",
-    note: "routing & workflow tasks",
-  },
-  {
-    id: "experiment",
-    phase: "Offline",
-    title: "Experiment",
-    note: "coding agents in Modal",
-  },
-  {
-    id: "eval",
-    phase: "Offline",
-    title: "Evaluate",
-    note: "trace checks & review",
-  },
-];
-
-const CLOSED_STATIONS: StationConfig[] = [
-  {
-    id: "trace",
-    phase: "Online",
-    title: "Trace",
-    note: "Halo runs & skill loads",
-  },
-  {
-    id: "monitor",
-    phase: "Online",
-    title: "Monitor",
-    note: "trace review & user signals",
-  },
-  {
-    id: "dataset",
-    phase: "Offline",
-    title: "Build\ndatasets",
-    note: "Halo cases & tasks",
-  },
-  {
-    id: "experiment",
-    phase: "Offline",
-    title: "Experiment",
-    note: "coding agents in Modal",
-  },
-  {
-    id: "eval",
-    phase: "Offline",
-    title: "Evaluate",
-    note: "trace checks & review",
-  },
-];
+const OFFLINE_STATIONS: StationConfig[] = ACTIVE_STATIONS.map((station) =>
+  station.phase === "Online" ? { ...station, dimmed: true } : station,
+);
 
 // Fixed 1080x380 canvas scaled smoothly to container width (matches LoopDiagram)
 const LEFT_X = [0, 221, 442, 663, 884];
@@ -140,12 +75,7 @@ export function SkillEngineeringLoopDiagram({
   const arrowDarkId = `seld-arrow-dark-${uid}`;
 
   const isClosed = mode !== "offline";
-  const stations =
-    mode === "closed"
-      ? CLOSED_STATIONS
-      : mode === "internal"
-        ? INTERNAL_STATIONS
-        : OFFLINE_STATIONS;
+  const stations = isClosed ? ACTIVE_STATIONS : OFFLINE_STATIONS;
   const deployLabel =
     mode === "closed"
       ? "Publish to GitHub & Skill Management"
@@ -479,30 +409,6 @@ export function SkillEngineeringLoopDiagram({
                 >
                   {station.title}
                 </div>
-
-                {station.note ? (
-                  <div style={{ marginTop: "auto", lineHeight: 1.5 }}>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-mono)",
-                        fontSize: 12,
-                        color: dimmed
-                          ? "var(--text-tertiary)"
-                          : "var(--text-primary)",
-                        letterSpacing: "0.02em",
-                        background: dimmed
-                          ? "none"
-                          : "linear-gradient(transparent 58%, color-mix(in oklab, var(--surface-cta-primary) 80%, transparent) 58% 95%, transparent 95%)",
-                        padding: "0 3px",
-                        marginLeft: -3,
-                        boxDecorationBreak: "clone",
-                        WebkitBoxDecorationBreak: "clone",
-                      }}
-                    >
-                      {station.note}
-                    </span>
-                  </div>
-                ) : null}
               </div>
             );
           })}
