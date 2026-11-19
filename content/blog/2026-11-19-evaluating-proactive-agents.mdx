@@ -110,15 +110,16 @@ Being too eager is a core risk, it is Dr. Doodle reminding me 5x about a package
 
 **The costs are not symmetric.** A missed nudge costs little. A wrong purchase costs money and trust. So don't tune one global threshold. Set a stricter bar for actions that are expensive or hard to undo, and a looser one for a suggestion the user can ignore.
 
-## Build a dataset of moments [#build-a-dataset-of-moments]
+## Build a dataset of moments and run evals [#build-a-dataset-of-moments]
 
-For a chatbot, a dataset item is a question with an expected answer. For a proactive agent, **it's a moment with an expected decision**: the event, a snapshot of the user's memory and instructions, and the right call (act, wait or stay silent, and how far).
+For a chatbot, a dataset item is a question with an expected answer. For a proactive agent, **it's a moment with an expected decision**.
 
-A full snapshot of the context is necessary to evaluate if a decision was right or wrong. The same delayed-flight email means "stay silent" for a user who said "never bother me about delays under an hour," and "rebook" for one who said "rebook me if I'll miss a connection." Pairs like that also test whether the agent uses memory at all.
+- **Input:** the trigger plus a snapshot of the user's memory and instructions. Without it, you can't judge the decision: the same flight delay means "stay silent" for one user and "rebook" for another.
+- **Expected output:** act, wait or stay silent, and how far, plus a short note on why.
+- **Sources** (if based on real failures): flagged traces (dismissals, undos, "why didn't you tell me?"), a random sample including runs where nothing happened, and pairs with the same trigger but different users.
+- **Experiments:** rerun on every change to prompt, model, memory or thresholds. Track precision and recall separately, since more helpful often means more annoying. When a run gets it wrong, check whether it's a judgment bug or a memory bug.
 
-Build it from real traces: the flagged ones (dismissals, undos, "why didn't you tell me?") plus a random sample, including runs where nothing happened. Label the right decision with a short note on why. When the agent got it wrong, note whether it was a judgment bug or a memory bug. They need different fixes.
-
-Then run experiments whenever you change the prompt, model, memory or thresholds, and look at precision and recall separately. More helpful often means more annoying. It's the same [AI engineering loop](/academy/ai-engineering-loop) as for any agent, with decisions as the unit instead of answers.
+It's the same [AI engineering loop](/academy/ai-engineering-loop) as for any agent, with decisions as the unit instead of answers.
 
 ## The decision is the product [#the-decision-is-the-product]
 
