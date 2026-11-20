@@ -127,11 +127,8 @@ Langfuse v4 reads a small set of ClickHouse system tables to schedule background
 Only the columns that Langfuse actually reads need to be granted:
 
 ```sql
--- Partition and part discovery: event propagation, historic backfill, deleted-mask cleaner
+-- Partition and part discovery: event propagation, historic backfill
 GRANT SELECT(database, table, name, partition, partition_id, active, rows) ON system.parts TO 'user';
-
--- Mutation backpressure for the deleted-mask cleaner
-GRANT SELECT(database, table, is_done) ON system.mutations TO 'user';
 
 -- Table engine detection for the historic backfill
 GRANT SELECT(database, name, engine) ON system.tables TO 'user';

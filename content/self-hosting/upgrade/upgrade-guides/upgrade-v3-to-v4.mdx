@@ -200,7 +200,6 @@ GRANT ALTER ADD INDEX, ALTER DROP INDEX, ALTER MATERIALIZE INDEX ON default.* TO
 -- System table reads for event propagation, the historic backfill, and the
 -- v4 transition usage detection
 GRANT SELECT(database, table, name, partition, partition_id, active, rows) ON system.parts TO 'user';
-GRANT SELECT(database, table, is_done) ON system.mutations TO 'user';
 GRANT SELECT(database, name, engine) ON system.tables TO 'user';
 GRANT SELECT ON system.processes TO 'user';
 GRANT SELECT ON system.query_log* TO 'user';
