@@ -1,0 +1,58 @@
+---
+title: Budgets
+seoTitle: "Langfuse AI Gateway budgets: spend limits per key, user, and organization (beta)"
+description: Set budgets that cap what each gateway key, each user, and the whole organization can spend on the Langfuse AI Gateway. The gateway rejects requests once a budget is reached.
+---
+
+import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
+
+# Budgets
+
+<AiGatewayBetaCallout />
+
+Budgets are spend limits: they cap what gateway traffic may cost in USD. Once a budget is reached, the gateway rejects new requests until the budget resets. Requests that are already in flight still complete.
+
+You manage budgets under **AI Gateway → Budgets**.
+
+<Frame fullWidth>
+  ![Budgets page with the organization budget, spend over time, and a table of gateway keys with their spend against each budget](/images/docs/ai-gateway/budgets.png)
+</Frame>
+
+## Budget types [#budget-types]
+
+| Budget                               | Caps                                    | Who can set it                                    |
+| ------------------------------------ | --------------------------------------- | ------------------------------------------------- |
+| API key                              | One gateway key                         | Admins and owners, and any user on their own keys |
+| User                                 | All gateway keys of one user            | Admins and owners                                 |
+| [Default](#default-budgets)          | Each key or user without its own budget | Admins and owners                                 |
+| [Organization](#organization-budget) | All gateway spend of the organization   | Admins and owners                                 |
+
+A request counts against every budget that applies to it: its key's budget, the key owner's user budget, and the organization budget. Whichever is reached first blocks the request.
+
+## Set a budget [#set-a-budget]
+
+Select **Add budget**, or **Edit budget** on a row in the **Users** or **API keys** table. You can also set a budget when you [create a key](/docs/gateway/features/api-keys#create-a-key).
+
+A budget resets daily (00:00 UTC), weekly (Monday), monthly (on the 1st), or never. It counts spend from when you set it. Changing the amount keeps the spend counted so far; changing the reset interval starts counting again.
+
+<Callout type="info">
+  Spend is calculated from model prices, so a key with a budget can only call
+  models that Langfuse has a [price](/docs/observability/features/token-and-cost-tracking)
+  for.
+</Callout>
+
+## Default budgets [#default-budgets]
+
+A default budget applies to every key, or every user, that has no budget of its own, including service account keys. Each key or user counts its own spend against the default; they don't share it. Admins and owners set one default for keys and one for users, from the **API keys** and **Users** tables.
+
+A key's or user's own budget replaces the default. Removing it puts the key or user back on the default.
+
+## Organization budget [#organization-budget]
+
+The organization budget caps the total gateway spend of the organization, across all users and keys. An organization has one organization budget. Admins and owners set it on the Budgets page, which also shows its current spend.
+
+## When a budget is reached [#budget-reached]
+
+The gateway responds with `429` and the error code `spend_limit_exceeded`, and the message names the budget, for example: `This key's user has spent $12.00 of its $10.00 monthly budget.` See [AI Gateway errors](/faq/all/ai-gateway-error-codes) for the full list of error codes.
+
+When a key or user budget is reached, the key owner or user and the organization's owners get an email.

@@ -55,6 +55,7 @@ const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   ogVideo: z.string().nullish(),
   gif: z.string().nullish(),
   badge: z.string().nullish(),
+  showOgInHeader: z.boolean().nullish(),
 });
 
 // Extended schema for customer story pages — preserves all default fields and

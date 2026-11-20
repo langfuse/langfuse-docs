@@ -291,7 +291,7 @@ Both signals are captured as [scores](/docs/evaluation/scores/overview) on every
 
 Traces with a bad score can then be looked at, improved, and added to the datasets if they weren't covered before. One way to do this is using the [error analysis](/academy/monitoring/error-analysis) process.
 
-One iteration through the loop then looks like this: [monitoring](/academy/monitoring#metrics-and-signals) shows a spike of `corrected` drafts in the `troubleshooting` category. The traces reveal the agent keeps citing an outdated export dialog, because the help-article index is stale. The index gets refreshed, the `troubleshooting` dataset is rerun to confirm the fix, and the share of `corrected` drafts drops. No new evaluator comes out of this: a stale index is a [one-time fix](/academy/evaluate/choosing-what-to-evaluate#fix-first), not a failure mode to keep tracking.
+One iteration through the loop then looks like this: [monitoring](/academy/monitoring#aggregate-metrics) shows a spike of `corrected` drafts in the `troubleshooting` category. The traces reveal the agent keeps citing an outdated export dialog, because the help-article index is stale. The index gets refreshed, the `troubleshooting` dataset is rerun to confirm the fix, and the share of `corrected` drafts drops. No new evaluator comes out of this: a stale index is a [one-time fix](/academy/evaluate/choosing-what-to-evaluate#fix-first), not a failure mode to keep tracking.
 
 The share of edited drafts should go down over time. Once drafts go out mostly unchanged across all ticket categories, the agent is ready to face customers.
 

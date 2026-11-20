@@ -1,85 +1,52 @@
 ---
 title: Monitoring
 sidebarTitle: Monitoring
-description: How to make sense of your traces through metrics tracking, signal detection, and quality evaluation.
+description: What to monitor in an LLM application (operational metrics, quality scores, and user feedback signals), how that data gets onto your traces, and how to use it to track trends and find the traces worth investigating.
 ---
 
 # Monitoring
 
 ## How monitoring fits into the loop
 
-[Tracing](/academy/tracing) provides a complete record of what your LLM app is doing — every request, every model call, every tool use. Monitoring is how you make sense of that data. It gives you two things: a continuous view of how your system performs over time, and a way to surface the specific traces worth investigating — errors, user behavior patterns, and cases where something went unexpectedly wrong. Together, they shift you from having data to actually understanding your system well enough to improve it.
+[Tracing](/academy/tracing) provides a complete record of what your LLM app is doing — every request, every model call, every tool use. Monitoring is how you make sense of that data: you decide what to watch, get that data onto your traces, and use it in two ways, to track how your system performs over time and to find the specific traces worth investigating. Together, they shift you from having data to actually understanding your system well enough to improve it.
 
 <LoopDiagram highlight="monitor" />
 
-## Metrics and signals [#metrics-and-signals]
+## What should you monitor? [#what-you-monitor]
 
-It helps to separate monitoring into two distinct activities, because they answer different questions.
+### Operational metrics [#operational-metrics]
 
-**[Aggregate metrics tracking](/docs/metrics/overview)** tells you whether things are getting better or worse over time. Cost, latency, evaluation scores — these become trends you can watch and reason about. Did that prompt change last Tuesday improve anything? Is quality drifting as usage grows?
+Cost, latency, token usage, and error rates tell you whether your application is healthy and affordable to run. They are the first to show when a model update, a prompt change, or a traffic spike makes your application slower, more expensive, or less reliable, and they are what you set budgets and service levels against. Most of them are standard fields on your traces, so you get them as soon as you instrument your application.
 
-**Signal detection** tells you where to look right now. It surfaces individual traces that are worth investigating — an error, a cluster of retries, a user abandoning mid-conversation. The signal is only useful because it's attached to the specific trace that triggered it. That trace is your starting point for understanding what went wrong.
+### Quality scores [#quality-scores]
 
-## Where metrics and signals come from
+Quality scores measure the quality of your agent's execution according to criteria you define, such as whether a response is grounded in the retrieved documents or follows your support policy. They let you keep watching failure modes you want to track, and catch quality drifting as models and usage change. [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) covers which criteria deserve a standing metric.
 
-Both aggregate metrics and signal detection depend on fields attached to observations. A lot of what you need is already there once you instrument properly: latency, token-derived cost, model and route metadata, tool outcomes, and errors typically flow from your client and provider APIs without extra wiring.
+### User feedback signals [#user-signals]
 
-Beyond the built-in fields, you add evaluation — user feedback (explicit ratings or implicit signals like session abandonment), human annotation, and automated evaluator scores — by annotating traces manually or running evaluators where they apply. That data feeds into aggregate charts for tracking trends over time, and into signal rules so individual traces surface when something crosses a threshold you care about.
+User signals are things users do or say that show you how they perceived an agent's output: a thumbs down, a retry, a request for a human, a draft sent without edits. They measure quality as perceived by the user rather than evaluating actual quality. They are useful because they are often cheap and straightforward to implement, and they surface failures you didn't think to evaluate for yourself. [Capturing user signals](/academy/monitoring/capturing-signals) covers the kinds of signals, how to read them, and their biases.
 
-### Explicit and implicit user feedback [#user-feedback]
+## Multiple ways of getting this data onto your traces [#how-data-gets-onto-traces]
 
-[User feedback](/docs/observability/features/user-feedback) is one of the richest sources of signal, but it comes in two forms with different tradeoffs.
+**Standard fields** come with instrumentation: latency, token usage and cost, model, and errors, plus the metadata, tags, users, and sessions you set when [tracing](/academy/tracing). Most operational metrics need nothing more.
 
-**Explicit feedback** is direct: a thumbs up or down, a star rating, a comment left by the user. The signal is unambiguous, but response rates are low and skewed — dissatisfied users respond more often than satisfied ones.
+**Scores** hold everything else. You attach them in three ways:
 
-**Implicit feedback** is derived from behavior: whether a user retried a query, disagreed with the system, copied a response, accepted a suggestion, or abandoned a conversation midway. It requires no user effort and generates high-volume data, but the signals are indirect and need interpretation. These can be surfaced using automated evaluators.
+- **Manually**, by reviewing traces and [scoring them in the UI](/docs/evaluation/evaluation-methods/scores-via-ui) or working through an [annotation queue](/docs/evaluation/evaluation-methods/annotation-queues), for example during [error analysis](/academy/monitoring/error-analysis). It's how you learn what good looks like, and it gives you labels to check automated evaluators against.
+- **With evaluators** that score production data automatically. There are [different kinds of evaluators](/academy/evaluate/writing-evaluators#what-kind-of-evaluator), and arriving at a good set of metrics to measure the quality of your agent is extremely important. More on that in the [Evaluate](/academy/evaluate) section.
+- **Via the [API or SDK](/docs/evaluation/evaluation-methods/scores-via-sdk)** when your application captures something, such as a thumbs-down click, an edited draft, or a support ticket that reopens. This is how most user signals are recorded.
 
-To make this concrete, here are two example applications and how they balance explicit and implicit feedback:
+## Different monitoring practices [#what-you-do-with-it]
 
-<Tabs items={["Customer support chatbot", "Document extraction tool"]}>
-<Tab>
+There are different kinds of monitoring, and in a healthy setup, you should be doing a mix of these.
 
-_A customer support chatbot embedded in a SaaS company's help center. Users can rate the conversation after it ends, and can request a human handoff at any point during the chat._
+### Track aggregate metrics [#aggregate-metrics]
 
-The feedback the team captures:
+Aggregates tell you whether things are getting better or worse. Chart cost, latency, quality scores, and signal rates on [dashboards](/docs/metrics/features/custom-dashboards) to answer questions like: Did your latest prompt change improve anything? Is quality drifting as usage grows? Set [alerts](/docs/observability/features/alerts) on the metrics where a spike needs attention right away, so you don't have to watch the dashboards to catch it.
 
-```
-Explicit:  thumbs up / thumbs down at the end of a conversation
-Implicit:  user requests human handoff mid-conversation
-```
+### Investigate traces with error analysis [#investigate-traces]
 
-</Tab>
-<Tab>
-
-_An invoice-processing tool that extracts structured fields (vendor, total, due date) from uploaded PDFs. Each extraction is reviewed by a human in a downstream approval step before being written to the accounting system._
-
-The feedback the team captures:
-
-```
-Explicit:  none — there's no point in the workflow where a rating fits
-Implicit:  extracted field manually edited before approval
-```
-
-</Tab>
-</Tabs>
-
-Both register as [scores](/docs/evaluation/scores/overview), so they feed into the same [dashboards](/docs/metrics/features/custom-dashboards), trend charts, and signal rules as your other evaluation data. The page on [Capturing signals](/academy/monitoring/capturing-signals) dives deeper into the topic. To figure out which feedback signals are worth turning into automated evaluators in the first place, see our deeper dive into [Error analysis](/academy/monitoring/error-analysis).
-
-<ManualGuideCallout
-  href="/guides/user-feedback-loop"
-  topic="User feedback loop"
-  lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
-/>
-
-<Callout type="info">
-There are three types of automated evaluators to attach scores to traces:
-- [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) (for quality judgments where you want to read the reasoning behind each verdict)
-- [Decision models](/docs/evaluation/evaluation-methods/decision-models) (for high-volume signals or behavioral patterns with a fixed set of answers, like user disagreement)
-- [Code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) (for precise checks on observations or experiments, not traces, like whether the response contains a certain word or exceeds a length limit).
-
-More on all three can be found in the [Evaluate](/academy/evaluate) section.
-
-</Callout>
+Looking at your traces yourself is the most important thing you can do to understand what is going on in your application. Every decision you make, especially in the beginning, is downstream of this: which quality scores to set up, which user signals to capture, and what to fix first. Errors, low quality scores, and negative user signals help you find interesting traces to look at, and you can do [error analysis](/academy/monitoring/error-analysis) on these to decide what you want to automatically evaluate.
 
 ## Where to start
 
@@ -89,7 +56,7 @@ Start small and build your monitoring setup from real traces rather than abstrac
 
 2. **Use [error analysis](/academy/monitoring/error-analysis) to surface what's worth tracking.** Error analysis gives you a structured way to find patterns across your traces, the kinds of recurring issues worth turning into automated evaluators you can run continuously.
 
-3. **Think about how your specific application shows failure.** Application-specific implicit signals — a user disagreeing in a support chat, a correction in a process automation flow — are often more actionable than generic scores, and they surface issues without manual labeling.
+3. **Capture the user signals your application already produces.** Think about how your users show that something went wrong: a user disagreeing in a support chat, a correction in a process automation flow. These [user signals](/academy/monitoring/capturing-signals) are often more actionable than generic scores, are cheap to capture, and point you to traces worth reading without manual labeling.
 
 4. **Treat it as an iterative process.** A working monitoring setup isn't something you configure once and leave. Usage patterns shift, models get updated, new failure modes emerge. Keep refining your setup so you can cut through the noise and stay focused on what actually matters.
 
@@ -99,4 +66,3 @@ When monitoring surfaces something worth investigating, you have a few options: 
 
 - [Datasets](/academy/datasets): capturing production traces for evaluation
 - [Experiments](/academy/experiments): testing whether a fix actually worked
-- [Continuously Improving Agents With Langfuse](/guides/videos/continuously-improving-agents): a workshop on tracing a support agent, setting up online evaluators, and turning findings into datasets
