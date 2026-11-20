@@ -30,7 +30,7 @@ Give each major concept a diagram or a table, and answer the questions a newcome
 2. a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`
 3. how to set up/get started with the feature
 4. any other sections that are important enough are below this. These sections are ordered in terms of how often users need it. If all users need something, it should be higher up, edge cases and advanced features (only a small subgroup needs this) are lower
-5. Troubleshooting and FAQ are always at the bottom. When adding a section, always consider if it's important enough to have it featured on the main docs page, or if it could be linked in a troubleshooting/faq page
+5. Troubleshooting and FAQ are always at the bottom. When adding a section, always consider if it's important enough to have it featured on the main docs page, or if it belongs in the closing FAQ or a linked troubleshooting/faq page. A similar section already on the page is not a reason to add one
 
 Put long reference lists, such as every recorded field or response header, in a `<Details>` block whose `<Summary>` names the content. Put optional deep-dive topics in a closing `## FAQ` section that wraps question-titled `<Details>` blocks in `<FaqDetails>`.
 
