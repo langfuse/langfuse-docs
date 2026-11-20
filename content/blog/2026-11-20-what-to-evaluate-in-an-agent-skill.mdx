@@ -1,0 +1,156 @@
+---
+title: "What to evaluate in an agent skill"
+date: 2026/11/20
+description: "Skills are not prompts: agents decide whether to load them, read them in pieces, and execute multi-step workflows with them. Here is a practical framework for measuring skill lift, routing, trajectory cost, and task behavior."
+tag: engineering, agents, evaluation
+author: Lotte
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { FileTree } from "@/components/docs";
+
+<BlogHeader
+  title="What to evaluate in an agent skill"
+  description="Skills are not prompts: agents decide whether to load them, read them in pieces, and execute multi-step workflows with them. Here is a practical framework for measuring skill lift, routing, trajectory cost, and task behavior."
+  date="November 20, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+In [How to evaluate an agent skill](/blog/2026-11-19-engineering-the-langfuse-skill), we walked through the architecture we use to test and monitor the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) across isolated Modal sandboxes and live [Halo](/blog/2026-10-23-halo) traces.
+
+Once you have a harness that can run agents against a dataset, the harder question is content: **what should you actually measure?**
+
+It is tempting to evaluate a skill the same way you evaluate a system prompt: run a list of inputs, pass the final text answer to an LLM judge, and track a single pass rate. In practice, that hides almost everything you need to debug and improve a skill.
+
+## Why skill evals are not prompt evals [#why-skill-evals-are-not-prompt-evals]
+
+Evaluating an agent skill differs from evaluating a prompt in two fundamental ways:
+
+**1. A prompt is always read; a skill is conditional and partially read.** When you put instructions in a system prompt (or an `AGENTS.md` file), they sit in the model's context on every turn. A skill uses progressive disclosure. At the start of a run, the agent only sees each skill's `name` and `description`. The agent then has to decide whether the skill is worth loading at all, read `SKILL.md`, and decide which supporting `references/*.md` files or scripts to pull into context.
+
+> **[Visual placeholder: Prompt (always in context) vs. Skill progressive disclosure funnel (`Available` -> `SKILL.md loaded` -> `Reference files read` -> `Instructions followed`), showing where runs drop off at each gate.]**
+
+That extra indirection breaks naive outcome-only evals. Earlier this year, [Vercel benchmarked a Next.js 16 documentation skill](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) on APIs outside model pretraining and saw **zero improvement over baseline** (53% vs. 53% pass rate). The skill content wasn't the main issue: in 56% of runs, the coding agent simply never opened the skill. Grading only the final answer cannot tell you whether your skill gave bad guidance or sat unread on disk.
+
+**2. Skills imply multi-step agent behavior in an environment.** If you are building a simple single-turn chatbot, you rarely need skills. Skills show up when an agent has to *do* something across multiple steps: inspect and edit an existing codebase, run CLI commands, query APIs, or sequence domain tools. Evaluating a skill therefore means evaluating **behavior**: what the agent read, which commands it ran, how it modified the environment, and how many tokens and retries it burned to get there.
+
+## Start with the 3-run baseline (Skill lift vs. Routing lift) [#three-run-baseline]
+
+Before writing granular evaluators, you need to separate two questions that get tangled together in almost every skill setup:
+
+1. **Does the skill itself actually help when the agent uses it?**
+2. **Does the agent pick the right skill when left on its own?**
+
+How much the second question matters depends on the size of your skill catalog. If you ship a single skill, selection is a binary trigger decision (plus internal routing to reference files). Once an agent grows to dozens of skills, matching a user's request to the right skill becomes one of the biggest sources of agent error.
+
+One team we spoke with runs an internal agent with **120 skills**. At that scale, misrouting was driving a large share of production failures, and they had no clear signal on whether failures came from weak skill instructions or from the router picking the wrong skill. To separate the two, they run every item in their offline evaluation dataset **three ways**:
+
+1. **No skill (baseline):** The agent runs with skills disabled, relying only on its base model and standard tools.
+2. **Router-selected skill (end-to-end):** All skills are available as normal, and the agent (or skill router) decides what to load.
+3. **Forced target skill (oracle):** Selection is bypassed and the expected target skill is pre-loaded directly into context.
+
+> **[Visual placeholder: 3-run comparison per dataset item (`No skill` -> `Router-selected` -> `Forced target skill`), illustrating the delta for `Skill lift` and `Routing lift` across pass rate and token cost.]**
+
+Comparing those three runs gives you two high-signal metrics before you touch a single line of markdown:
+
+| Metric | Comparison | Question it answers |
+| --- | --- | --- |
+| **Skill lift** | `Forced skill` vs. `No skill` | Does the skill content actually beat the raw model on pass rate, turns, or token cost? |
+| **Routing lift (or gap)** | `Forced skill` vs. `Router-selected` | How much quality are we losing, or how many extra tokens are we spending, because the agent missed the skill or picked the wrong one? |
+
+Running a `no-skill` baseline sounds obvious, yet teams routinely skip it and assume any markdown they add makes the agent smarter. Empirical benchmarks show otherwise:
+
+- **Skills can produce negative lift.** In [SkillsBench](https://arxiv.org/abs/2602.12670), which evaluates 87 containerized tasks across 18 model-harness pairs with and without curated skills, skills raised average pass rates by +16.6 percentage points (from 33.9% to 50.5%), **but hurt performance on 13 of the 87 tasks** (by up to -7.4 pp). Negative lift happened when a skill prescribed an overly heavy workflow, pointed at a brittle tool, or overrode a stronger default strategy the model already knew.
+- **Models outgrow capability-uplift skills.** [Anthropic distinguishes two types of skills](https://claude.com/resources/articles/improving-skill-creator-test-measure-and-refine-agent-skills): *capability uplift* skills (teaching techniques the base model struggles with) and *encoded preference* skills (sequencing your team's specific conventions or proprietary workflows). When a new frontier model drops and suddenly passes your `no-skill` baseline, a capability-uplift skill isn't broken; it is just dead weight you can retire. Teams operating large skill libraries, [like Fin AI](https://x.com/MrDHat/status/2123182107023601667), use continuous usage and baseline checks specifically to prune skills that models have outgrown or stopped triggering.
+- **Lift depends on the harness, not just the model.** SkillsBench also found that the exact same model gets materially different lift depending on the coding harness (for example, Claude Opus 4.7 reached 61.2% with skills in Claude Code vs. 53.1% in OpenHands). If your skill is used across Claude Code, Codex, and Cursor, you need to measure lift per harness.
+
+## Evaluating skill selection & progressive disclosure (routing) [#evaluating-skill-selection-and-routing]
+
+When your 3-run comparison shows a gap between `Forced skill` and `Router-selected`, or when you add a new skill or reference file, zoom in on routing. Because routing happens in the first turn or two, these evals are fast, cheap, and completely deterministic when you [link skills to traces](/docs/skill-management/tracing).
+
+### 1. Skill-level triggering and coexistence
+
+A skill's `name` and `description` frontmatter act as its API contract with the model. In our [initial evaluation runs](/blog/2026-02-26-evaluate-ai-agent-skills), rewriting our description to sound more conceptual ("use Langfuse effectively across use cases") caused agents to stop invoking the skill entirely on prompts like `"fetch the last ten traces"`.
+
+Following the pattern [OpenAI recommends for Codex skills](https://developers.openai.com/blog/eval-skills/) and [Anthropic requires for enterprise skill gates](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise), a trigger dataset should cover four prompt shapes:
+
+- **Explicit invocation:** Naming the skill or product directly (`"Use the Langfuse skill to set up tracing"`).
+- **Implicit invocation:** Describing the job without naming the skill (`"Help me stop shipping regressions every time we tweak our system prompt"`).
+- **Noisy contextual prompts:** Realistic requests buried inside stack traces, repo context, or unrelated details.
+- **Negative controls & coexistence:** Adjacent requests that should *not* load the skill, or should route to a sibling skill instead. Broadening one skill's description to fix a false negative frequently steals triggers from neighboring skills.
+
+### 2. Intra-skill routing (`SKILL.md` to reference files)
+
+Routing does not stop at `SKILL.md`. Larger skills split instructions across nested files so they don't dump thousands of tokens into context on every turn. For example, our Langfuse skill keeps core rules and a routing index in `SKILL.md` and delegates workflows to `references/`:
+
+<div>
+  <FileTree>
+    <FileTree.Folder name="skills/langfuse" defaultOpen>
+      <FileTree.File name="SKILL.md" />
+      <FileTree.Folder name="references" defaultOpen>
+        <FileTree.File name="cli.md" />
+        <FileTree.File name="instrumentation.md" />
+        <FileTree.File name="prompt-migration.md" />
+        <FileTree.File name="setting-up-evals.md" />
+        <FileTree.File name="user-feedback.md" />
+        <FileTree.File name="cost-optimization.md" />
+        <FileTree.File name="judge-calibration.md" />
+        <FileTree.File name="ci-cd.md" />
+        <FileTree.File name="..." />
+      </FileTree.Folder>
+    </FileTree.Folder>
+  </FileTree>
+</div>
+
+Because an agent can read `SKILL.md` and skip the reference file (a partial read), or open three reference files when it needed zero, we test internal routing with its own dataset:
+
+| Dataset item `input` | `expected_output.invoked_reference_file` | Why |
+| --- | --- | --- |
+| `"I have traces flowing into Langfuse, how should I set up evals for my support agent?"` | `"setting-up-evals.md"` | Needs the structured gap analysis across signals, monitors, and evals |
+| `"Help me bring down the token cost of our coding agent without hurting answer quality."` | `"cost-optimization.md"` | Needs the cost levers and offline quality-check workflow |
+| `"Track thumbs-down clicks and message retries from our chat UI in Langfuse."` | `"user-feedback.md"` | Needs the taxonomy and score-ingestion patterns for user signals |
+| `"Fetch the specific docs page on Langfuse data retention as Markdown."` | `""` (empty string) | `SKILL.md` already covers `.md` doc fetching; opening more wastes context |
+
+You cannot score this from the final answer because agents rarely mention internal skill filenames to users. Instead, our deterministic evaluator inspects the traced tool observations (`Skill`, `skill_read`, `Read`, and shell file reads) and checks the exact files loaded during the run. Setting `invoked_reference_file` to `""` acts as a context-bloat guardrail: opening any extra file beyond `SKILL.md` scores `0`.
+
+That guardrail matters more than most authors expect. When [Together AI consolidated 14 separate skills into one unified skill](https://www.together.ai/blog/how-we-do-agent-evals-at-together-ai), their first version had a 14,000-character router that encouraged agents to read guides in full. Agents loaded 57% more skill text, **pass rates dropped from 90% to 75%, and cost per run more than doubled**. Trimming the router under 6,000 characters and adding concise file menus pushed pass rates to 97.2% while bringing cost back down. SkillsBench saw the same curve across 87 tasks: focused skills with 1 to 3 modules gained +19 to +21.5 pp, while exhaustive reference bundles gained just +0.7 pp.
+
+## Evaluating trajectory efficiency & cost [#evaluating-trajectory-efficiency-and-cost]
+
+Even when an agent loads the right files and passes the task, the final verdict can hide severe friction inside the run. Strong frontier models are remarkably good at recovering from broken instructions: if a skill points to a renamed CLI flag or a stale URL, a capable model will hit an error, run `--help`, search around, and eventually succeed anyway.
+
+[Together AI ran into this exact trap](https://www.together.ai/blog/how-we-do-agent-evals-at-together-ai): on a GPU cluster pricing task where their skill linked to a marketing page instead of the pricing table, Claude Opus worked around the dead end in 13 of 14 runs, masking the bug. Claude Sonnet failed 11 of 15 runs on the same skill, immediately exposing the bad link. Evaluating trajectory metrics—and including a smaller or faster model in your eval matrix—surfaces those paper cuts before every user pays the token tax for them.
+
+Three trajectory metrics consistently earn their keep:
+
+- **Tool and CLI error rate:** Count non-zero exit codes, `4xx` API responses, or failed tool spans per run. In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop that hit 90% of runs—both fixed with two-line edits to `SKILL.md`.
+- **Fallback and workaround rate:** Track when the agent abandons the path your skill recommends (for example, dropping from your SDK or CLI down to raw `curl` calls, or falling back to web search because a reference file lacked a concrete example).
+- **Token cost, turns, and wall-clock time on passing runs:** As [Vercel notes in their agent eval guide](https://vercel.com/blog/agent-evals), **compute efficiency metrics on successful trials only**. Failed runs often look fast and cheap simply because the agent gave up after three steps. On passing runs, compare token usage against your `no-skill` baseline: a good skill often *reduces* total tokens on complex tasks (SkillsBench recorded drops like 1.77M to 1.09M tokens on Opus 4.7) because upfront procedural knowledge eliminates exploratory guesswork. If tokens spike without a matching jump in pass rate, your skill is injecting noise.
+
+## Evaluating task outcomes & behavior (by use case) [#evaluating-task-outcomes-and-behavior]
+
+Finally, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, text-similarity checks on the assistant's final message rarely suffice. Match your outcome evaluators to the type of behavior the skill governs:
+
+| Skill archetype | Example tasks | What to check on the outcome | Best grader type |
+| --- | --- | --- | --- |
+| **Code transformation & setup** | Instrument a Next.js or FastAPI repo; migrate hardcoded prompts; scaffold an app | Code builds and passes tests; expected SDK/API patterns exist in the diff; objects exist in the scratch project; `git status` shows no stray artifacts | Deterministic environment/AST/API checks + structured LLM rubric for code conventions |
+| **CLI / API investigation & ops** | Find the cheapest valid resource; diagnose a latency spike from traces; create a dataset | Answer matches ground truth of the seeded fixture; zero unintended writes (`collateral_writes == 0`); explicit abstention when a request is impossible | Deterministic state & fixture assertions |
+| **Encoded team workflows** | Run a release checklist; review a PR against team rules; draft an incident postmortem | Required steps executed in order; mandatory approval gates respected; output adheres to team structure and tone | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) with per-criterion boolean checks |
+
+Two details make behavioral outcome evals much more reliable in practice:
+
+- **Score per constraint, not one monolithic score.** Instead of asking a judge for a single `0–100` quality rating, grade concrete sub-checks (`builds_cleanly`, `uses_production_label`, `links_prompt_to_trace`, `no_collateral_writes`) and roll them up. When a run fails, you immediately see *which* requirement broke.
+- **Pick `pass@k` vs. `pass^k` based on user risk.** If your skill powers an interactive coding workflow with a test suite where the developer or agent can easily iterate once, `pass@k` (succeeding at least once in `k` attempts) reflects real value. If your skill governs an operational action—like migrating production resources, reviewing compliance, or placing an order—track `pass^k` (succeeding across *every* trial in `k` runs), because inconsistency breaks trust fast.
+
+## How to sequence this without Goodharting yourself [#how-to-sequence-this]
+
+Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite on day one—or worse, optimize against a flawed metric.
+
+When we [ran Karpathy's autoresearch on our prompt migration skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch) using a weighted composite score (`correctness`, `completeness`, and `efficiency`), the optimizer drove our benchmark score from `0.35` to `0.824` in 14 experiments. When we read the diff, however, several of its biggest "wins" were Goodhart's Law in action: it deleted the user-approval gate so headless runs wouldn't stall, told agents to skip live documentation fetches to save turns, and deleted entire sections on subprompts and trace-linking simply because none of our six test repos checked for them.
+
+As we cover in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observed behavior rather than upfront guesswork:
+
+1. **Read trajectories before writing judges.** Start by running 15 to 30 realistic prompts (explicit, implicit, and messy) through your sandboxed harness and reading the traces—either manually in Langfuse or by having a coding agent summarize failure patterns across the experiment run. Fix obvious one-line skill bugs directly instead of building permanent evaluators for typos.
+2. **Establish the 3-run baseline (`no skill`, `router-selected`, `forced`).** Confirm your skill actually delivers positive **skill lift** over the raw model, and check whether your bottleneck is **routing lift** (selection) or workflow execution.
+3. **Automate deterministic checks first.** Wire up trace-based routing evaluators (`SKILL.md` and `references/*.md` loads, including negative controls), tool/CLI error counts, and deterministic environment or build checks. They cost nothing to run and never hallucinate.
+4. **Add targeted LLM-as-a-judge rubrics for stable qualitative criteria.** Once your workflow instructions settle, encode the remaining style, convention, and workflow-fidelity checks as narrow boolean rubrics—and keep a reminder to re-run your `no-skill` baseline whenever new frontier models ship so you know which parts of your skill you can delete.
