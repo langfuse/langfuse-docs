@@ -9,8 +9,8 @@ import { HoverCorners } from "@/components/ui/corner-box";
 
 const FULL_LABEL = "Hiring remotely";
 const COMPACT_LABEL = "Hiring";
-const HOVER_LABEL = "Looking for GOATS!";
-const COMPACT_HOVER_LABEL = "GOATS!";
+const HOVER_LABEL = CHRISTMAS_MODE ? "Looking for Santa" : "Looking for GOATS!";
+const COMPACT_HOVER_LABEL = CHRISTMAS_MODE ? "Hiring" : "GOATS!";
 const REINDEER_SLEIGH = "🦌🛷";
 const FLY_FALL_PX = 120;
 const FLY_SPEED_PX_PER_S = 160;
