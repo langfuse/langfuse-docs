@@ -115,6 +115,7 @@
   --animate-grid: grid 20s linear infinite;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
   --animate-fall: fall 1.5s linear forwards;
+  --animate-hiring-snow: hiring-snow-fall 2.4s linear forwards;
 
   @keyframes accordion-down {
     from {
@@ -207,6 +208,16 @@
     }
     100% {
       transform: translateY(250px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  @keyframes hiring-snow-fall {
+    0% {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(var(--snow-drift, 0px), 280px, 0);
       opacity: 0;
     }
   }

@@ -6,10 +6,28 @@ import NextLink from "next/link";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "@/components/ui/corner-box";
 
+/**
+ * Temporary Christmas decoration for the hiring badge.
+ * Set this to false after Christmas to restore the goat icon and falling goats.
+ */
+const CHRISTMAS_DECORATION = true;
+
 const FULL_LABEL = "Hiring remotely";
 const COMPACT_LABEL = "Hiring";
 const HOVER_LABEL = "Looking for GOATS!";
 const COMPACT_HOVER_LABEL = "GOATS!";
+const SNOWFLAKES = ["❄", "❅", "❆"] as const;
+const REINDEER_SLEIGH = "🦌🛷";
+
+type FallingParticle = {
+  id: number;
+  x: number;
+  y: number;
+  duration: number;
+  kind?: "snow" | "sleigh";
+  emoji?: string;
+  drift?: number;
+};
 
 export function HiringBadge({
   className,
@@ -26,12 +44,11 @@ export function HiringBadge({
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [goats, setGoats] = useState<
-    Array<{ id: number; x: number; y: number; duration: number }>
-  >([]);
+  const [goats, setGoats] = useState<FallingParticle[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const goatIdRef = useRef(0);
   const lastSpawnTimeRef = useRef(0);
+  const christmasTickRef = useRef(0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -44,6 +61,46 @@ export function HiringBadge({
     lastSpawnTimeRef.current = now;
 
     const rect = containerRef.current.getBoundingClientRect();
+
+    if (CHRISTMAS_DECORATION) {
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const tick = christmasTickRef.current++;
+      const snow: FallingParticle = {
+        id: goatIdRef.current++,
+        x,
+        y,
+        duration: 2.4 + Math.random() * 0.6,
+        kind: "snow",
+        emoji: SNOWFLAKES[Math.floor(Math.random() * SNOWFLAKES.length)],
+        drift: Math.round((Math.random() - 0.5) * 80),
+      };
+      const spawned: FallingParticle[] = [snow];
+
+      // Sleighs on every other tick so snow stays constant without doubling the rate.
+      if (tick % 2 === 0) {
+        spawned.push({
+          id: goatIdRef.current++,
+          x,
+          y,
+          duration: 1.5 + Math.random() * 0.6,
+          kind: "sleigh",
+          emoji: REINDEER_SLEIGH,
+        });
+      }
+
+      setGoats((prev) => [...prev, ...spawned]);
+      for (const particle of spawned) {
+        setTimeout(
+          () => {
+            setGoats((prev) => prev.filter((g) => g.id !== particle.id));
+          },
+          (particle.duration + 0.5) * 1000,
+        );
+      }
+      return;
+    }
+
     const newGoat = {
       id: goatIdRef.current++,
       x: e.clientX - rect.left,
@@ -69,17 +126,43 @@ export function HiringBadge({
             {goats.map((goat) => {
               if (!containerRef.current) return null;
               const rect = containerRef.current.getBoundingClientRect();
+              const position = {
+                left: `${rect.left + goat.x}px`,
+                top: `${rect.top + goat.y}px`,
+                animationDuration: `${goat.duration}s`,
+              };
+
+              if (!CHRISTMAS_DECORATION || goat.kind == null) {
+                return (
+                  <span
+                    key={goat.id}
+                    className="absolute text-lg animate-fall"
+                    style={position}
+                  >
+                    🐐
+                  </span>
+                );
+              }
+
+              const isSnow = goat.kind === "snow";
               return (
                 <span
                   key={goat.id}
-                  className="absolute text-lg animate-fall"
-                  style={{
-                    left: `${rect.left + goat.x}px`,
-                    top: `${rect.top + goat.y}px`,
-                    animationDuration: `${goat.duration}s`,
-                  }}
+                  className={
+                    isSnow
+                      ? "absolute whitespace-nowrap text-base animate-hiring-snow"
+                      : "absolute whitespace-nowrap text-lg animate-fall"
+                  }
+                  style={
+                    {
+                      ...position,
+                      ...(isSnow
+                        ? { "--snow-drift": `${goat.drift ?? 0}px` }
+                        : {}),
+                    } as React.CSSProperties
+                  }
                 >
-                  🐐
+                  {goat.emoji}
                 </span>
               );
             })}
@@ -138,7 +221,7 @@ export function HiringBadge({
           )}
         >
           <span className="text-xs shrink-0" aria-hidden>
-            🐐
+            {CHRISTMAS_DECORATION ? REINDEER_SLEIGH : "🐐"}
           </span>
           <span className="text-left">
             <span className="block whitespace-nowrap">
