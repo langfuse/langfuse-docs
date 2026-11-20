@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { CHRISTMAS_MODE } from "@/lib/christmas";
 
 const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
   ssr: false,
@@ -32,6 +33,15 @@ const WORDMARKS = {
   },
 } as const;
 
+const CHRISTMAS_NAV_WORDMARK = {
+  light: "/christmas/langfuse-by-clickhouse.png",
+  dark: "/christmas/langfuse-by-clickhouse-white.png",
+  alt: "Langfuse",
+  width: 1024,
+  height: 354,
+  className: "h-11 w-auto sm:h-11",
+} as const;
+
 export function Logo({
   wrapInLink = true,
   variant = "langfuse",
@@ -42,7 +52,10 @@ export function Logo({
   variant?: keyof typeof WORDMARKS;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const wordmark = WORDMARKS[variant];
+  const wordmark =
+    CHRISTMAS_MODE && variant === "langfuse"
+      ? CHRISTMAS_NAV_WORDMARK
+      : WORDMARKS[variant];
   const images = (
     <div className="logo-images flex gap-2 items-center cursor-pointer shrink-0">
       <Image

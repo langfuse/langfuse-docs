@@ -3,14 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import NextLink from "next/link";
+import { CHRISTMAS_MODE } from "@/lib/christmas";
 import { cn } from "@/lib/utils";
 import { HoverCorners } from "@/components/ui/corner-box";
-
-/**
- * Temporary Christmas decoration for the hiring badge.
- * Set this to false after Christmas to restore the goat icon and falling goats.
- */
-const CHRISTMAS_DECORATION = true;
 
 const FULL_LABEL = "Hiring remotely";
 const COMPACT_LABEL = "Hiring";
@@ -62,7 +57,7 @@ export function HiringBadge({
 
     const rect = containerRef.current.getBoundingClientRect();
 
-    if (CHRISTMAS_DECORATION) {
+    if (CHRISTMAS_MODE) {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       const tick = christmasTickRef.current++;
@@ -132,7 +127,7 @@ export function HiringBadge({
                 animationDuration: `${goat.duration}s`,
               };
 
-              if (!CHRISTMAS_DECORATION || goat.kind == null) {
+              if (!CHRISTMAS_MODE || goat.kind == null) {
                 return (
                   <span
                     key={goat.id}
@@ -221,7 +216,7 @@ export function HiringBadge({
           )}
         >
           <span className="text-xs shrink-0" aria-hidden>
-            {CHRISTMAS_DECORATION ? REINDEER_SLEIGH : "🐐"}
+            {CHRISTMAS_MODE ? REINDEER_SLEIGH : "🐐"}
           </span>
           <span className="text-left">
             <span className="block whitespace-nowrap">
