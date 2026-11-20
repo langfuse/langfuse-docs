@@ -218,7 +218,7 @@ export function ContactFormCard({
   return (
     <div
       className={cn(
-        "relative mx-auto w-full max-w-md border border-line-structure bg-stripe-pattern p-4 corner-box-corners",
+        "relative mx-auto w-full max-w-md border border-line-structure bg-stripe-pattern corner-box-corners",
         className,
       )}
     >
