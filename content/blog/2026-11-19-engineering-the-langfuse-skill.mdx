@@ -128,9 +128,15 @@ At a high level, our offline evaluation setup consists of a Langfuse project and
 
 <SkillTestingHarnessDiagram />
 
-Four design choices make this setup practical day to day:
+Here is how an evaluation run works end to end:
 
-**1. Webhook triggers pinned to Skill Management versions.** Clicking **Run** on a dataset in the Langfuse UI sends a webhook `POST` with the dataset name and a JSON configuration payload to a Modal web endpoint:
+### 1. Datasets, skills, and coding environments
+
+In Langfuse, we maintain our benchmark datasets alongside versioned skills in [Langfuse Skill Management](/docs/skill-management/version-control). Each dataset item defines a prompt and, for code-editing tasks like `"instrument this application with Langfuse"` or `"migrate hardcoded prompts"`, references a starter workspace stored in our [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) repository (such as a Flask chat app, a Next.js app on the Vercel AI SDK, or a LangChain agent). We bake these starter environments into our Modal sandbox image so every run starts from an identical, realistic codebase rather than an empty folder.
+
+### 2. Triggering an experiment from Langfuse
+
+To test a change, we trigger a [remote experiment](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) directly from a dataset in the Langfuse UI. Langfuse sends a webhook `POST` to Modal with the dataset name and a JSON payload specifying which coding agents to run and which skill version (or label, such as `staging`) to test:
 
 ```json
 {
@@ -144,16 +150,20 @@ Four design choices make this setup practical day to day:
 }
 ```
 
-Because Langfuse times out remote experiment webhooks after 20 seconds, the Modal endpoint authenticates the request, spawns the `orchestrate` function asynchronously, and returns `200` immediately. Inside each sandbox, the runner installs that exact skill from [Langfuse Skill Management](/docs/skill-management/version-control) (via `langfuse skills install langfuse --version 12`, or by a label such as `staging`). Because skill versions in Langfuse are immutable, we can benchmark a candidate version before assigning it the `production` label, or omit the `skill` block to run the exact same dataset as a baseline side by side.
+Triggering runs from the Langfuse UI means anyone on the team can launch an experiment without local scripts or credentials. Because skill versions in Langfuse are immutable, we can benchmark a candidate version before promoting it to `production`, or omit the `skill` block to run the same dataset as a baseline side by side.
 
-**2. Starter workspaces (`env_folder`) for code-editing tasks.** Prompts like `"instrument this application with Langfuse"` or `"migrate the hardcoded prompts in this repo"` require an existing codebase. Dataset items can set `metadata.env_folder` to reference a starter project baked into our sandbox image, such as a Flask OpenAI chat app, a Next.js app on the Vercel AI SDK, a LangChain support agent, or a Python service with broken tracing. Before the coding agent boots, the runner copies `/opt/envs/<env_folder>` into `/workspace` inside a fresh `modal.Sandbox`, so every run starts from an identical state.
+### 3. Running agents in isolated Modal sandboxes
 
-**3. Separate harness and scratch Langfuse projects.** Many of our test prompts ask the coding agent to create prompts, datasets, or traces in Langfuse. Letting those writes hit the same Langfuse project that stores our benchmark datasets and experiment runs would pollute our evaluation data and contaminate later runs (for example, when an earlier run leaves behind a dataset with a conflicting schema). We split them into two projects:
+Modal's orchestrator fetches the dataset items and spins up an isolated sandbox for each `(dataset item × coding agent)` pair across Claude Code, Codex, and Cursor. Before an agent starts, the sandbox loads the item's starter codebase (if any) and installs the requested skill version from Langfuse.
+
+Because many test prompts ask the coding agent to create prompts, datasets, or traces in Langfuse, we separate our setup into two Langfuse projects:
 
 - **The harness project** holds our benchmark datasets, versioned skills, coding-agent execution traces, and evaluation scores.
-- **The scratch project** provides the `LANGFUSE_*` credentials injected into the sandbox, and `orchestrate` wipes its prompts, dataset items, runs, and traces clean before each experiment starts.
+- **The scratch project** provides the Langfuse credentials injected into the sandbox and is wiped clean before each run, so agent side effects never pollute our evaluation data or leak into later runs.
 
-**4. Deterministic trace IDs across sandbox boundaries.** The orchestrator fans out one Modal container per `(dataset item × coding agent)`, running `claude -p`, `codex exec`, or `cursor-agent -p` headlessly with our open-source observability plugins ([Claude Code](https://github.com/langfuse/claude-observability-plugin), [Codex](https://github.com/langfuse/codex-observability-plugin), and [Cursor](https://github.com/langfuse/cursor-observability-plugin)) pointed at the harness project. Because the observability plugin creates the trace from inside the sandbox rather than in the orchestrator process, each runner generates a per-item seed (`CC_LANGFUSE_TRACE_SEED` / `LANGFUSE_CODEX_TRACE_SEED`) and precomputes the trace ID (`sha256(seed)[:32]`). After the sandbox exits, the runner polls until the completed root observation lands, computes item scores, and links the trace to one named dataset run per agent (`<run_name>-claude-code`, `<run_name>-codex`, `<run_name>-cursor`).
+### 4. Collecting traces and comparing results in Langfuse
+
+Each sandbox runs with our open-source observability plugins ([Claude Code](https://github.com/langfuse/claude-observability-plugin), [Codex](https://github.com/langfuse/codex-observability-plugin), and [Cursor](https://github.com/langfuse/cursor-observability-plugin)) pointed at the harness project, capturing the agent's full trajectory: prompts, tool calls, skill reads, and final outputs. When a run finishes, Modal links each trace back to its dataset item and groups results into one experiment run per agent (`<run_name>-claude-code`, `<run_name>-codex`, `<run_name>-cursor`) alongside evaluation scores. From there, we inspect individual traces and compare skill versions and agents side by side directly in the Langfuse UI.
 
 ## Putting the loop into practice [#putting-the-loop-into-practice]
 
