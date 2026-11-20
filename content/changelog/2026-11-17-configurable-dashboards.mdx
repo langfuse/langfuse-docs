@@ -37,11 +37,19 @@ Choose a bar chart and leave the breakdown empty. An observation containing both
 
 The example dashboard contains 300,000 observations. The bars show 180,000 and 150,000 matches, including 60,000 observations that belong to both groups.
 
-![Keep the preview visible while editing queries and chart settings](/images/changelog/2026-11-17-dashboard-studio-editor.png)
+## Calculate an error rate
 
-Open a widget in a dedicated editor. The result stays above the query controls, with chart type, title, formatting, and displayed series together on the right. Resize the preview or scroll the queries independently. Each query combines a source, metrics, filters, and optional grouping; advanced settings stay out of the way until needed.
+Start a chart with the observation count. Give series **A** a filter for the `ERROR` level. Choose **Add series** and let **B** count all observations over the same period.
 
-A visible warning marks changes that have not been run, while the chart retains the last result. Use **Run preview**, then **Apply changes** and **Save dashboard**. Presentation settings update the existing result immediately; changes that need different data wait for the next run. The editor shows inherited dashboard filters alongside the query configuration. Invalid formulas show guidance next to the expression. Apply becomes available after a successful preview, including a valid result with no matching rows.
+Choose **Add formula**, enter `A / B`, and select **Percentage** under **Display as**. **Plot formula only** leaves the rate on the chart and keeps both counts available for inspection. Choose a time bucket beneath the chart to see the exact inputs. On November 16 the example returned 178 errors among 10,107 observations, or **1.76%**.
+
+![The error-rate editor shows two named counts, their formula, and the values behind the selected week.](/images/changelog/2026-11-20-dashboard-formula-editor.png)
+
+Changes to arithmetic use the counts already in the browser. Use **Run preview** after changing a source, filter, or grouping. **Apply changes** puts the widget in the dashboard draft, and **Save dashboard** saves that draft.
+
+For a widget with several views, **Showing** lets you preview another series. **Default view** sets the one readers see when they open the dashboard. Here the author is inspecting p95 while p50 is the saved default.
+
+![Model latency plotted at p95 in the editor, with p50 selected as the dashboard default.](/images/changelog/2026-11-20-dashboard-percentile-preview.png)
 
 ## Make every starting point editable
 
@@ -83,7 +91,7 @@ The sample report compares support, search and coding spend using three existing
 
 ![Average quality by week paired with the number of evaluations that contributed to each point.](/images/changelog/2026-11-19-dashboard-score-report.png)
 
-In **Replacing the Home cards**, choose one of twelve cards to inspect its result beside an editable recipe. The notes identify changes that affect migration, including full-period totals, score definitions and sampled latency percentiles. **Compare editors** lets you try the original form, a multi-query form using existing analytics, and proposed query-builder controls. Proposed relationship queries show their contract and have execution disabled.
+In **Replacing the Home cards**, choose one of twelve cards to inspect its result beside an editable recipe. The notes identify changes that affect migration, including full-period totals, score definitions and sampled latency percentiles. **Compare editors** opens examples in the classic form and the multi-query editor. Inside the multi-query editor, **Editor options** lets you enable experimental queries or open a proposed relationship query to inspect its requirements.
 
 ## Learn how a chart gets its numbers
 
