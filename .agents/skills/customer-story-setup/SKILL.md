@@ -2,7 +2,7 @@
 name: customer-story-setup
 description: >-
   Converts draft customer-story Markdown into Langfuse website MDX (Fumadocs),
-  collects missing metadata and assets, wires meta.json and authors. Use when
+  collects missing metadata and assets, and wires meta.json. Use when
   adding or converting a customer case study, user story, or /users page, or
   when the user mentions customer story setup, cresta/canva-style posts, or
   CustomerStoryCTA/BlogHeader for customers.
@@ -107,12 +107,12 @@ ask explicitly and wait.
 Never put the customer name in the git branch. Do not put it in the pull
 request title unless asked.
 
-### Authors (BlogHeader `authors={["..."]}`)
+### Byline
 
-| Topic                        | Ask                                                                                                                                                                                                                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Byline author(s)**         | Who should appear under the title (keys from `data/authors.json`)                                                                                                                                                                                                                   |
-| **External / guest speaker** | If not in `authors.json`: collect name, title, optional socials, and **headshot path** under `public/images/people/` or `public/images/customers/<slug>/`, then **add an entry to `data/authors.json`** (see existing entries). Every `authors` key must resolve in `authors.json`. |
+Do not add a byline. Omit `author` from the frontmatter and do not pass
+`authors` to `BlogHeader`. The header hides that row when the list is empty.
+Add a byline only when the user names one. The customer speaker stays in
+`quoteAuthor`. That is not the page author.
 
 ### Branding and users index card
 
@@ -166,11 +166,12 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 ## MDX structure to produce
 
 1. **YAML frontmatter** at top: `title`, `date`, `description`, `ogImage`,
-   `tag: customer-story`, `author` (display string if needed), `customerLogo`,
+   `tag: customer-story`, `customerLogo`,
    `customerLogoDark`, optional quote fields, `showInCustomerIndex`.
 2. **Imports**: `BlogHeader`, `CustomerQuote` (if a callout is marked),
    `ImpactChart`, `CustomerStoryCTA`. `Frame` is global in MDX.
-3. **`BlogHeader`**: `title`, `description`, `customerLogo`, `authors`, `date`.
+3. **`BlogHeader`**: `title`, `description`, `customerLogo`, `date`. No
+   `authors` unless the user named a byline. See **Byline** above.
    Optional `image` for a hero.
 4. **Body headings**: one conceptual H1 only (from `BlogHeader`). Body uses
    `##` and `###`. Do not skip levels.
@@ -200,14 +201,10 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
      and do not move it into the six, unless the user asks for a headline
      story.
 
-2. **Authors**
-   - If the byline author is new, add them to `data/authors.json`. The key
-     must match `BlogHeader` `authors`.
-
-3. **Assets**
+2. **Assets**
    - Logos and story images under **`public/images/customers/<slug>/`**.
 
-4. **Users / adopters list**
+3. **Users / adopters list**
    - Add or update the company with
      [`add-customer-to-user-list`](../add-customer-to-user-list/SKILL.md) so
      the Reference cell is `[User Story](/users/<slug>)`.
@@ -227,7 +224,7 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 - [ ] The story is outside the headline six in `meta.json`, unless a headline slot was requested
 - [ ] Linear ticket has a comment with the LinkedIn draft and the X draft
 - [ ] The only `<CustomerQuote>` is the marked callout, and `customerQuote` is that same quote
-- [ ] `authors` keys exist in `data/authors.json`
+- [ ] No byline, unless the user named one
 - [ ] Adopters table row exists, and the explorer has a logo, description, and documented use case for that exact company label
 - [ ] Company website link in the About section
 - [ ] Doc links are preserved. The core concepts in **Docs links** are linked. No broken internal URLs
@@ -257,7 +254,6 @@ date: ...
 description: ...
 ogImage:
 tag: customer-story
-author: ...
 customerLogo: "/images/customers/<slug>/...-light.png"
 customerLogoDark: "/images/customers/<slug>/...-dark.png"
 customerQuote: "..."
