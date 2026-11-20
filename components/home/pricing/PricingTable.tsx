@@ -1787,6 +1787,13 @@ const sections: Section[] = [
         },
       },
       {
+        name: "ClickHouse ISO/IEC 27701:2025 certification coverage",
+        href: "/security/iso27701",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+        },
+      },
+      {
         name: "HIPAA-ready region",
         href: "/security/hipaa",
         tiers: {
