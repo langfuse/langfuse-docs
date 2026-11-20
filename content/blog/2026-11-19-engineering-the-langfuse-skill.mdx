@@ -124,7 +124,7 @@ To decide what to improve next, we combine these live traces with explicit feedb
 
 ## Offline evaluation & experimentation setup [#offline-test-harness]
 
-Building on our [initial local evaluation script](/blog/2026-02-26-evaluate-ai-agent-skills), we moved to a shared service on Modal connected directly to Langfuse datasets through [remote experiment webhooks](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook). Datasets, versioned skills, experiment triggers, execution traces, and side-by-side run comparisons all stay in Langfuse.
+At a high level, our offline evaluation setup consists of a Langfuse project and a Modal instance where everything runs. All of the supporting code lives in our public [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) GitHub repository: both the code deployed to Modal and the coding environments our agents run in so we can accurately simulate real tasks.
 
 <SkillTestingHarnessDiagram />
 
