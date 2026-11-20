@@ -12,22 +12,79 @@ const COMPACT_LABEL = "Hiring";
 const HOVER_LABEL = "Looking for GOATS!";
 const COMPACT_HOVER_LABEL = "GOATS!";
 const REINDEER_SLEIGH = "🦌🛷";
-const SLEIGH_TARGET = { x: 16, y: 8 };
+const FLY_FALL_PX = 120;
+const FLY_SPEED_PX_PER_S = 160;
+const FLY_EXIT = { x: -90, y: -70 };
+const GOAT_FALL_PX = 250;
 
 type FallingParticle = {
   id: number;
   x: number;
   y: number;
   duration: number;
-  kind?: "snow" | "sleigh";
+  kind?: "snow" | "sleigh" | "fly";
   drift?: number;
   size?: number;
   opacity?: number;
-  /** Viewport left/top captured at launch. Snow stays badge-relative. */
+  /** Viewport left/top captured at launch. Snow and falling sleighs stay badge-relative. */
   viewport?: boolean;
-  flyX?: number;
-  flyY?: number;
 };
+
+function FlyingSleigh({
+  x,
+  y,
+  onDone,
+}: {
+  x: number;
+  y: number;
+  onDone: () => void;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const flyDistance = Math.hypot(
+      FLY_EXIT.x - x,
+      FLY_EXIT.y - (y + FLY_FALL_PX),
+    );
+    const total = FLY_FALL_PX + flyDistance;
+    const rotation = 360 * (FLY_FALL_PX / GOAT_FALL_PX);
+    const animation = el.animate(
+      [
+        { transform: "translate3d(0px, 0px, 0) rotate(0deg)", offset: 0 },
+        {
+          transform: `translate3d(0px, ${FLY_FALL_PX}px, 0) rotate(${rotation}deg)`,
+          offset: FLY_FALL_PX / total,
+        },
+        {
+          transform: `translate3d(${FLY_EXIT.x - x}px, ${FLY_EXIT.y - y}px, 0) rotate(${rotation}deg)`,
+          offset: 1,
+        },
+      ],
+      {
+        duration: (total / FLY_SPEED_PX_PER_S) * 1000,
+        easing: "linear",
+        fill: "forwards",
+      },
+    );
+    animation.onfinish = () => onDoneRef.current();
+    return () => animation.cancel();
+  }, [x, y]);
+
+  return (
+    <span
+      ref={ref}
+      className="absolute whitespace-nowrap text-lg"
+      style={{ left: `${x}px`, top: `${y}px` }}
+    >
+      {REINDEER_SLEIGH}
+    </span>
+  );
+}
 
 export function HiringBadge({
   className,
@@ -71,32 +128,36 @@ export function HiringBadge({
     return flakes;
   };
 
-  const releaseSnow = (flakes: FallingParticle[]) => {
-    setGoats((prev) => [...prev, ...flakes]);
-    for (const flake of flakes) {
+  const spawnFallingSleigh = (x: number, y: number): FallingParticle => ({
+    id: goatIdRef.current++,
+    x,
+    y,
+    duration: 1.5 + Math.random() * 0.6,
+    kind: "sleigh",
+  });
+
+  const releaseParticles = (particles: FallingParticle[]) => {
+    setGoats((prev) => [...prev, ...particles]);
+    for (const particle of particles) {
       setTimeout(
         () => {
-          setGoats((prev) => prev.filter((g) => g.id !== flake.id));
+          setGoats((prev) => prev.filter((g) => g.id !== particle.id));
         },
-        (flake.duration + 0.5) * 1000,
+        (particle.duration + 0.5) * 1000,
       );
     }
   };
 
-  const launchSleigh = (rect: DOMRect) => {
+  const launchFlyingSleigh = (x: number, y: number) => {
     if (sleighLaunchedRef.current) return;
     sleighLaunchedRef.current = true;
-    const startX = rect.left + rect.width / 2;
-    const startY = rect.top + rect.height / 2;
     const sleigh: FallingParticle = {
       id: goatIdRef.current++,
-      x: startX,
-      y: startY,
-      duration: 2.2,
-      kind: "sleigh",
+      x,
+      y,
+      duration: 0,
+      kind: "fly",
       viewport: true,
-      flyX: SLEIGH_TARGET.x - startX,
-      flyY: SLEIGH_TARGET.y - startY,
     };
     setGoats((prev) => [...prev, sleigh]);
   };
@@ -105,8 +166,10 @@ export function HiringBadge({
     setIsHovered(true);
     if (!CHRISTMAS_MODE || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    releaseSnow(spawnSnow(e.clientX - rect.left, e.clientY - rect.top, 8, 24));
-    launchSleigh(rect);
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    releaseParticles([...spawnSnow(x, y, 8, 24), spawnFallingSleigh(x, y)]);
+    launchFlyingSleigh(e.clientX, e.clientY);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -118,7 +181,9 @@ export function HiringBadge({
     const rect = containerRef.current.getBoundingClientRect();
 
     if (CHRISTMAS_MODE) {
-      releaseSnow(spawnSnow(e.clientX - rect.left, e.clientY - rect.top, 3, 8));
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      releaseParticles([...spawnSnow(x, y, 3, 8), spawnFallingSleigh(x, y)]);
       return;
     }
 
@@ -145,27 +210,39 @@ export function HiringBadge({
             aria-hidden="true"
           >
             {goats.map((goat) => {
-              if (goat.kind === "sleigh" && goat.viewport) {
+              if (goat.kind === "fly" && goat.viewport) {
                 return (
-                  <span
+                  <FlyingSleigh
                     key={goat.id}
-                    className="absolute whitespace-nowrap text-2xl animate-hiring-sleigh-takeoff"
-                    style={
-                      {
-                        left: `${goat.x}px`,
-                        top: `${goat.y}px`,
-                        "--fly-x": `${goat.flyX ?? 0}px`,
-                        "--fly-y": `${goat.flyY ?? 0}px`,
-                      } as React.CSSProperties
+                    x={goat.x}
+                    y={goat.y}
+                    onDone={() =>
+                      setGoats((prev) =>
+                        prev.filter((item) => item.id !== goat.id),
+                      )
                     }
-                  >
-                    {REINDEER_SLEIGH}
-                  </span>
+                  />
                 );
               }
 
               if (!containerRef.current) return null;
               const rect = containerRef.current.getBoundingClientRect();
+
+              if (goat.kind === "sleigh") {
+                return (
+                  <span
+                    key={goat.id}
+                    className="absolute whitespace-nowrap text-lg animate-fall"
+                    style={{
+                      left: `${rect.left + goat.x}px`,
+                      top: `${rect.top + goat.y}px`,
+                      animationDuration: `${goat.duration}s`,
+                    }}
+                  >
+                    {REINDEER_SLEIGH}
+                  </span>
+                );
+              }
 
               if (!CHRISTMAS_MODE || goat.kind == null) {
                 return (
