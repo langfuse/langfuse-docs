@@ -41,6 +41,7 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/japan(\/|$)/,
   /^\/cn(\/|$)/,
   /^\/kr(\/|$)/,
+  /^\/reinvent(\/|$)/,
   /^\/wrapped(\/|$)/,
 ];
 
