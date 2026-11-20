@@ -139,6 +139,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | [UI customization](/self-hosting/administration/ui-customization)                                                       | --                          | Yes                                        | Yes                   |
 | [Audit logs](/docs/administration/audit-logs)                                                                           | --                          | Yes                                        | Yes                   |
 | [IAM role authentication for Amazon S3](/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth)      | --                          | Yes                                        | Yes                   |
+| [IAM role authentication for Amazon Bedrock](/docs/administration/llm-connection#bedrock-iam-role)                      | --                          | Yes                                        | Yes                   |
 | [Admin API (project management, SCIM)](/docs/administration/scim-and-org-api)                                           | --                          | Yes                                        | Yes                   |
 | [Instance management API](/self-hosting/administration/instance-management-api)                                         | --                          | Yes                                        | Yes                   |
 | [Use of FIPS 140-3 validated modules & hardened images](/self-hosting/configuration/hardening#hardening-for-government) | --                          | --                                         | Yes                   |
@@ -148,13 +149,11 @@ Dedicated Langfuse deployment for government and regulated industries.
 
 ## Discounts
 
-| Program              | Discount                            | Details                             |
-| -------------------- | ----------------------------------- | ----------------------------------- |
-| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups)   |
-| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research)   |
-| Non-profits          | $199 in credits / month             | [Learn more and apply](/non-profit) |
-| Hackathons           | $100 in credits / month, 3 months   | [Learn more and apply](/hackathons) |
-| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com        |
+| Program              | Discount                            | Details                           |
+| -------------------- | ----------------------------------- | --------------------------------- |
+| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups) |
+| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research) |
+| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com      |
 
 ## Frequently Asked Questions
 

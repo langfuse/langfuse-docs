@@ -1611,6 +1611,23 @@ const sections: Section[] = [
         },
       },
       {
+        name: "IAM role authentication for Amazon Bedrock",
+        href: "/docs/administration/llm-connection#bedrock-iam-role",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
@@ -1756,6 +1773,13 @@ const sections: Section[] = [
             Enterprise: true,
             Government: true,
           },
+        },
+      },
+      {
+        name: "ClickHouse ISO/IEC 27701:2025 certification coverage",
+        href: "/security/iso27701",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
       },
       {

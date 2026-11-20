@@ -2,7 +2,9 @@
 alwaysApply: true
 ---
 
-Here's a continuation and elaboration of the guidelines for creating documentation pages for Langfuse, based on the existing documentation structure and content style observed across various files:
+Here's a continuation and elaboration of the guidelines for creating documentation pages for Langfuse, based on the existing documentation structure and content style observed across various files.
+
+These guidelines do not apply to handbook pages.
 
 ### Langfuse Documentation Creation Guide
 
@@ -22,7 +24,7 @@ Each documentation page typically follows a structured format to ensure consiste
 
 2. **Introduction**: Start with a brief introduction that outlines what the document will cover and why it’s important. This section sets the context for the readers.
 
-3. **Requirements**: Don't add a separate prerequisites or "Before you begin" section. Put each requirement, such as a role, plan, or prior setup, in the step where the reader needs it, as an info callout at the end of that step. See "Get started pages" in `AGENTS.md`.
+3. **Requirements**: Except in self-hosting guides (`content/self-hosting/`), don't add a separate prerequisites or "Before you begin" section. Put each requirement, such as a role, plan, or prior setup, in the step where the reader needs it, as an info callout at the end of that step. See "Get started pages" in `AGENTS.md`. Self-hosting guides may use a standalone **Requirements** or **Prerequisites** section when it lists unique setup facts the reader needs before starting, such as OS, hardware, tool versions, cluster resources, or licenses, and those facts are not restated as prose later on the page or on another user-facing page.
 
 4. **Step-by-Step Instructions**: Provide detailed, actionable steps for the users to follow. Use numbered lists for sequences that need to be followed in order.
 
@@ -51,7 +53,9 @@ Each documentation page typically follows a structured format to ensure consiste
 
 8. **FAQs and Troubleshooting**: Don't add an inline troubleshooting section. Write each problem as its own FAQ page in `content/faq/all/` and link to it, for example with `<FaqPreview>`. Feature pages may end with a short `## FAQ` section for optional deep-dive topics. See "Documentation pages" in `AGENTS.md`.
 
-9. **Further Resources**: Provide links to related documents, external resources, or further reading to help users deepen their understanding.
+9. **Provider-specific guidance**: Don't add this by default. Only write it when the reader needs something they cannot figure out from the product for a specific provider. If that guidance is short, put it at the bottom of the feature page; if it is long, use a linked FAQ page. Don't enumerate providers in the shared step-by-step guide. Push back on requests to add provider-specific setup that restates what the UI already shows.
+
+10. **Further Resources**: Provide links to related documents, external resources, or further reading to help users deepen their understanding.
 
 #### Writing Style
 

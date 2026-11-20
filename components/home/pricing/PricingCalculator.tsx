@@ -24,62 +24,14 @@ import {
 import Link from "next/link";
 import { InfoIcon, MessageCircle } from "lucide-react";
 import { Button, Text } from "@/components/ui";
+import {
+  calculatePricingBreakdown,
+  formatEventsInput,
+  parseMonthlyUnits,
+  usageCost,
+} from "./pricing-calculator-math";
 
 const SALES_ASSISTED_UNITS_THRESHOLD = 50_000_000;
-
-// Graduated pricing tiers
-const pricingTiers = [
-  { min: 0, max: 100000, rate: 0, description: "0-100k units" },
-  { min: 100001, max: 1000000, rate: 8, description: "100k-1M units" },
-  { min: 1000001, max: 10000000, rate: 7, description: "1-10M units" },
-  {
-    min: 10000001,
-    max: 50000000,
-    rate: 6.5,
-    description: "10-50M units",
-  },
-  { min: 50000001, max: Infinity, rate: 6, description: "50M+ units" },
-];
-
-// Calculate pricing breakdown for all tiers
-type TierBreakdown = {
-  tier: (typeof pricingTiers)[0];
-  eventsInTier: number;
-  costForTier: number;
-  tierRate: string;
-};
-
-const calculatePricingBreakdown = (events: number): TierBreakdown[] => {
-  return pricingTiers.map((tier, index) => {
-    let eventsInTier = 0;
-    let costForTier = 0;
-    let tierRate = "";
-
-    if (index === 0) {
-      // Free tier
-      eventsInTier = Math.min(events, 100000);
-      costForTier = 0;
-      tierRate = "Free";
-    } else {
-      // Paid tiers
-      if (events >= tier.min) {
-        const tierStart = tier.min;
-        const tierEnd =
-          tier.max === Infinity ? events : Math.min(events, tier.max);
-        eventsInTier = Math.max(0, tierEnd - tierStart + 1);
-        costForTier = (eventsInTier / 100000) * tier.rate;
-      }
-      tierRate = `$${tier.rate}/100k`;
-    }
-
-    return {
-      tier,
-      eventsInTier,
-      costForTier,
-      tierRate,
-    };
-  });
-};
 
 // Plan configuration
 type PlanConfig = {
@@ -105,11 +57,6 @@ const formatCurrency = (amount: number) =>
     maximumFractionDigits: 2,
   }).format(amount);
 
-const formatEventsInput = (value: string) => {
-  const numbersOnly = value.replace(/\D/g, "");
-  return numbersOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-};
-
 export function PricingCalculator({
   initialPlan = "Core",
 }: {
@@ -121,7 +68,7 @@ export function PricingCalculator({
     PLAN_CONFIGS.find((p) => p.name === initialPlan)?.baseFee || 0,
   );
   const monthlyUnits = useMemo(
-    () => parseInt(monthlyEvents.replace(/,/g, "")) || 0,
+    () => parseMonthlyUnits(monthlyEvents),
     [monthlyEvents],
   );
   const shouldSuggestSales = monthlyUnits >= SALES_ASSISTED_UNITS_THRESHOLD;
@@ -132,13 +79,10 @@ export function PricingCalculator({
   }, [monthlyUnits]);
 
   // Derive total cost from breakdown
-  const calculatedPrice = useMemo(() => {
-    const total = pricingBreakdown.reduce(
-      (sum, item) => sum + item.costForTier,
-      0,
-    );
-    return Math.round(total * 100) / 100;
-  }, [pricingBreakdown]);
+  const calculatedPrice = useMemo(
+    () => usageCost(pricingBreakdown),
+    [pricingBreakdown],
+  );
 
   const handlePlanChange = (value: string) => {
     const newPlan = PLAN_CONFIGS.find((plan) => plan.name === value);
@@ -162,7 +106,7 @@ export function PricingCalculator({
       <Card>
         <CardContent className="p-6 space-y-6">
           <div className="grid gap-6 md:grid-cols-2 md:items-stretch">
-            <div className="flex flex-col gap-4">
+            <div className="flex min-w-0 flex-col gap-4">
               <div className="space-y-2">
                 <Label htmlFor="plan" className="block">
                   Plan
@@ -194,18 +138,21 @@ export function PricingCalculator({
                 <Input
                   id="events"
                   type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
                   value={monthlyEvents}
                   onChange={handleEventsChange}
                   placeholder="Enter number of units per month"
+                  className="min-w-0"
                 />
               </div>
             </div>
 
-            <CornerBox className="p-4 bg-surface-1 sm:p-6 flex items-center justify-center">
+            <CornerBox className="flex min-w-0 items-center justify-center bg-surface-1 p-4 sm:p-6">
               {currentBaseFee > 0 ? (
-                <div className="w-full text-center">
-                  <div className="flex flex-col gap-3 justify-center items-center text-base font-medium sm:flex-row sm:gap-4 sm:text-lg">
-                    <div className="text-center">
+                <div className="w-full min-w-0 text-center">
+                  <div className="flex w-full min-w-0 flex-col items-center justify-center gap-3 text-base font-medium sm:flex-row sm:flex-wrap sm:gap-4 sm:text-lg">
+                    <div className="min-w-0 max-w-full text-center">
                       <div className="text-xl font-bold text-primary sm:text-2xl">
                         {formatCurrency(currentBaseFee)}
                       </div>
@@ -216,8 +163,8 @@ export function PricingCalculator({
                     <div className="text-lg text-muted-foreground sm:text-xl">
                       +
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                    <div className="min-w-0 max-w-full text-center">
+                      <div className="max-w-full break-words text-xl font-bold text-primary sm:text-2xl">
                         {formatCurrency(calculatedPrice)}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
@@ -227,8 +174,8 @@ export function PricingCalculator({
                     <div className="text-lg text-muted-foreground sm:text-xl">
                       =
                     </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-primary sm:text-2xl">
+                    <div className="min-w-0 max-w-full text-center">
+                      <div className="max-w-full break-words text-xl font-bold text-primary sm:text-2xl">
                         {formatCurrency(calculatedPrice + currentBaseFee)}
                       </div>
                       <div className="mt-1 text-xs text-muted-foreground">
@@ -238,8 +185,8 @@ export function PricingCalculator({
                   </div>
                 </div>
               ) : (
-                <div className="w-full text-center">
-                  <div className="text-2xl font-bold sm:text-3xl text-primary">
+                <div className="w-full min-w-0 text-center">
+                  <div className="max-w-full break-words text-2xl font-bold text-primary sm:text-3xl">
                     {formatCurrency(calculatedPrice)}
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
@@ -275,7 +222,7 @@ export function PricingCalculator({
           )}
 
           {/* Breakdown */}
-          <div className="space-y-3">
+          <div className="min-w-0 space-y-3">
             <div className="font-medium">Pricing tiers breakdown:</div>
             <Table>
               <TableHeader>

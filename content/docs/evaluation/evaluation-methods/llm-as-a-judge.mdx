@@ -347,9 +347,11 @@ You can show the LLM-as-a-Judge execution traces by filtering for the environmen
 
 ### Rate limits and retries [#rate-limits-and-retries]
 
-When the judge's LLM provider returns a retryable error, such as a rate-limit HTTP `429` from Azure OpenAI, Langfuse schedules another attempt on the worker queue. By default, it allows **up to four queued retries in addition to the initial attempt**, spread across a **120-minute retry window**. Each queue attempt may also make a short retry within the LLM SDK, so this is not a cap of five provider requests.
+When the judge's LLM provider returns a retryable error, such as a rate-limit HTTP `429` from Azure OpenAI, Langfuse schedules another attempt on the worker queue. By default, it allows **up to four queued retries in addition to the initial attempt**, spread across a **120-minute retry window**. Each attempt sends at most one request to the provider.
 
 The nominal retry targets are approximately **5, 43, 82, and 120 minutes** into that window. These are elapsed times, not delays to add after each failure. The targets are evenly spaced after the first five-minute target; the queue does not use exponential backoff for this schedule. Each scheduled delay has up to **±20% jitter**, capped at the remaining time in the window.
+
+A rate-limit `429` also pauses that model on the LLM connection for every evaluation that uses it, for as long as the provider's `retry-after` header asks (between 5 seconds and 5 minutes, 60 seconds if the header is missing). An attempt during the pause fails without calling the provider and counts toward the retry limit. A retry after a rate limit runs no earlier than the end of the pause, even if its scheduled target is sooner.
 
 <Callout type="info">
 The retry window starts at the evaluation job's creation time plus its configured initial evaluation delay. Queue wait time consumes that window, so these times are approximate and fewer than four retries may be scheduled. A queued retry can execute after the window ends. After a failed attempt, Langfuse sets the execution to **Error** if the retry count or time budget is exhausted. Permanent credential, billing, or model errors do not follow this schedule and can pause the evaluator; a `429` with `insufficient_quota` is one such terminal error.

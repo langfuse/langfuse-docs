@@ -1,8 +1,10 @@
 ---
 title: Decision model evaluators
 sidebarTitle: Decision model evaluators
-description: Use OpenAI, Google AI Studio, or TypeSafe decision models to ask typed questions about observations and write structured evaluation scores.
+description: Use decision models to ask typed questions about observations and write structured evaluation scores.
 ---
+
+import { FaqPreview } from "@/components/faq/FaqPreview";
 
 # Decision model evaluators
 
@@ -23,7 +25,7 @@ They are often cheaper to run than [LLM-as-a-Judge](/docs/evaluation/evaluation-
 
 ### Create a decision-model evaluator [#create-a-jev-evaluator]
 
-Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose **New decision model evaluator**, then select an [OpenAI](#connect-openai), [Google AI Studio](#connect-google-ai-studio), or [TypeSafe](#connect-typesafe-jev) connection and model. Add the connection under **Settings → LLM Connections** if you do not have one yet.
+Go to the [Evaluators page](https://cloud.langfuse.com/project/~/evals) and click **New evaluator**. Choose **New decision model evaluator**, then select a connection and model. Add the connection under **Settings → LLM Connections** if you do not have one yet.
 
 <Frame fullWidth>
   ![New decision model evaluator in the template gallery, with a Yes / no question](/images/docs/evaluation/create-decision-model-evaluator.png)
@@ -49,7 +51,7 @@ Add one question per criterion. For each question, pick the type, write the inst
 
 ### Map the model input
 
-Map the observation data the model should evaluate.
+Map the observation data the model should evaluate. How you map the input depends on the provider; see [provider-specific guidance](#provider-specific-guidance).
 
 ### Test the evaluator
 
@@ -66,62 +68,18 @@ After saving, you can:
 
 <span id="use-an-openai-decision-model" />
 <span id="add-a-typesafe-connection" />
+<span id="connect-openai" />
+<span id="connect-google-ai-studio" />
+<span id="connect-typesafe-jev" />
+<span id="connect-system-one-compatible" />
 
 ## Connect a provider [#connect-a-provider]
 
-### OpenAI [#connect-openai]
+Add an [LLM connection](/docs/administration/llm-connection) under **Settings → LLM Connections** if you do not have one yet. Select that connection and a decision model when you create the evaluator.
 
-Add an **OpenAI** connection with access to `gpt-6-luna`. Langfuse calls the OpenAI Decisions API through this connection.
+### Provider-specific guidance [#provider-specific-guidance]
 
-Map observation data to the single state named `input`. Questions evaluate that state as a whole and cannot reference individual fields. Score levels need a label and can include an optional description.
-
-<Callout type="warning">
-  If OpenAI refuses any question, the run fails and writes no scores.
-</Callout>
-
-### Google AI Studio [#connect-google-ai-studio]
-
-Add a **Google AI Studio** connection and select `gemini-decision-1`. Langfuse calls the [Gemini Decisions API](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/) through this connection. The input and questions work as for [OpenAI](#connect-openai): map observation data to the single state named `input`.
-
-<Callout type="info">
-  Google Vertex AI connections can't run decision models. Use a Google AI
-  Studio connection.
-</Callout>
-
-### TypeSafe Jev [#connect-typesafe-jev]
-
-Add a connection with the adapter **typesafe**, choose the upstream that serves Jev, and paste its API key:
-
-| Upstream          | API key                                                                             | Billing                   |
-| ----------------- | ----------------------------------------------------------------------------------- | ------------------------- |
-| TypeSafe          | A key from the [TypeSafe console](https://console.typesafe.ai/settings/keys)        | Billed by TypeSafe        |
-| Vercel AI Gateway | An [AI Gateway API key](https://vercel.com/docs/ai-gateway/authentication-and-byok) | Billed through AI Gateway |
-| OpenRouter        | An [OpenRouter API key](https://openrouter.ai/settings/keys)                        | Billed through OpenRouter |
-
-These upstreams need no base URL or extra headers.
-
-<Callout type="info">
-  Use `jev-latest` to follow new releases, or pin a version such as `jev-1.13.0`
-  when an evaluation threshold should stay stable.
-</Callout>
-
-Build the JSON state from observation input, output, metadata, tool calls, **Expected Output**, or **Experiment Item Metadata**. Reference those fields in question instructions with backticks, for example ``Compare `output` with `expectedOutput`.`` Jev Score levels require a description.
-
-<Callout type="info">
-  TypeSafe connections are only available to decision-model evaluators because
-  Jev cannot generate text.
-</Callout>
-
-### Other System One-compatible models [#connect-system-one-compatible]
-
-Other vendors serve decision models through TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one) (`POST <base URL>/systemone`). Add a **TypeSafe (System One)** connection, select the **Custom** upstream, enter the vendor's base URL without the `/systemone` suffix, and add the model name under **Custom models**. Langfuse authenticates with `Authorization: Bearer <API key>`; use **Extra Headers** for any additional headers the vendor requires.
-
-| Vendor                                                                         | Model                                   | Base URL                                                       | Notes                                                                                                                           |
-| ------------------------------------------------------------------------------ | --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| [Subquadratic SubQ Snap](https://docs.subq.ai/endpoints/decisions-api/)        | `subq-snap-preview`                     | `https://api.subq.ai/v1`                                       | API key from the SubQ console.                                                                                                  |
-| [Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/) | Any name, for example `strands-decider` | `<your server URL>/v1`, for example `http://localhost:8000/v1` | Open weights you serve yourself with `strands-decider serve`. The server has no authentication, so use any placeholder API key. |
-
-On Langfuse Cloud, custom base URLs must use HTTPS and resolve to a public address. Self-hosted Langfuse can reach `localhost` or internal hosts once you allow them with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`; otherwise saving the connection fails with `Blocked hostname detected`.
+<FaqPreview tags={["decision-model-providers"]} />
 
 ## FAQ
 
@@ -144,20 +102,13 @@ Yes. They run on incoming observations through rules, on historical observations
 </Details>
 
 <Details>
-<Summary>Where do I get a TypeSafe API key?</Summary>
-
-Create an account at [typesafe.ai](https://typesafe.ai) and generate a key in the [TypeSafe console](https://console.typesafe.ai/settings/keys). Access currently runs through a waitlist on TypeSafe's side. If you already use Vercel AI Gateway or OpenRouter, pick that upstream instead and use its API key. See [Connect TypeSafe Jev](#connect-typesafe-jev).
-
-</Details>
-
-<Details>
 <span id="debug-executions" />
 <span id="scores" />
 <Summary>How do I debug a decision-model run?</Summary>
 
 Every run creates an execution trace in the internal environment `langfuse-llm-as-a-judge`, named `Execute evaluator: <evaluator name>`. Internal environments are hidden from the default tracing view: filter by `environment = langfuse-llm-as-a-judge` or open the trace from a score.
 
-Probabilities and confidence are stored in score metadata (`metadata.openai`, `metadata.google-ai-studio`, or `metadata.typesafe`) where the provider returns them, not in the score value.
+Probabilities and confidence are stored in score metadata where the provider returns them, not in the score value.
 
 </Details>
 
@@ -165,14 +116,13 @@ Probabilities and confidence are stored in score metadata (`metadata.openai`, `m
 <span id="limits" />
 <Summary>What are the limits?</Summary>
 
-| Constraint              | Limit / guidance                                                                                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Questions per evaluator | 1 to 50, all answered in one call.                                                                                                                                        |
-| Choice options          | 2 to 255 options with unique values.                                                                                                                                      |
-| Score levels            | 2 to 10 ordered levels.                                                                                                                                                   |
-| Input size              | TypeSafe accepts roughly 32k tokens for the state plus the longest question, `gemini-decision-1` up to 256k. Keep the input focused on the data needed for the decision.  |
-| Refusals                | OpenAI can refuse a question; one refusal fails the run without writing scores. Jev always picks an answer, so add an `other` or `unclear` option when input may be thin. |
-| Data handling           | Input and questions are sent through the selected connection. Review your provider terms, and use [masking](/docs/observability/features/masking) where needed.           |
+| Constraint              | Limit / guidance                     |
+| ----------------------- | ------------------------------------ |
+| Questions per evaluator | 1 to 50, all answered in one call.   |
+| Choice options          | 2 to 255 options with unique values. |
+| Score levels            | 2 to 10 ordered levels.              |
+
+Input and questions are sent through the selected connection. Review your provider terms, and use [masking](/docs/observability/features/masking) where needed. Input size limits and refusal behavior depend on the provider; see [provider-specific guidance](#provider-specific-guidance). Keep the input focused on the data needed for the decision.
 
 </Details>
 

@@ -111,6 +111,8 @@ function MdxParagraph({
   return <p {...props}>{children}</p>;
 }
 
+MdxParagraph.displayName = "MdxParagraph";
+
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
