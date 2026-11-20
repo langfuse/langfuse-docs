@@ -151,6 +151,21 @@ domain). Update an existing row instead of adding a duplicate.
 - One H1 per markdown file already exists in consumers; do not add a `# ` heading
   to the table file.
 
+## Adopters explorer
+
+The `/users` explorer looks up three maps in
+`components/customers/AdoptersExplorerWrapper.tsx` by the **exact** company
+label in the table. A missing key leaves the card without a logo, and the
+use-case sentence is shown as the company description.
+
+When the row is a user story, or the company already has a logo file:
+
+- `COMPANY_LOGOS`: the light logo
+- `COMPANY_DESCRIPTIONS`: one short public description of the company, not the use-case sentence
+- `COMPANIES_WITH_DOCUMENTED_USE_CASES`: the company name, so the card shows the use case
+
+Keep each list alphabetical, and use the same spelling as the table label.
+
 ## Optional companion updates (only if they already apply)
 
 Do these only when the company is already on that surface, or the user asks:
@@ -179,5 +194,6 @@ Do **not** add a homepage logo in this skill. That needs a tight wordmark SVG
 - [ ] Use case is a brief, sourced summary (not a long paragraph)
 - [ ] Company cell links to the official website
 - [ ] Row is alphabetical and not a duplicate
+- [ ] For a user story, the explorer maps use the same company label: logo, short description, and documented use case
 - [ ] Table column alignment preserved
 - [ ] `pnpm run format` if you edited Prettier-covered files
