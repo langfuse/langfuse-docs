@@ -11,11 +11,12 @@ jobs:
   update-available-internal-links-cursor-rule:
     runs-on: ubuntu-latest
     environment: "main"
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
           persist-credentials: false
 
       - name: Setup pnpm and Node.js
@@ -49,11 +50,20 @@ jobs:
             exit 1
           fi
 
+      # The app is a bypass actor on the main branch ruleset; GITHUB_TOKEN cannot bypass required status checks.
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.DOCS_BOT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_BOT_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Commit and push if changed
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git add .agents/cursor/rules/available-internal-links.mdc
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update available-internal-links.mdc" && git push "https://x-access-token:${UPDATE_DOCS_MAIN_BRANCH_PAT}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update available-internal-links.mdc" && git push "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${GITHUB_REF#refs/heads/}")
         env:
-          UPDATE_DOCS_MAIN_BRANCH_PAT: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
