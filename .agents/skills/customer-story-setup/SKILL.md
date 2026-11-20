@@ -19,6 +19,12 @@ Turns the customer story's Google Doc into **`content/customers/<slug>.mdx`**
 in the same pattern as `content/customers/dkb.mdx`, `canva.mdx`, and
 `cresta.mdx`.
 
+## Start
+
+Delegation starts from Slack once the Google Doc is ready. That message is
+the start of the work. It points at the Linear ticket, which holds the Doc
+and the thumbnail.
+
 ## Source
 
 The source is the Google Doc linked from the Linear ticket. Export it as
