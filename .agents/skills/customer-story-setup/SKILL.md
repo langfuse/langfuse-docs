@@ -87,6 +87,15 @@ pull request description.
 - One comment is enough. Put each post in its own fenced block so it can be
   copied as it will be published.
 
+## Thumbnail
+
+The thumbnail attached to the Linear ticket is the page's `ogImage`. Save it
+at `public/images/customers/<slug>/ogImage.png` and set `ogImage` to that
+path. It is the share image. Do not put it in the article body.
+
+If the ticket has no thumbnail, leave `ogImage` empty and say so in the pull
+request.
+
 ## Before writing any file: collect missing input
 
 **Do not guess.** If any item below is missing from the draft or the ticket,
@@ -102,7 +111,7 @@ ask explicitly and wait.
 | **Page title**        | H1 string for `BlogHeader` + YAML `title` (often "How &lt;Company&gt; ... with Langfuse")          |
 | **Short description** | YAML `description` + `BlogHeader` description. Use the draft summary. Do not write a new sentence. |
 | **Publish date**      | YAML `date` + `BlogHeader` `date` (e.g. `March 26, 2026`)                                          |
-| **OG image**          | Optional `ogImage:` path; if unset, leave empty like other stories                                 |
+| **OG image**          | The ticket thumbnail. See **Thumbnail**. Leave `ogImage` empty only when the ticket has none.      |
 
 Never put the customer name in the git branch. Do not put it in the pull
 request title unless asked.
@@ -225,6 +234,7 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 - [ ] `## Summary` is an `ImpactChart` whose impact cells are the draft's summary sentences
 - [ ] The story is outside the headline six in `meta.json`, unless a headline slot was requested
 - [ ] Linear ticket has a comment with the LinkedIn draft and the X draft
+- [ ] `ogImage` is the thumbnail from the Linear ticket, when the ticket has one
 - [ ] The only `<CustomerQuote>` is the marked callout, and `customerQuote` is that same quote
 - [ ] No byline, unless the user named one
 - [ ] Adopters table row exists. The explorer has a logo and a company description. The documented-use-case set includes the company only when the table cell describes Langfuse use and differs from that description
@@ -254,7 +264,7 @@ Stay with the pull request until it is done.
 title: "..."
 date: ...
 description: ...
-ogImage:
+ogImage: /images/customers/<slug>/ogImage.png
 tag: customer-story
 customerLogo: "/images/customers/<slug>/...-light.png"
 customerLogoDark: "/images/customers/<slug>/...-dark.png"
