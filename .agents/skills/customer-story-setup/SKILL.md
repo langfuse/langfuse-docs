@@ -104,8 +104,8 @@ ask explicitly and wait.
 | **Publish date**      | YAML `date` + `BlogHeader` `date` (e.g. `March 26, 2026`)                                          |
 | **OG image**          | Optional `ogImage:` path; if unset, leave empty like other stories                                 |
 
-Do not put the customer company name in the git branch or the pull request
-title unless asked.
+Never put the customer name in the git branch. Do not put it in the pull
+request title unless asked.
 
 ### Authors (BlogHeader `authors={["..."]}`)
 
@@ -233,6 +233,18 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 - [ ] Doc links are preserved. The core concepts in **Docs links** are linked. No broken internal URLs
 - [ ] Em dashes replaced with `-`
 - [ ] One H1 via BlogHeader, American English, alt text on every image
+- [ ] The branch name does not contain the customer name
+- [ ] CI on the pull request is green, and every review comment is answered
+
+## After the pull request is open
+
+Stay with the pull request until it is done.
+
+- Wait until CI is green. If a check fails, fix it and push again.
+- Read every review comment, including bot comments. Reply on the thread, and
+  change the page when the comment is right.
+- Do not stop at the first green commit if a later push or a new comment is
+  still open.
 
 ---
 
