@@ -1,0 +1,279 @@
+---
+title: When agents write the code, component APIs matter more
+date: 2026/11/20
+description: The API and composition choices behind Langfuse’s design system, including what we restrict, what stays flexible, and what still needs review.
+tag: engineering
+author: Ben
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { DesignSystemProgress } from "@/components/blog/DesignSystemProgress";
+import { DialogCompositionDiagram } from "@/components/blog/DialogCompositionDiagram";
+import { InputControlDiagram } from "@/components/blog/InputControlDiagram";
+import { UserCardStatesDiagram } from "@/components/blog/UserCardStatesDiagram";
+import { ComponentLayoutDiagram } from "@/components/blog/ComponentLayoutDiagram";
+import { ChartAdaptersDiagram } from "@/components/blog/ChartAdaptersDiagram";
+
+<BlogHeader
+  title="When agents write the code, component APIs matter more"
+  description="The API and composition choices behind Langfuse’s design system, including what we restrict, what stays flexible, and what still needs review."
+  date="November 20, 2026"
+  authors={["benbachem"]}
+/>
+
+A few months ago, we set out to redesign Langfuse’s dark mode. But improving the colors and contrast meant changing how we built the UI, not just how it looked. Langfuse never had a rigorous design system, and [Trang had only just started as the team's first designer](/blog/2026-11-19-comfortable-with-being-uncomfortable). This meant styling decisions were scattered between shared components and individual features, so changes required tracking down callers across the product and applying them to each. Much of the code-writing already used AI tools, which added to the complexity.
+
+Trang and I initiated the development of a design system to enhance the UI and streamline feature development and review. A central consideration was determining which decisions should be standardized within the system and which should remain at the feature level. Feature authors should concentrate on the unique aspects of their features, rather than redefining common interaction patterns. Component reuse should reflect shared design decisions, not merely code reuse.
+
+These principles aren’t just for AI, but using agents can make the effects of our API choices more impactful. An overly flexible API lets each caller add variations we never planned for. As the codebase grows, keeping an eye on these cases gets harder.
+
+## Cheap code makes good abstractions more important
+
+Before getting into those boundaries, it’s worth asking why we need shared components at all. If an agent can generate a select in seconds, why maintain a shared component?
+
+The first reason is consistent look and feel. Centralizing styling decisions lets us change them across the product rather than adjust each feature separately. Keyboard navigation, focus handling, and accessibility also need deliberate attention. With well-defined shared primitives, we can do that work once and apply those improvements to every feature that’s built on the primitive.
+
+You could argue that documentation could enforce these decisions without centralizing the code. The problem is that documentation cannot do this **reliably**, and changing instructions leaves existing code unchanged. Shared code lets us enforce decisions and apply changes to existing consumers.
+
+But shared code alone isn’t enough. A dropdown can provide shared items, icons, and shortcuts while still asking every caller to assemble and style them. If documentation is what tells callers where the shortcut belongs or how far the icon is from its label, those decisions still need to be checked at every call site.
+
+We want callers to choose the menu’s actions instead of reconstructing its presentation. A typed `items` prop lets us do that. The feature supplies labels, icons, and callbacks while the menu owns their arrangement and interactions.
+
+## Deciding what belongs in a shared component
+
+I initially experimented with automatically cleaning up and migrating existing components.
+
+This didn't go well. Many existing component APIs were awkward, with props bolted on over time. I think many of them happened because agents made shared-code changes optional instead of updating old uses to a new default. I get why: it lets them finish the feature without touching old code. Two badges might have different capitalization or padding because they serve different purposes, or simply because different people built them months apart. Preserving both with `uppercase={true}` or `padding="dense"` turns accidental history into a choice every future caller must make.
+
+Should the shared component keep all that functionality, split into several components, or leave an unusual variant as a one-off? I found coding agents didn’t always make good choices in these cases, especially since we had little documentation and the existing code wasn’t a good example. So, I decided to migrate some components myself first, planning to automate more once things were in better shape.
+
+In the following, I want to explore the principles we established for our new set of design-system components.
+
+## Start narrow, expand deliberately
+
+I started with small APIs covering known needs. If an option is exposed, people should be expected to use it; there shouldn’t be a need to tell them in the review that they weren’t supposed to. With agents, that option can spread quickly.
+
+Here's an example from our [legacy dropdown](https://github.com/langfuse/langfuse/blob/main/web/src/components/ui/dropdown-menu.stories.tsx) component:
+
+```tsx
+<DropdownMenuItem className="text-xs" onSelect={handleCopyTraceId()}>
+  <CopyIcon className="mr-2" />
+  Copy Trace ID
+</DropdownMenuItem>
+```
+
+The composite API requires even a copy action to decide on caller-owned text sizing and icon spacing. Nothing stops anyone from putting an element inside the `DropdownMenuItem` that would spill over its bounds. People have been asking to [restrict JSX composition at the type level for a decade](https://github.com/microsoft/TypeScript/issues/18357). Lint rules can help but can be brittle. Where we want to guarantee content structure, we’re replacing compound component APIs with strictly typed props.
+
+With the design system `DropdownMenu`, callers provide items rather than assembling their own markup. This excerpt shows the items API, with the second item and trigger omitted:
+
+```tsx
+<DropdownMenu
+  ariaLabel="Use skill"
+  items={[
+    {
+      type: "item",
+      id: "install",
+      title: "Install with CLI",
+      icon: Terminal,
+      disabled: installDisabled
+        ? { reason: "Loading installation options" }
+        : undefined,
+      onClick: handleInstall,
+    },
+  ]}
+>
+  {/* Trigger omitted. */}
+</DropdownMenu>
+```
+
+The caller still chooses the actions, labels, icons, and trigger. The menu owns how its items are rendered, including icon alignment and spacing.
+
+Now, a strict API can be annoying to use. You have to construct the exact object it expects, rather than just writing some JSX. With coding agents, I’m less concerned about the extra typing. I still need to read and debug the result, but I’d rather review an explicit list of actions than check whether someone put the shortcut in the right place again. I’m happy to make the call site more cumbersome if that’s what it takes to get those menus right.
+
+We still need to be very intentional with what props we expose. Our `ControlledDropdownMenu` briefly exposed a `selected` property on all menu items even though it was only needed for special options in our Organization and Project switchers. Selection behavior quickly appeared elsewhere. We should have used a discriminated union to separate entity rows from ordinary items and restricted the selection to the former from the beginning.
+
+We also value convenience and will provide tailored adapters, often splitting components into public-facing and internal implementations.
+
+For example, [`BarChart`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/charts/BarChart/BarChart.tsx), [`GroupedBarChart`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/charts/GroupedBarChart/GroupedBarChart.tsx), and [`StackedBarChart`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/charts/StackedBarChart/StackedBarChart.tsx) share an internal [`BarChartCore`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/internal/charts/BarChartCore.tsx):
+
+<ChartAdaptersDiagram />
+
+The core supports several layouts, but callers choose a named component rather than configure those through flags. If I need a stacked chart, I can find `StackedBarChart` in autocomplete instead of looking through a general-purpose chart’s props to figure out how to configure one. Its props cover only relevant options, and I can tell which chart is being used later without checking a combination of flags. We share the implementation without exposing it all.
+
+Starting narrow lets us learn before committing to a general abstraction. A focused one-off can show us what a feature needs without immediately turning that need into a promise to every other feature. With agents, adding a supported capability and updating callers later is cheaper as long as components have good boundaries, but more on that later.
+
+## Don’t expose className or style
+
+If an input accepts arbitrary classes, how do I know what it looks like across the product without checking every call site? This was part of what made our initial styling changes difficult.
+
+Caller-supplied styles can conflict with the component’s own styles. This is why I believe using a library like [`tailwind-merge`](https://github.com/dcastil/tailwind-merge) or shadcn's [`cn`](https://github.com/shadcn-ui/cn) is an antipattern. It resolves conflicts by letting later conflicting classes win, but that makes overriding the component’s decisions an expected part of using it.
+
+A `className` prop accepts any string; `variant` and `size` give us finite choices we can test and review. With `size="small"`, the component can adjust padding, text, icons, and gaps together. The component can’t reliably parse an arbitrary `className` string to determine which styling decisions it should adjust in response.
+
+Therefore, we’ve banned `style` and `className` props and enforce this across the repository with our [`no-style-props` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-style-props.ts).
+
+### Let the parent own layout
+
+How should we handle layout and spacing when components can’t be styled directly by callers? What has worked well for me is making them generally fill the available width, constrained by a wrapper. Padding, height variants, borders, and focus treatment stay internal. Our [`no-margin-on-root-elements` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-margin-on-root-elements.ts) prevents components from adding margins to their root elements, keeping them composable. An input shouldn’t bring a bottom margin that suits one form but needs undoing in a toolbar.
+
+The parent sets the gap between its children's bounding boxes; each component controls the spacing within its own bounding box. The parent knows which components it contains, while the input doesn’t need to know which layout it’s in.
+
+<ComponentLayoutDiagram />
+
+### Share styling through internal components
+
+What about sharing styling between components? Exporting class name strings still lets callers combine them with arbitrary classes. I prefer composition: our [`SelectInput`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/SelectInput/SelectInput.tsx) and [`MultiSelectInput`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/MultiSelectInput/MultiSelectInput.tsx) share the internal [`InputControl`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/internal/InputControl/InputControl.tsx), which owns their borders, focus treatment, and error styling.
+
+Our [import restrictions](https://github.com/langfuse/langfuse/blob/main/web/oxlint.config.mts) keep feature code from importing design-system internals. Feature authors use the public inputs, not `InputControl` directly.
+
+All eight components that use `InputControl` directly share that styling:
+
+<InputControlDiagram />
+
+### From Tailwind classes to typed props
+
+It’s also important to use the right tool for the task. I'm a large fan of Tailwind but just like with any tool, you have to understand its limitations.
+
+A few weeks ago, we wanted to standardize our icons so they all use a common size scale. We were using Lucide icons and simply passing ordinary Tailwind classes like `w-4`, `h-8`, or `size-3.5` to the components.
+
+We first standardized Lucide sizing using [Tailwind utilities such as `icon-sm` and `icon-base`](https://github.com/langfuse/langfuse/pull/18017) and enforced it with a lint rule. But those classes could still be applied to non-icons, and aliases or props could hide them from the rule.
+
+We replaced them with an [internal icon package](https://github.com/langfuse/langfuse/pull/19016) that wraps Lucide with typed `size` and semantic `color` props:
+
+```tsx
+// Before
+<Search className="icon-base text-icon-foreground" />
+
+// After
+<Search size="base" color="default" />
+```
+
+The package maps props to dimensions and theme tokens, and we reject ordinary `className`, `style`, and size overrides on the type level; exceptions require very explicit escape hatches.
+
+## Lean into composition
+
+Strict APIs also shouldn’t require putting everything into a single component, and leaning into composition helps here.
+
+### Keep triggers separate from dialogs
+
+Take a toolbar whose buttons open different dialogs. The toolbar owns how those buttons are arranged, but it shouldn’t need to know about the forms or data fetching inside each dialog.
+
+This is where Radix-style trigger APIs can get in the way. Assembling `Dialog.Trigger` and `Dialog.Content` under a single root is convenient when everything lives in one component. But as the feature grows, I want to move the button into a toolbar without bringing the dialog’s dependencies. The connection between them should be something I can pass through props.
+
+[Floating UI’s interaction hooks](https://floating-ui.com/docs/useInteractions) take an approach I like: they provide refs and prop getters that can be attached to caller-owned elements. Our `DropdownMenu` follows that pattern with `getTriggerProps`. For dialogs, our [`DialogController`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/DialogController/DialogController.tsx) owns the open state, renders the dialog through `renderDialog`, and gives its children an `openDialog` callback. The feature can pass that callback down to whichever button needs it. We still use Radix underneath; we don’t need to expose its trigger components to get its dialog behavior.
+
+The toolbar includes buttons and callbacks, so we can render it in Storybook without mocking dialog dependencies or changing its layout, even without touching forms.
+
+Keeping ownership separate also matters when a dropdown item opens a dialog. Closing the menu can unmount the item, but it shouldn’t unmount the dialog. A controller above the menu can keep the dialog alive after its trigger disappears.
+
+Our [`DatasetActionButton` refactor](https://github.com/langfuse/langfuse/pull/15531) is a concrete example. One component handled dataset creation, updates, and deletion, including permissions, analytics, dialog state, forms, and text or icon triggers. Given the primitives the code has access to, this was a natural consequence, since triggers could not easily be separated from modal elements. The resulting component was highly polymorphic, and the code was hard to grasp. Adding another place to invoke an operation meant adding another presentation option.
+
+With the new APIs, we could split it into operation-specific dialog content and controllers, and could inline the triggers at the call sites.
+
+<DialogCompositionDiagram />
+
+In many cases, this also allows us to have confidence around styling without looking at the output. A list of three repeated `Button` elements that share the same size and variant values implies uniformity, whereas code like `DatasetCreateButton`, `DatasetDeleteActionButton`, and `DatasetDeleteConfirmationButton` next to one another will naturally abstract their internals; thus, a reader cannot draw conclusions about their uniformity.
+
+Separating the dialog from its trigger doesn’t mean the feature has to render the trigger itself. It can pass a label and callback to a component like [`TabBar`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/TabBar/TabBar.tsx), which renders the button and its tooltip. Our [`SessionViewTabs`](https://github.com/langfuse/langfuse/blob/main/web/src/features/sessions/SessionViewTabs.tsx) does this with the label `"Create custom view"`. The callback ultimately calls `DialogController`’s `openDialog`, while `TabBar` uses the label for both the tooltip and the icon button’s accessible name. With intermediate feature components omitted, the wiring looks like this:
+
+```text
+DialogController
+  ├─ renderDialog → feature dialog
+  └─ children({ openDialog })
+       → SessionViewTabs (feature code)
+         → TabBar.createAction
+           ├─ label: "Create custom view"
+           │    ├─ Tooltip.label
+           │    └─ IconButton.label → button’s aria-label
+           └─ onClick → opens the dialog via openDialog
+```
+
+The feature supplies the wording once, without assembling a tooltip or knowing how the button is labeled for screen readers. `TabBar` owns those presentation decisions without needing to know what the callback opens.
+
+### Controlled vs uncontrolled components
+
+Instead of supporting both controlled and uncontrolled modes within the same component, we generally prefer to split the component. The uncontrolled variant can often be a simple wrapper around the controlled one, just holding and supplying state.
+
+Our [`AsyncSelectInput`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/AsyncSelectInput/AsyncSelectInput.tsx) allows the caller to manage selection and search state. This allows connecting selection to form state or search text to remote data fetching. Our [`SelectInput`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/SelectInput/SelectInput.tsx) wraps it, handling search text and filtering, simplifying use in most cases.
+
+That doesn’t mean lifting every bit of state out of the component. `AsyncSelectInput` still owns whether its popover is open and which option is active during keyboard navigation. Those are interaction details it can handle internally. The boundary is about which state the caller needs to coordinate, not about making components stateless.
+
+Our [`DropdownMenu`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/DropdownMenu/DropdownMenu.tsx) owns `open` and passes it to `ControlledDropdownMenu`. We recommend the uncontrolled wrapper unless callers need to coordinate visibility themselves.
+
+### Headless components
+
+Headless components are another great way to lean into composition. In cases where we cannot own the presentation but still want to share common behavioral patterns, we rely on them. Our [`DropzoneController`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/DropzoneController/DropzoneController.tsx) exposes drag state, file-picker actions, and prop getters without rendering the upload UI. We also offer a presentational `Dropzone` that composes it, while features that require a different upload surface can reuse the controller without adding potentially complex variants to the `Dropzone` component.
+
+### Don’t make every caller handle the exceptional case
+
+We don’t try to abstract everything; that would slow us down too much. Our [`Tooltip`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/Tooltip/Tooltip.tsx), for example, accepts a label and an optional keyboard shortcut. It owns the presentation. Underneath, it composes `CustomTooltip`, which accepts arbitrary content.
+
+A feature needing a richer explanation can use `CustomTooltip` directly. Trying to own all presentational variants would not scale, and allowing every caller to use an open-ended content prop, even though only a few need one, would unnecessarily forfeit consistency. The constrained wrapper is what we want people to reach for first, without ruling out a different approach when there’s a reason.
+
+### Keep loading and loaded states together
+
+Composition doesn’t mean splitting every variation into a separate component. A user card and its skeleton should share dimensions. With separate components, someone or their agent can change one without updating the other. I’d rather make loading a state of the same component.
+
+In this simplified example, both states share the same outer element:
+
+```tsx
+import { Skeleton } from "@/src/components/ui/skeleton";
+import { Avatar } from "@/src/components/design-system/Avatar/Avatar";
+
+type UserCardProps =
+  | { state: "loading" }
+  | { state: "loaded"; name: string };
+
+function UserCard(props: UserCardProps) {
+  return (
+    <div className="flex h-16 items-center gap-3 rounded-lg border px-4">
+      {props.state === "loading" ? (
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+      ) : (
+        <Avatar displayName={props.name} size="lg" />
+      )}
+      {props.state === "loading" ? (
+        <Skeleton className="h-4 w-24" />
+      ) : (
+        <span className="truncate">{props.name}</span>
+      )}
+    </div>
+  );
+}
+```
+
+Both states share card height, padding, and avatar spacing while still composing `Avatar` and `Skeleton` internally. Callers don’t have to choose between `UserCard` and a separately maintained `UserCardSkeleton` whose layout must remain synchronized.
+
+<UserCardStatesDiagram />
+
+## Testing components without the application
+
+There’s another reason I care about these separations: I want to test a component without running the application. Starting it, logging in, navigating to the right page, and recreating a state is too slow a feedback loop. Storybook lets humans and agents exercise components with fixture props; agents also use its interaction tests to check their changes. The toolbar from earlier only needs callbacks, not working dialogs. I think making verification easy enough that it actually happens matters a lot more than we give it credit for.
+
+Our [Writing good stories guide](https://github.com/langfuse/langfuse/blob/main/web/.storybook/docs/WritingGoodStories.mdx) requires a connected wrapper to handle API access and pass data and callbacks into presentational components. Those can own local state and interactions, but neither they nor their children make API calls. Rendering one in a table won’t unexpectedly introduce a request per row. Stories need no network mocks; API integration is verified separately.
+
+Full-application previews need databases, seeded data, and authentication, so we suspend and eventually shut them down. Storybook previews are static builds, cheap enough to keep available.
+
+Our [preview workflow](https://github.com/langfuse/langfuse/blob/main/.github/workflows/storybook-preview.yml) builds and deploys Storybook for pull requests labeled `storybook`, then posts a link in the PR. Trang and other reviewers can open the stories without setting up data or asking an engineer to walk them through the application.
+
+## Reviewing changes to the system
+
+Contributions are welcome, but given the wide-ranging impact, design-system changes require maintainer review, currently primarily mine.
+
+Does this prop add a visual variant we want to support? Does the layout belong to the parent? Can the feature compose existing components instead? I’d rather discuss those questions once than spend months reviewing the use of an unnecessary option. Sometimes a new feature shows that an earlier decision was wrong. That’s fine too.
+
+If a shared change would delay a feature, people can ship a one-off, and we can decide later whether it belongs in the system. But shared decisions only reach users when features adopt the components.
+
+## Tracking progress and adoption
+
+Our internal frontend code health dashboard tracks adoption and where features still depend on legacy UI code.
+
+<div className="my-8">
+  <DesignSystemProgress />
+</div>
+
+Between May 22 and [November 17, 2026](https://github.com/langfuse/langfuse/commit/839b988a7433b0585daac6407743b60607b0f1ce), the design system grew to **77 exported components**, with **1,646 imports across 801 files**. Legacy UI imports peaked at around **3,700** before falling to around **3,000**. We’re migrating while continuing to build features, rather than pausing feature work.
+
+The dashboard helps us find callers to migrate. Agents can handle much of that once the replacement API is established, though some usages reveal missing capabilities or a need for a different abstraction.
+
+Ultimately, building a robust design system is a high-leverage investment that goes far beyond enforcing consistency or saving review time: it’s about creating a foundation that amplifies the strengths of everyone who builds on it, human and agent alike. As code becomes cheaper and agents accelerate both good and bad patterns, the challenge is not just to centralize or automate decisions, but to shape defaults and boundaries that empower teams to focus on what’s unique. The work is iterative, sometimes frustrating, but deeply rewarding. With each improvement, the system becomes a little clearer and stronger, paving the way for higher-quality features. If you care about building tools that scale with both people and technology, [we’re hiring at Langfuse](/careers).
