@@ -15,7 +15,6 @@ const REINDEER_SLEIGH = "🦌🛷";
 const FLY_FALL_PX = 120;
 const FLY_SPEED_PX_PER_S = 160;
 const FLY_EXIT = { x: -90, y: -70 };
-const GOAT_FALL_PX = 250;
 
 type FallingParticle = {
   id: number;
@@ -52,16 +51,15 @@ function FlyingSleigh({
       FLY_EXIT.y - (y + FLY_FALL_PX),
     );
     const total = FLY_FALL_PX + flyDistance;
-    const rotation = 360 * (FLY_FALL_PX / GOAT_FALL_PX);
     const animation = el.animate(
       [
         { transform: "translate3d(0px, 0px, 0) rotate(0deg)", offset: 0 },
         {
-          transform: `translate3d(0px, ${FLY_FALL_PX}px, 0) rotate(${rotation}deg)`,
+          transform: `translate3d(0px, ${FLY_FALL_PX}px, 0) rotate(0deg)`,
           offset: FLY_FALL_PX / total,
         },
         {
-          transform: `translate3d(${FLY_EXIT.x - x}px, ${FLY_EXIT.y - y}px, 0) rotate(${rotation}deg)`,
+          transform: `translate3d(${FLY_EXIT.x - x}px, ${FLY_EXIT.y - y}px, 0) rotate(0deg)`,
           offset: 1,
         },
       ],
@@ -111,13 +109,13 @@ export function HiringBadge({
     setIsMounted(true);
   }, []);
 
-  const spawnSnow = (x: number, y: number, count: number, spread = 0) => {
+  const spawnSnow = (rect: DOMRect, count: number) => {
     const flakes: FallingParticle[] = [];
     for (let i = 0; i < count; i++) {
       flakes.push({
         id: goatIdRef.current++,
-        x: x + (spread ? (Math.random() - 0.5) * spread : 0),
-        y: y + (spread ? (Math.random() - 0.5) * spread : 0),
+        x: Math.random() * rect.width,
+        y: Math.random() * rect.height,
         duration: 2.4 + Math.random() * 1.6,
         kind: "snow",
         drift: Math.round((Math.random() - 0.5) * 72),
@@ -168,7 +166,7 @@ export function HiringBadge({
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    releaseParticles([...spawnSnow(x, y, 8, 24), spawnFallingSleigh(x, y)]);
+    releaseParticles([...spawnSnow(rect, 8), spawnFallingSleigh(x, y)]);
     launchFlyingSleigh(e.clientX, e.clientY);
   };
 
@@ -183,7 +181,7 @@ export function HiringBadge({
     if (CHRISTMAS_MODE) {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      releaseParticles([...spawnSnow(x, y, 3, 8), spawnFallingSleigh(x, y)]);
+      releaseParticles([...spawnSnow(rect, 3), spawnFallingSleigh(x, y)]);
       return;
     }
 
