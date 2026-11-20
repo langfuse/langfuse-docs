@@ -12,6 +12,7 @@ import { SkillBoundaryDiagram } from "@/components/blog/SkillBoundaryDiagram";
 import { SkillEngineeringLoopDiagram } from "@/components/blog/SkillEngineeringLoopDiagram";
 import { SkillOperationArchitectureDiagram } from "@/components/blog/SkillOperationArchitectureDiagram";
 import { SkillTestingHarnessDiagram } from "@/components/blog/SkillTestingHarnessDiagram";
+import { SkillTraceDiagram } from "@/components/blog/SkillTraceDiagram";
 import { SkillUniqueClonersChart } from "@/components/blog/SkillUniqueClonersChart";
 
 <BlogHeader
@@ -95,7 +96,7 @@ The traces coming in from Langfuse Halo track skill interactions with tool obser
 - **On the generation:** you see which skill versions were **Available** to the model and whether it **Requested** a skill.
 - **On the skill-loading tool call:** you see the exact skill version and the specific files (`SKILL.md` and individual `references/*.md` files) that were **Loaded** into context.
 
-<mark className="bg-yellow-200 dark:bg-yellow-900/60 px-1 italic">TODO: add screenshot of a trace showing available skills and a skill invocation</mark>
+<SkillTraceDiagram />
 
 To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request. For a deeper dive into the specific metrics we track and which evaluations we prioritize from these signals, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
 
