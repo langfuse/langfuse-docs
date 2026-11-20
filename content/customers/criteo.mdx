@@ -1,0 +1,132 @@
+---
+title: "How Criteo uses Langfuse to evaluate and optimize AI agents across 20 teams"
+date: November 20, 2026
+description: "Criteo, a global commerce intelligence platform, built a shared evaluation framework on Langfuse to ensure AI agents written in both Python and C# continue to perform as expected."
+ogImage: /images/customers/criteo/ogImage.png
+tag: customer-story
+customerLogo: "/images/customers/criteo/criteo-light.svg"
+customerLogoDark: "/images/customers/criteo/criteo-dark.svg"
+customerQuote: "At Criteo, we make decisions based on data. Evaluation through Langfuse is key to that."
+customerQuoteHighlight: "Evaluation through Langfuse"
+quoteAuthor: "Clément Charnay"
+quoteRole: "Senior Software Development Engineer"
+quoteCompany: "Criteo"
+quoteAuthorImage: "/images/customers/criteo/clement-charnay.jpg"
+showInCustomerIndex: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+
+<BlogHeader
+  title="How Criteo uses Langfuse to evaluate and optimize AI agents across 20 teams"
+  description="Criteo, a global commerce intelligence platform, built a shared evaluation framework on Langfuse to ensure AI agents written in both Python and C# continue to perform as expected."
+  customerLogo="/images/customers/criteo/criteo-light.svg"
+  date="November 20, 2026"
+/>
+
+## Summary [#summary]
+
+<ImpactChart
+  items={[
+    {
+      area: "Agents in Python and C#",
+      impact:
+        "Criteo built a shared evaluation framework on Langfuse to ensure AI agents written in both Python and C# continue to perform as expected.",
+    },
+    {
+      area: "The right model for each step",
+      impact:
+        "The same framework lets Criteo test which model fits each step of an agent, cutting costs without losing accuracy, and tracing helps pinpoint latency bottlenecks.",
+    },
+    {
+      area: "Langfuse Cloud across 20 teams",
+      impact:
+        "They chose Langfuse because it combines observability and evaluation in one tool that was easy to set up and try. Today they're on Langfuse Cloud with several dozen users across around 20 teams.",
+    },
+  ]}
+/>
+
+## About Criteo
+
+Founded in 2005, [Criteo](https://www.criteo.com/) is the global commerce intelligence platform that drives performance for brands, agencies, retailers, and publishers. Built on proprietary commerce data and two decades of AI innovation, it helps companies turn shopper signals into commerce outcomes while delivering more relevant experiences for shoppers. "Criteo is very data-oriented," says senior software development engineer Clément Charnay. "We try to make decisions based on data, so evaluation is key to that."
+
+Clément works on Criteo's agentic core team, which builds products on top of LLMs. Their main use case is agentic commerce, where agents search for products and make recommendations. The agentic core team is one of several dedicated AI teams at Criteo, alongside teams focused on research and infrastructure. Clément's team supports other teams building agents at Criteo. "My team plays the role of enabler for those teams," he says.
+
+Criteo adopted [Langfuse](https://langfuse.com/) at the very start of its agentic work, and today several hundreds of users have access, mostly engineers plus some product managers, across several dozens projects and 20 teams. As Clément says, "Langfuse has been with us pretty much the whole journey."
+
+We caught up with Clément to learn why Criteo chose Langfuse, how his team built a shared evaluation framework on top of it, and how they use it to tune agents for speed and cost.
+
+## Why Criteo chose Langfuse
+
+Criteo accelerated its work on AI agents in the summer of 2025, building on its earlier LLM research.
+
+From day one, Clément and the team knew they needed dedicated tooling. "At Criteo, we rely a lot on data and logs and monitoring," he says. None of their existing tools were a fit for observing LLMs, so "it made sense to have something specific for agents."
+
+<CustomerQuote
+  quote="At Criteo, we make decisions based on data. Evaluation through Langfuse is key to that."
+  name="Clément Charnay"
+  role="Senior Software Development Engineer"
+  company="Criteo"
+  image="/images/customers/criteo/clement-charnay.jpg"
+/>
+
+Building agents at Criteo, he notes, comes with certain challenges. The company's agentic products are multi-step, often chaining several LLM calls, so when something goes wrong, the team needs to know exactly where. As an ad tech company, Criteo places a strong emphasis on speed and responsiveness and LLMs are known to add latency. "Being able to see how fast we go and when there's an improvement is very important," Clément says. And because agentic work is decentralized, with teams working in both Python and C#, "it's important to be able to onboard a lot of teams with different stacks."
+
+The team tried a handful of tools. "Several of them would have fit some of our needs," Clément says, "but Langfuse was the best fit for a number of reasons." For one, he explains, "it combined both observability and evaluation in the same tool, which I really liked because we knew we were going to need both."
+
+It could also be [self-hosted](/self-hosting). That let the team set up a small Langfuse instance on a virtual machine and start prototyping while procurement was ongoing. As Clément says, "We weren't blocked, and we could start working on our agents." (Criteo later moved to [Langfuse Cloud](/cloud) for easier, managed scalability.)
+
+Finally, Langfuse is built on [OpenTelemetry](/integrations/native/opentelemetry), which Criteo's existing instrumentation already used. That meant teams building agents in C# could send traces to Langfuse, not just those working in Python. Criteo's infrastructure team has since built their own C# SDK for Langfuse.
+
+## A shared evaluation framework across teams
+
+Criteo's use of Langfuse starts with tracing. "When we have one execution of one product, we can immediately see all the calls in the sequence," Clément says. If something's gone wrong, the team can see precisely where, along with the inputs and outputs at each step. The same goes for evaluation runs. If a dataset run doesn't perform as expected, Clément has the trace, whereas with a homegrown script he'd "probably have to look through a huge pile of logs in text."
+
+The area Clément has worked on most, and that others at Criteo now rely on, is [datasets](/docs/evaluation/experiments/datasets) and [experiments](/docs/evaluation/experiments/experiments-via-sdk). As teams iterate on agents, they need to know that a change (e.g. an edited system prompt) hasn't broken anything. So Clément's team built an evaluation framework on top of Langfuse that automatically runs agents against test datasets, in both Python and C#. Many teams have since adopted it, and some of these evaluations now run nightly through Jenkins builds. "That helped us immensely improve the agents we've developed," he says.
+
+Most of these runs use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), with the judge prompts living in Langfuse's [prompt management](/docs/prompt-management/overview). As Clément explains, Criteo used to run judges with DeepEval, but the team's C# services needed an approach that would support both Python and C#. Now each judge prompt asks for a confidence score between zero and one. The score is stored in Langfuse for each dataset item and averaged across the dataset. For use cases where the goal is to call the right tool with the right inputs, the team compares outputs against ground truth with an exact match.
+
+The result is confidence in the products they're building. Teams can see that an agent is doing what it's supposed to do, and that it hasn't "from one day to the next exploded its latency figures or its cost figures," Clément says. "That's something that helps us sleep at night."
+
+## Tuning agents for speed and cost
+
+Running experiments in Langfuse has also changed how Criteo picks models. One of the team's agents serves as an internal knowledge base that other agents can draw on. It makes two calls, one to rewrite the incoming query for search and one to generate the final answer. Both started out on a large model, which Clément describes as "very accurate but also not fast enough for this use case."
+
+So the team ran all four combinations of small and large models and compared results. "What we found was counterintuitive," Clément says. The rewriting step needed the large model, but the final answer could move to a smaller one. "We probably wouldn't have noticed if it wasn't for Langfuse letting us run all four experiments and bring them side by side," he adds.
+
+<Frame fullWidth className="w-full">
+  ![Illustrative Langfuse experiments view comparing large and small models for the rewrite and answer steps. Sample data, not actual Criteo results.](/images/customers/criteo/model-comparison.png)
+</Frame>
+
+More recently, Clément needed to move an agent with three LLM calls from GPT-5.4 nano and mini to GPT-5.6, and to decide which 5.6 model each call needed, with or without added reasoning. That added up to 12 combinations. He connected Claude to the [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) and had it pull the scores from all 12 runs into a report. It showed that GPT-5.6 Luna, the cheapest option, could handle all three calls without losing accuracy on the dataset. "Being able to run all of them side by side and having all the results in Langfuse, and then the Langfuse MCP, that really saved my life," he says.
+
+<div className="flex justify-center">
+  <Frame fullWidth className="w-2/3">
+    ![Illustrative Claude Code session running model combinations as Langfuse experiments. Sample workflow, not an actual Criteo run.](/images/customers/criteo/experiment-run.png)
+  </Frame>
+</div>
+
+Tracing also helps the team optimize response times. In another use case Clément shared, an agent runs LLM calls behind a banner ad. "When you show a banner on the open web, you have to be fast," he says. To bring the initial version within a 10-second response-time requirement, the team used Langfuse to identify the LLM call contributing most to latency and pinpoint where to focus its optimization efforts.
+
+## What's next for Criteo and Langfuse
+
+Most of Criteo's evaluation so far has been [offline](/docs/evaluation/get-started/offline), usually in nightly runs on test datasets. But as Clément explains, the team is moving toward continuous [online evaluation](/docs/evaluation/get-started/online), scoring production traces as they arrive in Langfuse. An LLM-as-a-judge will assess whether each answer meets the evaluation criteria. Traces highlighting areas for improvement can then be added to test datasets, while the scores help monitor production performance and flag deviations for review.
+
+They're also starting work on prompt optimization. The goal is to update LLM prompts continuously and automatically. Each change would launch an experiment, and an agent connected to the Langfuse MCP server would check the results and traces to see whether the new prompt performs better, then adjust from there. "That's something that is going to be very beneficial to us and our product improvement cycle," Clément says.
+
+The team is sharing what it has learned along the way. Staff software engineer Fabian Höring recently wrote about [why agentic evaluation matters](https://tech.criteo.com/blog/beyond-the-demo-why-agentic-evaluation-matters/), including how Criteo collects traces, versions its judge prompts, and runs evaluations across teams with Langfuse.
+
+"If you have an agentic product, Langfuse will allow you to do observability and evaluation in the same place," Clément says. Asked to sum up the platform's value in three words, he describes the loop behind how Criteo builds agents: "See, measure, and improve."
+
+<CustomerQuote
+  quote="See, measure, and improve."
+  name="Clément Charnay"
+  role="Senior Software Development Engineer"
+  company="Criteo"
+  image="/images/customers/criteo/clement-charnay.jpg"
+/>
+
+<CustomerStoryCTA />
