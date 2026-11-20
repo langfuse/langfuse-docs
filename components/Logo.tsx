@@ -38,7 +38,7 @@ const CHRISTMAS_NAV_WORDMARK = {
   dark: "/christmas/langfuse-by-clickhouse-white.png",
   alt: "Langfuse",
   width: 1024,
-  height: 354,
+  height: 297,
   className: "h-11 w-auto sm:h-11",
 } as const;
 
