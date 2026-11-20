@@ -244,7 +244,7 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 - [ ] One H1 via BlogHeader, American English, alt text on every image
 - [ ] The branch name does not contain the customer name
 - [ ] CI on the pull request is green, and every review comment is answered
-- [ ] Ordinal has the LinkedIn and X drafts, and `lf-customer-stories` has the draft, the preview, the ticket, and any open points
+- [ ] `lf-customer-stories` has the social draft, the preview, the ticket, and any open points. The draft is in Ordinal when Ordinal is connected.
 
 ## After the pull request is open
 
@@ -261,10 +261,11 @@ Stay with the pull request until it is done.
 When CI is green and every review comment is answered:
 
 1. Create the LinkedIn and X drafts in Ordinal from the social copy on the
-   Linear ticket. Leave them as drafts.
-2. Send one Slack message to `lf-customer-stories`. Include the Ordinal draft,
-   the preview of the pull request, the Linear ticket, and any open points.
-   If there are no open points, say so.
+   Linear ticket. Leave them as drafts. If Ordinal is not connected, skip
+   this and put the same copy in the Slack message.
+2. Send one Slack message to `lf-customer-stories`. Include the Ordinal draft
+   or the social copy, the preview of the pull request, the Linear ticket,
+   and any open points. If there are no open points, say so.
 
 ---
 
