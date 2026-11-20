@@ -1,0 +1,157 @@
+---
+title: Topics
+description: Discover recurring intents, sentiment, outcomes, and issues across your traces, then inspect the conversations behind each topic.
+---
+
+import { Steps, Step } from "@/components/docs";
+
+# Topics
+
+Topics groups similar traces so you can see what users ask for, how interactions go, and where your application struggles. Open **Topics** in your project to explore recurring patterns and inspect the traces behind them.
+
+For example, use Topics to find the most common support requests, investigate unsuccessful interactions, or identify recurring tool failures to add to your [evaluation datasets](/docs/evaluation/experiments/datasets).
+
+<Frame fullWidth>
+  ![Topics treemap with a selected intent topic and its matching trace
+  summaries](/images/docs/topics/treemap.png)
+</Frame>
+
+_Topics treemap and trace summaries, shown with synthetic example data._
+
+## How Topics works [#how-it-works]
+
+A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
+
+| Facet     | Question                                         |
+| --------- | ------------------------------------------------ |
+| Intent    | What is the user trying to do?                   |
+| Sentiment | How does the user feel about the interaction?    |
+| Outcome   | What was delivered, and is the result confirmed? |
+| Issues    | What problems affected the final result?         |
+
+A **live map** follows a filtered set of traces over time. A **snapshot** analyzes a chosen time window once. Use separate maps for different applications or workflows so unrelated traffic does not dominate the results. Topics are discovered from your data; you do not need to define categories beforehand.
+
+## Get started [#get-started]
+
+The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
+
+<Callout type="warning">
+  Topics sends conversation content and execution context from selected traces to
+  the summary model configured in your LLM connections. Embedding and grouping
+  models receive generated summaries. Apply
+  [masking](/docs/observability/features/masking) before ingestion if content must
+  not reach those providers. Summarization does not guarantee anonymization.
+</Callout>
+
+<Steps>
+
+<Step>
+
+### Connect your models
+
+Add an [LLM connection](/docs/administration/llm-connection) under **Settings > LLM Connections**, or use an existing project or inherited organization connection. Open [Topics](https://cloud.langfuse.com/project/~/topics), choose **Set up topics**, then select your facets and models:
+
+- **Summaries**: a fast, cost-efficient text model that analyzes each trace.
+- **Embeddings**: an embedding model that represents the summaries for similarity comparisons.
+- **Grouping**: a text model that names and describes the discovered groups. A stronger model can produce clearer topic names.
+
+You can use the same text model for summaries and grouping. Embeddings require an embedding model; a chat model cannot fill that role.
+
+<Callout type="info">
+  Members, Admins, and Owners can configure Topics; Viewers can explore results.
+  Adding an LLM connection requires an Admin or Owner.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Select your traces
+
+Choose filters and a sampling rate. Start with one workflow and a small sample if you want to check relevance and provider costs before analyzing more traffic.
+
+<Callout type="info">
+  Topics needs recorded model conversations: capture generation observations with
+  inputs and outputs. A trace containing only a root span's input and output is
+  not enough. Follow the [tracing guide](/docs/observability/get-started) if your
+  model calls are not recorded yet.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Start a live map
+
+Review the selection and start processing. Setup reuses existing summaries and summarizes recent matching traces to build the first topics. The live map then analyzes new matching traces automatically.
+
+Follow setup progress on the Topics page. Open a topic once results appear to check that its traces match the pattern you expected.
+
+</Step>
+
+</Steps>
+
+## Live maps and snapshots [#maps-and-snapshots]
+
+Open the map picker to create a **New live map** or **New snapshot**.
+
+| Type     | Behavior                                                                                      |
+| -------- | --------------------------------------------------------------------------------------------- |
+| Live map | Analyzes new matching traces and updates topics daily from up to 30 days of recent summaries. |
+| Snapshot | Groups traces from a selected time window once, without changing live maps.                   |
+
+Live maps wait for a trace to become idle before analyzing it. The default is five minutes after the last event; adjust **Trace readiness** in **Topics > ⋮ > Settings** for long-running workflows.
+
+Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand.
+
+Snapshots can reuse existing summaries or **Summarize more traces** first. Choose the time window, filters, and facets; when summarizing more traces, choose a random sample or the latest matching traces. This lets you investigate traffic that your live maps have not processed.
+
+<Callout type="info">
+  A snapshot needs at least 10 applicable summarized traces per selected facet.
+  Small samples can produce broad topics. Counts describe the analyzed subset,
+  not all project traffic.
+</Callout>
+
+## Explore your topics [#explore]
+
+Select a live map or snapshot and a facet. Use **Treemap** to see the largest topics or **Scatter** to explore similar traces spatially. Select a topic to read its description and summaries, then open a trace to inspect the conversation and model calls.
+
+Within each map, a trace can belong to one topic per facet. **Unassigned** includes traces that do not fit a discovered topic, are awaiting an update, or lack enough applicable content.
+
+Treat topics as starting points for investigation. Similar conversations can have different outcomes, and a generated label may not describe every trace in a group. Review examples before turning a pattern into an evaluation or product decision (see the [Error Analysis chapter](/academy/monitoring/error-analysis) in the Academy).
+
+<Callout type="info">
+  The scatter plot represents the traces used in the last grouping. New traces
+  can appear in topic trace lists before the next update adds them to the map.
+  Topic groups and names can change when topics are rebuilt.
+</Callout>
+
+## Models and costs [#models-and-costs]
+
+Your provider charges for summarization, embeddings, and topic naming. Reduce processing costs with narrower filters, a lower sampling rate, or a less expensive summary model.
+
+<Callout type="info">
+  **Summaries and embeddings** in History shows estimated per-run costs where
+  pricing is available. The estimate excludes topic naming and failed calls, and can change
+  when summaries are replaced or deleted. Use your provider's billing for the total
+  cost.
+</Callout>
+
+<Callout type="warning">
+  The embedding model and dimensions are shared across the project and cannot
+  change once summaries have been embedded. Choose them before starting,
+  because embeddings from different models cannot be compared.
+</Callout>
+
+## Access results via API [#api]
+
+Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments for your own analyses.
+
+<Callout type="info">
+  These endpoints use the `/api/public/unstable` namespace and may change between
+  releases.
+</Callout>
+
+## Paused processing
+
+If Topics pauses because of a provider or billing error, resolve the error, then select **Turn back on** in the Topics banner and save. Updating model settings alone does not resume processing.
