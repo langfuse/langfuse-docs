@@ -116,6 +116,10 @@ On each generation, you see which skill versions were **Available** to the model
 
 On the skill-loading tool call, you see the exact skill version and the specific files (`SKILL.md` and individual `references/*.md` files) that were **Loaded** into context.
 
+<Frame fullWidth>
+  ![Langfuse skill_read tool observation showing 1 loaded skill and references/setting-up-evals.md loaded into context](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-tool-read.png)
+</Frame>
+
 To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request. For a deeper dive into the specific metrics we track and which evaluations we prioritize from these signals, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
 
 ## Offline evaluation setup for an agent skill [#offline-test-harness]
