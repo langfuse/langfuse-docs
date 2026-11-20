@@ -1,0 +1,87 @@
+---
+title: "Tracekit Integration with Langfuse"
+sidebarTitle: Tracekit
+logo: /images/integrations/tracekit_icon.png
+description: "See what Tracekit allowed, denied or held for a person on each agent tool call as spans in Langfuse, each tied to a signed record that verifies offline."
+category: Integrations
+---
+
+# Tracekit and Langfuse: policy decisions next to your agent traces
+
+An agent trace shows what a tool call did. It doesn't show whether anything checked the call first. Tracekit does that check, and this page sends its decisions to Langfuse as OpenTelemetry spans, so each tool call in a trace carries the policy decision and the rules behind it.
+
+> **What is Tracekit?** [Tracekit](https://github.com/Cygnux-Labs/Tracekit) (`tracekit-ai`, MIT licensed) asks a separate signer process to allow, deny or hold each tool call of an agent for a person before it runs. Every decision and result is recorded as a signed, hash-chained event, and a run exports as one bundle that anyone can verify offline.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source LLM engineering platform that helps teams trace, debug, and evaluate their LLM applications. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+## What you get
+
+`tracekit export` turns one run into one trace: an `invoke_agent` span, and an `execute_tool` span for each tool call, with the standard `gen_ai.*` attributes. Tracekit's own fields are under `tracekit.*`.
+
+| Span attribute                | What it shows in Langfuse                                  |
+| ----------------------------- | ---------------------------------------------------------- |
+| `tracekit.policy.decision`    | `allow`, `deny` or `ask` (held for a person)               |
+| `tracekit.policy.rule_ids`    | the rules that decided, such as `TK-D001`                  |
+| `tracekit.entry_hash`         | the hash of the signed record; `tracekit verify` checks it |
+| `tracekit.args_commitment`    | a commitment to the arguments                              |
+| `tracekit.result.ok`, `.hash` | whether the call completed, and a commitment to its result |
+
+Spans carry commitments, not argument or result content, so Langfuse shows no tool input or output for these spans.
+
+## Quick Start
+
+<Steps>
+
+### Record a run with Tracekit
+
+```bash
+pip install tracekit-ai
+```
+
+Add Tracekit to your agent with the [quickstart for your framework](https://github.com/Cygnux-Labs/Tracekit/blob/main/docs/integrations.md) (LangChain, OpenAI Agents, Pydantic AI, Google ADK, and others) or for [a custom agent](https://github.com/Cygnux-Labs/Tracekit/blob/main/docs/quickstarts/custom.md). The first call starts a local signer. Run your agent once, then write the run to a bundle:
+
+```bash
+tracekit last
+```
+
+It verifies the run and writes `<run id>.tkb`. The file name is the run id.
+
+### Send the run to Langfuse
+
+Langfuse Basic Auth is your public and secret key, base64 encoded:
+
+```bash
+AUTH_STRING=$(printf '%s' "pk-lf-...:sk-lf-..." | base64)
+
+tracekit export --v2 --run <run id> --otel \
+  --otel-endpoint "https://cloud.langfuse.com/api/public/otel/v1/traces" \
+  --otel-header "Authorization=Basic ${AUTH_STRING}" \
+  --otel-header "x-langfuse-ingestion-version=4"
+# 🇺🇸 US: https://us.cloud.langfuse.com/api/public/otel/v1/traces
+```
+
+Use the full `/v1/traces` path: Tracekit posts to the URL exactly as given when it has a path. For a [self-hosted Langfuse](/self-hosting), use `http://localhost:3000/api/public/otel/v1/traces`. Tracekit sends OTLP over `HTTP/JSON`, which Langfuse supports.
+
+### Look at the trace
+
+Open the trace in your Langfuse project. Each `execute_tool` span carries its decision and rule ids as attributes, so a denied or held call is visible next to the calls that ran.
+
+### Check the evidence behind a span
+
+Every span's `tracekit.entry_hash` names a signed record in the bundle. `tracekit verify` checks every record in it:
+
+```bash
+tracekit verify <run id>.tkb --trust <run id>.trust.json
+```
+
+`tracekit last` wrote both files.
+
+</Steps>
+
+> **Evidence level.** On a laptop the signer runs as your own user, so the check proves the records weren't changed afterwards, not that the agent couldn't have written them. A signer deployed as its own service closes that gap ([Tracekit deploy guide](https://github.com/Cygnux-Labs/Tracekit/wiki/Deploy)).
+
+## Resources
+
+- [Tracekit on GitHub](https://github.com/Cygnux-Labs/Tracekit)
+- [Tracekit OpenTelemetry export](https://github.com/Cygnux-Labs/Tracekit/blob/main/docs/otel.md#exporting-spans)
+- [Langfuse OpenTelemetry docs](/integrations/native/opentelemetry)
