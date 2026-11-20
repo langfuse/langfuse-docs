@@ -42,6 +42,7 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   /^\/cn(\/|$)/,
   /^\/kr(\/|$)/,
   /^\/wrapped(\/|$)/,
+  /^\/advent(\/|$)/,
 ];
 
 function isBarHidden(pathname: string): boolean {
