@@ -210,9 +210,11 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
      the Reference cell is `[User Story](/users/<slug>)`.
    - The `/users` explorer looks up three maps in
      `components/customers/AdoptersExplorerWrapper.tsx` by the exact company
-     label in the table. Add the light logo to `COMPANY_LOGOS`, a short public
-     description (not the use-case sentence) to `COMPANY_DESCRIPTIONS`, and
-     the company name to `COMPANIES_WITH_DOCUMENTED_USE_CASES`.
+     label in the table. Add the light logo to `COMPANY_LOGOS` and a short
+     public description, not the use-case sentence, to
+     `COMPANY_DESCRIPTIONS`. Add the company to
+     `COMPANIES_WITH_DOCUMENTED_USE_CASES` only when the table cell describes
+     how they use Langfuse and that sentence is not the company description.
 
 ---
 
@@ -225,7 +227,7 @@ from **`llms-docs.txt` / available-internal-links** so every link resolves.
 - [ ] Linear ticket has a comment with the LinkedIn draft and the X draft
 - [ ] The only `<CustomerQuote>` is the marked callout, and `customerQuote` is that same quote
 - [ ] No byline, unless the user named one
-- [ ] Adopters table row exists, and the explorer has a logo, description, and documented use case for that exact company label
+- [ ] Adopters table row exists. The explorer has a logo and a company description. The documented-use-case set includes the company only when the table cell describes Langfuse use and differs from that description
 - [ ] Company website link in the About section
 - [ ] Doc links are preserved. The core concepts in **Docs links** are linked. No broken internal URLs
 - [ ] Em dashes replaced with `-`
