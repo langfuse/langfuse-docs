@@ -32,7 +32,10 @@ const URL_TRACKING_FIELDS: Record<string, string> = {
   loc: "1a65d947-04f8-461b-8aef-5751631b37fe",
 };
 
-/** Ad click ids are advertisement-category data under CookieYes consent. */
+/**
+ * Ad click ids are advertisement-category data under CookieYes consent. Without
+ * consent they are sent empty, which also clears them after a revoke.
+ */
 const AD_CLICK_ID_PARAMS = new Set(["gclid", "fbclid"]);
 
 function trackingValuesFromUrl(search: string) {
@@ -40,9 +43,10 @@ function trackingValuesFromUrl(search: string) {
   const includeAdClickIds = readAdvertisementConsent() === "granted";
   const fields: Record<string, string> = {};
   for (const [param, fieldId] of Object.entries(URL_TRACKING_FIELDS)) {
-    if (AD_CLICK_ID_PARAMS.has(param) && !includeAdClickIds) continue;
     const value = params.get(param);
-    if (value) fields[fieldId] = value;
+    if (!value) continue;
+    fields[fieldId] =
+      AD_CLICK_ID_PARAMS.has(param) && !includeAdClickIds ? "" : value;
   }
   return fields;
 }
@@ -74,6 +78,7 @@ export function ContactForm({
   const [hasError, setHasError] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const conversionReportedRef = useRef(false);
+  const isFormReadyRef = useRef(false);
 
   useEffect(() => {
     // Only adds Conversion's visitor tracking; the form works without it.
@@ -86,6 +91,17 @@ export function ContactForm({
   }, []);
 
   useEffect(() => {
+    const sendTrackingValues = () => {
+      const iframeWindow = iframeRef.current?.contentWindow;
+      if (!iframeWindow || !isFormReadyRef.current) return;
+      const fields = trackingValuesFromUrl(window.location.search);
+      if (Object.keys(fields).length === 0) return;
+      iframeWindow.postMessage(
+        { type: "conversion-forms", data: { eventName: "set-values", fields } },
+        CONVERSION_ORIGIN,
+      );
+    };
+
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== CONVERSION_ORIGIN) return;
       const iframeWindow = iframeRef.current?.contentWindow;
@@ -104,16 +120,8 @@ export function ContactForm({
 
       // The form pings once when it is ready; there is no follow-up ping.
       if (type === "conversion-forms-ping") {
-        const fields = trackingValuesFromUrl(window.location.search);
-        if (Object.keys(fields).length > 0) {
-          iframeWindow.postMessage(
-            {
-              type: "conversion-forms",
-              data: { eventName: "set-values", fields },
-            },
-            CONVERSION_ORIGIN,
-          );
-        }
+        isFormReadyRef.current = true;
+        sendTrackingValues();
         return;
       }
 
@@ -156,10 +164,20 @@ export function ContactForm({
     };
 
     window.addEventListener("message", handleMessage);
+    // Consent is often unknown when the form pings and answered later.
+    document.addEventListener("cookieyes_banner_load", sendTrackingValues);
+    document.addEventListener("cookieyes_consent_update", sendTrackingValues);
     // Mount the iframe only once the listener exists, so its one-time ready
     // ping is not missed.
     setIsMounted(true);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      document.removeEventListener("cookieyes_banner_load", sendTrackingValues);
+      document.removeEventListener(
+        "cookieyes_consent_update",
+        sendTrackingValues,
+      );
+    };
   }, [section, useCase]);
 
   useEffect(() => {

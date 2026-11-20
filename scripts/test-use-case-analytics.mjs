@@ -140,7 +140,7 @@ function contactFormModuleLoader({
   adConversions,
   remembered,
   attributionValue = attribution,
-  adConsent = "granted",
+  consent = { advertisement: "granted" },
 }) {
   let refCalls = 0;
   return (name) => {
@@ -170,7 +170,7 @@ function contactFormModuleLoader({
         },
       };
     if (name === "@/lib/cookie-consent")
-      return { readAdvertisementConsent: () => adConsent };
+      return { readAdvertisementConsent: () => consent.advertisement };
     if (name === "@/lib/use-case-analytics")
       return {
         readUseCaseAttribution: () => attributionValue,
@@ -205,7 +205,12 @@ function mountContactForm({ pathname, search = "", props, ...loaderOptions }) {
     setTimeout: () => 0,
     clearTimeout() {},
   };
+  const documentListeners = {};
   globalThis.document = {
+    addEventListener: (type, fn) => {
+      documentListeners[type] = fn;
+    },
+    removeEventListener() {},
     querySelector: () => null,
     createElement: () => ({}),
     head: { appendChild: (script) => scripts.push(script) },
@@ -221,7 +226,7 @@ function mountContactForm({ pathname, search = "", props, ...loaderOptions }) {
       data,
       ...overrides,
     });
-  return { send, posted, scripts, iframe };
+  return { send, posted, scripts, iframe, documentListeners };
 }
 
 const submitted = {
@@ -299,24 +304,56 @@ test("campaign parameters are sent to the form's hidden fields when it pings", (
   }
 });
 
+const SOURCE_FIELD = "9a874dfc-ef18-4cfd-ab13-b9517e33a314";
+const GCLID_FIELD = "749e8f3f-0fd5-4296-9e57-659f08ece1f5";
+const FBCLID_FIELD = "0bff871f-522a-4530-92d9-fd1e5dc28951";
+const LOC_FIELD = "1a65d947-04f8-461b-8aef-5751631b37fe";
+
 test("ad click ids are only sent with advertisement consent", () => {
-  for (const adConsent of ["denied", "unknown"]) {
+  for (const advertisement of ["denied", "unknown"]) {
     const { send, posted } = mountContactForm({
       pathname: "/talk-to-us",
       search: "?utm_source=newsletter&gclid=abc&fbclid=def&loc=de",
       captured: [],
-      adConsent,
+      consent: { advertisement },
     });
     try {
       send({ type: "conversion-forms-ping" });
       assert.deepEqual(posted[0]?.message.data.fields, {
-        "9a874dfc-ef18-4cfd-ab13-b9517e33a314": "newsletter",
-        "1a65d947-04f8-461b-8aef-5751631b37fe": "de",
+        [SOURCE_FIELD]: "newsletter",
+        [GCLID_FIELD]: "",
+        [FBCLID_FIELD]: "",
+        [LOC_FIELD]: "de",
       });
     } finally {
       delete globalThis.window;
       delete globalThis.document;
     }
+  }
+});
+
+test("consent answered after the form is ready resends the click ids", () => {
+  const consent = { advertisement: "unknown" };
+  const { send, posted, documentListeners } = mountContactForm({
+    pathname: "/talk-to-us",
+    search: "?gclid=abc",
+    captured: [],
+    consent,
+  });
+  try {
+    documentListeners.cookieyes_banner_load();
+    assert.equal(posted.length, 0, "Nothing is sent before the form is ready");
+    send({ type: "conversion-forms-ping" });
+    assert.deepEqual(posted[0]?.message.data.fields, { [GCLID_FIELD]: "" });
+    consent.advertisement = "granted";
+    documentListeners.cookieyes_consent_update();
+    assert.deepEqual(posted[1]?.message.data.fields, { [GCLID_FIELD]: "abc" });
+    consent.advertisement = "denied";
+    documentListeners.cookieyes_consent_update();
+    assert.deepEqual(posted[2]?.message.data.fields, { [GCLID_FIELD]: "" });
+  } finally {
+    delete globalThis.window;
+    delete globalThis.document;
   }
 });
 
