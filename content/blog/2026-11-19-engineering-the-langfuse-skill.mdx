@@ -9,6 +9,7 @@ author: Lotte
 import { Frame } from "@/components/Frame";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { SkillBoundaryDiagram } from "@/components/blog/SkillBoundaryDiagram";
+import { SkillDatasetItemDiagram } from "@/components/blog/SkillDatasetItemDiagram";
 import { SkillEngineeringLoopDiagram } from "@/components/blog/SkillEngineeringLoopDiagram";
 import { SkillOperationArchitectureDiagram } from "@/components/blog/SkillOperationArchitectureDiagram";
 import { SkillTestingHarnessDiagram } from "@/components/blog/SkillTestingHarnessDiagram";
@@ -136,9 +137,7 @@ In Langfuse, we maintain our benchmark datasets alongside versioned skills in [L
 - **Expected output:** varies depending on what we are evaluating (for example, a reference file the agent should load or criteria for a workflow).
 - **Metadata:** an optional `env_folder` field when we want the agent to spin up inside a specific starter environment from our [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) repository.
 
-<Frame fullWidth>
-  ![Langfuse dataset item showing a prompt input, expected output with invoked_reference_file, and metadata with env_folder](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-dataset-item.png)
-</Frame>
+<SkillDatasetItemDiagram />
 
 We bake these starter environments into our Modal sandbox image so every run starts from an identical, realistic codebase rather than an empty folder.
 
