@@ -124,15 +124,23 @@ To decide what to improve next, we combine these live traces with explicit feedb
 
 ## Offline evaluation & experimentation setup [#offline-test-harness]
 
-At a high level, our offline evaluation setup consists of a Langfuse project and a Modal instance where everything runs. All of the supporting code lives in our public [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) GitHub repository: both the code deployed to Modal and the coding environments our agents run in so we can accurately simulate real tasks.
+At a high level, our offline evaluation setup consists of a Langfuse project and a [Modal](https://modal.com) instance where everything runs. All of the supporting code lives in our public [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) GitHub repository: both the code deployed to Modal and the coding environments our agents run in so we can accurately simulate real tasks.
 
 <SkillTestingHarnessDiagram />
 
-Here is how an evaluation run works end to end:
-
 ### 1. Datasets, skills, and coding environments
 
-In Langfuse, we maintain our benchmark datasets alongside versioned skills in [Langfuse Skill Management](/docs/skill-management/version-control). Each dataset item defines a prompt and, for code-editing tasks like `"instrument this application with Langfuse"` or `"migrate hardcoded prompts"`, references a starter workspace stored in our [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) repository (such as a Flask chat app, a Next.js app on the Vercel AI SDK, or a LangChain agent). We bake these starter environments into our Modal sandbox image so every run starts from an identical, realistic codebase rather than an empty folder.
+In Langfuse, we maintain our benchmark datasets alongside versioned skills in [Langfuse Skill Management](/docs/skill-management/version-control). Each dataset item follows a simple structure:
+
+- **Input:** the user prompt handed to the coding agent.
+- **Expected output:** varies depending on what we are evaluating (for example, a reference file the agent should load or criteria for a workflow).
+- **Metadata:** an optional `env_folder` field when we want the agent to spin up inside a specific starter environment from our [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) repository.
+
+<Frame fullWidth>
+  ![Langfuse dataset item showing a prompt input, expected output with invoked_reference_file, and metadata with env_folder](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-dataset-item.png)
+</Frame>
+
+We bake these starter environments into our Modal sandbox image so every run starts from an identical, realistic codebase rather than an empty folder.
 
 ### 2. Triggering an experiment from Langfuse
 
