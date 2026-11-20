@@ -135,11 +135,12 @@ const CONVERSION_ORIGIN = "https://forms.conversion.ai";
 const CONVERSION_FORM_ID = "8fed9078-25ce-4f9e-ad32-dac3ae839148";
 
 function contactFormModuleLoader({
-  iframeWindow,
+  iframe,
   captured,
   adConversions,
   remembered,
   attributionValue = attribution,
+  adConsent = "granted",
 }) {
   let refCalls = 0;
   return (name) => {
@@ -148,7 +149,7 @@ function contactFormModuleLoader({
         useState: (value) => [value, () => {}],
         // The first ref is the iframe; give it the stubbed frame window.
         useRef: (value) => ({
-          current: refCalls++ === 0 ? { contentWindow: iframeWindow } : value,
+          current: refCalls++ === 0 ? iframe : value,
         }),
         useEffect: (fn) => fn(),
       };
@@ -168,6 +169,8 @@ function contactFormModuleLoader({
           if (adConversions) adConversions.value += 1;
         },
       };
+    if (name === "@/lib/cookie-consent")
+      return { readAdvertisementConsent: () => adConsent };
     if (name === "@/lib/use-case-analytics")
       return {
         readUseCaseAttribution: () => attributionValue,
@@ -192,9 +195,9 @@ function mountContactForm({ pathname, search = "", props, ...loaderOptions }) {
       posted.push({ message, targetOrigin }),
   };
   const listeners = {};
+  const scripts = [];
   globalThis.window = {
     location: { pathname, search },
-    ConversionFormsV1: {},
     addEventListener: (type, fn) => {
       listeners[type] = fn;
     },
@@ -202,10 +205,14 @@ function mountContactForm({ pathname, search = "", props, ...loaderOptions }) {
     setTimeout: () => 0,
     clearTimeout() {},
   };
-  const form = load(
-    compile("components/ContactForm.tsx"),
-    contactFormModuleLoader({ iframeWindow, ...loaderOptions }),
-  );
+  globalThis.document = {
+    querySelector: () => null,
+    createElement: () => ({}),
+    head: { appendChild: (script) => scripts.push(script) },
+  };
+  const iframe = { contentWindow: iframeWindow, style: {} };
+  const loader = contactFormModuleLoader({ iframe, ...loaderOptions });
+  const form = load(compile("components/ContactForm.tsx"), loader);
   form.ContactForm(props);
   const send = (data, overrides = {}) =>
     listeners.message({
@@ -214,7 +221,7 @@ function mountContactForm({ pathname, search = "", props, ...loaderOptions }) {
       data,
       ...overrides,
     });
-  return { send, posted };
+  return { send, posted, scripts, iframe };
 }
 
 const submitted = {
@@ -226,15 +233,17 @@ test("sales completion is emitted only after the Conversion form submits and is 
   const captured = [];
   const remembered = [];
   const adConversions = { value: 0 };
-  const { send } = mountContactForm({
+  const { send, scripts, iframe } = mountContactForm({
     pathname: "/talk-to-us",
     captured,
     adConversions,
     remembered,
   });
   try {
+    assert.equal(scripts[0]?.src, "https://forms.conversion.ai/script.js");
     send({ type: "conversion-forms-ping" });
     send({ type: "conversion-forms-height-adjustment", data: { height: 900 } });
+    assert.equal(iframe.style.height, "900px");
     assert.equal(captured.length, 0, "Loading a form is not a conversion");
     assert.equal(remembered.length, 0, "Mount must not write attribution");
     send(submitted, { origin: "https://evil.example" });
@@ -256,6 +265,7 @@ test("sales completion is emitted only after the Conversion form submits and is 
     assert.equal(adConversions.value, 1);
   } finally {
     delete globalThis.window;
+    delete globalThis.document;
   }
 });
 
@@ -285,6 +295,28 @@ test("campaign parameters are sent to the form's hidden fields when it pings", (
     ]);
   } finally {
     delete globalThis.window;
+    delete globalThis.document;
+  }
+});
+
+test("ad click ids are only sent with advertisement consent", () => {
+  for (const adConsent of ["denied", "unknown"]) {
+    const { send, posted } = mountContactForm({
+      pathname: "/talk-to-us",
+      search: "?utm_source=newsletter&gclid=abc&fbclid=def&loc=de",
+      captured: [],
+      adConsent,
+    });
+    try {
+      send({ type: "conversion-forms-ping" });
+      assert.deepEqual(posted[0]?.message.data.fields, {
+        "9a874dfc-ef18-4cfd-ab13-b9517e33a314": "newsletter",
+        "1a65d947-04f8-461b-8aef-5751631b37fe": "de",
+      });
+    } finally {
+      delete globalThis.window;
+      delete globalThis.document;
+    }
   }
 });
 
@@ -315,5 +347,6 @@ test("use-case forms remember attribution only on submission", () => {
     assert.equal(captured[0]?.props.action, "form_submit");
   } finally {
     delete globalThis.window;
+    delete globalThis.document;
   }
 });

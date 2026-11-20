@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { reportTalkToUsConversion } from "@/lib/ad-conversions";
+import { readAdvertisementConsent } from "@/lib/cookie-consent";
 import posthog from "posthog-js";
 import {
   readUseCaseAttribution,
@@ -31,16 +32,15 @@ const URL_TRACKING_FIELDS: Record<string, string> = {
   loc: "1a65d947-04f8-461b-8aef-5751631b37fe",
 };
 
-declare global {
-  interface Window {
-    ConversionFormsV1?: unknown;
-  }
-}
+/** Ad click ids are advertisement-category data under CookieYes consent. */
+const AD_CLICK_ID_PARAMS = new Set(["gclid", "fbclid"]);
 
 function trackingValuesFromUrl(search: string) {
   const params = new URLSearchParams(search);
+  const includeAdClickIds = readAdvertisementConsent() === "granted";
   const fields: Record<string, string> = {};
   for (const [param, fieldId] of Object.entries(URL_TRACKING_FIELDS)) {
+    if (AD_CLICK_ID_PARAMS.has(param) && !includeAdClickIds) continue;
     const value = params.get(param);
     if (value) fields[fieldId] = value;
   }
@@ -68,7 +68,7 @@ export function ContactForm({
   useCase?: UseCase;
   section?: string;
 } = {}) {
-  const [isScriptSettled, setIsScriptSettled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [isFormLoaded, setIsFormLoaded] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -76,31 +76,13 @@ export function ContactForm({
   const conversionReportedRef = useRef(false);
 
   useEffect(() => {
-    const settle = () => setIsScriptSettled(true);
-
-    if (window.ConversionFormsV1) {
-      settle();
+    // Only adds Conversion's visitor tracking; the form works without it.
+    if (document.querySelector(`script[src="${CONVERSION_SCRIPT_SRC}"]`))
       return;
-    }
-
-    // The iframe works without the script, it only loses auto-height and
-    // Conversion's visitor tracking, so mount it even if the script fails.
-    const script =
-      document.querySelector<HTMLScriptElement>(
-        `script[src="${CONVERSION_SCRIPT_SRC}"]`,
-      ) ??
-      Object.assign(document.createElement("script"), {
-        src: CONVERSION_SCRIPT_SRC,
-        async: true,
-      });
-    script.addEventListener("load", settle);
-    script.addEventListener("error", settle);
-    if (!script.isConnected) document.head.appendChild(script);
-
-    return () => {
-      script.removeEventListener("load", settle);
-      script.removeEventListener("error", settle);
-    };
+    const script = document.createElement("script");
+    script.src = CONVERSION_SCRIPT_SRC;
+    script.async = true;
+    document.head.appendChild(script);
   }, []);
 
   useEffect(() => {
@@ -111,6 +93,14 @@ export function ContactForm({
 
       setIsFormLoaded(true);
       const { type, data } = event.data ?? {};
+
+      if (type === "conversion-forms-height-adjustment") {
+        const height = Number(data?.height);
+        if (iframeRef.current && height > 0) {
+          iframeRef.current.style.height = `${height}px`;
+        }
+        return;
+      }
 
       // The form pings once when it is ready; there is no follow-up ping.
       if (type === "conversion-forms-ping") {
@@ -166,17 +156,20 @@ export function ContactForm({
     };
 
     window.addEventListener("message", handleMessage);
+    // Mount the iframe only once the listener exists, so its one-time ready
+    // ping is not missed.
+    setIsMounted(true);
     return () => window.removeEventListener("message", handleMessage);
   }, [section, useCase]);
 
   useEffect(() => {
-    if (!isScriptSettled || isFormLoaded) return;
+    if (isFormLoaded) return;
     const timeout = window.setTimeout(
       () => setHasError(true),
       FORM_LOAD_TIMEOUT_MS,
     );
     return () => window.clearTimeout(timeout);
-  }, [isScriptSettled, isFormLoaded]);
+  }, [isFormLoaded]);
 
   return (
     <div
@@ -195,7 +188,7 @@ export function ContactForm({
           {!isFormLoaded && (
             <div className="lf-contact-form-message">Loading form...</div>
           )}
-          {isScriptSettled && (
+          {isMounted && (
             <iframe
               ref={iframeRef}
               id={CONVERSION_FORM_ID}
