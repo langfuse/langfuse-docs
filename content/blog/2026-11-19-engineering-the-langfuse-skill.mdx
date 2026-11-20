@@ -93,10 +93,10 @@ Both contribute value to the overall loop: Halo feeds live production traces (tr
 
 The traces coming in from Langfuse Halo track skill interactions with tool observations like `loadSkill`, `skill_read`, and `Read`.
 
+<SkillTraceDiagram />
+
 - **On the generation:** you see which skill versions were **Available** to the model and whether it **Requested** a skill.
 - **On the skill-loading tool call:** you see the exact skill version and the specific files (`SKILL.md` and individual `references/*.md` files) that were **Loaded** into context.
-
-<SkillTraceDiagram />
 
 To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request. For a deeper dive into the specific metrics we track and which evaluations we prioritize from these signals, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
 
