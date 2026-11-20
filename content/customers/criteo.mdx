@@ -17,6 +17,7 @@ showInCustomerIndex: true
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { CustomerQuote } from "@/components/customers/CustomerQuote";
+import { ImpactChart } from "@/components/customers/ImpactChart";
 import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
@@ -29,11 +30,25 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 ## Summary [#summary]
 
-Criteo, a global commerce intelligence platform, built a shared evaluation framework on Langfuse to ensure AI agents written in both Python and C# continue to perform as expected.
-
-The same framework lets Criteo test which model fits each step of an agent, cutting costs without losing accuracy, and tracing helps pinpoint latency bottlenecks.
-
-They chose Langfuse because it combines observability and evaluation in one tool that was easy to set up and try. Today they're on Langfuse Cloud with several dozen users across around 20 teams.
+<ImpactChart
+  items={[
+    {
+      area: "Agents in Python and C#",
+      impact:
+        "Criteo built a shared evaluation framework on Langfuse to ensure AI agents written in both Python and C# continue to perform as expected.",
+    },
+    {
+      area: "The right model for each step",
+      impact:
+        "The same framework lets Criteo test which model fits each step of an agent, cutting costs without losing accuracy, and tracing helps pinpoint latency bottlenecks.",
+    },
+    {
+      area: "Langfuse Cloud across 20 teams",
+      impact:
+        "They chose Langfuse because it combines observability and evaluation in one tool that was easy to set up and try. Today they're on Langfuse Cloud with several dozen users across around 20 teams.",
+    },
+  ]}
+/>
 
 ## About Criteo
 
@@ -72,7 +87,7 @@ Criteo's use of Langfuse starts with tracing. "When we have one execution of one
 
 The area Clément has worked on most, and that others at Criteo now rely on, is [datasets](/docs/evaluation/experiments/datasets) and [experiments](/docs/evaluation/experiments/experiments-via-sdk). As teams iterate on agents, they need to know that a change (e.g. an edited system prompt) hasn't broken anything. So Clément's team built an evaluation framework on top of Langfuse that automatically runs agents against test datasets, in both Python and C#. Many teams have since adopted it, and some of these evaluations now run nightly through Jenkins builds. "That helped us immensely improve the agents we've developed," he says.
 
-Most of these runs use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), with the judge prompts living in Langfuse's [prompt management](/docs/prompt-management/overview). As Clément explains, Criteo used to run judges with DeepEval, but the team's C# services needed an approach that would support the needs of. Now each judge prompt asks for a confidence score between zero and one. The score is stored in Langfuse for each dataset item and averaged across the dataset. For use cases where the goal is to call the right tool with the right inputs, the team compares outputs against ground truth with an exact match.
+Most of these runs use [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge), with the judge prompts living in Langfuse's [prompt management](/docs/prompt-management/overview). As Clément explains, Criteo used to run judges with DeepEval, but the team's C# services needed an approach that would support both Python and C#. Now each judge prompt asks for a confidence score between zero and one. The score is stored in Langfuse for each dataset item and averaged across the dataset. For use cases where the goal is to call the right tool with the right inputs, the team compares outputs against ground truth with an exact match.
 
 The result is confidence in the products they're building. Teams can see that an agent is doing what it's supposed to do, and that it hasn't "from one day to the next exploded its latency figures or its cost figures," Clément says. "That's something that helps us sleep at night."
 
