@@ -86,6 +86,6 @@ git diff --check
 
 The unit tests run in Node without a browser. They check conversion URL preservation, attribution validation and expiry, and successful-form-only reporting. PostHog and the Conversion form iframe use in-process stubs; tests send no production events and submit no real sales forms.
 
-After deployment, verify the six new event names in PostHog live events, then confirm production host filters and the first real Marketo/Cloud completion paths. Empty dashboards before deployment are expected. Do not send synthetic production signups or sales inquiries for validation.
+After deployment, verify the six new event names in PostHog live events, then confirm production host filters and the first real sales form and Cloud completion paths. Empty dashboards before deployment are expected. Do not send synthetic production signups or sales inquiries for validation.
 
 PostHog references: [JavaScript persistence](https://posthog.com/docs/libraries/js/persistence), [JavaScript events](https://posthog.com/docs/libraries/js/usage), and [funnels](https://posthog.com/docs/product-analytics/funnels).
