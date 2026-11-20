@@ -1,5 +1,5 @@
 ---
-title: How we’re building Langfuse’s design system
+title: When agents write the code, component APIs matter more
 date: 2026/11/20
 description: The API and composition choices behind Langfuse’s design system, including what we restrict, what stays flexible, and what still needs review.
 tag: engineering
@@ -8,15 +8,20 @@ author: Ben
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { DesignSystemProgress } from "@/components/blog/DesignSystemProgress";
+import { DialogCompositionDiagram } from "@/components/blog/DialogCompositionDiagram";
+import { InputControlDiagram } from "@/components/blog/InputControlDiagram";
+import { UserCardStatesDiagram } from "@/components/blog/UserCardStatesDiagram";
+import { ComponentLayoutDiagram } from "@/components/blog/ComponentLayoutDiagram";
+import { ChartAdaptersDiagram } from "@/components/blog/ChartAdaptersDiagram";
 
 <BlogHeader
-  title="How we’re building Langfuse’s design system"
+  title="When agents write the code, component APIs matter more"
   description="The API and composition choices behind Langfuse’s design system, including what we restrict, what stays flexible, and what still needs review."
   date="November 20, 2026"
   authors={["benbachem"]}
 />
 
-A few months ago, we set out to redesign Langfuse’s dark mode. But improving the colors and contrast meant changing how we built the UI, not just how it looked. Langfuse never had a rigorous design system, and Trang had only just started as the team's first designer. This meant styling decisions were scattered between shared components and individual features, so changes required tracking down callers across the product and applying them to each. Much of the code-writing already used AI tools, which added to the complexity.
+A few months ago, we set out to redesign Langfuse’s dark mode. But improving the colors and contrast meant changing how we built the UI, not just how it looked. Langfuse never had a rigorous design system, and [Trang had only just started as the team's first designer](/blog/2026-11-19-comfortable-with-being-uncomfortable). This meant styling decisions were scattered between shared components and individual features, so changes required tracking down callers across the product and applying them to each. Much of the code-writing already used AI tools, which added to the complexity.
 
 Trang and I initiated the development of a design system to enhance the UI and streamline feature development and review. A central consideration was determining which decisions should be standardized within the system and which should remain at the feature level. Feature authors should concentrate on the unique aspects of their features, rather than redefining common interaction patterns. Component reuse should reflect shared design decisions, not merely code reuse.
 
@@ -91,19 +96,7 @@ We also value convenience and will provide tailored adapters, often splitting co
 
 For example, [`BarChart`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/charts/BarChart/BarChart.tsx), [`GroupedBarChart`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/charts/GroupedBarChart/GroupedBarChart.tsx), and [`StackedBarChart`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/charts/StackedBarChart/StackedBarChart.tsx) share an internal [`BarChartCore`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/internal/charts/BarChartCore.tsx):
 
-```mermaid
-flowchart TD
-    subgraph public["Public components"]
-        B["BarChart"]
-        G["GroupedBarChart"]
-        S["StackedBarChart"]
-    end
-    C["BarChartCore<br/>(internal)"]
-    style C stroke-dasharray: 2 4
-    B -.-> C
-    G -.-> C
-    S -.-> C
-```
+<ChartAdaptersDiagram />
 
 The core supports several layouts, but callers choose a named component rather than configure those through flags. If I need a stacked chart, I can find `StackedBarChart` in autocomplete instead of looking through a general-purpose chart’s props to figure out how to configure one. Its props cover only relevant options, and I can tell which chart is being used later without checking a combination of flags. We share the implementation without exposing it all.
 
@@ -115,7 +108,7 @@ If an input accepts arbitrary classes, how do I know what it looks like across t
 
 Caller-supplied styles can conflict with the component’s own styles. This is why I believe using a library like [`tailwind-merge`](https://github.com/dcastil/tailwind-merge) or shadcn's [`cn`](https://github.com/shadcn-ui/cn) is an antipattern. It resolves conflicts by letting later conflicting classes win, but that makes overriding the component’s decisions an expected part of using it.
 
-A `className` prop accepts any string; `variant` and `size` give us finite choices we can test and review. They also let a component coordinate changes: `size="small"` can reduce padding, text size, icon size, and gap together. Overriding the height through `className` leaves the caller responsible for adjusting everything else.
+A `className` prop accepts any string; `variant` and `size` give us finite choices we can test and review. With `size="small"`, the component can adjust padding, text, icons, and gaps together. The component can’t reliably parse an arbitrary `className` string to determine which styling decisions it should adjust in response.
 
 Therefore, we’ve banned `style` and `className` props and enforce this across the repository with our [`no-style-props` lint rule](https://github.com/langfuse/langfuse/blob/main/packages/eslint-plugin/src/rules/no-style-props.ts).
 
@@ -125,6 +118,8 @@ How should we handle layout and spacing when components can’t be styled direct
 
 The parent sets the gap between its children's bounding boxes; each component controls the spacing within its own bounding box. The parent knows which components it contains, while the input doesn’t need to know which layout it’s in.
 
+<ComponentLayoutDiagram />
+
 ### Share styling through internal components
 
 What about sharing styling between components? Exporting class name strings still lets callers combine them with arbitrary classes. I prefer composition: our [`SelectInput`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/SelectInput/SelectInput.tsx) and [`MultiSelectInput`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/MultiSelectInput/MultiSelectInput.tsx) share the internal [`InputControl`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/internal/InputControl/InputControl.tsx), which owns their borders, focus treatment, and error styling.
@@ -133,22 +128,7 @@ Our [import restrictions](https://github.com/langfuse/langfuse/blob/main/web/oxl
 
 All eight components that use `InputControl` directly share that styling:
 
-<Mermaid
-  chart={`flowchart LR
-    I["Input"] --> C["InputControl"]
-    P["PasswordInput"] --> C
-    S["SelectInput"] --> C
-    M["MultiSelectInput"] --> C
-    A["AsyncSelectInput"] --> C
-    T["MultiSelectTagInput"] --> C
-    D["DateRangeInput"] --> C
-    Q["QueryInput"] --> C
-    I ~~~ A
-    P ~~~ T
-    S ~~~ D
-    M ~~~ Q
-`}
-/>
+<InputControlDiagram />
 
 ### From Tailwind classes to typed props
 
@@ -188,7 +168,27 @@ Keeping ownership separate also matters when a dropdown item opens a dialog. Clo
 
 Our [`DatasetActionButton` refactor](https://github.com/langfuse/langfuse/pull/15531) is a concrete example. One component handled dataset creation, updates, and deletion, including permissions, analytics, dialog state, forms, and text or icon triggers. Given the primitives the code has access to, this was a natural consequence, since triggers could not easily be separated from modal elements. The resulting component was highly polymorphic, and the code was hard to grasp. Adding another place to invoke an operation meant adding another presentation option.
 
-With the new APIs, we could split it into operation-specific dialog content and controllers, and could inline the triggers at the call sites. In many cases, this also allows us to have confidence around styling without looking at the output. A list of three repeated `Button` elements that share the same size and variant values implies uniformity, whereas code like `DatasetCreateButton`, `DatasetDeleteActionButton`, and `DatasetDeleteConfirmationButton` next to one another will naturally abstract their internals; thus, a reader cannot draw conclusions about their uniformity.
+With the new APIs, we could split it into operation-specific dialog content and controllers, and could inline the triggers at the call sites.
+
+<DialogCompositionDiagram />
+
+In many cases, this also allows us to have confidence around styling without looking at the output. A list of three repeated `Button` elements that share the same size and variant values implies uniformity, whereas code like `DatasetCreateButton`, `DatasetDeleteActionButton`, and `DatasetDeleteConfirmationButton` next to one another will naturally abstract their internals; thus, a reader cannot draw conclusions about their uniformity.
+
+Separating the dialog from its trigger doesn’t mean the feature has to render the trigger itself. It can pass a label and callback to a component like [`TabBar`](https://github.com/langfuse/langfuse/blob/main/web/src/components/design-system/TabBar/TabBar.tsx), which renders the button and its tooltip. Our [`SessionViewTabs`](https://github.com/langfuse/langfuse/blob/main/web/src/features/sessions/SessionViewTabs.tsx) does this with the label `"Create custom view"`. The callback ultimately calls `DialogController`’s `openDialog`, while `TabBar` uses the label for both the tooltip and the icon button’s accessible name. With intermediate feature components omitted, the wiring looks like this:
+
+```text
+DialogController
+  ├─ renderDialog → feature dialog
+  └─ children({ openDialog })
+       → SessionViewTabs (feature code)
+         → TabBar.createAction
+           ├─ label: "Create custom view"
+           │    ├─ Tooltip.label
+           │    └─ IconButton.label → button’s aria-label
+           └─ onClick → opens the dialog via openDialog
+```
+
+The feature supplies the wording once, without assembling a tooltip or knowing how the button is labeled for screen readers. `TabBar` owns those presentation decisions without needing to know what the callback opens.
 
 ### Controlled vs uncontrolled components
 
@@ -212,20 +212,26 @@ A feature needing a richer explanation can use `CustomTooltip` directly. Trying 
 
 ### Keep loading and loaded states together
 
-Composition doesn’t mean splitting every variation into a separate component. A username cell and its skeleton should share dimensions. With separate components, someone or their agent can change one without updating the other. I’d rather make loading a state of the same component.
+Composition doesn’t mean splitting every variation into a separate component. A user card and its skeleton should share dimensions. With separate components, someone or their agent can change one without updating the other. I’d rather make loading a state of the same component.
 
 In this simplified example, both states share the same outer element:
 
 ```tsx
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { Avatar } from "@/src/components/design-system/Avatar/Avatar";
 
-type UserCellProps =
+type UserCardProps =
   | { state: "loading" }
   | { state: "loaded"; name: string };
 
-function UserCell(props: UserCellProps) {
+function UserCard(props: UserCardProps) {
   return (
-    <div className="flex h-10 items-center px-3">
+    <div className="flex h-16 items-center gap-3 rounded-lg border px-4">
+      {props.state === "loading" ? (
+        <Skeleton className="size-8 shrink-0 rounded-full" />
+      ) : (
+        <Avatar displayName={props.name} size="lg" />
+      )}
       {props.state === "loading" ? (
         <Skeleton className="h-4 w-24" />
       ) : (
@@ -236,7 +242,9 @@ function UserCell(props: UserCellProps) {
 }
 ```
 
-Both states share row height and padding while still composing `Skeleton` internally. Callers don’t have to choose between `UserCell` and a separately maintained `UserCellSkeleton` whose layout must remain synchronized.
+Both states share card height, padding, and avatar spacing while still composing `Avatar` and `Skeleton` internally. Callers don’t have to choose between `UserCard` and a separately maintained `UserCardSkeleton` whose layout must remain synchronized.
+
+<UserCardStatesDiagram />
 
 ## Testing components without the application
 

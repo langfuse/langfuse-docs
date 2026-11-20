@@ -1,39 +1,32 @@
 export function MetricChart({
   title,
   value,
-  changes,
-  description,
-  maximum,
-  dateRange,
-  ticks,
+  comparison,
+  labels,
   series,
 }: {
   title: string;
   value: string;
-  changes: readonly { label: string; value: string }[];
-  description: string;
-  maximum: number;
-  dateRange: { start: string; end: string; label: string };
-  ticks: readonly { date: string; label: string }[];
+  comparison: string | readonly { label: string; value: string }[];
+  labels: readonly string[];
   series: readonly {
     label: string;
-    dashed: boolean;
-    points: readonly { date: string; value: number }[];
+    values: readonly number[];
   }[];
 }) {
-  const start = Date.parse(dateRange.start);
-  const duration = Date.parse(dateRange.end) - start;
+  const maximum = Math.max(1, ...series.flatMap((item) => item.values));
+  const grouped = series.length > 1;
 
   return (
-    <figure className="not-prose m-0 flex min-w-0 flex-col overflow-hidden rounded-lg border border-line-structure bg-surface-1 p-4 text-text-primary">
-      <figcaption className="pb-3">
-        <p className="text-xs font-medium">{title}</p>
-        <div className="mt-2 flex items-center gap-3">
-          <p className="shrink-0 text-3xl font-semibold tracking-tight tabular-nums">
-            {value}
-          </p>
+    <div className="flex min-w-0 flex-col border border-line-structure bg-surface-1 p-5">
+      <p className="text-sm text-text-secondary">{title}</p>
+      <div className="mt-1 flex items-center gap-3">
+        <p className="shrink-0 text-3xl font-semibold leading-tight text-text-primary">
+          {value}
+        </p>
+        {typeof comparison !== "string" && (
           <dl className="flex shrink-0 flex-col gap-0.5 border-l border-line-structure pl-3 text-[10px] leading-tight tabular-nums">
-            {changes.map((change) => (
+            {comparison.map((change) => (
               <div
                 key={change.label}
                 className="flex flex-nowrap items-baseline justify-between gap-2 whitespace-nowrap"
@@ -45,117 +38,75 @@ export function MetricChart({
               </div>
             ))}
           </dl>
-        </div>
-      </figcaption>
-      {series.length > 1 && (
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] leading-none text-text-secondary">
-          {series.map((item) => (
-            <span
-              key={item.label}
-              className="inline-flex items-center gap-1 whitespace-nowrap"
-            >
+        )}
+      </div>
+      {typeof comparison === "string" && (
+        <p className="mt-1 text-sm text-text-tertiary">{comparison}</p>
+      )}
+      {grouped && (
+        <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-tertiary">
+          {series.map((item, index) => (
+            <span key={item.label} className="inline-flex items-center gap-1">
               <span
                 aria-hidden="true"
-                className={`w-3 shrink-0 border-t-2 ${item.dashed ? "border-dashed border-text-tertiary" : "border-text-primary"}`}
+                className={`size-2 ${index === 0 ? "bg-line-cta" : "bg-text-tertiary/30"}`}
               />
               {item.label}
             </span>
           ))}
         </div>
       )}
-      <svg
-        viewBox="0 0 300 200"
-        role="img"
-        aria-label={`${title}, ${dateRange.label}`}
-        className="mt-auto block h-auto w-full pt-1 font-mono"
+      <ol
+        className="mt-auto grid pt-4"
+        style={{
+          gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))`,
+        }}
+        aria-label={title}
       >
-        <title>{title}</title>
-        <desc>
-          {description}{" "}
-          {series
-            .map(
-              (item) =>
-                `${item.label}: ${item.points[0]?.value} to ${item.points[item.points.length - 1]?.value}.`,
-            )
-            .join(" ")}
-        </desc>
-        {[0, 1, 2].map((tick) => {
-          const y = 164 - tick * 70;
-          return (
-            <g key={tick}>
-              <line
-                x1="26"
-                x2="288"
-                y1={y}
-                y2={y}
-                className="stroke-line-structure"
-              />
-              <text
-                x="20"
-                y={y + 4}
-                textAnchor="end"
-                fontSize={13}
-                className="fill-text-secondary"
-              >
-                {((maximum * tick) / 2).toLocaleString("en-US", {
-                  notation: "compact",
+        {labels.map((label, index) => (
+          <li key={label} className="flex min-w-0 flex-col items-center">
+            <div className="w-full border-b border-line-structure pt-6">
+              <div className="flex h-24 items-end justify-center gap-1">
+                {series.map((item, seriesIndex) => {
+                  const amount = item.values[index];
+                  const height = `${(amount / maximum) * 100}%`;
+                  const showValue =
+                    !grouped &&
+                    (labels.length <= 4 ||
+                      index === 0 ||
+                      index === labels.length - 1);
+                  return (
+                    <div
+                      key={item.label}
+                      className={`relative h-full ${grouped ? "w-2" : "w-6 max-w-[75%]"}`}
+                    >
+                      <span
+                        className={
+                          showValue
+                            ? "absolute inset-x-0 mb-1 text-center text-xs font-medium tabular-nums text-text-primary"
+                            : "sr-only"
+                        }
+                        style={showValue ? { bottom: height } : undefined}
+                      >
+                        {grouped
+                          ? `${item.label}: ${amount.toLocaleString("en-US")}`
+                          : amount}
+                      </span>
+                      <div
+                        aria-hidden="true"
+                        title={`${label}, ${item.label}: ${amount.toLocaleString("en-US")}`}
+                        className={`absolute inset-x-0 bottom-0 rounded-t ${seriesIndex === 0 ? "bg-line-cta" : "bg-text-tertiary/30"}`}
+                        style={{ height }}
+                      />
+                    </div>
+                  );
                 })}
-              </text>
-            </g>
-          );
-        })}
-        {ticks.map((tick) => (
-          <text
-            key={tick.date}
-            x={26 + ((Date.parse(tick.date) - start) / duration) * 262}
-            y="188"
-            textAnchor="middle"
-            fontSize={13}
-            className="fill-text-secondary"
-          >
-            {tick.label}
-          </text>
+              </div>
+            </div>
+            <span className="mt-2 text-xs text-text-tertiary">{label}</span>
+          </li>
         ))}
-        {series.map((item) => {
-          const points = item.points.map((point) => ({
-            ...point,
-            x: 26 + ((Date.parse(point.date) - start) / duration) * 262,
-            y: 164 - (point.value / maximum) * 140,
-          }));
-          return (
-            <g key={item.label}>
-              <path
-                d={points
-                  .map((point, index) =>
-                    index === 0
-                      ? `M ${point.x} ${point.y}`
-                      : `H ${point.x} V ${point.y}`,
-                  )
-                  .join(" ")}
-                fill="none"
-                strokeWidth="2.5"
-                strokeDasharray={item.dashed ? "6 4" : undefined}
-                className={
-                  item.dashed ? "stroke-text-tertiary" : "stroke-text-primary"
-                }
-              />
-              {points.map((point) => (
-                <circle
-                  key={point.date}
-                  cx={point.x}
-                  cy={point.y}
-                  r="2"
-                  className={
-                    item.dashed ? "fill-text-tertiary" : "fill-text-primary"
-                  }
-                >
-                  <title>{`${point.date}: ${point.value.toLocaleString("en-US")} ${item.label}`}</title>
-                </circle>
-              ))}
-            </g>
-          );
-        })}
-      </svg>
-    </figure>
+      </ol>
+    </div>
   );
 }
