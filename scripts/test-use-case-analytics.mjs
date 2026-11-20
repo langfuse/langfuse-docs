@@ -131,18 +131,25 @@ test("attribution rejects malformed values and expires after 30 minutes", () => 
   delete globalThis.sessionStorage;
 });
 
-function marketoModuleLoader({
+const CONVERSION_ORIGIN = "https://forms.conversion.ai";
+const CONVERSION_FORM_ID = "8fed9078-25ce-4f9e-ad32-dac3ae839148";
+
+function contactFormModuleLoader({
+  iframeWindow,
   captured,
   adConversions,
   remembered,
   attributionValue = attribution,
 }) {
+  let refCalls = 0;
   return (name) => {
     if (name === "react")
       return {
         useState: (value) => [value, () => {}],
-        useRef: (value) => ({ current: value }),
-        useCallback: (fn) => fn,
+        // The first ref is the iframe; give it the stubbed frame window.
+        useRef: (value) => ({
+          current: refCalls++ === 0 ? { contentWindow: iframeWindow } : value,
+        }),
         useEffect: (fn) => fn(),
       };
     if (name === "react/jsx-runtime")
@@ -176,78 +183,71 @@ function marketoModuleLoader({
   };
 }
 
-test("sales completion is emitted only after Marketo success and is deduplicated", () => {
+// Renders the form against stubbed browser globals and returns a function that
+// delivers a postMessage event to the form's message listener.
+function mountContactForm({ pathname, search = "", props, ...loaderOptions }) {
+  const posted = [];
+  const iframeWindow = {
+    postMessage: (message, targetOrigin) =>
+      posted.push({ message, targetOrigin }),
+  };
+  const listeners = {};
+  globalThis.window = {
+    location: { pathname, search },
+    ConversionFormsV1: {},
+    addEventListener: (type, fn) => {
+      listeners[type] = fn;
+    },
+    removeEventListener() {},
+    setTimeout: () => 0,
+    clearTimeout() {},
+  };
+  const form = load(
+    compile("components/ContactForm.tsx"),
+    contactFormModuleLoader({ iframeWindow, ...loaderOptions }),
+  );
+  form.ContactForm(props);
+  const send = (data, overrides = {}) =>
+    listeners.message({
+      origin: CONVERSION_ORIGIN,
+      source: iframeWindow,
+      data,
+      ...overrides,
+    });
+  return { send, posted };
+}
+
+const submitted = {
+  type: "conversion-forms",
+  data: { eventName: "submitted", formId: CONVERSION_FORM_ID },
+};
+
+test("sales completion is emitted only after the Conversion form submits and is deduplicated", () => {
   const captured = [];
   const remembered = [];
   const adConversions = { value: 0 };
-  let onSuccess;
-  globalThis.window = {
-    location: { pathname: "/talk-to-us" },
-    MktoForms2: {
-      loadForm(_base, _id, _form, callback) {
-        callback({
-          onSuccess: (fn) => {
-            onSuccess = fn;
-          },
-        });
-      },
-    },
-  };
-  const requiredAsterisk = {
-    display: null,
-    priority: null,
-    closest: (selector) =>
-      selector === ".mktoRequiredField" ? { required: true } : null,
-    style: {
-      setProperty(name, value, priority) {
-        if (name === "display") {
-          requiredAsterisk.display = value;
-          requiredAsterisk.priority = priority;
-        }
-      },
-    },
-  };
-  const optionalAsterisk = {
-    display: null,
-    priority: null,
-    closest: () => null,
-    style: {
-      setProperty(name, value, priority) {
-        if (name === "display") {
-          optionalAsterisk.display = value;
-          optionalAsterisk.priority = priority;
-        }
-      },
-    },
-  };
-  globalThis.document = {
-    getElementById: () => ({
-      replaceChildren() {},
-      querySelectorAll(selector) {
-        assert.equal(selector, ".mktoAsterix");
-        return [requiredAsterisk, optionalAsterisk];
-      },
-    }),
-  };
-  const form = load(
-    compile("components/MarketoContactForm.tsx"),
-    marketoModuleLoader({ captured, adConversions, remembered }),
-  );
+  const { send } = mountContactForm({
+    pathname: "/talk-to-us",
+    captured,
+    adConversions,
+    remembered,
+  });
   try {
-    form.MarketoContactForm();
-    assert.equal(requiredAsterisk.display, "inline");
-    assert.equal(requiredAsterisk.priority, "important");
-    assert.equal(optionalAsterisk.display, "none");
-    assert.equal(optionalAsterisk.priority, "important");
+    send({ type: "conversion-forms-ping" });
+    send({ type: "conversion-forms-height-adjustment", data: { height: 900 } });
     assert.equal(captured.length, 0, "Loading a form is not a conversion");
     assert.equal(remembered.length, 0, "Mount must not write attribution");
-    assert.equal(onSuccess({ Email: "test@example.invalid" }, ""), false);
-    assert.equal(onSuccess({}, ""), false);
+    send(submitted, { origin: "https://evil.example" });
+    send(submitted, { source: {} });
+    send({ ...submitted, data: { ...submitted.data, formId: "other" } });
+    assert.equal(captured.length, 0, "Foreign messages are ignored");
+    send(submitted);
+    send(submitted);
     assert.deepEqual(captured, [
       {
         event: "sales:inquiry_completed",
         props: {
-          form_id: 1645,
+          form_id: CONVERSION_FORM_ID,
           page_path: "/talk-to-us",
           ...attribution,
         },
@@ -256,154 +256,52 @@ test("sales completion is emitted only after Marketo success and is deduplicated
     assert.equal(adConversions.value, 1);
   } finally {
     delete globalThis.window;
-    delete globalThis.document;
   }
 });
 
-test("sales completion still registers when the form stub has no querySelectorAll", () => {
-  const captured = [];
-  let onSuccess;
-  globalThis.window = {
-    location: { pathname: "/talk-to-us" },
-    MktoForms2: {
-      loadForm(_base, _id, _form, callback) {
-        callback({
-          onSuccess: (fn) => {
-            onSuccess = fn;
-          },
-        });
-      },
-    },
-  };
-  globalThis.document = { getElementById: () => ({ replaceChildren() {} }) };
-  const form = load(
-    compile("components/MarketoContactForm.tsx"),
-    marketoModuleLoader({ captured }),
-  );
+test("campaign parameters are sent to the form's hidden fields when it pings", () => {
+  const { send, posted } = mountContactForm({
+    pathname: "/talk-to-us",
+    search: "?utm_source=newsletter&gclid=abc&loc=de&other=ignored",
+    captured: [],
+  });
   try {
-    assert.doesNotThrow(() => form.MarketoContactForm());
-    assert.equal(typeof onSuccess, "function");
-    assert.equal(onSuccess({}, ""), false);
-    assert.equal(captured[0]?.event, "sales:inquiry_completed");
-    assert.equal(captured[0]?.props.page_path, "/talk-to-us");
+    send({ type: "conversion-forms-ping" });
+    assert.deepEqual(posted, [
+      {
+        message: {
+          type: "conversion-forms",
+          data: {
+            eventName: "set-values",
+            fields: {
+              "9a874dfc-ef18-4cfd-ab13-b9517e33a314": "newsletter",
+              "749e8f3f-0fd5-4296-9e57-659f08ece1f5": "abc",
+              "1a65d947-04f8-461b-8aef-5751631b37fe": "de",
+            },
+          },
+        },
+        targetOrigin: CONVERSION_ORIGIN,
+      },
+    ]);
   } finally {
     delete globalThis.window;
-    delete globalThis.document;
   }
 });
 
-test("compact Marketo form collapses deferred rows and remembers use-case only on success", () => {
+test("use-case forms remember attribution only on submission", () => {
   const captured = [];
   const remembered = [];
-  let onSuccess;
-  let onValidate;
-  const deferredRow = {
-    querySelector: (selector) =>
-      selector === ".mktoHtmlText" ? { text: "extra" } : null,
-    querySelectorAll: () => [],
-  };
-  const firstNameInput = { name: "FirstName", type: "text" };
-  const lastNameInput = { name: "LastName", type: "text" };
-  const emailInput = { name: "Email", type: "email" };
-  const phoneInput = { name: "Phone", type: "tel" };
-  const firstNameRow = {
-    parentElement: {
-      insertBefore(nameRow, before) {
-        this.inserted = { nameRow, before };
-      },
-    },
-    querySelectorAll: () => [firstNameInput],
-    querySelector: () => null,
-  };
-  const lastNameRow = {
-    parentElement: firstNameRow.parentElement,
-    querySelectorAll: () => [lastNameInput],
-    querySelector: () => null,
-  };
-  const emailRow = {
-    querySelectorAll: () => [emailInput],
-    querySelector: () => null,
-  };
-  const phoneRow = {
-    querySelectorAll: () => [phoneInput],
-    querySelector: () => null,
-  };
-  const buttonRow = { parentElement: { insertBefore() {} } };
-  const formElement = {
-    replaceChildren() {},
-    querySelectorAll(selector) {
-      if (selector === ".mktoAsterix") return [];
-      if (selector === ".mktoFormRow") {
-        return [firstNameRow, lastNameRow, emailRow, phoneRow, deferredRow];
-      }
-      return [];
-    },
-    querySelector(selector) {
-      if (selector === 'input[name="FirstName"]') {
-        return { closest: () => firstNameRow };
-      }
-      if (selector === 'input[name="LastName"]') {
-        return { closest: () => lastNameRow };
-      }
-      if (selector === ".mktoButtonRow") return buttonRow;
-      return null;
-    },
-    appendChild() {},
-  };
-  globalThis.HTMLElement = function HTMLElement() {};
-  Object.setPrototypeOf(formElement, globalThis.HTMLElement.prototype);
-  globalThis.window = {
-    location: { pathname: "/financial-services" },
-    MktoForms2: {
-      loadForm(_base, _id, _form, callback) {
-        callback({
-          getFormElem: () => formElement,
-          onValidate: (fn) => {
-            onValidate = fn;
-          },
-          onSuccess: (fn) => {
-            onSuccess = fn;
-          },
-        });
-      },
-    },
-  };
-  globalThis.document = {
-    getElementById: () => formElement,
-    createElement: (tag) => {
-      const node = {
-        tag,
-        className: "",
-        textContent: "",
-        children: [],
-        appendChild(child) {
-          this.children.push(child);
-        },
-      };
-      return node;
-    },
-  };
-  const form = load(
-    compile("components/MarketoContactForm.tsx"),
-    marketoModuleLoader({
-      captured,
-      remembered,
-      attributionValue: null,
-    }),
-  );
+  const { send } = mountContactForm({
+    pathname: "/financial-services",
+    props: { useCase: "financial_services", section: "hero" },
+    captured,
+    remembered,
+    attributionValue: null,
+  });
   try {
-    form.MarketoContactForm({
-      compact: true,
-      useCase: "financial_services",
-      section: "hero",
-    });
+    send({ type: "conversion-forms-ping" });
     assert.equal(remembered.length, 0, "Mount must not write attribution");
-    assert.equal(typeof onValidate, "function");
-    assert.ok(
-      firstNameRow.parentElement.inserted?.nameRow,
-      "First/last name rows are grouped",
-    );
-    assert.equal(onSuccess({}, ""), false);
+    send(submitted);
     assert.deepEqual(remembered, [
       {
         use_case: "financial_services",
@@ -417,7 +315,5 @@ test("compact Marketo form collapses deferred rows and remembers use-case only o
     assert.equal(captured[0]?.props.action, "form_submit");
   } finally {
     delete globalThis.window;
-    delete globalThis.document;
-    delete globalThis.HTMLElement;
   }
 });
