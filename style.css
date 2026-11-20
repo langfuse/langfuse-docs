@@ -214,11 +214,30 @@
   @keyframes hiring-snow-fall {
     0% {
       transform: translate3d(0, 0, 0);
+      opacity: var(--snow-opacity, 1);
+    }
+    50% {
+      transform: translate3d(calc(var(--snow-drift, 0px) * 0.5), 160px, 0);
+      opacity: var(--snow-opacity, 1);
+    }
+    100% {
+      transform: translate3d(var(--snow-drift, 0px), 320px, 0);
+      opacity: 0;
+    }
+  }
+  @keyframes hiring-sleigh-takeoff {
+    0% {
+      transform: translate3d(0, 6px, 0) rotate(10deg);
+      opacity: 1;
+    }
+    30% {
+      transform: translate3d(calc(var(--fly-x) * 0.22), -36px, 0) rotate(-16deg)
+        scale(1.12);
       opacity: 1;
     }
     100% {
-      transform: translate3d(var(--snow-drift, 0px), 280px, 0);
-      opacity: 0;
+      transform: translate3d(var(--fly-x), var(--fly-y), 0) rotate(-4deg);
+      opacity: 1;
     }
   }
 }
@@ -448,6 +467,10 @@
 @layer utilities {
   .animate-slide {
     animation: slide var(--speed) ease-in-out infinite alternate;
+  }
+  .animate-hiring-sleigh-takeoff {
+    animation: hiring-sleigh-takeoff 2.2s cubic-bezier(0.2, 0.7, 0.2, 1)
+      forwards;
   }
   .animate-spin-custom {
     animation: spin-custom calc(var(--speed) * 2) infinite linear;

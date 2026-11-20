@@ -11,8 +11,8 @@ const FULL_LABEL = "Hiring remotely";
 const COMPACT_LABEL = "Hiring";
 const HOVER_LABEL = "Looking for GOATS!";
 const COMPACT_HOVER_LABEL = "GOATS!";
-const SNOWFLAKES = ["❄", "❅", "❆"] as const;
 const REINDEER_SLEIGH = "🦌🛷";
+const SLEIGH_TARGET = { x: 16, y: 8 };
 
 type FallingParticle = {
   id: number;
@@ -20,8 +20,13 @@ type FallingParticle = {
   y: number;
   duration: number;
   kind?: "snow" | "sleigh";
-  emoji?: string;
   drift?: number;
+  size?: number;
+  opacity?: number;
+  /** Viewport left/top captured at launch. Snow stays badge-relative. */
+  viewport?: boolean;
+  flyX?: number;
+  flyY?: number;
 };
 
 export function HiringBadge({
@@ -43,11 +48,66 @@ export function HiringBadge({
   const containerRef = useRef<HTMLDivElement>(null);
   const goatIdRef = useRef(0);
   const lastSpawnTimeRef = useRef(0);
-  const christmasTickRef = useRef(0);
+  const sleighLaunchedRef = useRef(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const spawnSnow = (x: number, y: number, count: number, spread = 0) => {
+    const flakes: FallingParticle[] = [];
+    for (let i = 0; i < count; i++) {
+      flakes.push({
+        id: goatIdRef.current++,
+        x: x + (spread ? (Math.random() - 0.5) * spread : 0),
+        y: y + (spread ? (Math.random() - 0.5) * spread : 0),
+        duration: 2.4 + Math.random() * 1.6,
+        kind: "snow",
+        drift: Math.round((Math.random() - 0.5) * 72),
+        size: 3 + Math.round(Math.random() * 4),
+        opacity: 0.8 + Math.random() * 0.2,
+      });
+    }
+    return flakes;
+  };
+
+  const releaseSnow = (flakes: FallingParticle[]) => {
+    setGoats((prev) => [...prev, ...flakes]);
+    for (const flake of flakes) {
+      setTimeout(
+        () => {
+          setGoats((prev) => prev.filter((g) => g.id !== flake.id));
+        },
+        (flake.duration + 0.5) * 1000,
+      );
+    }
+  };
+
+  const launchSleigh = (rect: DOMRect) => {
+    if (sleighLaunchedRef.current) return;
+    sleighLaunchedRef.current = true;
+    const startX = rect.left + rect.width / 2;
+    const startY = rect.top + rect.height / 2;
+    const sleigh: FallingParticle = {
+      id: goatIdRef.current++,
+      x: startX,
+      y: startY,
+      duration: 2.2,
+      kind: "sleigh",
+      viewport: true,
+      flyX: SLEIGH_TARGET.x - startX,
+      flyY: SLEIGH_TARGET.y - startY,
+    };
+    setGoats((prev) => [...prev, sleigh]);
+  };
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsHovered(true);
+    if (!CHRISTMAS_MODE || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    releaseSnow(spawnSnow(e.clientX - rect.left, e.clientY - rect.top, 8, 24));
+    launchSleigh(rect);
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !isHovered) return;
@@ -58,41 +118,7 @@ export function HiringBadge({
     const rect = containerRef.current.getBoundingClientRect();
 
     if (CHRISTMAS_MODE) {
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const tick = christmasTickRef.current++;
-      const snow: FallingParticle = {
-        id: goatIdRef.current++,
-        x,
-        y,
-        duration: 2.4 + Math.random() * 0.6,
-        kind: "snow",
-        emoji: SNOWFLAKES[Math.floor(Math.random() * SNOWFLAKES.length)],
-        drift: Math.round((Math.random() - 0.5) * 80),
-      };
-      const spawned: FallingParticle[] = [snow];
-
-      // Sleighs on every other tick so snow stays constant without doubling the rate.
-      if (tick % 2 === 0) {
-        spawned.push({
-          id: goatIdRef.current++,
-          x,
-          y,
-          duration: 1.5 + Math.random() * 0.6,
-          kind: "sleigh",
-          emoji: REINDEER_SLEIGH,
-        });
-      }
-
-      setGoats((prev) => [...prev, ...spawned]);
-      for (const particle of spawned) {
-        setTimeout(
-          () => {
-            setGoats((prev) => prev.filter((g) => g.id !== particle.id));
-          },
-          (particle.duration + 0.5) * 1000,
-        );
-      }
+      releaseSnow(spawnSnow(e.clientX - rect.left, e.clientY - rect.top, 3, 8));
       return;
     }
 
@@ -119,46 +145,62 @@ export function HiringBadge({
             aria-hidden="true"
           >
             {goats.map((goat) => {
+              if (goat.kind === "sleigh" && goat.viewport) {
+                return (
+                  <span
+                    key={goat.id}
+                    className="absolute whitespace-nowrap text-2xl animate-hiring-sleigh-takeoff"
+                    style={
+                      {
+                        left: `${goat.x}px`,
+                        top: `${goat.y}px`,
+                        "--fly-x": `${goat.flyX ?? 0}px`,
+                        "--fly-y": `${goat.flyY ?? 0}px`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    {REINDEER_SLEIGH}
+                  </span>
+                );
+              }
+
               if (!containerRef.current) return null;
               const rect = containerRef.current.getBoundingClientRect();
-              const position = {
-                left: `${rect.left + goat.x}px`,
-                top: `${rect.top + goat.y}px`,
-                animationDuration: `${goat.duration}s`,
-              };
 
               if (!CHRISTMAS_MODE || goat.kind == null) {
                 return (
                   <span
                     key={goat.id}
                     className="absolute text-lg animate-fall"
-                    style={position}
+                    style={{
+                      left: `${rect.left + goat.x}px`,
+                      top: `${rect.top + goat.y}px`,
+                      animationDuration: `${goat.duration}s`,
+                    }}
                   >
                     🐐
                   </span>
                 );
               }
 
-              const isSnow = goat.kind === "snow";
               return (
                 <span
                   key={goat.id}
-                  className={
-                    isSnow
-                      ? "absolute whitespace-nowrap text-base animate-hiring-snow"
-                      : "absolute whitespace-nowrap text-lg animate-fall"
-                  }
+                  className="absolute rounded-full bg-white animate-hiring-snow"
                   style={
                     {
-                      ...position,
-                      ...(isSnow
-                        ? { "--snow-drift": `${goat.drift ?? 0}px` }
-                        : {}),
+                      left: `${rect.left + goat.x}px`,
+                      top: `${rect.top + goat.y}px`,
+                      width: `${goat.size ?? 4}px`,
+                      height: `${goat.size ?? 4}px`,
+                      animationDuration: `${goat.duration}s`,
+                      boxShadow:
+                        "0 0 0 1px rgba(150,170,190,0.5), 0 1px 2px rgba(0,0,0,0.12)",
+                      "--snow-drift": `${goat.drift ?? 0}px`,
+                      "--snow-opacity": String(goat.opacity ?? 0.9),
                     } as React.CSSProperties
                   }
-                >
-                  {goat.emoji}
-                </span>
+                />
               );
             })}
           </div>,
@@ -194,9 +236,10 @@ export function HiringBadge({
         !adaptive && className,
       )}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={() => {
         setIsHovered(false);
+        sleighLaunchedRef.current = false;
         setGoats([]);
       }}
     >
