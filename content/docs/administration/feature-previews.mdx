@@ -1,0 +1,47 @@
+---
+title: Feature Previews
+sidebarTitle: Feature Previews
+description: Try upcoming Langfuse features before they are generally available, and roll them out to everyone in your organization.
+---
+
+# Feature Previews
+
+Feature previews give you early access to new Langfuse features before they become generally available. Every user can turn previews on for themselves, and organization owners and admins can turn them on for all members of an organization.
+
+<Frame className="my-10" fullWidth>
+  ![Feature Previews tab in the organization settings](/images/changelog/2026-08-25-organization-feature-previews.png)
+</Frame>
+
+## Try a preview yourself [#personal]
+
+Open your account menu and select **Feature preview**. Each preview has a short description and a toggle.
+
+Your personal choice applies in every organization you belong to. Turning a preview off is a global opt-out that also overrides organization defaults, so you keep the current experience even if your organization enables the preview.
+
+## Enable a preview for your organization [#organization]
+
+Go to **Organization Settings > Feature Previews** and turn on the previews you want everyone to use. Current members get the preview as soon as you confirm, and new members inherit it when they join.
+
+Organization defaults apply only while members work in that organization. They don't change a member's settings in other organizations.
+
+<Callout type="info">
+  Requires the **Owner** or **Admin** [role](/docs/administration/rbac). The organization toggle for a preview stays disabled until you have enabled that preview for yourself.
+</Callout>
+
+## Change previews for a member [#members]
+
+In **Organization Settings > Members**, the **Feature Previews** column shows how many previews each member has enabled. Select it to turn previews on or off for that member.
+
+<Callout type="info">
+  A change for a member applies in every organization they belong to, so you can only make it if you are an Owner or Admin in all of those organizations.
+</Callout>
+
+## Self-hosted deployments [#self-hosted]
+
+The **Feature preview** entry in the account menu is available after you turn on the [Langfuse v4 preview](/docs/v4). Organization defaults and member controls work the same as on Langfuse Cloud.
+
+To turn on all previews for every user, set `LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES=true` on the Langfuse web container.
+
+<Callout type="info">
+  While `LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES` is set, every preview is on for everyone. Personal opt-outs and organization defaults are ignored, and users can't turn previews off.
+</Callout>
