@@ -1,7 +1,7 @@
 ---
-title: Deploy Langfuse v3 on Railway
-description: Use this guide to deploy Langfuse v3 on Railway via the prebuilt template.
-label: "Version: v3"
+title: Deploy Langfuse v4 on Railway
+description: Use this guide to deploy Langfuse v4 on Railway via the prebuilt template.
+label: "Version: v4"
 sidebarTitle: "Railway"
 ---
 
@@ -11,15 +11,18 @@ import SelfHostCommunityDeployment from "@/components-mdx/self-host-community-de
 
 <SelfHostCommunityDeployment />
 
+You can deploy Langfuse v4 on [Railway](https://railway.com/) via the prebuilt template.
+The template runs the same services as the [Docker Compose setup](/self-hosting/deployment/docker-compose): Langfuse Web and Langfuse Worker (pinned to the same release), ClickHouse, Postgres and Redis, with a Railway Bucket as the S3-compatible blob storage.
+See [architecture overview](/self-hosting#architecture) for more details.
+
+On first start, the template uses [headless initialization](/self-hosting/administration/headless-initialization) to create your user, an organization, a project and its API keys, and it sets `AUTH_DISABLE_SIGNUP=true`, so the instance can't be claimed by someone else before you sign in. The deploy form asks for your email; the password and API keys are generated and shown in the service's variables.
+
 <Callout type="info">
 
-The Railway template currently deploys **Langfuse v3**. [Subscribe to the self-hosting mailing list](/self-hosting#subscribe) to get notified as soon as a Langfuse v4 template is available. For a v4 deployment today, use one of the other [deployment options](/self-hosting#deployment-options).
+The stack needs about 3 to 4.5 GB of RAM in total (ClickHouse is the largest part), so it requires a Railway Hobby plan or higher.
+Existing Langfuse v3 deployments on Railway can follow the [v3 to v4 upgrade guide](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4).
 
 </Callout>
-
-You can deploy Langfuse v3 on [Railway](https://railway.app/) via the prebuilt template.
-The template contains all the necessary services and configurations to get you started.
-See [architecture overview](/self-hosting#architecture) for more details.
 
 <Callout type="warning">
   After deployment, verify that PostgreSQL and ClickHouse use UTC. See the
@@ -29,16 +32,9 @@ See [architecture overview](/self-hosting#architecture) for more details.
 
 ## Deploy
 
-Use the following button to deploy the Langfuse v3 template on Railway:
+Use the following button to deploy the Langfuse v4 template on Railway:
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/exma_H?referralCode=513qqz)
-
-Recording of 1-click deployment on Railway:
-
-<Video
-  src="https://static.langfuse.com/docs-videos/railway-v3.mp4"
-  aspectRatio={16 / 9}
-/>
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/langfuse-2?referralCode=513qqz)
 
 ## Features
 
