@@ -146,8 +146,43 @@ Instead, we recommend using the [Langfuse data-retention feature](/docs/data-ret
 ### ClickHouse Disk Usage
 
 To automatically remove data within ClickHouse, you can use the [TTL](https://clickhouse.com/docs/guides/developer/ttl) feature.
-See the ClickHouse documentation for more details on how to configure it.
-This is applicable for the `traces`, `observations`, `scores`, and `event_log` table within ClickHouse.
+
+A table-level TTL applies one fixed retention window to an entire table. It is not a replacement for [data retention](/docs/administration/data-retention): data retention is configured per project and also removes media assets, whereas a TTL expires every row in a table after the same number of days, regardless of project.
+
+Langfuse stores observability data in the following ClickHouse tables, each partitioned monthly by its timestamp column:
+
+| Table          | Timestamp column | Notes                                                                                                   |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
+| `traces`       | `timestamp`      | Written only in the legacy and dual write modes; may still hold historical data after upgrading from v3 |
+| `scores`       | `timestamp`      | Always populated                                                                                        |
+| `events_full`  | `start_time`     | v4 default write path                                                                                   |
+| `events_core`  | `start_time`     | v4 default write path                                                                                   |
+| `observations` | `start_time`     | Written only in the legacy and dual write modes; may still hold historical data after upgrading from v3 |
+
+By default ClickHouse expires rows individually, which rewrites the affected data parts. On S3-backed storage this rewrite performs S3 I/O and can be slow. Setting `ttl_only_drop_parts = 1` makes ClickHouse drop whole parts once all of their rows have expired, instead of rewriting them row by row.
+
+`MODIFY TTL` also applies the new TTL to existing data by default (`materialize_ttl_after_modify = 1`), which runs a mutation that rewrites every existing part of the table. Setting `materialize_ttl_recalculate_only = 1` limits this mutation to recalculating TTL metadata, so expired parts are dropped by background merges instead.
+
+Set both on each table before adding a TTL:
+
+```sql
+ALTER TABLE traces MODIFY SETTING ttl_only_drop_parts = 1, materialize_ttl_recalculate_only = 1;
+-- repeat for each table above
+```
+
+Then set a TTL on each table you want to expire, for example 30 days:
+
+```sql
+ALTER TABLE traces MODIFY TTL timestamp + INTERVAL 30 DAY;
+ALTER TABLE scores MODIFY TTL timestamp + INTERVAL 30 DAY;
+ALTER TABLE events_full MODIFY TTL start_time + INTERVAL 30 DAY;
+ALTER TABLE events_core MODIFY TTL start_time + INTERVAL 30 DAY;
+ALTER TABLE observations MODIFY TTL start_time + INTERVAL 30 DAY;
+```
+
+On a clustered deployment, place `ON CLUSTER <cluster_name>` immediately after the table name, for example `ALTER TABLE traces ON CLUSTER <cluster_name> MODIFY TTL timestamp + INTERVAL 30 DAY;`.
+
+Keep two caveats in mind: with `ttl_only_drop_parts = 1` a part is dropped only once its newest row has expired. Because parts never span partitions and merges combine data within a month, expired data can remain for up to about one extra month. TTL expiry is also asynchronous — the default four-hour TTL merge interval is a minimum interval, not a deletion deadline.
 
 The following query helps to identify the largest tables in Clickhouse:
 
