@@ -1,15 +1,12 @@
+import { download } from "@/lib/ai/download";
 import { ProvideLinksToolSchema } from "@/lib/ai/inkeep-qa-schema";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { convertToModelMessages, streamText, zodSchema } from "ai";
-import type { UIMessage } from "ai";
+import { convertToModelMessages, streamText, validateUIMessages } from "ai";
+import type { InkeepUIMessage } from "@/lib/ai/inkeep-qa-schema";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 export const maxDuration = 60;
-
-// Type assertions below work around pnpm resolving duplicate copies of
-// @ai-sdk/provider and zod, which makes structurally identical types
-// appear incompatible to TypeScript.
 
 const ChatBodySchema = z.object({
   messages: z.array(z.any()).max(80),
@@ -75,13 +72,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const messages = parsed.data.messages as UIMessage[];
-
   let modelMessages: Awaited<ReturnType<typeof convertToModelMessages>>;
   try {
-    modelMessages = await (convertToModelMessages as Function)(messages, {
+    const messages = await validateUIMessages<InkeepUIMessage>({
+      messages: parsed.data.messages,
+      dataSchemas: { client: z.object({ location: z.string() }) },
+      tools: { provideLinks: { inputSchema: ProvideLinksToolSchema } },
+    });
+    modelMessages = await convertToModelMessages(messages, {
       ignoreIncompleteToolCalls: true,
-      convertDataPart(part: { type: string; data: unknown }) {
+      convertDataPart(part) {
         if (part.type === "data-client")
           return {
             type: "text" as const,
@@ -98,12 +98,11 @@ export async function POST(req: Request) {
 
   try {
     const result = streamText({
-      model: inkeep("inkeep-qa-expert") as unknown as Parameters<
-        typeof streamText
-      >[0]["model"],
+      experimental_download: download,
+      model: inkeep("inkeep-qa-expert"),
       tools: {
         provideLinks: {
-          inputSchema: zodSchema(ProvideLinksToolSchema as any),
+          inputSchema: ProvideLinksToolSchema,
         },
       },
       messages: modelMessages,
@@ -113,7 +112,7 @@ export async function POST(req: Request) {
       telemetry: { isEnabled: false },
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({ redactToolErrors: true });
   } catch {
     return NextResponse.json(
       { error: "Failed to start the assistant." },
