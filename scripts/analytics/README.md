@@ -77,14 +77,14 @@ These funnels describe observed associations, not causal lift or mutually exclus
 Run:
 
 ```sh
-node --test scripts/test-use-case-analytics.mjs
-pnpm exec tsc --noEmit --pretty false
-node scripts/copy_md_sources.js
-node scripts/check-h1-headings.js
+bun test ./scripts/test-use-case-analytics.mjs
+bun check
+bun scripts/copy_md_sources.js
+bun scripts/check-h1-headings.js
 git diff --check
 ```
 
-The unit tests run in Node without a browser. They check conversion URL preservation, attribution validation and expiry, and successful-form-only reporting. PostHog and the Conversion form iframe use in-process stubs; tests send no production events and submit no real sales forms.
+The unit tests run in Bun without a browser. They check conversion URL preservation, attribution validation and expiry, and successful-form-only reporting. PostHog and the Conversion form iframe use in-process stubs; tests send no production events and submit no real sales forms.
 
 After deployment, verify the six new event names in PostHog live events, then confirm production host filters and the first real sales form and Cloud completion paths. Empty dashboards before deployment are expected. Do not send synthetic production signups or sales inquiries for validation.
 

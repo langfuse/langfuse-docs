@@ -180,4 +180,4 @@ Do **not** add a homepage logo in this skill. That needs a tight wordmark SVG
 - [ ] Company cell links to the official website
 - [ ] Row is alphabetical and not a duplicate
 - [ ] Table column alignment preserved
-- [ ] `pnpm run format` if you edited Prettier-covered files
+- [ ] `bun fmt` if you edited formatter-covered files

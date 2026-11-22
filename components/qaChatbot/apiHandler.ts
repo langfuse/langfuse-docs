@@ -52,20 +52,11 @@ export const handler = async (req: Request) => {
       });
 
       const reasoningSummary = prompt.config.reasoningSummary as
-        | "low"
-        | "medium"
-        | "high"
-        | undefined;
+        "low" | "medium" | "high" | undefined;
       const textVerbosity = prompt.config.textVerbosity as
-        | "low"
-        | "medium"
-        | "high"
-        | undefined;
+        "low" | "medium" | "high" | undefined;
       const reasoningEffort = prompt.config.reasoningEffort as
-        | "low"
-        | "medium"
-        | "high"
-        | undefined;
+        "low" | "medium" | "high" | undefined;
 
       const chatHistory = messages.map((msg) => ({
         role: msg.role,

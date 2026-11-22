@@ -29,29 +29,29 @@ Maps Git commit emails to rich author profiles (names, photos, social handles) f
 ### Check for unmapped emails
 
 ```bash
-node scripts/authors/update-authors.js analyze
+bun scripts/authors/update-authors.js analyze
 ```
 
 ### Map emails to authors
 
 ```bash
 # Add primary email
-node scripts/authors/update-authors.js add-email <authorKey> <email>
+bun scripts/authors/update-authors.js add-email <authorKey> <email>
 
 # Add alternative email
-node scripts/authors/update-authors.js add-email <authorKey> <email> --alt
+bun scripts/authors/update-authors.js add-email <authorKey> <email> --alt
 ```
 
 ### Example
 
 ```bash
-node scripts/authors/update-authors.js add-email marcklingen "marc@langfuse.com"
+bun scripts/authors/update-authors.js add-email marcklingen "marc@langfuse.com"
 ```
 
 ### Generate contributors.json manually
 
 ```bash
-node scripts/authors/generate-contributors.js
+bun scripts/authors/generate-contributors.js
 ```
 
 ## Automated Process
@@ -72,7 +72,7 @@ The refresh fails without committing partial output when GitHub returns an error
 
 ## Workflow
 
-1. **Check for new contributors:** `node scripts/authors/update-authors.js analyze` (analyzes all documentation sections)
+1. **Check for new contributors:** `bun scripts/authors/update-authors.js analyze` (analyzes all documentation sections)
 2. **For existing team members:** Map new email to existing author
 3. **For new contributors:** Add author profile to `data/authors.json` first
 4. **Contributors.json updates automatically** during the next scheduled GitHub data refresh

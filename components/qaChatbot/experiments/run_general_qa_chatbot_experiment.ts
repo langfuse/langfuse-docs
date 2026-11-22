@@ -8,10 +8,10 @@
  * - keyword-overlap: deterministic SDK evaluator over the expected keywords
  *
  * Examples:
- *   npx tsx components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
- *   npx tsx components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project --setup-product-evaluators-only
- *   PROMPT_LABELS=production,candidate-v3 EXPERIMENT_MODELS=gpt-4o-mini,gpt-4o npx tsx components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
- *   PROMPT_VERSIONS=1,2 EXPERIMENT_MODELS=gpt-4o-mini npx tsx components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
+ *   bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
+ *   bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project --setup-product-evaluators-only
+ *   PROMPT_LABELS=production,candidate-v3 EXPERIMENT_MODELS=gpt-4o-mini,gpt-4o bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
+ *   PROMPT_VERSIONS=1,2 EXPERIMENT_MODELS=gpt-4o-mini bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -647,20 +647,11 @@ async function runOneExperiment(
 
   const promptConfig = prompt.config as Record<string, unknown>;
   const reasoningSummary = promptConfig.reasoningSummary as
-    | "low"
-    | "medium"
-    | "high"
-    | undefined;
+    "low" | "medium" | "high" | undefined;
   const textVerbosity = promptConfig.textVerbosity as
-    | "low"
-    | "medium"
-    | "high"
-    | undefined;
+    "low" | "medium" | "high" | undefined;
   const reasoningEffort = promptConfig.reasoningEffort as
-    | "low"
-    | "medium"
-    | "high"
-    | undefined;
+    "low" | "medium" | "high" | undefined;
 
   console.log(
     `Running dataset="${args.datasetName}" prompt=${QA_CHATBOT_PROMPT_NAME}@${promptSelector} resolvedVersion=${prompt.version} model=${params.model}`,

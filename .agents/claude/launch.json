@@ -4,7 +4,10 @@
     {
       "name": "dev",
       "runtimeExecutable": "/bin/bash",
-      "runtimeArgs": ["-c", "source ~/.nvm/nvm.sh && pnpm run dev"],
+      "runtimeArgs": [
+        "-c",
+        "export PATH=\"$HOME/.bun/bin:$PATH\" && bun run dev"
+      ],
       "port": 3333
     }
   ]

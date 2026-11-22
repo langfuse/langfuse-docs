@@ -280,20 +280,11 @@ async function runOneExperiment(
 
   const promptConfig = prompt.config as Record<string, unknown>;
   const reasoningSummary = promptConfig.reasoningSummary as
-    | "low"
-    | "medium"
-    | "high"
-    | undefined;
+    "low" | "medium" | "high" | undefined;
   const textVerbosity = promptConfig.textVerbosity as
-    | "low"
-    | "medium"
-    | "high"
-    | undefined;
+    "low" | "medium" | "high" | undefined;
   const reasoningEffort = promptConfig.reasoningEffort as
-    | "low"
-    | "medium"
-    | "high"
-    | undefined;
+    "low" | "medium" | "high" | undefined;
 
   console.log(
     `Running dataset="${args.datasetName}" prompt=${QA_CHATBOT_PROMPT_NAME}@${promptSelector} resolvedVersion=${prompt.version} model=${params.model}`,

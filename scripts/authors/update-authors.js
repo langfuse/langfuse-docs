@@ -165,7 +165,7 @@ switch (command) {
   case "add-email":
     if (!authorKey || !email) {
       console.error(
-        "Usage: node scripts/authors/update-authors.js add-email <authorKey> <email> [--alt]",
+        "Usage: bun scripts/authors/update-authors.js add-email <authorKey> <email> [--alt]",
       );
       process.exit(1);
     }
@@ -185,11 +185,11 @@ switch (command) {
       "  add-email <authorKey> <email> --alt       - Add alternative email to author",
     );
     console.log("\nExamples:");
-    console.log("  node scripts/authors/update-authors.js analyze");
+    console.log("  bun scripts/authors/update-authors.js analyze");
     console.log(
-      '  node scripts/authors/update-authors.js add-email marcklingen "marc@example.com"',
+      '  bun scripts/authors/update-authors.js add-email marcklingen "marc@example.com"',
     );
     console.log(
-      '  node scripts/authors/update-authors.js add-email marcklingen "marc.alt@example.com" --alt',
+      '  bun scripts/authors/update-authors.js add-email marcklingen "marc.alt@example.com" --alt',
     );
 }

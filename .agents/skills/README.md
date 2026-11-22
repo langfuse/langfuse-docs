@@ -7,7 +7,7 @@ For the shared agent config and generated shim model, start with
 
 Claude and Cursor discover these shared skills through projected paths under
 `.claude/skills/` and `.cursor/skills/`. Those discovery links are created and
-verified by `pnpm run agents:sync` and `pnpm run agents:check`.
+verified by `bun run agents:sync` and `bun run agents:check`.
 
 ## Available Skills
 
