@@ -22,6 +22,7 @@ import magicPatternsLogo from "../home/img/magic.svg";
 import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
+import rubyLogo from "../home/img/ruby.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumupLogo from "../home/img/sumup.svg";
 import tradeRepublicLogo from "../home/img/trade-republic.svg";
@@ -82,6 +83,7 @@ const companiesWithoutStories = [
     logo: circlebackLogo,
   },
   { name: "freee", logo: freeeLogo },
+  { name: "Ruby", logo: rubyLogo },
 ];
 
 function CustomerStoryCard({
@@ -240,6 +242,7 @@ export function Customers() {
       { type: "logo", name: "freee" },
       { type: "story", name: "Khan Academy" },
       { type: "logo", name: "Circleback" },
+      { type: "logo", name: "Ruby" },
       { type: "text", name: "And thousands more..." },
       { type: "story", name: "Merck" },
       { type: "story", name: "Magic Patterns" },

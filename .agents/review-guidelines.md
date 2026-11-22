@@ -7,11 +7,13 @@
 
 - Applies to `content/docs/`, `content/integrations/`, `content/guides/`, and `content/faq/`.
 - A `content/changelog/` entry is an announcement, including when the docs already explain the feature. Judge it with [Changelog entries](page-types.md#changelog-entries), and with the workflow rules and CI checks in [AGENTS.md](AGENTS.md).
+- `content/resources/engineering/` pages are marketing content and skip gate 1: they may repeat docs content and don't need a docs home. Flag only claims that contradict the docs, such as a stated default, limit, or permission the docs describe differently.
 
 ### Necessity
 
 - Keep a fact only when a reader with that screen open still could not know it. Don't list options, providers, etc. just for the sake of having them in the docs. less is more.
 - Also cut every category in [Cut what the reader doesn't need](AGENTS.md#cut-what-the-reader-doesnt-need)
+- Fail additions that explain the absence of something the rest of the page never mentions. Fail restatements of a fact the page already demonstrates.
 - Flag provider-specific setup that restates the UI. In most cases these can be cut entirely. If not, add it as a short note at the bottom of the feature page of as a separate guide/FAQ that the feature page can link to at the bottom of the page.
 
 ### Duplication

@@ -47,12 +47,18 @@ export const BlogHeader = ({
             />
           </div>
         )}
-        <h1 className="mt-3 font-medium leading-snug text-balance text-foreground">
-          {title}
+        <h1 className="mt-3 font-medium leading-snug text-foreground">
+          {title.split("\n").map((line) => (
+            <span key={line} className="block text-balance">
+              {line}
+            </span>
+          ))}
         </h1>
-        <p className="mt-2 text-primary/60 text-xl text-balance">
-          {description}
-        </p>
+        {description ? (
+          <p className="mt-2 text-primary/60 text-xl text-balance">
+            {description}
+          </p>
+        ) : null}
         {authors.length > 0 ? <Authors authors={authors} /> : null}
       </div>
     </div>

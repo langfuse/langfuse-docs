@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
-import { CornerBox } from "@/components/ui/corner-box";
+import { CornerGrid, CornerGridItem } from "@/components/ui/corner-grid";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { buttonVariants, controlTextClassName } from "@/components/ui/button";
@@ -46,24 +46,16 @@ export function CustomerIndex({
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2">
+      <CornerGrid>
         {customerStories.map((story, index) => {
           const company = companyName(story);
           const headline = story.frontMatter.title ?? story.route;
           const quote = story.frontMatter.customerQuote;
           const logo = story.frontMatter.customerLogo;
           const logoDark = story.frontMatter.customerLogoDark;
-          const withStripes = index % 3 === 1;
 
           return (
-            <CornerBox
-              key={story.route}
-              withStripes={withStripes}
-              hoverStripes={!withStripes}
-              className={cn(
-                "-mt-px flex min-h-[176px] flex-col p-5 sm:-ml-px sm:p-6",
-              )}
-            >
+            <CornerGridItem key={story.route} index={index}>
               <Link
                 href={story.route}
                 className="group flex h-full flex-col no-underline outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -132,10 +124,10 @@ export function CustomerIndex({
                   {storyCtaLabel(story.frontMatter.ctaLabel)}
                 </span>
               </Link>
-            </CornerBox>
+            </CornerGridItem>
           );
         })}
-      </div>
+      </CornerGrid>
     </section>
   );
 }

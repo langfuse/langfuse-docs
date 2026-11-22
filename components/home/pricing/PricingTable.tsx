@@ -288,8 +288,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom Pricing",
       mainFeatures: [
         "Everything in Enterprise",
-        "FIPS 140-3 validated cryptographic modules operated in approved mode",
-        "Iron Bank-hardened UBI 9 base images",
+        "Use of FIPS 140-3 validated modules",
+        "Hardened images",
         "Air-gapped deployment",
       ],
       cta: "Talk to sales",
@@ -1611,6 +1611,23 @@ const sections: Section[] = [
         },
       },
       {
+        name: "IAM role authentication for Amazon Bedrock",
+        href: "/docs/administration/llm-connection#bedrock-iam-role",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
@@ -1633,19 +1650,8 @@ const sections: Section[] = [
         },
       },
       {
-        name: "FIPS 140-3 validated cryptographic modules operated in approved mode",
-        href: "/self-hosting/configuration/fips-mode",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
-      {
-        name: "Iron Bank-hardened UBI 9 base images",
-        href: "/self-hosting/configuration/hardening#hardened-images",
+        name: "Use of FIPS 140-3 validated modules & hardened images",
+        href: "/self-hosting/configuration/hardening#hardening-for-government",
         tiers: {
           selfHosted: {
             "Open Source": false,
@@ -1767,6 +1773,13 @@ const sections: Section[] = [
             Enterprise: true,
             Government: true,
           },
+        },
+      },
+      {
+        name: "ClickHouse ISO/IEC 27701:2025 certification coverage",
+        href: "/security/iso27701",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
       },
       {

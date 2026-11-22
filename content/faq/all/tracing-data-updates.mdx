@@ -15,7 +15,10 @@ If you want to enrich traces or observations after they were ingested with evalu
 <Callout type="warning">
 Do not attempt to update a trace or observation after ingestion by re-sending an event with the same `id`.
 
-In Langfuse v4, ingested data is **not deduplicated on the read path**, and the underlying storage does **not** guarantee consistency (not even eventual consistency) across records that share an `id`. Re-inserting therefore creates **duplicate records** rather than replacing the original. Duplicates inflate metrics (for example, `sum(totalCost)` in the Metrics API counts every version) and cause inconsistent results in dashboards, filtering, and exports.
+In Langfuse v4, ingested data is **not reliably deduplicated on the read path**, and the underlying storage does **not** guarantee consistency (not even eventual consistency) across records that share an `id`. What a re-sent `id` does depends on its start time:
+
+- **Different start time:** Langfuse keeps both records as **duplicates**. Duplicates inflate metrics (for example, `sum(totalCost)` in the Metrics API counts every version) and cause inconsistent results in dashboards, filtering, and exports.
+- **Same start time:** Langfuse silently keeps only the version it **processed last**, which may be an earlier, incomplete export rather than the one you sent last.
 
 </Callout>
 

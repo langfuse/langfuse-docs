@@ -1,6 +1,6 @@
 "use client";
 
-import { MarketoContactFormCard } from "@/components/MarketoContactForm";
+import { ContactFormCard } from "@/components/ContactForm";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { getGitHubStars } from "@/lib/github-stars";
 import { Link } from "@/components/ui/link";
@@ -195,7 +195,7 @@ function DiscoverYourselfContent() {
 }
 
 function ContactFormSection() {
-  return <MarketoContactFormCard />;
+  return <ContactFormCard />;
 }
 
 export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {

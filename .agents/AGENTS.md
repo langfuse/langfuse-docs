@@ -60,6 +60,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 7. **Preserve custom MDX components in Markdown output.** When creating or adding a custom MDX component that contains user-facing content or links, make sure that content is not removed when the page is converted to plain Markdown. If the content only exists in component props or rendered JSX, add a Markdown renderer in `lib/markdown-component-renderers.js`. Run `node scripts/copy_md_sources.js` and inspect the corresponding file in `public/md-src/` to verify that all content and links remain available to Markdown consumers.
 8. **Users / adopters table archives.** When adding or updating a row in `components-mdx/adopters-table.mdx` whose Reference cell is an external URL, always include a Wayback Machine `[Archive](...)` link. If no snapshot exists yet, request one (`https://web.archive.org/save/{url}`), wait until CDX returns a `200` capture, and cite `https://web.archive.org/web/{timestamp}/{url}`. Percent-encode the URL in CDX queries (`curl -G --data-urlencode`) so `&` in query strings is not parsed as another CDX parameter. Do not ship the row without that archive. Follow `.agents/skills/add-customer-to-user-list/SKILL.md`.
 9. Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
+10. Never include internal Slack references in page content, code, commit messages, or PR descriptions. This covers channel names (`#team-docs`), channel, user, or message IDs (`C0123ABCD`, `U0123ABCD`), workspace names, message or thread links (`*.slack.com/...`), and quotes or summaries attributed to internal threads. The repo and site are public, so describe the change and its reasoning on its own terms. The only exception is the content of handbook pages (`content/handbook/`) for page content only (Commit messages/PR descriptions still prohibited).
 
 ## Passing CI checks on the first try
 
@@ -119,7 +120,7 @@ These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The
 
 ## Writing guidelines: Read this every time you add or change content to a docs page
 
-- When changing something, always make the change considering the surrounding context. Prefer changing an existing sentence over adding an extra sentence or section somewhere. The less new sentences you introduce, the better.
+- When changing something, always make the change considering the surrounding page and what a first-time reader of that page already expects. Prefer the smallest edit that leaves the page accurate. The less new sentences you introduce, the better. Do not add a concept, history, or reassurance the rest of the page does not already rely on, unless readers would otherwise follow a dead path.
 - Order documentation sections by how many readers need them. The default path most people using the page should follow comes first; optional, advanced, or edge-case settings come later. A new feature can live on the page without jumping ahead of the core workflow.
 
 ### Documentation page-specific guidelines
@@ -189,6 +190,8 @@ Read [Review guidelines](review-guidelines.md) before commenting on a pull reque
 
 - **Single service**: This is a Next.js website (not a monorepo). The only service to run is `pnpm dev` on port 3333. No databases, Docker, or external services are required for local development.
 - **Dev server bind address**: The dev script binds to `127.0.0.1` (`-H 127.0.0.1`), so use `http://127.0.0.1:3333` (not `localhost`) when curling or testing.
+- **Letting the user preview pages**: The browser tab in the Cursor interface cannot reach a server bound to `127.0.0.1`. When the user wants to look at pages themselves, run `pnpm exec next dev -p 3333 -H 0.0.0.0` in a tmux session instead of `pnpm dev`, and send them `http://127.0.0.1:3333/<path>` (or the VM address from `hostname -I` if that refuses to connect). Live reload is blocked from that origin, so tell them to refresh after edits. Keep the branch under review checked out while the server runs, because it serves the working tree.
+- **Next.js upgrade prompt on first start**: The first `next dev` run on a fresh VM can exit right after printing a `next upgrade` recommendation. Start it again; the second run starts normally. Do not run the upgrade unless the user asks.
 - **First page load is slow**: After `pnpm dev` starts ("Ready in ~1s"), the first HTTP request compiles on-demand and can take 20-40 seconds. Subsequent pages are much faster.
 - **Langfuse SDK warnings are expected**: The dev server logs `[Langfuse SDK] [WARN] No exporter configured…` on startup. These are harmless — the SDK keys are only needed for optional demo API routes and are not required for the docs site itself.
 - **No env file needed**: All external integrations (OpenAI, Supabase, PostHog, etc.) degrade gracefully when keys are absent. You do not need a `.env` file for routine development.
