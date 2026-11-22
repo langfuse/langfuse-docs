@@ -1,3 +1,4 @@
+import { download } from "@/lib/ai/download";
 import { openai } from "@ai-sdk/openai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { LangfuseClient } from "@langfuse/client";
@@ -154,6 +155,7 @@ export async function POST(req: Request) {
                 throw new Error("Documentation tools unavailable");
               }
               const result = streamText({
+                experimental_download: download,
                 model: openai(config.model),
                 instructions,
                 messages,
@@ -207,6 +209,7 @@ export async function POST(req: Request) {
               });
               return result.toUIMessageStreamResponse({
                 generateMessageId: () => getActiveTraceId(),
+                redactToolErrors: true,
                 sendSources: false,
                 sendReasoning: false,
                 onError: () => unavailable,

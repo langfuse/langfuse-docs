@@ -1,3 +1,4 @@
+import { download } from "@/lib/ai/download";
 import { anthropic, type AnthropicProviderOptions } from "@ai-sdk/anthropic";
 import { openai, type OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import { streamText, tool, type LanguageModel } from "ai";
@@ -244,6 +245,7 @@ const handler = async (req: Request) => {
         try {
           try {
             const result = streamText({
+              experimental_download: download,
               model: config.model(),
               system: SYSTEM_PROMPT,
               prompt: buildUserPrompt({ round, history }),

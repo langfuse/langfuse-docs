@@ -1,3 +1,4 @@
+import { download } from "@/lib/ai/download";
 import { openai } from "@ai-sdk/openai";
 import { generateObject } from "ai";
 import { z } from "zod";
@@ -42,6 +43,7 @@ const schemaFor = (definition: ClassifierDefinition) => {
 
 const classifyOne = async (definition: ClassifierDefinition, text: string) => {
   const result = await generateObject({
+    experimental_download: download,
     model: openai(LLM_MODEL),
     schema: schemaFor(definition),
     system: llmSystemPrompt(definition),
