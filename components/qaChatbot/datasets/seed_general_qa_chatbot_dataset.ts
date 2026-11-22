@@ -462,7 +462,7 @@ const items: SeedItem[] = [
   },
   {
     id: "general-qa-chatbot-v1-26-typescript-runtime-dependency",
-    question: "Hello world",
+    question: "TypeScript",
     messages: [
       { role: "user", content: "What can I use Langfuse for?" },
       {
@@ -470,7 +470,7 @@ const items: SeedItem[] = [
         content:
           "Langfuse is for LLM observability and tracing, evaluation and experiments, prompt management, the AI Gateway, analytics, and self-hosting. Would you like a 5-minute hello world tracing example in Python or TypeScript?",
       },
-      { role: "user", content: "Hello world" },
+      { role: "user", content: "TypeScript" },
     ],
     sampleReply:
       "Give a minimal TypeScript hello-world trace. Install `@langfuse/tracing`, `@langfuse/otel`, and `@opentelemetry/sdk-node` in the documented version range, and also install `tsx`, the runtime the JS/TS quickstart uses to run the example. Register `LangfuseSpanProcessor` on a `NodeSDK` in `instrumentation.ts`, import that file first, and run it with `npx tsx index.ts`. Call `sdk.shutdown()` before a short-lived process exits.",
@@ -485,8 +485,21 @@ const items: SeedItem[] = [
   {
     id: "general-qa-chatbot-v1-27-not-working-troubleshooting",
     question: "没工作了怎么办啊",
+    messages: [
+      {
+        role: "user",
+        content:
+          "My Langfuse integration was sending traces, and then new requests stopped showing up.",
+      },
+      {
+        role: "assistant",
+        content:
+          "I can help debug a Langfuse integration that stopped sending traces.",
+      },
+      { role: "user", content: "没工作了怎么办啊" },
+    ],
     sampleReply:
-      "把这句话当成 Langfuse 集成不工作来回答，不要当成个人问题拒绝，也不要只给一份入门指南。按文档检查：导入 SDK 之前设置 LANGFUSE_PUBLIC_KEY、LANGFUSE_SECRET_KEY 和 LANGFUSE_BASE_URL；短生命周期脚本调用 flush() 或 shutdown()；打开 LANGFUSE_DEBUG 查看导出日志。如果仍然没有数据，再问具体报错和所用 SDK。",
+      "继续排查已经停止上报的 Langfuse 集成，用中文回答。不要拒绝，也不要只给一份入门指南。按文档检查：导入 SDK 之前设置 LANGFUSE_PUBLIC_KEY、LANGFUSE_SECRET_KEY 和 LANGFUSE_BASE_URL；短生命周期脚本调用 flush() 或 shutdown()；打开 LANGFUSE_DEBUG 查看导出日志。如果仍然没有数据，再问具体报错和所用 SDK。",
     behavior: "answer",
     keywords: ["flush", "LANGFUSE_DEBUG", "LANGFUSE_BASE_URL"],
     category: "typical_case",
