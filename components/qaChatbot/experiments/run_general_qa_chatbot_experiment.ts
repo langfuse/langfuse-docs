@@ -1,3 +1,4 @@
+import { download } from "../../../lib/ai/download";
 /**
  * General QA chatbot experiment runner.
  *
@@ -18,7 +19,8 @@ import { resolve } from "node:path";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { openai, type OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
-import { generateText, stepCountIs } from "ai";
+import { generateText, registerTelemetry, stepCountIs } from "ai";
+import { LangfuseVercelAiSdkIntegration } from "@langfuse/vercel-ai-sdk";
 import {
   LangfuseClient,
   type Evaluator,
@@ -68,20 +70,6 @@ const CORRECTNESS_EVALUATOR_NAME = "general-qa-chatbot-correctness";
 const BEHAVIOR_EVALUATOR_NAME = "general-qa-chatbot-behavior-judge";
 const CORRECTNESS_RULE_NAME = "general-qa-chatbot-correctness-experiment";
 const BEHAVIOR_RULE_NAME = "general-qa-chatbot-behavior-experiment";
-
-type ExperimentTelemetry = Parameters<
-  typeof generateText
->[0]["experimental_telemetry"];
-type ExperimentTelemetryMetadata = Record<string, string | number | boolean>;
-
-function makeExperimentTelemetry(
-  metadata: ExperimentTelemetryMetadata,
-): ExperimentTelemetry {
-  return {
-    isEnabled: true,
-    metadata,
-  } as ExperimentTelemetry;
-}
 
 const PRODUCT_EVALUATORS = [
   {
@@ -681,6 +669,7 @@ async function runOneExperiment(
     try {
       const tools = await mcpClient.tools();
       const { text } = await generateText({
+        experimental_download: download,
         abortSignal: AbortSignal.timeout(240_000),
         model: openai(params.model),
         ...(isReasoningModel(params.model)
@@ -699,12 +688,20 @@ async function runOneExperiment(
         >[0]["messages"],
         tools: tools as Parameters<typeof generateText>[0]["tools"],
         stopWhen: stepCountIs(10),
-        experimental_telemetry: makeExperimentTelemetry({
-          langfusePrompt: JSON.stringify(prompt.toJSON() ?? {}),
+        runtimeContext: {
+          langfusePrompt: prompt,
           experiment_model: params.model,
           experiment_prompt_selector: promptSelector,
           experiment_dataset: args.datasetName,
-        }),
+        },
+        telemetry: {
+          includeRuntimeContext: {
+            langfusePrompt: true,
+            experiment_model: true,
+            experiment_prompt_selector: true,
+            experiment_dataset: true,
+          },
+        },
       });
 
       return text;
@@ -768,6 +765,7 @@ async function main() {
     spanProcessors: [spanProcessor],
   });
   tracerProvider.register();
+  registerTelemetry(new LangfuseVercelAiSdkIntegration());
 
   try {
     const promptSelectors =
