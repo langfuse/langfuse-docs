@@ -2,6 +2,7 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { buildCanonicalUrl } = require("../lib/og-url.ts");
 const { getAllFaqTags, getFaqTags } = require("../lib/faq-tags.ts");
+const { primitiveOnly } = require("../lib/mdx-frontmatter.ts");
 const { isSearchUtility } = require("../lib/search-index-policy.js");
 
 test("canonicals remove fragments without dropping pagination or changing hosts", () => {
@@ -47,4 +48,24 @@ test("search utility policy keeps the login landing page indexable, excluding de
   ]) {
     assert.equal(isSearchUtility(route), false);
   }
+});
+
+test("frontmatter copies primitive fields without evaluating lazy MDX outputs", () => {
+  const frontmatter = {
+    title: "Release notes",
+    date: "2026-11-22",
+    draft: false,
+    order: 2,
+    optional: null,
+    authors: ["author"],
+  };
+  const pageData = {
+    ...frontmatter,
+    body: () => {},
+    info: { path: "release.mdx" },
+    get structuredData() {
+      assert.fail("copying frontmatter must not render the MDX document");
+    },
+  };
+  assert.deepEqual(primitiveOnly(pageData), frontmatter);
 });

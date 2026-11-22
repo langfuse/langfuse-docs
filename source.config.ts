@@ -14,7 +14,6 @@ import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
 import { remarkHideStepsFromToc } from "./lib/remark-hide-steps-from-toc.mjs";
 import { remarkIntegrationSignupCta } from "./lib/remark-integration-signup-cta.mjs";
-import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
 // YAML parses unquoted dates (e.g. `date: 2023-07-19`) as JS Date objects.
@@ -241,15 +240,6 @@ export default defineConfig({
     // Disable remark-image: many content files reference remote images via https://
     // and the plugin tries to fetch dimensions at compile time, causing build failures
     remarkImageOptions: false,
-    // Teach remark-structure's mdast-util-to-markdown serializer how to handle
-    // MDX JSX nodes (mdxJsxFlowElement / mdxJsxTextElement). Without this, it
-    // throws "Cannot handle unknown node `mdxJsxFlowElement`" when pages contain
-    // JSX components like <Callout>, <Tabs>, etc.
-    remarkStructureOptions: {
-      // @ts-ignore — extensions is valid in mdast-util-to-markdown but the
-      // StructureOptions type doesn't expose it directly
-      stringify: { extensions: [mdxJsxToMarkdown()] },
-    },
     // @ts-ignore — RehypeCodeOptions types themes as BundledTheme strings but
     // Shiki's ThemeRegistrationAny (custom JSON object) is valid at runtime.
     // fumadocs automatically sets defaultColor:false so --shiki-light / --shiki-dark

@@ -173,20 +173,4 @@ export function buildSectionMetadata(
   };
 }
 
-/**
- * Strip non-serializable values from page data for client context providers.
- */
-export function primitiveOnly(
-  obj: Record<string, unknown>,
-): Record<string, unknown> {
-  return Object.fromEntries(
-    Object.entries(obj).filter(
-      ([, v]) =>
-        v === null ||
-        typeof v === "string" ||
-        typeof v === "number" ||
-        typeof v === "boolean" ||
-        (Array.isArray(v) && v.every((item) => typeof item !== "function")),
-    ),
-  );
-}
+export { primitiveOnly } from "./mdx-frontmatter";
