@@ -4,7 +4,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Quickstart
 
-- Use **Node.js 22** (`package.json#engines`).
+- Use **Node.js 24** (`package.json#engines`).
 - Use **pnpm** (`packageManager` is configured in `package.json`).
 - Local dev server runs on **http://localhost:3333**.
 
