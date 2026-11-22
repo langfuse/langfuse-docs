@@ -7,7 +7,7 @@ import { z } from "zod";
 
 export const maxDuration = 60;
 
-// Type assertions below work around pnpm resolving duplicate copies of
+// Type assertions below work around the lockfile resolving duplicate copies of
 // @ai-sdk/provider and zod, which makes structurally identical types
 // appear incompatible to TypeScript.
 

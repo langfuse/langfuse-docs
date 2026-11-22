@@ -7,5 +7,5 @@ if [[ ! -f "scripts/agents/sync-agent-shims.mjs" || ! -f ".agents/config.json" ]
   exit 0
 fi
 
-pnpm run agents:sync
-pnpm run agents:check
+bun run agents:sync
+bun run agents:check

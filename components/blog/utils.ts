@@ -89,7 +89,7 @@ export function calendarDaysSince(
 }
 
 /**
- * Static exports (`pnpm build:static`) are rendered once at build time, so a
+ * Static exports (`bun run build:static`) are rendered once at build time, so a
  * relative label would freeze. Those builds show absolute dates instead.
  */
 const isStaticExport = () => process.env.STATIC_EXPORT === "true";

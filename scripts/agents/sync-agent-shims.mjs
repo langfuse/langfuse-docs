@@ -408,7 +408,7 @@ for (const output of fileOutputs) {
       ) {
         hasMismatch = true;
         console.error(
-          `Missing generated config: ${output.path}. Run "pnpm run agents:sync".`,
+          `Missing generated config: ${output.path}. Run "bun run agents:sync".`,
         );
         continue;
       }
@@ -449,7 +449,7 @@ for (const output of symlinkOutputs) {
       ) {
         hasMismatch = true;
         console.error(
-          `Missing symlink shim: ${output.path}. Run "pnpm run agents:sync".`,
+          `Missing symlink shim: ${output.path}. Run "bun run agents:sync".`,
         );
         continue;
       }
@@ -467,14 +467,12 @@ for (const output of symlinkOutputs) {
       continue;
     }
   } catch (error) {
-    if (
-      !(
-        error &&
-        typeof error === "object" &&
-        "code" in error &&
-        error.code === "ENOENT"
-      )
-    ) {
+    if (!(
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      error.code === "ENOENT"
+    )) {
       throw error;
     }
   }

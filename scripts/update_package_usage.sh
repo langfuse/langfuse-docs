@@ -15,6 +15,6 @@ for pair in "langfuse-python:python" "langfuse-js:js"; do
   perl -pi -e 's/^# Dependents/### Dependents/; s/<img class="avatar mr-2" src="/![avatar](/g; s/" width="20" height="20" alt="">/)/g' "$file"
 done
 
-node scripts/generate-top-dependents.js
-node scripts/update-container-pulls.js
-pnpm exec prettier --write ./components-mdx/dependents/ ./data/generated/container-pulls.json
+bun scripts/generate-top-dependents.js
+bun scripts/update-container-pulls.js
+bun fmt ./components-mdx/dependents/ ./data/generated/container-pulls.json

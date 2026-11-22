@@ -19,7 +19,7 @@
  *       hand. It is self-contained for external consumers (humans and agents):
  *       no repo-internal paths or commands, only public URLs.
  *
- * Runs via `pnpm sync-design-tokens` and as part of `prebuild`.
+ * Runs via `bun run sync-design-tokens` and as part of `prebuild`.
  */
 "use strict";
 const fs = require("fs");
