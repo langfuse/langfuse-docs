@@ -27,11 +27,11 @@
     "test": "bun test",
     "test:link-check": "bun test scripts/check-links.test.js scripts/check-sitemap-links.test.js",
     "test:mcp": "bun test scripts/mcp.test.mjs",
-    "qa-chatbot:seed-general": "bun components/qaChatbot/datasets/seed_general_qa_chatbot_dataset.ts",
-    "qa-chatbot:seed-sdk-grounding": "bun components/qaChatbot/datasets/seed_sdk_integration_grounding_dataset.ts",
-    "qa-chatbot:setup-sdk-grounding-evaluators": "bun components/qaChatbot/evaluators/setup_sdk_integration_grounding_evaluators.ts",
-    "qa-chatbot:general-experiment": "bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts",
-    "qa-chatbot:sdk-grounding-experiment": "bun components/qaChatbot/experiments/run_sdk_integration_grounding_experiment.ts",
+    "qa-chatbot:seed-general": "bun --no-env-file components/qaChatbot/datasets/seed_general_qa_chatbot_dataset.ts",
+    "qa-chatbot:seed-sdk-grounding": "bun --no-env-file components/qaChatbot/datasets/seed_sdk_integration_grounding_dataset.ts",
+    "qa-chatbot:setup-sdk-grounding-evaluators": "bun --no-env-file components/qaChatbot/evaluators/setup_sdk_integration_grounding_evaluators.ts",
+    "qa-chatbot:general-experiment": "bun --no-env-file components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts",
+    "qa-chatbot:sdk-grounding-experiment": "bun --no-env-file components/qaChatbot/experiments/run_sdk_integration_grounding_experiment.ts",
     "nuke": "rm -rf .next && rm -rf node_modules && bun install"
   },
   "engines": {

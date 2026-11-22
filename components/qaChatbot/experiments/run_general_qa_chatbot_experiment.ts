@@ -8,10 +8,10 @@
  * - keyword-overlap: deterministic SDK evaluator over the expected keywords
  *
  * Examples:
- *   bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
- *   bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project --setup-product-evaluators-only
- *   PROMPT_LABELS=production,candidate-v3 EXPERIMENT_MODELS=gpt-4o-mini,gpt-4o bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
- *   PROMPT_VERSIONS=1,2 EXPERIMENT_MODELS=gpt-4o-mini bun components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
+ *   bun --no-env-file components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
+ *   bun --no-env-file components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project --setup-product-evaluators-only
+ *   PROMPT_LABELS=production,candidate-v3 EXPERIMENT_MODELS=gpt-4o-mini,gpt-4o bun --no-env-file components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
+ *   PROMPT_VERSIONS=1,2 EXPERIMENT_MODELS=gpt-4o-mini bun --no-env-file components/qaChatbot/experiments/run_general_qa_chatbot_experiment.ts components/qaChatbot/.env_sample_project
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
