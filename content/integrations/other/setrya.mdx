@@ -8,9 +8,13 @@ category: Integrations
 
 # Check trace deletion with Setrya
 
-A support assistant may record the same answer in its application database and in a trace. Deleting the source row leaves a question for the team operating Langfuse. Can a reader still find the answer in a stored observation?
+Deleting a support ticket may still leave its answer visible in a trace. This notebook uses Setrya to locate one synthetic marker in Langfuse, delete only the trace containing it, and check that another trace in the same session remains readable.
 
-This notebook creates two synthetic traces in one disposable Langfuse project. [Setrya](https://github.com/davidahma/setrya) records their IDs and searches the stored inputs and outputs. You delete just the trace containing the test marker and repeat the search. The other trace gives the reader a positive control throughout the check.
+> **What is Setrya?** [Setrya](https://github.com/davidahma/setrya) is a Python toolkit for testing deletion in AI applications. Its Langfuse integration records observation IDs and reads back the stored inputs and outputs.
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. Its tracing tools let application teams inspect inputs and outputs from individual requests. Create a test project in [Langfuse Cloud](https://langfuse.com/cloud) or use a [self-hosted instance](https://langfuse.com/self-hosting).
+
+<SignupCTA />
 
 <Steps>
 ## Install the integration
@@ -88,37 +92,52 @@ The scanner paginates through observation inputs and outputs in the declared pro
 ```python
 import time
 
+from langfuse.api.core import ApiError
 from setrya.drill import InputError
 
 scanner = LangfuseCanaryScanner(client, project_id=project, control=retained)
 
 
-def wait_for_matches(expected, timeout=90):
+def wait_for_matches(expected, *, timeout):
     deadline = time.monotonic() + timeout
+    delay = 5
     while time.monotonic() < deadline:
+        pause = delay
         try:
             matches = scanner.find(scope=session, marker=marker)
         except InputError as error:
             if "retained Langfuse observation is missing" not in str(error):
                 raise
+        except ApiError as error:
+            if error.status_code != 429:
+                raise
+            # The Langfuse API specifies Retry-After as a number of seconds.
+            headers = {k.lower(): v for k, v in (error.headers or {}).items()}
+            retry_after = headers.get("retry-after", "").strip()
+            if retry_after.isdigit():
+                pause = max(pause, int(retry_after))
         else:
             if matches == expected:
                 return
-        time.sleep(1)
+        remaining = deadline - time.monotonic()
+        if pause >= remaining:
+            break
+        time.sleep(pause)
+        delay = min(delay * 2, 30)
     raise TimeoutError("The expected observation set and retained control were not verified.")
 
 
-wait_for_matches({target})
+wait_for_matches({target}, timeout=120)
 print("Before deletion: the target contains the marker and the retained trace is readable.")
 ```
 
 ## Delete the test trace and repeat the read
 
-Use the exact target trace ID created above. Trace deletion can take time to appear in the read API. The same reader must now see the retained control and find zero occurrences of the marker.
+Pass the exact target trace ID created above. Langfuse [usually removes tracing data within 15 minutes](https://langfuse.com/docs/administration/data-deletion). Allow up to 20 minutes for the read API to reflect the deletion. Polling begins at five-second intervals, backs off to 30 seconds and honors the Cloud API's `Retry-After` header. A timeout leaves the result unresolved.
 
 ```python
 client.api.trace.delete(target.split("/")[0])
-wait_for_matches(set())
+wait_for_matches(set(), timeout=20 * 60)
 print("After deletion: the marker is absent from the session and the retained trace is readable.")
 ```
 
