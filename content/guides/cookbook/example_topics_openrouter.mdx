@@ -575,6 +575,9 @@ from concurrent.futures import ThreadPoolExecutor
 with ThreadPoolExecutor(max_workers=10) as pool:
     conversations = list(pool.map(run_conversation, personas))
 
+failed = [conversation["error"] for conversation in conversations if conversation["error"]]
+if failed:
+    print(f"{len(failed)} conversations stopped on an API error, for example: {failed[0]}")
 print(f"{len(conversations)} conversations with {sum(conversation['customer_messages'] for conversation in conversations)} customer messages, one trace each")
 print(f"OpenRouter cost: ${sum(conversation['agent_cost'] for conversation in conversations):.2f} for the agent, "
       f"${sum(conversation['customer_cost'] for conversation in conversations):.2f} for the simulated customers")
@@ -761,7 +764,7 @@ The next cell collects the traces of the topic, and shows which intent topics th
 ISSUE_TOPIC = "Unsupported Non-Troubleshooting Guidance"
 
 dataset_trace_ids = sorted(row["traceId"] for row in topic_assignments(facetName=["Issues"], topicName=[ISSUE_TOPIC]))
-intents = per_trace.loc[dataset_trace_ids, "Intent"]
+intents = per_trace["Intent"].reindex(dataset_trace_ids)
 print(f"{len(dataset_trace_ids)} traces in the topic, from {intents.nunique()} intent topics. The most common ones:")
 print(intents.value_counts().head(5).to_string())
 ```
@@ -971,7 +974,7 @@ You started with traces and no idea what to look for. You now have two findings 
 - **The opportunity:** customers ask the assistant to change a delivery address, and one more tool would let it do that.
 - **The failure:** the assistant invents instructions. You know which model does it least, and what a reply from that model costs.
 
-To act on the failure, change `DEFAULT_MODEL` to the model that won. If it costs more than you want to pay for every request, keep the default and send only the affected kinds of requests to the stronger model.
+To act on the failure, change `DEFAULT_MODEL` in section 2 to the model that won, and run the notebook again from there. If it costs more than you want to pay for every request, keep the default and send only the affected kinds of requests to the stronger model.
 
 Then keep watching:
 
