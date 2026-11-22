@@ -1,3 +1,4 @@
+import { download } from "@/lib/ai/download";
 import { openai, OpenAIResponsesProviderOptions } from "@ai-sdk/openai";
 import { streamText, UIMessage, stepCountIs } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
@@ -100,6 +101,7 @@ export const handler = async (req: Request) => {
       const tools = await mcpClient.tools();
 
       const result = streamText({
+        experimental_download: download,
         model: openai(String(prompt.config.model)),
         providerOptions: {
           openai: {
@@ -110,7 +112,7 @@ export const handler = async (req: Request) => {
         },
         instructions: systemPrompt || undefined,
         messages: modelMessages,
-        tools: tools as Parameters<typeof streamText>[0]["tools"],
+        tools,
         stopWhen: stepCountIs(10),
         runtimeContext: {
           langfusePrompt: prompt,
@@ -139,6 +141,7 @@ export const handler = async (req: Request) => {
 
       return result.toUIMessageStreamResponse({
         generateMessageId: () => getActiveTraceId(),
+        redactToolErrors: true,
         sendSources: true,
         sendReasoning: true,
       });
