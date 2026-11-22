@@ -6,7 +6,6 @@ import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "esbuild";
 
-// test:mcp uses --test-force-exit because mcp-handler owns a cleanup interval.
 const root = fileURLToPath(new URL("../", import.meta.url));
 const temporaryDirectory = await mkdtemp(join(tmpdir(), "docs-mcp-test-"));
 after(() => rm(temporaryDirectory, { recursive: true, force: true }));
@@ -149,4 +148,57 @@ test("limits tool arguments to 16 elements before invoking a tool, while valid c
   assert.notEqual(result.result.isError, true);
   assert.equal(result.result.content[0].text, "# Langfuse docs");
   assert.equal(fetches, 1);
+});
+
+test("serves current-protocol discovery alongside repeated legacy requests", async () => {
+  const discovery = await POST(
+    request(
+      JSON.stringify(
+        message("server/discover", {
+          _meta: {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities": {},
+          },
+        }),
+      ),
+      {
+        headers: {
+          ...headers,
+          "mcp-protocol-version": "2026-07-28",
+          "mcp-method": "server/discover",
+        },
+      },
+    ),
+  );
+  const discoveryText = await discovery.text();
+  assert.equal(discovery.status, 200, discoveryText);
+  const discovered = JSON.parse(discoveryText);
+  assert.ok(discovered.result);
+  assert.equal(discovered.error, undefined);
+
+  for (let iteration = 0; iteration < 2; iteration++) {
+    const initialized = await rpcResponse(
+      await POST(
+        request(
+          JSON.stringify(
+            message("initialize", {
+              protocolVersion: "2025-03-26",
+              capabilities: {},
+              clientInfo: { name: "docs-mcp-test", version: "1.0.0" },
+            }),
+          ),
+        ),
+      ),
+    );
+    assert.equal(initialized.result.protocolVersion, "2025-03-26");
+    const listed = await rpcResponse(
+      await POST(request(JSON.stringify(message("tools/list")))),
+    );
+    assert.deepEqual(listed.result.tools.map((tool) => tool.name).sort(), [
+      "getLangfuseDocsPage",
+      "getLangfuseOverview",
+      "searchLangfuseDocs",
+      "submitFeedback",
+    ]);
+  }
 });
