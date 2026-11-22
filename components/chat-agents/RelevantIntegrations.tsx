@@ -95,8 +95,7 @@ function resolveChipIcon(item: IntegrationItem): ReactNode {
   const slug = integrationSlugFromHref(item.href);
   const page = slug ? integrationsSource.getPage(slug) : undefined;
   const data = page?.data as
-    | { logo?: string; logoAppearance?: "light" | "dark" | "both" }
-    | undefined;
+    { logo?: string; logoAppearance?: "light" | "dark" | "both" } | undefined;
   const logo = item.logo ?? data?.logo;
   if (!logo) return undefined;
 

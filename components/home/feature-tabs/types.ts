@@ -12,10 +12,7 @@ export interface StatementItem {
 }
 
 export type TabDisplayMode =
-  | "default"
-  | "code-only"
-  | "feature-only"
-  | "image-only";
+  "default" | "code-only" | "feature-only" | "image-only";
 
 export interface FeatureTabData {
   id: string;

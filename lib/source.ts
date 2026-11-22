@@ -40,8 +40,7 @@ const shortTitleTransformer: any = {
   file(node: any, filePath?: string): any {
     if (!filePath) return node;
     const page = (this as any).storage.read(filePath) as
-      | { data?: { shortTitle?: string; sidebarTitle?: string } }
-      | undefined;
+      { data?: { shortTitle?: string; sidebarTitle?: string } } | undefined;
     if (!page) return node;
     const label = page.data?.shortTitle ?? page.data?.sidebarTitle;
     return typeof label === "string" ? { ...node, name: label } : node;

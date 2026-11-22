@@ -9,12 +9,7 @@ import IconWarning from "@/components/icons/warning";
 import IconError from "@/components/icons/error";
 
 export type CalloutType =
-  | "info"
-  | "warn"
-  | "error"
-  | "success"
-  | "warning"
-  | "idea";
+  "info" | "warn" | "error" | "success" | "warning" | "idea";
 
 const iconClass = "size-4 mt-0.5 text-(--callout-color)";
 

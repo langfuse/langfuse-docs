@@ -2,11 +2,7 @@
 // Keep them in sync with `components/academy/LoopDiagram.tsx`.
 
 export type LoopStepId =
-  | "trace"
-  | "monitor"
-  | "dataset"
-  | "experiment"
-  | "eval";
+  "trace" | "monitor" | "dataset" | "experiment" | "eval";
 export type LoopPhaseId = "production" | "development";
 
 export type LoopStep = {
