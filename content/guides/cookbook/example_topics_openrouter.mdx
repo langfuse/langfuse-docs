@@ -615,12 +615,12 @@ The first topics appear a few minutes after the setup. On the Topics page, selec
 
 Each facet groups the same traces from a different angle:
 
-- **Intent:** what the customer wanted, for example "Delivery Status and Resolution" or "Cancel or Pause Subscription".
+- **Intent:** what the customer wanted, for example "Missing or Delayed Delivery Resolution" or "Cancel or pause subscriptions".
 - **Sentiment:** how the customer felt about the replies.
-- **Outcome:** how the exchange ended, for example "Refund Processed or Input Requested" or "Requested Content Not Provided".
-- **Issues:** what went wrong in the handling, for example "Overpromised follow-up actions and outcomes".
+- **Outcome:** how the exchange ended, for example "Self-Service Guidance and Answers" or "Requested Outcomes Remain Unresolved".
+- **Issues:** what went wrong in the handling, for example "Overstated Actions and Follow-Up".
 
-Topics discovers these groups from the content of your traces. Your topic names and counts will differ from the ones in this notebook, even if you run the same code.
+Topics discovers these groups from the content of your traces. Your topic names and counts will differ from the ones in this notebook, even if you run the same code. They can also change over time in your own project, because Topics rebuilds the topics once a day when new traces have arrived.
 
 ### Read the topics through the API
 
@@ -673,7 +673,7 @@ print(topics.groupby("facet")["topic"].count().rename("topics").to_string(), "\n
 print(topics[topics["facet"] == "Intent"].sort_values("traces", ascending=False)[["topic", "traces"]].to_string(index=False))
 ```
 
-For the traffic of this cookbook, Topics found 19 topics for Intent, 15 for Outcome, 9 for Sentiment and 6 for Issues. The largest intent topics are "Delivery Status and Resolution" with 56 traces and "Cancel or Pause Subscription" with 48.
+For the traffic of this cookbook, Topics found 16 topics for Intent, 13 for Outcome, 10 for Sentiment and 8 for Issues. The largest intent topics are "Cancel or pause subscriptions" with 44 traces and "Account Access and Reset Recovery" with 40.
 
 ### Find an opportunity
 
@@ -699,17 +699,17 @@ A part of the result for the traffic of this cookbook:
 
 | Intent topic | Traces | Most common outcome topic | Share |
 | --- | --- | --- | --- |
-| Delivery Status and Resolution | 54 | Delivery and Tracking Updates | 41% |
-| Cancel or Pause Subscription | 45 | Cancellation or pause guidance | 58% |
-| Duplicate Charge Refund | 22 | Refund Processed or Input Requested | 64% |
-| Webhook Setup and Troubleshooting | 19 | Information and Guidance Provided | 84% |
-| Change Order Delivery Address | 14 | Support Steps Without Direct Resolution | 86% |
+| Cancel or pause subscriptions | 44 | Self-Service Guidance and Answers | 68% |
+| Invoice or Charge Refund | 31 | Completed or Awaiting User Input | 65% |
+| Exporting and Retaining Sales Data | 20 | Self-Service Guidance and Answers | 80% |
+| Plan Pricing and Invoice Increases | 19 | Pricing and plan-change guidance | 79% |
+| Delivery Address Changes and Timing | 16 | Requested Outcomes Remain Unresolved | 62% |
 
-Most intent topics end in an outcome topic that fits the request. Requests in "Duplicate Charge Refund" mostly end in "Refund Processed or Input Requested", and requests in "Webhook Setup and Troubleshooting" in "Information and Guidance Provided".
+Many intent topics end in an outcome topic that fits the request. Requests in "Invoice or Charge Refund" mostly end in "Completed or Awaiting User Input", and requests in "Plan Pricing and Invoice Increases" in "Pricing and plan-change guidance".
 
-"Change Order Delivery Address" is different: 12 of its 14 traces end in "Support Steps Without Direct Resolution". Open the topic on the Topics page and read a few of its traces before you draw a conclusion. A typical one goes like this: the assistant looks up the order, sees that it is still processing, tells the customer that the address can still be changed, and opens a ticket for the human support team.
+"Delivery Address Changes and Timing" is different: 10 of the 16 traces in its row end in "Requested Outcomes Remain Unresolved", and no other intent topic has that outcome on top. Open the topic on the Topics page and read a few of its traces before you draw a conclusion. A typical one goes like this: the assistant looks up the order, sees that it is still processing, tells the customer that the address can still be changed, and opens a ticket for the human support team.
 
-![The topic Change Order Delivery Address with its description and traces](/images/cookbook/example-topics-openrouter/topics-opportunity-topic.png)
+![The topic Delivery Address Changes and Timing with its description and traces](/images/cookbook/example-topics-openrouter/topics-opportunity-topic.png)
 
 The assistant does what it was built to do, so no error and no evaluator points at these traces. Still, each of these requests becomes work for a human, because the assistant has no tool to change an address. This is an opportunity: customers already try to do this through the assistant, and one more tool would let it finish the request in the chat. With the helpers from section 2, the tool could look like this:
 
@@ -736,20 +736,22 @@ for topic in sorted(issue_topics, key=lambda topic: -topic["traceCount"]):
     print(f"{topic['traceCount']:>4}  {topic['name']}: {topic['description']}")
 ```
 
-For the traffic of this cookbook, the Issues facet has six topics:
+For the traffic of this cookbook, the Issues facet has eight topics:
 
 | Issue topic | Traces |
 | --- | --- |
-| Mishandled requests and support steps | 83 |
-| Unsupported Non-Troubleshooting Guidance | 66 |
-| Overpromised follow-up actions and outcomes | 51 |
-| Incorrect or unclear factual details | 26 |
-| Speculative Claims and Inferences | 21 |
-| Misleading or incomplete troubleshooting guidance | 20 |
+| Speculative Guidance and Explanations | 65 |
+| Inaccurate or overstated answers | 49 |
+| Overstated Actions and Follow-Up | 36 |
+| Incomplete or Ineffective Responses | 27 |
+| Unconfirmed or Inadequate Support Actions | 21 |
+| Handoff-related resolution gaps | 20 |
+| Assumed Navigation and Interface Details | 16 |
+| Misstated Procedures and Outcomes | 16 |
 
-Take "Unsupported Non-Troubleshooting Guidance". Topics describes it as "Answers included unverified instructions, options, conditions, or assurances in guidance outside troubleshooting." In its traces, the assistant gives instructions that no help center article contains. One reply tells the customer to go to "Settings → Security (or Profile → Sign Out)" and to look for an option like "Log out of all devices". The customer writes back: "Is there actually a button called 'Sign Out / Log Out All Devices' in Settings → Security — yes or no?"
+Take "Assumed Navigation and Interface Details". It is one of the smaller topics, and Topics describes it as "The final answers supplied navigation paths or specific interface details without adequate grounding." In its traces, the assistant names menus, buttons and fields that no help center article contains. One reply tells the customer to open "Settings → Security → Sign Out / Log Out All Devices" in the app. The customer writes back: "Is there a 'Sign Out / Log Out All Devices' button in Settings → Security, or was that just a fallback?"
 
-![The Issues facet with the topic Unsupported Non-Troubleshooting Guidance selected](/images/cookbook/example-topics-openrouter/topics-issue-topic.png)
+![The Issues facet with the topic Assumed Navigation and Interface Details selected](/images/cookbook/example-topics-openrouter/topics-issue-topic.png)
 
 The trace of that reply shows the invented steps, and the topics of the trace next to the session and the user:
 
@@ -761,7 +763,7 @@ The next cell collects the traces of the topic, and shows which intent topics th
 
 
 ```python
-ISSUE_TOPIC = "Unsupported Non-Troubleshooting Guidance"
+ISSUE_TOPIC = "Assumed Navigation and Interface Details"
 
 dataset_trace_ids = sorted(row["traceId"] for row in topic_assignments(facetName=["Issues"], topicName=[ISSUE_TOPIC]))
 intents = per_trace["Intent"].reindex(dataset_trace_ids)
@@ -769,13 +771,13 @@ print(f"{len(dataset_trace_ids)} traces in the topic, from {intents.nunique()} i
 print(intents.value_counts().head(5).to_string())
 ```
 
-In this run, the topic has 66 traces, and they come from 15 different intent topics. The most common ones are "Sales Data Export Guidance" with 10 traces and "Integration Setup and Import Troubleshooting" with 9. A check of one kind of request would have seen only a small part of the problem.
+In this run, the topic has 16 traces. Nine of them have an intent topic, and they come from 6 different ones: "Shopfront Connection and Import Help" with 4 traces, and five more with one trace each. The other seven traces fit no intent topic. A check of one kind of request would have seen only a part of the problem.
 
 Each trace is one customer message with the assistant's answer. The dataset item for a trace holds what the assistant received at that point: the conversation up to and including the customer's message. The gateway recorded it as the input of the first generation of the trace. `source_trace_id` links the item back to the production trace.
 
 
 ```python
-DATASET_NAME = "support-assistant/invented-instructions"
+DATASET_NAME = "support-assistant/invented-interface-details"
 
 
 def conversation(trace_id: str) -> list[dict]:
@@ -796,7 +798,7 @@ langfuse.create_dataset(
 for trace_id in dataset_trace_ids:
     langfuse.create_dataset_item(
         dataset_name=DATASET_NAME,
-        id=f"topics-openrouter-{trace_id}",
+        id=f"{DATASET_NAME.replace('/', '-')}-{trace_id}",  # item IDs are unique in a project, across datasets
         input={"messages": conversation(trace_id)},
         source_trace_id=trace_id,
         metadata={"issue_topic": ISSUE_TOPIC},
@@ -950,18 +952,18 @@ The cell prints one row per model. The result of this run:
 
 | Model | Replies without invented instructions | Cost per reply | Latency |
 | --- | --- | --- | --- |
-| `liquid/lfm-3-1.7b` (current model) | 39% | $0.00048 | 4.7 s |
-| `meta/muse-ember` | 82% | $0.00088 | 5.1 s |
-| `anthropic/claude-haiku-5.5` | 71% | $0.00073 | 4.1 s |
-| `deepseek/deepseek-v4.1-flash-1017` | 65% | $0.00047 | 4.0 s |
+| `liquid/lfm-3-1.7b` (current model) | 2 of 16 | $0.00053 | 5.0 s |
+| `meta/muse-ember` | 9 of 16 | $0.00064 | 4.0 s |
+| `anthropic/claude-haiku-5.5` | 10 of 16 | $0.00065 | 3.5 s |
+| `deepseek/deepseek-v4.1-flash-1017` | 4 of 16 | $0.00034 | 3.4 s |
 
-`meta/muse-ember` wrote a reply without invented instructions for 82% of the conversations, and the current model for 39%. A reply from `meta/muse-ember` costs almost twice as much. `deepseek/deepseek-v4.1-flash-1017` costs the same as the current model and reaches 65%.
+`anthropic/claude-haiku-5.5` wrote a reply without invented instructions for 10 of the 16 conversations, `meta/muse-ember` for 9, and the current model for 2. A reply from either of the two costs about 20% more than a reply from the current model. `deepseek/deepseek-v4.1-flash-1017` is the cheapest and reaches 4 of 16.
 
 Keep three things in mind when you read the table:
 
 - The current model does not score 0. The dataset holds the conversations in which it invented instructions once, and it does not repeat every mistake when it answers the same message again.
-- The judge is strict. It also counts a button that the reply names slightly differently than the help center does. It is equally strict with every model, so compare the models with each other and do not read a score as an exact error rate.
-- The dataset has 66 items. A difference of a few points between two models can be chance.
+- The judge is strict. It also counts a small addition, such as "and save it" when no help center article mentions saving. It is equally strict with every model, so compare the models with each other and do not read a score as an exact error rate.
+- The dataset has 16 items, so one reply is 6 percentage points. The gap between the current model and the two best models is large. The gap between those two is one reply, which can be chance.
 
 Open the links from the experiments cell to read every reply with its score and the reasoning of the judge. The Experiments page lists the runs with their average score and latency. Your numbers will differ from the ones above.
 
