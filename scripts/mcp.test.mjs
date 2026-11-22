@@ -191,6 +191,19 @@ test("serves current-protocol discovery alongside repeated legacy requests", asy
       ),
     );
     assert.equal(initialized.result.protocolVersion, "2025-03-26");
+    assert.equal(typeof initialized.result.instructions, "string");
+    for (const instruction of [
+      "Use this server for Langfuse documentation",
+      "prefer the authenticated Langfuse app MCP server",
+      "When Langfuse agent skills are installed",
+      "Inspect the available tools and their schemas dynamically",
+      "ask permission and show the exact payload",
+    ]) {
+      assert.ok(
+        initialized.result.instructions.includes(instruction),
+        `initialize instructions must include: ${instruction}`,
+      );
+    }
     const listed = await rpcResponse(
       await POST(request(JSON.stringify(message("tools/list")))),
     );
@@ -200,5 +213,67 @@ test("serves current-protocol discovery alongside repeated legacy requests", asy
       "searchLangfuseDocs",
       "submitFeedback",
     ]);
+    const tools = Object.fromEntries(
+      listed.result.tools.map((tool) => [tool.name, tool]),
+    );
+    for (const tool of Object.values(tools)) {
+      assert.equal(tool.inputSchema.type, "object", tool.name);
+    }
+    for (const [name, field] of [
+      ["searchLangfuseDocs", "query"],
+      ["getLangfuseDocsPage", "pathOrUrl"],
+    ]) {
+      assert.deepEqual(Object.keys(tools[name].inputSchema.properties), [
+        field,
+      ]);
+      assert.equal(tools[name].inputSchema.properties[field].type, "string");
+      assert.deepEqual(tools[name].inputSchema.required, [field]);
+    }
+    assert.deepEqual(tools.getLangfuseOverview.inputSchema.properties, {});
+    assert.deepEqual(tools.getLangfuseOverview.inputSchema.required ?? [], []);
+    for (const name of [
+      "searchLangfuseDocs",
+      "getLangfuseDocsPage",
+      "getLangfuseOverview",
+    ]) {
+      assert.equal(tools[name].annotations.readOnlyHint, true, name);
+    }
+    assert.notEqual(tools.submitFeedback.annotations?.readOnlyHint, true);
+
+    const feedbackSchema = tools.submitFeedback.inputSchema;
+    assert.deepEqual(feedbackSchema.required, [
+      "targetType",
+      "target",
+      "feedback",
+    ]);
+    assert.deepEqual(Object.keys(feedbackSchema.properties).sort(), [
+      "feedback",
+      "goal",
+      "referenceUrl",
+      "target",
+      "targetType",
+    ]);
+    for (const property of Object.values(feedbackSchema.properties)) {
+      assert.equal(property.type, "string");
+    }
+    assert.deepEqual(feedbackSchema.properties.targetType.enum, [
+      "skill",
+      "mcp-tool",
+      "cli",
+      "docs",
+      "public-api",
+      "other",
+    ]);
+    // Pin the published feedback limits and the optional fields clients see.
+    for (const [name, minLength, maxLength] of [
+      ["target", 1, 200],
+      ["feedback", 1, 3000],
+      ["goal", 1, 1500],
+      ["referenceUrl", undefined, 2048],
+    ]) {
+      assert.equal(feedbackSchema.properties[name].minLength, minLength, name);
+      assert.equal(feedbackSchema.properties[name].maxLength, maxLength, name);
+    }
+    assert.equal(feedbackSchema.properties.referenceUrl.format, "uri");
   }
 });
