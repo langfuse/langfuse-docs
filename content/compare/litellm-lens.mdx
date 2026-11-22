@@ -2,7 +2,7 @@
 title: Langfuse vs. LiteLLM Lens
 shortTitle: LiteLLM Lens
 seoTitle: "LiteLLM Lens Alternative: Langfuse vs. LiteLLM Lens"
-description: Langfuse is the open-source alternative to LiteLLM Lens. October 2026 comparison of release status, Cloud and self-hosting, ClickHouse retention, pricing, and the improvement loop.
+description: Langfuse is the open-source alternative to LiteLLM Lens. November 2026 comparison of release status, Cloud and self-hosting, ClickHouse retention, pricing, and the improvement loop.
 tags: [comparison]
 ---
 
@@ -13,11 +13,11 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 # Langfuse vs. LiteLLM Lens
 
-**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide outlines how it differs from **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in October 2026.
+**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide outlines how it differs from **[LiteLLM Lens](https://docs.litellm.ai/docs/proxy/lens)** to help engineering teams choose the right AI engineering platform. All Lens facts were checked against the public LiteLLM docs and the Lens GitHub repository in November 2026.
 
 ## TL;DR
 
-- **A shipped product with an open-source core, on Cloud or self-hosted.** Langfuse's core tracing, evaluation, prompt management, and APIs are [MIT-licensed](#open-source-and-deployment) with versioned releases on Cloud and self-hosted; additional Enterprise features require a license, and Enterprise SSO is in the free distribution. Lens launched on October 1, 2026 as early access; it is MIT-licensed, self-run only, and its releases page says to build from source until a release is published.
+- **A shipped product with an open-source core, on Cloud or self-hosted.** Langfuse's core tracing, evaluation, prompt management, and APIs are [MIT-licensed](#open-source-and-deployment) with versioned releases on Cloud and self-hosted; additional Enterprise features require a license, and Enterprise SSO is in the free distribution. Lens launched on October 1, 2026 as early access; it is MIT-licensed, self-run only, and its [releases page](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) publishes Lens v0.1.0 as a container image and Helm chart.
 - **3 years of history, with the platform on top of ClickHouse.** Both products store traces in ClickHouse. Langfuse is [part of ClickHouse](#storage), keeps 3 years on Pro, and puts APIs, dashboards, SQL when self-hosting, and scheduled exports on Pro with the Teams add-on, Enterprise, and self-hosted on that table. Lens defaults to 14 days of retention, configurable by the operator, on a single ClickHouse server you operate.
 - **Published pricing.** Langfuse Cloud publishes [Core at $29, Pro at $199 with unlimited users, and Enterprise at $2,499](#pricing); self-hosting is free. Lens has no license fee and no hosted plan; the cost is the service, its ClickHouse, and the analysis-model spend each investigation caps.
 - **The loop runs in one project, prompts included.** Langfuse [judges and code evaluators](#improvement-loop) score incoming observations, prompt experiments run in the UI and applications through the SDK, annotation queues are on every plan, and prompt labels carry model and tool config. Lens investigates a sample of stored traces with an analysis model and gates pull requests through a GitHub Action; prompt management and annotation queues are not documented.
@@ -25,7 +25,7 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 **Choose Langfuse** if the system of record has to include review, experiments, and prompt versions: an open-source core on Cloud or self-hosted including air-gapped, a published price with 3 years of history on Pro, and observations in ClickHouse you can query and export, with the LiteLLM gateway kept for routing, keys, and budgets. Proven at 21 of the Fortune 50.
 
-**Choose Lens** if you are already running LiteLLM, want its investigator over agent traces on infrastructure you operate, and can build and pin it from source. You accept early-access status with no published release, a 14-day default retention on one ClickHouse server, no hosted option, and a loop without prompt management or annotation queues.
+**Choose Lens** if you are already running LiteLLM, want its investigator over agent traces on infrastructure you operate, and can pin published v0.1.0 images. You accept early-access status, a 14-day default retention on one ClickHouse server, no hosted option, and a loop without prompt management or annotation queues.
 
 ---
 
@@ -33,18 +33,18 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed and available on Cloud or self-hosted; additional Enterprise features require a license. [Self-hosting](/self-hosting) runs the UI, login, and data in your environment on every tier, including [air-gapped operation](/self-hosting/security/networking), and Enterprise SSO and organization-level RBAC ship in the [free distribution](/pricing-self-host). Langfuse Cloud is covered by [SOC 2 Type II and ISO 27001 audits, is GDPR compliant](/security), and signs a BAA from the Pro plan in the [HIPAA region](/security/hipaa). Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise).
 
-Lens [launched on October 1, 2026](https://docs.litellm.ai/blog/litellm-lens-launch) and its overview is labeled early access. The [repository](https://github.com/BerriAI/lens) is MIT-licensed outside an `enterprise/` directory. Lens runs as its own service with ClickHouse, standalone behind an admin token or inside the LiteLLM sidebar using LiteLLM's identity, and its [releases page](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) states that, as of October 9, 2026, there is no published GitHub release and the quickstart builds from source.
+Lens [launched on October 1, 2026](https://docs.litellm.ai/blog/litellm-lens-launch) and its overview is labeled early access. The [repository](https://github.com/BerriAI/lens) is MIT-licensed outside an `enterprise/` directory. Lens runs as its own service with ClickHouse, standalone behind an admin token or inside the LiteLLM sidebar using LiteLLM's identity, and its [releases page](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) publishes Lens v0.1.0 (`ghcr.io/berriai/lens:0.1.0` and Helm chart 0.1.0). The [overview](https://docs.litellm.ai/docs/proxy/lens) still labels it early access.
 
-|                       | Langfuse                                                                                                                                                                            | LiteLLM Lens                                           |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| License               | **[MIT](https://github.com/langfuse/langfuse)** core: tracing, evaluation, prompts, APIs; Enterprise features licensed separately                                                   | MIT, except an `enterprise/` directory                 |
-| GitHub stars          | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | Repository published October 2026                      |
-| Release status        | Versioned Cloud and [self-hosted releases](/self-hosting/upgrade)                                                                                                                   | Early access; no published release as of October 9     |
-| Hosted option         | **Langfuse Cloud**, US, EU, Japan, and HIPAA regions                                                                                                                                | None; self-run only                                    |
-| Self-hosting          | **[Every tier, including free](/pricing-self-host)**; Docker Compose, Helm, Terraform                                                                                               | Docker Compose or Helm, built from source              |
-| Sign-in               | **Enterprise SSO in free OSS**; Cloud via the [Teams add-on](/pricing)                                                                                                              | Admin token standalone; LiteLLM identity when embedded |
-| Air-gapped operation  | Supported                                                                                                                                                                           | Not described                                          |
-| Published Cloud price | **[$29 / $199 / $2,499](/pricing)**                                                                                                                                                 | No hosted plan                                         |
+|                       | Langfuse                                                                                                                                                                            | LiteLLM Lens                                                                                                   |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| License               | **[MIT](https://github.com/langfuse/langfuse)** core: tracing, evaluation, prompts, APIs; Enterprise features licensed separately                                                   | MIT, except an `enterprise/` directory                                                                         |
+| GitHub stars          | [![Langfuse GitHub stars](https://img.shields.io/github/stars/langfuse/langfuse?style=for-the-badge&label=%20&labelColor=black&color=orange)](https://github.com/langfuse/langfuse) | Repository published October 2026                                                                              |
+| Release status        | Versioned Cloud and [self-hosted releases](/self-hosting/upgrade)                                                                                                                   | Early access; [v0.1.0 published](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) 19 November 2026 |
+| Hosted option         | **Langfuse Cloud**, US, EU, Japan, and HIPAA regions                                                                                                                                | None; self-run only                                                                                            |
+| Self-hosting          | **[Every tier, including free](/pricing-self-host)**; Docker Compose, Helm, Terraform                                                                                               | Docker Compose or Helm, published v0.1.0 images                                                                |
+| Sign-in               | **Enterprise SSO in free OSS**; Cloud via the [Teams add-on](/pricing)                                                                                                              | Admin token standalone; LiteLLM identity when embedded                                                         |
+| Air-gapped operation  | Supported                                                                                                                                                                           | Not described                                                                                                  |
+| Published Cloud price | **[$29 / $199 / $2,499](/pricing)**                                                                                                                                                 | No hosted plan                                                                                                 |
 
 ---
 
@@ -105,7 +105,7 @@ If you trial Lens beside Langfuse, decide which store holds datasets and human l
 
 Choose **Langfuse** if you want **a shipped, independent platform for the LLM application**: an open-source core on Cloud or self-hosted including air-gapped with SSO and organization RBAC in the free distribution, prompt experiments in the UI and application experiments through the SDK, annotation queues, prompt labels, and CI gates in one project, 3 years of observations in ClickHouse you can query and export, and a published price.
 
-Choose **Lens** if you are **already running LiteLLM**, want its investigator over agent traces on infrastructure you operate, and can build and pin it from source.
+Choose **Lens** if you are **already running LiteLLM**, want its investigator over agent traces on infrastructure you operate, and can pin published v0.1.0 images.
 
 Keep **LiteLLM** for the gateway either way. See [Using Langfuse and LiteLLM together](#coexistence).
 
@@ -115,7 +115,7 @@ Keep **LiteLLM** for the gateway either way. See [Using Langfuse and LiteLLM tog
 
 The same reasons recur when teams evaluate both.
 
-- **The artifact you deploy matters.** Lens's releases page says to build from source until a release is published, and a gateway upgrade does not carry a Lens service deployed beside it. Langfuse Cloud and the [self-hosted release](/self-hosting/upgrade) are the shipped product, with the [same open-source core](#open-source-and-deployment) on both.
+- **The artifact you deploy matters.** Lens [publishes v0.1.0](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) container and Helm artifacts; a gateway upgrade does not carry a Lens service deployed beside it. Langfuse Cloud and the [self-hosted release](/self-hosting/upgrade) are the shipped product, with the [same open-source core](#open-source-and-deployment) on both.
 - **Retention default and topology.** Lens defaults to 14-day retention, configurable by the operator. Its documented topology supports one ClickHouse server shared by Lens replicas; multi-server load balancing and automatic failover are unsupported. Langfuse Pro keeps **3 years** on a [managed or clustered ClickHouse](#storage), with APIs, dashboards, and scheduled exports on Pro with the Teams add-on, Enterprise, and self-hosted on the same table.
 - **Prompts and review are missing from the loop.** Lens investigates, flags, and gates pull requests; it documents no prompt management or annotation queue. Langfuse runs [judges, experiments, queues, prompt labels, and CI](#improvement-loop) in one project.
 - **No hosted option and no published price.** Lens is self-run only, with analysis-model spend capped per investigation on a ClickHouse you operate. Langfuse Cloud publishes [Core, Pro, and Enterprise](#pricing) with unlimited users, and self-hosting is free.
@@ -169,7 +169,7 @@ No. LiteLLM remains the gateway for routing, keys, and budgets. Langfuse traces 
 <Details id="is-litellm-lens-open-source">
 <Summary>Is LiteLLM Lens open source?</Summary>
 
-Yes. The Lens repository is MIT-licensed outside an `enterprise/` directory. As of its releases page, dated October 9, 2026, there is no published GitHub release, and the quickstart builds from source. Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed with versioned Cloud and self-hosted releases; additional Enterprise features require a license. See [Open source and deployment](#open-source-and-deployment).
+Yes. The Lens repository is MIT-licensed outside an `enterprise/` directory. Its [releases page](https://docs.litellm.ai/docs/proxy/lens/deployment/releases) publishes Lens v0.1.0 as a container image and Helm chart (19 November 2026). The product overview still labels it early access. Langfuse's core tracing, evaluation, prompt management, and APIs are MIT-licensed with versioned Cloud and self-hosted releases; additional Enterprise features require a license. See [Open source and deployment](#open-source-and-deployment).
 
 </Details>
 
