@@ -4,7 +4,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Quickstart
 
-- Use **Bun** for installing, running scripts, formatting, and type checking (version pinned in `package.json#packageManager`). Scripts run Next.js on Bun's runtime (`bun --bun next ...`).
+- Use **Bun** for installing, running scripts, formatting, and type checking (version pinned in `.bun-version`). Scripts run Next.js on Bun's runtime (`bun --bun next ...`).
 - Vercel functions still run on **Node.js 22** (`package.json#engines`).
 - Local dev server runs on **http://localhost:3333**.
 
@@ -193,7 +193,7 @@ Read [Review guidelines](review-guidelines.md) before commenting on a pull reque
 
 ## Cursor Cloud specific instructions
 
-- **Bun is required**: If `bun` is not on the `PATH`, install the version pinned in `package.json#packageManager` with `npm install -g bun@<version>` before running `bun install`.
+- **Bun is required**: If `bun` is not on the `PATH`, install the version pinned in `.bun-version` with `npm install -g bun@<version>` before running `bun install`.
 - **Single service**: This is a Next.js website (not a monorepo). The only service to run is `bun dev` on port 3333. No databases, Docker, or external services are required for local development.
 - **Dev server bind address**: The dev script binds to `127.0.0.1` (`-H 127.0.0.1`), so use `http://127.0.0.1:3333` (not `localhost`) when curling or testing.
 - **Letting the user preview pages**: The browser tab in the Cursor interface cannot reach a server bound to `127.0.0.1`. When the user wants to look at pages themselves, run `NODE_PATH=node_modules/.bun/node_modules bun --bun next dev -p 3333 -H 0.0.0.0` in a tmux session instead of `bun dev`, and send them `http://127.0.0.1:3333/<path>` (or the VM address from `hostname -I` if that refuses to connect). Live reload is blocked from that origin, so tell them to refresh after edits. Keep the branch under review checked out while the server runs, because it serves the working tree.

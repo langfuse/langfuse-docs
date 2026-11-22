@@ -12,7 +12,7 @@ Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fum
 
 ## Local Development
 
-Pre-requisites: [Bun](https://bun.com) (version pinned in `package.json#packageManager`). Install it with `curl -fsSL https://bun.com/install | bash` or `npm install -g bun`. Bun installs dependencies, runs the scripts, and runs Next.js on its runtime, so you don't need Node.js locally.
+Pre-requisites: [Bun](https://bun.com) (version pinned in `.bun-version`). Install it with `curl -fsSL https://bun.com/install | bash` or `npm install -g bun`. Bun installs dependencies, runs the scripts, and runs Next.js on its runtime, so you don't need Node.js locally.
 
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `bun install` to install the dependencies.
