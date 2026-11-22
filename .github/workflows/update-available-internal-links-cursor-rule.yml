@@ -18,15 +18,16 @@ jobs:
           token: ${{ secrets.UPDATE_DOCS_MAIN_BRANCH_PAT }}
           persist-credentials: false
 
-      - name: Setup pnpm and Node.js
-        uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          runtime: node@22
-          cache: true
-          require-lockfile: true
+          bun-version-file: package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Build sitemap and generate llms.txt
-        run: pnpm run build
+        run: bun run build
         # The llms.txt generation happens automatically as part of the postbuild process
 
       - name: Append llms.txt to available-internal-links cursor rule

@@ -28,21 +28,23 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
-        id: pnpm-install
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          runtime: node@22
-          cache: true
-          require-lockfile: true
+          bun-version-file: package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Build next.js app
         # change this if your site requires a custom build command
-        run: ./node_modules/.bin/next build
+        run: bun --bun next build
+        env:
+          NODE_PATH: node_modules/.bun/node_modules
 
       # Here's the first place where next-bundle-analysis' own script is used
       # This step pulls the raw bundle stats for the current bundle
       - name: Analyze bundle
-        run: npx -p nextjs-bundle-analysis report
+        run: bunx -p nextjs-bundle-analysis report
 
       - name: Upload bundle
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -73,7 +75,7 @@ jobs:
       # entry in your package.json file.
       - name: Compare with base branch bundle
         if: success() && github.event.number
-        run: ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis compare
+        run: ls -laR .next/analyze/base && bunx -p nextjs-bundle-analysis compare
 
       - name: Get Comment Body
         id: get-comment-body
