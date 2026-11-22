@@ -460,6 +460,42 @@ const items: SeedItem[] = [
     source: "synthetic_defer",
     topic: "out-of-scope",
   },
+  {
+    id: "general-qa-chatbot-v1-26-typescript-runtime-dependency",
+    question: "Hello world",
+    messages: [
+      { role: "user", content: "What can I use Langfuse for?" },
+      {
+        role: "assistant",
+        content:
+          "Langfuse is for LLM observability and tracing, evaluation and experiments, prompt management, the AI Gateway, analytics, and self-hosting. Would you like a 5-minute hello world tracing example in Python or TypeScript?",
+      },
+      { role: "user", content: "Hello world" },
+    ],
+    sampleReply:
+      "Give a minimal TypeScript hello-world trace. Install `@langfuse/tracing`, `@langfuse/otel`, and `@opentelemetry/sdk-node` in the documented version range, and also install `tsx`, the runtime the JS/TS quickstart uses to run the example. Register `LangfuseSpanProcessor` on a `NodeSDK` in `instrumentation.ts`, import that file first, and run it with `npx tsx index.ts`. Call `sdk.shutdown()` before a short-lived process exits.",
+    behavior: "answer",
+    keywords: ["tsx", "LangfuseSpanProcessor", "instrumentation"],
+    category: "typical_case",
+    source: "production_trace",
+    topic: "sdk",
+    sourceTraceId: "5240012a91ed4f934a75ec338672767c",
+    sourceObservationId: "2eca156a67328547",
+  },
+  {
+    id: "general-qa-chatbot-v1-27-not-working-troubleshooting",
+    question: "没工作了怎么办啊",
+    sampleReply:
+      "把这句话当成 Langfuse 集成不工作来回答，不要当成个人问题拒绝，也不要只给一份入门指南。按文档检查：导入 SDK 之前设置 LANGFUSE_PUBLIC_KEY、LANGFUSE_SECRET_KEY 和 LANGFUSE_BASE_URL；短生命周期脚本调用 flush() 或 shutdown()；打开 LANGFUSE_DEBUG 查看导出日志。如果仍然没有数据，再问具体报错和所用 SDK。",
+    behavior: "answer",
+    keywords: ["flush", "LANGFUSE_DEBUG", "LANGFUSE_BASE_URL"],
+    category: "typical_case",
+    source: "production_trace",
+    topic: "troubleshooting",
+    language: "zh",
+    sourceTraceId: "5dedb7f9c5f3353546e569de7abb20e7",
+    sourceObservationId: "d5444c72894b76e2",
+  },
 ];
 
 function parseEnv(content: string): Record<string, string> {
