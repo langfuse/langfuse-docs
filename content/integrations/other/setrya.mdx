@@ -1,0 +1,141 @@
+---
+source: ⚠️ Jupyter Notebook
+title: Check trace deletion with Setrya
+sidebarTitle: Setrya
+description: Read a synthetic marker from a Langfuse observation, delete its trace, and verify that a second trace in the same session remains visible.
+category: Integrations
+---
+
+# Check trace deletion with Setrya
+
+A support assistant may record the same answer in its application database and in a trace. Deleting the source row leaves a question for the team operating Langfuse. Can a reader still find the answer in a stored observation?
+
+This notebook creates two synthetic traces in one disposable Langfuse project. [Setrya](https://github.com/davidahma/setrya) records their IDs and searches the stored inputs and outputs. You delete just the trace containing the test marker and repeat the search. The other trace gives the reader a positive control throughout the check.
+
+<Steps>
+## Install the integration
+
+Use a Python 3.11 or newer notebook kernel. The example writes synthetic observations directly and requires no model credentials.
+
+```python
+%pip install "setrya[traces-langfuse]==1.1.0"
+```
+
+## Connect to a disposable Langfuse project
+
+Use a test project where your key can create, read and delete traces. Set the environment variables below before starting Jupyter, or enter them at the prompts. Find the project ID in the URL of your [project settings](https://cloud.langfuse.com/project/~/settings). Use the API base URL for your region or self-hosted instance.
+
+```python
+import os
+from getpass import getpass
+
+from langfuse import Langfuse
+
+base_url = os.getenv("LANGFUSE_BASE_URL") or input("Langfuse base URL: ")
+project = os.getenv("LANGFUSE_PROJECT_ID") or input("Disposable project ID: ")
+client = Langfuse(
+    base_url=base_url,
+    public_key=os.getenv("LANGFUSE_PUBLIC_KEY") or input("Project public key: "),
+    secret_key=os.getenv("LANGFUSE_SECRET_KEY") or getpass("Project secret key: "),
+)
+if not client.auth_check():
+    raise RuntimeError("Check the project keys and the API base URL.")
+```
+
+## Write a target trace and a retained trace
+
+A fresh session and marker keep each run separate. The hook records a trace/observation ID in a temporary SQLite journal. Langfuse stores the observation itself. Recording the ID alone cannot establish what a reader can retrieve.
+
+```python
+from pathlib import Path
+from secrets import token_bytes
+from tempfile import TemporaryDirectory
+from uuid import uuid4
+
+from setrya.erasure.hooks import CopyHooks
+from setrya.erasure.journal import CopyJournal
+from setrya.erasure.subject import Subject
+from setrya.integrations.agent_harnesses import LangfuseCanaryScanner, langfuse_observation
+
+session = str(uuid4())
+marker = f"deleted-ticket-{uuid4().hex}"
+scratch = TemporaryDirectory()
+journal = CopyJournal(Path(scratch.name) / "pointers.sqlite")
+subject = Subject.derive(token_bytes(32), "test-tenant", "test-customer", "synthetic")
+hooks = CopyHooks(journal, subject)
+
+
+def emit(name, answer):
+    with langfuse_observation(
+        hooks, client, session=session, store="traces", source="test-ticket",
+        name=name, input="What changed?", output=answer,
+    ) as observation:
+        return f"{observation.trace_id}/{observation.id}"
+
+
+target = emit("ticket-answer", marker)
+retained = emit("public-answer", "The service is available.")
+client.flush()
+if {record.key for record in journal.copies(subject)} != {target, retained}:
+    raise RuntimeError("Both trace pointers must be journalled.")
+print(f"Test session: {session}")
+```
+
+## Establish what the reader can see
+
+The scanner paginates through observation inputs and outputs in the declared project and session. It checks that the retained observation is present. Wait for asynchronous ingestion and require an exact match to the target pointer before running the deletion.
+
+```python
+import time
+
+from setrya.drill import InputError
+
+scanner = LangfuseCanaryScanner(client, project_id=project, control=retained)
+
+
+def wait_for_matches(expected, timeout=90):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            matches = scanner.find(scope=session, marker=marker)
+        except InputError as error:
+            if "retained Langfuse observation is missing" not in str(error):
+                raise
+        else:
+            if matches == expected:
+                return
+        time.sleep(1)
+    raise TimeoutError("The expected observation set and retained control were not verified.")
+
+
+wait_for_matches({target})
+print("Before deletion: the target contains the marker and the retained trace is readable.")
+```
+
+## Delete the test trace and repeat the read
+
+Use the exact target trace ID created above. Trace deletion can take time to appear in the read API. The same reader must now see the retained control and find zero occurrences of the marker.
+
+```python
+client.api.trace.delete(target.split("/")[0])
+wait_for_matches(set())
+print("After deletion: the marker is absent from the session and the retained trace is readable.")
+```
+
+Open the printed session in your Langfuse project's [sessions view](https://cloud.langfuse.com/project/~/sessions) to inspect the retained trace. A timeout leaves the observation unresolved. A completed check covers the literal marker in the returned input and output fields of this session. Backups, paraphrases and other projects need separate checks.
+
+When you finish inspecting the result, remove the control trace this notebook created and close the temporary local journal directory.
+
+```python
+client.api.trace.delete(retained.split("/")[0])
+client.shutdown()
+scratch.cleanup()
+```
+
+To connect these reads to your application's deletion test, see [Setrya's Langfuse integration guide](https://github.com/davidahma/setrya/blob/v1.1.0/docs/langfuse-integration.md).
+
+</Steps>
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
