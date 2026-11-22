@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createMcpHandler } from "mcp-handler";
-import type { McpServerOptions } from "@modelcontextprotocol/sdk/server/mcp.js";
-import * as z from "zod/v3";
+import type { McpServerOptions } from "@modelcontextprotocol/server";
+import * as z from "zod";
 import { PostHog } from "posthog-node";
 import { waitUntil } from "@vercel/functions";
 import { searchLangfuseDocsWithInkeep } from "@/lib/inkeep-search-backend";
@@ -116,23 +116,24 @@ const MCP_SERVER_INSTRUCTIONS = [
   "If the user wants to provide feedback about Langfuse docs or something is not working well, ask permission and show the exact payload; if they want a reply, include only an email address they explicitly provide in the feedback text; exclude secrets, customer/project data, trace payloads, and unrelated context, then use submitFeedback.",
 ].join("\n");
 
-const mcpServerOptions: McpServerOptions = {
+const mcpServerOptions: McpServerOptions & { verboseLogs: boolean } = {
   instructions: MCP_SERVER_INSTRUCTIONS,
+  verboseLogs: true,
   // Docs tools accept at most five flat fields; reject excessive nested input.
   maxToolInputElements: 16,
 };
 
-export const mcpHandler = createMcpHandler(
-  (server) => {
-    (server as any).tool(
-      "submitFeedback",
-      [
+export const mcpHandler = createMcpHandler((server) => {
+  server.registerTool(
+    "submitFeedback",
+    {
+      description: [
         "Submit explicit user-approved feedback to the Langfuse team.",
         "Before calling, ask permission and show the exact payload.",
         "If the user wants a reply, ask them to include their email address in the feedback text; only use an address they explicitly provide and show it in the exact payload preview.",
         "Do not include secrets, credentials, customer/project data, trace payloads, or unrelated context; the only contact detail to include is an explicitly provided reply email.",
       ].join("\n"),
-      {
+      inputSchema: z.object({
         targetType: z
           .enum(["skill", "mcp-tool", "cli", "docs", "public-api", "other"])
           .describe("Category of the thing the feedback is about."),
@@ -155,171 +156,178 @@ export const mcpHandler = createMcpHandler(
             "referenceUrl must use http or https",
           )
           .optional(),
-      },
-      async (input) => {
-        try {
-          const id = crypto.randomUUID();
-          await sendFeedbackToSlack(
-            buildDocsMcpFeedbackMessage({ id, ...input }),
-          );
+      }),
+    },
+    async (input) => {
+      try {
+        const id = crypto.randomUUID();
+        await sendFeedbackToSlack(
+          buildDocsMcpFeedbackMessage({ id, ...input }),
+        );
 
-          trackMcpToolUsage("submitFeedback", "success", {
-            target_type: input.targetType,
-          });
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Feedback submitted to the Langfuse team. Reference ID: ${id}`,
-              },
-            ],
-          };
-        } catch (error) {
-          trackMcpToolUsage("submitFeedback", "error", {
-            error_message:
-              error instanceof Error ? error.message : "Unknown error",
-          });
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Feedback submission failed. Please try again later.",
-              },
-            ],
-            isError: true,
-          };
-        }
-      },
-    );
-
-    (server as any).tool(
-      "searchLangfuseDocs",
-      `${SEARCH_LANGFUSE_DOCS_DESCRIPTION} The raw provider response is included in _meta.`,
-      {
-        query: z.string().describe(SEARCH_LANGFUSE_DOCS_QUERY_DESCRIPTION),
-      },
-      { readOnlyHint: true },
-      async ({ query }) => {
-        try {
-          const inkeepResult = await searchLangfuseDocsWithInkeep(query);
-          trackMcpToolUsage("searchLangfuseDocs", "success", {
-            query,
-            response_length: inkeepResult.answer.length,
-          });
-          return {
-            content: [{ type: "text", text: inkeepResult.answer }],
-            _meta: inkeepResult.metadata,
-          };
-        } catch (error) {
-          trackMcpToolUsage("searchLangfuseDocs", "error", {
-            query,
-            error_message:
-              error instanceof Error ? error.message : "Unknown error",
-          });
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error searching documentation: ${error instanceof Error ? error.message : "Unknown error"}`,
-              },
-            ],
-            isError: true,
-          };
-        }
-      },
-    );
-
-    (server as any).tool(
-      "getLangfuseDocsPage",
-      GET_LANGFUSE_DOCS_PAGE_DESCRIPTION,
-      {
-        pathOrUrl: z.string().describe(GET_LANGFUSE_DOCS_PAGE_PATH_DESCRIPTION),
-      },
-      { readOnlyHint: true },
-      async ({ pathOrUrl }: { pathOrUrl: string }) => {
-        try {
-          const pathname = normalizeDocsPath(pathOrUrl);
-          const mdUrl = docsMarkdownUrl(pathname, "https://langfuse.com");
-
-          const res = await fetch(mdUrl, {
-            // Self-identify so these fetches are distinguishable from external
-            // agents in the agent_content_fetch events fired by proxy.ts.
-            headers: {
-              Accept: "text/markdown",
-              "User-Agent": "langfuse-docs-mcp-server",
+        trackMcpToolUsage("submitFeedback", "success", {
+          target_type: input.targetType,
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Feedback submitted to the Langfuse team. Reference ID: ${id}`,
             },
-          });
-          if (!res.ok) {
-            throw new Error(`Failed to fetch ${mdUrl}: ${res.status}`);
-          }
-          const markdown = await res.text();
+          ],
+        };
+      } catch (error) {
+        trackMcpToolUsage("submitFeedback", "error", {
+          error_message:
+            error instanceof Error ? error.message : "Unknown error",
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: "Feedback submission failed. Please try again later.",
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
 
-          trackMcpToolUsage("getLangfuseDocsPage", "success", {
-            path: pathname,
-            length: markdown.length,
-          });
+  server.registerTool(
+    "searchLangfuseDocs",
+    {
+      description: `${SEARCH_LANGFUSE_DOCS_DESCRIPTION} The raw provider response is included in _meta.`,
+      inputSchema: z.object({
+        query: z.string().describe(SEARCH_LANGFUSE_DOCS_QUERY_DESCRIPTION),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    async ({ query }) => {
+      try {
+        const inkeepResult = await searchLangfuseDocsWithInkeep(query);
+        const metadata = z
+          .record(z.string(), z.unknown())
+          .parse(inkeepResult.metadata);
+        trackMcpToolUsage("searchLangfuseDocs", "success", {
+          query,
+          response_length: inkeepResult.answer.length,
+        });
+        return {
+          content: [{ type: "text", text: inkeepResult.answer }],
+          _meta: metadata,
+        };
+      } catch (error) {
+        trackMcpToolUsage("searchLangfuseDocs", "error", {
+          query,
+          error_message:
+            error instanceof Error ? error.message : "Unknown error",
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error searching documentation: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
 
-          return {
-            content: [{ type: "text", text: markdown }],
-            _meta: { url: mdUrl },
-          };
-        } catch (error) {
-          trackMcpToolUsage("getLangfuseDocsPage", "error", {
-            input: pathOrUrl,
-            error_message:
-              error instanceof Error ? error.message : "Unknown error",
-          });
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error fetching docs page markdown: ${error instanceof Error ? error.message : "Unknown error"}`,
-              },
-            ],
-            isError: true,
-          };
+  server.registerTool(
+    "getLangfuseDocsPage",
+    {
+      description: GET_LANGFUSE_DOCS_PAGE_DESCRIPTION,
+      inputSchema: z.object({
+        pathOrUrl: z.string().describe(GET_LANGFUSE_DOCS_PAGE_PATH_DESCRIPTION),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    async ({ pathOrUrl }: { pathOrUrl: string }) => {
+      try {
+        const pathname = normalizeDocsPath(pathOrUrl);
+        const mdUrl = docsMarkdownUrl(pathname, "https://langfuse.com");
+
+        const res = await fetch(mdUrl, {
+          // Self-identify so these fetches are distinguishable from external
+          // agents in the agent_content_fetch events fired by proxy.ts.
+          headers: {
+            Accept: "text/markdown",
+            "User-Agent": "langfuse-docs-mcp-server",
+          },
+        });
+        if (!res.ok) {
+          throw new Error(`Failed to fetch ${mdUrl}: ${res.status}`);
         }
-      },
-    );
+        const markdown = await res.text();
 
-    (server as any).tool(
-      "getLangfuseOverview",
-      GET_LANGFUSE_OVERVIEW_DESCRIPTION,
-      {},
-      { readOnlyHint: true },
-      async () => {
-        try {
-          const llmsTxtRes = await fetch("https://langfuse.com/llms.txt", {
-            headers: { "User-Agent": "langfuse-docs-mcp-server" },
-          });
-          if (!llmsTxtRes.ok) {
-            throw new Error(`Failed to fetch llms.txt: ${llmsTxtRes.status}`);
-          }
-          const llmsTxtContent = await llmsTxtRes.text();
-          trackMcpToolUsage("getLangfuseOverview", "success", {
-            content_length: llmsTxtContent.length,
-          });
-          return {
-            content: [{ type: "text", text: llmsTxtContent }],
-          };
-        } catch (error) {
-          trackMcpToolUsage("getLangfuseOverview", "error", {
-            error_message:
-              error instanceof Error ? error.message : "Unknown error",
-          });
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error fetching Langfuse overview: ${error instanceof Error ? error.message : "Unknown error"}`,
-              },
-            ],
-            isError: true,
-          };
+        trackMcpToolUsage("getLangfuseDocsPage", "success", {
+          path: pathname,
+          length: markdown.length,
+        });
+
+        return {
+          content: [{ type: "text", text: markdown }],
+          _meta: { url: mdUrl },
+        };
+      } catch (error) {
+        trackMcpToolUsage("getLangfuseDocsPage", "error", {
+          input: pathOrUrl,
+          error_message:
+            error instanceof Error ? error.message : "Unknown error",
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error fetching docs page markdown: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+
+  server.registerTool(
+    "getLangfuseOverview",
+    {
+      description: GET_LANGFUSE_OVERVIEW_DESCRIPTION,
+      inputSchema: z.object({}),
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      try {
+        const llmsTxtRes = await fetch("https://langfuse.com/llms.txt", {
+          headers: { "User-Agent": "langfuse-docs-mcp-server" },
+        });
+        if (!llmsTxtRes.ok) {
+          throw new Error(`Failed to fetch llms.txt: ${llmsTxtRes.status}`);
         }
-      },
-    );
-  },
-  mcpServerOptions,
-  { basePath: "/api", maxDuration: 60, verboseLogs: true },
-);
+        const llmsTxtContent = await llmsTxtRes.text();
+        trackMcpToolUsage("getLangfuseOverview", "success", {
+          content_length: llmsTxtContent.length,
+        });
+        return {
+          content: [{ type: "text", text: llmsTxtContent }],
+        };
+      } catch (error) {
+        trackMcpToolUsage("getLangfuseOverview", "error", {
+          error_message:
+            error instanceof Error ? error.message : "Unknown error",
+        });
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error fetching Langfuse overview: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
+}, mcpServerOptions);
