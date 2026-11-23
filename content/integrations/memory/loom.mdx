@@ -54,3 +54,5 @@ If the trace is missing, check the base URL, key pair, and `LOOM_OTEL_ENABLED`. 
 ## What Loom sends [#what-loom-sends]
 
 Loom exports server operation spans and includes latency, token usage, and cost where available. Model prompt and completion capture defaults to off and can be configured per namespace. [Loom trace attributes and text capture settings](https://clickhouse.github.io/loom/features/integrations/langfuse/#what-text-leaves-loom)
+
+Loom also posts retrieval-quality [scores](/docs/evaluation/scores/overview) onto each search trace: `retrieval_confidence`, `top_similarity`, `abstained`, and `abstain_reason`. `code.ask` traces add `code_ask_cache_hit` and `code_ask_coverage`. To have an LLM judge write a `retrieval_relevance` score, set `LOOM_RETRIEVAL_JUDGE_SAMPLE_RATE` above `0` (default `0`). Each sampled search costs one extra model call. [Loom scores](https://clickhouse.github.io/loom/features/integrations/langfuse/#scores)
