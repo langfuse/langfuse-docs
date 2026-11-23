@@ -273,7 +273,7 @@ Topic labels are a starting point, not ground truth: read a few underlying trace
 Running Topics has two cost components:
 
 - **Model provider usage**: Summarization, embeddings, and cluster naming run on your own LLM connections and are billed directly by your provider. Narrow your filters, lower the sampling rate, or pick a smaller summary model to keep spend down. Langfuse displays estimated costs where model pricing is available; check your provider's invoice for exact spend.
-- **Langfuse billing**: On Langfuse Cloud, each facet summary counts as one [billable unit](/docs/administration/billable-units). Traces skipped for insufficient input are not billed.
+- **Langfuse billing**: On Langfuse Cloud, each generated facet summary counts as one [billable unit](/docs/administration/billable-units) and appears under **Facet summaries** in the [organization usage breakdown](/docs/administration/billable-units#monitor-organization-usage).
 
 <Callout type="warning">
   Choose your embedding model and dimensions (64–2,048, default 1,024) carefully
