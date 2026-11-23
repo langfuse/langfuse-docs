@@ -29,7 +29,7 @@ export const PricingDiscounts = () => (
       <Heading as="h2" size="normal" className="text-left mb-4">
         Discounts
       </Heading>
-      <div className="grid grid-cols-1 mt-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 mt-3 sm:grid-cols-2">
         {discounts.map((discount) => (
           <CornerBox
             key={discount.name}
