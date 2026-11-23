@@ -33,7 +33,7 @@ For production projects. Longer data access and unlimited users.
 - Unlimited users
 - In-app support
 
-Discounts available for [startups](/startups) and [research/students](/research).
+Discounts available for [startups](/startups), [research/students](/research), and [open-source projects](/pricing#discounts).
 
 Trusted by: [Magic Patterns](/users/magic-patterns-ai-design-tools), Draftbit
 
@@ -256,10 +256,11 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 
 ## Discounts
 
-| Program              | Discount                        | Details                           |
-| -------------------- | ------------------------------- | --------------------------------- |
-| Early-stage startups | US$2,000 in credits, first year | [Learn more and apply](/startups) |
-| Research / Students  | US$2,000 in credits             | [Learn more and apply](/research) |
+| Program              | Discount                            | Details                           |
+| -------------------- | ----------------------------------- | --------------------------------- |
+| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups) |
+| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research) |
+| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com      |
 
 ## Frequently Asked Questions
 
@@ -295,7 +296,7 @@ A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar,
 
 Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team.
 
-If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you. Credits from the [discount programs](/pricing#discounts) are separate and apply to any paid plan.
+If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
 
 **Can I set up alerts on usage fees?**
 Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when spending exceeds predefined thresholds.
