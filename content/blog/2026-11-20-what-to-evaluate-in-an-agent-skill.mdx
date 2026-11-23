@@ -39,23 +39,24 @@ The decision to put something into a skill implies a decision not to put it in t
 
 Evaluating a skill therefore often means evaluating more complex behavior. This shifts the focus to a specific kind of evals.
 
-## Start with the 3-run baseline (Skill lift vs. Routing lift) [#three-run-baseline]
+## Separate skill routing from skill quality [#separate-routing-from-quality]
 
 Before writing granular evaluators, you need to separate two questions that often get tangled together in a skill setup:
 
 1. **Does the agent pick the right skill when left on its own?**
 2. **Does the skill itself actually help when the agent uses it?**
 
-To answer both questions, run your agent across three modes: **no skill**, **forced skill**, and **skill available** (not forced).
+You do not need to run a full end-to-end execution to answer both. Instead, split them into two separate evaluations:
 
-> **[Visual placeholder: 3-run comparison per dataset item (`No skill` -> `Router-selected` -> `Forced target skill`), illustrating the delta for `Skill lift` and `Routing lift` across pass rate and token cost.]**
+- **Skill routing:** Leave the skill available (not forced) and check whether the agent selects the right skill. You can stop the run as soon as the agent picks (or skips) the skill—no need to pay for the rest of the agent execution.
+- **Skill quality (lift):** Force the skill into context and run the full task against a baseline—either **no skill** or the **previous version of the skill**—to measure whether the instructions actually improve outcomes, turns, or token cost.
 
-Comparing those three runs gives you two high-signal metrics before you touch a single line of markdown:
+> **[Visual placeholder: Two decoupled eval tracks per dataset item — (1) Skill routing (stops as soon as the agent selects or skips a skill) and (2) Skill quality (full run comparing `Forced skill` against `No skill` or `Previous skill version`).]**
 
-| Metric | Comparison | Question it answers |
+| Eval | Setup | Question it answers |
 | --- | --- | --- |
-| **Skill lift** | `Forced skill` vs. `No skill` | Does the skill content actually beat the raw model on pass rate, turns, or token cost? |
-| **Routing lift (or gap)** | `Forced skill` vs. `Router-selected` | How much quality are we losing, or how many extra tokens are we spending, because the agent missed the skill or picked the wrong one? |
+| **Skill routing** | `Skill available` (stop after selection) | Does the agent pick the right skill—and skip it when it shouldn't trigger? |
+| **Skill quality (lift)** | `Forced skill` vs. baseline (`No skill` or previous version) | Does the skill content actually beat the baseline on pass rate, turns, or token cost? |
 
 Running a `no-skill` baseline sounds obvious, yet teams routinely skip it and assume any markdown they add makes the agent smarter. Empirical benchmarks show otherwise:
 
@@ -65,7 +66,7 @@ Running a `no-skill` baseline sounds obvious, yet teams routinely skip it and as
 
 ## Evaluating skill selection & progressive disclosure (routing) [#evaluating-skill-selection-and-routing]
 
-When your 3-run comparison shows a gap between `Forced skill` and `Router-selected`, or when you add a new skill or reference file, zoom in on routing. Because routing happens in the first turn or two, these evals are fast, cheap, and completely deterministic when you [link skills to traces](/docs/skill-management/tracing).
+Because routing happens in the first turn or two, you can stop the run once the agent picks a skill—making routing evals fast, cheap, and completely deterministic when you [link skills to traces](/docs/skill-management/tracing).
 
 ### 1. Skill-level triggering and coexistence
 
@@ -150,10 +151,11 @@ When we [ran Karpathy's autoresearch on our prompt migration skill](/blog/2026-0
 As we cover in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observed behavior rather than upfront guesswork:
 
 1. **Read trajectories before writing judges.** Start by running 15 to 30 realistic prompts (explicit, implicit, and messy) through your sandboxed harness and reading the traces—either manually in Langfuse or by having a coding agent summarize failure patterns across the experiment run. Fix obvious one-line skill bugs directly instead of building permanent evaluators for typos.
-2. **Establish the 3-run baseline (`no skill`, `router-selected`, `forced`).** Confirm your skill actually delivers positive **skill lift** over the raw model, and check whether your bottleneck is **routing lift** (selection) or workflow execution.
+2. **Separate routing checks from forced-skill baselines.** Test skill selection cheaply by stopping after the agent picks a skill, and measure skill quality by comparing a forced skill against a `no-skill` or previous-version baseline.
 3. **Automate deterministic checks first.** Wire up trace-based routing evaluators (`SKILL.md` and `references/*.md` loads, including negative controls), tool/CLI error counts, and deterministic environment or build checks. They cost nothing to run and never hallucinate.
 4. **Add targeted LLM-as-a-judge rubrics for stable qualitative criteria.** Once your workflow instructions settle, encode the remaining style, convention, and workflow-fidelity checks as narrow boolean rubrics—and keep a reminder to re-run your `no-skill` baseline whenever new frontier models ship so you know which parts of your skill you can delete.
 
-> **TODO (draft note — remove before publishing):** Example to potentially incorporate somewhere in the post:
+> **TODO (draft notes — remove before publishing):**
 >
-> That extra indirection breaks naive outcome-only evals. Earlier this year, [Vercel benchmarked a Next.js 16 documentation skill](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) on APIs outside model pretraining and saw **zero improvement over baseline** (53% vs. 53% pass rate). The skill content wasn't the main issue: in 56% of runs, the coding agent simply never opened the skill. Grading only the final answer cannot tell you whether your skill gave bad guidance or sat unread on disk.
+> 1. **Example to potentially incorporate somewhere in the post:** That extra indirection breaks naive outcome-only evals. Earlier this year, [Vercel benchmarked a Next.js 16 documentation skill](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) on APIs outside model pretraining and saw **zero improvement over baseline** (53% vs. 53% pass rate). The skill content wasn't the main issue: in 56% of runs, the coding agent simply never opened the skill. Grading only the final answer cannot tell you whether your skill gave bad guidance or sat unread on disk.
+> 2. **Production monitoring idea for later in the post:** Track in production what the cost is of wrongly routing skills (extra tokens, latency, or degraded outcomes when the agent picks the wrong skill or misses a needed one).
