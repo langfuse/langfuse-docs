@@ -41,18 +41,10 @@ Evaluating a skill therefore often means evaluating more complex behavior. This 
 
 ## Start with the 3-run baseline (Skill lift vs. Routing lift) [#three-run-baseline]
 
-Before writing granular evaluators, you need to separate two questions that get tangled together in almost every skill setup:
+Before writing granular evaluators, you need to separate two questions that often get tangled together in a skill setup:
 
-1. **Does the skill itself actually help when the agent uses it?**
-2. **Does the agent pick the right skill when left on its own?**
-
-How much the second question matters depends on the size of your skill catalog. If you ship a single skill, selection is a binary trigger decision (plus internal routing to reference files). Once an agent grows to dozens of skills, matching a user's request to the right skill becomes one of the biggest sources of agent error.
-
-One team we spoke with runs an internal agent with **120 skills**. At that scale, misrouting was driving a large share of production failures, and they had no clear signal on whether failures came from weak skill instructions or from the router picking the wrong skill. To separate the two, they run every item in their offline evaluation dataset **three ways**:
-
-1. **No skill (baseline):** The agent runs with skills disabled, relying only on its base model and standard tools.
-2. **Router-selected skill (end-to-end):** All skills are available as normal, and the agent (or skill router) decides what to load.
-3. **Forced target skill (oracle):** Selection is bypassed and the expected target skill is pre-loaded directly into context.
+1. **Does the agent pick the right skill when left on its own?**
+2. **Does the skill itself actually help when the agent uses it?**
 
 > **[Visual placeholder: 3-run comparison per dataset item (`No skill` -> `Router-selected` -> `Forced target skill`), illustrating the delta for `Skill lift` and `Routing lift` across pass rate and token cost.]**
 
