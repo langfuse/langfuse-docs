@@ -240,7 +240,7 @@ Before upgrading, verify on the latest v3 release that every background migratio
 SELECT name, failed_at, failed_reason
 FROM background_migrations
 WHERE finished_at IS NULL
-  AND NOT (args ? 'envGate');
+  AND args->>'envGate' IS NULL;
 ```
 
 The latest v3 release already ships the five [historic backfill](#historic-backfill) entries (`20260701_v4_step_*`). They carry an `envGate` in their args and stay dormant until their gate variable is set to `true`, which v4 does by default for the backfill. In the UI they can show as queued; ignore them. The query above excludes them, and every other entry must show as finished.
