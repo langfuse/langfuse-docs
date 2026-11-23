@@ -149,10 +149,11 @@ Dedicated Langfuse deployment for government and regulated industries.
 
 ## Discounts
 
-| Program              | Discount                        | Details                           |
-| -------------------- | ------------------------------- | --------------------------------- |
-| Early-stage startups | US$2,000 in credits, first year | [Learn more and apply](/startups) |
-| Research / Students  | US$2,000 in credits             | [Learn more and apply](/research) |
+| Program              | Discount                            | Details                           |
+| -------------------- | ----------------------------------- | --------------------------------- |
+| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups) |
+| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research) |
+| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com      |
 
 ## Frequently Asked Questions
 
