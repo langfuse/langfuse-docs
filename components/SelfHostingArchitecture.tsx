@@ -228,6 +228,37 @@ const LLM_LOWER = LLM_Y + (LLM_HEIGHT * 2) / 3;
 const CONTAINER_MID = WEB_Y + CARD_HEIGHT / 2;
 const portY = (i: number) => CONTAINER_MID + (i - 1.5) * 24;
 
+const HEAD_LENGTH = 7;
+const HEAD_HALF_WIDTH = 3.5;
+// Lines stop just inside the arrowhead base so their round caps stay hidden.
+const LINE_STOP = HEAD_LENGTH - 1;
+// Curves end this far before the target edge and finish with a straight run,
+// so each arrowhead sits on a straight segment instead of the bend.
+const CURVE_LEAD = 16;
+
+function Head({
+  x,
+  y,
+  dir,
+}: {
+  x: number;
+  y: number;
+  dir: "left" | "right" | "down";
+}) {
+  const d =
+    dir === "down"
+      ? `M ${x} ${y} L ${x - HEAD_HALF_WIDTH} ${y - HEAD_LENGTH} L ${x + HEAD_HALF_WIDTH} ${y - HEAD_LENGTH} Z`
+      : `M ${x} ${y} L ${x + (dir === "left" ? 1 : -1) * HEAD_LENGTH} ${y - HEAD_HALF_WIDTH} V ${y + HEAD_HALF_WIDTH} Z`;
+  return <path d={d} className={styles.head} />;
+}
+
+function storeCurve(x1: number, y1: number, x2: number, y2: number) {
+  const sign = Math.sign(x2 - x1);
+  const bendEnd = x2 - sign * CURVE_LEAD;
+  const mid = (x1 + bendEnd) / 2;
+  return `M ${x1} ${y1} C ${mid} ${y1} ${mid} ${y2} ${bendEnd} ${y2} H ${x2 - sign * LINE_STOP}`;
+}
+
 function DesktopDiagram() {
   return (
     <svg
@@ -263,50 +294,47 @@ function DesktopDiagram() {
       <Client x={STORE_X} y={24} name="Apps & agents" icon={Bot} />
       {/* Explicit arrowheads avoid shared SVG marker IDs. */}
       <g className={styles.optionalPaths}>
-        <path d={`M 400 78 V 140 H 140 V ${GATEWAY_Y}`} />
-        <path d={`M 140 ${GATEWAY_Y + CARD_HEIGHT} V ${WEB_Y}`} />
-        <path d={`M ${LEFT} ${GATEWAY_MID} H 24 V ${LLM_LOWER} H 280`} />
+        <path d={`M 400 78 V 140 H 140 V ${GATEWAY_Y - LINE_STOP}`} />
+        <path d={`M 140 ${GATEWAY_Y + CARD_HEIGHT} V ${WEB_Y - LINE_STOP}`} />
         <path
-          d={`M 140 ${WEB_Y + CARD_HEIGHT} V ${LLM_UPPER - 16} Q 140 ${LLM_UPPER} 156 ${LLM_UPPER} H 280`}
+          d={`M ${LEFT} ${GATEWAY_MID} H 24 V ${LLM_LOWER} H ${280 - LINE_STOP}`}
         />
         <path
-          d={`M 660 ${WORKER_Y + CARD_HEIGHT} V ${LLM_UPPER - 16} Q 660 ${LLM_UPPER} 644 ${LLM_UPPER} H 520`}
+          d={`M 140 ${WEB_Y + CARD_HEIGHT} V ${LLM_UPPER - 16} Q 140 ${LLM_UPPER} 156 ${LLM_UPPER} H ${280 - LINE_STOP}`}
         />
+        <path
+          d={`M 660 ${WORKER_Y + CARD_HEIGHT} V ${LLM_UPPER - 16} Q 660 ${LLM_UPPER} 644 ${LLM_UPPER} H ${520 + LINE_STOP}`}
+        />
+        <Head x={140} y={GATEWAY_Y} dir="down" />
+        <Head x={140} y={WEB_Y} dir="down" />
+        <Head x={280} y={LLM_LOWER} dir="right" />
+        <Head x={280} y={LLM_UPPER} dir="right" />
+        <Head x={520} y={LLM_UPPER} dir="left" />
       </g>
       <g className={styles.webPaths}>
-        <path d={`M ${LEFT} 51 H 8 V ${CONTAINER_MID} H ${LEFT}`} />
+        <path d={`M ${LEFT} 51 H 8 V ${CONTAINER_MID} H ${LEFT - LINE_STOP}`} />
+        <Head x={LEFT} y={CONTAINER_MID} dir="right" />
         {stores.map(({ path, y }, i) => (
-          <path
-            key={path}
-            d={`M 240 ${portY(i)} C 270 ${portY(i)} 270 ${y + 40} 300 ${y + 40}`}
-          />
-        ))}
-        {stores.map(({ path, y }) => (
-          <path key={path} d={`m 294 ${y + 36} 6 4 -6 4`} />
+          <g key={path}>
+            <path d={storeCurve(240, portY(i), STORE_X, y + 40)} />
+            <Head x={STORE_X} y={y + 40} dir="right" />
+          </g>
         ))}
       </g>
       <g className={styles.workerPaths}>
-        {stores.map(({ path, y }, i) => (
-          <path
-            key={path}
-            d={`M 560 ${portY(i)} C 530 ${portY(i)} 530 ${y + 40} 500 ${y + 40}`}
-          />
-        ))}
         {stores.map(({ path, y }, i) =>
           path === "cache" ? (
-            <path key={path} d={`m 554 ${portY(i) - 4} 6 4 -6 4`} />
+            <g key={path}>
+              <path d={storeCurve(500, y + 40, RIGHT, portY(i))} />
+              <Head x={RIGHT} y={portY(i)} dir="right" />
+            </g>
           ) : (
-            <path key={path} d={`m 506 ${y + 36} -6 4 6 4`} />
+            <g key={path}>
+              <path d={storeCurve(RIGHT, portY(i), 500, y + 40)} />
+              <Head x={500} y={y + 40} dir="left" />
+            </g>
           ),
         )}
-      </g>
-      <g className={styles.arrows}>
-        <path d={`m 136 ${GATEWAY_Y - 6} 4 6 4 -6`} />
-        <path d={`m 136 ${WEB_Y - 6} 4 6 4 -6`} />
-        <path d={`m 34 ${CONTAINER_MID - 4} 6 4 -6 4`} />
-        <path d={`m 274 ${LLM_UPPER - 4} 6 4 -6 4`} />
-        <path d={`m 274 ${LLM_LOWER - 4} 6 4 -6 4`} />
-        <path d={`m 526 ${LLM_UPPER - 4} -6 4 6 4`} />
       </g>
       <text x="154" y="136" className={styles.detail}>
         Model requests
