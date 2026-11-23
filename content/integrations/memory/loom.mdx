@@ -1,0 +1,56 @@
+---
+title: Trace ClickHouse Loom with Langfuse
+sidebarTitle: ClickHouse Loom
+logo: /images/logos/clickhouse_icon.svg
+description: Send ClickHouse Loom memory operation traces to Langfuse over OpenTelemetry and inspect retrieval latency, model calls, and token usage.
+category: Integrations
+---
+
+# Trace ClickHouse Loom with Langfuse
+
+Send Loom’s server traces to Langfuse over OpenTelemetry to see where a memory search spends time and inspect the model calls it makes.
+
+> **What is ClickHouse Loom?** [ClickHouse Loom](https://github.com/ClickHouse/loom) is an open-source, self-hosted memory server that lets AI agents store and retrieve context across sessions.
+
+> **What is Langfuse?** Langfuse is an open-source AI engineering platform for tracing, evaluating, and debugging agent applications. Use [Langfuse Cloud](/cloud) or [self-host Langfuse](/self-hosting).
+
+## Set up tracing [#setup]
+
+<Steps>
+
+### Get project API keys
+
+Create a Langfuse project and get its public and secret keys from the project settings. Set up a Loom server if you need one. [Loom quickstart](https://clickhouse.github.io/loom/getting-started/quickstart/)
+
+### Configure the Loom server
+
+Set these environment variables on the Loom server. For the Docker Compose installer, edit `$HOME/.loom/.env`.
+
+```bash
+# Langfuse Cloud, EU region
+LOOM_LANGFUSE_URL=https://cloud.langfuse.com
+# US: https://us.cloud.langfuse.com
+# Japan: https://jp.cloud.langfuse.com
+# HIPAA: https://hipaa.cloud.langfuse.com
+LOOM_LANGFUSE_ADMIN_TOKEN=pk-lf-...:sk-lf-...
+```
+
+For self-hosted Langfuse, use your instance’s base URL. Loom appends `/api/public/otel/v1/traces` and authenticates with the `public_key:secret_key` pair. OpenTelemetry must be enabled on Loom (`LOOM_OTEL_ENABLED=true`, the default).
+
+Restart Loom with the new environment. For the Docker Compose installer, recreate the Loom service to load the updated `.env`.
+
+```bash
+docker compose --project-directory "$HOME/.loom" up -d --force-recreate loom
+```
+
+### Verify a trace in Langfuse
+
+Run a memory search from your agent or with the [Loom HTTP quickstart](https://clickhouse.github.io/loom/getting-started/quickstart/#4-first-memory-over-http). Open **Tracing** in your Langfuse project and select the `memory.search` trace. Expand it to inspect retrieval spans and any embedding or generation calls made by Loom.
+
+If the trace is missing, check the base URL, key pair, and `LOOM_OTEL_ENABLED`. Loom reports the local exporter state at `GET /v1/health?include=langfuse`.
+
+</Steps>
+
+## What Loom sends [#what-loom-sends]
+
+Loom exports server operation spans and includes latency, token usage, and cost where available. Model prompt and completion capture defaults to off and can be configured per namespace. [Loom trace attributes and text capture settings](https://clickhouse.github.io/loom/features/integrations/langfuse/#what-text-leaves-loom)
