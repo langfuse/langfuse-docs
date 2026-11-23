@@ -6,37 +6,39 @@ const STAGES = [
   {
     step: "01",
     name: "Installed or fetched",
-    detail: "Skill files written to disk via CLI or manifest fetched via API.",
-    storage: "Local lockfile only",
-    persisted: "local" as const,
+    detail: "Skill files sit on disk or are fetched from the registry.",
+    storage: "Not on traces yet",
+    state: "local" as const,
   },
   {
     step: "02",
     name: "Available / discoverable",
-    detail: "Skill name and description exposed in the prompt or tool listing.",
-    storage: "Persisted: skills_available (GENERATION)",
-    persisted: "persisted" as const,
+    detail:
+      "Skill name and description appear in the system prompt or listing.",
+    storage: "Recorded on GENERATION",
+    state: "persisted" as const,
   },
   {
     step: "03",
     name: "Requested (intent)",
-    detail: "Model emits a skill-loading tool call in its generation output.",
-    storage: "Computed in trace UI (not persisted)",
-    persisted: "ui" as const,
+    detail: "Model emits a tool call asking to load a skill in its output.",
+    storage: "Computed in trace UI",
+    state: "ui" as const,
   },
   {
     step: "04",
     name: "Loaded",
-    detail: "Tool observation succeeds with non-null, non-error output.",
-    storage: "Persisted: skills_resource_loaded (TOOL)",
-    persisted: "persisted" as const,
+    detail: "Skill-loading tool succeeds and returns non-null output.",
+    storage: "Recorded on TOOL",
+    state: "persisted" as const,
   },
   {
     step: "05",
     name: "Evicted / compacted",
-    detail: "Context window summarized or trimmed later in a long session.",
+    detail:
+      "Long session compacts context; skill may be dropped or re-attached.",
     storage: "Not modeled yet",
-    persisted: "unmodeled" as const,
+    state: "unmodeled" as const,
   },
 ];
 
@@ -49,9 +51,9 @@ export function SkillLifecycleDiagram() {
             <div
               className={cn(
                 "w-full border px-4 py-3 text-left",
-                stage.persisted === "unmodeled"
+                stage.state === "unmodeled"
                   ? "border-dashed border-line-structure bg-surface-1/50"
-                  : stage.persisted === "persisted"
+                  : stage.state === "persisted"
                     ? "border-line-cta bg-surface-bg"
                     : "border-line-structure bg-surface-1",
               )}
@@ -68,7 +70,7 @@ export function SkillLifecycleDiagram() {
                 <span
                   className={cn(
                     "font-mono text-[11px]",
-                    stage.persisted === "persisted"
+                    stage.state === "persisted"
                       ? "text-text-primary"
                       : "text-text-tertiary",
                   )}
