@@ -36,6 +36,9 @@ const ADOPTERS_TABLE_PATH = join(
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Adobe: { src: adobeLogo },
+  "Blue Yonder": {
+    src: "/images/customers/blue-yonder/blue-yonder-light.png",
+  },
   "Bosch Power Tools": { src: boschLogo },
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
