@@ -18,13 +18,19 @@ import { SkillTracingSplitDiagram } from "@/components/blog/SkillTracingSplitDia
   date="November 23, 2026"
 />
 
-As soon as a team ships a few agent skills, two questions come up: _did the agent use the skill, and did version 2 work better than version 1?_
+This work started with two questions we kept running into while iterating on our own skills. We offer the open-source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) (hosted on [GitHub](https://github.com/langfuse/skills)) for any coding agent or harness, and we also use it inside Halo, our in-app agent (read more in [How we built Langfuse Halo](/blog/2026-10-21-building-the-langfuse-assistant)).
 
-Under the [Agent Skills specification](https://agentskills.io/specification), a skill is a directory with a `SKILL.md` file (YAML frontmatter with a `name` and `description`, plus Markdown instructions) and optional files in `references/` or `scripts/`. Tracing it sounds like a boolean on a trace.
+Whenever we changed instructions or added references, we wanted to answer the same two things: _which skills did an agent actually use, and when it used one, did version 2 perform better than version 1?_
+
+The catch was that every harness and SDK, including Halo, loaded and reported skills differently. We wanted a unified way to trace skill usage in Langfuse with minimal setup effort, alongside [Skill Management](/docs/skill-management/overview) for storing and versioning them.
+
+## What is a skill? [#what-is-a-skill]
+
+Under the [Agent Skills specification](https://agentskills.io/specification), a skill is a directory with a `SKILL.md` file (YAML frontmatter with a `name` and `description`, plus Markdown instructions) and optional files in `references/` or `scripts/`. On paper, tracing it looks like a boolean on a trace.
 
 <SkillStructureDiagram />
 
-Look at a real agent run, though, and "used" breaks into five states that every coding agent and framework implements differently. When we built [Skill Management](/docs/skill-management/overview) in Langfuse, storing and versioning skill directories was the straightforward part. Most of the design work went into figuring out what happened to a skill inside a trace, across harnesses we don't control.
+In a live agent run, though, "used" breaks into five states. Storing and versioning skill directories was the straightforward part. Most of the design work went into figuring out which of those states a skill actually reached inside a trace, across harnesses we don't control.
 
 ## A skill on disk isn't a skill in context [#lifecycle-states]
 
@@ -156,7 +162,7 @@ try {
 }
 ```
 
-**API-driven agents.** Agents that load skills in memory, including [Halo](/blog/2026-10-21-building-the-langfuse-assistant), our Mastra-based in-app assistant, fetch the skill manifest and files at run start with `langfuse.api.skills.get(...)`. They pin the resolved version for the full run so `SKILL.md` and its reference files always come from the same revision, and pass `{ name, version }` directly into `propagateAttributes`.
+**API-driven agents.** Agents that load skills in memory, including Halo, our Mastra-based in-app assistant, fetch the skill manifest and files at run start with `langfuse.api.skills.get(...)`. They pin the resolved version for the full run so `SKILL.md` and its reference files always come from the same revision, and pass `{ name, version }` directly into `propagateAttributes`.
 
 In both setups, `propagateAttributes` attaches skills in-process only. They aren't sent over OpenTelemetry baggage across service boundaries, and an explicit span attribute always overrides propagated or processor-level defaults.
 
