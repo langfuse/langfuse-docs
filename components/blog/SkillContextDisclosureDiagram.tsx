@@ -40,24 +40,22 @@ export function SkillContextDisclosureDiagram() {
 
           {/* Left panel: Prompt */}
           <text
-            x="20"
+            x="142"
             y="20"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
+            textAnchor="middle"
           >
             Prompt
-          </text>
-          <text x="20" y="40" fontSize="11.5" fill="var(--text-tertiary)">
-            agent context
           </text>
 
           {/* Left context container */}
           <rect
             x="20"
-            y="50"
+            y="36"
             width="132"
-            height="292"
+            height="306"
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
@@ -67,9 +65,9 @@ export function SkillContextDisclosureDiagram() {
           {/* Full-height prompt strip */}
           <rect
             x="20"
-            y="50"
+            y="36"
             width="28"
-            height="292"
+            height="306"
             rx="1"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
@@ -77,21 +75,30 @@ export function SkillContextDisclosureDiagram() {
           />
           <text
             x="34"
-            y="196"
+            y="189"
             fontSize="11.5"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 34 196)"
+            transform="rotate(-90 34 189)"
           >
             prompt
+          </text>
+          <text
+            x="100"
+            y="54"
+            fontSize="11"
+            fill="var(--text-tertiary)"
+            textAnchor="middle"
+          >
+            agent context
           </text>
 
           {/* Left iteration timeline */}
           <line
             x1="188"
-            y1="50"
+            y1="36"
             x2="188"
             y2="344"
             stroke="var(--text-secondary)"
@@ -121,24 +128,22 @@ export function SkillContextDisclosureDiagram() {
 
           {/* Right panel: Skill */}
           <text
-            x="340"
+            x="530"
             y="20"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
+            textAnchor="middle"
           >
             Skill
-          </text>
-          <text x="340" y="40" fontSize="11.5" fill="var(--text-tertiary)">
-            agent context
           </text>
 
           {/* Right context container */}
           <rect
             x="340"
-            y="50"
+            y="36"
             width="148"
-            height="292"
+            height="306"
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
@@ -148,9 +153,9 @@ export function SkillContextDisclosureDiagram() {
           {/* Frontmatter strip (iterations 1-7) */}
           <rect
             x="340"
-            y="50"
+            y="36"
             width="28"
-            height="292"
+            height="306"
             rx="1"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
@@ -158,15 +163,24 @@ export function SkillContextDisclosureDiagram() {
           />
           <text
             x="354"
-            y="196"
+            y="189"
             fontSize="11.5"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 354 196)"
+            transform="rotate(-90 354 189)"
           >
             frontmatter
+          </text>
+          <text
+            x="428"
+            y="54"
+            fontSize="11"
+            fill="var(--text-tertiary)"
+            textAnchor="middle"
+          >
+            agent context
           </text>
 
           {/* SKILL.md strip (iterations 3-7) */}
@@ -266,7 +280,7 @@ export function SkillContextDisclosureDiagram() {
           {/* Right iteration timeline */}
           <line
             x1="640"
-            y1="50"
+            y1="36"
             x2="640"
             y2="344"
             stroke="var(--text-secondary)"

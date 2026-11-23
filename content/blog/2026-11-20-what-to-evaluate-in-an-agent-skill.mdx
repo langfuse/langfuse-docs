@@ -31,8 +31,6 @@ When you put instructions in a system prompt (or an `AGENTS.md` file), they sit 
 
 <SkillContextDisclosureDiagram />
 
-That extra indirection breaks naive outcome-only evals. Earlier this year, [Vercel benchmarked a Next.js 16 documentation skill](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) on APIs outside model pretraining and saw **zero improvement over baseline** (53% vs. 53% pass rate). The skill content wasn't the main issue: in 56% of runs, the coding agent simply never opened the skill. Grading only the final answer cannot tell you whether your skill gave bad guidance or sat unread on disk.
-
 ### 2. Skills imply multi-step agent behavior in an environment
 
 If you are building a simple single-turn chatbot, you rarely need skills. Skills show up when an agent has to *do* something across multiple steps: inspect and edit an existing codebase, run CLI commands, query APIs, or sequence domain tools. Evaluating a skill therefore means evaluating **behavior**: what the agent read, which commands it ran, how it modified the environment, and how many tokens and retries it burned to get there.
@@ -157,3 +155,7 @@ As we cover in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-ev
 2. **Establish the 3-run baseline (`no skill`, `router-selected`, `forced`).** Confirm your skill actually delivers positive **skill lift** over the raw model, and check whether your bottleneck is **routing lift** (selection) or workflow execution.
 3. **Automate deterministic checks first.** Wire up trace-based routing evaluators (`SKILL.md` and `references/*.md` loads, including negative controls), tool/CLI error counts, and deterministic environment or build checks. They cost nothing to run and never hallucinate.
 4. **Add targeted LLM-as-a-judge rubrics for stable qualitative criteria.** Once your workflow instructions settle, encode the remaining style, convention, and workflow-fidelity checks as narrow boolean rubrics—and keep a reminder to re-run your `no-skill` baseline whenever new frontier models ship so you know which parts of your skill you can delete.
+
+> **TODO (draft note — remove before publishing):** Example to potentially incorporate somewhere in the post:
+>
+> That extra indirection breaks naive outcome-only evals. Earlier this year, [Vercel benchmarked a Next.js 16 documentation skill](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) on APIs outside model pretraining and saw **zero improvement over baseline** (53% vs. 53% pass rate). The skill content wasn't the main issue: in 56% of runs, the coding agent simply never opened the skill. Grading only the final answer cannot tell you whether your skill gave bad guidance or sat unread on disk.
