@@ -27,13 +27,17 @@ Evaluating an agent skill differs from evaluating a prompt in two fundamental wa
 
 ### 1. Progressive disclosure
 
-When you put instructions in a system prompt (or an `AGENTS.md` file), they sit in the model's context on every turn. A skill uses progressive disclosure. At the start of a run, the agent only sees each skill's `name` and `description`. The agent then has to decide whether the skill is worth loading at all, read `SKILL.md`, and decide which supporting `references/*.md` files or scripts to pull into context.
+Prompts are always immediately in an agent's context. A skill, on the other hand, uses a progressive disclosure mechanism: the agent starts off with only the skill's frontmatter in context. Only when the agent decides, based on this frontmatter, that it needs the skill will it load the main skill file into its context. Same for any sub-files of the skill.
+
+This means that, unlike for prompts, you can't just blindly evaluate every agent execution assuming the agent was aware of the skill content.
 
 <SkillContextDisclosureDiagram />
 
-### 2. Skills imply multi-step agent behavior in an environment
+### 2. Agent behavior is (often) more complex
 
-If you are building a simple single-turn chatbot, you rarely need skills. Skills show up when an agent has to *do* something across multiple steps: inspect and edit an existing codebase, run CLI commands, query APIs, or sequence domain tools. Evaluating a skill therefore means evaluating **behavior**: what the agent read, which commands it ran, how it modified the environment, and how many tokens and retries it burned to get there.
+The decision to put something into a skill implies a decision not to put it in the system prompt. This is often done because the behavior of the agent is too complex or nuanced to put everything into one long string that's always completely in the agent's context.
+
+Evaluating a skill therefore often means evaluating more complex behavior. This often shifts the focus to a specific kind of evals.
 
 ## Start with the 3-run baseline (Skill lift vs. Routing lift) [#three-run-baseline]
 

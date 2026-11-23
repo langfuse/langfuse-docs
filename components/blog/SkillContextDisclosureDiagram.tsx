@@ -49,13 +49,7 @@ export function SkillContextDisclosureDiagram() {
           >
             Prompt
           </text>
-          <text
-            x="75"
-            y="58"
-            fontSize="13"
-            fill="var(--text-tertiary)"
-            textAnchor="middle"
-          >
+          <text x="8" y="58" fontSize="13" fill="var(--text-tertiary)">
             agent context
           </text>
 
@@ -148,13 +142,7 @@ export function SkillContextDisclosureDiagram() {
           >
             Skill
           </text>
-          <text
-            x="368"
-            y="58"
-            fontSize="13"
-            fill="var(--text-tertiary)"
-            textAnchor="middle"
-          >
+          <text x="292" y="58" fontSize="13" fill="var(--text-tertiary)">
             agent context
           </text>
 
