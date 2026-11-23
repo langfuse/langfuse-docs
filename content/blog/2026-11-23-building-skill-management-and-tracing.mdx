@@ -110,7 +110,7 @@ Neither extreme works on its own, so we split the job in two: **active reporting
 
 The application only reports one attribute: `langfuse.observation.skills_available`, an OpenTelemetry attribute listing the skill names (and optional versions) available to the agent. Clients and hooks don't emit a separate load event.
 
-Instead, Langfuse's ingestion pipeline (implemented in both TypeScript and Rust, sharing parser rules with the trace UI) parses incoming `TOOL` observations automatically. It recognizes dedicated skill tools (`Skill`, `skill`, `loadSkill`, `langfuse_loadSkill`, `skill_read`, `loadSkillResource`, `langfuse_loadSkillResource`), generic file readers (`Read`, `readFile`), and a non-executing scanner over literal `cat` commands on Codex shell observations (`service.name=codex`).
+Instead, Langfuse's ingestion pipeline parses incoming `TOOL` observations automatically. It recognizes dedicated skill tools (`Skill`, `skill`, `loadSkill`, `langfuse_loadSkill`, `skill_read`, `loadSkillResource`, `langfuse_loadSkillResource`), generic file readers (`Read`, `readFile`), and a non-executing scanner over literal `cat` commands on Codex shell observations (`service.name=codex`).
 
 One detail makes this split work: clients attach `skills_available` to **both** model spans and skill-loading tool spans, even though Langfuse only persists the catalog on `GENERATION` observations. On a `TOOL` span, the catalog does two things before ingestion discards it:
 
@@ -162,14 +162,18 @@ try {
 
 In both setups, `propagateAttributes` attaches skills in-process only. They aren't sent over OpenTelemetry baggage across service boundaries, and an explicit span attribute always overrides propagated or processor-level defaults.
 
-## What's next [#whats-next]
+## Usage analytics out of the box [#usage-analytics]
 
-Skill Management is in beta on Langfuse Cloud and self-hosted deployments. Traced skill observations feed directly into event filters, custom dashboard dimensions, per-version **Usage** analytics, and skill-version webhooks so teams can trigger evaluations when a new version ships.
+Once your traces carry the available skill catalog, each skill version's **Usage** tab brings the numbers together automatically. You can see how many observations offered the skill versus loaded it, check per-file load counts to spot which reference docs agents actually open (or never touch), and filter the linked generations and tool observations from the same view.
 
-Next on our list:
+<Frame fullWidth>
+  ![The skill Usage tab showing available and loaded observation counts, per-file load statistics, and linked observations for a skill version.](/images/changelog/2026-11-03-skill-management-usage.png)
+</Frame>
 
-- Propagating installed skill catalogs from our first-party Claude Code, Codex, and Cursor observability plugins so coding-agent traces get version-resolved links instead of name-only tags.
-- Expanding ingestion rules for additional harnesses, starting with Gemini CLI (`activate_skill`), Deep Agents (`read_file`), OpenCode (`skill` with `{id}`), and Mastra's `load_skill`.
-- Exploring persisted request funnels (available to requested to loaded), compaction tracking, and server-side provider skills.
+The same skill metadata also flows into observation filters, custom dashboards, and skill-version webhooks, so you can compare versions across production traffic or trigger evaluations when a new version ships.
 
-To try it out, start with the [Skill Management overview](/docs/skill-management/overview) and the [skill tracing guide](/docs/skill-management/tracing). If your harness loads skills in a format we don't recognize yet, [open a GitHub issue](https://github.com/langfuse/langfuse/issues) with the tool name and a sample input/output. If you like working on this kind of problem, [we are hiring](/careers).
+## Try it out [#try-it-out]
+
+Skill Management is in beta on Langfuse Cloud and self-hosted deployments. Follow the [get-started guide](/docs/skill-management/get-started) to create your first versioned skill, or read the [Skill Management overview](/docs/skill-management/overview) and [skill tracing docs](/docs/skill-management/tracing) to connect it to your agent traces.
+
+If your harness loads skills in a format we don't recognize yet, [open a GitHub issue](https://github.com/langfuse/langfuse/issues) with the tool name and a sample input and output. If you like working on this kind of problem, [we are hiring](/careers).
