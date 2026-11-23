@@ -15,7 +15,7 @@ const discounts = [
   },
   {
     name: "Research / Students",
-    description: "US$2,000 in credits, first year",
+    description: "US$2,000 in credits",
     cta: {
       text: "Learn more and apply",
       href: "/research",

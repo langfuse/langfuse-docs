@@ -152,7 +152,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | Program              | Discount                        | Details                           |
 | -------------------- | ------------------------------- | --------------------------------- |
 | Early-stage startups | US$2,000 in credits, first year | [Learn more and apply](/startups) |
-| Research / Students  | US$2,000 in credits, first year | [Learn more and apply](/research) |
+| Research / Students  | US$2,000 in credits             | [Learn more and apply](/research) |
 
 ## Frequently Asked Questions
 
