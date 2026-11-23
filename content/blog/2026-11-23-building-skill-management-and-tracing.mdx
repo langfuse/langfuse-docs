@@ -24,15 +24,11 @@ Whenever we changed instructions or added references, we wanted to answer the sa
 
 The catch was that every harness and SDK, including Halo, loaded and reported skills differently. We wanted a unified way to trace skill usage in Langfuse with minimal setup effort, alongside [Skill Management](/docs/skill-management/overview) for storing and versioning them.
 
-## What is a skill? [#what-is-a-skill]
+## A skill on disk isn't a skill in context [#lifecycle-states]
 
-Under the [Agent Skills specification](https://agentskills.io/specification), a skill is a directory with a `SKILL.md` file (YAML frontmatter with a `name` and `description`, plus Markdown instructions) and optional files in `references/` or `scripts/`. On paper, tracing it looks like a boolean on a trace.
+Under the [Agent Skills specification](https://agentskills.io/specification), a skill is a directory with a `SKILL.md` file (YAML frontmatter with a `name` and `description`, plus Markdown instructions) and optional files in `references/` or `scripts/`.
 
 <SkillStructureDiagram />
-
-In a live agent run, though, "used" breaks into five states. Storing and versioning skill directories was the straightforward part. Most of the design work went into figuring out which of those states a skill actually reached inside a trace, across harnesses we don't control.
-
-## A skill on disk isn't a skill in context [#lifecycle-states]
 
 Skills save context tokens through **progressive disclosure**. At startup, the agent only exposes each skill's `name` and `description` in the system prompt or tool list. When the model decides a skill applies, it reads `SKILL.md`. If the task needs more detail, it opens reference files or runs scripts.
 
