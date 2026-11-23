@@ -1,8 +1,7 @@
 import { useId } from "react";
 import styles from "./diagram-fit.module.css";
 
-const FULL_RUN_STEPS = [122, 152, 182, 212, 242];
-const SKIPPED_STEPS = [198, 224, 250];
+const QUALITY_STEPS = [128, 160, 192, 224];
 
 export function SkillRoutingVsQualityDiagram() {
   const arrowId = useId();
@@ -13,9 +12,9 @@ export function SkillRoutingVsQualityDiagram() {
       {/* Desktop / tablet layout */}
       <div className={styles.desktop}>
         <svg
-          viewBox="0 0 680 322"
+          viewBox="0 0 680 330"
           role="img"
-          aria-label="Comparison of skill routing vs. skill quality evaluations: skill routing leaves the skill available and stops as soon as the agent picks or skips the skill, skipping the rest of the execution; skill quality runs full trajectories in parallel comparing a baseline (no skill or previous version) against a forced skill and compares their results."
+          aria-label="Comparison of skill routing vs. skill quality evaluations: skill routing tests whether an agent routes a user prompt to the right skill among all available skills (skill A, edited skill B, skill C, or no skill) without interfering with other skills; skill quality forces skill B (v2) into context and compares the full run result against a baseline (no skill or v1)."
           className="block h-auto w-full text-text-primary"
         >
           <defs>
@@ -55,137 +54,180 @@ export function SkillRoutingVsQualityDiagram() {
             Skill routing
           </text>
 
-          {/* Left start box */}
+          {/* User prompt box */}
           <rect
-            x="36"
-            y="54"
-            width="136"
-            height="44"
+            x="76"
+            y="56"
+            width="146"
+            height="34"
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
             strokeWidth="1"
           />
           <text
-            x="104"
-            y="72"
+            x="149"
+            y="77"
+            fontSize="13"
+            fill="var(--text-secondary)"
+            textAnchor="middle"
+          >
+            user prompt
+          </text>
+
+          {/* Arrow: prompt -> agent */}
+          <line
+            x1="149"
+            y1="90"
+            x2="149"
+            y2="112"
+            stroke="var(--text-secondary)"
+            strokeWidth="1"
+            markerEnd={`url(#${arrowId})`}
+          />
+
+          {/* Agent box */}
+          <rect
+            x="99"
+            y="114"
+            width="100"
+            height="34"
+            rx="2"
+            fill="var(--surface-bg)"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+          />
+          <text
+            x="149"
+            y="135"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
           >
-            skill available
+            agent
           </text>
+
+          {/* Arrow: agent -> available skills */}
+          <line
+            x1="149"
+            y1="148"
+            x2="149"
+            y2="184"
+            stroke="var(--text-secondary)"
+            strokeWidth="1"
+            markerEnd={`url(#${arrowId})`}
+          />
+          <text x="159" y="170" fontSize="12" fill="var(--text-secondary)">
+            selects
+          </text>
+
+          {/* Available skills catalog */}
+          <text x="14" y="179" fontSize="12" fill="var(--text-tertiary)">
+            all available skills
+          </text>
+          <rect
+            x="14"
+            y="186"
+            width="270"
+            height="108"
+            rx="2"
+            fill="var(--surface-bg)"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+          />
+
+          {/* 2x2 grid of skills */}
+          <rect
+            x="28"
+            y="200"
+            width="114"
+            height="34"
+            rx="2"
+            fill="var(--surface-bg)"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+          />
           <text
-            x="104"
-            y="88"
-            fontSize="11.5"
-            fill="var(--text-tertiary)"
+            x="85"
+            y="221"
+            fontSize="13"
+            fill="var(--text-secondary)"
             textAnchor="middle"
           >
-            not forced
+            skill A
           </text>
 
-          {/* Left active timeline (steps 1-2) */}
-          <line
-            x1="104"
-            y1="98"
-            x2="104"
-            y2="174"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
-          />
-          <circle
-            cx="104"
-            cy="122"
-            r="4.5"
-            fill="var(--surface-cta-primary)"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
-          />
-          <circle
-            cx="104"
-            cy="152"
-            r="4.5"
-            fill="var(--surface-cta-primary)"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
-          />
-
-          {/* Selection callout at step 2 */}
-          <line
-            x1="109"
-            y1="152"
-            x2="164"
-            y2="152"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
-            strokeDasharray="4 3"
-          />
           <rect
-            x="164"
-            y="137"
-            width="120"
-            height="30"
+            x="156"
+            y="200"
+            width="114"
+            height="34"
             rx="2"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
             strokeWidth="1"
           />
           <text
-            x="224"
-            y="156"
+            x="213"
+            y="221"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
           >
-            picks skill?
+            skill B (v2)
           </text>
 
-          {/* Stop bar */}
-          <line
-            x1="74"
-            y1="174"
-            x2="134"
-            y2="174"
-            stroke="var(--text-primary)"
-            strokeWidth="1.5"
-          />
-          <text
-            x="144"
-            y="178"
-            fontSize="12.5"
-            fontWeight="500"
-            fill="var(--text-primary)"
-          >
-            stop here
-          </text>
-
-          {/* Ghosted remaining execution */}
-          <line
-            x1="104"
-            y1="178"
-            x2="104"
-            y2="266"
+          <rect
+            x="28"
+            y="246"
+            width="114"
+            height="34"
+            rx="2"
+            fill="var(--surface-bg)"
             stroke="var(--line-structure)"
             strokeWidth="1"
-            strokeDasharray="3 3"
           />
-          {SKIPPED_STEPS.map((y) => (
-            <circle
-              key={`skip-${y}`}
-              cx="104"
-              cy={y}
-              r="4.5"
-              fill="var(--surface-bg)"
-              stroke="var(--line-structure)"
-              strokeWidth="1"
-              strokeDasharray="2 2"
-            />
-          ))}
-          <text x="122" y="228" fontSize="12" fill="var(--text-tertiary)">
-            rest of run skipped
+          <text
+            x="85"
+            y="267"
+            fontSize="13"
+            fill="var(--text-secondary)"
+            textAnchor="middle"
+          >
+            skill C
+          </text>
+
+          <rect
+            x="156"
+            y="246"
+            width="114"
+            height="34"
+            rx="2"
+            fill="var(--surface-bg)"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+            strokeDasharray="3 2"
+          />
+          <text
+            x="213"
+            y="267"
+            fontSize="13"
+            fill="var(--text-tertiary)"
+            textAnchor="middle"
+          >
+            no skill
+          </text>
+
+          <text
+            x="149"
+            y="316"
+            fontSize="12"
+            fill="var(--text-tertiary)"
+            textAnchor="middle"
+          >
+            right pick, no interference with other skills
           </text>
 
           {/* Vertical dotted separator */}
@@ -193,7 +235,7 @@ export function SkillRoutingVsQualityDiagram() {
             x1="310"
             y1="8"
             x2="310"
-            y2="312"
+            y2="320"
             stroke="var(--text-primary)"
             strokeWidth="1"
             strokeDasharray="2 4"
@@ -214,7 +256,7 @@ export function SkillRoutingVsQualityDiagram() {
           {/* Right Column A: Baseline */}
           <rect
             x="348"
-            y="54"
+            y="56"
             width="132"
             height="44"
             rx="2"
@@ -224,7 +266,7 @@ export function SkillRoutingVsQualityDiagram() {
           />
           <text
             x="414"
-            y="72"
+            y="74"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
@@ -234,24 +276,24 @@ export function SkillRoutingVsQualityDiagram() {
           </text>
           <text
             x="414"
-            y="88"
+            y="90"
             fontSize="11.5"
             fill="var(--text-tertiary)"
             textAnchor="middle"
           >
-            no skill / prev. v
+            no skill or v1
           </text>
 
           <line
             x1="414"
-            y1="98"
+            y1="100"
             x2="414"
-            y2="268"
+            y2="254"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             markerEnd={`url(#${arrowId})`}
           />
-          {FULL_RUN_STEPS.map((y) => (
+          {QUALITY_STEPS.map((y) => (
             <circle
               key={`base-${y}`}
               cx="414"
@@ -265,9 +307,9 @@ export function SkillRoutingVsQualityDiagram() {
 
           <rect
             x="368"
-            y="272"
+            y="258"
             width="92"
-            height="32"
+            height="34"
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
@@ -275,7 +317,7 @@ export function SkillRoutingVsQualityDiagram() {
           />
           <text
             x="414"
-            y="292"
+            y="279"
             fontSize="13"
             fill="var(--text-secondary)"
             textAnchor="middle"
@@ -286,7 +328,7 @@ export function SkillRoutingVsQualityDiagram() {
           {/* Right Column B: Forced skill */}
           <rect
             x="520"
-            y="54"
+            y="56"
             width="132"
             height="44"
             rx="2"
@@ -296,34 +338,34 @@ export function SkillRoutingVsQualityDiagram() {
           />
           <text
             x="586"
-            y="72"
+            y="74"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
           >
-            forced skill
+            skill B (v2)
           </text>
           <text
             x="586"
-            y="88"
+            y="90"
             fontSize="11.5"
             fill="var(--text-secondary)"
             textAnchor="middle"
           >
-            loaded in context
+            forced in context
           </text>
 
           <line
             x1="586"
-            y1="98"
+            y1="100"
             x2="586"
-            y2="268"
+            y2="254"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             markerEnd={`url(#${arrowId})`}
           />
-          {FULL_RUN_STEPS.map((y) => (
+          {QUALITY_STEPS.map((y) => (
             <circle
               key={`forced-${y}`}
               cx="586"
@@ -337,9 +379,9 @@ export function SkillRoutingVsQualityDiagram() {
 
           <rect
             x="540"
-            y="272"
+            y="258"
             width="92"
-            height="32"
+            height="34"
             rx="2"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
@@ -347,7 +389,7 @@ export function SkillRoutingVsQualityDiagram() {
           />
           <text
             x="586"
-            y="292"
+            y="279"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
@@ -359,7 +401,7 @@ export function SkillRoutingVsQualityDiagram() {
           {/* Compare arrow between results */}
           <text
             x="500"
-            y="278"
+            y="265"
             fontSize="12.5"
             fontWeight="500"
             fill="var(--text-primary)"
@@ -369,14 +411,24 @@ export function SkillRoutingVsQualityDiagram() {
           </text>
           <line
             x1="466"
-            y1="288"
+            y1="275"
             x2="534"
-            y2="288"
+            y2="275"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             markerStart={`url(#${arrowStartId})`}
             markerEnd={`url(#${arrowId})`}
           />
+
+          <text
+            x="500"
+            y="316"
+            fontSize="12"
+            fill="var(--text-tertiary)"
+            textAnchor="middle"
+          >
+            is the new version better when used?
+          </text>
         </svg>
       </div>
 
@@ -385,23 +437,28 @@ export function SkillRoutingVsQualityDiagram() {
         <div className="border border-line-structure bg-surface-bg p-3.5">
           <div className="font-medium text-text-primary">Skill routing</div>
           <p className="mt-1.5 text-xs">
-            Run with <span className="font-mono text-text-primary">skill available</span> (not forced), check whether the agent{" "}
-            <span className="bg-surface-cta-primary px-1 font-medium text-text-primary">
-              picks the right skill
+            Test in the context of all available skills (
+            <span className="font-mono text-text-primary">skill A</span>,{" "}
+            <span className="bg-surface-cta-primary px-1 font-mono font-medium text-text-primary">
+              skill B (v2)
             </span>
-            , and stop there without running the rest of the execution.
+            , <span className="font-mono text-text-primary">skill C</span>, or{" "}
+            <span className="font-mono text-text-primary">no skill</span>) to
+            verify the agent picks the right one without interfering with other
+            skills.
           </p>
         </div>
 
         <div className="border border-line-structure bg-surface-bg p-3.5">
           <div className="font-medium text-text-primary">Skill quality</div>
           <p className="mt-1.5 text-xs">
-            Run the full task in parallel with a{" "}
-            <span className="font-mono text-text-primary">baseline</span> (no skill or previous version) vs.{" "}
+            Assume{" "}
             <span className="bg-surface-cta-primary px-1 font-mono font-medium text-text-primary">
-              forced skill
-            </span>
-            , then compare outcomes, turns, and cost.
+              skill B (v2)
+            </span>{" "}
+            is forced into context, run the full task against a{" "}
+            <span className="font-mono text-text-primary">baseline</span> (no
+            skill or v1), and compare the results.
           </p>
         </div>
       </div>
