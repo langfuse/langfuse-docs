@@ -25,7 +25,7 @@ It is tempting to evaluate a skill the same way you evaluate a system prompt. Bu
 
 Evaluating an agent skill differs from evaluating a prompt in two fundamental ways:
 
-### 1. A prompt is always read; a skill is conditional and partially read
+### 1. Progressive disclosure
 
 When you put instructions in a system prompt (or an `AGENTS.md` file), they sit in the model's context on every turn. A skill uses progressive disclosure. At the start of a run, the agent only sees each skill's `name` and `description`. The agent then has to decide whether the skill is worth loading at all, read `SKILL.md`, and decide which supporting `references/*.md` files or scripts to pull into context.
 
