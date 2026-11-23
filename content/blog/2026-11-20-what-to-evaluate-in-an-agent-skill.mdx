@@ -24,13 +24,17 @@ It is tempting to evaluate a skill the same way you evaluate a system prompt. Bu
 
 Evaluating an agent skill differs from evaluating a prompt in two fundamental ways:
 
-**1. A prompt is always read; a skill is conditional and partially read.** When you put instructions in a system prompt (or an `AGENTS.md` file), they sit in the model's context on every turn. A skill uses progressive disclosure. At the start of a run, the agent only sees each skill's `name` and `description`. The agent then has to decide whether the skill is worth loading at all, read `SKILL.md`, and decide which supporting `references/*.md` files or scripts to pull into context.
+### 1. A prompt is always read; a skill is conditional and partially read
+
+When you put instructions in a system prompt (or an `AGENTS.md` file), they sit in the model's context on every turn. A skill uses progressive disclosure. At the start of a run, the agent only sees each skill's `name` and `description`. The agent then has to decide whether the skill is worth loading at all, read `SKILL.md`, and decide which supporting `references/*.md` files or scripts to pull into context.
 
 > **[Visual placeholder: Prompt (always in context) vs. Skill progressive disclosure funnel (`Available` -> `SKILL.md loaded` -> `Reference files read` -> `Instructions followed`), showing where runs drop off at each gate.]**
 
 That extra indirection breaks naive outcome-only evals. Earlier this year, [Vercel benchmarked a Next.js 16 documentation skill](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals) on APIs outside model pretraining and saw **zero improvement over baseline** (53% vs. 53% pass rate). The skill content wasn't the main issue: in 56% of runs, the coding agent simply never opened the skill. Grading only the final answer cannot tell you whether your skill gave bad guidance or sat unread on disk.
 
-**2. Skills imply multi-step agent behavior in an environment.** If you are building a simple single-turn chatbot, you rarely need skills. Skills show up when an agent has to *do* something across multiple steps: inspect and edit an existing codebase, run CLI commands, query APIs, or sequence domain tools. Evaluating a skill therefore means evaluating **behavior**: what the agent read, which commands it ran, how it modified the environment, and how many tokens and retries it burned to get there.
+### 2. Skills imply multi-step agent behavior in an environment
+
+If you are building a simple single-turn chatbot, you rarely need skills. Skills show up when an agent has to *do* something across multiple steps: inspect and edit an existing codebase, run CLI commands, query APIs, or sequence domain tools. Evaluating a skill therefore means evaluating **behavior**: what the agent read, which commands it ran, how it modified the environment, and how many tokens and retries it burned to get there.
 
 ## Start with the 3-run baseline (Skill lift vs. Routing lift) [#three-run-baseline]
 
