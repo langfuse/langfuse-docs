@@ -1,5 +1,5 @@
 ---
-title: "How to evaluate an agent skill"
+title: "How we stopped vibe-editing our agent skill"
 date: 2026/11/19
 description: "External agent skills run on other people's machines, where you cannot trace them. Here is how we engineer the Langfuse skill across 22k biweekly clones using Modal sandboxes, Skill Management, and Halo."
 tag: engineering, agents, evaluation
@@ -17,7 +17,7 @@ import { SkillTraceDiagram } from "@/components/blog/SkillTraceDiagram";
 import { SkillUniqueClonersChart } from "@/components/blog/SkillUniqueClonersChart";
 
 <BlogHeader
-  title="How to evaluate an agent skill"
+  title="How we stopped vibe-editing our agent skill"
   description="External agent skills run on other people's machines, where you cannot trace them. Here is how we engineer the Langfuse skill across 22k biweekly clones using Modal sandboxes, Skill Management, and Halo."
   date="November 19, 2026"
   authors={["lotteverheyden"]}
@@ -36,7 +36,7 @@ How do we, as an AI observability and evals company, measure and improve our age
 <SkillEngineeringLoopDiagram mode="internal" />
 
 <Callout type="info">
-This post talks about our setup. If you're interested in the metrics we track and the evals we prioritize, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
+This post talks about our setup. If you're interested in the metrics we track and the evals we prioritize, see [How to evaluate an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
 </Callout>
 
 ## Skills for your own agent vs. someone else's [#own-agent-vs-distributed]
@@ -121,7 +121,7 @@ On the skill-loading tool call, you see the exact skill version and the specific
   ![Langfuse skill_read tool observation showing 1 loaded skill and references/setting-up-evals.md loaded into context](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-tool-read.png)
 </Frame>
 
-To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request. For a deeper dive into the specific metrics we track and which evaluations we prioritize from these signals, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
+To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request. For a deeper dive into the specific metrics we track and which evaluations we prioritize from these signals, see [How to evaluate an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
 
 ## Offline evaluation & experimentation setup [#offline-test-harness]
 
@@ -190,4 +190,4 @@ Whether you are building skills for your own engineering team or publishing them
 
 **3. Share external skills with an agent you host.** Asking external agents to submit explicit feedback helps at the margins, but user friction keeps coverage low. If you distribute a skill publicly, running that same skill inside an internal or in-app agent you control gives you the live traces needed to close the AI engineering loop.
 
-For a deeper look at what we actually evaluate and measure inside this harness, see [What to evaluate in an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
+For a deeper look at what we actually evaluate and measure inside this harness, see [How to evaluate an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
