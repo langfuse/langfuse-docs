@@ -2,13 +2,13 @@ import { useId } from "react";
 import styles from "./diagram-fit.module.css";
 
 const ITERATIONS = [
-  { label: "iteration 1", y: 78 },
-  { label: "iteration 2", y: 122 },
-  { label: "iteration 3", y: 166 },
-  { label: "iteration 4", y: 210 },
-  { label: "iteration 5", y: 254 },
-  { label: "iteration 6", y: 298 },
-  { label: "iteration 7", y: 342 },
+  { label: "iteration 1", y: 96 },
+  { label: "iteration 2", y: 140 },
+  { label: "iteration 3", y: 184 },
+  { label: "iteration 4", y: 228 },
+  { label: "iteration 5", y: 272 },
+  { label: "iteration 6", y: 316 },
+  { label: "iteration 7", y: 360 },
 ];
 
 export function SkillContextDisclosureDiagram() {
@@ -19,7 +19,7 @@ export function SkillContextDisclosureDiagram() {
       {/* Desktop / tablet layout */}
       <div className={styles.desktop}>
         <svg
-          viewBox="0 0 680 410"
+          viewBox="0 0 680 428"
           role="img"
           aria-label="Comparison of agent context across 7 iterations: a system prompt stays in context from iteration 1 to 7, whereas a skill starts with only frontmatter, loads SKILL.md when the agent decides to use the skill at iteration 3, and loads references/file-1.md when the agent reads a reference file at iteration 6."
           className="block h-auto w-full text-text-primary"
@@ -53,7 +53,7 @@ export function SkillContextDisclosureDiagram() {
           {/* Left context container */}
           <rect
             x="8"
-            y="40"
+            y="58"
             width="134"
             height="352"
             rx="2"
@@ -65,7 +65,7 @@ export function SkillContextDisclosureDiagram() {
           {/* Full-height prompt strip */}
           <rect
             x="8"
-            y="40"
+            y="58"
             width="30"
             height="352"
             rx="1"
@@ -75,19 +75,19 @@ export function SkillContextDisclosureDiagram() {
           />
           <text
             x="23"
-            y="216"
+            y="234"
             fontSize="13.5"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 23 216)"
+            transform="rotate(-90 23 234)"
           >
             prompt
           </text>
           <text
             x="90"
-            y="60"
+            y="78"
             fontSize="13"
             fill="var(--text-tertiary)"
             textAnchor="middle"
@@ -98,9 +98,9 @@ export function SkillContextDisclosureDiagram() {
           {/* Left iteration timeline */}
           <line
             x1="166"
-            y1="40"
+            y1="58"
             x2="166"
-            y2="398"
+            y2="416"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             markerEnd={`url(#${arrowId})`}
@@ -126,6 +126,17 @@ export function SkillContextDisclosureDiagram() {
             </g>
           ))}
 
+          {/* Vertical dotted separator between Prompt and Skill */}
+          <line
+            x1="271"
+            y1="8"
+            x2="271"
+            y2="418"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+            strokeDasharray="2 4"
+          />
+
           {/* Right panel: Skill */}
           <text
             x="482"
@@ -141,7 +152,7 @@ export function SkillContextDisclosureDiagram() {
           {/* Right context container */}
           <rect
             x="292"
-            y="40"
+            y="58"
             width="152"
             height="352"
             rx="2"
@@ -153,7 +164,7 @@ export function SkillContextDisclosureDiagram() {
           {/* Frontmatter strip (iterations 1-7) */}
           <rect
             x="292"
-            y="40"
+            y="58"
             width="30"
             height="352"
             rx="1"
@@ -163,19 +174,19 @@ export function SkillContextDisclosureDiagram() {
           />
           <text
             x="307"
-            y="216"
+            y="234"
             fontSize="13.5"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 307 216)"
+            transform="rotate(-90 307 234)"
           >
             frontmatter
           </text>
           <text
             x="383"
-            y="60"
+            y="78"
             fontSize="13"
             fill="var(--text-tertiary)"
             textAnchor="middle"
@@ -186,7 +197,7 @@ export function SkillContextDisclosureDiagram() {
           {/* SKILL.md strip (iterations 3-7) */}
           <rect
             x="322"
-            y="166"
+            y="184"
             width="30"
             height="226"
             rx="1"
@@ -196,13 +207,13 @@ export function SkillContextDisclosureDiagram() {
           />
           <text
             x="337"
-            y="279"
+            y="297"
             fontSize="13"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 337 279)"
+            transform="rotate(-90 337 297)"
           >
             SKILL.md
           </text>
@@ -210,7 +221,7 @@ export function SkillContextDisclosureDiagram() {
           {/* references/file-1.md strip (iterations 6-7) */}
           <rect
             x="352"
-            y="298"
+            y="316"
             width="36"
             height="94"
             rx="1"
@@ -220,25 +231,25 @@ export function SkillContextDisclosureDiagram() {
           />
           <text
             x="364"
-            y="345"
+            y="363"
             fontSize="11.5"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 364 345)"
+            transform="rotate(-90 364 363)"
           >
             references/
           </text>
           <text
             x="378"
-            y="345"
+            y="363"
             fontSize="11.5"
             fontWeight="500"
             fill="var(--text-primary)"
             textAnchor="middle"
             dominantBaseline="central"
-            transform="rotate(-90 378 345)"
+            transform="rotate(-90 378 363)"
           >
             file-1.md
           </text>
@@ -246,43 +257,43 @@ export function SkillContextDisclosureDiagram() {
           {/* Dashed trigger line: iteration 3 -> SKILL.md */}
           <line
             x1="352"
-            y1="166"
+            y1="184"
             x2="583"
-            y2="166"
+            y2="184"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             strokeDasharray="4 3"
           />
-          <text x="456" y="140" fontSize="13" fill="var(--text-secondary)">
+          <text x="456" y="158" fontSize="13" fill="var(--text-secondary)">
             agent decides
           </text>
-          <text x="456" y="157" fontSize="13" fill="var(--text-secondary)">
+          <text x="456" y="175" fontSize="13" fill="var(--text-secondary)">
             to use skill
           </text>
 
           {/* Dashed trigger line: iteration 6 -> references/file-1.md */}
           <line
             x1="388"
-            y1="298"
+            y1="316"
             x2="583"
-            y2="298"
+            y2="316"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             strokeDasharray="4 3"
           />
-          <text x="456" y="272" fontSize="13" fill="var(--text-secondary)">
+          <text x="456" y="290" fontSize="13" fill="var(--text-secondary)">
             agent reads skill
           </text>
-          <text x="456" y="289" fontSize="13" fill="var(--text-secondary)">
+          <text x="456" y="307" fontSize="13" fill="var(--text-secondary)">
             reference file
           </text>
 
           {/* Right iteration timeline */}
           <line
             x1="588"
-            y1="40"
+            y1="58"
             x2="588"
-            y2="398"
+            y2="416"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             markerEnd={`url(#${arrowId})`}
