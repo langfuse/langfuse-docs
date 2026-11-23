@@ -15,7 +15,7 @@ const events: {
   title: string;
   where: string;
   href?: string;
-  soon?: boolean;
+  linkLabel?: string;
 }[] = [
   {
     when: "Nov 30 to Dec 3",
@@ -42,6 +42,16 @@ const events: {
     title: "House Party with The Chainsmokers, by ClickHouse",
     where: "Intrigue, Wynn",
     href: "https://clickhouse.com/houseparty/reinvent",
+    linkLabel: "Request a ticket",
+  },
+  {
+    when: "Wed, Dec 2, 7:30 am",
+    kind: "Community",
+    title: "Morning Traces in Las Vegas (Langfuse community run)",
+    where:
+      "The Campanile Tower at The Venetian (at the fountain). Relaxed 5km run.",
+    href: "https://luma.com/fjoz7ymk",
+    linkLabel: "Register on Luma",
   },
   {
     when: "Wed, Dec 2 and Thu, Dec 3",
@@ -49,13 +59,6 @@ const events: {
     title: "Observability for AI agents: Strands, OpenTelemetry, and Langfuse",
     where:
       "OPN304. Wed 12:30 pm at Caesars Forum, Forum 101. Thu 3:00 pm at Wynn/Encore, Brahms 4.",
-  },
-  {
-    when: "Date to be announced",
-    kind: "Community",
-    title: "Langfuse community run",
-    where: "Las Vegas. Time and meeting point coming soon.",
-    soon: true,
   },
 ];
 
@@ -335,23 +338,19 @@ function Events() {
         {events.map((event, i) => (
           <div
             key={event.title}
-            className={`rei-chip-card flex flex-col gap-3 p-6${
-              event.soon ? " rei-accent-top" : ""
-            }`}
+            className="rei-chip-card flex flex-col gap-3 p-6"
           >
             <div className="flex items-center justify-between gap-3">
               <span className="rei-eyebrow">
                 {String(i + 1).padStart(2, "0")} {event.kind}
               </span>
-              <span className={`rei-pill${event.soon ? " is-accent" : ""}`}>
-                {event.when}
-              </span>
+              <span className="rei-pill">{event.when}</span>
             </div>
             <div className="font-analog text-[22px] font-medium leading-[1.3] text-text-primary [text-wrap:balance]">
               {event.title}
             </div>
             <p className="rei-body-sm">{event.where}</p>
-            {event.href ? (
+            {event.href && event.linkLabel ? (
               <>
                 <div className="flex-1" />
                 <Link
@@ -360,7 +359,7 @@ function Events() {
                   rel="noopener noreferrer"
                   className="self-start border-b border-text-primary pb-px font-mono text-[12px] text-text-primary"
                 >
-                  Request a ticket ↗
+                  {event.linkLabel} ↗
                 </Link>
               </>
             ) : null}

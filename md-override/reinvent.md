@@ -21,8 +21,8 @@ Times are Pacific Time.
 - **Partners LIVE! (Tue, Dec 1, 11:20 am):** AWS Partners LIVE! AI segment. AWS Partner Zone, booth #1686-E, Venetian.
 - **Breakout (Tue, Dec 1, 3:00 pm):** Open source agent observability and evals with AgentCore and Langfuse. MGM Grand, session AIM278-S.
 - **Evening (Tue, Dec 1, 9:00 pm):** House Party with The Chainsmokers, by ClickHouse. Intrigue, Wynn. [Request a ticket](https://clickhouse.com/houseparty/reinvent).
+- **Community (Wed, Dec 2, 7:30 am):** Morning Traces in Las Vegas (Langfuse community run). The Campanile Tower at The Venetian (at the fountain). Relaxed 5km run. [Register on Luma](https://luma.com/fjoz7ymk).
 - **Workshop (Wed, Dec 2 and Thu, Dec 3):** Observability for AI agents: Strands, OpenTelemetry, and Langfuse. Session OPN304. Wednesday 12:30 pm at Caesars Forum, Forum 101. Thursday 3:00 pm at Wynn/Encore, Brahms 4.
-- **Community (date to be announced):** Langfuse community run. Las Vegas. Time and meeting point coming soon.
 
 ## Langfuse works with the AWS stack you use [#integrations]
 
