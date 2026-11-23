@@ -27,6 +27,62 @@ Open [**Topics**](https://cloud.langfuse.com/project/~/topics) in your project t
   ![Topics treemap showing clustered intent topics on the left and trace summaries for the selected topic on the right](/images/docs/topics/treemap.png)
 </Frame>
 
+## Get started [#get-started]
+
+On self-hosted Langfuse v4, enable Topics on your instance first; see [self-hosted Topics configuration](/self-hosting/configuration/topics).
+
+<Callout type="warning">
+  Topics sends trace conversations to the summary model configured in your LLM
+  connections, and sends generated summaries to your embedding and clustering
+  models. [Mask sensitive data before
+  ingestion](/docs/observability/features/masking) if it must not reach those
+  providers. Summarization does not guarantee anonymization.
+</Callout>
+
+<Steps>
+
+<Step>
+
+### Pick your models and facets
+
+Open [**Topics**](https://cloud.langfuse.com/project/~/topics), click **Set up topics**, choose which [facets](#how-it-works) to run, and assign models from your project or organization [LLM connections](/docs/administration/llm-connection): {/* pragma: allowlist secret */}
+
+- **Facet summaries**: a fast, inexpensive text model that runs once per trace.
+- **Embeddings**: an embedding model that turns each summary into a vector for clustering.
+- **Topic clustering**: a text model that names and describes each cluster. A stronger model usually produces clearer topic names.
+
+<Callout type="info">
+  Members, Admins, and Owners can configure Topics; Viewers can explore results.
+  Adding an LLM connection requires an Admin or Owner.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Filter and sample your traces
+
+Filter to a single agent, environment, or workflow and choose a sampling rate. Starting with one workflow and a modest sample keeps model costs predictable and stops unrelated traffic from muddying your clusters.
+
+<Callout type="info">
+  Topics reads recorded model conversations, so your traces need generation
+  observations with inputs and outputs. A trace with only a root span is not
+  enough. See the [tracing quickstart](/docs/observability/get-started) if your
+  model calls are not captured yet.
+</Callout>
+
+</Step>
+
+<Step>
+
+### Start your first live map
+
+Start processing to backfill recent matching traces and build your initial topics. The first topics usually appear within a few minutes, and the live map keeps processing new matching traces as they arrive.
+
+</Step>
+
+</Steps>
+
 ## How it works [#how-it-works]
 
 Topics examines each trace through up to four **facets**, each answering a different question about the run. For every active facet, it summarizes the trace, embeds the summary, clusters similar summaries, and names each group. Topics emerge directly from your traffic, so you do not need to define categories beforehand.
@@ -38,8 +94,60 @@ Topics examines each trace through up to four **facets**, each answering a diffe
 | **Outcome**   | What was delivered and whether the trace confirms it     |
 | **Issues**    | The main mistake that hurt the final result              |
 
+<TopicsArchitectureDiagram />
+
+## Live maps and snapshots [#maps-and-snapshots]
+
+Use **live maps** to track ongoing traffic and **snapshots** for one-off investigations. A project supports up to five live maps, so you can keep one per agent or workflow.
+
+| Mode         | How it works                                                                                                                                        |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Live map** | Summarizes new matching traces as they finish, assigns them to existing topics, and rebuilds clusters daily from up to 30 days of recent summaries. |
+| **Snapshot** | Clusters traces from a selected time window (up to 30 days) once, without affecting your live maps.                                                 |
+
+When configuring live maps and snapshots, keep these constraints in mind:
+
+- **Trace readiness**: Live maps wait until a trace goes idle before summarizing it, five minutes after the last observation by default. Adjust **Trace readiness** under **Topics > ⋮ > Settings** (60 seconds to 1 hour) for long-running agents.
+- **Filter rules**: Live map filters evaluate at ingestion, so they support positive filters on trace, session, user, tags, metadata, observation, and experiment fields. Scores, cost, latency, and `is not` filters are not supported.
+- **Pausing and refreshing**: Turning off **Live updates** freezes a map without deleting its results. **Refresh map** rebuilds clusters on demand (15-minute cooldown between manual refreshes).
+- **Snapshots**: Useful for comparing a release against baseline traffic or finding production use cases your [datasets](/docs/evaluation/experiments/datasets) miss. A snapshot can cluster existing summaries or **Summarize more traces** (up to 1,000 random or latest traces) first. Each facet needs at least 10 applicable summarized traces (100+ for full clustering; 10–99 uses small-sample mode), up to 20,000 traces per snapshot.
+
+## Explore and act on topics [#explore]
+
+Switch between **Treemap** to see the biggest clusters at a glance and **Scatter** to inspect how similar traces sit next to each other. Click any topic to read its description and trace summaries, inspect individual conversations, or click **Open in Tracing** to filter the tracing table to that topic. From there, you can turn a recurring issue into an [evaluation dataset](/docs/evaluation/experiments/datasets) or add an [evaluator](/docs/evaluation/overview) to catch it going forward.
+
+Within a map, each trace belongs to at most one topic per facet. **Unassigned** holds traces that do not fit any cluster, are waiting for the next rebuild, or lacked enough content for that facet.
+
+Topic labels are a starting point, not ground truth: read a few underlying traces before turning a cluster into an evaluator or product decision (see [Error analysis](/academy/monitoring/error-analysis)). The scatter plot reflects the cohort from the last rebuild; newer traces show up in topic trace lists first and appear on the scatter plot after the next rebuild, when topic names and boundaries can shift.
+
+## Models, billing, and costs [#models-and-costs]
+
+Running Topics has two cost components:
+
+- **Model provider usage**: Summarization, embeddings, and cluster naming run on your own LLM connections and are billed directly by your provider. Narrow your filters, lower the sampling rate, or pick a smaller summary model to keep spend down. Langfuse displays estimated costs where model pricing is available; check your provider's invoice for exact spend.
+- **Langfuse billing**: On Langfuse Cloud, each generated facet summary counts as one [billable unit](/docs/administration/billable-units) and appears under **Facet summaries** in the [organization usage breakdown](/docs/administration/billable-units#monitor-organization-usage).
+
+<Callout type="warning">
+  Choose your embedding model and dimensions (64–2,048, default 1,024) carefully
+  before starting. Both are shared across the project and locked once summaries
+  have been embedded, because vectors from different models or dimensions cannot
+  be compared.
+</Callout>
+
+## API, MCP, and agents [#api]
+
+Instead of pulling raw traces into a script or an agent's context window, read your live-map topics first and fetch full traces only where you need them:
+
+- **REST API**: Query live-map facets, rules, topics, summaries, and assignments through the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) under `/api/public/unstable/`. These endpoints are unstable and may change while Topics is in beta.
+- **MCP Server**: Connect the [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) to give coding agents and [Halo](/docs/api-and-data-platform/features/halo) access to `listTopicFacets`, `listTopics`, `listTopicRules`, `listTopicSummaries`, and `listTopicAssignments`.
+- **CLI**: Query the same endpoints from the terminal with the [Langfuse CLI](/docs/api-and-data-platform/features/cli).
+
+## FAQ [#faq]
+
+<FaqDetails>
+
 <Details id="facet-prompts">
-<Summary>Default facet prompts</Summary>
+<Summary>What prompts does Topics use for each facet?</Summary>
 
 These facet-specific instructions are combined with shared summarization instructions and the trace transcript.
 
@@ -185,114 +293,6 @@ Examples:
 </div>
 
 </Details>
-
-<TopicsArchitectureDiagram />
-
-## Get started [#get-started]
-
-On self-hosted Langfuse v4, enable Topics on your instance first; see [self-hosted Topics configuration](/self-hosting/configuration/topics).
-
-<Callout type="warning">
-  Topics sends trace conversations to the summary model configured in your LLM
-  connections, and sends generated summaries to your embedding and clustering
-  models. [Mask sensitive data before
-  ingestion](/docs/observability/features/masking) if it must not reach those
-  providers. Summarization does not guarantee anonymization.
-</Callout>
-
-<Steps>
-
-<Step>
-
-### Pick your models and facets
-
-Open [**Topics**](https://cloud.langfuse.com/project/~/topics), click **Set up topics**, choose which facets to run, and assign models from your project or organization [LLM connections](/docs/administration/llm-connection): {/* pragma: allowlist secret */}
-
-- **Facet summaries**: a fast, inexpensive text model that runs once per trace.
-- **Embeddings**: an embedding model that turns each summary into a vector for clustering.
-- **Topic clustering**: a text model that names and describes each cluster. A stronger model usually produces clearer topic names.
-
-<Callout type="info">
-  Members, Admins, and Owners can configure Topics; Viewers can explore results.
-  Adding an LLM connection requires an Admin or Owner.
-</Callout>
-
-</Step>
-
-<Step>
-
-### Filter and sample your traces
-
-Filter to a single agent, environment, or workflow and choose a sampling rate. Starting with one workflow and a modest sample keeps model costs predictable and stops unrelated traffic from muddying your clusters.
-
-<Callout type="info">
-  Topics reads recorded model conversations, so your traces need generation
-  observations with inputs and outputs. A trace with only a root span is not
-  enough. See the [tracing quickstart](/docs/observability/get-started) if your
-  model calls are not captured yet.
-</Callout>
-
-</Step>
-
-<Step>
-
-### Start your first live map
-
-Start processing to backfill recent matching traces and build your initial topics. The first topics usually appear within a few minutes, and the live map keeps processing new matching traces as they arrive.
-
-</Step>
-
-</Steps>
-
-## Live maps and snapshots [#maps-and-snapshots]
-
-Use **live maps** to track ongoing traffic and **snapshots** for one-off investigations. A project supports up to five live maps, so you can keep one per agent or workflow.
-
-| Mode         | How it works                                                                                                                                        |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Live map** | Summarizes new matching traces as they finish, assigns them to existing topics, and rebuilds clusters daily from up to 30 days of recent summaries. |
-| **Snapshot** | Clusters traces from a selected time window (up to 30 days) once, without affecting your live maps.                                                 |
-
-When configuring live maps and snapshots, keep these constraints in mind:
-
-- **Trace readiness**: Live maps wait until a trace goes idle before summarizing it, five minutes after the last observation by default. Adjust **Trace readiness** under **Topics > ⋮ > Settings** (60 seconds to 1 hour) for long-running agents.
-- **Filter rules**: Live map filters evaluate at ingestion, so they support positive filters on trace, session, user, tags, metadata, observation, and experiment fields. Scores, cost, latency, and `is not` filters are not supported.
-- **Pausing and refreshing**: Turning off **Live updates** freezes a map without deleting its results. **Refresh map** rebuilds clusters on demand (15-minute cooldown between manual refreshes).
-- **Snapshots**: Useful for comparing a release against baseline traffic or finding production use cases your [datasets](/docs/evaluation/experiments/datasets) miss. A snapshot can cluster existing summaries or **Summarize more traces** (up to 1,000 random or latest traces) first. Each facet needs at least 10 applicable summarized traces (100+ for full clustering; 10–99 uses small-sample mode), up to 20,000 traces per snapshot.
-
-## Explore and act on topics [#explore]
-
-Switch between **Treemap** to see the biggest clusters at a glance and **Scatter** to inspect how similar traces sit next to each other. Click any topic to read its description and trace summaries, inspect individual conversations, or click **Open in Tracing** to filter the tracing table to that topic. From there, you can turn a recurring issue into an [evaluation dataset](/docs/evaluation/experiments/datasets) or add an [evaluator](/docs/evaluation/overview) to catch it going forward.
-
-Within a map, each trace belongs to at most one topic per facet. **Unassigned** holds traces that do not fit any cluster, are waiting for the next rebuild, or lacked enough content for that facet.
-
-Topic labels are a starting point, not ground truth: read a few underlying traces before turning a cluster into an evaluator or product decision (see [Error analysis](/academy/monitoring/error-analysis)). The scatter plot reflects the cohort from the last rebuild; newer traces show up in topic trace lists first and appear on the scatter plot after the next rebuild, when topic names and boundaries can shift.
-
-## Models, billing, and costs [#models-and-costs]
-
-Running Topics has two cost components:
-
-- **Model provider usage**: Summarization, embeddings, and cluster naming run on your own LLM connections and are billed directly by your provider. Narrow your filters, lower the sampling rate, or pick a smaller summary model to keep spend down. Langfuse displays estimated costs where model pricing is available; check your provider's invoice for exact spend.
-- **Langfuse billing**: On Langfuse Cloud, each generated facet summary counts as one [billable unit](/docs/administration/billable-units) and appears under **Facet summaries** in the [organization usage breakdown](/docs/administration/billable-units#monitor-organization-usage).
-
-<Callout type="warning">
-  Choose your embedding model and dimensions (64–2,048, default 1,024) carefully
-  before starting. Both are shared across the project and locked once summaries
-  have been embedded, because vectors from different models or dimensions cannot
-  be compared.
-</Callout>
-
-## API, MCP, and agents [#api]
-
-Instead of pulling raw traces into a script or an agent's context window, read your live-map topics first and fetch full traces only where you need them:
-
-- **REST API**: Query live-map facets, rules, topics, summaries, and assignments through the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) under `/api/public/unstable/`. These endpoints are unstable and may change while Topics is in beta.
-- **MCP Server**: Connect the [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) to give coding agents and [Halo](/docs/api-and-data-platform/features/halo) access to `listTopicFacets`, `listTopics`, `listTopicRules`, `listTopicSummaries`, and `listTopicAssignments`.
-- **CLI**: Query the same endpoints from the terminal with the [Langfuse CLI](/docs/api-and-data-platform/features/cli).
-
-## FAQ [#faq]
-
-<FaqDetails>
 
 <Details>
 <Summary>Why did Topics pause automatically?</Summary>
