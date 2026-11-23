@@ -7,7 +7,7 @@ import Link from "next/link";
 const discounts = [
   {
     name: "Early-stage startups",
-    description: "50% off, first year",
+    description: "US$2,000 in credits, first year",
     cta: {
       text: "Learn more and apply",
       href: "/startups",
@@ -15,15 +15,11 @@ const discounts = [
   },
   {
     name: "Research / Students",
-    description: "Up to 100% off, limits apply",
+    description: "US$2,000 in credits, first year",
     cta: {
       text: "Learn more and apply",
       href: "/research",
     },
-  },
-  {
-    name: "Open-source projects",
-    description: "USD 300 in credits / month, first year",
   },
 ];
 
@@ -68,9 +64,9 @@ export const PricingDiscounts = () => (
         <Link href="mailto:support@langfuse.com" className="underline">
           support@langfuse.com
         </Link>{" "}
-        to apply for a discount. We want all startups, educational users and
-        open source projects to build with Langfuse and are happy to work with
-        you to make that happen.
+        if you have questions about a discount. We want all startups and
+        educational users to build with Langfuse and are happy to work with you
+        to make that happen.
       </Text>
     </div>
   </div>

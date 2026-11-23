@@ -33,7 +33,7 @@ For production projects. Longer data access and unlimited users.
 - Unlimited users
 - In-app support
 
-Discounts available for [startups](/startups), [research/students](/research), and [open-source projects](/pricing#discounts).
+Discounts available for [startups](/startups) and [research/students](/research).
 
 Trusted by: [Magic Patterns](/users/magic-patterns-ai-design-tools), Draftbit
 
@@ -256,11 +256,10 @@ A billable unit in Langfuse is any tracing data point sent to the platform -- in
 
 ## Discounts
 
-| Program              | Discount                            | Details                           |
-| -------------------- | ----------------------------------- | --------------------------------- |
-| Early-stage startups | 50% off, first year                 | [Learn more and apply](/startups) |
-| Research / Students  | Up to 100% off (limits apply)       | [Learn more and apply](/research) |
-| Open-source projects | $300 in credits / month, first year | Contact support@langfuse.com      |
+| Program              | Discount                        | Details                           |
+| -------------------- | ------------------------------- | --------------------------------- |
+| Early-stage startups | US$2,000 in credits, first year | [Learn more and apply](/startups) |
+| Research / Students  | US$2,000 in credits, first year | [Learn more and apply](/research) |
 
 ## Frequently Asked Questions
 
