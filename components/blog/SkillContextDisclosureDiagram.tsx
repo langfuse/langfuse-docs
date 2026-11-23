@@ -132,7 +132,7 @@ export function SkillContextDisclosureDiagram() {
             y1="8"
             x2="271"
             y2="418"
-            stroke="var(--line-structure)"
+            stroke="var(--text-primary)"
             strokeWidth="1"
             strokeDasharray="2 4"
           />
