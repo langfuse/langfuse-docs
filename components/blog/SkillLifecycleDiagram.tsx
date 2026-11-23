@@ -2,13 +2,18 @@ import { cn } from "@/lib/utils";
 import { VerticalArrow } from "./diagram-primitives";
 import styles from "./diagram-fit.module.css";
 
-const STAGES = [
+const STAGES: Array<{
+  step: string;
+  name: string;
+  detail: string;
+  storage?: string;
+  state: "local" | "persisted" | "ui" | "unmodeled";
+}> = [
   {
     step: "01",
     name: "Installed or fetched",
     detail: "Skill files sit on disk or are fetched from the registry.",
-    storage: "Not on traces yet",
-    state: "local" as const,
+    state: "local",
   },
   {
     step: "02",
@@ -16,28 +21,27 @@ const STAGES = [
     detail:
       "Skill name and description appear in the system prompt or tool list.",
     storage: "Recorded on GENERATION",
-    state: "persisted" as const,
+    state: "persisted",
   },
   {
     step: "03",
     name: "Requested (intent)",
     detail: "Model calls a skill-loading tool in its output.",
     storage: "Computed in trace UI",
-    state: "ui" as const,
+    state: "ui",
   },
   {
     step: "04",
     name: "Loaded",
     detail: "Tool call succeeds and returns non-null output.",
     storage: "Recorded on TOOL",
-    state: "persisted" as const,
+    state: "persisted",
   },
   {
     step: "05",
     name: "Evicted or compacted",
     detail: "Session compacts context; skill may be dropped or re-attached.",
-    storage: "Not modeled yet",
-    state: "unmodeled" as const,
+    state: "unmodeled",
   },
 ];
 
@@ -66,16 +70,18 @@ export function SkillLifecycleDiagram() {
                     {stage.name}
                   </span>
                 </div>
-                <span
-                  className={cn(
-                    "font-mono text-[11px]",
-                    stage.state === "persisted"
-                      ? "text-text-primary"
-                      : "text-text-tertiary",
-                  )}
-                >
-                  {stage.storage}
-                </span>
+                {stage.storage ? (
+                  <span
+                    className={cn(
+                      "font-mono text-[11px]",
+                      stage.state === "persisted"
+                        ? "text-text-primary"
+                        : "text-text-tertiary",
+                    )}
+                  >
+                    {stage.storage}
+                  </span>
+                ) : null}
               </div>
               <p className="mt-1 text-xs leading-relaxed text-text-secondary">
                 {stage.detail}

@@ -1,18 +1,19 @@
 ---
-title: "How we built skill management and tracing in Langfuse"
+title: "How we enabled tracing skill usage in Langfuse"
 date: 2026/11/23
-description: "Tracing which skills an agent used sounds simple until you look at real runs. Why skill usage spans multiple lifecycle stages, how harnesses load skills in incompatible ways, and how we split active catalog reporting from passive load parsing in Langfuse."
+description: "Understanding the influence a skill had on an agent run should be straightforward, but it proved surprisingly hard to implement across a skill's lifecycle stages and across different harnesses."
 tag: engineering
 author: Tobias
 ---
 
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { SkillStructureDiagram } from "@/components/blog/SkillStructureDiagram";
 import { SkillLifecycleDiagram } from "@/components/blog/SkillLifecycleDiagram";
 import { SkillTracingSplitDiagram } from "@/components/blog/SkillTracingSplitDiagram";
 
 <BlogHeader
-  title="How we built skill management and tracing in Langfuse"
-  description="Tracing which skills an agent used sounds simple until you look at real runs. Why skill usage spans multiple lifecycle stages, how harnesses load skills in incompatible ways, and how we split active catalog reporting from passive load parsing in Langfuse."
+  title="How we enabled tracing skill usage in Langfuse"
+  description="Understanding the influence a skill had on an agent run should be straightforward, but it proved surprisingly hard to implement across a skill's lifecycle stages and across different harnesses."
   authors={["tobiasklesel"]}
   date="November 23, 2026"
 />
@@ -20,6 +21,8 @@ import { SkillTracingSplitDiagram } from "@/components/blog/SkillTracingSplitDia
 As soon as a team ships a few agent skills, two questions come up: _did the agent use the skill, and did version 2 work better than version 1?_
 
 Under the [Agent Skills specification](https://agentskills.io/specification), a skill is a directory with a `SKILL.md` file (YAML frontmatter with a `name` and `description`, plus Markdown instructions) and optional files in `references/` or `scripts/`. Tracing it sounds like a boolean on a trace.
+
+<SkillStructureDiagram />
 
 Look at a real agent run, though, and "used" breaks into five states that every coding agent and framework implements differently. When we built [Skill Management](/docs/skill-management/overview) in Langfuse, storing and versioning skill directories was the straightforward part. Most of the design work went into figuring out what happened to a skill inside a trace, across harnesses we don't control.
 
@@ -71,33 +74,31 @@ Tracking availability, intent, and loads is already tricky for one agent. Suppor
 
 The Agent Skills spec standardizes the folder layout on disk, not how an agent reads it at runtime. Every harness invents its own discovery budget, tool name, argument schema, and message format:
 
-| Harness                     | Load mechanism                                     | Context delivery                        | Langfuse ingestion today                    |
-| --------------------------- | -------------------------------------------------- | --------------------------------------- | ------------------------------------------- |
-| **Claude Code / Agent SDK** | `Skill` (`{skill}`), `Read`, or `/name`            | `isMeta: true` user row; short tool ack | `Skill`, `Read` (with catalog); not `/name` |
-| **Anthropic API**           | `bash: cat .../SKILL.md` in container              | Server-side container tool result       | No (no client span)                         |
-| **OpenAI Codex**            | Shell `exec_command` (`cat`), or `$skill`          | Tool result, or `<skill>` prompt block  | `cat` (Codex + catalog); not `$skill`       |
-| **Cursor**                  | File read or shell tool                            | Tool result                             | Not yet                                     |
-| **Gemini CLI**              | `activate_skill` (`{name}`) + consent prompt       | `<activated_skill>` XML tool result     | Not yet                                     |
-| **OpenCode**                | `skill` (`{id}` from path) or `@skill-id`          | Tool result                             | Not yet                                     |
-| **LangChain Deep Agents**   | `read_file` (`{file_path}`) via `SkillsMiddleware` | Tool result                             | Not yet                                     |
-| **Mastra**                  | `skill`, `skill_read`, or `load_skill`             | Tool result                             | `skill`, `skill_read`; not `load_skill`     |
-| **Vercel AI SDK**           | `HarnessAgent` inline `skills`, or `uploadSkill`   | Depends on harness adapter              | Via underlying harness spans                |
+| Harness                     | Load mechanism                                     | Context delivery                        |
+| --------------------------- | -------------------------------------------------- | --------------------------------------- |
+| **Claude Code / Agent SDK** | `Skill` (`{skill}`), `Read`, or `/name`            | `isMeta: true` user row; short tool ack |
+| **Anthropic API**           | `bash: cat .../SKILL.md` in container              | Server-side container tool result       |
+| **OpenAI Codex**            | Shell `exec_command` (`cat`), or `$skill`          | Tool result, or `<skill>` prompt block  |
+| **Cursor**                  | File read or shell tool                            | Tool result                             |
+| **Gemini CLI**              | `activate_skill` (`{name}`) + consent prompt       | `<activated_skill>` XML tool result     |
+| **OpenCode**                | `skill` (`{id}` from path) or `@skill-id`          | Tool result                             |
+| **LangChain Deep Agents**   | `read_file` (`{file_path}`) via `SkillsMiddleware` | Tool result                             |
+| **Mastra**                  | `skill`, `skill_read`, or `load_skill`             | Tool result                             |
+| **Vercel AI SDK**           | `HarnessAgent` inline `skills`, or `uploadSkill`   | Depends on harness adapter              |
 
 Those differences break a simple "log the skill tool call" design in four ways:
 
-1. **Tool names and argument keys don't match across frameworks.** Claude Code calls `Skill({ skill })` and `Read({ file_path })`. Mastra uses `skill` (accepting `/skills/<name>` paths), `skill_read({ skillName, path })`, or `load_skill` when its search processor is enabled. Gemini CLI calls `activate_skill({ name })`. OpenCode calls `skill({ id })`, where `id` comes from the directory path instead of frontmatter `name`. LangChain Deep Agents expects `read_file({ file_path })`, which doesn't match `Read` or `readFile`.
+1. **Tool names and argument keys don't match across frameworks.** Claude Code calls `Skill({ skill })` and `Read({ file_path })`. Mastra uses `skill` (accepting `/skills/<name>` paths), `skill_read({ skillName, path })`, or `load_skill` when its search processor is enabled. Gemini CLI calls `activate_skill({ name })`. OpenCode calls `skill({ id })`, where `id` comes from the directory path instead of frontmatter `name`. LangChain Deep Agents calls `read_file({ file_path })`.
 2. **Some agents never call a skill tool.** OpenAI Codex lets the model run `cat .../SKILL.md` inside its shell tool (`exec_command`). Anthropic's Messages API runs `bash: cat` inside a server-side code execution container using Anthropic-managed `skver_...` version IDs, so no client-side tool observation is emitted at all.
-3. **In Claude Code, the tool result isn't the skill.** The `Skill` tool returns a short acknowledgement while the rendered `SKILL.md` body lands in a separate `isMeta: true` user transcript entry linked via `sourceToolUseID`. Our public `claude-observability-plugin` stitches those together when content capture is enabled so you can read the injected instructions on the tool span, while Langfuse ingestion treats a successful `Skill` span as the load signal.
+3. **In Claude Code, the tool result isn't the skill.** The `Skill` tool returns a short acknowledgement while the rendered `SKILL.md` body lands in a separate `isMeta: true` user transcript entry linked via `sourceToolUseID`.
 4. **Some loads produce no tool span at all.** Running `/skill-name` in Claude Code, preloading skills onto a Claude Code subagent, or typing `$skill-name` in Codex injects the skill directly into messages with zero tool calls.
-
-Even our own early observability plugins for Claude Code, Codex, and Cursor predate this model: they spot skill activity to attach `skill:<name>` trace tags and rename spans rather than emitting structured skill catalogs.
 
 ## Hooks everywhere vs. ingestion-side parsing [#decision-gate]
 
 Once you see that fragmentation, you run into the main design question for skill tracing: **who should report a skill load?**
 
 - **Active reporting via hooks everywhere.** Every SDK, framework, and coding-agent plugin emits structured events when skills are offered and whenever a file loads. In theory, that's the cleanest signal: exact, version-aware, and able to catch non-tool loads like slash commands or prompt injections. In practice, almost nobody would wire it up. Every harness needs custom load hooks, every custom agent loop has to instrument its own file readers, existing OpenTelemetry pipelines emit nothing until rewritten, and you duplicate data that's already sitting in your tool spans.
-- **Pure ingestion-side parsing.** Ask nothing from the client and infer everything on the server from prompts and tool spans. Zero client work sounds appealing, but it breaks in two places. First, the server can't reliably extract which skills were offered from arbitrary system prompts. Second, when an agent calls `Read(".agents/skills/refund-policy/SKILL.md")`, the span gives you a path on disk, not whether that folder holds version 1 or version 2 in Langfuse. Guessing skill loads from generic `Read` calls without knowing which skills exist also flags ordinary source files as skill loads.
+- **Pure ingestion-side parsing.** Ask nothing from the client and infer everything on the server from prompts and tool spans. Zero client work sounds appealing, but it breaks in two places. First, the server can't reliably extract which skills were offered from arbitrary system prompts. Second, when an agent calls `Read(".agents/skills/my-skill/SKILL.md")`, the span gives you a path on disk, not whether that folder holds version 1 or version 2 in Langfuse. Guessing skill loads from generic `Read` calls without knowing which skills exist also flags ordinary source files as skill loads.
 
 ### Active catalog in, passive loads out [#hybrid-approach]
 
@@ -126,7 +127,7 @@ The upside of keeping the parser inside Langfuse is that adding a new harness sh
 
 ## Carrying skill versions into traces [#distribution-and-versioning]
 
-Knowing that `refund-policy` loaded only gets you halfway if you can't tell whether the agent ran **version 2** or **version 1**.
+Knowing that a specific skill loaded only gets you halfway if you can't tell whether the agent ran **version 2** or **version 1**.
 
 In Langfuse, each skill version is an immutable snapshot of `SKILL.md` and its supporting files, promoted or rolled back with movable labels like `staging` and `production` through the UI, API, CLI, or MCP. Because Langfuse is the registry and observability backend rather than the runtime skill loader, carrying version identity from the registry into the trace works differently depending on how the agent loads skills.
 
