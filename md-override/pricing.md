@@ -295,7 +295,7 @@ A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar,
 
 Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team.
 
-If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.
+If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you. Credits from the [discount programs](/pricing#discounts) are separate and apply to any paid plan.
 
 **Can I set up alerts on usage fees?**
 Yes, you can configure [spend alerts](/docs/administration/spend-alerts) to receive email notifications when spending exceeds predefined thresholds.
