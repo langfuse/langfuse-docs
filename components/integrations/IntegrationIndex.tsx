@@ -102,6 +102,10 @@ const categoryConfig: Record<
       },
     ],
   },
+  memory: {
+    title: "Memory",
+    description: "Trace agent memory operations in Langfuse",
+  },
   "model-providers": {
     title: "Model Providers",
     description: "Direct integrations with AI model providers",
