@@ -12,31 +12,30 @@ const STAGES = [
   },
   {
     step: "02",
-    name: "Available / discoverable",
+    name: "Available",
     detail:
-      "Skill name and description appear in the system prompt or listing.",
+      "Skill name and description appear in the system prompt or tool list.",
     storage: "Recorded on GENERATION",
     state: "persisted" as const,
   },
   {
     step: "03",
     name: "Requested (intent)",
-    detail: "Model emits a tool call asking to load a skill in its output.",
+    detail: "Model calls a skill-loading tool in its output.",
     storage: "Computed in trace UI",
     state: "ui" as const,
   },
   {
     step: "04",
     name: "Loaded",
-    detail: "Skill-loading tool succeeds and returns non-null output.",
+    detail: "Tool call succeeds and returns non-null output.",
     storage: "Recorded on TOOL",
     state: "persisted" as const,
   },
   {
     step: "05",
-    name: "Evicted / compacted",
-    detail:
-      "Long session compacts context; skill may be dropped or re-attached.",
+    name: "Evicted or compacted",
+    detail: "Session compacts context; skill may be dropped or re-attached.",
     storage: "Not modeled yet",
     state: "unmodeled" as const,
   },

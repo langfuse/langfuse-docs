@@ -65,9 +65,9 @@ export function SkillTracingSplitDiagram() {
           <div>
             Langfuse ingestion pipeline
             <Subtext>
-              Gates on non-error, non-null tool output, uses the catalog to
-              allow-list generic file paths, and resolves loaded names to exact
-              skill versions
+              Checks for non-error, non-null output, allow-lists generic file
+              paths against the catalog, and resolves loaded names to skill
+              versions
             </Subtext>
           </div>
         </Box>
@@ -96,8 +96,8 @@ export function SkillTracingSplitDiagram() {
             <div>
               GENERATION observations
               <Subtext>
-                Available skill list; trace UI splits into Requested and Not
-                requested from output tool calls
+                Available skills; trace UI splits them into Requested and Not
+                requested from tool calls
               </Subtext>
             </div>
           </Box>
@@ -105,7 +105,7 @@ export function SkillTracingSplitDiagram() {
             <div>
               TOOL observations
               <Subtext>
-                Confirmed loaded skill version and file path; feeds filters and
+                Loaded skill version and file path; feeds filters and
                 per-version Usage analytics
               </Subtext>
             </div>
@@ -141,7 +141,7 @@ export function SkillTracingSplitDiagram() {
             <div>
               Langfuse ingestion pipeline
               <Subtext>
-                Success gate, path allow-listing from catalog, and version
+                Success check, path allow-listing from catalog, and version
                 resolution
               </Subtext>
             </div>
@@ -151,7 +151,8 @@ export function SkillTracingSplitDiagram() {
             <div>
               GENERATION observations
               <Subtext>
-                Available skills; trace UI computes Requested vs. Not requested
+                Available skills; trace UI splits them into Requested and Not
+                requested
               </Subtext>
             </div>
           </Box>
@@ -162,7 +163,7 @@ export function SkillTracingSplitDiagram() {
             <div>
               TOOL observations
               <Subtext>
-                Confirmed loaded version and file path; feeds Usage analytics
+                Loaded skill version and file path; feeds Usage analytics
               </Subtext>
             </div>
           </Box>
