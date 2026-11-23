@@ -20,7 +20,7 @@ Send Loom’s server traces to Langfuse over OpenTelemetry to see where a memory
 
 ### Get project API keys
 
-Create a Langfuse project and get its public and secret keys from the project settings. Set up a Loom server if you need one. [Loom quickstart](https://clickhouse.github.io/loom/getting-started/quickstart/)
+Create a Langfuse project and get its public and secret keys from the project settings. If you need a Loom server, set one up with the [Loom quickstart](https://clickhouse.github.io/loom/getting-started/quickstart/).
 
 ### Configure the Loom server
 
@@ -53,6 +53,6 @@ If the trace is missing, check the base URL, key pair, and `LOOM_OTEL_ENABLED`. 
 
 ## What Loom sends [#what-loom-sends]
 
-Loom exports server operation spans and includes latency, token usage, and cost where available. Model prompt and completion capture defaults to off and can be configured per namespace. [Loom trace attributes and text capture settings](https://clickhouse.github.io/loom/features/integrations/langfuse/#what-text-leaves-loom)
+Loom exports server operation spans and includes latency, token usage, and cost where available. [Model prompt and completion capture](https://clickhouse.github.io/loom/features/integrations/langfuse/#what-text-leaves-loom) defaults to off and can be configured per namespace.
 
-Loom also posts retrieval-quality [scores](/docs/evaluation/scores/overview) onto each search trace: `retrieval_confidence`, `top_similarity`, `abstained`, and `abstain_reason`. `code.ask` traces add `code_ask_cache_hit` and `code_ask_coverage`. To have an LLM judge write a `retrieval_relevance` score, set `LOOM_RETRIEVAL_JUDGE_SAMPLE_RATE` above `0` (default `0`). Each sampled search costs one extra model call. [Loom scores](https://clickhouse.github.io/loom/features/integrations/langfuse/#scores)
+Loom also posts [retrieval-quality scores](https://clickhouse.github.io/loom/features/integrations/langfuse/#scores) onto each search trace: `retrieval_confidence`, `top_similarity`, `abstained`, and `abstain_reason`. `code.ask` traces add `code_ask_cache_hit` and `code_ask_coverage`. To have an LLM judge write a `retrieval_relevance` score, set `LOOM_RETRIEVAL_JUDGE_SAMPLE_RATE` above `0` (default `0`). Each sampled search costs one extra model call.
