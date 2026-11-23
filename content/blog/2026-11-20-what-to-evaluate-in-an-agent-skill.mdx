@@ -1,7 +1,7 @@
 ---
 title: "How to evaluate an agent skill"
 date: 2026/11/20
-description: "Skills are not prompts: agents decide whether to load them, read them in pieces, and execute multi-step workflows with them. Here is a practical framework for measuring skill lift, routing, trajectory cost, and task behavior."
+description: "Evaluating agent skills has a learning curve. This post will give you a good framework for setting up your skill evals."
 tag: engineering, agents, evaluation
 author: Lotte
 ---
@@ -11,16 +11,14 @@ import { FileTree } from "@/components/docs";
 
 <BlogHeader
   title="How to evaluate an agent skill"
-  description="Skills are not prompts: agents decide whether to load them, read them in pieces, and execute multi-step workflows with them. Here is a practical framework for measuring skill lift, routing, trajectory cost, and task behavior."
+  description="Evaluating agent skills has a learning curve. This post will give you a good framework for setting up your skill evals."
   date="November 20, 2026"
   authors={["lotteverheyden"]}
 />
 
-In [How we stopped vibe-editing our agent skill](/blog/2026-11-19-engineering-the-langfuse-skill), we walked through the architecture we use to test and monitor the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) across isolated Modal sandboxes and live [Halo](/blog/2026-10-23-halo) traces.
-
 Once you have a harness that can run agents against a dataset, the harder question is content: **what should you actually measure?**
 
-It is tempting to evaluate a skill the same way you evaluate a system prompt: run a list of inputs, pass the final text answer to an LLM judge, and track a single pass rate. In practice, that hides almost everything you need to debug and improve a skill.
+It is tempting to evaluate a skill the same way you evaluate a system prompt. But skills are not prompts, and skill evals are not prompt evals. Let's walk through what that means and how you should think about your skill eval setup.
 
 ## Why skill evals are not prompt evals [#why-skill-evals-are-not-prompt-evals]
 
