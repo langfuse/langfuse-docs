@@ -6,7 +6,6 @@ import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { build } from "esbuild";
 
-// test:mcp uses --test-force-exit because mcp-handler owns a cleanup interval.
 const root = fileURLToPath(new URL("../", import.meta.url));
 const temporaryDirectory = await mkdtemp(join(tmpdir(), "docs-mcp-test-"));
 after(() => rm(temporaryDirectory, { recursive: true, force: true }));

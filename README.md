@@ -12,20 +12,19 @@ Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fum
 
 ## Local Development
 
-Pre-requisites: Node.js 22 (22.13+), pnpm v12.8.1
-
-To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22` then `nvm use` (or `nvm use 22`). The repo includes an `.nvmrc` so `nvm use` picks 22 automatically.
+Pre-requisites: [Bun](https://bun.com) (version pinned in `.bun-version`). Install it with `curl -fsSL https://bun.com/install | bash` or `npm install -g bun`. Bun installs dependencies, runs the scripts, and runs Next.js on its runtime, so you don't need Node.js locally.
 
 1. Optional: Create env based on [.env.template](./.env.template)
-2. Run `pnpm i` to install the dependencies.
-3. Run `pnpm dev` to start the development server on localhost:3333
+2. Run `bun install` to install the dependencies.
+3. Run `bun dev` to start the development server on localhost:3333
 
 ## Formatting
 
-This repo uses [Prettier](https://prettier.io/) for formatting supported source and content files, including Markdown and MDX.
+This repo uses [`bun fmt`](https://bun.com/docs/format), Bun's built-in Prettier-compatible formatter, for supported source and content files, including Markdown and MDX. It reads `.prettierrc.json` and `.prettierignore`.
 
-- Run `pnpm run format` to format files.
-- Run `pnpm run format:check` to check formatting in CI mode.
+- Run `bun fmt` to format files.
+- Run `bun fmt --check` to check formatting in CI mode.
+- Run `bun lint` to run the formatting, type (`bun check`), H1, and middle dot checks together.
 
 Markdown prose wrapping is preserved and embedded-language formatting is disabled in `.prettierrc.json` so formatting does not change linebreak-sensitive Markdown rendering or fenced code snippet contents.
 
@@ -90,4 +89,4 @@ Copy and MCP use the same pre-built static Markdown files.
 
 ## Bundle analysis
 
-Run `pnpm run analyze` to analyze the bundle size of the production build using `@next/bundle-analyzer`.
+Run `bun run analyze` to analyze the bundle size of the production build using `@next/bundle-analyzer`.

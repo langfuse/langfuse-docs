@@ -54,8 +54,7 @@ export default async function SectionDocPage(props: PageProps) {
 
   const contentWidth: ResolvedContentWidth =
     ((page.data as Record<string, unknown>).contentWidth as
-      | ContentWidthType
-      | undefined) ?? "default";
+      ContentWidthType | undefined) ?? "default";
 
   let bodyClient = <MDX components={getMDXComponents()} />;
 

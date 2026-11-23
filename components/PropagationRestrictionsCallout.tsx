@@ -3,12 +3,7 @@ import { Link } from "@/components/ui/link";
 
 interface PropagationRestrictionsCalloutProps {
   attributes?: (
-    | "userId"
-    | "sessionId"
-    | "metadata"
-    | "version"
-    | "tags"
-    | "traceName"
+    "userId" | "sessionId" | "metadata" | "version" | "tags" | "traceName"
   )[];
 }
 

@@ -38,7 +38,7 @@ function WorkshopContentUnavailablePage() {
         </p>
         <p>Run this command, then refresh the page:</p>
         <pre>
-          <code>pnpm workshop:sync</code>
+          <code>bun run workshop:sync</code>
         </pre>
       </DocsBody>
     </DocsPage>
@@ -63,7 +63,8 @@ export async function generateMetadata({
   if (!hasWorkshopContent()) {
     return {
       title: "Workshop content is not available",
-      description: "Run pnpm workshop:sync to generate workshop pages locally.",
+      description:
+        "Run bun run workshop:sync to generate workshop pages locally.",
     };
   }
 

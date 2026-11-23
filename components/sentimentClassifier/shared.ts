@@ -88,8 +88,7 @@ export type ClassifySentimentSuccess = {
 };
 
 export type ClassifySentimentOutcome =
-  | { ok: true; data: ClassifySentimentSuccess }
-  | { ok: false; error: string };
+  { ok: true; data: ClassifySentimentSuccess } | { ok: false; error: string };
 
 export async function classifySentiment(
   engine: SentimentEngine,

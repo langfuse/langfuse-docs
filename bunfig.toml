@@ -1,0 +1,26 @@
+[install]
+linker = "isolated"
+# 7 days, in seconds.
+minimumReleaseAge = 604800
+# Exact exceptions; future versions must age normally.
+minimumReleaseAgeExcludes = [
+  "@internationalized/date@3.12.4",
+  "@internationalized/number@3.6.8",
+  "@smithy/fetch-http-handler@5.8.0",
+  "@smithy/node-http-handler@4.12.1",
+  "@smithy/types@4.18.0",
+  "hls.js@1.7.2",
+  "react-aria@3.52.0",
+  "react-stately@3.50.0",
+  # First-party Langfuse JS SDK v6 release.
+  "@langfuse/browser@6.0.0",
+  "@langfuse/client@6.0.0",
+  "@langfuse/core@6.0.0",
+  "@langfuse/openai@6.0.0",
+  "@langfuse/otel@6.0.0",
+  "@langfuse/tracing@6.0.0",
+  "@langfuse/vercel-ai-sdk@6.0.0",
+  # Agent traffic classifier used by proxy.ts. Zero dependencies, no install
+  # scripts; the published dist matches a build of the GitHub source.
+  "@mintlify/agent-traffic@0.1.0",
+]

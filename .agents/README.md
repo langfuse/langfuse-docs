@@ -34,8 +34,8 @@ Current shape:
 ```json
 {
   "shared": {
-    "setupScript": "pnpm install",
-    "devCommand": "pnpm dev",
+    "setupScript": "npm install -g bun@1.4.5 && bun install",
+    "devCommand": "bun dev",
     "devTerminalDescription": "Development server on http://localhost:3333"
   },
   "mcpServers": {},
@@ -54,7 +54,7 @@ Current shape:
       "terminals": [
         {
           "name": "Run dev server",
-          "command": "pnpm dev"
+          "command": "bun dev"
         }
       ]
     }
@@ -101,9 +101,9 @@ truth.
 After editing `.agents/config.json`, `.agents/skills/`, `.agents/claude/`, or
 `.agents/cursor/`:
 
-1. Run `pnpm run agents:sync`
-2. Run `pnpm run agents:check`
+1. Run `bun run agents:sync`
+2. Run `bun run agents:check`
 3. Verify you did not stage generated files under `.claude/`, `.cursor/`,
    `.vscode/`, `.mcp.json`, or `.codex/`
 
-`pnpm install` also runs the sync/check flow via `postinstall`.
+`bun install` also runs the sync/check flow via `postinstall`.

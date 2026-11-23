@@ -35,13 +35,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          node-version: 22
+          bun-version-file: .bun-version
 
       - name: Run H1 heading check
-        run: node scripts/check-h1-headings.js
+        run: bun scripts/check-h1-headings.js
 
   check_middle_dot:
     needs:
@@ -54,13 +53,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          node-version: 22
+          bun-version-file: .bun-version
 
       - name: Run middle dot check
-        run: node scripts/check-middle-dot.js
+        run: bun scripts/check-middle-dot.js
 
   format:
     needs:
@@ -74,14 +72,34 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          runtime: node@22
-          cache: true
-          require-lockfile: true
+          bun-version-file: .bun-version
 
-      - name: Check Prettier formatting
-        run: pnpm run format:check
+      - name: Check formatting
+        run: bun fmt --check
+
+  test:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run unit tests
+        run: bun test
 
   # check-notebook-docs-sync:
   #   needs:
@@ -132,27 +150,24 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
-        id: pnpm-install
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          runtime: node@22
-          cache: true
-          require-lockfile: true
+          bun-version-file: .bun-version
 
-      - name: Run link checker and workshop sync unit tests
-        run: node --test scripts/check-links.test.js scripts/sync-workshop.test.mjs
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Build next.js app
-        run: pnpm build
+        run: bun run build
 
       - name: Start production server
         run: |
-          pnpm start &
+          bun run start &
           echo "SERVER_PID=$!" >> "$GITHUB_ENV"
           timeout 30 bash -c 'until curl -sf http://127.0.0.1:3333 > /dev/null; do sleep 1; done'
 
       - name: Check markdown and source links
-        run: pnpm link-check
+        run: bun run link-check
 
       - name: Stop production server
         if: always()
@@ -171,27 +186,24 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
-        id: pnpm-install
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          runtime: node@22
-          cache: true
-          require-lockfile: true
+          bun-version-file: .bun-version
 
-      - name: Run sitemap checker unit tests
-        run: node --test scripts/check-sitemap-links.test.js lib/compare-labels.test.js
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Build next.js app
-        run: pnpm build
+        run: bun run build
 
       - name: Start production server
         run: |
-          pnpm start &
+          bun run start &
           echo "SERVER_PID=$!" >> "$GITHUB_ENV"
           timeout 30 bash -c 'until curl -sf http://127.0.0.1:3333 > /dev/null; do sleep 1; done'
 
       - name: Check sitemap URLs
-        run: pnpm sitemap-check
+        run: bun run sitemap-check
 
       - name: Stop production server
         if: always()
@@ -206,6 +218,7 @@ jobs:
         check_h1,
         check_middle_dot,
         format,
+        test,
         # check-notebook-docs-sync,
         build-and-check-links,
         check-sitemap-links,

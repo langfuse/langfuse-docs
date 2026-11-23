@@ -21,20 +21,20 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
-          node-version: 22
+          bun-version-file: .bun-version
 
       - name: Update cached GitHub star count
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/update-github-stars.js
+        run: bun scripts/update-github-stars.js
 
       - name: Generate contributors
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/authors/generate-contributors.js
+        run: bun scripts/authors/generate-contributors.js
 
       - name: Install uv
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3

@@ -24,7 +24,7 @@ const TEXT_EXTENSIONS = new Set([
 ]);
 
 const EXCLUDE_PREFIXES = ["public/"];
-const EXCLUDE_FILES = new Set(["pnpm-lock.yaml", "package-lock.json"]);
+const EXCLUDE_FILES = new Set(["bun.lock", "package-lock.json"]);
 // This script spells out the escaped forms it bans.
 const SELF = path.relative(process.cwd(), __filename).split(path.sep).join("/");
 

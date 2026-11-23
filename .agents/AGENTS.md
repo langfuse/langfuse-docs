@@ -4,29 +4,30 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Quickstart
 
-- Use **Node.js 22** (`package.json#engines`).
-- Use **pnpm** (`packageManager` is configured in `package.json`).
+- Use **Bun** for installing, running scripts, formatting, and type checking (version pinned in `.bun-version`). Scripts run Next.js on Bun's runtime (`bun --bun next ...`).
+- Vercel functions still run on **Node.js 22** (`package.json#engines`).
 - Local dev server runs on **http://localhost:3333**.
 
 ## Commands you will use most
 
 ### Development
 
-- `pnpm dev` — start the local dev server on port 3333 (preferred default after install).
-- `pnpm build` — build the production site when you need to validate many pages and the dev server is too slow. This takes about 10 minutes, so do not run it by default for small changes.
-- `pnpm start` — run the production build on port 3333 when using the production build for broader checks.
+- `bun dev` — start the local dev server on port 3333 (preferred default after install).
+- `bun run build` — build the production site when you need to validate many pages and the dev server is too slow. This takes about a minute on an 8-core machine, so do not run it by default for small changes.
+- `bun run start` — run the production build on port 3333 when using the production build for broader checks.
 
 ### Content and maintenance
 
 - `bash scripts/update_cookbook_docs.sh` — convert notebook-based cookbook content into docs markdown.
-- `pnpm run format` — format supported files with Prettier, including Markdown and MDX. Markdown prose wrapping is preserved and embedded-language formatting is disabled to avoid rendering or fenced-snippet changes.
-- `pnpm run format:check` — check Prettier formatting without writing files; CI runs this.
-- `pnpm run link-check` — validate markdown links.
-- `pnpm run sitemap-check` — validate links from generated sitemap.
+- `bun fmt` — format supported files, including Markdown and MDX, with Bun's built-in Prettier-compatible formatter. It reads `.prettierrc.json` and `.prettierignore`. Markdown prose wrapping is preserved and embedded-language formatting is disabled to avoid rendering or fenced-snippet changes.
+- `bun fmt --check` — check formatting without writing files; CI runs this.
+- `bun lint` — run the formatting, type (`bun check`), H1, and middle dot checks in about a second.
+- `bun run link-check` — validate markdown links.
+- `bun run sitemap-check` — validate links from generated sitemap.
 
 ### Optional analysis
 
-- `pnpm run analyze` — run a bundle analysis build.
+- `bun run analyze` — run a bundle analysis build.
 
 ## Repository map
 
@@ -54,43 +55,47 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 1. For cookbook changes, edit notebook sources in `cookbook/`.
 2. Regenerate docs with `bash scripts/update_cookbook_docs.sh`.
 3. Do **not** hand-edit generated files in `content/guides/cookbook/`.
-4. Avoid `pnpm build` for routine edits or small UI/content changes. Prefer targeted checks or `pnpm dev`, and only run the full production build when it is necessary or explicitly requested.
-5. **Always run `pnpm run format` before committing or opening a PR if you edited any file Prettier formats** (see "Passing CI checks on the first try" below). The `format` CI job runs `pnpm run format:check` and fails the build on a single unformatted file.
+4. Avoid `bun run build` for routine edits or small UI/content changes. Prefer targeted checks or `bun dev`, and only run the full production build when it is necessary or explicitly requested.
+5. **Always run `bun fmt` before committing or opening a PR if you edited any file the formatter covers** (see "Passing CI checks on the first try" below). The `format` CI job runs `bun fmt --check` and fails the build on a single unformatted file.
 6. **Always keep Markdown overrides synchronized.** Before changing a page or route, check whether its URL has a corresponding file in `md-override/`. If it does, treat the rendered page and the Markdown override as one source pair: mirror user-facing copy, links, structure, and factual changes in both files in the same change. Do this even when the page does not include a comment pointing to the override.
-7. **Preserve custom MDX components in Markdown output.** When creating or adding a custom MDX component that contains user-facing content or links, make sure that content is not removed when the page is converted to plain Markdown. If the content only exists in component props or rendered JSX, add a Markdown renderer in `lib/markdown-component-renderers.js`. Run `node scripts/copy_md_sources.js` and inspect the corresponding file in `public/md-src/` to verify that all content and links remain available to Markdown consumers.
+7. **Preserve custom MDX components in Markdown output.** When creating or adding a custom MDX component that contains user-facing content or links, make sure that content is not removed when the page is converted to plain Markdown. If the content only exists in component props or rendered JSX, add a Markdown renderer in `lib/markdown-component-renderers.js`. Run `bun scripts/copy_md_sources.js` and inspect the corresponding file in `public/md-src/` to verify that all content and links remain available to Markdown consumers.
 8. **Users / adopters table archives.** When adding or updating a row in `components-mdx/adopters-table.mdx` whose Reference cell is an external URL, always include a Wayback Machine `[Archive](...)` link. If no snapshot exists yet, request one (`https://web.archive.org/save/{url}`), wait until CDX returns a `200` capture, and cite `https://web.archive.org/web/{timestamp}/{url}`. Percent-encode the URL in CDX queries (`curl -G --data-urlencode`) so `&` in query strings is not parsed as another CDX parameter. Do not ship the row without that archive. Follow `.agents/skills/add-customer-to-user-list/SKILL.md`.
 9. Never reference internal ticket ids (`LFE-1234`, `LFINT-1234`) or Linear URLs in page content, commit messages, or PR descriptions. They mean nothing to readers of the public site or repo. Describe the change on its own terms; a ticket-prefixed branch name is the one place the identifier belongs.
 10. Never include internal Slack references in page content, code, commit messages, or PR descriptions. This covers channel names (`#team-docs`), channel, user, or message IDs (`C0123ABCD`, `U0123ABCD`), workspace names, message or thread links (`*.slack.com/...`), and quotes or summaries attributed to internal threads. The repo and site are public, so describe the change and its reasoning on its own terms. The only exception is the content of handbook pages (`content/handbook/`) for page content only (Commit messages/PR descriptions still prohibited).
 
 ## Passing CI checks on the first try
 
-CI runs four required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
+CI runs five required checks on every PR. Run these locally before pushing to avoid a re-run cycle:
 
-### 1. Prettier format (`format` job) — this is the check that most often fails
+### 1. Format (`format` job) — this is the check that most often fails
 
-CI runs `pnpm run format:check`. To fix locally, run `pnpm run format` and commit the result.
+CI runs `bun fmt --check`. To fix locally, run `bun fmt` and commit the result. `bun lint` runs this check together with the other fast checks.
 
-- Prettier formats: `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.json`, `.css`, `.scss`, `.md`, `.mdx`, `.yaml`/`.yml`, `.html`. Any change to one of these — including tiny edits like a one-line tweak to an MDX page, a TSX component, or `next.config.mjs` — can trigger the check.
-- Prettier does **not** format files matched by `.prettierignore` (generated cookbook docs in `content/guides/cookbook/**`, `content/workshop/**`, lockfiles, generated assets in `public/`, etc.). Source notebooks (`.ipynb` in `cookbook/`) are also skipped because Prettier has no built-in parser for them.
+- `bun fmt` formats: `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.json`, `.css`, `.scss`, `.md`, `.mdx`, `.yaml`/`.yml`, `.html`. Any change to one of these — including tiny edits like a one-line tweak to an MDX page, a TSX component, or `next.config.mjs` — can trigger the check.
+- `bun fmt` does **not** format files matched by `.prettierignore` or `.gitignore` (generated cookbook docs in `content/guides/cookbook/**`, `content/workshop/**`, lockfiles, generated assets in `public/`, etc.). Source notebooks (`.ipynb` in `cookbook/`) are also skipped.
 - Config (`.prettierrc.json`): `proseWrap: "preserve"` (don't reflow Markdown prose), `embeddedLanguageFormatting: "off"` (fenced code blocks are left alone), `trailingComma: "all"`.
-- If you touched only files Prettier skips (e.g., a notebook, or a generated file listed in `.prettierignore`), the check will still pass — no need to run format.
-- When in doubt, just run `pnpm run format` — it's fast and idempotent.
+- If you touched only files the formatter skips (e.g., a notebook, or a generated file listed in `.prettierignore`), the check will still pass — no need to run format.
+- When in doubt, just run `bun fmt` — it takes well under a second and is idempotent.
 
 ### 2. H1 heading check (`check_h1` job)
 
-CI runs `node scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc. Do not skip heading levels.
+CI runs `bun scripts/check-h1-headings.js`. It fails if any `.md`/`.mdx` file contains more than one top-level `# ` heading (code-fenced examples are ignored; `AGENTS.md` is excluded because Next.js appends a managed agent-rules H1). Use exactly one H1 per markdown file; deeper sections use `##`, `###`, etc. Do not skip heading levels.
 
 ### 3. Middle dot check (`check_middle_dot` job)
 
-CI runs `node scripts/check-middle-dot.js` (locally: `pnpm run lint:middle-dot`). It fails if any tracked text file outside `public/` contains a middle dot (U+00B7) or its lookalikes, the bullet operator (U+2219) and the dot operator (U+22C5). It prints each hit as `path:line:col`. The only exceptions are proper nouns on the allowlist in the script (currently only the DALL-E product name). See the writing guidelines for what to use instead.
+CI runs `bun scripts/check-middle-dot.js` (locally: `bun run lint:middle-dot`). It fails if any tracked text file outside `public/` contains a middle dot (U+00B7) or its lookalikes, the bullet operator (U+2219) and the dot operator (U+22C5). It prints each hit as `path:line:col`. The only exceptions are proper nouns on the allowlist in the script (currently only the DALL-E product name). See the writing guidelines for what to use instead.
 
 ### 4. Build + link/sitemap checks (`build-and-check-links`, `check-sitemap-links` jobs)
 
-These run `pnpm build` followed by `pnpm link-check` / `pnpm sitemap-check`. The full build is ~10 minutes locally — don't run it for routine edits. Instead, before pushing:
+These run `bun run build` followed by `bun run link-check` / `bun run sitemap-check`. The full build takes about a minute locally — don't run it for routine edits. Instead, before pushing:
 
 - Check internal links you added/changed point to real pages or anchors.
 - For anchor links (`...#some-id`), make sure the target page defines the anchor explicitly with `[#some-id]` at the end of the heading line.
 - If you renamed, moved, or removed a page or section, search for links to its URL or anchor and repoint them. Add a redirect in `lib/redirects.js` only for URLs that have been live on langfuse.com; pages that were never published need no redirect.
+
+### 5. Unit tests (`test` job)
+
+CI runs `bun test`, which runs every `*.test.*` file in the repo in a few seconds. Run it locally when you change a script or library that has tests.
 
 ## Styling and implementation guidelines
 
@@ -188,15 +193,16 @@ Read [Review guidelines](review-guidelines.md) before commenting on a pull reque
 
 ## Cursor Cloud specific instructions
 
-- **Single service**: This is a Next.js website (not a monorepo). The only service to run is `pnpm dev` on port 3333. No databases, Docker, or external services are required for local development.
+- **Bun is required**: If `bun` is not on the `PATH`, install the version pinned in `.bun-version` with `npm install -g bun@<version>` before running `bun install`.
+- **Single service**: This is a Next.js website (not a monorepo). The only service to run is `bun dev` on port 3333. No databases, Docker, or external services are required for local development.
 - **Dev server bind address**: The dev script binds to `127.0.0.1` (`-H 127.0.0.1`), so use `http://127.0.0.1:3333` (not `localhost`) when curling or testing.
-- **Letting the user preview pages**: The browser tab in the Cursor interface cannot reach a server bound to `127.0.0.1`. When the user wants to look at pages themselves, run `pnpm exec next dev -p 3333 -H 0.0.0.0` in a tmux session instead of `pnpm dev`, and send them `http://127.0.0.1:3333/<path>` (or the VM address from `hostname -I` if that refuses to connect). Live reload is blocked from that origin, so tell them to refresh after edits. Keep the branch under review checked out while the server runs, because it serves the working tree.
+- **Letting the user preview pages**: The browser tab in the Cursor interface cannot reach a server bound to `127.0.0.1`. When the user wants to look at pages themselves, run `NODE_PATH=node_modules/.bun/node_modules bun --bun next dev -p 3333 -H 0.0.0.0` in a tmux session instead of `bun dev`, and send them `http://127.0.0.1:3333/<path>` (or the VM address from `hostname -I` if that refuses to connect). Live reload is blocked from that origin, so tell them to refresh after edits. Keep the branch under review checked out while the server runs, because it serves the working tree.
 - **Next.js upgrade prompt on first start**: The first `next dev` run on a fresh VM can exit right after printing a `next upgrade` recommendation. Start it again; the second run starts normally. Do not run the upgrade unless the user asks.
-- **First page load is slow**: After `pnpm dev` starts ("Ready in ~1s"), the first HTTP request compiles on-demand and can take 20-40 seconds. Subsequent pages are much faster.
+- **First page load is slow**: After `bun dev` starts ("Ready in ~1s"), the first HTTP request compiles on-demand and can take 20-40 seconds. Subsequent pages are much faster.
 - **Langfuse SDK warnings are expected**: The dev server logs `[Langfuse SDK] [WARN] No exporter configured…` on startup. These are harmless — the SDK keys are only needed for optional demo API routes and are not required for the docs site itself.
 - **No env file needed**: All external integrations (OpenAI, Supabase, PostHog, etc.) degrade gracefully when keys are absent. You do not need a `.env` file for routine development.
 - **Site search is inert locally**: The `Ctrl/Cmd+K` search dialog (powered by Inkeep) opens but returns no results without Inkeep keys. This is expected; use sidebar/link navigation to reach pages when testing docs locally.
-- **postinstall runs agent shim sync**: `pnpm install` triggers `scripts/postinstall.sh`, which syncs agent config shims. This is expected and idempotent.
+- **postinstall runs agent shim sync**: `bun install` triggers `scripts/postinstall.sh`, which syncs agent config shims. This is expected and idempotent.
 - **Walkthrough screenshots and demo videos**: Create these only for complex visual changes that cannot be understood from the diff alone — for example multi-step UI interactions, layout or responsive changes, or new interactive components. Do not create screenshots or demo videos for small edits such as copy changes, docs or markdown updates, simple style tweaks, or other changes that are clear from the code diff. In those cases, the diff is sufficient evidence.
 
 <!-- BEGIN:nextjs-agent-rules -->

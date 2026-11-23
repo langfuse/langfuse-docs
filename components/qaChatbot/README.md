@@ -52,22 +52,22 @@ LANGFUSE_SECRET_KEY=sk-lf-...
 Seed both datasets:
 
 ```bash
-pnpm qa-chatbot:seed-general -- components/qaChatbot/.env_new_region
-pnpm qa-chatbot:seed-sdk-grounding -- components/qaChatbot/.env_new_region
+bun run qa-chatbot:seed-general components/qaChatbot/.env_new_region
+bun run qa-chatbot:seed-sdk-grounding components/qaChatbot/.env_new_region
 ```
 
 Create missing product evaluators and experiment rules:
 
 ```bash
-pnpm qa-chatbot:general-experiment -- components/qaChatbot/.env_new_region --setup-product-evaluators-only
-pnpm qa-chatbot:setup-sdk-grounding-evaluators -- components/qaChatbot/.env_new_region
+bun run qa-chatbot:general-experiment components/qaChatbot/.env_new_region --setup-product-evaluators-only
+bun run qa-chatbot:setup-sdk-grounding-evaluators components/qaChatbot/.env_new_region
 ```
 
 Run a first smoke experiment:
 
 ```bash
-pnpm qa-chatbot:general-experiment -- components/qaChatbot/.env_new_region --models gpt-4.1
-pnpm qa-chatbot:sdk-grounding-experiment -- components/qaChatbot/.env_new_region --models gpt-4o-mini
+bun run qa-chatbot:general-experiment components/qaChatbot/.env_new_region --models gpt-4.1
+bun run qa-chatbot:sdk-grounding-experiment components/qaChatbot/.env_new_region --models gpt-4o-mini
 ```
 
 No code changes are needed for one-off seeding and experiments when the new env file uses the generic `LANGFUSE_*` names above.
@@ -77,13 +77,13 @@ No code changes are needed for one-off seeding and experiments when the new env 
 Seed the general QA dataset:
 
 ```bash
-pnpm qa-chatbot:seed-general -- components/qaChatbot/.env_sample_project
+bun run qa-chatbot:seed-general components/qaChatbot/.env_sample_project
 ```
 
 Seed the SDK integration docs-grounding dataset:
 
 ```bash
-pnpm qa-chatbot:seed-sdk-grounding -- components/qaChatbot/.env_sample_project
+bun run qa-chatbot:seed-sdk-grounding components/qaChatbot/.env_sample_project
 ```
 
 The seed scripts upsert datasets and stable item IDs, so rerunning them updates existing datasets instead of creating duplicates.
@@ -93,26 +93,26 @@ The seed scripts upsert datasets and stable item IDs, so rerunning them updates 
 Run the general QA chatbot experiment:
 
 ```bash
-pnpm qa-chatbot:general-experiment -- components/qaChatbot/.env_sample_project
+bun run qa-chatbot:general-experiment components/qaChatbot/.env_sample_project
 ```
 
 Run the SDK integration docs-grounding experiment:
 
 ```bash
-pnpm qa-chatbot:sdk-grounding-experiment -- components/qaChatbot/.env_sample_project
+bun run qa-chatbot:sdk-grounding-experiment components/qaChatbot/.env_sample_project
 ```
 
 Pass models as a comma-separated list:
 
 ```bash
-pnpm qa-chatbot:sdk-grounding-experiment -- components/qaChatbot/.env_sample_project \
+bun run qa-chatbot:sdk-grounding-experiment components/qaChatbot/.env_sample_project \
   --models gpt-5,gpt-5.6-terra,gpt-5.6-sol
 ```
 
 Compare prompt labels:
 
 ```bash
-pnpm qa-chatbot:general-experiment -- components/qaChatbot/.env_sample_project \
+bun run qa-chatbot:general-experiment components/qaChatbot/.env_sample_project \
   --models gpt-4.1 \
   --prompt-labels production,candidate-v3
 ```
@@ -120,7 +120,7 @@ pnpm qa-chatbot:general-experiment -- components/qaChatbot/.env_sample_project \
 Compare prompt versions:
 
 ```bash
-pnpm qa-chatbot:general-experiment -- components/qaChatbot/.env_sample_project \
+bun run qa-chatbot:general-experiment components/qaChatbot/.env_sample_project \
   --models gpt-4.1 \
   --prompt-versions 1,2
 ```
@@ -152,17 +152,17 @@ The general QA runner also supports:
 Set up SDK integration docs-grounding product evaluators and rules:
 
 ```bash
-pnpm qa-chatbot:setup-sdk-grounding-evaluators -- components/qaChatbot/.env_sample_project
+bun run qa-chatbot:setup-sdk-grounding-evaluators components/qaChatbot/.env_sample_project
 ```
 
 ## Package scripts
 
 ```bash
-pnpm qa-chatbot:seed-general
-pnpm qa-chatbot:seed-sdk-grounding
-pnpm qa-chatbot:setup-sdk-grounding-evaluators
-pnpm qa-chatbot:general-experiment
-pnpm qa-chatbot:sdk-grounding-experiment
+bun run qa-chatbot:seed-general
+bun run qa-chatbot:seed-sdk-grounding
+bun run qa-chatbot:setup-sdk-grounding-evaluators
+bun run qa-chatbot:general-experiment
+bun run qa-chatbot:sdk-grounding-experiment
 ```
 
 ## Shared config

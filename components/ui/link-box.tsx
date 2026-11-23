@@ -16,9 +16,7 @@ import {
 } from "./tooltip";
 
 export type LinkBoxTooltipPlacement =
-  | "follow"
-  | "bottom-center"
-  | "bottom-right";
+  "follow" | "bottom-center" | "bottom-right";
 
 export interface LinkBoxProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
