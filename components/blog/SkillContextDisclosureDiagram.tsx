@@ -30,8 +30,8 @@ export function SkillContextDisclosureDiagram() {
               viewBox="0 0 8 8"
               refX="7"
               refY="4"
-              markerWidth="5.5"
-              markerHeight="5.5"
+              markerWidth="4.5"
+              markerHeight="4.5"
               orient="auto"
             >
               <path d="M0 1 L7 4 L0 7 Z" fill="var(--text-secondary)" />
@@ -62,7 +62,7 @@ export function SkillContextDisclosureDiagram() {
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
           />
 
           {/* Full-height prompt strip */}
@@ -74,7 +74,7 @@ export function SkillContextDisclosureDiagram() {
             rx="1"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
           />
           <text
             x="23"
@@ -96,7 +96,7 @@ export function SkillContextDisclosureDiagram() {
             x2="166"
             y2="426"
             stroke="var(--text-secondary)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
             markerEnd={`url(#${arrowId})`}
           />
           {ITERATIONS.map((iter) => (
@@ -107,7 +107,7 @@ export function SkillContextDisclosureDiagram() {
                 r="4.5"
                 fill="var(--surface-cta-primary)"
                 stroke="var(--text-secondary)"
-                strokeWidth="0.75"
+                strokeWidth="0.5"
               />
               <text
                 x="180"
@@ -127,7 +127,7 @@ export function SkillContextDisclosureDiagram() {
             x2="271"
             y2="428"
             stroke="var(--text-primary)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
             strokeDasharray="2 4"
           />
 
@@ -155,7 +155,7 @@ export function SkillContextDisclosureDiagram() {
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
           />
 
           {/* Frontmatter strip (iterations 1-7) */}
@@ -167,7 +167,7 @@ export function SkillContextDisclosureDiagram() {
             rx="1"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
           />
           <text
             x="307"
@@ -191,7 +191,7 @@ export function SkillContextDisclosureDiagram() {
             rx="1"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
           />
           <text
             x="337"
@@ -215,7 +215,7 @@ export function SkillContextDisclosureDiagram() {
             rx="1"
             fill="var(--surface-cta-primary)"
             stroke="var(--line-structure)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
           />
           <text
             x="364"
@@ -249,7 +249,7 @@ export function SkillContextDisclosureDiagram() {
             x2="583"
             y2="194"
             stroke="var(--text-tertiary)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
             strokeDasharray="4 3"
           />
           <text x="456" y="168" fontSize="13" fill="var(--text-secondary)">
@@ -266,7 +266,7 @@ export function SkillContextDisclosureDiagram() {
             x2="583"
             y2="326"
             stroke="var(--text-tertiary)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
             strokeDasharray="4 3"
           />
           <text x="456" y="300" fontSize="13" fill="var(--text-secondary)">
@@ -283,7 +283,7 @@ export function SkillContextDisclosureDiagram() {
             x2="588"
             y2="426"
             stroke="var(--text-secondary)"
-            strokeWidth="0.75"
+            strokeWidth="0.5"
             markerEnd={`url(#${arrowId})`}
           />
           {ITERATIONS.map((iter) => (
@@ -294,7 +294,7 @@ export function SkillContextDisclosureDiagram() {
                 r="4.5"
                 fill="var(--surface-cta-primary)"
                 stroke="var(--text-secondary)"
-                strokeWidth="0.75"
+                strokeWidth="0.5"
               />
               <text
                 x="602"
