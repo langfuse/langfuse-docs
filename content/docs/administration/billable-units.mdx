@@ -5,11 +5,11 @@ description: Learn how billable units are calculated and monitor usage across yo
 
 # Billable Units
 
-Langfuse [pricing](/pricing) counts [traces and observations](/docs/observability/data-model#observations-and-traces), [scores](/docs/evaluation/scores/data-model#scores), and billable [Topics facet results](/docs/observability/features/topics#models-and-costs) in each billing period.
+Langfuse [pricing](/pricing) counts [traces and observations](/docs/observability/data-model#observations-and-traces), [scores](/docs/evaluation/scores/data-model#scores), and [facet results](/docs/observability/features/topics#models-and-costs) in each billing period.
 
-`Units` = `Traces` + `Observations` + `Scores` + `Billable Topics facet results`
+`Units` = `Traces` + `Observations` + `Scores` + `Facet results`
 
-The usage breakdown labels Topics results **Facet summaries**. Each new facet result the model returns and Langfuse stores adds one unit. For example, a trace analyzed for all four facets adds four Topics units, even if the Issues result says the facet does not apply.
+When Topics analyzes a trace, each new facet result the model returns and Langfuse stores adds one unit. The usage breakdown shows these units under **Facet summaries**. For example, a trace analyzed for all four facets adds four Topics units, even if the Issues result says the facet does not apply.
 
 On Langfuse Cloud, use the [pricing calculator](/pricing#pricing-calculator) to estimate your monthly costs. Self-hosted Langfuse (OSS) is free under the MIT license, with no usage-based billing; for self-hosted Enterprise, billable units are one component of the pricing. Unit counts also help you estimate data volume when sizing a self-hosted deployment.
 
