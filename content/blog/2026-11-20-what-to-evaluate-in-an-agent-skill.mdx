@@ -58,6 +58,12 @@ This brings you to two things to test every time you edit your skill:
 
 The mechanism here is straightforward: spin up agents in an environment with a prompt and check whether they read the skill you want, which is deterministic when you [link skills to traces](/docs/skill-management/tracing).
 
+<p>
+  <span className="bg-surface-cta-primary px-1 italic text-text-primary">
+    TODO: add something about code based evaluators that check output against what is in expected_output in the dataset item
+  </span>
+</p>
+
 ### 1. Skill-level triggering and coexistence
 
 A skill's `name` and `description` frontmatter act as its API contract with the model. In our [initial evaluation runs](/blog/2026-02-26-evaluate-ai-agent-skills), rewriting our description to sound more conceptual ("use Langfuse effectively across use cases") caused agents to stop invoking the skill entirely on prompts like `"fetch the last ten traces"`.
