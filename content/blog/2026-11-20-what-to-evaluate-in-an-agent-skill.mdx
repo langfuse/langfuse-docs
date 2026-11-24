@@ -65,7 +65,7 @@ The mechanism here is straightforward: spin up agents in an environment with a p
 
 ### 1. Skill-level triggering and coexistence
 
-A skill's `name` and `description` frontmatter act as its API contract with the model. In our [initial evaluation runs](/blog/2026-02-26-evaluate-ai-agent-skills), rewriting our description to sound more conceptual ("use Langfuse effectively across use cases") caused agents to stop invoking the skill entirely on prompts like `"fetch the last ten traces"`.
+At the skill level, you measure whether the agent triggers the right skill at all. Once you have many skills in the same harness, this becomes even more important: adding a new skill can interfere with the expected routing of existing skills, causing the agent to pick the wrong one or miss a skill it previously triggered. These are the evals you iterate your skill's `name` and `description` frontmatter against.
 
 ### 2. Intra-skill routing (`SKILL.md` to reference files)
 
