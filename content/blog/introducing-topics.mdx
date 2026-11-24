@@ -17,7 +17,7 @@ import { ImagePlaceholder } from "@/components/blog/ImagePlaceholder";
   date="November 24, 2026"
 />
 
-{/* TODO before publishing: upload the four topics videos referenced below to the docs-videos bucket, replace the remaining ImagePlaceholders (visuals 1, 3 and 6) with Video components, then remove the ImagePlaceholder import. */}
+{/* TODO before publishing: upload the six topics videos referenced below to the docs-videos bucket, replace the remaining ImagePlaceholder with the launch video, then remove the ImagePlaceholder import. */}
 
 Today, we are launching [Topics](/docs/observability/features/topics) in public beta. It clusters your production traces into named topics, so you can see how your agent is used and where it breaks.
 
@@ -42,7 +42,13 @@ Topics describes each trace from different angles, called facets. Then it cluste
 - **Outcome** is how the trace ended and whether the result is confirmed.
 - **Issues** is the main problem in how the trace was handled.
 
-<ImagePlaceholder label="Visual 3 (screen recording): the four built-in facets and their topics" />
+<Video
+  src="https://static.langfuse.com/docs-videos/topics-facets.mp4"
+  title="The four built-in facets and their topics"
+  description="The Topics view of a live map switches between the Intent, Sentiment, Outcome and Issues facets, and each shows its own treemap of topics. Clicking a topic lists its traces, and an opened trace shows its topic for every facet."
+  aspectRatio={16 / 9}
+  controls={false}
+/>
 
 Each facet is clustered on its own, so a problem that is spread across many intents still shows up as one topic under Issues. You get this without writing evals first, and the topics show you which evaluators are worth setting up.
 
@@ -72,7 +78,13 @@ Topics can be used for continuous analysis of production traffic using live maps
 
 A topic tells you where to look, so open it and read a few of its traces before you act. The fix can be the prompt, missing context for the agent, a gap in its knowledge base or a new evaluator. Filter the tracing table by the topic to work through its traces.
 
-<ImagePlaceholder label="Visual 6 (screen recording): opening a topic and filtering the tracing table by it" />
+<Video
+  src="https://static.langfuse.com/docs-videos/topics-filter-by-topic.mp4"
+  title="Filtering the tracing table by a topic"
+  description="Typing the topics prefix in the search bar of the tracing table suggests the four facets and their topics. The table is filtered to one Issues topic, and an opened trace shows its topic for every facet with a link back to Topics."
+  aspectRatio={16 / 9}
+  controls={false}
+/>
 
 ### Give your agents the enrichment layer
 
