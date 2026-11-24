@@ -91,13 +91,7 @@ Because an agent can read `SKILL.md` and skip the reference file (a partial read
 
 ## Evaluating task outcomes & behavior (by use case) [#evaluating-task-outcomes-and-behavior]
 
-Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, text-similarity checks on the assistant's final message rarely suffice. Match your outcome evaluators to the type of behavior the skill governs:
-
-| Skill archetype | Example tasks | What to check on the outcome | Best grader type |
-| --- | --- | --- | --- |
-| **Code transformation & setup** | Instrument a Next.js or FastAPI repo; migrate hardcoded prompts; scaffold an app | Code builds and passes tests; expected SDK/API patterns exist in the diff; objects exist in the scratch project; `git status` shows no stray artifacts | Deterministic environment/AST/API checks + structured LLM rubric for code conventions |
-| **CLI / API investigation & ops** | Find the cheapest valid resource; diagnose a latency spike from traces; create a dataset | Answer matches ground truth of the seeded fixture; zero unintended writes (`collateral_writes == 0`); explicit abstention when a request is impossible | Deterministic state & fixture assertions |
-| **Encoded team workflows** | Run a release checklist; review a PR against team rules; draft an incident postmortem | Required steps executed in order; mandatory approval gates respected; output adheres to team structure and tone | [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) with per-criterion boolean checks |
+Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, text-similarity checks on the assistant's final message rarely suffice. Match your outcome evaluators to the type of behavior the skill governs.
 
 Two details make behavioral outcome evals much more reliable in practice:
 
@@ -114,8 +108,6 @@ Two details make behavioral outcome evals much more reliable in practice:
 
 Even when an agent loads the right files and passes the task, the final verdict can hide severe friction inside the run. Strong frontier models are remarkably good at recovering from broken instructions: if a skill points to a renamed CLI flag or a stale URL, a capable model will hit an error, run `--help`, search around, and eventually succeed anyway.
 
-[Together AI ran into this exact trap](https://www.together.ai/blog/how-we-do-agent-evals-at-together-ai): on a GPU cluster pricing task where their skill linked to a marketing page instead of the pricing table, Claude Opus worked around the dead end in 13 of 14 runs, masking the bug. Claude Sonnet failed 11 of 15 runs on the same skill, immediately exposing the bad link. Evaluating trajectory metrics—and including a smaller or faster model in your eval matrix—surfaces those paper cuts before every user pays the token tax for them.
-
 Three trajectory metrics consistently earn their keep:
 
 - **Tool and CLI error rate:** Count non-zero exit codes, `4xx` API responses, or failed tool spans per run. In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop that hit 90% of runs—both fixed with two-line edits to `SKILL.md`.
@@ -125,8 +117,6 @@ Three trajectory metrics consistently earn their keep:
 ## How to sequence this without Goodharting yourself [#how-to-sequence-this]
 
 Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite on day one—or worse, optimize against a flawed metric.
-
-When we [ran Karpathy's autoresearch on our prompt migration skill](/blog/2026-03-24-optimizing-ai-skill-with-autoresearch) using a weighted composite score (`correctness`, `completeness`, and `efficiency`), the optimizer drove our benchmark score from `0.35` to `0.824` in 14 experiments. When we read the diff, however, several of its biggest "wins" were Goodhart's Law in action: it deleted the user-approval gate so headless runs wouldn't stall, told agents to skip live documentation fetches to save turns, and deleted entire sections on subprompts and trace-linking simply because none of our six test repos checked for them.
 
 As we cover in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observed behavior rather than upfront guesswork:
 
