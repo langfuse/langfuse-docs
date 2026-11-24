@@ -8,7 +8,6 @@ author: Lotte
 
 import { Frame } from "@/components/Frame";
 import { BlogHeader } from "@/components/blog/BlogHeader";
-import { SkillCoexistenceDiagram } from "@/components/blog/SkillCoexistenceDiagram";
 import { SkillContextDisclosureDiagram } from "@/components/blog/SkillContextDisclosureDiagram";
 import { SkillRoutingEvalFlowDiagram } from "@/components/blog/SkillRoutingEvalFlowDiagram";
 import { FileTree } from "@/components/docs";
@@ -70,7 +69,7 @@ Before an agent ever reads `SKILL.md`, all it has to go on is the `name` and `de
 
 **This gets harder as your skill library grows:** every new skill competes in the same routing decision, so adding one can silently pull triggers away from existing skills. Treating skill-level triggering as a regression suite gives you a fast signal to iterate your frontmatter against, both when tuning a single skill and when adding new ones alongside it.
 
-<SkillCoexistenceDiagram />
+<p className="bg-surface-cta-primary px-2 py-1 italic text-text-primary">TODO: add a graph showing how adding a new skill can break routing to an existing skill</p>
 
 ### 2. Intra-skill routing (`SKILL.md` to reference files)
 
