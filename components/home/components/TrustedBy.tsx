@@ -38,10 +38,14 @@ export function TrustedBy({
   className = "",
 }: TrustedByProps) {
   return (
-    <div className={`px-4 lg:px-6 h-[64px] flex items-center ${className}`}>
-      <div className="flex items-center w-full">
-        <div className="text-xs text-muted-foreground">Trusted by:</div>
-        <div className="flex items-center pl-4">
+    <div
+      className={`@container px-4 lg:px-6 py-3 min-h-[64px] flex items-center ${className}`}
+    >
+      <div className="flex flex-col items-start gap-2 w-full min-w-0 @[15rem]:flex-row @[15rem]:items-center @[15rem]:gap-4">
+        <div className="text-xs text-muted-foreground whitespace-nowrap">
+          Trusted by:
+        </div>
+        <div className="flex items-center">
           {customers && customers.length > 0 ? (
             <TooltipProvider disableHoverableContent={false}>
               <div className="flex items-center">
