@@ -103,6 +103,21 @@ test("rejects bodies over 64 KiB before parsing, including streamed and misdecla
   assert.equal(result.result.tools.length, 4);
 });
 
+test("accepts requests that Next.js hands to route handlers as a Proxy", async () => {
+  // Next.js wraps the incoming request in a Proxy that forwards reads to the
+  // real request. Private fields such as Request#state are not reachable
+  // through it, so the route must not pass the request object to `new Request`.
+  const target = request(JSON.stringify(message("tools/list")));
+  const proxied = new Proxy(target, {
+    get(object, property) {
+      const value = Reflect.get(object, property, object);
+      return typeof value === "function" ? value.bind(object) : value;
+    },
+  });
+  const result = await rpcResponse(await POST(proxied));
+  assert.equal(result.result.tools.length, 4);
+});
+
 test("limits tool arguments to 16 elements before invoking a tool, while valid calls work", async (t) => {
   let fetches = 0;
   t.mock.method(globalThis, "fetch", async (url) => {
