@@ -406,11 +406,11 @@ importers:
         specifier: ^8.5.33
         version: 8.5.33
       posthog-js:
-        specifier: ^1.442.0
-        version: 1.442.0(@types/react@19.3.0)(react@19.3.1)
+        specifier: ^1.450.0
+        version: 1.450.0(@types/react@19.3.0)(react@19.3.1)
       posthog-node:
-        specifier: ^5.49.1
-        version: 5.49.1(rxjs@7.8.2)
+        specifier: ^5.74.0
+        version: 5.74.0(@opentelemetry/api@1.9.1)(rxjs@7.8.2)
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -1429,14 +1429,14 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@posthog/browser-common@0.10.1':
-    resolution: {integrity: sha512-gKtBGEsjxNExO/19trnkiXTHFX0075vXn69zZ+lPlXy6P/DkED4644WqjDN/GIWr1Y5en2dcVJPOqUmVO+drkg==}
+  '@posthog/browser-common@0.12.0':
+    resolution: {integrity: sha512-P1CubrDp1xwYi2DQxjzJITEeMJpZ7qYcbHuhtXLHgkG8bE6gLy0JwkykjRtEFbElvJNbHQO1jQi7Cbb3JyazNw==}
 
-  '@posthog/core@1.61.2':
-    resolution: {integrity: sha512-l3b6Dc2NmItwmyu6ot7K2jtStQOAQjZw/PB/gpZwk2W6SBCbvPg6YJzReSBSQLuok19ridbfVNk70a5hgoGX2Q==}
+  '@posthog/core@1.68.0':
+    resolution: {integrity: sha512-5kjPcLquzj47qBGn52+7RRXrJJvrTHaRKgxV9izYPFzoVFEftFqSXYZF/ug+yialxDU73dR9apyi+mSaAeaXPw==}
 
-  '@posthog/types@1.418.0':
-    resolution: {integrity: sha512-WqDXUWH1R8OilBp2PfDpQIRZSCs3QyOnw7H3YK7lvZLCMIsOqSZAKJrrqYWt4f7FvnVCACRuNGCC0HKh3J/HWw==}
+  '@posthog/types@1.425.1':
+    resolution: {integrity: sha512-mh7jyQ5lN+XCeOnMdYkBEFtO/G0TxeLOKTWNH6E6OZjxS4nVM0Tb2xQt+FG5DCFM9qzL2HmuX6A793TwlJVDvw==}
 
   '@radix-ui/number@1.1.0':
     resolution: {integrity: sha512-V3gRzhVNU1ldS5XhAPTom1fOIo4ccrjjJgmE+LI2h/WaFpHmx0MQApT+KZHnx8abG6Avtfcz4WoEciMnpFT3HQ==}
@@ -5347,8 +5347,8 @@ packages:
     resolution: {integrity: sha512-RVHEU9/Pp1Fnjr/MpAJsZoADukCKhfIi15OunEYiGktIkYLkPVvC1sioWolGDS7XByMTx9m/IGbro0Js13zhnQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.442.0:
-    resolution: {integrity: sha512-RaZhFpqlPdoHU5VCkUCUR1c9oMQJAGZHvv0T1bl57smHxKEihTrfYP8ovny81XrrDmswNGkNYC35wTibY7P3OQ==}
+  posthog-js@1.450.0:
+    resolution: {integrity: sha512-KsjBOy0At8HFm8aYIb3zZ+0oYdOeAMCDkGcvM4po/N08K+nyvFNJgqHL2DzyVXkN0FiB6lvdWzjbZk7QQbxJCQ==}
     peerDependencies:
       '@types/react': ^19.3.0
       react: '>=16.8.0'
@@ -5358,12 +5358,18 @@ packages:
       react:
         optional: true
 
-  posthog-node@5.49.1:
-    resolution: {integrity: sha512-kmjvzc7K8y+wQX7r3oIkLfKc2BzDJPXMJor5D8gAxpGE7qLNlk4HO2y1brc5587GxtdsZzqtGOxfBJXUBE2MiQ==}
+  posthog-node@5.74.0:
+    resolution: {integrity: sha512-lAnGzPVobruQ7rZe45kzcXKZAcCK3J+1dMNS3WOOdx9mnM4ECRc2WRxBdS1ncBO/h/vDtHIEmcuIr/LUxxze5w==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
+      '@opentelemetry/api': ^1.2.0
+      '@react-email/render': ^2.1.0
       rxjs: ^7.0.0
     peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+      '@react-email/render':
+        optional: true
       rxjs:
         optional: true
 
@@ -7247,19 +7253,20 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@posthog/browser-common@0.10.1':
+  '@posthog/browser-common@0.12.0':
     dependencies:
-      '@posthog/core': 1.61.2
-      '@posthog/types': 1.418.0
+      '@posthog/core': 1.68.0
+      '@posthog/types': 1.425.1
+      dompurify: 3.4.17
       preact: 10.29.8
     transitivePeerDependencies:
       - preact-render-to-string
 
-  '@posthog/core@1.61.2':
+  '@posthog/core@1.68.0':
     dependencies:
-      '@posthog/types': 1.418.0
+      '@posthog/types': 1.425.1
 
-  '@posthog/types@1.418.0': {}
+  '@posthog/types@1.425.1': {}
 
   '@radix-ui/number@1.1.0': {}
 
@@ -11401,11 +11408,11 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.2
 
-  posthog-js@1.442.0(@types/react@19.3.0)(react@19.3.1):
+  posthog-js@1.450.0(@types/react@19.3.0)(react@19.3.1):
     dependencies:
-      '@posthog/browser-common': 0.10.1
-      '@posthog/core': 1.61.2
-      '@posthog/types': 1.418.0
+      '@posthog/browser-common': 0.12.0
+      '@posthog/core': 1.68.0
+      '@posthog/types': 1.425.1
       core-js: 3.49.0
       dompurify: 3.4.17
       fflate: 0.4.9
@@ -11419,10 +11426,11 @@ snapshots:
     transitivePeerDependencies:
       - preact-render-to-string
 
-  posthog-node@5.49.1(rxjs@7.8.2):
+  posthog-node@5.74.0(@opentelemetry/api@1.9.1)(rxjs@7.8.2):
     dependencies:
-      '@posthog/core': 1.61.2
+      '@posthog/core': 1.68.0
     optionalDependencies:
+      '@opentelemetry/api': 1.9.1
       rxjs: 7.8.2
 
   potpack@1.0.2: {}
