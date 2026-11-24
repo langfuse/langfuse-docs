@@ -58,19 +58,19 @@ In Langfuse, we split this into three signals:
 
 <figure className="my-6">
   <Frame fullWidth className="mt-0 w-full">
-    ![A generation reporting four available skills and a request for refund-policy v1 in the Preview view.](/images/changelog/2026-11-03-skill-management-generation.png)
+    ![A generation observation reporting three available skills and a request for langfuse v2 in the Preview view.](/images/blog/2026-11-23-building-skill-management-and-tracing/skill-management-generation.png)
   </Frame>
   <figcaption className="mt-2 text-sm text-text-tertiary">
-    A generation observation showing four available skills, with `refund-policy` v1 split under Requested from the model's tool call.
+    A generation observation showing three available skills, with `langfuse` v2 split under Requested from the model's `loadSkill` tool call.
   </figcaption>
 </figure>
 
 <figure className="my-6">
   <Frame fullWidth className="mt-0 w-full">
-    ![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-11-03-skill-management-tool-load.png)
+    ![A loadSkill tool observation showing langfuse v2 and the loaded SKILL.md file in the trace's Preview view.](/images/blog/2026-11-23-building-skill-management-and-tracing/skill-management-tool-load.png)
   </Frame>
   <figcaption className="mt-2 text-sm text-text-tertiary">
-    The subsequent `loadSkill` tool observation recording `refund-policy` v1 and `SKILL.md` as loaded once the call succeeds.
+    The subsequent `loadSkill` tool observation recording `langfuse` v2 and `SKILL.md` as loaded once the call succeeds.
   </figcaption>
 </figure>
 
@@ -185,15 +185,15 @@ In both setups, `propagateAttributes` attaches skills in-process only. They aren
 
 With the available catalog reported on generations, successful loads parsed from tool spans, and version numbers carried into both, the two questions we started with now answer themselves directly in each skill version's **Usage** tab:
 
-1. **Which skills did an agent actually use?** Comparing available vs. loaded observation counts shows whether a skill is being offered and ignored, or actually loaded. Per-file load counts break that down further so you can see which reference docs agents open and which ones never get touched.
-2. **Did version 2 perform better than version 1?** Because every loaded tool observation resolves to a specific skill version, you can filter linked generations and tool spans by version, compare outcomes across production traffic in custom dashboards, or trigger evaluations through skill-version webhooks whenever a new version ships.
+1. **Which skills did an agent actually use?** Comparing available vs. loaded observation counts shows whether a skill is being offered and ignored, or actually loaded. Per-file load counts break that down further so you can see which reference docs and scripts agents open and which ones never get touched.
+2. **Did version 2 perform better than version 1?** Because every loaded tool observation resolves to a specific skill version, you can switch between versions in the sidebar, filter linked generations and tool spans by version, compare outcomes across production traffic in custom dashboards, or trigger evaluations through skill-version webhooks whenever a new version ships.
 
 <figure className="my-6">
   <Frame fullWidth className="mt-0 w-full">
-    ![The skill Usage tab showing available and loaded observation counts, per-file load statistics, and linked observations for a skill version.](/images/changelog/2026-11-03-skill-management-usage.png)
+    ![The Usage tab for langfuse v2 showing version history, available versus loaded observation counts, per-file load breakdown, and linked observations.](/images/blog/2026-11-23-building-skill-management-and-tracing/skill-management-usage.png)
   </Frame>
   <figcaption className="mt-2 text-sm text-text-tertiary">
-    The Usage tab for `refund-policy` v1, combining available and loaded observation counts, per-file load counts, and linked observations.
+    The Usage tab for `langfuse` v2 alongside its version history, showing available vs. loaded observation counts, per-file load breakdown across `SKILL.md`, references, and scripts, and linked observations.
   </figcaption>
 </figure>
 
