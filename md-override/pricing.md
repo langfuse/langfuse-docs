@@ -252,7 +252,7 @@ Additional usage beyond the included units is billed at graduated rates. Higher 
 
 ### Billable Units
 
-A billable unit in Langfuse is any tracing data point sent to the platform -- including traces (complete application interactions), observations (individual steps: spans, events, and generations), and scores (evaluations). See [billable units documentation](/docs/administration/billable-units) for details.
+For the pricing calculator, enter your monthly total of traces, observations, scores, and [facet results](/docs/observability/features/topics#models-and-costs).
 
 ## Discounts
 
@@ -270,7 +270,7 @@ You can view the [public example project](/docs/demo) or sign up for a [free acc
 Yes, Langfuse is open source and you can self-host it for free. Use Docker Compose to run Langfuse locally, or use one of the templates to self-host in production on Kubernetes. See the [self-hosting documentation](/self-hosting) to learn more.
 
 **What is a billable unit?**
-A billable unit is any tracing data point you send to Langfuse -- including the trace, observations (spans, events, generations), and scores (evaluations). See [billable units docs](/docs/administration/billable-units) for a detailed explanation.
+Each trace, observation, and score counts as one unit. Topics adds one unit for each new [facet result](/docs/observability/features/topics#models-and-costs) that Langfuse stores from a model response. For example, an Intent result and a Sentiment result for the same trace add two units. See how to [track billable units](/docs/administration/billable-units#monitor-usage).
 
 **How does the graduated pricing work?**
 Graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for 100k--1M, $7/100k for 1M--10M, $6.50/100k for 10M--50M, and $6/100k for 50M+ units. Use the pricing calculator on [langfuse.com/pricing](https://langfuse.com/pricing#pricing-calculator) to estimate your bill.
@@ -279,7 +279,7 @@ Graduated pricing means you pay different rates for different volume tiers. The 
 Data access is set by your plan and determines how many days of historic data you can view (Hobby: 30 days, Core: 90 days, Pro and Enterprise: 3 years). Older data is still stored and becomes accessible again when you upgrade. [Data retention](/docs/administration/data-retention) is a separate, opt-in feature on Pro and Enterprise that permanently deletes data after a custom period. See [data access vs. data retention](/faq/all/data-access-vs-data-retention).
 
 **How can I reduce my Langfuse Cloud bill?**
-The primary way is to reduce the number of billable units you ingest. See [tips for cutting costs](/faq/all/cutting-costs). With graduated pricing, you automatically get lower rates as your volume increases.
+You can reduce usage by sampling traces, filtering observations, or choosing fewer facets in Topics. See the [cost-cutting guide](/faq/all/cutting-costs) for examples. Graduated pricing also lowers the rate per 100,000 units as volume grows.
 
 **How does Langfuse pricing compare to LangSmith, Braintrust, Arize, and Datadog?**
 On a representative workload, Langfuse Cloud is cheaper than [LangSmith](/compare/langsmith), [Braintrust](/compare/braintrust), [Arize](/compare/arize-phoenix), and [Datadog Agent Observability](/compare/datadog). Open the [editable pricing comparison sheet](/pricing-comparison-sheet) to fill in your own assumptions and check the numbers for your workload. For product-by-product differences, see the [comparison pages](/compare). Langfuse is also [open source](/why), based on [OpenTelemetry](/integrations/native/opentelemetry) for interoperability, [self-hostable](/self-hosting) at the same scale as Langfuse Cloud, and model- and framework-agnostic.

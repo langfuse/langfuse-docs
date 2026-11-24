@@ -76,7 +76,7 @@ Datadog Agent Observability [retains traces and spans for **15 days**](https://d
   trace, scores, and retention to see where the costs cross over.
 </Callout>
 
-Langfuse bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score. Datadog Agent Observability bills LLM inference spans (one call to an LLM provider). Tool, workflow, agent, embedding, and retrieval spans are free on Datadog's [published pricing](https://www.datadoghq.com/pricing/list/), and retention beyond 15 days is a second meter charged on every LLM span.
+Langfuse counts each trace, observation, score, or new [facet result](/docs/observability/features/topics#models-and-costs) as one [unit](/docs/administration/billable-units). Datadog Agent Observability bills LLM inference spans (one call to an LLM provider). Tool, workflow, agent, embedding, and retrieval spans are free on Datadog's [published pricing](https://www.datadoghq.com/pricing/list/), and retention beyond 15 days is a second meter charged on every LLM span.
 
 |             | Langfuse                                                             | Datadog Agent Observability                                                              |
 | ----------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
@@ -90,7 +90,7 @@ Langfuse bills [units](/docs/administration/billable-units): one unit is a trace
 
 ### Worked example [#worked-example]
 
-500,000 traces/month, 10 observations per trace, 2 LLM calls per trace, 1 score per trace, 5 users.
+500,000 traces/month, 10 observations per trace, 2 LLM calls per trace, 1 score per trace, 5 users, zero facet results.
 
 |                                     | Base    | Usage   | Retention | **Total/month** |
 | ----------------------------------- | ------- | ------- | --------- | --------------- |
@@ -99,7 +99,7 @@ Langfuse bills [units](/docs/administration/billable-units): one unit is a trace
 
 Public annual list prices:
 
-- **Langfuse Pro:** 6,000,000 units (traces + observations + scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included.
+- **Langfuse Pro:** 6,000,000 units (500,000 traces + 5,000,000 observations + 500,000 scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included.
 - **Datadog Pro:** 1,000,000 LLM spans → $160 base + $315 (900,000 spans beyond the included 100k, at $3.50/10k) + $400 (90-day retention add-on at $4.00 per 10k spans, applied to all 1,000,000) = **$875**. With the default 15-day retention and no add-on, Datadog is $475. Month-to-month Pro is $200 + $4.20/10k.
 
 The crossover depends on your span mix and how much history you need: Datadog bills only LLM-provider calls, Langfuse bills every observation. Different volumes or fewer LLM calls per trace? The [editable sheet](/pricing-comparison-sheet) reproduces this math from your inputs.

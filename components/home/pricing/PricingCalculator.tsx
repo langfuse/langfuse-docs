@@ -100,8 +100,8 @@ export function PricingCalculator({
         Pricing Calculator
       </Heading>
       <Text className="mb-4 text-left">
-        Enter your monthly billable units to see the graduated pricing
-        breakdown.
+        Enter your monthly total of traces, observations, scores, and facet
+        results.
       </Text>
       <Card>
         <CardContent className="p-6 space-y-6">

@@ -88,7 +88,7 @@ Logfire is the Pydantic team's [OpenTelemetry backend](https://ai.pydantic.dev/l
 
 Logfire includes **10 million records** on Personal, Team, and Growth, then **$2 per million** on Team and Growth. A record is a span, a log, or a metric. The pricing page lists **$0 per 1,000 scores** on Team and Growth. Personal hard-caps at 10 million records and pauses ingestion. Team and Growth can set a spending cap.
 
-Langfuse bills [units](/docs/administration/billable-units) at $8 per 100,000 after the included 100,000, then $7 per 100,000 from 1 million to 10 million. A trace, an observation, and a score each count as one unit. There is no separate seat fee on Core and above.
+Langfuse bills [units](/docs/administration/billable-units) at $8 per 100,000 after the included 100,000, then $7 per 100,000 from 1 million to 10 million. Each trace, observation, score, or new [facet result](/docs/observability/features/topics#models-and-costs) counts as one unit. There is no separate seat fee on Core and above.
 
 |            | Langfuse                                                                                                       | Pydantic Logfire                                                                                                                                               |
 | ---------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -102,7 +102,7 @@ Langfuse bills [units](/docs/administration/billable-units) at $8 per 100,000 af
 
 ### Worked example [#worked-example]
 
-**A 10-person team that needs 90 days of history.** 50,000 traces a month, each with 8 observations and one trace-level score (a judge verdict or user feedback on the final output). In Langfuse that is 1 trace + 8 observations + 1 score = 10 units per trace, 500,000 units a month. Scoring every observation instead would make it 17 units per trace. In Logfire the 8 observations are 8 spans, 400,000 records; the trace itself is not a record and scores carry no per-score charge. Logs, metrics, and extra spans would add records, and the month stays inside the 10 million allowance either way. Public list prices.
+**A 10-person team that needs 90 days of history.** 50,000 traces a month, each with 8 observations and one trace-level score (a judge verdict or user feedback on the final output). The example assumes zero facet results. In Langfuse that is 1 trace + 8 observations + 1 score = 10 units per trace, 500,000 units a month. Scoring every observation instead would make it 17 units per trace. In Logfire the 8 observations are 8 spans, 400,000 records; the trace itself is not a record and scores carry no per-score charge. Logs, metrics, and extra spans would add records, and the month stays inside the 10 million allowance either way. Public list prices.
 
 |                    | Base    | Seats                   | Usage  | Retention on this plan | **Total/month** |
 | ------------------ | ------- | ----------------------- | ------ | ---------------------- | --------------- |

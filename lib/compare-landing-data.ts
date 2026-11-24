@@ -189,7 +189,7 @@ The comparisons below show how Langfuse differs from LangSmith, Braintrust, Ariz
     {
       n: "02",
       title: "One billing unit. Public prices.",
-      body: "Traces, observations, and scores each count as one unit. Plan prices are public, and paid Cloud plans include unlimited users, so adding a reviewer costs nothing extra.",
+      body: "Each trace, observation, score, or new facet result counts as one unit. Plan prices are public, and paid Cloud plans include unlimited users, so adding a reviewer costs nothing extra.",
       link: "/pricing-comparison-sheet",
       linkLabel: "Editable pricing model",
     },
