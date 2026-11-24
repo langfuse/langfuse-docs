@@ -11,21 +11,35 @@ Topics runs on your existing Langfuse web and worker services, using Postgres, C
 
 This page covers infrastructure configuration. For project setup and usage, see the [Topics guide](/docs/observability/features/topics).
 
+## Enable Topics [#enable-topics]
+
+On Langfuse v4.85.0 or later, set these environment variables on the indicated services and redeploy them. All three default to `false`.
+
+| Set to `true`                                     | Service                                                                       | Purpose                                                          |
+| ------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `LANGFUSE_TOPICS_ENABLED`                         | Web and worker                                                                | Makes Topics available for project setup and enables processing. |
+| `LANGFUSE_EVENTS_DISPATCH_ENABLED`                | Every worker that processes OpenTelemetry ingestion, plus the dispatch worker | Tracks when incoming traces are ready for live maps.             |
+| `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED` | One worker service with events dispatch enabled                               | Starts the dispatcher and processes its queued jobs.             |
+
+If you run a single worker service, set all three on that service and only `LANGFUSE_TOPICS_ENABLED` on web. In each project, map filters and sampling determine which recorded traces Topics analyzes.
+
 ## Configure model access [#model-access]
 
 Create project or inherited organization [LLM connections](/docs/administration/llm-connection), then follow the [Topics setup steps](/docs/observability/features/topics#get-started) to select your models.
 
-Both **web and worker** need access to the configured provider endpoints: web validates model configuration, and worker processes traces and names topics. Keep `ENCRYPTION_KEY` consistent across both services so they can read the stored credentials; see [encryption configuration](/self-hosting/configuration/encryption).
+Both **web and worker** need access to the configured provider endpoints. Web validates the model configuration, and the worker processes traces and names topics. Use the deployment's existing [`ENCRYPTION_KEY`](/self-hosting/configuration/encryption#application-level-encryption) on both services so they can read the stored credentials.
 
-For a private model endpoint or gateway, configure the [LLM connection outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) on both services.
+If you use a private model endpoint or gateway, [allow outbound requests to that endpoint](/self-hosting/configuration/hardening#outbound-url-allowlists) from both services.
 
 ### Embedding compatibility
 
-Choose a dimension count supported by your embedding model. Langfuse accepts **64–2,048 dimensions**, with **1,024** as the default. The model must return the configured number of dimensions. See [model selection and costs](/docs/observability/features/topics#models-and-costs) before processing your first traces.
+Choose a dimension count supported by your embedding model. Langfuse accepts **64–2,048 dimensions**, with **1,024** as the default. The model must return the configured number of dimensions.
 
 ## Configure storage retention [#storage-retention]
 
-Trace processing stages assembled transcripts in the event-upload bucket under `${LANGFUSE_S3_EVENT_UPLOAD_PREFIX}events-dispatch/trace-transcript/`. Configure a [blob storage lifecycle policy](/self-hosting/deployment/infrastructure/blobstorage) to expire objects under this prefix after three days, or set `LANGFUSE_EVENTS_DISPATCH_TRANSCRIPT_CLEANER_ENABLED=true` on the worker. The cleaner is disabled by default and requires permission to list and delete objects in the prefix.
+Live maps stage temporary transcripts under `events-dispatch/trace-transcript/` in the event-upload bucket. If your deployment sets `LANGFUSE_S3_EVENT_UPLOAD_PREFIX`, prepend its existing value to that path.
+
+Configure a [blob storage lifecycle policy](/self-hosting/deployment/infrastructure/blobstorage) to expire objects at that path after three days, or set `LANGFUSE_EVENTS_DISPATCH_TRANSCRIPT_CLEANER_ENABLED=true` on the worker. The cleaner is disabled by default and needs permission to list and delete those objects.
 
 For versioned storage or soft delete, configure lifecycle expiry for retained versions too.
 
@@ -36,10 +50,10 @@ For versioned storage or soft delete, configure lifecycle expiry for retained ve
 
 ## Start processing
 
-Start a small live map or snapshot and confirm that you can open a topic and its source traces. This exercises model access and the worker's clustering runtime.
+To verify live processing, create a live map filtered to a test workflow with 100% sampling. Send a matching trace with a recorded model conversation and check that its summary appears after the readiness delay and processing.
 
 ## Tune worker load [#worker-load]
 
-`LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` controls concurrent per-trace jobs per worker and queue shard (default: `20`). Lower it when provider rate limits or worker capacity require less concurrency.
+The worker runs up to 20 per-trace jobs concurrently per queue shard by default. Set `LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` only if you need to tune this, for example to stay within provider rate limits.
 
 Clustering consumes worker CPU and memory too. Allow headroom alongside ingestion and evaluation jobs; see [sizing and scaling](/self-hosting/configuration/scaling) for worker deployment options.
