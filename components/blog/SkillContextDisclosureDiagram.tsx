@@ -30,8 +30,9 @@ export function SkillContextDisclosureDiagram() {
               viewBox="0 0 8 8"
               refX="7"
               refY="4"
-              markerWidth="4.5"
-              markerHeight="4.5"
+              markerUnits="userSpaceOnUse"
+              markerWidth="7"
+              markerHeight="7"
               orient="auto"
             >
               <path d="M0 1 L7 4 L0 7 Z" fill="var(--text-secondary)" />
@@ -53,16 +54,13 @@ export function SkillContextDisclosureDiagram() {
             agent context
           </text>
 
-          {/* Left context container */}
+          {/* Left context container background */}
           <rect
             x="8"
             y="68"
             width="134"
             height="352"
-            rx="2"
             fill="var(--surface-bg)"
-            stroke="var(--line-structure)"
-            strokeWidth="0.5"
           />
 
           {/* Full-height prompt strip */}
@@ -71,11 +69,30 @@ export function SkillContextDisclosureDiagram() {
             y="68"
             width="30"
             height="352"
-            rx="1"
             fill="var(--surface-cta-primary)"
-            stroke="var(--line-structure)"
-            strokeWidth="0.5"
           />
+          <line
+            x1="38"
+            y1="68"
+            x2="38"
+            y2="420"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
+          />
+
+          {/* Left context outer border (single crisp stroke, no double-stroking) */}
+          <rect
+            x="8"
+            y="68"
+            width="134"
+            height="352"
+            fill="none"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
+          />
+
           <text
             x="23"
             y="244"
@@ -96,7 +113,8 @@ export function SkillContextDisclosureDiagram() {
             x2="166"
             y2="426"
             stroke="var(--text-secondary)"
-            strokeWidth="0.5"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
             markerEnd={`url(#${arrowId})`}
           />
           {ITERATIONS.map((iter) => (
@@ -104,10 +122,10 @@ export function SkillContextDisclosureDiagram() {
               <circle
                 cx="166"
                 cy={iter.y}
-                r="4.5"
+                r="4"
                 fill="var(--surface-cta-primary)"
                 stroke="var(--text-secondary)"
-                strokeWidth="0.5"
+                strokeWidth="0.9"
               />
               <text
                 x="180"
@@ -127,8 +145,9 @@ export function SkillContextDisclosureDiagram() {
             x2="271"
             y2="428"
             stroke="var(--text-primary)"
-            strokeWidth="0.5"
+            strokeWidth="1"
             strokeDasharray="2 4"
+            shapeRendering="crispEdges"
           />
 
           {/* Right panel: Skill */}
@@ -146,16 +165,13 @@ export function SkillContextDisclosureDiagram() {
             agent context
           </text>
 
-          {/* Right context container */}
+          {/* Right context container background */}
           <rect
             x="292"
             y="68"
             width="152"
             height="352"
-            rx="2"
             fill="var(--surface-bg)"
-            stroke="var(--line-structure)"
-            strokeWidth="0.5"
           />
 
           {/* Frontmatter strip (iterations 1-7) */}
@@ -164,10 +180,16 @@ export function SkillContextDisclosureDiagram() {
             y="68"
             width="30"
             height="352"
-            rx="1"
             fill="var(--surface-cta-primary)"
+          />
+          <line
+            x1="322"
+            y1="68"
+            x2="322"
+            y2="420"
             stroke="var(--line-structure)"
-            strokeWidth="0.5"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
           />
           <text
             x="307"
@@ -188,10 +210,14 @@ export function SkillContextDisclosureDiagram() {
             y="194"
             width="30"
             height="226"
-            rx="1"
             fill="var(--surface-cta-primary)"
+          />
+          <path
+            d="M 322 194 H 352 V 420"
+            fill="none"
             stroke="var(--line-structure)"
-            strokeWidth="0.5"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
           />
           <text
             x="337"
@@ -212,10 +238,14 @@ export function SkillContextDisclosureDiagram() {
             y="326"
             width="36"
             height="94"
-            rx="1"
             fill="var(--surface-cta-primary)"
+          />
+          <path
+            d="M 352 326 H 388 V 420"
+            fill="none"
             stroke="var(--line-structure)"
-            strokeWidth="0.5"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
           />
           <text
             x="364"
@@ -242,6 +272,18 @@ export function SkillContextDisclosureDiagram() {
             file-1.md
           </text>
 
+          {/* Right context outer border (single crisp stroke, no double-stroking) */}
+          <rect
+            x="292"
+            y="68"
+            width="152"
+            height="352"
+            fill="none"
+            stroke="var(--line-structure)"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
+          />
+
           {/* Dashed trigger line: iteration 3 -> SKILL.md */}
           <line
             x1="352"
@@ -249,8 +291,9 @@ export function SkillContextDisclosureDiagram() {
             x2="583"
             y2="194"
             stroke="var(--text-tertiary)"
-            strokeWidth="0.5"
+            strokeWidth="1"
             strokeDasharray="4 3"
+            shapeRendering="crispEdges"
           />
           <text x="456" y="168" fontSize="13" fill="var(--text-secondary)">
             agent decides
@@ -266,8 +309,9 @@ export function SkillContextDisclosureDiagram() {
             x2="583"
             y2="326"
             stroke="var(--text-tertiary)"
-            strokeWidth="0.5"
+            strokeWidth="1"
             strokeDasharray="4 3"
+            shapeRendering="crispEdges"
           />
           <text x="456" y="300" fontSize="13" fill="var(--text-secondary)">
             agent reads skill
@@ -283,7 +327,8 @@ export function SkillContextDisclosureDiagram() {
             x2="588"
             y2="426"
             stroke="var(--text-secondary)"
-            strokeWidth="0.5"
+            strokeWidth="1"
+            shapeRendering="crispEdges"
             markerEnd={`url(#${arrowId})`}
           />
           {ITERATIONS.map((iter) => (
@@ -291,10 +336,10 @@ export function SkillContextDisclosureDiagram() {
               <circle
                 cx="588"
                 cy={iter.y}
-                r="4.5"
+                r="4"
                 fill="var(--surface-cta-primary)"
                 stroke="var(--text-secondary)"
-                strokeWidth="0.5"
+                strokeWidth="0.9"
               />
               <text
                 x="602"
