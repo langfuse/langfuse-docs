@@ -1,0 +1,112 @@
+---
+title: "Langfuse launches Topics"
+date: 2026/11/24
+description: "An open source map of your production traces. See what users ask, how they felt, how it went and what went wrong, without reading every trace."
+tag: announcement
+author: Hande
+highlight: true
+---
+
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { ImagePlaceholder } from "@/components/blog/ImagePlaceholder";
+
+<BlogHeader
+  title="Langfuse launches Topics"
+  description="An open source map of your production traces. See what users ask, how they felt, how it went and what went wrong, without reading every trace."
+  authors={["handekafkas"]}
+  date="November 24, 2026"
+/>
+
+{/* TODO before publishing: replace each ImagePlaceholder with the final visual, a Video component pointing at an .mp4 in the docs-videos bucket, then remove the ImagePlaceholder import. */}
+
+Today, we are launching [Topics](/docs/observability/features/topics) in public beta. It clusters your production traces into named topics, so you can see how your agent is used and where it breaks.
+
+<ImagePlaceholder label="Visual 1: Topics launch video" />
+
+## Let Topics find your unknown unknowns
+
+Every team running an agent in production has the same question: "What do people do with my agent, and where does it fail?" The answer is in the traces, but there are more of them than anyone can read.
+
+One way to find out is setting up evals when you know what to check for. What we see many teams do for the rest is let a coding agent find patterns in their raw traces. That works on a sample, but at production volume it is too expensive, and the result stays with the person who ran it.
+
+Topics does this analysis for you at scale and keeps it current, so you know sooner what to prioritize. It adds an enrichment layer on top of your traces, which gives your team and your agents a quick overview of what users do and how often. You spot common friction points without having to ask about them, and find opportunities to support what your users already try to do.
+
+## What you can do with Topics
+
+### See every trace through facets
+
+Topics describes each trace from different angles, called facets. Then it clusters every facet into its own set of topics. There are four built-in facets you can choose from.
+
+- **Intent** is what the agent was asked to do.
+- **Sentiment** is how the user felt about the interaction.
+- **Outcome** is how the trace ended and whether the result is confirmed.
+- **Issues** is the main problem in how the trace was handled.
+
+<ImagePlaceholder label="Visual 3 (screen recording): the four built-in facets and their topics" />
+
+Each facet is clustered on its own, so a problem that is spread across many intents still shows up as one topic under Issues. You get this without writing evals first, and the topics show you which evaluators are worth setting up.
+
+### Explore topics in several views and maps
+
+You can view the topics of a facet as a treemap or a scatter plot.
+
+<ImagePlaceholder label="Visual 4 (screen recording): the treemap and scatter plot views of a facet" />
+
+Topics can be used for continuous analysis of production traffic using live maps or for one-off analysis through snapshots. A live map groups the traces that match a filter and a sample rate and keeps adding new traces as they arrive. You can create several, for example one per agent or environment, so each gets its own topics. A snapshot is a one-time analysis of a time window, for example to put your dataset or experiment traces next to production, to see which critical use cases your datasets miss.
+
+<ImagePlaceholder label="Visual 5 (screen recording): live maps and snapshots" />
+
+### Go from a topic to a fix
+
+A topic tells you where to look, so open it and read a few of its traces before you act. The fix can be the prompt, missing context for the agent, a gap in its knowledge base or a new evaluator. Filter the tracing table by the topic to work through its traces.
+
+<ImagePlaceholder label="Visual 6 (screen recording): opening a topic and filtering the tracing table by it" />
+
+### Give your agents the enrichment layer
+
+[Halo](/docs/api-and-data-platform/features/halo), the assistant inside Langfuse, uses Topics, and you can build your own agents and workflows on top of them through the [API](/docs/api-and-data-platform/features/public-api), [MCP](/docs/api-and-data-platform/features/mcp-server) and [CLI](/docs/api-and-data-platform/features/cli). Instead of reading raw traces to find the patterns, an agent starts from the topics and loads full traces only where it needs them, which keeps the cost down. Ask your own agent: "Look at Langfuse Topics. What are the most common issues in my support agent, and which requests cause them?" Your agent can then open the traces behind a topic and find the step that caused the failure.
+
+<ImagePlaceholder label="Visual 7 (screen recording): an agent answering a question from Topics" />
+
+## What Topics showed us on Halo
+
+We also run Topics on Halo's own traces, and it found things nobody on our team was looking for. The topics showed some people used Halo to write homework and Python scripts. A larger group tried to pen-test it, for example by asking for its environment variables.
+
+Another topic was full of traces where Halo wrote its answer in its reasoning and the user saw nothing. We had no evaluator for either finding, and now we know which ones to set up.
+
+## How Topics works
+
+Every facet goes through the same four steps on the traces you select:
+
+- Summarize the transcript of a complete trace with a cost-efficient model per facet
+- Cluster similar summaries into topics
+- Name and describe each topic with a stronger model
+- Keep the topics current by sorting each completed trace into the existing topics as they arrive and clustering again every six hours to pick up new patterns
+
+<ImagePlaceholder label="Visual 8 (diagram or motion graphic): the four steps of the Topics pipeline" />
+
+## Open source, on your own models, at production scale
+
+Topics is built like the rest of Langfuse:
+
+- It is open source and runs on self-hosted Langfuse as well as on Langfuse Cloud.
+- You choose the models from your own [LLM connections](/docs/administration/llm-connection), and the calls go to your provider with your key.
+- It is designed for production scale and tested at millions of traces per day.
+
+## How to get started
+
+Topics is available today in public beta on Langfuse Cloud, in all regions. Self-hosted deployments need Langfuse v4.
+
+Open **Topics** in your project and click **Set up topics**. Choose the facets and your models, select which traces to cover, and start analyzing. The first topics appear about five minutes after setup.
+
+Each facet summary counts as one [billable unit](/docs/administration/billable-units) in Langfuse, and your provider bills the model calls on your own key.
+
+Read the [Topics docs](/docs/observability/features/topics) for the full setup.
+
+{/* TODO before publishing: link the GitHub Discussion feedback thread in the next sentence. */}
+
+Because Topics is in beta, it will still change, and we want your feedback to guide how. Thank you to everyone who asked us to build this and gave us feedback while we designed it.
+
+## What's next
+
+We are working on better ways to surface outliers and representative examples for each topic. Custom facets, so you can cluster traces based on your own questions, will follow soon.
