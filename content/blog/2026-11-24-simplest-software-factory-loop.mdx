@@ -152,15 +152,23 @@ Click **Test** once on the routine to verify it runs cleanly.
 
 </Steps>
 
-## Optional next step: add a dataset as your PR gate [#optional-dataset-pr-gate]
+## Next step over time: turn daily reviews into a dataset [#turn-daily-reviews-into-a-dataset]
 
-You don't need datasets or offline evals to start.
+Just like error analysis, you don't need to build a test suite upfront. The traces you already review every day are the best raw material for one.
 
-Once your daily sweeps surface recurring failure modes you never want to regress on, save those traces into a [Langfuse Dataset](/docs/evaluation/experiments/datasets) and have the bot run your [experiment script](/docs/evaluation/experiments/experiments-via-sdk) before opening a PR, attaching the before/after [score comparison](/docs/evaluation/experiments/compare-experiments) right in the PR description.
+Every time a daily sweep surfaces a tricky edge case, a recurring failure mode, or a gray area you just made a call on, add that trace to a [Langfuse Dataset](/docs/evaluation/experiments/datasets). Over a few weeks, those two-minute reviews naturally grow into a living benchmark of how you actually want your agent to behave.
+
+Here is how the dataset loop works in practice:
+
+1. **Save reviewed traces to a dataset.** From any trace you inspect in Langfuse (or directly via the [Langfuse CLI](/docs/api-and-data-platform/features/cli) and [skill](/docs/api-and-data-platform/features/agent-skill)), add the run as a dataset item so the real production input is captured as-is.
+2. **Edit the expected output as your taste evolves.** Each dataset item holds the input plus the expected output or behavior. When a trace went wrong, edit the expected output to show what the agent should have done instead. When your product or bar changes later, update or prune items so the dataset stays aligned with what "good" means today.
+3. **Run an experiment before opening a PR.** Once you have a small set of cases you never want to break, update `docs/agent-quality.md` so the bot runs your [experiment script](/docs/evaluation/experiments/experiments-via-sdk) against the dataset before opening a PR (or run it in [CI](/docs/evaluation/experiments/experiments-ci-cd)) and attaches the before/after [score comparison](/docs/evaluation/experiments/compare-experiments) in the PR description.
 
 <Frame fullWidth className="w-full my-8">
   ![Comparing baseline vs. candidate experiment runs side by side in Langfuse](/images/docs/experiment-comparison-peek-view.png)
 </Frame>
+
+That closes the loop against regressions: a fix for today's failure has to pass every case you already cared about yesterday.
 
 Start with traces, a daily sweep, and 2–3 examples to judge. If you have good traces and signals, simplicity rules.
 
