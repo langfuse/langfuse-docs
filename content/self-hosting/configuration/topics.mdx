@@ -1,0 +1,71 @@
+---
+title: Topics (self-hosted)
+sidebarTitle: Topics
+description: Enable Topics and configure model access, transcript cleanup, and worker sizing on a self-hosted Langfuse v4 deployment.
+label: "Version: v4"
+---
+
+# Topics
+
+Topics runs on your existing Langfuse v4 web and worker containers using Postgres, ClickHouse, Redis, and blob storage, with no separate service to deploy. Clustering runs inside the worker using a native module bundled in the official worker image.
+
+This page covers self-hosted infrastructure setup. For project configuration and usage, see the [Topics guide](/docs/observability/features/topics).
+
+<Callout type="info">
+  Topics is in public beta on self-hosted deployments from version
+  `>=v4.84.0`. Its configuration may change between releases; [subscribe to
+  Langfuse OSS updates](/self-hosting/oss-newsletter) to hear when it leaves
+  beta.
+</Callout>
+
+## Enable Topics [#enable]
+
+Set these environment variables and restart web and worker:
+
+```bash
+# Web and worker
+LANGFUSE_TOPICS_ENABLED=true
+
+# Every worker consuming OTel ingestion
+LANGFUSE_EVENTS_DISPATCH_ENABLED=true
+
+# Exactly one worker service (runs the trace dispatcher and events-dispatch consumer)
+QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED=true
+```
+
+Topics requires Langfuse v4's observations-first write mode (`LANGFUSE_MIGRATION_V4_WRITE_MODE` set to `events_only` or `dual`, which is the v4 default). Without events dispatch enabled, the Topics UI opens normally but no traces are summarized.
+
+## Model access [#model-access]
+
+Topics uses per-project or inherited organization [LLM connections](/docs/administration/llm-connection), not instance-wide model environment variables. Configure your connections in the UI, then follow the [Topics setup steps](/docs/observability/features/topics#get-started).
+
+- **Network access**: Both **web** and **worker** must reach your model provider endpoints. Web validates model configuration; worker summarizes traces, embeds summaries, and names topics.
+- **Shared encryption key**: Keep `ENCRYPTION_KEY` identical across web and worker so both services can decrypt stored credentials ([encryption configuration](/self-hosting/configuration/encryption)).
+- **Private endpoints**: For internal gateways or private endpoints, add their hosts to the [LLM connection outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists) on both services.
+- **Embeddings**: Use a connection whose adapter supports embeddings and returns the configured dimension count (64–2,048, default 1,024). See [Models, billing, and costs](/docs/observability/features/topics#models-and-costs) before processing your first traces.
+
+## Transcript storage and cleanup [#storage-retention]
+
+Trace processing stages assembled transcripts in your event-upload bucket under `${LANGFUSE_S3_EVENT_UPLOAD_PREFIX}events-dispatch/trace-transcript/`.
+
+- **Recommended**: Add a [blob storage lifecycle policy](/self-hosting/deployment/infrastructure/blobstorage) to expire objects under this prefix after 3 days, including retained versions or soft-deleted copies if versioning is enabled.
+- **Alternative**: Set `LANGFUSE_EVENTS_DISPATCH_TRANSCRIPT_CLEANER_ENABLED=true` on the worker. The cleaner is off by default and requires list and delete permissions on the prefix.
+
+<Callout type="warning">
+  Staged transcripts contain trace content, and trace or project deletion does
+  not remove them. Make sure either a bucket lifecycle policy or the worker
+  cleaner is active.
+</Callout>
+
+## Worker sizing and tuning [#worker-load]
+
+| Variable                                             | Default | Purpose                                                                                                                                 |
+| ---------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` | `20`    | Concurrent per-trace summarization jobs per worker and queue shard. Lower it to stay within provider rate limits or reduce worker load. |
+| `LANGFUSE_TOPICS_NIGHTLY_REFIT_HOUR_UTC`             | `4`     | UTC hour when live maps rebuild their clusters.                                                                                         |
+
+Clustering runs in a worker child process and admits up to 20,000 summaries (256 MiB) per fit. Leave CPU and memory headroom on workers alongside ingestion and evaluation jobs; see [sizing and scaling](/self-hosting/configuration/scaling).
+
+## Verify your setup [#verify]
+
+Open a project, start a small live map or snapshot following the [Topics setup steps](/docs/observability/features/topics#get-started), and confirm you can open a discovered topic and its underlying traces. This exercises events dispatch, provider connectivity, and the worker's native clustering runtime end to end.
