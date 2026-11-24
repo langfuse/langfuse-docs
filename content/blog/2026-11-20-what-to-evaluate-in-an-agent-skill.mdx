@@ -99,10 +99,17 @@ Because an agent can read `SKILL.md` and skip the reference file (a partial read
 
 Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, the focus will likely be on outcome evaluators and trajectory evaluators, for example:
 
-- **Build, test, and environment state (outcome):** Did the edited repo compile and pass tests, were the expected resources created in the scratch project, and is `git status` clean of stray artifacts?
-- **Side effects and safety bounds (outcome):** Did the agent avoid unintended writes (`collateral_writes == 0`) and explicitly abstain when a request was impossible?
-- **Step order and workflow fidelity (trajectory):** Did the agent run required steps in order (such as a dry run or approval gate before a destructive action) and use the intended CLI or SDK instead of ad-hoc workarounds?
-- **Team conventions and output quality (outcome):** Does the final artifact (a code diff, PR review, or incident postmortem) follow the structure and rules encoded in the skill, graded with an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)?
+- **Code setup and migrations** (e.g., instrumenting an app or migrating prompts):
+  - **Build and tests pass (outcome):** Does the edited repo still compile and pass its test suite?
+  - **Expected code patterns (outcome):** Are the required SDK calls or imports present in the diff?
+  - **Clean workspace (outcome):** Is `git status` free of stray temporary files or artifacts?
+- **CLI and API operations** (e.g., investigating traces or managing resources):
+  - **Ground-truth match (outcome):** Does the final answer or created resource match the seeded fixture?
+  - **No collateral writes (outcome):** Did the agent avoid unintended mutations (`collateral_writes == 0`)?
+  - **Tool adherence (trajectory):** Did the agent use the skill's CLI or SDK instead of ad-hoc workarounds?
+- **Encoded team workflows** (e.g., PR reviews, release checklists, or incident postmortems):
+  - **Step order and gates (trajectory):** Did the agent run required steps in order (such as a dry run or approval gate before a destructive action)?
+  - **Structure and conventions (outcome):** Does the final artifact follow the team's format and rules, graded with an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)?
 
 ### Score per constraint, not one monolithic score
 
