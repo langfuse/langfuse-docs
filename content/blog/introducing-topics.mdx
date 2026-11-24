@@ -50,7 +50,7 @@ Topics summarizes each trace from different angles, called facets. Then it clust
   title="The four built-in facets and their topics"
   description="The Topics view of a live map switches between the Intent, Sentiment, Outcome and Issues facets, and each shows its own treemap of topics. Clicking a topic lists its traces, and an opened trace shows its topic for every facet."
   aspectRatio={16 / 9}
-  controls={false}
+  gifStyle
 />
 
 Traces are clustered per facet, so a problem occurring in multiple "Intent" clusters still shows up as just one topic in "Issues". Through that information, you can then set up very targeted new evaluators to check against surfaced "Issues" for example.
@@ -64,7 +64,7 @@ You can view the topics of a facet as a treemap or a scatter plot in the Langfus
   title="Treemap and scatter plot views of the Issues facet"
   description="The Issues facet of a live map is shown as a treemap, then switched to the scatter plot. Hovering a point shows the summary of its trace, and clicking it opens the trace."
   aspectRatio={16 / 9}
-  controls={false}
+  gifStyle
 />
 
 Live maps can be used to continuously scan production traffic for new topics. Snapshots allow you to run a one-off topic analysis on a (filtered) set of traces. Both cluster the traces that match the specified filter and sample rate. You can have multiple live maps and snapshots at once. We recommend setting up one live map per agent or environment, so that each gets its own topics. Snapshots are useful for getting topics once for a filtered set, for example to pit your French-region versus your German-region customer support interactions.
@@ -74,7 +74,7 @@ Live maps can be used to continuously scan production traffic for new topics. Sn
   title="Switching between live maps and creating a snapshot"
   description="The map picker switches between two live maps. A new snapshot is then created for the traces of the last seven days that match a tag filter, and it appears in the picker next to the live maps."
   aspectRatio={16 / 9}
-  controls={false}
+  gifStyle
 />
 
 ### Go from a topic to a fix
@@ -86,7 +86,7 @@ A topic tells you where to look, so open it and read a few of its traces before 
   title="Filtering the tracing table by a topic"
   description="Typing the topics prefix in the search bar of the tracing table suggests the four facets and their topics. The table is filtered to one Issues topic, and an opened trace shows its topic for every facet with a link back to Topics."
   aspectRatio={16 / 9}
-  controls={false}
+  gifStyle
 />
 
 ### Give your agents the enrichment layer
@@ -98,7 +98,7 @@ A topic tells you where to look, so open it and read a few of its traces before 
   title="Halo answering a question from Topics"
   description="Halo is asked for the three most common issues users have with a travel concierge agent. It reads the topics and their trace assignments, then lists each issue with its trace count and example traces."
   aspectRatio={16 / 9}
-  controls={false}
+  gifStyle
 />
 
 ## What Topics showed us on Halo
@@ -121,7 +121,7 @@ Every facet goes through the same four steps on the traces you select:
   title="The Topics pipeline"
   description="As traces arrive, Topics waits until a trace is finished, writes one summary per active facet and embeds each summary. Topic discovery then clusters the embeddings within each facet and names each cluster."
   aspectRatio={16 / 9}
-  controls={false}
+  gifStyle
 />
 
 ## Open source, on your own models, at production scale
