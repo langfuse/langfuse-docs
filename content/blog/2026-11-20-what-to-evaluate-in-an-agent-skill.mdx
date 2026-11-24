@@ -65,7 +65,7 @@ The mechanism here is straightforward: spin up agents in an environment with a p
 
 ### 1. Skill-level triggering and coexistence
 
-First of all, you want to measure whether the agent triggers your skill when you expect it to. Once you have many skills in the same harness, this becomes even more important: adding a new skill can interfere with the expected routing of existing skills, causing the agent to pick the wrong one or miss a skill it previously triggered. These are the evals you iterate your skill's `name` and `description` frontmatter against.
+Before an agent ever reads `SKILL.md`, all it has to go on is the `name` and `description` in your frontmatter. Your first routing eval tests whether that frontmatter is clear enough for the agent to load your skill when it should—and leave it alone when it shouldn't. This gets harder as your skill library grows: every new skill competes in the same routing decision, so adding one can silently pull triggers away from existing skills. Treating skill-level triggering as a regression suite gives you a fast signal to iterate your frontmatter against, both when tuning a single skill and when adding new ones alongside it.
 
 ### 2. Intra-skill routing (`SKILL.md` to reference files)
 
