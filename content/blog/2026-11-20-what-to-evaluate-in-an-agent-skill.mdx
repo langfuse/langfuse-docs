@@ -87,10 +87,6 @@ Because an agent can read `SKILL.md` and skip the reference file (a partial read
   ![Langfuse dataset items for intra-skill routing showing prompt inputs, expected output with invoked_reference_file, and metadata with env_folder](/images/blog/2026-11-20-what-to-evaluate-in-an-agent-skill/routing-dataset-items.png)
 </Frame>
 
-You cannot score this from the final answer because agents rarely mention internal skill filenames to users. Instead, our deterministic evaluator inspects the traced tool observations (`Skill`, `skill_read`, `Read`, and shell file reads) and checks the exact files loaded during the run. Setting `invoked_reference_file` to `""` acts as a context-bloat guardrail: opening any extra file beyond `SKILL.md` scores `0`.
-
-That guardrail matters more than most authors expect. When [Together AI consolidated 14 separate skills into one unified skill](https://www.together.ai/blog/how-we-do-agent-evals-at-together-ai), their first version had a 14,000-character router that encouraged agents to read guides in full. Agents loaded 57% more skill text, **pass rates dropped from 90% to 75%, and cost per run more than doubled**. Trimming the router under 6,000 characters and adding concise file menus pushed pass rates to 97.2% while bringing cost back down. SkillsBench saw the same curve across 87 tasks: focused skills with 1 to 3 modules gained +19 to +21.5 pp, while exhaustive reference bundles gained just +0.7 pp.
-
 ## Evaluating trajectory efficiency & cost [#evaluating-trajectory-efficiency-and-cost]
 
 Even when an agent loads the right files and passes the task, the final verdict can hide severe friction inside the run. Strong frontier models are remarkably good at recovering from broken instructions: if a skill points to a renamed CLI flag or a stale URL, a capable model will hit an error, run `--help`, search around, and eventually succeed anyway.
