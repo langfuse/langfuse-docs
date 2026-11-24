@@ -117,13 +117,9 @@ Instead of asking a judge for a single `0–100` quality rating, grade concrete 
 
 ### Pick `pass@k` vs. `pass^k` based on user risk
 
-If your skill powers an interactive workflow where the agent can easily iterate, the `pass@k` (succeeding at least once in `k` attempts) metric represents reality pretty well. If your skill governs an operational action—like migrating production resources, reviewing compliance, or placing an order—track `pass^k` (succeeding across *every* trial in `k` runs), because inconsistency breaks trust fast.
+If your skill powers an interactive workflow where the agent can easily iterate, the `pass@k` (succeeding at least once in `k` attempts) metric represents reality pretty well.
 
-### Always compare against a baseline
-
-- **Skills can produce negative lift.** In [SkillsBench](https://arxiv.org/abs/2602.12670), which evaluates 87 containerized tasks across 18 model-harness pairs with and without curated skills, skills raised average pass rates by +16.6 percentage points (from 33.9% to 50.5%), **but hurt performance on 13 of the 87 tasks** (by up to -7.4 pp). Negative lift happened when a skill prescribed an overly heavy workflow, pointed at a brittle tool, or overrode a stronger default strategy the model already knew.
-- **Models outgrow capability-uplift skills.** [Anthropic distinguishes two types of skills](https://claude.com/resources/articles/improving-skill-creator-test-measure-and-refine-agent-skills): *capability uplift* skills (teaching techniques the base model struggles with) and *encoded preference* skills (sequencing your team's specific conventions or proprietary workflows). When a new frontier model drops and suddenly passes your `no-skill` baseline, a capability-uplift skill isn't broken; it is just dead weight you can retire. Teams operating large skill libraries, [like Fin AI](https://x.com/MrDHat/status/2123182107023601667), use continuous usage and baseline checks specifically to prune skills that models have outgrown or stopped triggering.
-- **Lift depends on the harness, not just the model.** SkillsBench also found that the exact same model gets materially different lift depending on the coding harness (for example, Claude Opus 4.7 reached 61.2% with skills in Claude Code vs. 53.1% in OpenHands). If your skill is used across Claude Code, Codex, and Cursor, you need to measure lift per harness.
+If your skill governs an operational action (e.g., migrating production resources, reviewing compliance, placing an order), you should use `pass^k` (succeeding across every trial in `k` runs).
 
 ## Evaluating trajectory efficiency & cost [#evaluating-trajectory-efficiency-and-cost]
 
