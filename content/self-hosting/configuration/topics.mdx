@@ -1,27 +1,21 @@
 ---
 title: Topics (self-hosted)
 sidebarTitle: Topics
-description: Configure model access, workers, and storage for Topics on a self-hosted Langfuse deployment.
+description: Configure the Topics infrastructure on a self-hosted Langfuse deployment.
 label: "Version: v4"
 ---
 
 # Topics
 
-Topics runs on your existing Langfuse web and worker services, using Postgres, ClickHouse, Redis, and blob storage. Clustering runs inside the worker; the official worker image includes the required native module.
+Topics runs on your existing Langfuse web and worker services, using Postgres, ClickHouse, Redis, and blob storage. Clustering runs inside the worker and the official worker image includes the required native module.
 
 This page covers infrastructure configuration. For project setup and usage, see the [Topics guide](/docs/observability/features/topics).
 
-## Enable Topics [#enable-topics]
+## Configure the dispatch worker [#enable-topics]
 
-On Langfuse v4.85.0 or later, set these environment variables on the indicated services and redeploy them. All three default to `false`.
+Topics is enabled by default. To process traces, set `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED=true` on one worker service and redeploy it. If you run a single worker service, use that service.
 
-| Set to `true`                                     | Service                                                                       | Purpose                                                          |
-| ------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `LANGFUSE_TOPICS_ENABLED`                         | Web and worker                                                                | Makes Topics available for project setup and enables processing. |
-| `LANGFUSE_EVENTS_DISPATCH_ENABLED`                | Every worker that processes OpenTelemetry ingestion, plus the dispatch worker | Tracks when incoming traces are ready for live maps.             |
-| `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED` | One worker service with events dispatch enabled                               | Starts the dispatcher and processes its queued jobs.             |
-
-If you run a single worker service, set all three on that service and only `LANGFUSE_TOPICS_ENABLED` on web. In each project, map filters and sampling determine which recorded traces Topics analyzes.
+Event dispatch defaults to `true`. If you set `LANGFUSE_EVENTS_DISPATCH_ENABLED=false` on the dispatch worker or any OpenTelemetry ingestion worker, remove the override and redeploy the affected services. In each project, map filters and sampling determine which recorded traces Topics analyzes.
 
 ## Configure model access [#model-access]
 
