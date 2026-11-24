@@ -93,21 +93,9 @@ Because an agent can read `SKILL.md` and skip the reference file (a partial read
   ![Langfuse dataset items for intra-skill routing showing prompt inputs, expected output with invoked_reference_file, and metadata with env_folder](/images/blog/2026-11-20-what-to-evaluate-in-an-agent-skill/routing-dataset-items.png)
 </Frame>
 
-## Evaluating trajectory efficiency & cost [#evaluating-trajectory-efficiency-and-cost]
-
-Even when an agent loads the right files and passes the task, the final verdict can hide severe friction inside the run. Strong frontier models are remarkably good at recovering from broken instructions: if a skill points to a renamed CLI flag or a stale URL, a capable model will hit an error, run `--help`, search around, and eventually succeed anyway.
-
-[Together AI ran into this exact trap](https://www.together.ai/blog/how-we-do-agent-evals-at-together-ai): on a GPU cluster pricing task where their skill linked to a marketing page instead of the pricing table, Claude Opus worked around the dead end in 13 of 14 runs, masking the bug. Claude Sonnet failed 11 of 15 runs on the same skill, immediately exposing the bad link. Evaluating trajectory metrics—and including a smaller or faster model in your eval matrix—surfaces those paper cuts before every user pays the token tax for them.
-
-Three trajectory metrics consistently earn their keep:
-
-- **Tool and CLI error rate:** Count non-zero exit codes, `4xx` API responses, or failed tool spans per run. In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop that hit 90% of runs—both fixed with two-line edits to `SKILL.md`.
-- **Fallback and workaround rate:** Track when the agent abandons the path your skill recommends (for example, dropping from your SDK or CLI down to raw `curl` calls, or falling back to web search because a reference file lacked a concrete example).
-- **Token cost, turns, and wall-clock time on passing runs:** As [Vercel notes in their agent eval guide](https://vercel.com/blog/agent-evals), **compute efficiency metrics on successful trials only**. Failed runs often look fast and cheap simply because the agent gave up after three steps. On passing runs, compare token usage against your `no-skill` baseline: a good skill often *reduces* total tokens on complex tasks (SkillsBench recorded drops like 1.77M to 1.09M tokens on Opus 4.7) because upfront procedural knowledge eliminates exploratory guesswork. If tokens spike without a matching jump in pass rate, your skill is injecting noise.
-
 ## Evaluating task outcomes & behavior (by use case) [#evaluating-task-outcomes-and-behavior]
 
-Finally, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, text-similarity checks on the assistant's final message rarely suffice. Match your outcome evaluators to the type of behavior the skill governs:
+Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, text-similarity checks on the assistant's final message rarely suffice. Match your outcome evaluators to the type of behavior the skill governs:
 
 | Skill archetype | Example tasks | What to check on the outcome | Best grader type |
 | --- | --- | --- | --- |
@@ -125,6 +113,18 @@ Two details make behavioral outcome evals much more reliable in practice:
 - **Skills can produce negative lift.** In [SkillsBench](https://arxiv.org/abs/2602.12670), which evaluates 87 containerized tasks across 18 model-harness pairs with and without curated skills, skills raised average pass rates by +16.6 percentage points (from 33.9% to 50.5%), **but hurt performance on 13 of the 87 tasks** (by up to -7.4 pp). Negative lift happened when a skill prescribed an overly heavy workflow, pointed at a brittle tool, or overrode a stronger default strategy the model already knew.
 - **Models outgrow capability-uplift skills.** [Anthropic distinguishes two types of skills](https://claude.com/resources/articles/improving-skill-creator-test-measure-and-refine-agent-skills): *capability uplift* skills (teaching techniques the base model struggles with) and *encoded preference* skills (sequencing your team's specific conventions or proprietary workflows). When a new frontier model drops and suddenly passes your `no-skill` baseline, a capability-uplift skill isn't broken; it is just dead weight you can retire. Teams operating large skill libraries, [like Fin AI](https://x.com/MrDHat/status/2123182107023601667), use continuous usage and baseline checks specifically to prune skills that models have outgrown or stopped triggering.
 - **Lift depends on the harness, not just the model.** SkillsBench also found that the exact same model gets materially different lift depending on the coding harness (for example, Claude Opus 4.7 reached 61.2% with skills in Claude Code vs. 53.1% in OpenHands). If your skill is used across Claude Code, Codex, and Cursor, you need to measure lift per harness.
+
+## Evaluating trajectory efficiency & cost [#evaluating-trajectory-efficiency-and-cost]
+
+Even when an agent loads the right files and passes the task, the final verdict can hide severe friction inside the run. Strong frontier models are remarkably good at recovering from broken instructions: if a skill points to a renamed CLI flag or a stale URL, a capable model will hit an error, run `--help`, search around, and eventually succeed anyway.
+
+[Together AI ran into this exact trap](https://www.together.ai/blog/how-we-do-agent-evals-at-together-ai): on a GPU cluster pricing task where their skill linked to a marketing page instead of the pricing table, Claude Opus worked around the dead end in 13 of 14 runs, masking the bug. Claude Sonnet failed 11 of 15 runs on the same skill, immediately exposing the bad link. Evaluating trajectory metrics—and including a smaller or faster model in your eval matrix—surfaces those paper cuts before every user pays the token tax for them.
+
+Three trajectory metrics consistently earn their keep:
+
+- **Tool and CLI error rate:** Count non-zero exit codes, `4xx` API responses, or failed tool spans per run. In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop that hit 90% of runs—both fixed with two-line edits to `SKILL.md`.
+- **Fallback and workaround rate:** Track when the agent abandons the path your skill recommends (for example, dropping from your SDK or CLI down to raw `curl` calls, or falling back to web search because a reference file lacked a concrete example).
+- **Token cost, turns, and wall-clock time on passing runs:** As [Vercel notes in their agent eval guide](https://vercel.com/blog/agent-evals), **compute efficiency metrics on successful trials only**. Failed runs often look fast and cheap simply because the agent gave up after three steps. On passing runs, compare token usage against your `no-skill` baseline: a good skill often *reduces* total tokens on complex tasks (SkillsBench recorded drops like 1.77M to 1.09M tokens on Opus 4.7) because upfront procedural knowledge eliminates exploratory guesswork. If tokens spike without a matching jump in pass rate, your skill is injecting noise.
 
 ## How to sequence this without Goodharting yourself [#how-to-sequence-this]
 
