@@ -1,5 +1,5 @@
 ---
-title: "How we enabled tracing skill usage in Langfuse"
+title: "How we build cross-harness skill tracing without pushing complexity to the user"
 date: 2026/11/23
 description: "Understanding the influence a skill had on an agent run should be straightforward, but it proved surprisingly hard to implement across a skill's lifecycle stages and across different harnesses."
 tag: engineering
@@ -9,66 +9,85 @@ author: Tobias
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { SkillStructureDiagram } from "@/components/blog/SkillStructureDiagram";
 import { SkillLifecycleDiagram } from "@/components/blog/SkillLifecycleDiagram";
+import { SkillCompactionDiagram } from "@/components/blog/SkillCompactionDiagram";
 import { SkillTracingSplitDiagram } from "@/components/blog/SkillTracingSplitDiagram";
 
 <BlogHeader
-  title="How we enabled tracing skill usage in Langfuse"
+  title="How we build cross-harness skill tracing without pushing complexity to the user"
   description="Understanding the influence a skill had on an agent run should be straightforward, but it proved surprisingly hard to implement across a skill's lifecycle stages and across different harnesses."
   authors={["tobiasklesel"]}
   date="November 23, 2026"
 />
 
-This work started with two questions we kept running into while iterating on our own skills. We offer the open-source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) (hosted on [GitHub](https://github.com/langfuse/skills)) for any coding agent or harness, and we also use it inside Halo, our in-app agent (read more in [How we built Langfuse Halo](/blog/2026-10-21-building-the-langfuse-assistant)).
+We've done our fair share of skill engineering ourselves at Langfuse, through our open-source [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) (hosted on [GitHub](https://github.com/langfuse/skills)) and Halo, our in-app agent (read more in [How we built Langfuse Halo](/blog/2026-10-21-building-the-langfuse-assistant)). Whenever we changed instructions or added references, we wanted to answer the same two things:
 
-Whenever we changed instructions or added references, we wanted to answer the same two things: _which skills did an agent actually use, and when it used one, did version 2 perform better than version 1?_
+1. which skills did an agent actually use, and
+2. when it used one, did version 2 perform better than version 1?
 
-The catch was that every harness and SDK, including Halo, loaded and reported skills differently. We wanted a unified way to trace skill usage in Langfuse with minimal setup effort.
+So we started on a journey to get these questions easily answered in Langfuse. But every harness and SDK, including Halo, loaded and reported skills differently. So how do you trace skill usage in a unified way?
 
-## A skill on disk isn't a skill in context [#lifecycle-states]
+## What "using a skill" actually means at runtime [#lifecycle-states]
 
 Under the [Agent Skills specification](https://agentskills.io/specification), a skill is a directory with a `SKILL.md` file (YAML frontmatter with a `name` and `description`, plus Markdown instructions) and optional files in `references/` or `scripts/`.
 
 <SkillStructureDiagram />
 
-Skills save context tokens through **progressive disclosure**. At startup, the agent only exposes each skill's `name` and `description` in the system prompt or tool list. When the model decides a skill applies, it reads `SKILL.md`. If the task needs more detail, it opens reference files or runs scripts.
+To avoid overloading the model's context window with instructions it may not need, skills use **progressive disclosure**. At startup, the agent only exposes each skill's `name` and `description` in the system prompt or tool list. When the model decides a skill applies, it reads `SKILL.md`. If the task needs more detail, it opens reference files or runs scripts.
 
-That runtime behavior turns "was skill X used?" into a five-stage lifecycle:
+Because of this behavior, you can divide the skill lifecycle into five stages:
 
 <SkillLifecycleDiagram />
 
-A prompt is binary: your code either put it in a generation or it didn't. A skill moves through multiple stages across generations, tool calls, and long sessions. Collapsing those stages into one flag hides why a skill failed to help:
+Collapsing those stages into one flag hides why a skill failed to help:
 
 - **Installed, never discovered:** the folder sits on disk, or the agent's context budget dropped its description before the model saw it.
 - **Available, never requested:** the model saw the description and ignored it, usually because the description was too vague to match the user's phrasing (something we hit when [evaluating our own Langfuse skill](/blog/2026-02-26-evaluate-ai-agent-skills)).
 - **Requested, never loaded:** the model called the skill tool, but the file never reached context.
 
-### Requesting a skill isn't loading it [#intent-vs-load]
+### Separating model intent from actual loads [#intent-vs-load]
 
 Counting a model's tool call as a skill load skews your analytics. Between the model asking for a skill and the instructions entering context, plenty can fail: the path may not exist, a sandbox rule can block the read, the loader can return an error, or (in harnesses like Gemini CLI) the user can deny the activation consent prompt.
 
-In Langfuse, we separate the two signals:
+In Langfuse, we split this into three signals:
 
-- **Available and requested are on the generation.** Each `GENERATION` observation stores the skills offered to the model. The trace UI parses that generation's tool-call output on the fly to split the list into **Requested** and **Not requested** (including requested file paths). That lets you see when the model tried to load a skill without counting failed attempts as loads.
-- **Loaded is on the tool observation.** Ingestion records a loaded skill resource (skill name, resolved version, and file path such as `SKILL.md` or `references/eligibility.md`) only on a subsequent `TOOL` observation that matches a recognized skill loader, doesn't have an `ERROR` level, and returns non-null output.
+| Signal               | Recorded on  | Capturing mechanism                                                                                                                                                    |
+| -------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Available skills** | `GENERATION` | Reported on the model span as the agent's available skill catalog.                                                                                                     |
+| **Requested skills** | `GENERATION` | Parsed in the trace UI from the generation's tool-call output, splitting available skills into **Requested** and **Not requested** (with requested file paths).        |
+| **Loaded skills**    | `TOOL`       | Recorded at ingestion when a subsequent tool span matches a recognized skill loader, has no `ERROR` level, and returns non-null output (name, version, and file path). |
 
-<Frame fullWidth>
-  ![A generation reporting four available skills and a request for refund-policy v1 in the Preview view.](/images/changelog/2026-11-03-skill-management-generation.png)
-</Frame>
+<figure className="my-6">
+  <Frame fullWidth className="mt-0 w-full">
+    ![A generation reporting four available skills and a request for refund-policy v1 in the Preview view.](/images/changelog/2026-11-03-skill-management-generation.png)
+  </Frame>
+  <figcaption className="mt-2 text-sm text-text-tertiary">
+    A generation observation showing four available skills, with `refund-policy` v1 split under Requested from the model's tool call.
+  </figcaption>
+</figure>
 
-<Frame fullWidth>
-  ![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-11-03-skill-management-tool-load.png)
-</Frame>
+<figure className="my-6">
+  <Frame fullWidth className="mt-0 w-full">
+    ![A loadSkill tool call showing refund-policy v1 and the loaded SKILL.md file in the trace's Preview view.](/images/changelog/2026-11-03-skill-management-tool-load.png)
+  </Frame>
+  <figcaption className="mt-2 text-sm text-text-tertiary">
+    The subsequent `loadSkill` tool observation recording `refund-policy` v1 and `SKILL.md` as loaded once the call succeeds.
+  </figcaption>
+</figure>
 
-A non-error, non-null tool result is still a proxy, not a guarantee. Early on, we scanned plain-text tool outputs for strings like `"not found"` to catch soft failures, then removed that check because free-text matching was too brittle. If a custom tool swallows an exception and returns an error string with a normal status, it still counts as loaded.
+<Callout type="info">
+  A non-error, non-null tool result is still a proxy, not a guarantee. Early on, we scanned plain-text tool outputs for strings like `"not found"` to catch soft failures, then removed that check because free-text matching was too brittle. If a custom tool swallows an exception and returns an error string with a normal status, it still counts as loaded.
+</Callout>
 
 ### Compaction and eviction [#compaction]
 
-Even if a skill loads on turn 2, long sessions hit context limits and compact conversation history. After compaction, whether that skill is still in context on turn 20 depends on the harness:
+Even with availability, intent, and loads separated, long sessions still introduce the open challenges of compaction and eviction. Once a conversation hits context limits and compacts history, whether a skill loaded earlier is still in context depends on the harness:
+
+<SkillCompactionDiagram />
 
 - **Claude Code** re-attaches the most recent invocation of each skill after auto-compaction, keeping up to 5,000 tokens per skill inside a 25,000-token combined budget (most recent first), so older skills can be dropped. If the model calls a skill again and its rendered content hasn't changed, Claude Code inserts a short "already loaded" note instead of repeating the body.
 - **Mastra** treats skill loading as stateless: instructions sit in conversation history as a tool result, and if compaction trims them out, the agent has to call the `skill` tool again.
 
-Langfuse doesn't model compaction or eviction today. Answering whether skill X was still in context on generation 14 would require harness-specific compaction hooks or scanning every generation's full message history for earlier skill payloads, and neither has a standard format yet.
+**Langfuse doesn't model compaction or eviction today.** Answering whether skill X was still in context on generation 14 would require harness-specific compaction hooks or scanning every generation's full message history for earlier skill payloads, and neither has a standard format yet.
 
 ## Every harness loads skills differently [#harness-fragmentation]
 
@@ -88,12 +107,12 @@ The Agent Skills spec standardizes the folder layout on disk, not how an agent r
 | **Mastra**                  | `skill`, `skill_read`, or `load_skill`             | Tool result                             |
 | **Vercel AI SDK**           | `HarnessAgent` inline `skills`, or `uploadSkill`   | Depends on harness adapter              |
 
-Those differences break a simple "log the skill tool call" design in four ways:
+Those differences make it challenging to get to a unified skill logging design:
 
-1. **Tool names and argument keys don't match across frameworks.** Claude Code calls `Skill({ skill })` and `Read({ file_path })`. Mastra uses `skill` (accepting `/skills/<name>` paths), `skill_read({ skillName, path })`, or `load_skill` when its search processor is enabled. Gemini CLI calls `activate_skill({ name })`. OpenCode calls `skill({ id })`, where `id` comes from the directory path instead of frontmatter `name`. LangChain Deep Agents calls `read_file({ file_path })`.
-2. **Some agents never call a skill tool.** OpenAI Codex lets the model run `cat .../SKILL.md` inside its shell tool (`exec_command`). Anthropic's Messages API runs `bash: cat` inside a server-side code execution container using Anthropic-managed `skver_...` version IDs, so no client-side tool observation is emitted at all.
-3. **In Claude Code, the tool result isn't the skill.** The `Skill` tool returns a short acknowledgement while the rendered `SKILL.md` body lands in a separate `isMeta: true` user transcript entry linked via `sourceToolUseID`.
-4. **Some loads produce no tool span at all.** Running `/skill-name` in Claude Code, preloading skills onto a Claude Code subagent, or typing `$skill-name` in Codex injects the skill directly into messages with zero tool calls.
+1. **Tool names and argument keys don't match across frameworks.**
+2. **Some agents never call a skill tool.** Codex shells out to `cat`, and Anthropic's API loads skills inside a server-side container with no client tool span.
+3. **The tool result isn't always the skill.** Claude Code's `Skill` tool returns a short ack while the rendered body lands in a separate `isMeta: true` message.
+4. **Some loads produce no tool span at all.** Slash commands (`/skill-name`), subagent preloads, and Codex `$skill` blocks inject skills directly into messages.
 
 ## Hooks everywhere vs. ingestion-side parsing [#decision-gate]
 
@@ -108,9 +127,9 @@ Neither extreme works on its own, so we split the job in two: **active reporting
 
 <SkillTracingSplitDiagram />
 
-The application only reports one attribute: `langfuse.observation.skills_available`, an OpenTelemetry attribute listing the skill names (and optional versions) available to the agent. Clients and hooks don't emit a separate load event.
+Harnesses don't natively emit a standardized list of available skills on their spans. To enable full skill tracing in Langfuse, your application attaches one OpenTelemetry attribute, `langfuse.observation.skills_available`, listing the skill names (and optional versions) available to the agent, either through the Langfuse SDK helpers or directly on your spans. That is the only client-side step: clients and hooks never emit a separate load event.
 
-Instead, Langfuse's ingestion pipeline parses incoming `TOOL` observations automatically. It recognizes dedicated skill tools (`Skill`, `skill`, `loadSkill`, `langfuse_loadSkill`, `skill_read`, `loadSkillResource`, `langfuse_loadSkillResource`), generic file readers (`Read`, `readFile`), and a non-executing scanner over literal `cat` commands on Codex shell observations (`service.name=codex`).
+Instead, Langfuse's ingestion pipeline parses incoming tool observations automatically. It recognizes dedicated skill tools (such as `Skill`, `loadSkill`, and `skill_read`), generic file readers like `Read`, and literal `cat` commands inside Codex shell observations without executing any shell code.
 
 One detail makes this split work: clients attach `skills_available` to **both** model spans and skill-loading tool spans, even though Langfuse only persists the catalog on `GENERATION` observations. On a `TOOL` span, the catalog does two things before ingestion discards it:
 
@@ -119,21 +138,21 @@ One detail makes this split work: clients attach `skills_available` to **both** 
 
 ### Tradeoffs we accepted [#tradeoffs]
 
-Centralizing load detection in ingestion gives us skill tracing across custom agents, Mastra, Claude Code, and Codex without asking teams to rewrite their tools. It also comes with three tradeoffs:
+Centralizing load detection in ingestion gives us skill tracing across custom agents and all of the prominent harnesses without asking teams to rewrite their tools. It also comes with three tradeoffs:
 
-- **Loader drift needs new parser rules.** Harnesses whose tool names or argument shapes sit outside our rule table (`activate_skill`, `read_file`, OpenCode's `{id}`, Mastra's `load_skill`) are missed until we add them.
+- **Loader drift needs new parser rules.** Harnesses whose tool names or argument shapes aren't in our rule table yet, such as `activate_skill`, `read_file`, OpenCode's `{id}`, or Mastra's `load_skill`, are missed until we add them.
 - **Shell scanning is heuristic.** Scanning literal `cat` arguments never executes shell code, which keeps ingestion safe, but it matches command text rather than proving the file was read.
 - **Non-tool loads stay invisible to ingestion.** Slash commands (`/skill-name`), prompt-injected `$skill` blocks, and server-side Anthropic container executions never emit a client-side `TOOL` span.
 
-The upside of keeping the parser inside Langfuse is that adding a new harness shape fixes tracing for every team using that harness without waiting on client upgrades.
+Putting load detection in client SDKs or harness plugins would let each integration report exact loads locally (including custom or non-tool loaders), but every new harness shape would require SDK updates and client upgrades across teams. Keeping the parser inside Langfuse flips that equation: adding a new harness rule once fixes tracing for everyone without waiting on client upgrades.
 
 ## Carrying skill versions into traces [#distribution-and-versioning]
 
 Knowing that a specific skill loaded only gets you halfway if you can't tell whether the agent ran **version 2** or **version 1**.
 
-In Langfuse, each skill version is an immutable snapshot of `SKILL.md` and its supporting files, promoted or rolled back with movable labels like `staging` and `production` through the UI, API, CLI, or MCP. Because Langfuse is the registry and observability backend rather than the runtime skill loader, carrying version identity from the registry into the trace works differently depending on how the agent loads skills.
+In Langfuse, each skill version is an immutable snapshot of `SKILL.md` and its supporting files, promoted or rolled back with movable labels like `staging` and `production` through the UI, API, CLI, or MCP. Because Langfuse is the registry and observability backend rather than the runtime skill loader, carrying those version numbers into traces works in one of two setups depending on how your agent loads skills: **filesystem harnesses** that read folders from disk, or **API-driven agents** that fetch skills in memory.
 
-**Filesystem harnesses (Claude Code, Codex, Cursor, Claude Agent SDK).** Coding agents read plain folders on disk (`.agents/skills/<name>/`), and `SKILL.md` has no Langfuse version field. Installing skills with `@langfuse/cli` (`langfuse skills install`, `update`, `push`) records which version landed in each directory, so teams can reproduce identical versions across machines and CI and update label-tracked skills deliberately instead of letting them drift. At runtime, the Langfuse JS/TS and Python SDKs read those installed versions locally (`discoverSkills` / `discover_skills`) and attach the catalog in-process via context propagation:
+**1. Filesystem harnesses (Claude Code, Codex, Cursor, Claude Agent SDK).** Coding agents read plain folders on disk (`.agents/skills/<name>/`), and `SKILL.md` itself has no Langfuse version field. To resolve versions on disk, installing skills with `@langfuse/cli` (`langfuse skills install`) writes local version metadata next to those folders recording which Langfuse version landed in each directory. At runtime, the Langfuse SDK's `discoverSkills` (or `discover_skills` in Python) reads that directory and its recorded versions into a `{ name, version }` catalog. Passing that catalog to `LangfuseSpanProcessor` and wrapping the agent run in `propagateAttributes` automatically attaches those versions to every model and tool span:
 
 ```typescript
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -158,22 +177,28 @@ try {
 }
 ```
 
-**API-driven agents.** Agents that load skills in memory, including Halo, our Mastra-based in-app assistant, fetch the skill manifest and files at run start with `langfuse.api.skills.get(...)`. They pin the resolved version for the full run so `SKILL.md` and its reference files always come from the same revision, and pass `{ name, version }` directly into `propagateAttributes`.
+**2. API-driven agents.** Agents that load skills directly in memory, including Halo, our Mastra-based in-app assistant, don't read from disk at all. Instead, they call `langfuse.api.skills.get(...)` at run start, which returns the resolved version number alongside the skill's files. The agent pins that version for the full run so `SKILL.md` and its reference files always come from the same revision, and passes `{ name, version }` directly into `propagateAttributes`.
 
 In both setups, `propagateAttributes` attaches skills in-process only. They aren't sent over OpenTelemetry baggage across service boundaries, and an explicit span attribute always overrides propagated or processor-level defaults.
 
 ## Usage analytics out of the box [#usage-analytics]
 
-Once your traces carry the available skill catalog, each skill version's **Usage** tab brings the numbers together automatically. You can see how many observations offered the skill versus loaded it, check per-file load counts to spot which reference docs agents actually open (or never touch), and filter the linked generations and tool observations from the same view.
+With the available catalog reported on generations, successful loads parsed from tool spans, and version numbers carried into both, the two questions we started with now answer themselves directly in each skill version's **Usage** tab:
 
-<Frame fullWidth>
-  ![The skill Usage tab showing available and loaded observation counts, per-file load statistics, and linked observations for a skill version.](/images/changelog/2026-11-03-skill-management-usage.png)
-</Frame>
+1. **Which skills did an agent actually use?** Comparing available vs. loaded observation counts shows whether a skill is being offered and ignored, or actually loaded. Per-file load counts break that down further so you can see which reference docs agents open and which ones never get touched.
+2. **Did version 2 perform better than version 1?** Because every loaded tool observation resolves to a specific skill version, you can filter linked generations and tool spans by version, compare outcomes across production traffic in custom dashboards, or trigger evaluations through skill-version webhooks whenever a new version ships.
 
-The same skill metadata also flows into observation filters, custom dashboards, and skill-version webhooks, so you can compare versions across production traffic or trigger evaluations when a new version ships.
+<figure className="my-6">
+  <Frame fullWidth className="mt-0 w-full">
+    ![The skill Usage tab showing available and loaded observation counts, per-file load statistics, and linked observations for a skill version.](/images/changelog/2026-11-03-skill-management-usage.png)
+  </Frame>
+  <figcaption className="mt-2 text-sm text-text-tertiary">
+    The Usage tab for `refund-policy` v1, combining available and loaded observation counts, per-file load counts, and linked observations.
+  </figcaption>
+</figure>
 
 ## Try it out [#try-it-out]
 
-Skill Management is in beta on Langfuse Cloud and self-hosted deployments. Follow the [get-started guide](/docs/skill-management/get-started) to create your first versioned skill, or read the [Skill Management overview](/docs/skill-management/overview) and [skill tracing docs](/docs/skill-management/tracing) to connect it to your agent traces.
+Follow the [get-started guide](/docs/skill-management/get-started) to create your first versioned skill, or read the [Skill Management overview](/docs/skill-management/overview) and [skill tracing docs](/docs/skill-management/tracing) to connect it to your agent traces.
 
 If your harness loads skills in a format we don't recognize yet, [open a GitHub issue](https://github.com/langfuse/langfuse/issues) with the tool name and a sample input and output. If you like working on this kind of problem, [we are hiring](/careers).
