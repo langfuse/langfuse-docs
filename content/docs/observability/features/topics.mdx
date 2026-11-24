@@ -225,9 +225,7 @@ Choose filters and a sampling rate. It makes sense to filter for single agents, 
 
 ### Start a live map
 
-Review the selection and start processing. Setup reuses existing summaries and summarizes recent matching traces to build the first topics. The live map then analyzes new matching traces automatically.
-
-Follow setup progress on the Topics page. Open a topic once results appear to check that its traces match the pattern you expected.
+Review the selection and start processing. Setup reuses existing summaries and summarizes recent matching traces to build the first topics. The live map then analyzes new matching traces automatically going forward.
 
 </Step>
 
@@ -239,50 +237,49 @@ Open the map picker to create a **New live map** or **New snapshot**.
 
 | Type     | Behavior                                                                                      |
 | -------- | --------------------------------------------------------------------------------------------- |
-| Live map | Analyzes new matching traces and updates topics daily from up to 30 days of recent summaries. |
+| Live map | Analyzes new matching traces continuously and updates topics daily. |
 | Snapshot | Groups traces from a selected time window once, without changing live maps.                   |
 
-Live maps wait for a trace to become idle before analyzing it. The default is five minutes after the last event; adjust **Trace readiness** in **Topics > ⋮ > Settings** for long-running workflows.
+Live maps wait for a trace to finish before analyzing it. The default is five minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
 
-Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand.
+Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand instead of waiting for the daily refresh.
 
-Snapshots can reuse existing summaries or **Summarize more traces** first. Choose the time window, filters, and facets; when summarizing more traces, choose a random sample or the latest matching traces. This lets you investigate traffic that your live maps have not processed.
+Snapshots also reuse existing summaries and summarize more traces if required. Choose the time window, filters, and facets. This lets you investigate traffic that your live maps have not processed.
 
 <Callout type="info">
   A snapshot needs at least 10 applicable summarized traces per selected facet.
-  Small samples can produce broad topics. Counts describe the analyzed subset,
-  not all project traffic.
+  Small samples can produce broad topics. We recommend at least more than 150 traces
+  to see meaningful clusters.
 </Callout>
 
 ## Explore your topics [#explore]
 
 Select a live map or snapshot and a facet. Use **Treemap** to see the largest topics or **Scatter** to explore similar traces spatially. Select a topic to read its description and summaries, then open a trace to inspect the conversation and model calls.
 
-Within each map, a trace can belong to one topic per facet. **Unassigned** includes traces that do not fit a discovered topic, are awaiting an update, or lack enough applicable content.
+Within each map, a trace can belong to one topic per facet. Unassigned includes traces that do not fit a discovered topic, are awaiting an update, or lack enough applicable content.
 
 Treat topics as starting points for investigation. Similar conversations can have different outcomes, and a generated label may not describe every trace in a group. Review examples before turning a pattern into an evaluation or product decision (see the [Error Analysis chapter](/academy/monitoring/error-analysis) in the Academy).
 
 <Callout type="info">
-  The scatter plot represents the traces used in the last grouping. New traces
-  can appear in topic trace lists before the next update adds them to the map.
+  The scatter plot represents the traces used in the last grouping.
+  Their distances represent the distances in embedding space.
   Topic groups and names can change when topics are rebuilt.
 </Callout>
 
 ## Models and costs [#models-and-costs]
 
-Langfuse Cloud counts each new facet summary as one [billable unit](/docs/administration/billable-units). A trace summarized for four facets counts as four units. Reusing those summaries in another map or snapshot adds no summary units.
+Langfuse Cloud counts each new facet summary as one [billable unit](/docs/administration/billable-units). A trace summarized for four facets counts as four units. Reusing those summaries in another map or snapshot adds no further summary and thus no further billable units.
 
 Your model provider charges separately for summarization, embeddings, and topic naming. During setup, **Estimate cost** forecasts summary and embedding costs for the traces you select. Narrower filters and a lower sampling rate reduce how many new traces you summarize.
 
-Open the map picker or a run in **History** to see **Estimated cost**, which includes topic naming when pricing is available. Check your provider's invoice for actual charges.
+Open the map picker or a run in **Settings -> History** to see **Estimated costs**, which includes topic naming when pricing is available. Check your provider's invoice for actual charges.
 
 ## Access results via API [#api]
 
 Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments for your own analyses.
 
 <Callout type="info">
-  These endpoints use the `/api/public/unstable` namespace and may change between
-  releases.
+  These endpoints use the `/api/public/unstable` namespace and may change between releases.
 </Callout>
 
 ## Paused processing
