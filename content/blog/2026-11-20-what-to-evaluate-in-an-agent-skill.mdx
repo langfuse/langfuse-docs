@@ -61,13 +61,6 @@ The mechanism here is straightforward: spin up agents in an environment with a p
 
 A skill's `name` and `description` frontmatter act as its API contract with the model. In our [initial evaluation runs](/blog/2026-02-26-evaluate-ai-agent-skills), rewriting our description to sound more conceptual ("use Langfuse effectively across use cases") caused agents to stop invoking the skill entirely on prompts like `"fetch the last ten traces"`.
 
-Following the pattern [OpenAI recommends for Codex skills](https://developers.openai.com/blog/eval-skills/) and [Anthropic requires for enterprise skill gates](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/enterprise), a trigger dataset should cover four prompt shapes:
-
-- **Explicit invocation:** Naming the skill or product directly (`"Use the Langfuse skill to set up tracing"`).
-- **Implicit invocation:** Describing the job without naming the skill (`"Help me stop shipping regressions every time we tweak our system prompt"`).
-- **Noisy contextual prompts:** Realistic requests buried inside stack traces, repo context, or unrelated details.
-- **Negative controls & coexistence:** Adjacent requests that should *not* load the skill, or should route to a sibling skill instead. Broadening one skill's description to fix a false negative frequently steals triggers from neighboring skills.
-
 ### 2. Intra-skill routing (`SKILL.md` to reference files)
 
 Routing does not stop at `SKILL.md`. Larger skills split instructions across nested files so they don't dump thousands of tokens into context on every turn. For example, our Langfuse skill keeps core rules and a routing index in `SKILL.md` and delegates workflows to `references/`:
@@ -78,27 +71,16 @@ Routing does not stop at `SKILL.md`. Larger skills split instructions across nes
       <FileTree.File name="SKILL.md" />
       <FileTree.Folder name="references" defaultOpen>
         <FileTree.File name="cli.md" />
-        <FileTree.File name="instrumentation.md" />
-        <FileTree.File name="prompt-migration.md" />
         <FileTree.File name="setting-up-evals.md" />
-        <FileTree.File name="user-feedback.md" />
         <FileTree.File name="cost-optimization.md" />
         <FileTree.File name="judge-calibration.md" />
-        <FileTree.File name="ci-cd.md" />
         <FileTree.File name="..." />
       </FileTree.Folder>
     </FileTree.Folder>
   </FileTree>
 </div>
 
-Because an agent can read `SKILL.md` and skip the reference file (a partial read), or open three reference files when it needed zero, we test internal routing with its own dataset:
-
-| Dataset item `input` | `expected_output.invoked_reference_file` | Why |
-| --- | --- | --- |
-| `"I have traces flowing into Langfuse, how should I set up evals for my support agent?"` | `"setting-up-evals.md"` | Needs the structured gap analysis across signals, monitors, and evals |
-| `"Help me bring down the token cost of our coding agent without hurting answer quality."` | `"cost-optimization.md"` | Needs the cost levers and offline quality-check workflow |
-| `"Track thumbs-down clicks and message retries from our chat UI in Langfuse."` | `"user-feedback.md"` | Needs the taxonomy and score-ingestion patterns for user signals |
-| `"Fetch the specific docs page on Langfuse data retention as Markdown."` | `""` (empty string) | `SKILL.md` already covers `.md` doc fetching; opening more wastes context |
+Because an agent can read `SKILL.md` and skip the reference file (a partial read), or open three reference files when it needed zero, we test internal routing with its own dataset.
 
 You cannot score this from the final answer because agents rarely mention internal skill filenames to users. Instead, our deterministic evaluator inspects the traced tool observations (`Skill`, `skill_read`, `Read`, and shell file reads) and checks the exact files loaded during the run. Setting `invoked_reference_file` to `""` acts as a context-bloat guardrail: opening any extra file beyond `SKILL.md` scores `0`.
 
