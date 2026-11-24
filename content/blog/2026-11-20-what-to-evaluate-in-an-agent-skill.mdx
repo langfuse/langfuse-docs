@@ -99,15 +99,16 @@ Because an agent can read `SKILL.md` and skip the reference file (a partial read
 
 Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, the focus will likely be on outcome evaluators and trajectory evaluators, for example:
 
-- **Code setup and migrations** (e.g., instrumenting an app or migrating prompts):
-  - **Build and tests pass (outcome):** Does the edited repo still compile and pass its test suite?
+- **Coding use case:**
+  - **Build passes (outcome):** Does the edited repo still compile without errors?
+  - **Tests pass (outcome):** Does the test suite still pass?
   - **Expected code patterns (outcome):** Are the required SDK calls or imports present in the diff?
   - **Clean workspace (outcome):** Is `git status` free of stray temporary files or artifacts?
-- **CLI and API operations** (e.g., investigating traces or managing resources):
+- **CLI and API operations:**
   - **Ground-truth match (outcome):** Does the final answer or created resource match the seeded fixture?
   - **No collateral writes (outcome):** Did the agent avoid unintended mutations (`collateral_writes == 0`)?
   - **Tool adherence (trajectory):** Did the agent use the skill's CLI or SDK instead of ad-hoc workarounds?
-- **Encoded team workflows** (e.g., PR reviews, release checklists, or incident postmortems):
+- **Encoded team workflows:**
   - **Step order and gates (trajectory):** Did the agent run required steps in order (such as a dry run or approval gate before a destructive action)?
   - **Structure and conventions (outcome):** Does the final artifact follow the team's format and rules, graded with an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)?
 
