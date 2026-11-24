@@ -46,7 +46,9 @@ In **Organization Settings**, open the page for your deployment. Its **Usage bre
 
 Open a project you have access to, go to **Dashboards**, and select **Langfuse Usage Management**, one of Langfuse's [curated dashboards](/docs/metrics/features/custom-dashboards). This view counts units for that project only.
 
-To estimate a month of usage, select the last 30 days and add **Total Trace Count**, **Total Observation Count**, and **Total Score Count** (including both numeric and categorical score widgets). If the project uses Topics, add its **Facet summaries** count from the organization usage breakdown for the same period.
+To estimate a month of usage, select the last 30 days and add **Total Trace Count**, **Total Observation Count**, and **Total Score Count** (including both numeric and categorical score widgets).
+
+If the project uses Topics, its total also includes **facet results**. To get all four counts in one place, download the [organization usage breakdown](#monitor-organization-usage) as a CSV for the same period, filter to the project, and sum the `units` column.
 
 <Frame>
   ![Langfuse Usage Management dashboard showing total trace, observation, and score counts](/images/docs/self-hosted-usage-management-dashboard.png)
