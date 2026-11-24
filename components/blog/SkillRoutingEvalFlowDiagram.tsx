@@ -121,21 +121,18 @@ export function SkillRoutingEvalFlowDiagram() {
             skill/file that should be used
           </text>
 
-          {/* Dashed arrows: input & metadata -> run agent */}
-          <line
-            x1="73"
-            y1="114"
-            x2="155"
-            y2="220"
+          {/* Orthogonal dashed connectors: input & metadata -> run agent */}
+          <path
+            d="M 73 114 V 168 H 277 V 114"
+            fill="none"
             stroke="var(--text-secondary)"
             strokeWidth="1"
             strokeDasharray="4 4"
-            markerEnd={`url(#${dashedArrowId})`}
           />
           <line
-            x1="277"
-            y1="114"
-            x2="195"
+            x1="175"
+            y1="168"
+            x2="175"
             y2="220"
             stroke="var(--text-secondary)"
             strokeWidth="1"
@@ -143,7 +140,7 @@ export function SkillRoutingEvalFlowDiagram() {
             markerEnd={`url(#${dashedArrowId})`}
           />
 
-          {/* Dashed arrow: expected output -> evaluator -> trace */}
+          {/* Dashed arrow: expected output -> trace with plain text label */}
           <line
             x1="545"
             y1="114"
@@ -153,22 +150,11 @@ export function SkillRoutingEvalFlowDiagram() {
             strokeWidth="1"
             strokeDasharray="4 4"
           />
-          <rect
-            x="427"
-            y="144"
-            width="236"
-            height="46"
-            rx="2"
-            fill="var(--surface-cta-primary)"
-            stroke="var(--line-structure)"
-            strokeWidth="1"
-          />
           <text
             x="545"
             y="163"
             fontSize="13"
-            fontWeight="500"
-            fill="var(--text-primary)"
+            fill="var(--text-secondary)"
             textAnchor="middle"
           >
             check trace with
@@ -177,15 +163,14 @@ export function SkillRoutingEvalFlowDiagram() {
             x="545"
             y="180"
             fontSize="13"
-            fontWeight="500"
-            fill="var(--text-primary)"
+            fill="var(--text-secondary)"
             textAnchor="middle"
           >
             code-based evaluator
           </text>
           <line
             x1="545"
-            y1="190"
+            y1="192"
             x2="545"
             y2="220"
             stroke="var(--text-secondary)"
@@ -287,8 +272,8 @@ export function SkillRoutingEvalFlowDiagram() {
           </p>
         </div>
 
-        <div className="border border-line-structure bg-surface-cta-primary p-3.5 text-xs text-text-primary">
-          <div className="font-medium">
+        <div className="border border-line-structure bg-surface-bg p-3.5 text-xs">
+          <div className="font-medium text-text-primary">
             2. check trace with code-based evaluator
           </div>
           <p className="mt-1">
