@@ -97,12 +97,20 @@ Because an agent can read `SKILL.md` and skip the reference file (a partial read
 
 ## Evaluating task outcomes & behavior (by use case) [#evaluating-task-outcomes-and-behavior]
 
-Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, the focus will likely be on outcome evaluators and trajectory evaluators.
+Next, you need to grade whether the agent actually accomplished the user's goal. Because skills target multi-step work, the focus will likely be on outcome evaluators and trajectory evaluators, for example:
 
-Two details make behavioral outcome evals much more reliable in practice:
+- **Build, test, and environment state (outcome):** Did the edited repo compile and pass tests, were the expected resources created in the scratch project, and is `git status` clean of stray artifacts?
+- **Side effects and safety bounds (outcome):** Did the agent avoid unintended writes (`collateral_writes == 0`) and explicitly abstain when a request was impossible?
+- **Step order and workflow fidelity (trajectory):** Did the agent run required steps in order (such as a dry run or approval gate before a destructive action) and use the intended CLI or SDK instead of ad-hoc workarounds?
+- **Team conventions and output quality (outcome):** Does the final artifact (a code diff, PR review, or incident postmortem) follow the structure and rules encoded in the skill, graded with an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)?
 
-- **Score per constraint, not one monolithic score.** Instead of asking a judge for a single `0–100` quality rating, grade concrete sub-checks (`builds_cleanly`, `uses_production_label`, `links_prompt_to_trace`, `no_collateral_writes`) and roll them up. When a run fails, you immediately see *which* requirement broke.
-- **Pick `pass@k` vs. `pass^k` based on user risk.** If your skill powers an interactive coding workflow with a test suite where the developer or agent can easily iterate once, `pass@k` (succeeding at least once in `k` attempts) reflects real value. If your skill governs an operational action—like migrating production resources, reviewing compliance, or placing an order—track `pass^k` (succeeding across *every* trial in `k` runs), because inconsistency breaks trust fast.
+### Score per constraint, not one monolithic score
+
+Instead of asking a judge for a single `0–100` quality rating, grade concrete sub-checks (`builds_cleanly`, `uses_production_label`, `links_prompt_to_trace`, `no_collateral_writes`) and roll them up. When a run fails, you immediately see *which* requirement broke.
+
+### Pick `pass@k` vs. `pass^k` based on user risk
+
+If your skill powers an interactive coding workflow with a test suite where the developer or agent can easily iterate once, `pass@k` (succeeding at least once in `k` attempts) reflects real value. If your skill governs an operational action—like migrating production resources, reviewing compliance, or placing an order—track `pass^k` (succeeding across *every* trial in `k` runs), because inconsistency breaks trust fast.
 
 ### Always compare against a baseline
 
