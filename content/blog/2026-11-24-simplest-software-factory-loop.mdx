@@ -18,15 +18,15 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 Most "software factory" setups are overengineered. You don't need a dark factory shipping features from scratch to get real leverage.
 
-The highest-ROI version is much smaller: an **agent improver** — a loop that watches production, asks you when something looks off, and turns your feedback into PRs.
+The highest-ROI version is much smaller: an **agent improver** (a loop that watches production, asks you when something looks off, and turns your feedback into PRs).
 
 Every self-improvement loop only needs five things:
 
-1. **Data to analyze** — production [traces](/docs/observability/get-started) of what your agent actually did.
-2. **A take on what "good" is** — doesn't need to be a huge spec on day one.
-3. **A way to tell if it is** — automated signals (errors, latency/cost spikes, [topics](/docs/observability/features/topics), [user feedback](/docs/observability/features/user-feedback)) and a way to inspect individual traces step by step when something looks off.
-4. **A scheduled run to check on it** — a cron or routine that sweeps production daily.
-5. **An agent that can act on it** — repo access to update its own context and open PRs.
+1. **Data to analyze:** production [traces](/docs/observability/get-started) of what your agent actually did.
+2. **A take on what "good" is:** doesn't need to be a huge spec on day one.
+3. **A way to tell if it is:** automated signals (errors, latency/cost spikes, [topics](/docs/observability/features/topics), [user feedback](/docs/observability/features/user-feedback)) and a way to inspect individual traces step by step when something looks off.
+4. **A scheduled run to check on it:** a cron or routine that sweeps production daily.
+5. **An agent that can act on it:** repo access to update its own context and open PRs.
 
 <Frame fullWidth className="w-full my-8">
   ![Loop diagram titled The simplest software factory loop for your agent (Langfuse + Grok Bot): production traces flow into a scheduled Grok Bot reading written instructions updated daily from feedback; human review either clarifies gray areas and updates context or approves a fix to optionally run an experiment and open a PR](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
@@ -34,15 +34,15 @@ Every self-improvement loop only needs five things:
 
 Two things make this loop actually work (and stay simple):
 
-## 1. Don't write a giant spec upfront — calibrate taste daily [#calibrate-taste-daily]
+## 1. Don't write a giant spec upfront. Calibrate taste daily [#calibrate-taste-daily]
 
 Most teams stall because they try to write down every rule for "what good looks like" before starting.
 
 You don't need to. Start with hard signals (errors, latency/cost spikes, tool loops) plus an open-ended sample of recent traces. Then tell your bot one thing:
 
-> "Whenever you're unsure whether a behavior is good or bad, bring me 2–3 examples to judge — and update your context daily with my feedback."
+> "Whenever you're unsure whether a behavior is good or bad, bring me 2–3 examples to judge, and update your context daily with my feedback."
 
-Signals narrow 10,000 runs down to 5. Clicking into those traces one by one — seeing the exact prompts, tool calls, and outputs — is how you judge gray areas in two minutes instead of guessing from aggregates.
+Signals narrow 10,000 runs down to 5. Clicking into those traces one by one (seeing the exact prompts, tool calls, and outputs) is how you judge gray areas in two minutes instead of guessing from aggregates.
 
 <Frame fullWidth className="w-full my-8">
   ![Inspecting an individual multi-step trace step by step in Langfuse](/images/docs/tracing-overview.png)
@@ -60,7 +60,7 @@ A lot of people try to fix a blind bot by adding more prompts and sub-agents. Us
 The more your traces are enriched, the less guessing the bot has to do:
 
 - **[Topics](/docs/observability/features/topics)** attached to traces let the bot spot what's trending across thousands of runs (new intents, sudden spikes, topics with higher error rates) instead of guessing from 10 random samples.
-- **[Conversation signals](/blog/2026-09-23-catching-conversation-signals-in-langfuse) and [user feedback](/docs/observability/features/user-feedback)** (like user disagreement or thumbs-down) catch silent failures where nothing crashed — the answer was just frustrating.
+- **[Conversation signals](/blog/2026-09-23-catching-conversation-signals-in-langfuse) and [user feedback](/docs/observability/features/user-feedback)** (like user disagreement or thumbs-down) catch silent failures where nothing crashed: the answer was just frustrating.
 - **[Releases](/docs/observability/features/releases-and-versioning), [sessions](/docs/observability/features/sessions), [prompt versions](/docs/prompt-management/features/link-to-traces), and clean tool I/O** let the bot trace a regression back to the exact change instead of hunting through the repo.
 
 You don't need a heavier bot to get better PRs. Just richer traces.
@@ -73,7 +73,7 @@ This pattern works with any observability tool and scheduled coding agent. Here 
 
 ### Connect Langfuse and GitHub to Grok Bot
 
-Open a Grok Bot chat and ask it to connect to your Langfuse project via API keys. It surfaces masked Secrets cards right in chat — no config files to wrangle.
+Open a Grok Bot chat and ask it to connect to your Langfuse project via API keys. It surfaces masked Secrets cards right in chat, with no config files to wrangle.
 
 <Frame className="block max-w-xl mx-auto my-8">
   ![Grok Bot surfacing a masked Secrets card for Langfuse API keys right in chat](/images/blog/2026-11-24-simplest-software-factory-loop/grokbot-langfuse-secrets.png)
@@ -94,7 +94,7 @@ Keep it tiny on day one and let it grow from your replies:
 ```markdown filename="docs/agent-quality.md"
 # Agent Quality Spec (living doc)
 
-> Updated daily from trace review feedback. Don't try to make this complete upfront — let it grow from real production examples.
+> Updated daily from trace review feedback. Don't try to make this complete upfront. Let it grow from real production examples.
 
 ## What to sweep (last 24h)
 - Telemetry anomalies: errors, latency spikes (e.g., p95 > 12s), token/cost spikes, or repeated identical tool calls
@@ -115,7 +115,7 @@ Keep it tiny on day one and let it grow from your replies:
 - <!-- Add false alarms here after human review -->
 
 ## PR guardrails
-- Never push directly to `main` — always open a PR for review
+- Never push directly to `main`: always open a PR for review
 - Link the underlying production trace(s) in every PR description
 - Never open a PR without explicit approval on the sweep finding
 - (Optional) If a dataset/experiment command is configured (e.g., `npm run eval:run`), run it before opening the PR and include the before/after score delta
@@ -154,7 +154,7 @@ Click **Test** once on the routine to verify it runs cleanly.
 
 You don't need datasets or offline evals to start.
 
-Once your daily sweeps surface recurring failure modes you never want to regress on, save those traces into a [Langfuse Dataset](/docs/evaluation/experiments/datasets) and have the bot run your [experiment script](/docs/evaluation/experiments/experiments-via-sdk) before opening a PR — attaching the before/after [score comparison](/docs/evaluation/experiments/compare-experiments) right in the PR description.
+Once your daily sweeps surface recurring failure modes you never want to regress on, save those traces into a [Langfuse Dataset](/docs/evaluation/experiments/datasets) and have the bot run your [experiment script](/docs/evaluation/experiments/experiments-via-sdk) before opening a PR, attaching the before/after [score comparison](/docs/evaluation/experiments/compare-experiments) right in the PR description.
 
 <Frame fullWidth className="w-full my-8">
   ![Comparing baseline vs. candidate experiment runs side by side in Langfuse](/images/docs/experiment-comparison-peek-view.png)
