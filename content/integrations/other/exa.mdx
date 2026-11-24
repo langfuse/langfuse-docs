@@ -112,7 +112,7 @@ def search_and_summarize(query: str):
     # 3. Summarize with OpenAI
     client = OpenAI()
     resp = client.chat.completions.create(
-        model="gpt-5-mini",
+        model="gpt-6.1-terra",
         messages=[
             {"role": "system", "content": "Summarize the following search results clearly and concisely."},
             {"role": "user", "content": context}
