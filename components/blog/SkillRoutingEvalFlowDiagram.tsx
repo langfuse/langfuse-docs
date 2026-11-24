@@ -21,22 +21,22 @@ export function SkillRoutingEvalFlowDiagram() {
               viewBox="0 0 8 8"
               refX="7"
               refY="4"
-              markerWidth="6"
-              markerHeight="6"
+              markerWidth="5.5"
+              markerHeight="5.5"
               orient="auto"
             >
-              <path d="M0 1 L7 4 L0 7 Z" fill="var(--text-secondary)" />
+              <path d="M0 1 L7 4 L0 7 Z" fill="var(--text-tertiary)" />
             </marker>
             <marker
               id={solidArrowId}
               viewBox="0 0 8 8"
               refX="7"
               refY="4"
-              markerWidth="6"
-              markerHeight="6"
+              markerWidth="5.5"
+              markerHeight="5.5"
               orient="auto"
             >
-              <path d="M0 1 L7 4 L0 7 Z" fill="var(--text-primary)" />
+              <path d="M0 1 L7 4 L0 7 Z" fill="var(--text-secondary)" />
             </marker>
           </defs>
 
@@ -54,7 +54,7 @@ export function SkillRoutingEvalFlowDiagram() {
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
-            strokeWidth="1"
+            strokeWidth="0.75"
           />
           <line
             x1="8"
@@ -62,7 +62,7 @@ export function SkillRoutingEvalFlowDiagram() {
             x2="672"
             y2="66"
             stroke="var(--line-structure)"
-            strokeWidth="1"
+            strokeWidth="0.75"
           />
           <line
             x1="138"
@@ -70,7 +70,7 @@ export function SkillRoutingEvalFlowDiagram() {
             x2="138"
             y2="110"
             stroke="var(--line-structure)"
-            strokeWidth="1"
+            strokeWidth="0.75"
           />
           <line
             x1="418"
@@ -78,7 +78,7 @@ export function SkillRoutingEvalFlowDiagram() {
             x2="418"
             y2="110"
             stroke="var(--line-structure)"
-            strokeWidth="1"
+            strokeWidth="0.75"
           />
 
           {/* Table headers */}
@@ -125,8 +125,8 @@ export function SkillRoutingEvalFlowDiagram() {
           <path
             d="M 73 114 V 168 H 277 V 114"
             fill="none"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
+            stroke="var(--text-tertiary)"
+            strokeWidth="0.75"
             strokeDasharray="4 4"
           />
           <line
@@ -134,8 +134,8 @@ export function SkillRoutingEvalFlowDiagram() {
             y1="168"
             x2="175"
             y2="220"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
+            stroke="var(--text-tertiary)"
+            strokeWidth="0.75"
             strokeDasharray="4 4"
             markerEnd={`url(#${dashedArrowId})`}
           />
@@ -146,8 +146,8 @@ export function SkillRoutingEvalFlowDiagram() {
             y1="114"
             x2="545"
             y2="144"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
+            stroke="var(--text-tertiary)"
+            strokeWidth="0.75"
             strokeDasharray="4 4"
           />
           <text
@@ -173,8 +173,8 @@ export function SkillRoutingEvalFlowDiagram() {
             y1="192"
             x2="545"
             y2="220"
-            stroke="var(--text-secondary)"
-            strokeWidth="1"
+            stroke="var(--text-tertiary)"
+            strokeWidth="0.75"
             strokeDasharray="4 4"
             markerEnd={`url(#${dashedArrowId})`}
           />
@@ -188,7 +188,7 @@ export function SkillRoutingEvalFlowDiagram() {
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
-            strokeWidth="1"
+            strokeWidth="0.75"
           />
           <text
             x="175"
@@ -208,8 +208,8 @@ export function SkillRoutingEvalFlowDiagram() {
             y1="244"
             x2="481"
             y2="244"
-            stroke="var(--text-primary)"
-            strokeWidth="1.2"
+            stroke="var(--text-secondary)"
+            strokeWidth="0.75"
             markerEnd={`url(#${solidArrowId})`}
           />
 
@@ -222,7 +222,7 @@ export function SkillRoutingEvalFlowDiagram() {
             rx="2"
             fill="var(--surface-bg)"
             stroke="var(--line-structure)"
-            strokeWidth="1"
+            strokeWidth="0.75"
           />
           <text
             x="545"
