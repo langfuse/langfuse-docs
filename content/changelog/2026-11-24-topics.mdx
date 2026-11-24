@@ -1,0 +1,72 @@
+---
+date: 2026-11-24
+title: Cluster your traces into topics
+seoTitle: Langfuse Topics public beta
+description: A clustered map of your production traces. See what users ask, how they felt, how it went and what went wrong, without reading every trace. Topics is now in public beta.
+badge: Beta
+author: Lysander Kiesel, Nimar Blume, Trang Nguyen
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { TopicsArchitectureDiagram } from "@/components/TopicsArchitectureDiagram";
+import { Book, Server } from "lucide-react";
+
+<ChangelogHeader />
+
+[Topics](/docs/observability/features/topics) clusters your production traces into named topics, so you can see how your agent is used and where it breaks.
+
+<Video
+  src="https://static.langfuse.com/docs-videos/topics-launch.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+  title="Explore your topics"
+  description="Travel assistant traces form a treemap of named topics. The view switches between Intent, Sentiment, Outcome, and Issues. In the scatter plot, selecting a cluster of task execution and reporting errors reveals the individual trace summaries."
+/>
+
+- **Let Topics find your unknown unknowns.** On Halo, the assistant inside Langfuse, Topics showed some people using it to write homework and Python scripts, and a larger group trying to pen-test it.
+- **Give your agents the enrichment layer.** Agents start from the topics via API, MCP, and CLI and load full traces only where they need them.
+- **Go from a topic to a fix.** Filter the tracing table by the topic, read a few of its traces, then fix the prompt or add a new evaluator.
+
+## Four summaries from different view points per trace [#facets]
+
+Topics summarizes each trace from different angles, called **facets**, then clusters every facet summary and names the clusters. There are four built-in facets:
+
+- **Intent:** what the agent was asked to do
+- **Sentiment:** how the user felt about the interaction
+- **Outcome:** how the trace ended
+- **Issues:** the main problem in how the trace was handled
+
+Traces are clustered per facet, so a problem that occurs in multiple Intent topics still shows up as one topic under Issues.
+
+## Live maps and snapshots [#maps-and-snapshots]
+
+A [live map](/docs/observability/features/topics#maps-and-snapshots) groups the traces that match a filter and a sample rate and keeps adding new traces as they arrive, for example one map per agent. A snapshot is a one-time analysis of a time window, for example to put your dataset traces next to production and see which use cases your datasets miss.
+
+## How Topics works [#how-it-works]
+
+After a matching trace stops receiving observations for the configured delay, Topics writes one summary per active facet. It embeds each summary so traces with similar meanings can be grouped within that facet. Live maps rebuild and name these groups daily. Snapshots do this once for the selected time window.
+
+<TopicsArchitectureDiagram />
+
+## Get started [#get-started]
+
+Open **Topics** in your project and click **Set up topics**. Topics runs on models from your own [LLM connections](/docs/administration/llm-connection), and the first topics appear about five minutes after setup.
+
+Topics is available on Langfuse Cloud in all regions and on self-hosted Langfuse v4. Each facet summary counts as one [billable unit](/docs/administration/billable-units), and your provider bills the model calls on your own key. Read the [launch post](/blog/introducing-topics) for the full story.
+
+{/* TODO before publishing: add the feedback sentence with the GitHub Discussion link. */}
+
+<Cards num={2}>
+  <Card
+    title="Topics docs"
+    href="/docs/observability/features/topics"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Topics on self-hosted Langfuse"
+    href="/self-hosting/configuration/topics"
+    icon={<Server />}
+    arrow
+  />
+</Cards>
