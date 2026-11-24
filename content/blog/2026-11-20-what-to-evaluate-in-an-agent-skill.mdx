@@ -136,17 +136,24 @@ If your skill governs an operational action (e.g., migrating production resource
 
 Even when an agent succeeds at the task, the final verdict can hide severe friction inside the run. Strong frontier models are remarkably good at recovering from broken instructions.
 
-### Tool and CLI error rate
+### Tool error rate
 
-Count non-zero exit codes, `4xx` API responses, or failed tool spans per run. In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop that hit 90% of runs—both fixed with two-line edits to `SKILL.md`.
+Count non-zero exit codes, `4xx` API responses, or failed tool spans per run.
 
-### Fallback and workaround rate
+<Callout type="info">
+  In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop that hit 90% of runs—both fixed with two-line edits to `SKILL.md`.
+</Callout>
 
-Track when the agent abandons the path your skill recommends (for example, dropping from your SDK or CLI down to raw `curl` calls, or falling back to web search because a reference file lacked a concrete example).
+### Workaround rate
+
+Track when the agent abandons the path your skill recommends, for example:
+
+- Dropping from your SDK or CLI down to raw `curl` calls
+- Falling back to web search because a reference file lacked a concrete example
 
 ### Token cost, turns, and wall-clock time on passing runs
 
-As [Vercel notes in their agent eval guide](https://vercel.com/blog/agent-evals), **compute efficiency metrics on successful trials only**. Failed runs often look fast and cheap simply because the agent gave up after three steps. On passing runs, compare token usage against your `no-skill` baseline: a good skill often *reduces* total tokens on complex tasks (SkillsBench recorded drops like 1.77M to 1.09M tokens on Opus 4.7) because upfront procedural knowledge eliminates exploratory guesswork. If tokens spike without a matching jump in pass rate, your skill is injecting noise.
+**Compute efficiency metrics on successful trials only.** Failed runs often look fast and cheap simply because the agent gave up after three steps. On passing runs, compare token usage, turns, and wall-clock time against your `no-skill` baseline: a good skill often *reduces* total tokens on complex tasks because upfront procedural knowledge eliminates exploratory guesswork. If tokens spike without a matching jump in pass rate, your skill is injecting noise.
 
 ## How to sequence this without Goodharting yourself [#how-to-sequence-this]
 
