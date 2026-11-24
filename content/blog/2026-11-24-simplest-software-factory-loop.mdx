@@ -22,11 +22,11 @@ One high-ROI version is much smaller: an **agent improver** built on [Grok Bot](
 
 Every self-improvement loop only needs five things:
 
-1. **Data to analyze:** production [traces](/docs/observability/get-started) of what your agent actually did.
-2. **A take on what "good" is:** doesn't need to be a huge spec on day one.
-3. **A way to tell if it is:** automated signals (errors, latency/cost spikes, [topics](/docs/observability/features/topics), [user feedback](/docs/observability/features/user-feedback)) and a way to inspect individual traces step by step when something looks off.
-4. **A scheduled run to check on it:** a cron or routine that sweeps production daily.
-5. **An agent that can act on it:** repo access to update its own context and open PRs.
+1. **Production traces:** full [traces](/docs/observability/get-started) of what your agent actually did (prompts, tool calls, and outputs), so both you and the bot can inspect individual runs step by step.
+2. **Signals that surface what matters:** errors, latency/cost spikes, [topics](/docs/observability/features/topics), and [user feedback](/docs/observability/features/user-feedback) to narrow thousands of runs down to the handful worth checking.
+3. **A written sense of "good":** a short living doc of your expectations and edge cases that starts tiny on day one and grows from your feedback.
+4. **A scheduled sweep:** a daily routine that checks recent traces against that doc and brings you clear issues plus gray areas to judge.
+5. **An agent that can act:** repo access to update its written context from your replies and open PRs once you approve a fix.
 
 <Frame fullWidth className="w-full my-8">
   ![Loop diagram titled The simplest software factory loop for your agent (Langfuse + Grok Bot): production traces flow into a scheduled Grok Bot reading written instructions updated daily from feedback; human review either clarifies gray areas and updates context or approves a fix to optionally run an experiment and open a PR](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
