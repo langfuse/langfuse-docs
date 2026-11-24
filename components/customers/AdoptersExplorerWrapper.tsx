@@ -36,10 +36,14 @@ const ADOPTERS_TABLE_PATH = join(
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Adobe: { src: adobeLogo },
+  "Blue Yonder": {
+    src: "/images/customers/blue-yonder/blue-yonder-light.png",
+  },
   "Bosch Power Tools": { src: boschLogo },
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
+  Criteo: { src: "/images/customers/criteo/criteo-light.svg" },
   DKB: { src: "/images/customers/dkb/dkb-light.svg" },
   EnBW: { src: enbwLogo },
   "Expedia Group": { src: expediaLogo },
@@ -74,6 +78,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Cisco: "Networking and cybersecurity company",
   "City of Munich": "Municipal government",
   Cornelsen: "Educational publisher and learning provider",
+  Criteo: "Global commerce intelligence platform",
   CyberAgent: "Digital advertising, media, and internet services company",
   Cybozu: "Workplace collaboration software company",
   "Dep for Environment, Food & Rural Affairs": "UK government department",
@@ -139,6 +144,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Bayer",
   "Canva",
   "City of Munich",
+  "Criteo",
   "CyberAgent",
   "Cybozu",
   "Dep for Environment, Food & Rural Affairs",
