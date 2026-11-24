@@ -104,13 +104,12 @@ Next, you need to grade whether the agent actually accomplished the user's goal.
   - **Tests pass (outcome):** Does the test suite still pass?
   - **Expected code patterns (outcome):** Are the required SDK calls or imports present in the diff?
   - **Clean workspace (outcome):** Is `git status` free of stray temporary files or artifacts?
-- **CLI and API operations:**
-  - **Ground-truth match (outcome):** Does the final answer or created resource match the seeded fixture?
+- **CLI/API operations:**
   - **No collateral writes (outcome):** Did the agent avoid unintended mutations (`collateral_writes == 0`)?
   - **Tool adherence (trajectory):** Did the agent use the skill's CLI or SDK instead of ad-hoc workarounds?
 - **Encoded team workflows:**
-  - **Step order and gates (trajectory):** Did the agent run required steps in order (such as a dry run or approval gate before a destructive action)?
-  - **Structure and conventions (outcome):** Does the final artifact follow the team's format and rules, graded with an [LLM-as-a-judge](/docs/evaluation/evaluation-methods/llm-as-a-judge)?
+  - **Step order (trajectory):** Did the agent run required steps in order (such as a dry run before a destructive action)?
+  - **Structure (outcome):** Does the final artifact follow the team's expected format?
 
 ### Score per constraint, not one monolithic score
 
