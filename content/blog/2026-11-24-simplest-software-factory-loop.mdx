@@ -34,9 +34,9 @@ If you boil it down, a minimal software factory for your agent needs 5 parts:
   ![Loop diagram showing Langfuse traces, signals, and scores flowing into a scheduled Grok Bot guided by written instructions updated daily from feedback; human review either routes off or gray-area cases back to update written instructions or approves a fix to optionally run a Langfuse dataset experiment and open a PR that ships new production traces](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
 </Frame>
 
-Two things make this loop actually work (and stay simple):
+## Two things that make this loop work [#what-makes-it-work]
 
-## 1. Do error analysis over time. Calibrate taste daily [#calibrate-taste-daily]
+### 1. Do error analysis over time. Calibrate taste daily [#calibrate-taste-daily]
 
 Usually, you figure out what "good" looks like through [error analysis](/academy/monitoring/error-analysis): sitting down with a batch of production traces, reading through them, and writing down every failure mode and rule upfront.
 
@@ -55,7 +55,7 @@ Your taste compounds into written instructions automatically, one 2-minute revie
   **Bonus:** You can also tell Grok Bot to add your feedback back as [scores](/docs/evaluation/scores/overview#score-types) (including free-text scores) on those Langfuse traces, so you collect those inputs over time instead of leaving them in chat.
 </Callout>
 
-## 2. The richer your traces, the simpler your bot can stay [#richer-traces-simpler-bot]
+### 2. The richer your traces, the simpler your bot can stay [#richer-traces-simpler-bot]
 
 A lot of people try to fix a blind bot by adding more prompts and sub-agents. Usually the leverage is on the data side instead.
 
