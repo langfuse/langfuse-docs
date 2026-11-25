@@ -1,0 +1,29 @@
+---
+title: Skills (self-hosted)
+description: Skill Management availability and optional limits on a self-hosted Langfuse deployment.
+label: "Version: v4"
+sidebarTitle: "Skills"
+---
+
+# Skills
+
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4.73",
+  }}
+/>
+
+Skill Management is available from Langfuse v4.73.0 or later. Upgrade the web and worker containers. For creating and loading skills, see [Skill Management](/docs/skill-management/overview).
+
+## Optional limits [#limits]
+
+Set these on the web container to override the [Skill Management limits](/docs/skill-management/overview#limits) for each skill version:
+
+| Variable                   | Default     | Description                                                                                                              |
+| -------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `LANGFUSE_SKILL_MAX_BYTES` | `1_000_000` | Maximum total UTF-8 text per skill version, in bytes. Requests are capped at 4.5 MB, so keep this below about 4,000,000. |
+| `LANGFUSE_SKILL_MAX_FILES` | `200`       | Maximum files per skill version, including the root `SKILL.md`.                                                          |
