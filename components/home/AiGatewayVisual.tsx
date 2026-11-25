@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { ProviderMark, type ProviderMarkName } from "./AiGatewayProviderMarks";
 
 // Same axonometric projection as the other bento illustrations: plane x runs
 // up-right, plane y runs down-right, and raised chips extrude upward.
@@ -13,7 +14,13 @@ const RAISE = 10;
 const project = (x: number, y: number, z = 0) =>
   `${ORIGIN.x + EX.x * x + EY.x * y},${ORIGIN.y + EX.y * x + EY.y * y - z}`;
 
-type Chip = { label: string; x: number; y: number; w: number };
+type Chip = {
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  mark?: ProviderMarkName;
+};
 
 const CHIP_H = 30;
 const clients: Chip[] = [
@@ -22,9 +29,27 @@ const clients: Chip[] = [
   { label: "Codex", x: 0, y: 88, w: 130 },
 ];
 const providers: Chip[] = [
-  { label: "OpenAI", x: 400, y: 0, w: 130 },
-  { label: "Anthropic", x: 400, y: 44, w: 130 },
+  { label: "Anthropic", x: 400, y: 0, w: 130, mark: "anthropic" },
+  { label: "OpenAI", x: 400, y: 44, w: 130, mark: "openai" },
 ];
+const MARK = 16;
+const MARK_INSET = 10;
+// Logo strip for the providers without a named chip.
+const more = {
+  x: 400,
+  y: 88,
+  cell: 28,
+  marks: ["gemini", "aws", "azure", "openrouter"],
+  label: "and more",
+} satisfies {
+  x: number;
+  y: number;
+  cell: number;
+  marks: ProviderMarkName[];
+  label: string;
+};
+const moreW = more.cell * more.marks.length;
+const providerRows = [...providers.map((chip) => chip.y), more.y];
 const gateway = { x: 190, y: 34, w: 150, h: 50 };
 const ROW_H = 22;
 const checks = [{ label: "trace", value: "1.2s $0.0031" }];
@@ -44,8 +69,16 @@ function FadedChip({ chip }: { chip: Chip }) {
         fill="var(--surface-1)"
         stroke="var(--line-structure)"
       />
+      {chip.mark && (
+        <ProviderMark
+          name={chip.mark}
+          x={chip.x + MARK_INSET}
+          y={chip.y + (CHIP_H - MARK) / 2}
+          size={MARK}
+        />
+      )}
       <text
-        x={chip.x + 12}
+        x={chip.x + (chip.mark ? MARK_INSET + MARK + 8 : 12)}
         y={chip.y + 20}
         className="font-mono"
         fontSize={14}
@@ -108,7 +141,7 @@ export function AiGatewayVisual({ className }: { className?: string }) {
 
   return (
     <svg
-      viewBox="22 44 554 322"
+      viewBox="22 44 595 322"
       className={className}
       aria-hidden="true"
       preserveAspectRatio="xMidYMid meet"
@@ -175,16 +208,16 @@ export function AiGatewayVisual({ className }: { className?: string }) {
             </g>
           );
         })}
-        {providers.map((chip) => {
-          const cy = chip.y + CHIP_H / 2;
+        {providerRows.map((rowY) => {
+          const cy = rowY + CHIP_H / 2;
           return (
-            <g key={chip.label}>
+            <g key={rowY}>
               <path
-                d={`M${x1} ${gatewayMidY}H${x1 + 30}V${cy}H${chip.x}`}
+                d={`M${x1} ${gatewayMidY}H${x1 + 30}V${cy}H${more.x}`}
                 fill="none"
                 stroke="var(--text-disabled)"
               />
-              <Node x={chip.x} y={cy} />
+              <Node x={more.x} y={cy} />
             </g>
           );
         })}
@@ -200,6 +233,39 @@ export function AiGatewayVisual({ className }: { className?: string }) {
         {providers.map((chip) => (
           <FadedChip key={chip.label} chip={chip} />
         ))}
+        <rect
+          x={more.x}
+          y={more.y}
+          width={moreW}
+          height={CHIP_H}
+          fill="var(--surface-1)"
+          stroke="var(--line-structure)"
+        />
+        {more.marks.map((name, i) => (
+          <g key={name}>
+            {i > 0 && (
+              <path
+                d={`M${more.x + i * more.cell} ${more.y}V${more.y + CHIP_H}`}
+                stroke="var(--line-structure)"
+              />
+            )}
+            <ProviderMark
+              name={name}
+              x={more.x + i * more.cell + (more.cell - MARK) / 2}
+              y={more.y + (CHIP_H - MARK) / 2}
+              size={MARK}
+            />
+          </g>
+        ))}
+        <text
+          x={more.x + moreW + 10}
+          y={more.y + 20}
+          className="font-mono"
+          fontSize={14}
+          fill="var(--text-disabled)"
+        >
+          {more.label}
+        </text>
 
         <rect
           x={trace.x}
