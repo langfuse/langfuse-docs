@@ -17,22 +17,23 @@ We use Slack mostly asynchronously to reduce noise and allow everyone to focus o
 
 ## Most important channels
 
-| Channel                                                                                                      | Purpose                                                                                                                |
-| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `team`                                                                                                       | General team chat (notifying)                                                                                          |
-| `team-async`                                                                                                 | General team chat (non-notifying, suitable for most messages)                                                          |
-| `engineering`, `product`, `user-feedback`, `market-insights`, `media-recommendations`, `marketing`, `growth` | Topical channels (non-notifying)                                                                                       |
-| `incidents`                                                                                                  | Incident communication (notifying)                                                                                     |
-| `memehq`                                                                                                     | Arguably the most fun channel                                                                                          |
-| `ai-trickshots`                                                                                              | Show off what you've got done with AI (non-notifying)                                                                  |
-| `queue-<name>-x-<name>`                                                                                      | Private channel for non-notifying messages between team members                                                        |
-| `clickhouse-*-external`, `ext-*`                                                                             | Customer communication, managed via Pylon. New channels use `clickhouse-*-external` in the ClickHouse Slack workspace. |
-| `vendor-*`                                                                                                   | Vendor communication. Join the channels which are relevant to you.                                                     |
-| `partner-*`                                                                                                  | Partner communication. Join the channels which are relevant to you.                                                    |
+| Channel                                                                                                      | Purpose                                                                   |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| `team`                                                                                                       | General team chat (notifying)                                             |
+| `team-async`                                                                                                 | General team chat (non-notifying, suitable for most messages)             |
+| `engineering`, `product`, `user-feedback`, `market-insights`, `media-recommendations`, `marketing`, `growth` | Topical channels (non-notifying)                                          |
+| `incidents`                                                                                                  | Incident communication (notifying)                                        |
+| `memehq`                                                                                                     | Arguably the most fun channel                                             |
+| `ai-trickshots`                                                                                              | Show off what you've got done with AI (non-notifying)                     |
+| `queue-<name>-x-<name>`                                                                                      | Private channel for non-notifying messages between team members           |
+| `clickhouse-*-external`                                                                                      | Customer, partner, and vendor channels in the ClickHouse Slack workspace. |
+| `ext-*`                                                                                                      | Existing customer channels in the Langfuse Slack workspace.               |
 
 ## External channels
 
 For some prioritized customer groups, we use shared Slack Connect channels for support and sales.
+
+New customer, partner, and vendor channels in the ClickHouse Slack workspace use the `clickhouse-[name]-external` format.
 
 ### Create a customer Slack channel [#create-new-external-slack-connect-channel]
 
@@ -45,10 +46,6 @@ Use Pylon to handle support and sales messages from customer channels.
 ### Existing Langfuse customer channels [#sync-to-pylon]
 
 Existing customer channels in the Langfuse Slack workspace use the `ext-` prefix. The Pylon app joins public `ext-*` channels automatically. For a private `ext-*` channel, add the Pylon app manually and [link the channel to a Pylon account](https://app.usepylon.com/customers/accounts/add).
-
-### Partner and vendor channels
-
-Use the `partner-` prefix for partner channels and the `vendor-` prefix for vendor channels. Shared channels should be public so people in the external organization can discover them. Pylon does not sync partner or vendor channels.
 
 ### Configure Slack for external channels
 
