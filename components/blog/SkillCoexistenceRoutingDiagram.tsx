@@ -40,7 +40,7 @@ const AW = 104;
 const SX = 540;
 
 const rowY = (index: number) => 24 + index * 36;
-const exitY = (index: number) => 60 + index * 18;
+const exitY = (index: number) => 120 + index * 8;
 
 function routeTarget(route: RouteItem): string {
   return route.id === STOLEN_ROUTE_ID ? NEW_SKILL : route.skill;
@@ -73,8 +73,8 @@ export function SkillCoexistenceRoutingDiagram() {
   const isRouteHot = (route: RouteItem) =>
     hoveredRoute === route.id || hoveredSkill === routeTarget(route);
 
-  const ay = exitY(0) - 24;
-  const ah = exitY(ROUTES.length - 1) - exitY(0) + 48;
+  const ay = exitY(0) - 16;
+  const ah = exitY(ROUTES.length - 1) - exitY(0) + 32;
   const stolenRoute = ROUTES[STOLEN_ROUTE_ID - 1];
 
   return (
@@ -156,7 +156,7 @@ export function SkillCoexistenceRoutingDiagram() {
                 <circle
                   cx={AX + AW}
                   cy={exitY(route.id - 1)}
-                  r={1.75}
+                  r={1.5}
                   fill={stroke}
                   opacity={opacity}
                   style={{ transition: "opacity 150ms ease-out" }}
