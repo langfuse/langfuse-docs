@@ -20,11 +20,11 @@ Most "software factory" setups aim for fully autonomous feature delivery. A smal
 
 If you boil it down, a minimal software factory for your agent needs 5 parts:
 
-1. **Production traces:** full [traces](/docs/observability/get-started?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) of what your agent actually did (prompts, tool calls, and outputs), so both you and the bot can inspect individual runs step by step.
-2. **A way to pick which traces to look at:** on day one, the bot can simply sample and read recent traces on its own. As volume grows, signals like errors, latency/cost spikes, [topics](/docs/observability/features/topics?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell), and [user feedback](/docs/observability/features/user-feedback?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) help narrow thousands of runs down to the handful worth checking.
+1. **Production traces:** full [traces](/docs/observability/get-started) of what your agent actually did (prompts, tool calls, and outputs), so both you and the bot can inspect individual runs step by step.
+2. **A way to pick which traces to look at:** on day one, the bot can simply sample and read recent traces on its own. As volume grows, signals like errors, latency/cost spikes, [topics](/docs/observability/features/topics), and [user feedback](/docs/observability/features/user-feedback) help narrow thousands of runs down to the handful worth checking.
 3. **A written sense of "good":** a short living doc of your expectations and edge cases that starts tiny on day one and grows from your feedback.
 4. **A scheduled sweep:** a daily routine that checks recent traces against that doc and brings you clear issues plus gray areas to judge.
-5. **An agent that can act and verify changes:** repo access to update its written context from your replies, run tests or [experiments](/docs/evaluation/experiments/experiments-via-sdk?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) to validate fixes, and open PRs once you approve.
+5. **An agent that can act and verify changes:** repo access to update its written context from your replies, run tests or [experiments](/docs/evaluation/experiments/experiments-via-sdk) to validate fixes, and open PRs once you approve.
 
 <Frame fullWidth className="w-full my-8">
   ![Loop diagram showing a scheduled agent (e.g. Grok Bot) reading written instructions and Langfuse traces, signals, and scores to surface daily issues and gray areas; human review routes false alarms or judgment calls back so the agent updates written instructions, or approves a fix to optionally run a Langfuse dataset experiment and open a PR that feeds new traces back into Langfuse](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
@@ -34,7 +34,7 @@ If you boil it down, a minimal software factory for your agent needs 5 parts:
 
 ### 1. Do error analysis over time. Calibrate taste daily [#calibrate-taste-daily]
 
-Usually, you figure out what "good" looks like through [error analysis](/academy/monitoring/error-analysis?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell): sitting down with a batch of production traces, reading through them, and writing down every failure mode and rule upfront.
+Usually, you figure out what "good" looks like through [error analysis](/academy/monitoring/error-analysis): sitting down with a batch of production traces, reading through them, and writing down every failure mode and rule upfront.
 
 That works, and it's also understandable why most teams stall on it. Doing it all in one big pass is painful.
 
@@ -48,7 +48,7 @@ In a lightweight version, you can do error analysis over time instead, and figur
 Over time, those short daily replies turn your judgment into written instructions without needing a big upfront pass.
 
 <Callout type="info">
-  **Bonus:** You can also tell the bot to add your feedback back as [scores](/docs/evaluation/scores/overview?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell#score-types) (including free-text scores) on those Langfuse traces, so you collect those inputs over time instead of leaving them in chat.
+  **Bonus:** You can also tell the bot to add your feedback back as [scores](/docs/evaluation/scores/overview#score-types) (including free-text scores) on those Langfuse traces, so you collect those inputs over time instead of leaving them in chat.
 </Callout>
 
 ### 2. The richer your traces, the simpler your bot can stay [#richer-traces-simpler-bot]
@@ -57,9 +57,9 @@ A lot of people try to fix a blind bot by adding more prompts and sub-agents. Us
 
 The more your traces are enriched, the less guessing the bot has to do:
 
-- **[Topics](/docs/observability/features/topics?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell)** attached to traces let the bot spot what's trending across thousands of runs (new intents, sudden spikes, topics with higher error rates) instead of guessing from 10 random samples.
-- **[Conversation signals](/blog/2026-09-23-catching-conversation-signals-in-langfuse?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) and [user feedback](/docs/observability/features/user-feedback?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell)** (like user disagreement or thumbs-down) catch silent failures where nothing crashed: the answer was just frustrating.
-- **[Releases](/docs/observability/features/releases-and-versioning?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell), [sessions](/docs/observability/features/sessions?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell), [prompt versions](/docs/prompt-management/features/link-to-traces?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell), and clean tool I/O** let the bot trace a regression back to the exact change instead of hunting through the repo.
+- **[Topics](/docs/observability/features/topics)** attached to traces let the bot spot what's trending across thousands of runs (new intents, sudden spikes, topics with higher error rates) instead of guessing from 10 random samples.
+- **[Conversation signals](/blog/2026-09-23-catching-conversation-signals-in-langfuse) and [user feedback](/docs/observability/features/user-feedback)** (like user disagreement or thumbs-down) catch silent failures where nothing crashed: the answer was just frustrating.
+- **[Releases](/docs/observability/features/releases-and-versioning), [sessions](/docs/observability/features/sessions), [prompt versions](/docs/prompt-management/features/link-to-traces), and clean tool I/O** let the bot trace a regression back to the exact change instead of hunting through the repo.
 
 <Frame fullWidth className="w-full my-8">
   ![Annotated Langfuse trace highlighting attached topics (Device Wi-Fi Connection Help), linked prompt, tool calls, session metadata, and conversation signals scores including user_express_frustration](/images/blog/2026-11-24-simplest-software-factory-loop/enriched-trace.png)
@@ -69,7 +69,7 @@ You don't need a heavier bot to get better PRs. Just richer traces.
 
 ## How to wire this up with Langfuse and Grok Bot [#setup]
 
-This pattern works with any observability tool and scheduled coding agent. Here is the minimal setup using Langfuse and [Grok Bot](https://x.ai/news/grok-bot-1-0?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell):
+This pattern works with any observability tool and scheduled coding agent. Here is the minimal setup using Langfuse and [Grok Bot](https://x.ai/news/grok-bot-1-0):
 
 <Steps>
 
@@ -81,7 +81,7 @@ Open a Grok Bot chat and ask it to connect to your Langfuse project via API keys
   ![Grok Bot surfacing a masked Secrets card for Langfuse API keys right in chat](/images/blog/2026-11-24-simplest-software-factory-loop/grokbot-langfuse-secrets.png)
 </Frame>
 
-Ask it to install the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) so it queries traces, topics, and scores cleanly via the [Langfuse CLI](/docs/api-and-data-platform/features/cli?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell):
+Ask it to install the [Langfuse skill](/docs/api-and-data-platform/features/agent-skill) so it queries traces, topics, and scores cleanly via the [Langfuse CLI](/docs/api-and-data-platform/features/cli):
 
 ```bash
 npx skills add langfuse/skills --skill "langfuse"
@@ -166,15 +166,15 @@ Click **Test** once on the routine to verify it runs cleanly.
 
 Building datasets from scratch is hard. But the traces you review every day are the best raw material for one.
 
-Every time a daily sweep surfaces a tricky edge case, a recurring failure mode, or a gray area you just made a call on, add that trace to a [Langfuse Dataset](/docs/evaluation/experiments/datasets?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell). Over a few weeks, those two-minute reviews naturally grow into a living benchmark of how you actually want your agent to behave.
+Every time a daily sweep surfaces a tricky edge case, a recurring failure mode, or a gray area you just made a call on, add that trace to a [Langfuse Dataset](/docs/evaluation/experiments/datasets). Over a few weeks, those two-minute reviews naturally grow into a living benchmark of how you actually want your agent to behave.
 
 Here is how the dataset loop works in practice:
 
-1. **Save reviewed traces to a dataset.** From any trace you inspect in Langfuse (or directly via the [Langfuse CLI](/docs/api-and-data-platform/features/cli?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) and [skill](/docs/api-and-data-platform/features/agent-skill?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell)), add the run as a dataset item so the real production input is captured as-is.
+1. **Save reviewed traces to a dataset.** From any trace you inspect in Langfuse (or directly via the [Langfuse CLI](/docs/api-and-data-platform/features/cli) and [skill](/docs/api-and-data-platform/features/agent-skill)), add the run as a dataset item so the real production input is captured as-is.
 2. **Edit the expected output as your taste evolves.** Each dataset item holds the input plus the expected output or behavior. When a trace went wrong, edit the expected output to show what the agent should have done instead. When your product or bar changes later, update or prune items so the dataset stays aligned with what "good" means today.
-3. **Run an experiment before opening a PR.** Once you have a small set of cases you never want to break, update `docs/agent-quality.md` so the bot runs your [experiment script](/docs/evaluation/experiments/experiments-via-sdk?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) against the dataset before opening a PR (or run it in [CI](/docs/evaluation/experiments/experiments-ci-cd?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell)) and attaches the before/after [score comparison](/docs/evaluation/experiments/compare-experiments?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell) in the PR description.
+3. **Run an experiment before opening a PR.** Once you have a small set of cases you never want to break, update `docs/agent-quality.md` so the bot runs your [experiment script](/docs/evaluation/experiments/experiments-via-sdk) against the dataset before opening a PR (or run it in [CI](/docs/evaluation/experiments/experiments-ci-cd)) and attaches the before/after [score comparison](/docs/evaluation/experiments/compare-experiments) in the PR description.
 
-If you want to learn more about building out eval datasets, check out [Langfuse Academy](/academy/datasets?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell).
+If you want to learn more about building out eval datasets, check out [Langfuse Academy](/academy/datasets).
 
 <Frame fullWidth className="w-full my-8">
   ![Comparing baseline vs. candidate experiment runs side by side in Langfuse](/images/docs/experiment-comparison-peek-view.png)
@@ -186,9 +186,9 @@ Start with traces, a daily sweep, and 2–3 examples to judge. If you have good 
 
 ## Further reading [#further-reading]
 
-- [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell): what to hand to agents, and where your judgment stays the product.
-- [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell): score every conversation for frustration, corrections, and resolution.
-- [Evaluating proactive agents](/blog/2026-11-19-evaluating-proactive-agents?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell): how to trace and evaluate agents that decide whether, when, and how far to act.
-- [How to set up a user feedback loop](/guides/user-feedback-loop?utm_source=x&utm_medium=social&utm_campaign=202611-agent-factory&utm_content=annabell): turn explicit and implicit user feedback into scores on your traces.
+- [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering): what to hand to agents, and where your judgment stays the product.
+- [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse): score every conversation for frustration, corrections, and resolution.
+- [Evaluating proactive agents](/blog/2026-11-19-evaluating-proactive-agents): how to trace and evaluate agents that decide whether, when, and how far to act.
+- [How to set up a user feedback loop](/guides/user-feedback-loop): turn explicit and implicit user feedback into scores on your traces.
 
 <CustomerStoryCTA />
