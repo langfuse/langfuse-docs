@@ -161,10 +161,11 @@ Looking at routing, trajectory efficiency, and multi-constraint outcome graders 
 
 As expansively covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observing your agent's traces:
 
-1. **Read trajectories before writing judges.** Start by running 15 to 30 realistic prompts (explicit, implicit, and messy) through your sandboxed harness and reading the traces—either manually in Langfuse or by having a coding agent summarize failure patterns across the experiment run. Fix obvious one-line skill bugs directly instead of building permanent evaluators for typos.
-2. **Separate routing checks from forced-skill baselines.** Test skill selection cheaply by stopping after the agent picks a skill, and measure skill quality by comparing a forced skill against a `no-skill` or previous-version baseline.
-3. **Automate deterministic checks first.** Wire up trace-based routing evaluators (`SKILL.md` and `references/*.md` loads, including negative controls), tool/CLI error counts, and deterministic environment or build checks. They cost nothing to run and never hallucinate.
-4. **Add targeted LLM-as-a-judge rubrics for stable qualitative criteria.** Once your workflow instructions settle, encode the remaining style, convention, and workflow-fidelity checks as narrow boolean rubrics—and keep a reminder to re-run your `no-skill` baseline whenever new frontier models ship so you know which parts of your skill you can delete.
+1. **Prove the skill works when forced before testing routing.** Don't tune frontmatter for a skill whose instructions don't improve outcomes yet. Force-load it on a small set of real tasks and verify it beats `no-skill` first.
+2. **Read 10 to 20 traces and fix the obvious bugs directly.** Early failures are usually glaring instruction gaps—missing flags, stale paths, or unclear steps. Fix those in `SKILL.md` instead of building permanent evaluators around temporary bugs.
+3. **Lock in cheap, deterministic checks next.** Once the skill settles, automate the highest-signal regressions: routing (`SKILL.md` and `references/` loads, plus coexistence with existing skills), tool error rates, and objective outcome checks.
+4. **Add LLM judges last, and never collapse them into one score.** Only write narrow, boolean judges for qualitative failures you have actually seen in traces. Keeping metrics separate—rather than optimizing a single composite number—is what stops you from Goodharting your skill.
+5. **Re-run your `no-skill` baseline when models upgrade.** New frontier models quietly absorb instructions older skills had to spell out. Periodically check whether your skill still earns its context tokens, and delete what the model already knows.
 
 > **TODO (draft notes — remove before publishing):**
 >
