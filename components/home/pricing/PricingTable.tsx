@@ -108,7 +108,6 @@ const YEARLY_COMMITMENT = "Yearly Commitment";
 
 const yearlyCommitmentBenefits = [
   "Custom volume pricing",
-  "Architecture reviews",
   "Billing via AWS Marketplace",
   "Billing via invoice",
   "Vendor onboarding",
@@ -1337,8 +1336,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: YEARLY_COMMITMENT,
-            Pro: YEARLY_COMMITMENT,
+            Core: false,
+            Pro: false,
             Enterprise: YEARLY_COMMITMENT,
           },
         },
@@ -1916,8 +1915,8 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available with a yearly commitment (subject to a minimum contract
-              value on Core and Pro).
+              Available when committing to a yearly contract (subject to a
+              minimum contract value).
             </HoverCardContent>
           </HoverCard>
         )}

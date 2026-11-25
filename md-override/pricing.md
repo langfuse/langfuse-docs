@@ -85,7 +85,6 @@ Trusted by: Ramp, GoDaddy, [Khan Academy](/users/khan-academy), [Merck Group](/u
 Available on any paid plan (Core, Pro, or Enterprise) starting from a minimum contract value:
 
 - Custom volume pricing
-- Architecture reviews
 - Billing via AWS Marketplace
 - Billing via invoice
 - Vendor onboarding
@@ -166,7 +165,7 @@ Available on any paid plan (Core, Pro, or Enterprise) starting from a minimum co
 | [Private Slack channel](/support#slack)                                                                            | --                  | --                                                 | Teams add-on                                       | Yes                                                |
 | [Named lead support engineer](/support#onboarding)                                                                 | --                  | --                                                 | --                                                 | Yes                                                |
 | [Onboarding support](/support#onboarding)                                                                          | --                  | --                                                 | --                                                 | Yes                                                |
-| [Architecture reviews](/support#onboarding)                                                                        | --                  | Yearly Commitment                                  | Yearly Commitment                                  | Yearly Commitment                                  |
+| [Architecture reviews](/support#onboarding)                                                                        | --                  | --                                                 | --                                                 | Yearly Commitment                                  |
 | [Response time SLO (Severity 1)](https://clickhouse.com/legal/support-services-policy)                             | Best effort         | Best effort                                        | Best effort                                        | Committed: 1h (24/7); pay-as-you-go: Best effort   |
 | [Support SLA](/enterprise#faq)                                                                                     | --                  | --                                                 | --                                                 | Yes                                                |
 | **Security**                                                                                                       |                     |                                                    |                                                    |                                                    |
