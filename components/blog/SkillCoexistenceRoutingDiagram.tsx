@@ -214,8 +214,7 @@ export function SkillCoexistenceRoutingDiagram() {
                 <text
                   x={SX + 12}
                   y={y}
-                  fontSize="13"
-                  fontFamily="var(--font-mono)"
+                  fontSize="13.5"
                   fontWeight={hot || isBrokenTarget || isNewSkill ? 500 : 400}
                   fill={textColor}
                   dominantBaseline="central"
@@ -226,7 +225,7 @@ export function SkillCoexistenceRoutingDiagram() {
                 {isNewSkill ? (
                   <>
                     <rect
-                      x={SX + 74}
+                      x={SX + 62}
                       y={y - 8}
                       width={34}
                       height={16}
@@ -236,7 +235,7 @@ export function SkillCoexistenceRoutingDiagram() {
                       strokeWidth={1}
                     />
                     <text
-                      x={SX + 91}
+                      x={SX + 79}
                       y={y}
                       fontSize="10.5"
                       fill="var(--text-secondary)"
@@ -261,19 +260,19 @@ export function SkillCoexistenceRoutingDiagram() {
           </div>
           <ul className="mt-2 space-y-1.5">
             <li>
-              <span className="font-mono text-text-primary">
+              <span className="font-medium text-text-primary">
                 Skill A through Skill K:
               </span>{" "}
               existing skills with established routing paths from the agent.
             </li>
             <li>
-              <span className="font-mono text-text-primary">
+              <span className="font-medium text-text-primary">
                 Skill L (new):
               </span>{" "}
               added alongside the existing library with its own intended route.
             </li>
             <li>
-              <span className="font-mono text-[var(--callout-error)]">
+              <span className="font-medium text-[var(--callout-error)]">
                 Skill C → Skill L:
               </span>{" "}
               a prompt that previously routed to Skill C is silently pulled away
