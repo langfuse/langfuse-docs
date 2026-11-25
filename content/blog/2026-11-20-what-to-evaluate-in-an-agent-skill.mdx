@@ -159,7 +159,7 @@ Track when the agent abandons the path your skill recommends, for example:
 
 Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite on day one—or worse, optimize against a flawed metric.
 
-As we cover in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observed behavior rather than upfront guesswork:
+As expansively covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observing your agent's traces:
 
 1. **Read trajectories before writing judges.** Start by running 15 to 30 realistic prompts (explicit, implicit, and messy) through your sandboxed harness and reading the traces—either manually in Langfuse or by having a coding agent summarize failure patterns across the experiment run. Fix obvious one-line skill bugs directly instead of building permanent evaluators for typos.
 2. **Separate routing checks from forced-skill baselines.** Test skill selection cheaply by stopping after the agent picks a skill, and measure skill quality by comparing a forced skill against a `no-skill` or previous-version baseline.
