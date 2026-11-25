@@ -1,5 +1,4 @@
 import { useId } from "react";
-import { cn } from "@/lib/utils";
 import {
   ProviderMark,
   type ProviderMarkName,
@@ -11,6 +10,7 @@ const CHIP_FILL = "var(--surface-bg)";
 const FONT = 10;
 const W = 240;
 const H = 100;
+const CHIP_H = 20;
 
 function Traffic({ d, delay }: { d: string; delay: number }) {
   return (
@@ -31,7 +31,6 @@ function Chip({
   x,
   y,
   w,
-  h = 20,
   label,
   mark,
   strong,
@@ -39,7 +38,6 @@ function Chip({
   x: number;
   y: number;
   w: number;
-  h?: number;
   label: string;
   mark?: ProviderMarkName;
   strong?: boolean;
@@ -49,9 +47,9 @@ function Chip({
     <g>
       <rect
         x={x}
-        y={y - h / 2}
+        y={y - CHIP_H / 2}
         width={w}
-        height={h}
+        height={CHIP_H}
         rx={4}
         fill={CHIP_FILL}
         stroke={strong ? "var(--text-disabled)" : "var(--line-structure)"}
@@ -106,7 +104,7 @@ function Hub({ x, y, size }: { x: number; y: number; size: number }) {
 }
 
 /** Traffic fans in to the Langfuse hub and out to model providers. */
-export function GatewayCtaGraphic({ className }: { className?: string }) {
+export function GatewayCtaGraphic() {
   const gradientId = useId().replace(/:/g, "");
   const hub = { x: 88, y: 50 };
   const fanInX = hub.x - 17;
@@ -126,7 +124,7 @@ export function GatewayCtaGraphic({ className }: { className?: string }) {
       viewBox={`0 0 ${W} ${H}`}
       fill="none"
       aria-hidden="true"
-      className={cn("block h-auto w-full overflow-visible", className)}
+      className="block h-auto w-full overflow-visible"
     >
       <defs>
         <linearGradient
@@ -204,7 +202,7 @@ export function GatewayCtaGraphic({ className }: { className?: string }) {
 }
 
 /** An app call enters the Langfuse hub and unfolds into a span tree. */
-export function TracingCtaGraphic({ className }: { className?: string }) {
+export function TracingCtaGraphic() {
   const gradientId = useId().replace(/:/g, "");
   const hub = { x: 30, y: 22 };
   const rows = [22, 50, 78];
@@ -226,7 +224,7 @@ export function TracingCtaGraphic({ className }: { className?: string }) {
       viewBox={`0 0 ${W} ${H}`}
       fill="none"
       aria-hidden="true"
-      className={cn("block h-auto w-full overflow-visible", className)}
+      className="block h-auto w-full overflow-visible"
     >
       <defs>
         <linearGradient
