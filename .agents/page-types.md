@@ -30,7 +30,7 @@ Give each major concept a diagram or a table, and answer the questions a newcome
 2. a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`
 3. how to set up/get started with the feature
 4. any other sections that are important enough are below this. These sections are ordered in terms of how often users need it. If all users need something, it should be higher up, edge cases and advanced features (only a small subgroup needs this) are lower
-5. Troubleshooting and FAQ are always at the bottom. When adding a section, always consider if it's important enough to have it featured on the main docs page, or if it could be linked in a troubleshooting/faq page
+5. Troubleshooting and FAQ are always at the bottom. When adding a section, always consider if it's important enough to have it featured on the main docs page, or if it belongs in the closing FAQ or a linked troubleshooting/faq page. A similar section already on the page is not a reason to add one
 
 Put long reference lists, such as every recorded field or response header, in a `<Details>` block whose `<Summary>` names the content. Put optional deep-dive topics in a closing `## FAQ` section that wraps question-titled `<Details>` blocks in `<FaqDetails>`.
 
@@ -55,7 +55,7 @@ When the tool already has an integration page for another Langfuse product area,
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
 - Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
 - A changelog entry can be updated to record that something was retired. Do not copy that history onto a docs or integration page unless readers of that page would otherwise follow a dead path.
-- For new features, follow the intro immediately with 2-3 concrete use cases, not in a separate section. For additions to existing features, such as a new provider or endpoint, use cases are optional. A one-sentence entry that restates the title and links to docs is incomplete.
+- Use cases are optional. Add 2-3 concrete use cases right after the intro, not in a separate section, only when a new feature's uses aren't clear from the intro. A one-sentence entry that restates the title and links to docs is incomplete.
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
 - Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Frontmatter `ogImage` or `ogVideo` counts only when `showOgInHeader` is not `false`. When that flag is `false`, the visual has to be in the body. Do not invent a visual.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
