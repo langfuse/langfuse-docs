@@ -59,7 +59,7 @@ This brings you to two things to test every time you edit your skill:
 
 Routing evals test whether the agent loads the right skill, and the right files inside it, when left on its own.
 
-To test this, each dataset item pairs a prompt (`input`) and environment setup (`metadata`) with the skill or reference file that should be used (`expected_output`). When you [link skills to traces](/docs/skill-management/tracing), every skill load is recorded on the trace, so a [code-based evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can deterministically check the trace against `expected_output`.
+To test this, create a dataset where each item pairs a prompt and environment setup with the skill file that should be used (`expected_output`). When you [link skills to traces](/docs/skill-management/tracing), every skill load is recorded on the trace, so a [code-based evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can deterministically check the trace against `expected_output`.
 
 <SkillRoutingEvalFlowDiagram />
 
