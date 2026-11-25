@@ -417,9 +417,19 @@ The observation tools distinguish logical roots from physical parentage:
 
 For the complete tool schemas and request examples, see the [MCP Reference](https://mcp.reference.langfuse.com).
 
-## Feedback
+## Submit feedback [#submit-feedback]
 
-We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
+Use the `submitFeedback` tool to send user-approved feedback about Langfuse skills, MCP tools, CLI, docs, or the public API. The same operation is available as [`POST /api/public/feedback`](https://api.reference.langfuse.com/#tag/feedback/POST/api/public/feedback).
+
+Show the payload and ask permission before submitting. Do not include secrets, customer data, or trace payloads.
+
+<Callout type="info">
+
+Not available in the [HIPAA cloud region](/security/hipaa). Self-hosted deployments return 409 unless feedback intake is configured.
+
+</Callout>
+
+Without a Langfuse project, use `submitFeedback` on the [Docs MCP server](/docs/docs-mcp#submit-feedback).
 
 ## Related Documentation
 
