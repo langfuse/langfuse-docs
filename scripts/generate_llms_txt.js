@@ -379,7 +379,7 @@ async function generateLLMsList() {
     // Langfuse Skill section
     markdownContent += `## Langfuse Skill for AI Coding Agents\n\n`;
     markdownContent += `Install the Langfuse skill before implementing anything with Langfuse. The skill provides up-to-date documentation, best-practice workflows for instrumentation, prompt management, and programmatic API access via the Langfuse CLI.\n\n`;
-    markdownContent += `Install from: [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse)\n\n`;
+    markdownContent += `Install from [github.com/langfuse/skills](https://github.com/langfuse/skills/tree/main/skills/langfuse) or connect the [Langfuse MCP server](https://langfuse.com/docs/api-and-data-platform/features/mcp-server.md#bundled-skills) in a client that supports MCP skills.\n\n`;
 
     // Tracing best practices section
     markdownContent += `## Tracing Best Practices\n\n`;
