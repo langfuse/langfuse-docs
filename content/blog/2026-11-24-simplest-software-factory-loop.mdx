@@ -22,7 +22,7 @@ In a software factory, coding agents turn specs, tests, and feedback into shippe
 
 One high-ROI version is much smaller: an **agent improver** built on [Grok Bot](https://x.ai/news/grok-bot-1-0) and your Langfuse traces. It's a loop that watches your production traces, asks you when something looks off, and turns your feedback into PRs.
 
-Every self-improvement loop only needs five things:
+If you drill it down, a software factory for agent loops needs 5 parts:
 
 1. **Production traces:** full [traces](/docs/observability/get-started) of what your agent actually did (prompts, tool calls, and outputs), so both you and the bot can inspect individual runs step by step.
 2. **A way to pick which traces to look at:** on day one, the bot can simply sample and read recent traces on its own. As volume grows, signals like errors, latency/cost spikes, [topics](/docs/observability/features/topics), and [user feedback](/docs/observability/features/user-feedback) help narrow thousands of runs down to the handful worth checking.
