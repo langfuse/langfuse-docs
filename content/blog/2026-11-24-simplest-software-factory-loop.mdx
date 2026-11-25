@@ -16,13 +16,13 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
   authors={["annabellschafer"]}
 />
 
-"Software factory" setups can seem super complex. But you don't need a dark factory shipping features from scratch to get real leverage and value.
+"Software factory" setups can seem super complex. But you don't need a fully autonomous pipeline shipping features from scratch to get real leverage and value.
 
 In a software factory, coding agents turn specs, tests, and feedback into shipped code changes with minimal human intervention (sometimes called a "dark factory" when humans barely touch the code at all).
 
-One high-ROI version is much smaller: an **agent improver** built on [Grok Bot](https://x.ai/news/grok-bot-1-0) and your Langfuse traces. It's a loop that watches your production traces, asks you when something looks off, and turns your feedback into PRs.
+A high-ROI version can be very small: an **agent improver** built on [Grok Bot](https://x.ai/news/grok-bot-1-0) and your Langfuse traces. It's a loop that watches your production traces, asks you when something looks off, and turns your feedback into PRs.
 
-If you drill it down, a software factory for agent loops needs 5 parts:
+If you boil it down, a minimal software factory for your agent needs 5 parts:
 
 1. **Production traces:** full [traces](/docs/observability/get-started) of what your agent actually did (prompts, tool calls, and outputs), so both you and the bot can inspect individual runs step by step.
 2. **A way to pick which traces to look at:** on day one, the bot can simply sample and read recent traces on its own. As volume grows, signals like errors, latency/cost spikes, [topics](/docs/observability/features/topics), and [user feedback](/docs/observability/features/user-feedback) help narrow thousands of runs down to the handful worth checking.
@@ -54,8 +54,8 @@ In a lightweight version, you can do error analysis over time instead, and figur
   ![Inspecting an individual multi-step trace step by step in Langfuse](/images/docs/tracing-overview.png)
 </Frame>
 
-- **If it's off?** You tell it why. It updates its written instructions so it doesn't flag the same thing tomorrow.
-- **If it's right?** You greenlight the fix and it opens a PR.
+- **False alarm?** You tell it why. It updates its written instructions so it doesn't flag the same thing tomorrow.
+- **Real issue?** You greenlight the fix and it opens a PR.
 
 Your taste compounds into written instructions automatically, one 2-minute review a day.
 
@@ -127,24 +127,28 @@ Keep it tiny on day one and let it grow from your replies:
 - (Optional) If a dataset/experiment command is configured (e.g., `npm run eval:run`), run it before opening the PR and include the before/after score delta
 ```
 
+<Callout type="info">
+  **Avoid spec bloat:** Updating `docs/agent-quality.md` daily for a month can turn it into a long, contradictory doc. Periodically prune rules as recurring cases graduate into [dataset items and experiments](#turn-daily-reviews-into-a-dataset) or automated tests.
+</Callout>
+
 ### Run one sweep and save it as a Skill
 
 Paste this into Grok Bot, tweak the output once, and tell it to save the workflow as a skill:
 
 ```text filename="Prompt"
-Every sweep, read docs/agent-quality.md (if it exists) and check the last 24h of Langfuse traces for:
-  - errors, latency/cost spikes, and repeated tool calls
-  - topics added to traces (new/spiking topics or topics with higher failure rates)
-  - conversation signals / negative user feedback (if enabled)
-  - a quick open-ended review of 10–20 sampled traces inspected one by one
+Every sweep, read docs/agent-quality.md and run the sweep defined there for the last 24h of Langfuse traces.
 
-Post a short digest and wait for my reply:
+If nothing is worth flagging, say "All clear" and stop. Don't invent nitpicks just to fill the digest.
+
+Otherwise, post a short digest and wait for my reply:
   1. Trending topics worth noticing
   2. Clear issues (max 3) with trace links, suspected root cause, and proposed fix
   3. Gray areas (2–3 examples) where you're unsure what "good" looks like, so I can judge them
 
 Update docs/agent-quality.md (and your context) daily with my feedback. Only branch and open a PR once I approve a fix.
 ```
+
+The `"All clear"` exit ramp matters in practice: without it, an agent reviewing 10–20 traces every day will invent nitpicks just to fill the digest and create alert fatigue.
 
 ### Put it on a schedule
 
