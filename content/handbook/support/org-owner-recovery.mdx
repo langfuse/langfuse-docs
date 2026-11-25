@@ -72,22 +72,3 @@ If your company cannot access the owner's email, change DNS records, or provide 
 4. Point your applications to the API keys of the new projects.
 
 This is also the fastest route if you need full control right away. You can complete the verification above later.
-
-## For the support team
-
-- Record every check and its evidence as internal notes on the Pylon ticket.
-- Generate a random code per request and send it in a new email from Pylon.
-- Verify the DNS record yourself with `dig TXT <domain>` and compare billing details with Stripe.
-- Escalate to engineering to apply the role change, and whenever a check fails or you are unsure.
-
-Reply template:
-
-```
-Hi <name>,
-
-Thanks for reaching out. Because the Owner role controls billing, API keys, and deletion of your organization, we need to verify a request like this before changing it.
-
-The fastest way: ask your IT team to restore access to <owner email>, log in to Langfuse with that account, and promote a new owner under Organization Settings → Members.
-
-If logging in is not possible but your company can receive email at that address, let us know. We will send a one-time code there and continue once you share it in this thread.
-```
