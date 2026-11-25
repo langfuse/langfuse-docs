@@ -45,29 +45,28 @@ export const productLinks: NavPanelLink[] = [
 ];
 
 export type NavCta = {
+  id: "tracing" | "gateway";
   title: string;
   description: string;
   cta: string;
   href: string;
-  icon: LucideIcon;
   badge?: string;
 };
 
 export const productCtas: NavCta[] = [
   {
+    id: "tracing",
     title: "Get started with tracing",
-    description: "Ingest your first trace with OpenAI, LangChain, or the SDKs.",
-    cta: "Read docs",
+    description: "Debug agents step by step, from prompt to tool call.",
+    cta: "Get started",
     href: "/docs/observability/get-started",
-    icon: Activity,
   },
   {
+    id: "gateway",
     title: "Set up AI Gateway",
-    description:
-      "Route OpenAI and Anthropic calls through Langfuse, with no code changes.",
-    cta: "Read setup guide",
+    description: "One key for every model, with spend tracked per user.",
+    cta: "Get started",
     href: "/docs/gateway/get-started/admin-setup",
-    icon: Network,
     badge: "New",
   },
 ];

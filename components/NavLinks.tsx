@@ -15,7 +15,6 @@ import {
 } from "@/lib/nav-links";
 import type { NavCta, NavPanelLink } from "@/lib/nav-links";
 import {
-  CtaGraphicPanel,
   GatewayCtaGraphic,
   TracingCtaGraphic,
 } from "@/components/nav/ProductCtaGraphics";
@@ -87,19 +86,43 @@ function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
   );
 }
 
-// ── Product panel variants (temporary preview switch: ?navVariant=2|2a..2d) ───
-
-const PRODUCT_VARIANTS = ["2", "2a", "2b", "2c", "2d"] as const;
-export type ProductPanelVariant = (typeof PRODUCT_VARIANTS)[number];
-const DEFAULT_PRODUCT_VARIANT: ProductPanelVariant = "2b";
+// ── Product panel ──────────────────────────────────────────────────────────────
 
 const ctaGraphics: Record<
-  string,
+  NavCta["id"],
   React.ComponentType<{ className?: string }>
 > = {
-  "/docs/observability/get-started": TracingCtaGraphic,
-  "/docs/gateway/get-started/admin-setup": GatewayCtaGraphic,
+  tracing: TracingCtaGraphic,
+  gateway: GatewayCtaGraphic,
 };
+
+// Temporary preview switch for description copy: ?navCopy=a|b|c
+const PRODUCT_COPY_SETS = {
+  a: {
+    tracing: "See every LLM call, tool, and cost in one trace.",
+    gateway: "Trace every model call without changing your code.",
+  },
+  b: {
+    tracing: "Trace your app in a few lines of code.",
+    gateway: "Point any client at Langfuse and trace every call.",
+  },
+  c: {
+    tracing: "Debug agents step by step, from prompt to tool call.",
+    gateway: "One key for every model, with spend tracked per user.",
+  },
+} satisfies Record<string, Record<NavCta["id"], string>>;
+type ProductCopySet = keyof typeof PRODUCT_COPY_SETS;
+
+function useProductCopySet(): ProductCopySet | null {
+  const [copySet, setCopySet] = useState<ProductCopySet | null>(null);
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get("navCopy");
+    if (value && value in PRODUCT_COPY_SETS) {
+      setCopySet(value as ProductCopySet);
+    }
+  }, []);
+  return copySet;
+}
 
 function CtaBadge({ label }: { label: string }) {
   return (
@@ -107,42 +130,6 @@ function CtaBadge({ label }: { label: string }) {
       {label}
     </span>
   );
-}
-
-function CtaTitle({ cta }: { cta: NavCta }) {
-  return (
-    <span className="flex items-center gap-2 font-sans text-[13px] font-semibold leading-snug text-text-primary">
-      {cta.title}
-      {cta.badge ? <CtaBadge label={cta.badge} /> : null}
-    </span>
-  );
-}
-
-function CtaDescription({ cta }: { cta: NavCta }) {
-  return (
-    <span className="font-sans text-[12px] leading-relaxed text-text-tertiary">
-      {cta.description}
-    </span>
-  );
-}
-
-function CtaAction({ cta, className }: { cta: NavCta; className?: string }) {
-  return (
-    <span
-      className={cn(
-        "flex items-center gap-1 font-mono text-[11px] text-text-tertiary transition-colors group-hover/cta:text-text-primary",
-        className,
-      )}
-    >
-      {cta.cta}
-      <ArrowRight className="size-3 transition-transform group-hover/cta:translate-x-0.5" />
-    </span>
-  );
-}
-
-function CtaGraphic({ cta, className }: { cta: NavCta; className?: string }) {
-  const Graphic = ctaGraphics[cta.href];
-  return Graphic ? <Graphic className={className} /> : null;
 }
 
 function ProductItemList() {
@@ -168,197 +155,63 @@ function ProductItemList() {
   );
 }
 
-function ProductPanelShell({ children }: { children: React.ReactNode }) {
+function ProductCtaCard({
+  cta,
+  description,
+  divider,
+}: {
+  cta: NavCta;
+  description: string;
+  divider: boolean;
+}) {
+  const Graphic = ctaGraphics[cta.id];
+  return (
+    <Link
+      href={cta.href}
+      className={cn(
+        "group/cta relative flex w-[430px] flex-1 overflow-hidden no-underline transition-colors hover:bg-surface-bg",
+        divider && "border-t border-line-structure",
+      )}
+    >
+      <div className="pointer-events-none absolute right-1 top-1/2 w-[240px] -translate-y-1/2 opacity-90 transition-opacity [mask-image:linear-gradient(to_right,transparent,black_35%)] group-hover/cta:opacity-100">
+        <Graphic />
+      </div>
+      <span className="relative flex w-[200px] flex-col gap-1 p-4">
+        <span className="flex items-center gap-2 font-sans text-[13px] font-semibold leading-snug text-text-primary">
+          {cta.title}
+          {cta.badge ? <CtaBadge label={cta.badge} /> : null}
+        </span>
+        <span className="font-sans text-[12px] leading-relaxed text-text-tertiary">
+          {description}
+        </span>
+        <span className="mt-auto flex items-center gap-1 pt-1 font-mono text-[11px] text-text-tertiary transition-colors group-hover/cta:text-text-primary">
+          {cta.cta}
+          <ArrowRight className="size-3 transition-transform group-hover/cta:translate-x-0.5" />
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function ProductPanel() {
+  const copySet = useProductCopySet();
   return (
     <div className="flex min-w-max border border-line-structure bg-surface-1 shadow-md">
       <ProductItemList />
       <div className="flex flex-col border-l border-line-structure">
-        {children}
+        {productCtas.map((cta, index) => (
+          <ProductCtaCard
+            key={cta.href}
+            cta={cta}
+            description={
+              copySet ? PRODUCT_COPY_SETS[copySet][cta.id] : cta.description
+            }
+            divider={index > 0}
+          />
+        ))}
       </div>
     </div>
   );
-}
-
-const ctaDivider = (index: number) =>
-  index > 0 && "border-t border-line-structure";
-
-/** 2: stacked cards with an icon tile (previous round's option 2). */
-function ProductPanelIcons() {
-  return (
-    <ProductPanelShell>
-      <div className="flex w-[300px] flex-1 flex-col bg-surface-bg">
-        {productCtas.map((cta, index) => {
-          const Icon = cta.icon;
-          return (
-            <Link
-              key={cta.href}
-              href={cta.href}
-              className={cn(
-                "group/cta flex flex-1 gap-3.5 p-4 no-underline transition-colors hover:bg-surface-1",
-                ctaDivider(index),
-              )}
-            >
-              <span className="with-stripes flex size-10 shrink-0 items-center justify-center border border-line-structure bg-surface-1">
-                <Icon className="size-[18px] text-text-secondary" />
-              </span>
-              <span className="flex flex-col gap-1">
-                <CtaTitle cta={cta} />
-                <CtaDescription cta={cta} />
-                <CtaAction cta={cta} className="mt-1" />
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </ProductPanelShell>
-  );
-}
-
-/** 2a: stacked cards, graphic band on top of each card. */
-function ProductPanelGraphicTop() {
-  return (
-    <ProductPanelShell>
-      {productCtas.map((cta, index) => (
-        <Link
-          key={cta.href}
-          href={cta.href}
-          className={cn(
-            "group/cta flex w-[300px] flex-1 flex-col no-underline",
-            ctaDivider(index),
-          )}
-        >
-          <CtaGraphicPanel className="border-b border-line-structure px-6 py-2">
-            <CtaGraphic cta={cta} className="mx-auto max-w-[180px]" />
-          </CtaGraphicPanel>
-          <span className="flex flex-col gap-1 px-4 py-3 transition-colors group-hover/cta:bg-surface-bg">
-            <span className="flex items-center justify-between gap-2">
-              <CtaTitle cta={cta} />
-              <ArrowRight className="size-3.5 text-text-tertiary transition-transform group-hover/cta:translate-x-0.5 group-hover/cta:text-text-primary" />
-            </span>
-            <CtaDescription cta={cta} />
-          </span>
-        </Link>
-      ))}
-    </ProductPanelShell>
-  );
-}
-
-/** 2b: stacked cards, graphic tile beside the copy. */
-function ProductPanelGraphicSide() {
-  return (
-    <ProductPanelShell>
-      {productCtas.map((cta, index) => (
-        <Link
-          key={cta.href}
-          href={cta.href}
-          className={cn(
-            "group/cta flex w-[470px] flex-1 no-underline",
-            ctaDivider(index),
-          )}
-        >
-          <CtaGraphicPanel className="flex w-[210px] shrink-0 items-center border-r border-line-structure px-2.5">
-            <CtaGraphic cta={cta} />
-          </CtaGraphicPanel>
-          <span className="flex flex-1 flex-col gap-1 p-4 transition-colors group-hover/cta:bg-surface-bg">
-            <CtaTitle cta={cta} />
-            <CtaDescription cta={cta} />
-            <CtaAction cta={cta} className="mt-auto pt-1" />
-          </span>
-        </Link>
-      ))}
-    </ProductPanelShell>
-  );
-}
-
-/** 2c: the graphic fills the card as a faded background behind the copy. */
-function ProductPanelGraphicBackground() {
-  return (
-    <ProductPanelShell>
-      {productCtas.map((cta, index) => (
-        <Link
-          key={cta.href}
-          href={cta.href}
-          className={cn(
-            "group/cta relative flex w-[430px] flex-1 overflow-hidden no-underline",
-            ctaDivider(index),
-          )}
-        >
-          <CtaGraphicPanel className="absolute inset-0">
-            <div className="absolute right-1 top-1/2 w-[240px] -translate-y-1/2 opacity-90 transition-opacity [mask-image:linear-gradient(to_right,transparent,black_35%)] group-hover/cta:opacity-100">
-              <CtaGraphic cta={cta} />
-            </div>
-          </CtaGraphicPanel>
-          <span className="absolute inset-y-0 left-0 w-[240px] bg-gradient-to-r from-surface-1 via-surface-1/80 to-transparent" />
-          <span className="relative flex w-[200px] flex-col gap-1 p-4">
-            <CtaTitle cta={cta} />
-            <CtaDescription cta={cta} />
-            <CtaAction cta={cta} className="mt-auto pt-1" />
-          </span>
-        </Link>
-      ))}
-    </ProductPanelShell>
-  );
-}
-
-/** 2d: AI Gateway as the large featured card, tracing as a compact card. */
-function ProductPanelFeaturedGateway() {
-  const [tracing, gateway] = productCtas;
-  return (
-    <ProductPanelShell>
-      <Link
-        href={gateway.href}
-        className="group/cta flex w-[320px] flex-1 flex-col no-underline"
-      >
-        <CtaGraphicPanel className="border-b border-line-structure px-7 py-3.5">
-          <CtaGraphic cta={gateway} />
-        </CtaGraphicPanel>
-        <span className="flex flex-1 flex-col gap-1 px-4 py-3 transition-colors group-hover/cta:bg-surface-bg">
-          <CtaTitle cta={gateway} />
-          <CtaDescription cta={gateway} />
-          <CtaAction cta={gateway} className="mt-1" />
-        </span>
-      </Link>
-      <Link
-        href={tracing.href}
-        className="group/cta flex shrink-0 items-stretch border-t border-line-structure no-underline"
-      >
-        <CtaGraphicPanel className="flex w-[150px] shrink-0 items-center border-r border-line-structure px-1.5 py-1.5">
-          <CtaGraphic cta={tracing} />
-        </CtaGraphicPanel>
-        <span className="flex flex-1 flex-col justify-center gap-1 px-4 py-2.5 transition-colors group-hover/cta:bg-surface-bg">
-          <CtaTitle cta={tracing} />
-          <CtaAction cta={tracing} />
-        </span>
-      </Link>
-    </ProductPanelShell>
-  );
-}
-
-function ProductPanel({ variant }: { variant: ProductPanelVariant }) {
-  switch (variant) {
-    case "2":
-      return <ProductPanelIcons />;
-    case "2a":
-      return <ProductPanelGraphicTop />;
-    case "2c":
-      return <ProductPanelGraphicBackground />;
-    case "2d":
-      return <ProductPanelFeaturedGateway />;
-    default:
-      return <ProductPanelGraphicSide />;
-  }
-}
-
-function useProductPanelVariant(): ProductPanelVariant {
-  const [variant, setVariant] = useState<ProductPanelVariant>(
-    DEFAULT_PRODUCT_VARIANT,
-  );
-  useEffect(() => {
-    const value = new URLSearchParams(window.location.search).get("navVariant");
-    const match = PRODUCT_VARIANTS.find((v) => v === value);
-    if (match) setVariant(match);
-  }, []);
-  return variant;
 }
 
 // ── Mega dropdown panel ────────────────────────────────────────────────────────
@@ -571,7 +424,6 @@ export function NavLinks({
   sectionNavData: SectionNavData[];
 }) {
   const [openId, setOpenId] = useState<MegaMenuId | null>(null);
-  const productVariant = useProductPanelVariant();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cancelScheduledClose = useCallback(() => {
@@ -601,7 +453,7 @@ export function NavLinks({
         <NavDropdown
           id="product"
           label="Product"
-          panel={<ProductPanel variant={productVariant} />}
+          panel={<ProductPanel />}
           openId={openId}
           setOpenId={setOpenId}
           cancelScheduledClose={cancelScheduledClose}

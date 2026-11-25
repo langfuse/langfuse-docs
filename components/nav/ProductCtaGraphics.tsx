@@ -12,20 +12,6 @@ const FONT = 10;
 const W = 240;
 const H = 100;
 
-export function CtaGraphicPanel({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={cn("overflow-hidden", styles.panel, className)}>
-      {children}
-    </div>
-  );
-}
-
 function Traffic({ d, delay }: { d: string; delay: number }) {
   return (
     <path
