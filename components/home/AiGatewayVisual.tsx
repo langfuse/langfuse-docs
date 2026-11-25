@@ -32,13 +32,13 @@ const providers: Chip[] = [
   { label: "Anthropic", x: 400, y: 0, w: 130, mark: "anthropic" },
   { label: "OpenAI", x: 400, y: 44, w: 130, mark: "openai" },
 ];
-const MARK = 16;
+const MARK = 20;
 const MARK_INSET = 10;
 // Logo strip for the providers without a named chip.
 const more = {
   x: 400,
   y: 88,
-  cell: 28,
+  cell: 32.5,
   marks: ["gemini", "aws", "azure", "openrouter"],
   label: "and more",
 } satisfies {
@@ -54,7 +54,7 @@ const gateway = { x: 190, y: 34, w: 150, h: 50 };
 const ROW_H = 22;
 const checks = [{ label: "trace", value: "1.2s $0.0031" }];
 const trace = { x: 180, y: 120, w: 170, h: ROW_H * checks.length + 8 };
-const VIEW = { x: 22, y: 44, w: 595, h: 322 };
+const VIEW = { x: 22, y: 44, w: 554, h: 322 };
 const CENTER = { x: VIEW.x + VIEW.w / 2, y: VIEW.y + VIEW.h / 2 };
 
 const gatewayMidY = gateway.y + gateway.h / 2;
@@ -259,8 +259,8 @@ export function AiGatewayVisual({ className }: { className?: string }) {
           </g>
         ))}
         <text
-          x={more.x + moreW + 10}
-          y={more.y + 20}
+          x={more.x}
+          y={more.y + CHIP_H + 18}
           className="font-mono"
           fontSize={14}
           fill="var(--text-disabled)"
