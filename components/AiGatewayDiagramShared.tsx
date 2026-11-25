@@ -94,7 +94,7 @@ function TracingCard() {
 function ProviderCard() {
   return (
     <Card title="External model provider">
-      <p className={styles.meta}>OpenAI, Anthropic</p>
+      <p className={styles.meta}>OpenAI, Anthropic, and more</p>
     </Card>
   );
 }

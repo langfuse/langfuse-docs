@@ -90,7 +90,7 @@ function Lines({
 }
 
 const ARIA_LABEL =
-  "AI Gateway overview. Coding agents and AI applications send requests to the AI gateway, which runs in Langfuse. The gateway authorizes the user with the gateway key, maps the model name and URL to a valid model provider request, calls the external model provider (OpenAI or Anthropic), and returns the response. Langfuse tracing captures the request data, with different tracing options.";
+  "AI Gateway overview. Coding agents and AI applications send requests to the AI gateway, which runs in Langfuse. The gateway authorizes the user with the gateway key, maps the model name and URL to a valid model provider request, calls the external model provider (such as OpenAI, Anthropic, or Amazon Bedrock), and returns the response. Langfuse tracing captures the request data, with different tracing options.";
 
 export function AiGatewayOverviewDiagram() {
   return (
@@ -296,7 +296,7 @@ export function AiGatewayOverviewDiagram() {
           <Lines
             x={680}
             y={245.5}
-            lines={["OpenAI,", "Anthropic"]}
+            lines={["OpenAI,", "Anthropic,", "and more"]}
             style={{ ...bodyStyle, fill: "var(--text-tertiary)" }}
           />
         </svg>
