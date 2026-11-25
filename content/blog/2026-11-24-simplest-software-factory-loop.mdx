@@ -27,7 +27,7 @@ If you boil it down, a minimal software factory for your agent needs 5 parts:
 5. **An agent that can act and verify changes:** repo access to update its written context from your replies, run tests or [experiments](/docs/evaluation/experiments/experiments-via-sdk) to validate fixes, and open PRs once you approve.
 
 <Frame fullWidth className="w-full my-8">
-  ![Loop diagram showing Langfuse traces, signals, and scores flowing into a scheduled Grok Bot guided by written instructions updated daily from feedback; human review either routes off or gray-area cases back to update written instructions or approves a fix to optionally run a Langfuse dataset experiment and open a PR that ships new production traces](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
+  ![Loop diagram showing a scheduled agent (e.g. Grok Bot) reading written instructions and Langfuse traces, signals, and scores to surface daily issues and gray areas; human review routes false alarms or judgment calls back so the agent updates written instructions, or approves a fix to optionally run a Langfuse dataset experiment and open a PR that feeds new traces back into Langfuse](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
 </Frame>
 
 ## Two things that make this loop work [#what-makes-it-work]
