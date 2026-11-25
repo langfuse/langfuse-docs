@@ -274,12 +274,13 @@ Your model provider charges separately for summarization, embeddings, and topic 
 
 Open the map picker or a run in **Settings -> History** to see **Estimated costs**, which includes topic naming when pricing is available. Check your provider's invoice for actual charges.
 
-## Access results via API [#api]
+## Access results via API, MCP, and CLI [#api]
 
-Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments for your own analyses.
+Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments. The [Langfuse CLI](/docs/api-and-data-platform/features/cli) wraps those endpoints, and the [MCP server](/docs/api-and-data-platform/features/mcp-server) exposes them as tools, including to [Halo](/docs/api-and-data-platform/features/halo). Start from the topics, then load full traces only where you need them.
 
 <Callout type="info">
-  These endpoints use the `/api/public/unstable` namespace and may change between releases.
+  These endpoints and MCP tools use the `/api/public/unstable` namespace and may
+  change between releases.
 </Callout>
 
 ## Paused processing
