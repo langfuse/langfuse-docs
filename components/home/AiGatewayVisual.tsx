@@ -49,12 +49,13 @@ const more = {
   label: string;
 };
 const moreW = more.cell * more.marks.length;
-const providerRows = [...providers.map((chip) => chip.y), more.y];
+const providerRows = [...providers, more].map(({ x, y }) => ({ x, y }));
 const gateway = { x: 190, y: 34, w: 150, h: 50 };
 const ROW_H = 22;
 const checks = [{ label: "trace", value: "1.2s $0.0031" }];
 const trace = { x: 180, y: 120, w: 170, h: ROW_H * checks.length + 8 };
-const CENTER = { x: 299, y: 205 };
+const VIEW = { x: 22, y: 44, w: 595, h: 322 };
+const CENTER = { x: VIEW.x + VIEW.w / 2, y: VIEW.y + VIEW.h / 2 };
 
 const gatewayMidY = gateway.y + gateway.h / 2;
 
@@ -141,7 +142,7 @@ export function AiGatewayVisual({ className }: { className?: string }) {
 
   return (
     <svg
-      viewBox="22 44 595 322"
+      viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`}
       className={className}
       aria-hidden="true"
       preserveAspectRatio="xMidYMid meet"
@@ -208,16 +209,16 @@ export function AiGatewayVisual({ className }: { className?: string }) {
             </g>
           );
         })}
-        {providerRows.map((rowY) => {
-          const cy = rowY + CHIP_H / 2;
+        {providerRows.map((row) => {
+          const cy = row.y + CHIP_H / 2;
           return (
-            <g key={rowY}>
+            <g key={row.y}>
               <path
-                d={`M${x1} ${gatewayMidY}H${x1 + 30}V${cy}H${more.x}`}
+                d={`M${x1} ${gatewayMidY}H${x1 + 30}V${cy}H${row.x}`}
                 fill="none"
                 stroke="var(--text-disabled)"
               />
-              <Node x={more.x} y={cy} />
+              <Node x={row.x} y={cy} />
             </g>
           );
         })}

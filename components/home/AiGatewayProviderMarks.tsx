@@ -23,7 +23,7 @@ export function ProviderMark({
   size: number;
 }) {
   const gradientId = `${useId().replace(/:/g, "")}-gemini`;
-  const box = { x, y, width: size, height: size };
+  const box = { x, y, width: size, height: size, overflow: "visible" };
   // The AWS lettering is wide and short, so it is drawn larger to read.
   const wide = size * 1.25;
   const wideBox = {
@@ -31,6 +31,7 @@ export function ProviderMark({
     y: y - (wide - size) / 2,
     width: wide,
     height: wide,
+    overflow: "visible",
   };
 
   switch (name) {
@@ -93,5 +94,9 @@ export function ProviderMark({
           <path d="M795.893 0C915.776 0 1012.95 97.9963 1012.95 218.88C1012.95 339.764 915.776 437.76 795.893 437.76L1011.2 654.869C1038.55 682.447 1019.18 729.6 980.504 729.6H361.77C161.97 729.6 0 566.273 0 364.8C0 163.327 161.97 0 361.77 0L795.893 0ZM361.77 145.92C241.89 145.92 144.708 243.916 144.708 364.8C144.708 485.684 241.89 583.68 361.77 583.68C481.649 583.68 578.831 485.684 578.831 364.8C578.831 243.916 481.649 145.92 361.77 145.92Z" />
         </svg>
       );
+    default: {
+      const unhandled: never = name;
+      return unhandled;
+    }
   }
 }
