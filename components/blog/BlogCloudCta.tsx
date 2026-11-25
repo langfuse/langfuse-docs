@@ -2,6 +2,7 @@
 
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { SignupCTA } from "@/components/SignupCTA";
 import { buttonVariants } from "@/components/ui/button";
 import { HoverCorners } from "@/components/ui/corner-box";
 import { Text } from "@/components/ui/text";
@@ -9,12 +10,26 @@ import { cn } from "@/lib/utils";
 import { usePostHogClientCapture } from "@/src/usePostHogClientCapture";
 
 type SignupSurface = "blog" | "customer_story";
+type SignupPlacement = "sidebar" | "article";
 
 type BlogCloudCtaProps = {
   /** Which page the click came from. Picks the PostHog event name. */
   surface?: SignupSurface;
   className?: string;
 };
+
+function useTrackSignUp(surface: SignupSurface, placement: SignupPlacement) {
+  const pathname = usePathname() ?? "/";
+  const capture = usePostHogClientCapture();
+  return () => {
+    const properties = { placement, path: pathname };
+    if (surface === "customer_story") {
+      capture("customer_story:sign_up_clicked", properties);
+    } else {
+      capture("blog:sign_up_clicked", properties);
+    }
+  };
+}
 
 function CtaLink({
   href,
@@ -59,16 +74,7 @@ export function BlogCloudCta({
   surface = "blog",
   className,
 }: BlogCloudCtaProps) {
-  const pathname = usePathname() ?? "/";
-  const capture = usePostHogClientCapture();
-  const trackSignUp = () => {
-    const properties = { placement: "sidebar" as const, path: pathname };
-    if (surface === "customer_story") {
-      capture("customer_story:sign_up_clicked", properties);
-    } else {
-      capture("blog:sign_up_clicked", properties);
-    }
-  };
+  const trackSignUp = useTrackSignUp(surface, "sidebar");
 
   return (
     <section
@@ -100,4 +106,16 @@ export function BlogCloudCta({
       </CtaLink>
     </section>
   );
+}
+
+/**
+ * End-of-article signup banner for blog posts and customer stories when the
+ * right sidebar is hidden. Reuses the shared SignupCTA with PostHog tracking.
+ */
+export function BlogArticleSignupCta({
+  surface = "blog",
+  className,
+}: BlogCloudCtaProps) {
+  const trackSignUp = useTrackSignUp(surface, "article");
+  return <SignupCTA className={className} onClick={trackSignUp} />;
 }
