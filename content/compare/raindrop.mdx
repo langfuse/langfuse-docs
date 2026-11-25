@@ -68,7 +68,7 @@ Raindrop's store is vendor-operated. Reads go through its Query API and MCP; dat
 
 ## Pricing [#pricing]
 
-Raindrop bills **events**. The pricing card defines one event as a user message and agent response, including tool calls and sub-agents, or one background agent run. Langfuse bills [units](/docs/administration/billable-units): one trace, one observation, or one score. A single Raindrop event can contain many Langfuse observations, so the cheaper bill depends on trace shape.
+Raindrop bills **events**. The pricing card defines one event as a user message and agent response, including tool calls and sub-agents, or one background agent run. Langfuse counts each trace, observation, score, or new [facet result](/docs/observability/features/topics#models-and-costs) as one [unit](/docs/administration/billable-units). A single Raindrop event can contain many Langfuse observations, so the cheaper bill depends on trace shape.
 
 The table and example below cover the software subscription and telemetry usage only. Model inference for judges or Triage, privacy add-ons, and export add-ons are separate on both sides.
 
@@ -87,7 +87,7 @@ Masking and PII Guard are different approaches, not the same feature at two pric
 
 ### Worked example [#worked-example]
 
-500,000 user turns/month, 10 observations per turn, 1 score per turn. Each turn is one Raindrop event; in Langfuse it is 1 trace + 10 observations + 1 score = **12 units**.
+500,000 user turns/month, 10 observations per turn, 1 score per turn, zero facet results. Each turn is one Raindrop event; in Langfuse it is 1 trace + 10 observations + 1 score = **12 units**.
 
 |                  | Base    | Usage     | **Total/month** |
 | ---------------- | ------- | --------- | --------------- |

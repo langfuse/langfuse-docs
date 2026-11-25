@@ -38,7 +38,7 @@ Topics continuously analyzes your traces, so you know sooner what to prioritize.
 
 ### See every trace through facets
 
-Topics summarizes each trace from different angles, called facets. Then it clusters every facet summary and names the clusters. There are four built-in facets (summary angles) you can choose from.
+Each **facet** asks a different question about a trace. Choose the questions you want to explore.
 
 - **Intent** is what the agent was asked to do.
 - **Sentiment** is how the user felt about the interaction.
@@ -53,7 +53,7 @@ Topics summarizes each trace from different angles, called facets. Then it clust
   gifStyle
 />
 
-Traces are clustered per facet, so a problem occurring in multiple "Intent" clusters still shows up as just one topic in "Issues". Through that information, you can then set up very targeted new evaluators to check against surfaced "Issues" for example.
+Imagine two travelers. One wants an earlier departure. The other wants to fly on Sunday instead of Friday. Their Intent **facet summaries** describe the two requests, and both can land in a **topic** called **Flight changes**. A booking tool failure could affect both flight changes and hotel reservations. The Issues facet can bring those failures together in one topic, giving you a specific problem to test for.
 
 ### Explore topics in auto-refreshing maps or one-off snapshots
 
@@ -109,17 +109,12 @@ Another topic was full of traces where Halo wrote its answer in its reasoning an
 
 ## How Topics works
 
-Every facet goes through the same four steps on the traces you select:
-
-- Summarize the transcript of a complete trace with a cost-efficient model per facet
-- Cluster similar summaries
-- Name and describe each cluster with a stronger model
-- Summarize traces as they come in and add them to clusters once per day or when you click **Refresh map**
+Once a trace goes idle, one model request can analyze all its selected facets. Topics turns each text summary into an **embedding** so it can group summaries with similar meanings within the same facet. A stronger model names and describes each cluster. Those named groups are the topics you explore on the map. Live maps refresh daily or when you click **Refresh map**.
 
 <Video
   src="https://static.langfuse.com/docs-videos/topics-pipeline.mp4?v=2"
   title="The Topics pipeline"
-  description="As traces arrive, Topics waits until a trace is finished, writes one summary per active facet and embeds each summary. Topic discovery then clusters the embeddings within each facet and names each cluster."
+  description="After a trace goes idle, Topics analyzes its active facets and embeds the summaries they produce. Topic discovery groups the embeddings within each facet and names each cluster."
   aspectRatio={16 / 9}
   controls={false}
 />
@@ -138,7 +133,7 @@ Topics is available today in public beta on [Langfuse Cloud](/cloud), in all reg
 
 Open **Topics** in your project and click **Set up topics**. Choose the facets and your models, select which traces to cover, and start analyzing. The first topics appear about five minutes after setup.
 
-Each facet summary counts as one [billable unit](/docs/administration/billable-units) in Langfuse, and your provider bills the model calls on your own key.
+On Langfuse Cloud, a trace with four new model-generated facet results adds four [billable units](/docs/observability/features/topics#models-and-costs), however many topics those results lead to. Reusing results in another map adds zero units. Your provider bills the model calls on your own key.
 
 Read the [Topics docs](/docs/observability/features/topics) for the full setup.
 

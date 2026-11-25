@@ -30,7 +30,7 @@ const faqs: FAQItem[] = [
   {
     question: "What is a billable unit?",
     answer:
-      "A billable unit in Langfuse is any tracing data point you send to our platform — this includes the trace (a complete application interaction), observations (individual steps within a trace: Spans, Events and Generations), and scores (evaluations of your AI outputs). For a detailed explanation and an example, see our [Langfuse Billable Units docs](/docs/administration/billable-units).",
+      "Each trace, observation, and score counts as one unit. Topics adds one unit for each new [facet result](/docs/observability/features/topics#models-and-costs) that Langfuse stores from a model response. For example, an Intent result and a Sentiment result for the same trace add two units. See how to [track billable units](/docs/administration/billable-units#monitor-usage).",
   },
   {
     question: "How does the graduated pricing work?",
@@ -45,7 +45,7 @@ const faqs: FAQItem[] = [
   {
     question: "How can I reduce my Langfuse Cloud bill?",
     answer:
-      "The primary way to reduce your Langfuse Cloud bill is to reduce the number of billable units that you ingest. We have summarized how this can be done [here](/faq/all/cutting-costs). Additionally, with our new graduated pricing model, you automatically get lower rates per 100k units as your volume increases.",
+      "You can reduce usage by sampling traces, filtering observations, or choosing fewer facets in Topics. See the [cost-cutting guide](/faq/all/cutting-costs) for examples. Graduated pricing also lowers the rate per 100,000 units as volume grows.",
   },
   {
     question:

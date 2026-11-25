@@ -1,21 +1,16 @@
 ---
 title: How do I cut my Langfuse Cloud bill?
-description: "Langfuse Cloud billing is based on ingested units. Practical ways to bring a bill down: sampling, trimming payloads, and picking the right plan."
+description: "Reduce Langfuse Cloud usage by filtering observations, sampling traces, and choosing which traces and facets Topics analyzes."
 tags: [platform, cloud]
 ---
 
 # How do I cut my Langfuse Cloud bill?
 
-Langfuse Cloud [pricing](/pricing) is based on the number of ingested units per billing period.
-
-`Units = Traces + Observations + Scores` ([data model](/docs/administration/billable-units))
-
-Most cost spikes result from ingesting **too many traces or overly verbose observations**.
-You can **cut costs quickly by sampling fewer traces or logging only essential data**—all while preserving your core insights.
+Langfuse Cloud [billable units](/docs/administration/billable-units) include traces, observations, scores, and facet results.
 
 Use our [pricing calculator](/pricing#pricing-calculator) to estimate how different usage levels impact your monthly costs.
 
-You can track your unit consumption in real-time via the "Langfuse Usage Management" dashboard:
+The **Langfuse Usage Management** project dashboard shows trace, observation, and score counts. To see Topics usage, select **By type** in the [organization usage breakdown](/docs/administration/billable-units#monitor-organization-usage) and look for **Facet summaries**.
 
 <Frame>
   ![Langfuse Usage Management
@@ -40,6 +35,10 @@ Keeping all traces is often valuable for LLM application development. Unlike tra
 - Retaining all traces supports model distillation efforts down the line.
 
 However, if your application operates at significant scale, sampling can be a reasonable cost-cutting strategy. Check out the [sampling docs](/docs/tracing-features/sampling) to learn more.
+
+## Option 3: Analyze fewer traces or facets with Topics
+
+If Topics accounts for a large share of usage, narrow the map's trace filter, lower its sampling rate, or select fewer facets. Each new [model-generated facet result](/docs/observability/features/topics#models-and-costs) that Langfuse stores counts as one unit.
 
 ## Get notified before costs spike
 

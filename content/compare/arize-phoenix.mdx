@@ -21,7 +21,7 @@ Arize is part of Dynatrace following the [acquisition completed on October 1, 20
 
 - **One open product.** Langfuse is [one MIT-licensed product](#open-source-and-distribution), identical on Cloud, self-hosted, and air-gapped. Arize splits this in two: Phoenix (source-available, Elastic License 2.0) and the proprietary AX platform. Their own guidance puts the most sensitive workloads on Phoenix, not AX.
 - **A battle-tested data plane.** Langfuse runs on ClickHouse, [open source and in production for a decade](#history-and-data-plane) with 2,000+ contributors, and self-hosters query it in SQL. AX Cloud stores traces in adb, a closed database that first shipped in June 2025. Phoenix stays on SQLite or Postgres, which [Arize's own docs say to outgrow by moving to AX](#history-and-data-plane).
-- **~6.5x cheaper, with 3 years of history.** At 500k traces/month, Langfuse Pro is $621 where [AX Pro is $4,055 with 30-day retention](#worked-example), because AX meters spans plus ingested GB. Langfuse meters one unit (a trace, observation, or score) with no seat fees.
+- **~6.5x cheaper, with 3 years of history.** At 500k traces/month, Langfuse Pro is $621 where [AX Pro is $4,055 with 30-day retention](#worked-example), because AX meters spans plus ingested GB. Langfuse charges for [usage](/docs/administration/billable-units) with no seat fees.
 - **The full eval loop on every plan.** [Code evaluators and CI gates](#evaluation-and-experiments) run on all Langfuse plans and self-hosted. AX gates custom code evaluators behind Enterprise.
 - **Same-day switch.** Existing OpenInference instrumentation [keeps working over OTLP](#switching-from-arize); most teams see first traces in Langfuse the same day.
 
@@ -87,11 +87,11 @@ The [Arize pricing page](https://arize.com/pricing/) lists **15 days** of retent
   see where the costs cross over.
 </Callout>
 
-Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a trace, an observation, or a score, with no seat fees. Arize AX bills on two meters: span volume and ingested GB. On AX Pro, spans beyond the included 50,000 cost **$0.0008 each** and ingestion beyond 10 GB costs **$3/GB**, shown as tooltips on the [Arize pricing page](https://arize.com/pricing/) when checked in October 2026. Phoenix self-hosted has no platform usage fee; you run the infrastructure.
+Langfuse counts each trace, observation, score, or new [facet result](/docs/observability/features/topics#models-and-costs) as one [unit](/docs/administration/billable-units). Langfuse charges no seat fees. Arize AX bills on two meters: span volume and ingested GB. On AX Pro, spans beyond the included 50,000 cost **$0.0008 each** and ingestion beyond 10 GB costs **$3/GB**, shown as tooltips on the [Arize pricing page](https://arize.com/pricing/) when checked in October 2026. Phoenix self-hosted has no platform usage fee; you run the infrastructure.
 
 |            | Langfuse                                                             | Arize AX                                                        |
 | ---------- | -------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Meter      | One unit = trace, observation, or score                              | Two meters: spans + ingested GB                                 |
+| Meter      | One unit per trace, observation, score, or new facet result          | Two meters: spans + ingested GB                                 |
 | Free tier  | 50,000 units/month, 2 users, 30 days                                 | 25,000 spans/month, 1 GB, 15 days                               |
 | Paid entry | **Core $29/month** (100,000 units, unlimited users)                  | **Pro $50/month** (50,000 spans, 10 GB)                         |
 | Usage rate | $8/100k units after the included 100k, graduating to $6/100k at 50M+ | $0.0008 per additional span; $3 per additional GB (Pro)         |
@@ -101,7 +101,7 @@ Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a
 
 ### Worked example [#worked-example]
 
-500,000 traces/month, 10 spans (observations) per trace, 1 score per trace, 5 KB average span size, 5 users.
+500,000 traces/month, 10 spans (observations) per trace, 1 score per trace, 5 KB average span size, 5 users, zero facet results.
 
 |                                     | Base    | Usage     | Retention                      | **Total/month** |
 | ----------------------------------- | ------- | --------- | ------------------------------ | --------------- |
@@ -110,7 +110,7 @@ Langfuse Cloud bills [units](/docs/administration/billable-units): one unit is a
 
 Public list prices:
 
-- **Langfuse Pro:** 6,000,000 units (traces + observations + scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included.
+- **Langfuse Pro:** 6,000,000 units (500,000 traces + 5,000,000 observations + 500,000 scores), 100k included → $199 base + $72 (100k–1M at $8/100k) + $350 (1M–6M at $7/100k) = **$621**, 3-year history included.
 - **Arize AX Pro:** 5,000,000 spans and 25 GB → $50 base + $3,960 (4,950,000 spans beyond the included 50k, at $0.0008) + $45 (15 GB beyond the included 10, at $3/GB) = **$4,055**. Arize does not publish a price for retention beyond 30 days, so none is included.
 
 Different volumes? The [editable sheet](/pricing-comparison-sheet) reproduces this math from your inputs.

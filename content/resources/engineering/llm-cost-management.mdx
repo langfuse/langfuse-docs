@@ -199,8 +199,7 @@ needs:
 2. **Hard budgets and rate limits.** Enforcement belongs in the request path, which is a
    gateway job: per-team budgets and key-level rate limits stop runaway spend rather than
    reporting it. Observability tells you what to set the limits to.
-3. **Controls on the observability bill itself.** Langfuse Cloud pricing is unit-based
-   (traces + observations + scores), so [sampling](/docs/observability/features/sampling)
+3. **Controls on the observability bill itself.** Langfuse Cloud counts traces, observations, scores, and [facet results](/docs/observability/features/topics#models-and-costs), so [sampling](/docs/observability/features/sampling)
    and span filtering reduce that bill directly, and
    [spend alerts](/docs/administration/spend-alerts) notify org admins when the Langfuse
    Cloud bill itself crosses a threshold. Note the distinction: spend alerts cover what you

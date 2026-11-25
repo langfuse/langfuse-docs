@@ -18,9 +18,9 @@ Topics groups similar traces into clusters to easily discover patterns in your t
   controls={false}
 />
 
-## How Topics works and what it is [#how-it-works]
+## How Topics works [#how-it-works]
 
-A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
+A **facet** is a question about a trace. Choose the facets you want Topics to analyze.
 
 | Facet     | Question                                         |
 | --------- | ------------------------------------------------ |
@@ -28,6 +28,10 @@ A **facet** is a question you want to answer about each trace. Topics summarizes
 | Sentiment | How does the user feel about the interaction?    |
 | Outcome   | What was delivered, and is the result confirmed? |
 | Issues    | What problems affected the final result?         |
+
+Suppose a traveler asks to move a Friday flight to Sunday and the agent confirms the change. Topics records a **facet result** for each question the model answers. For Intent, the result includes a **facet summary**, a short description such as “Move a flight from Friday to Sunday.” For Issues, the model can return `not_applicable` because the change succeeded without a problem.
+
+Topics turns each text summary into an **embedding**, a list of numbers that represents its meaning. Within each facet, Topics uses these embeddings to group similar summaries into **clusters**. A **topic** is a cluster with a name and description. On the trace, a **topic assignment** such as **Intent → Flight changes** tells you which group the trace belongs to in that map.
 
 <Details id="facet-prompts">
 <Summary>View default facet prompts</Summary>
@@ -268,7 +272,9 @@ Treat topics as starting points for investigation. Similar conversations can hav
 
 ## Models and costs [#models-and-costs]
 
-Langfuse Cloud counts each new facet summary as one [billable unit](/docs/administration/billable-units). A trace summarized for four facets counts as four units. Reusing those summaries in another map or snapshot adds no further summary and thus no further billable units.
+Langfuse Cloud counts one [billable unit](/docs/administration/billable-units) for each new facet result the model returns and Langfuse stores. In the flight example, analyzing Intent and Issues adds **two units**, even if only Intent gets a topic assignment. The Issues result counts when the model finds no issue (`not_applicable`) or too little evidence to decide (`insufficient_input`).
+
+Skipping analysis because the transcript is empty or too large adds zero units. Reusing stored results in another map or snapshot and regrouping them into topics also add zero units.
 
 Your model provider charges separately for summarization, embeddings, and topic naming. During setup, **Estimate cost** forecasts summary and embedding costs for the traces you select. Narrower filters and a lower sampling rate reduce how many new traces you summarize.
 
@@ -276,7 +282,7 @@ Open the map picker or a run in **Settings -> History** to see **Estimated costs
 
 ## Access results via API [#api]
 
-Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments for your own analyses.
+Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, facet results, and assignments. In a result from `/api/public/unstable/topic-summaries`, `state` gives the status and `summary` contains text when the state is `complete`.
 
 <Callout type="info">
   These endpoints use the `/api/public/unstable` namespace and may change between releases.

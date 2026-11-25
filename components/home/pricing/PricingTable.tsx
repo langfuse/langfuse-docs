@@ -454,7 +454,7 @@ const sections: Section[] = [
       {
         name: "Included usage",
         description:
-          "Billable units are the collection of created traces, observations, and scores in Langfuse.",
+          "Each trace, observation, score, or new facet result counts as one unit.",
         href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
@@ -473,7 +473,7 @@ const sections: Section[] = [
       {
         name: "Additional usage",
         description:
-          "Billable units are the collection of created traces, observations, and scores in Langfuse. Pricing follows graduated tiers with lower rates at higher volumes.",
+          "Each trace, observation, score, or new facet result counts as one unit. Pricing follows graduated tiers with lower rates at higher volumes.",
         href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
