@@ -143,7 +143,7 @@ Passing runs can still hide severe friction, because strong frontier models ofte
   In our own CLI skill iterations, tracking CLI error rate caught a 25% hallucinated-flag rate and a `No server URL found` retry loop hitting 90% of runs. Both were fixed with two-line edits to `SKILL.md`.
 </Callout>
 
-**Workaround rate:** Track when the agent abandons the skill's recommended path (for example, dropping from your CLI to raw `curl`, or falling back to web search because a reference file lacked an example).
+**Workaround rate:** Track when the agent abandons the skill's recommended path (for example, dropping from your CLI to raw `curl`, or falling back to web search).
 
 **Token cost, turns, and wall-clock time (passing runs only):** Separate successful runs from failed ones—failed runs often look cheap because the agent gave up early. If tokens rise on passing runs without a matching lift in pass rate, the skill is adding noise.
 
