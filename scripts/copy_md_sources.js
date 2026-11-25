@@ -13,6 +13,7 @@ const {
 } = require("../lib/markdown-component-renderers.js");
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 const { hasResourceSignupCta } = require("../lib/resource-signup-cta.js");
+const { hasGatewaySignupFooter } = require("../lib/gateway-update-signup.js");
 const {
   injectIntegrationSignupCta,
 } = require("../lib/integration-signup-cta.js");
@@ -32,6 +33,11 @@ const SELF_HOSTING_FOOTER_PATH = path.join(
   process.cwd(),
   "components-mdx",
   "self-host-help-footer.mdx",
+);
+const GATEWAY_SIGNUP_FOOTER_PATH = path.join(
+  process.cwd(),
+  "components-mdx",
+  "gateway-update-signup.mdx",
 );
 
 // Directories whose .md output is historical changelog content. Agents fetch
@@ -206,8 +212,13 @@ function copyAll() {
     const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
     const isSelfHostingPage =
       destRel === "self-hosting.md" || destRel.startsWith("self-hosting/");
-    const contentWithSharedFooter = isSelfHostingPage
-      ? `${originalContent}\n\n${fs.readFileSync(SELF_HOSTING_FOOTER_PATH, "utf8")}`
+    const sharedFooterPath = isSelfHostingPage
+      ? SELF_HOSTING_FOOTER_PATH
+      : hasGatewaySignupFooter(`/${destRel.replace(/\.md$/, "")}`)
+        ? GATEWAY_SIGNUP_FOOTER_PATH
+        : null;
+    const contentWithSharedFooter = sharedFooterPath
+      ? `${originalContent}\n\n${fs.readFileSync(sharedFooterPath, "utf8")}`
       : originalContent;
     const inlined = replaceComponentsWithMarkdown(
       inlineComponentsMdx(contentWithSharedFooter, file),
