@@ -15,7 +15,7 @@ On Langfuse Cloud, use the [pricing calculator](/pricing#pricing-calculator) to 
 
 ## Monitor usage [#monitor-usage]
 
-The organization view shows all four unit types across projects. The project dashboard shows trace, observation, and score counts. Both views are available on Langfuse Cloud and self-hosted deployments.
+The organization usage breakdown shows all four unit types across projects. Use the project dashboard to inspect a single project's counts for a selected date range. Both views are available on Langfuse Cloud and self-hosted deployments.
 
 Start with the organization overview when investigating a usage increase, then open the relevant project's dashboard for more detail. If you already know which project to inspect, go directly to its dashboard.
 
@@ -46,17 +46,15 @@ In **Organization Settings**, open the page for your deployment. Its **Usage bre
 
 Open a project you have access to, go to **Dashboards**, and select **Langfuse Usage Management**, one of Langfuse's [curated dashboards](/docs/metrics/features/custom-dashboards). This view counts units for that project only.
 
-To estimate a month of usage, select the last 30 days and add **Total Trace Count**, **Total Observation Count**, and **Total Score Count** (including both numeric and categorical score widgets).
+To estimate monthly usage, select the last 30 days. Add **Total Trace Count**, **Total Observation Count**, and the **Total Score Count** widgets for numeric and categorical scores. If your dashboard shows **Facet results**, add that number too. It shows how many units [Topics analysis](/docs/observability/features/topics#models-and-costs) contributed to this project during the selected period.
 
-If the project uses Topics, its total also includes **facet results**. To get all four counts in one place, download the [organization usage breakdown](#monitor-organization-usage) as a CSV for the same period, filter to the project, and sum the `units` column.
+If the project uses Topics and the dashboard does not yet show **Facet results**, download the [organization usage breakdown](#monitor-organization-usage) as a CSV for the same period. Filter to the project and sum the `units` column across all four types to get the complete project total.
 
 <Frame>
   ![Langfuse Usage Management dashboard showing total trace, observation, and score counts](/images/docs/self-hosted-usage-management-dashboard.png)
 </Frame>
 
-For example, a project with zero Topics usage would count the following units:
-
-`Units` = `20,070 Traces` + `119,500 Observations` + `561 Scores` = `140,131 units / month` (≈ `1,681,572 units / year`)
+For example, a project with 20,070 traces, 119,500 observations, 561 scores, and 2,000 facet results used **142,131 billable units** in those 30 days.
 
 </Steps>
 
