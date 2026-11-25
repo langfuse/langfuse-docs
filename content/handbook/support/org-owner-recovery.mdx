@@ -30,7 +30,8 @@ All of the following must be true before we continue:
 - The organization is on Langfuse Cloud. Self-hosted deployments control their own database and can change roles themselves.
 - The organization has no other owner. If it does, that owner can change roles under **Organization Settings → Members**.
 - The requester is already a member of the organization. We only promote existing members, never a new email address.
-- The departed owner's email and the requester's email are on the same company domain. If the owner signed up with a personal address (for example Gmail), only [the fallback](#fallback) applies.
+- The departed owner's email and the requester's email are on the same company domain. If the owner signed up with a personal address (for example Gmail), we cannot verify that the requester speaks for the organization and do not transfer ownership. In that case, [move to a new organization](#new-organization).
+- Roles are not synced from an identity provider. If your organization provisions users through [SCIM](/docs/administration/scim-and-org-api), set the `Owner` role in your identity provider instead, because it overwrites a role we change by hand.
 
 We do not share details about an organization, such as who its members are, with someone who is not a member.
 
@@ -57,10 +58,10 @@ If your company controls the mailbox but cannot log in, we send a one-time code 
 
 This path applies only if your company cannot receive email at the owner's address. It requires both of the following, plus the notification and 24-hour wait from the last step:
 
-- **Domain control**: you add a DNS TXT record with a value we provide to the email domain of the requester.
+- **Domain control**: you add a DNS TXT record with a value we provide to the email domain of the departed owner.
 - **Authority over the account**: billing details that match our records (a recent invoice number and the last four digits of the card).
 
-If both cannot be provided, for example because the organization has no paid plan or uses a personal email domain, we do not transfer ownership. In that case, [move to a new organization](#new-organization).
+If both cannot be provided, for example because the organization has no paid plan, we do not transfer ownership. In that case, [move to a new organization](#new-organization).
 
 ## Moving to a new organization [#new-organization]
 
