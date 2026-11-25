@@ -1,6 +1,6 @@
 ---
 title: Topics
-description: Continously surface topics in your traces to understand which traces matter most.
+description: Continuously surface topics in your traces to understand which traces matter most.
 ---
 
 import { Steps, Step } from "@/components/docs";
@@ -18,7 +18,7 @@ Topics groups similar traces into clusters to easily discover patterns in your t
   controls={false}
 />
 
-## How Topics works and what it is [#how-it-works]
+## How Topics works [#how-it-works]
 
 A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
 
@@ -212,7 +212,7 @@ Add an [LLM connection](/docs/administration/llm-connection) under **Settings > 
 
 ### Select your traces
 
-Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate, as to not loose topics. Consider costs.
+Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate so you do not lose topics. Consider costs.
 
 <Callout type="info">
   Topics needs recorded model conversations on `GENERATION` observations. Therefore,
@@ -248,7 +248,7 @@ Snapshots also reuse existing summaries and summarize more traces if required. C
 
 <Callout type="info">
   A snapshot needs at least 10 applicable summarized traces per selected facet.
-  Small samples can produce broad topics. We recommend at least more than 150 traces
+  Small samples can produce broad topics. We recommend at least 150 traces
   to see meaningful clusters.
 </Callout>
 
@@ -274,12 +274,13 @@ Your model provider charges separately for summarization, embeddings, and topic 
 
 Open the map picker or a run in **Settings -> History** to see **Estimated costs**, which includes topic naming when pricing is available. Check your provider's invoice for actual charges.
 
-## Access results via API [#api]
+## Access results via API, MCP, and CLI [#api]
 
-Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments for your own analyses.
+Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments. The [Langfuse CLI](/docs/api-and-data-platform/features/cli) wraps those endpoints, and the [MCP server](/docs/api-and-data-platform/features/mcp-server) exposes them as tools, including to [Halo](/docs/api-and-data-platform/features/halo). Start from the topics, then load full traces only where you need them.
 
 <Callout type="info">
-  These endpoints use the `/api/public/unstable` namespace and may change between releases.
+  These endpoints and MCP tools use the `/api/public/unstable` namespace and may
+  change between releases.
 </Callout>
 
 ## Paused processing
