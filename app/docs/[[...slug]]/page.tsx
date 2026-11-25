@@ -13,10 +13,13 @@ export default async function DocPage({ params }: PageProps) {
   const { slug = [] } = await params;
   const page = source.getPage(slug);
   if (!page) notFound();
+  // The gateway overview embeds the signup below its beta callout instead.
+  const showGatewaySignup =
+    slug[0] === "gateway" && slug.join("/") !== "gateway/overview";
   return (
     <DocsChromePage
       page={page}
-      bottomSuffix={slug[0] === "gateway" ? <GatewayUpdateSignup /> : undefined}
+      bottomSuffix={showGatewaySignup ? <GatewayUpdateSignup /> : undefined}
     />
   );
 }
