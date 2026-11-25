@@ -147,6 +147,10 @@ Passing runs can still hide severe friction, because strong frontier models ofte
 
 **Token cost, turns, and wall-clock time (passing runs only):** for these metrics it's important to make a distinction between successful vs. failed runs (failed runs often look cheap because the agent gave up early). If tokens increase on passing runs without improving quality metrics, the skill is adding noise.
 
+<Callout type="info">
+  **In production, also track the cost of misrouted skills.** When an agent loads the wrong skill or misses a needed one, the extra tokens, latency, and degraded outcomes add up quickly and show which routing failures are worth fixing first.
+</Callout>
+
 ## How to sequence this without Goodharting yourself [#how-to-sequence-this]
 
 Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite on day one—or worse, optimize against a flawed metric.
@@ -157,7 +161,3 @@ As covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-eva
 2. **Add routing evals first.** Everything else is noise if the skill never gets loaded.
 3. **Layer in outcome and trajectory evals.** These should be heavily inspired by the outcome of your error analysis.
 4. **Re-run your `no-skill` baseline when models upgrade.** Newer models absorb older skills, so you know what to drop.
-
-> **TODO (draft notes — remove before publishing):**
->
-> - **Production monitoring idea for later in the post:** Track in production what the cost is of wrongly routing skills (extra tokens, latency, or degraded outcomes when the agent picks the wrong skill or misses a needed one).
