@@ -62,7 +62,7 @@ We use the following properties per entity to decide whether they are outside th
 - **Scores**: `timestamp`
 - **Media Assets**: `created_at`
 
-Langfuse cannot restore traces or other data deleted by the retention policy. If you exported the data before deletion, you can still access your exported copy. To preserve data beyond the retention window, set up a [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to regularly sync data to your own storage.
+Deleted assets cannot be recovered. If you need to preserve data beyond the retention window, you can set up a [Blob Storage Export](/docs/api-and-data-platform/features/export-to-blob-storage) to automatically sync traces, observations, and scores to S3, GCS, or Azure on a recurring schedule.
 
 ## What does project retention delete? [#retention-scope]
 
