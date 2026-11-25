@@ -6,7 +6,10 @@ import { getBlogTagCounts } from "@/lib/blog-index";
 import { getMDXComponents } from "@/mdx-components";
 import { ContentColumns } from "@/components/layout";
 import { BlogPostSidebar } from "@/components/blog/BlogPostSidebar";
-import { BlogCloudCta } from "@/components/blog/BlogCloudCta";
+import {
+  BlogArticleSignupCta,
+  BlogCloudCta,
+} from "@/components/blog/BlogCloudCta";
 import { HomeAside } from "@/components/home/layout/HomeAside";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
@@ -50,7 +53,7 @@ export default async function BlogPostPage(props: PageProps) {
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
         </MainContentWrapper>
-        <BlogCloudCta layout="row" className="my-10 wide:hidden" />
+        <BlogArticleSignupCta className="my-10 wide:hidden" />
         <PageFooterNav items={footerItems} className="mt-10" />
       </div>
     </ContentColumns>

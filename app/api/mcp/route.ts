@@ -41,7 +41,13 @@ async function limitRequestBody(request: Request): Promise<Request | Response> {
   const headers = new Headers(request.headers);
   headers.set("content-length", String(size));
   headers.delete("transfer-encoding");
-  return new Request(request, { headers, body: body.slice(0, size) });
+  // Next.js passes route handlers a Proxy around the request, which
+  // `new Request(request)` cannot read, so rebuild it from its parts.
+  return new Request(request.url, {
+    method: request.method,
+    headers,
+    body: body.slice(0, size),
+  });
 }
 
 export async function GET(request: NextRequest) {

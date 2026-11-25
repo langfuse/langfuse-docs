@@ -5,7 +5,10 @@ import { loadPage, buildSectionMetadata } from "@/lib/mdx-page";
 import { getMDXComponents } from "@/mdx-components";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
-import { BlogCloudCta } from "@/components/blog/BlogCloudCta";
+import {
+  BlogArticleSignupCta,
+  BlogCloudCta,
+} from "@/components/blog/BlogCloudCta";
 import { HomeAside } from "@/components/home/layout/HomeAside";
 import { ContentColumns } from "@/components/layout";
 
@@ -32,9 +35,8 @@ export default async function UserStoryPage(props: PageProps) {
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
         </MainContentWrapper>
-        <BlogCloudCta
+        <BlogArticleSignupCta
           surface="customer_story"
-          layout="row"
           className="my-10 wide:hidden"
         />
       </div>
