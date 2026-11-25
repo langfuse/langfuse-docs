@@ -16,6 +16,11 @@
     opacity: 0.55;
     animation: nav-cta-traffic 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
+
+  /* The nav keeps closed dropdown panels mounted; don't animate them. */
+  :global(div[aria-hidden="true"]) .pulse {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes nav-cta-traffic {
