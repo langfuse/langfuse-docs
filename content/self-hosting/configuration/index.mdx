@@ -181,15 +181,6 @@ Halo is available from `>=v4.28.0`. It stays hidden until `LANGFUSE_IN_APP_AGENT
 
 </div>
 
-## Skills [#skills]
-
-Skill Management is available from `>=v4.73.0`. Optional per-version limits default to the [Skill Management limits](/docs/skill-management/overview#limits). Set these on the web container. See [Skills](/self-hosting/configuration/skills).
-
-| Variable                   | Required / Default | Description                                                                                                              |
-| -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `LANGFUSE_SKILL_MAX_BYTES` | `1_000_000`        | Maximum total UTF-8 text per skill version, in bytes. Requests are capped at 4.5 MB, so keep this below about 4,000,000. |
-| `LANGFUSE_SKILL_MAX_FILES` | `200`              | Maximum files per skill version, including the root `SKILL.md`.                                                          |
-
 ## AI Gateway [#ai-gateway]
 
 The AI Gateway (beta) runs as a separate container deployed with the [Helm chart](/self-hosting/deployment/kubernetes-helm#ai-gateway) or the [Docker Compose setup](/self-hosting/deployment/docker-compose#ai-gateway) and requires additional configuration. See the [AI Gateway configuration reference](/self-hosting/configuration/ai-gateway#configuration) for details.
