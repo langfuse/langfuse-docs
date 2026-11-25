@@ -144,6 +144,12 @@ To use an LLM-as-a-Judge evaluator for batch evaluation, enable the [Langfuse v4
 
 The resulting scores are attached to the matching observations in each selected trace.
 
+Batch evaluation only includes observations within your organization's plan data-access window, for example on the Hobby or Core plan. Langfuse enforces this on the server, so older observations are excluded even if your filters match them.
+
+The execution traces and scores that a batch evaluation run produces carry the batch action ID as `batch_action_id` in their metadata. Filter on `batch_action_id` to find all outputs of a single run together.
+
+AI agents can start a batch evaluation with the `runBatchEvaluation` tool of the [MCP server](/docs/api-and-data-platform/features/mcp-server#run-batch-evaluations).
+
 ## Experiments [#experiments]
 
 An experiment runs your application against a dataset and evaluates the outputs. This is how you test changes before deploying to production.
