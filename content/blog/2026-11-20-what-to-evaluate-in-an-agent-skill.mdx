@@ -65,9 +65,9 @@ To test this, create a dataset where each item pairs a prompt and environment se
 
 ### 1. Skill-level triggering and coexistence
 
-Before testing anything else, test whether the agent is loading the skill you'd expect at all. Skill-level trigger eval sets test whether the frontmatter of the skill is clear enough for the agent to load your skill when it should, and leave it alone when it shouldn't.
+Skill-level trigger eval sets test whether the frontmatter of the skill is clear enough for the agent to load your skill when it should, and leave it alone when it shouldn't.
 
-**This gets harder (and more important) as your skill library grows:** every new skill competes in the same routing decision, so adding one can silently pull triggers away from existing skills. Treating skill-level triggering as a regression suite gives you a fast signal to iterate your frontmatter against, both when tuning a single skill and when adding new ones alongside it.
+**This gets harder (and more important) as your skill library grows:** every new skill competes in the same routing decision, so adding one can silently pull attention away from existing skills. Treating skill-level triggering as a regression suite gives you a fast signal to iterate your frontmatter against, both when tuning a single skill and when adding new ones alongside it.
 
 <p className="bg-surface-cta-primary px-2 py-1 italic text-text-primary">TODO: add a graph showing how adding a new skill can break routing to an existing skill</p>
 
