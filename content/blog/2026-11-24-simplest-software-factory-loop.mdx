@@ -168,6 +168,8 @@ Here is how the dataset loop works in practice:
 2. **Edit the expected output as your taste evolves.** Each dataset item holds the input plus the expected output or behavior. When a trace went wrong, edit the expected output to show what the agent should have done instead. When your product or bar changes later, update or prune items so the dataset stays aligned with what "good" means today.
 3. **Run an experiment before opening a PR.** Once you have a small set of cases you never want to break, update `docs/agent-quality.md` so the bot runs your [experiment script](/docs/evaluation/experiments/experiments-via-sdk) against the dataset before opening a PR (or run it in [CI](/docs/evaluation/experiments/experiments-ci-cd)) and attaches the before/after [score comparison](/docs/evaluation/experiments/compare-experiments) in the PR description.
 
+If you want to learn more about building out eval datasets, check out [Langfuse Academy](/academy/datasets).
+
 <Frame fullWidth className="w-full my-8">
   ![Comparing baseline vs. candidate experiment runs side by side in Langfuse](/images/docs/experiment-comparison-peek-view.png)
 </Frame>
