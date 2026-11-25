@@ -1,7 +1,7 @@
 ---
 title: 'Build a simple "software factory" loop for your agent'
 date: 2026/11/24
-description: "Software factory setups can seem complex. Here is a smaller, high-ROI version: an agent improver built on Grok Bot and your Langfuse traces that checks production daily, calibrates taste on gray areas, and turns your feedback into PRs."
+description: "Software factory setups can seem complex. Here is a smaller, high-ROI version: a scheduled coding agent wired to your Langfuse traces that checks production daily, calibrates taste on gray areas, and turns your feedback into PRs."
 tag: agents, guide
 author: Annabell
 ---
@@ -11,12 +11,12 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 <BlogHeader
   title='Build a simple "software factory" loop for your agent'
-  description="Software factory setups can seem complex. Here is a smaller, high-ROI version: an agent improver built on Grok Bot and your Langfuse traces that checks production daily, calibrates taste on gray areas, and turns your feedback into PRs."
+  description="Software factory setups can seem complex. Here is a smaller, high-ROI version: a scheduled coding agent wired to your Langfuse traces that checks production daily, calibrates taste on gray areas, and turns your feedback into PRs."
   date="November 24, 2026"
   authors={["annabellschafer"]}
 />
 
-Most "software factory" setups aim for fully autonomous feature delivery. A smaller, high-ROI starting point is an **agent improver**: a scheduled coding agent like [Grok Bot](https://x.ai/news/grok-bot-1-0) connected to your Langfuse traces that sweeps production daily, calibrates taste on gray areas, and turns approved fixes into PRs.
+Most "software factory" setups aim for fully autonomous feature delivery. A smaller, high-ROI starting point is an **agent improver**: a scheduled coding agent connected to your Langfuse traces that sweeps production daily, calibrates taste on gray areas, and turns approved fixes into PRs.
 
 If you boil it down, a minimal software factory for your agent needs 5 parts:
 
@@ -45,10 +45,10 @@ In a lightweight version, you can do error analysis over time instead, and figur
 - **False alarm?** You tell it why. It updates its written instructions so it doesn't flag the same thing tomorrow.
 - **Real issue?** You greenlight the fix and it opens a PR.
 
-Your taste compounds into written instructions automatically, one 2-minute review a day.
+Over time, those short daily replies turn your judgment into written instructions without needing a big upfront pass.
 
 <Callout type="info">
-  **Bonus:** You can also tell Grok Bot to add your feedback back as [scores](/docs/evaluation/scores/overview#score-types) (including free-text scores) on those Langfuse traces, so you collect those inputs over time instead of leaving them in chat.
+  **Bonus:** You can also tell the bot to add your feedback back as [scores](/docs/evaluation/scores/overview#score-types) (including free-text scores) on those Langfuse traces, so you collect those inputs over time instead of leaving them in chat.
 </Callout>
 
 ### 2. The richer your traces, the simpler your bot can stay [#richer-traces-simpler-bot]
@@ -67,7 +67,7 @@ The more your traces are enriched, the less guessing the bot has to do:
 
 You don't need a heavier bot to get better PRs. Just richer traces.
 
-## How to wire this up in 10 minutes (Langfuse + Grok Bot) [#setup]
+## How to wire this up with Langfuse and Grok Bot [#setup]
 
 This pattern works with any observability tool and scheduled coding agent. Here is the minimal setup using Langfuse and [Grok Bot](https://x.ai/news/grok-bot-1-0):
 
