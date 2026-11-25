@@ -1,6 +1,6 @@
 ---
 title: Topics
-description: Continously surface topics in your traces to understand which traces matter most.
+description: Continuously surface topics in your traces to understand which traces matter most.
 ---
 
 import { Steps, Step } from "@/components/docs";
@@ -18,7 +18,7 @@ Topics groups similar traces into clusters to easily discover patterns in your t
   controls={false}
 />
 
-## How Topics works and what it is [#how-it-works]
+## Facets [#how-it-works]
 
 A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
 
@@ -197,9 +197,9 @@ The project setup is the same on Langfuse Cloud and self-hosted deployments. Sel
 
 Add an [LLM connection](/docs/administration/llm-connection) under **Settings > LLM Connections**, or use an existing project or inherited organization connection. Open [Topics](https://cloud.langfuse.com/project/~/topics), choose **Set up topics**, then select your facets and models:
 
-- **Summaries**: a fast, cost-efficient text model that analyzes each trace. Think OpenAI Luna or Anthropic Haiku.
+- **Summaries**: a fast, cost-efficient text model that analyzes each trace.
 - **Embeddings**: encodes the trace summaries. Choose a small and fast model here. You should not change this later, as you would have to regenerate all summaries + embeddings.
-- **Grouping**: a stronger model can produce clearer topic names. Think OpenAI Terra/Sol or Anthropic Sonnet.
+- **Grouping**: a stronger model can produce clearer topic names.
 
 <Callout type="info">
   Members, Admins, and Owners can configure Topics; Viewers can explore results.
@@ -212,7 +212,7 @@ Add an [LLM connection](/docs/administration/llm-connection) under **Settings > 
 
 ### Select your traces
 
-Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate, as to not loose topics. Consider costs.
+Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate so you do not lose topics. Consider costs.
 
 <Callout type="info">
   Topics needs recorded model conversations on `GENERATION` observations. Therefore,
@@ -248,7 +248,7 @@ Snapshots also reuse existing summaries and summarize more traces if required. C
 
 <Callout type="info">
   A snapshot needs at least 10 applicable summarized traces per selected facet.
-  Small samples can produce broad topics. We recommend at least more than 150 traces
+  Small samples can produce broad topics. We recommend at least 150 traces
   to see meaningful clusters.
 </Callout>
 
