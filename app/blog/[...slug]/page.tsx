@@ -11,6 +11,7 @@ import { HomeAside } from "@/components/home/layout/HomeAside";
 import { DocBodyChrome } from "@/components/DocBodyChrome";
 import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { PageFooterNav } from "@/components/PageFooterNav";
+import { SignupCTA } from "@/components/SignupCTA";
 import { getPageFooterItems } from "@/lib/page-footer-nav";
 
 type PageProps = {
@@ -50,7 +51,7 @@ export default async function BlogPostPage(props: PageProps) {
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
         </MainContentWrapper>
-        <BlogCloudCta layout="row" className="my-10 wide:hidden" />
+        <SignupCTA className="my-10 wide:hidden" />
         <PageFooterNav items={footerItems} className="mt-10" />
       </div>
     </ContentColumns>

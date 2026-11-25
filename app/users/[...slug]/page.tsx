@@ -8,6 +8,7 @@ import { MainContentWrapper } from "@/components/MainContentWrapper";
 import { BlogCloudCta } from "@/components/blog/BlogCloudCta";
 import { HomeAside } from "@/components/home/layout/HomeAside";
 import { ContentColumns } from "@/components/layout";
+import { SignupCTA } from "@/components/SignupCTA";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -32,11 +33,7 @@ export default async function UserStoryPage(props: PageProps) {
             <MDX components={getMDXComponents()} />
           </DocBodyChrome>
         </MainContentWrapper>
-        <BlogCloudCta
-          surface="customer_story"
-          layout="row"
-          className="my-10 wide:hidden"
-        />
+        <SignupCTA className="my-10 wide:hidden" />
       </div>
     </ContentColumns>
   );
