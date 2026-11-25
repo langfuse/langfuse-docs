@@ -13,6 +13,7 @@ import remarkGfm from "remark-gfm";
 import { remarkMdxMermaid } from "fumadocs-core/mdx-plugins";
 import { remarkCodeFilename } from "./lib/remark-code-filename.mjs";
 import { remarkHideStepsFromToc } from "./lib/remark-hide-steps-from-toc.mjs";
+import { remarkIntegrationSignupCta } from "./lib/remark-integration-signup-cta.mjs";
 import { mdxJsxToMarkdown } from "mdast-util-mdx-jsx";
 import { z } from "zod";
 
@@ -54,6 +55,7 @@ const changelogFrontmatterSchema = baseFrontmatterSchema.extend({
   ogVideo: z.string().nullish(),
   gif: z.string().nullish(),
   badge: z.string().nullish(),
+  showOgInHeader: z.boolean().nullish(),
 });
 
 // Extended schema for customer story pages — preserves all default fields and
@@ -157,11 +159,6 @@ export const security = defineDocs({
   docs: { schema: sidebarFrontmatterSchema },
 });
 
-export const library = defineDocs({
-  dir: "content/library",
-  docs: { schema: sidebarFrontmatterSchema },
-});
-
 export const customers = defineDocs({
   dir: "content/customers",
   docs: {
@@ -238,6 +235,7 @@ export default defineConfig({
       remarkMdxMermaid,
       remarkCodeFilename,
       remarkHideStepsFromToc,
+      remarkIntegrationSignupCta,
     ],
     providerImportSource: "@/mdx-components",
     // Disable remark-image: many content files reference remote images via https://

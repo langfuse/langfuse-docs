@@ -1,10 +1,6 @@
 // Content shared by the compare landing page and its Markdown renderer.
 // Keep claims aligned with the dated, sourced comparisons linked from each card.
-// This file is loaded by Node without a bundler, so it has no imports; the
-// stat tokens below are filled in by each consumer from usage-stats.
-export const OBSERVATIONS_TOKEN = "{observationsPerMonth}";
-export const FORTUNE_50_TOKEN = "{fortune50}";
-
+// This file is loaded by Node without a bundler, so it has no imports.
 export const compareSections = [
   ["compare-heading", "Overview"],
   ["platform-comparisons", "Compare platforms"],
@@ -34,9 +30,9 @@ const vendors = [
     chips: [
       chip("$39 / seat / month", 6, 22),
       chip("14-day retention", 50, 58, { faint: true }),
-      chip("SmithDB · closed · 2026", 8, 94),
+      chip("SmithDB, closed, 2026", 8, 94),
       chip("self-host: Enterprise only", 46, 130, { dot: R }),
-      chip("Langfuse Core $29 · unlimited users", 10, 168, {
+      chip("Langfuse Core $29, unlimited users", 10, 168, {
         dark: true,
         dot: G,
       }),
@@ -51,7 +47,7 @@ const vendors = [
     chips: [
       chip("$3 / GB processed", 8, 22),
       chip("$1.50 / 1k scores", 52, 58),
-      chip("Brainstore · closed · 2025", 6, 94, { faint: true }),
+      chip("Brainstore, closed, 2025", 6, 94, { faint: true }),
       chip("control plane: vendor-run", 46, 130, { dot: R }),
       chip("Langfuse: 1 score = 1 unit", 12, 168, { dark: true, dot: G }),
     ],
@@ -63,8 +59,8 @@ const vendors = [
     name: "Arize AX / Phoenix",
     body: "Arize ships two products: Phoenix (source-available) and AX (proprietary). How each compares with Langfuse on evals, cost, and scale.",
     chips: [
-      chip("Phoenix · Elastic License 2.0", 4, 22),
-      chip("AX · adb · closed · 2025", 50, 58),
+      chip("Phoenix, Elastic License 2.0", 4, 22),
+      chip("AX, adb, closed, 2025", 50, 58),
       chip("30-day retention (Pro)", 8, 94, { faint: true }),
       chip("AX code evals: Enterprise only", 42, 130, { dot: R }),
       chip("Langfuse: code evals on every plan", 8, 168, {
@@ -95,7 +91,9 @@ export const compareLanding = {
   hero: {
     eyebrow: "Compare Langfuse",
     lines: ["Trace. Evaluate. Improve.", "On your terms."],
-    description: `Open-source AI engineering platform behind ${FORTUNE_50_TOKEN} of the Fortune 50 and ${OBSERVATIONS_TOKEN} observations a month. One MIT license, one codebase, on Langfuse Cloud or your own infrastructure, priced by usage instead of seats. The comparisons below show where that differs from LangSmith, Braintrust, Arize, and Datadog.`,
+    description: `You run one MIT-licensed codebase on your own infrastructure or Langfuse Cloud, and pay for usage instead of seats.
+
+The comparisons below show how Langfuse differs from LangSmith, Braintrust, Arize, Datadog, and others.`,
   },
   headings: {
     comparisons: "Compare what matters to your team",
@@ -109,7 +107,7 @@ export const compareLanding = {
   copy: {
     methodology:
       "Each comparison cites public documentation and shows the date we last checked it.",
-    correctionPrompt: "Spotted an error?",
+    correctionPrompt: "See something out of date?",
     correctionLabel: "Pull requests",
     correctionLink: "https://github.com/langfuse/langfuse-docs",
     correctionSuffix: "are welcome.",
@@ -118,7 +116,7 @@ export const compareLanding = {
     migration:
       "Repoint the exporter. Run both side by side. Import datasets, recreate prompts and judges. Your history stays where it is.",
     cta: "Start with one application, explore your traces, and evaluate the results. Moving from another platform? Follow a migration guide or talk through your requirements with us.",
-    ctaNote: "No credit card · Free tier · Self-host anytime",
+    ctaNote: "No credit card, free tier, self-host anytime",
   },
   vendors,
   comparisonResources: [

@@ -141,7 +141,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         href: "/pricing#discounts",
       },
       calloutLink: {
-        text: "Discounts: Startups, EDU, OSS",
+        text: "Discounts: Startups, EDU",
         href: "/pricing#discounts",
       },
       mainFeatures: [
@@ -167,7 +167,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       description:
         "For scaling projects. Unlimited history, high rate limits, all features.",
       calloutLink: {
-        text: "Discounts: Startups, EDU, OSS",
+        text: "Discounts: Startups, EDU",
         href: "/pricing#discounts",
       },
       mainFeatures: [
@@ -288,8 +288,8 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       price: "Custom Pricing",
       mainFeatures: [
         "Everything in Enterprise",
-        "NIST hardening",
-        "FIPS 140-3",
+        "Use of FIPS 140-3 validated modules",
+        "Hardened images",
         "Air-gapped deployment",
       ],
       cta: "Talk to sales",
@@ -428,7 +428,7 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Proxy-based Logging (via LiteLLM)",
+        name: "Proxy-based Logging (via Langfuse AI Gateway, LiteLLM, etc.)",
         href: "/integrations/gateways/litellm",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
@@ -514,6 +514,23 @@ const sections: Section[] = [
         },
       },
       {
+        name: "External media storage (S3)",
+        href: "/docs/observability/features/multi-modality#external-s3-media",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Access to historical data",
         description: DATA_ACCESS_DESCRIPTION,
         href: DATA_ACCESS_FAQ_HREF,
@@ -547,7 +564,7 @@ const sections: Section[] = [
         name: "Halo (in-app agent)",
         description:
           "In-product AI assistant to explore your Langfuse project data and take selected actions with your approval.",
-        href: "/docs/halo",
+        href: "/docs/api-and-data-platform/features/halo",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
@@ -559,7 +576,7 @@ const sections: Section[] = [
       },
       {
         name: "Halo usage limits",
-        href: "/docs/halo",
+        href: "/docs/api-and-data-platform/features/halo",
         tiers: {
           cloud: {
             Hobby: "Low",
@@ -941,6 +958,23 @@ const sections: Section[] = [
     ],
   },
   {
+    name: "AI Gateway",
+    href: "/docs/gateway/overview",
+    features: [
+      {
+        name: "AI Gateway",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
+          selfHosted: {
+            "Open Source": true,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+    ],
+  },
+  {
     name: "API",
     href: "/docs/api-and-data-platform/features/public-api",
     features: [
@@ -1314,15 +1348,16 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Response time SLO",
+        name: "Response time SLO (Severity 1)",
+        href: "https://clickhouse.com/legal/support-services-policy",
         description:
-          "Target response time for support requests via supported channels",
+          "Target initial response time for critical production issues. The 1-hour target applies 24/7 to committed Enterprise customers.",
         tiers: {
           cloud: {
-            Hobby: "n/a",
-            Core: "48h",
-            Pro: "48h, Teams add-on: 24h",
-            Enterprise: "Custom",
+            Hobby: "Best effort",
+            Core: "Best effort",
+            Pro: "Best effort",
+            Enterprise: "Committed: 1h (24/7); pay-as-you-go: Best effort",
           },
         },
       },
@@ -1559,6 +1594,40 @@ const sections: Section[] = [
         },
       },
       {
+        name: "IAM role authentication for Amazon S3",
+        href: "/docs/api-and-data-platform/features/export-to-blob-storage#iam-role-auth",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "IAM role authentication for Amazon Bedrock",
+        href: "/docs/administration/llm-connection#bedrock-iam-role",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: true,
+          },
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
         name: "Admin API (project management, SCIM)",
         href: "/docs/administration/scim-and-org-api",
         tiers: {
@@ -1581,19 +1650,8 @@ const sections: Section[] = [
         },
       },
       {
-        name: "NIST hardening",
+        name: "Use of FIPS 140-3 validated modules & hardened images",
         href: "/self-hosting/configuration/hardening#hardening-for-government",
-        tiers: {
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: false,
-            Government: true,
-          },
-        },
-      },
-      {
-        name: "FIPS 140-3",
-        href: "/self-hosting/configuration/fips-mode",
         tiers: {
           selfHosted: {
             "Open Source": false,
@@ -1644,8 +1702,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "Monthly",
-            Pro: "Monthly",
+            Core: "Monthly or " + YEARLY_COMMITMENT,
+            Pro: "Monthly or " + YEARLY_COMMITMENT,
             Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
@@ -1660,8 +1718,8 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
+            Core: YEARLY_COMMITMENT,
+            Pro: YEARLY_COMMITMENT,
             Enterprise: YEARLY_COMMITMENT,
           },
           selfHosted: {
@@ -1715,6 +1773,13 @@ const sections: Section[] = [
             Enterprise: true,
             Government: true,
           },
+        },
+      },
+      {
+        name: "ClickHouse ISO/IEC 27701:2025 certification coverage",
+        href: "/security/iso27701",
+        tiers: {
+          cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
         },
       },
       {
@@ -1818,8 +1883,7 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available when committing to a yearly contract on the Enterprise
-              plan.
+              Available when committing to a yearly contract.
             </HoverCardContent>
           </HoverCard>
         )}
@@ -1845,77 +1909,113 @@ const FeatureCell = ({
 // Pricing Plans component - renders the card grid
 export function PricingPlans({ variant }: { variant: DeploymentOption }) {
   const selectedTiers = tiers[variant];
+  const isGrid = selectedTiers.length > 1;
+  // Multi-column cards become row subgrids so header, price/CTA, "Trusted by"
+  // and feature list line up across cards. Breakpoints are container queries
+  // because the available width depends on the surrounding page layout.
+  const subgridClassName = cn(
+    variant === "cloud" ? "row-span-6" : "row-span-5",
+    "@2xl:grid @2xl:grid-rows-subgrid",
+  );
 
   return (
-    <div
-      className={cn(
-        "mt-12",
-        selectedTiers.length === 1
-          ? "flex justify-center"
-          : "grid grid-cols-1 gap-y-6 gap-x-6 md:grid-cols-2 md:gap-x-2 lg:gap-x-6 lg:items-stretch",
-        selectedTiers.length === 4 && "lg:grid-cols-4",
-        selectedTiers.length === 3 && "lg:grid-cols-3",
-        selectedTiers.length === 2 && "lg:grid-cols-2",
-      )}
-    >
-      {selectedTiers.map((tier) => {
-        return (
-          <Card
-            key={tier.id}
-            id={tier.anchor}
-            hoverStripes
-            className={cn(
-              "relative h-full flex flex-col",
-              selectedTiers.length === 1 && "w-full max-w-lg",
-              tier.anchor && "scroll-mt-28",
-            )}
-          >
-            {tier.pill && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <div
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
-                    tier.pillClassName ?? "bg-primary text-primary-foreground",
-                  )}
-                >
-                  {tier.pill}
+    <div className="@container mt-6">
+      <div
+        className={cn(
+          isGrid
+            ? "grid grid-cols-1 gap-x-6 gap-y-0 items-stretch"
+            : "flex justify-center",
+          selectedTiers.length === 4 && "@2xl:grid-cols-2 @4xl:grid-cols-4",
+          selectedTiers.length === 3 && "@2xl:grid-cols-3",
+          selectedTiers.length === 2 && "@2xl:grid-cols-2",
+        )}
+      >
+        {selectedTiers.map((tier) => {
+          return (
+            <Card
+              key={tier.id}
+              id={tier.anchor}
+              hoverStripes
+              className={cn(
+                "relative mt-6 flex flex-col",
+                isGrid ? subgridClassName : "w-full max-w-lg",
+                tier.anchor && "scroll-mt-28",
+              )}
+            >
+              {tier.pill && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-center whitespace-nowrap rounded-full",
+                      tier.pillClassName ??
+                        "bg-primary text-primary-foreground",
+                    )}
+                  >
+                    {tier.pill}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <CardHeader className="p-4 text-left lg:p-6">
-              <CardTitle className="text-lg font-semibold text-foreground">
-                {tier.name}
-              </CardTitle>
-              <CardDescription className="text-left max-w-[24ch]">
-                {tier.description}
-                {tier.learnMore && (
-                  <>
-                    {" "}
-                    <Link href={tier.learnMore} className="underline">
-                      Learn more
-                    </Link>
-                    .
-                  </>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0 px-4 lg:px-6">
-              {/* Price information */}
-              <div className="h-[60px] flex items-baseline">
-                <span className="text-3xl font-bold">{tier.price}</span>
-                <span className="ml-1 text-sm leading-4">
-                  {tier.price.includes("$")
-                    ? tier.priceUnit
-                      ? `/ ${tier.priceUnit}`
-                      : "/ month"
-                    : ""}
-                </span>
-              </div>
+              <CardHeader className="p-4 text-left lg:p-6">
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  {tier.name}
+                </CardTitle>
+                <CardDescription className="text-left max-w-[24ch]">
+                  {tier.description}
+                  {tier.learnMore && (
+                    <>
+                      {" "}
+                      <Link href={tier.learnMore} className="underline">
+                        Learn more
+                      </Link>
+                      .
+                    </>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0 px-4 lg:px-6 row-span-3 @2xl:grid @2xl:grid-rows-subgrid">
+                {/* Price information */}
+                <div className="min-h-[60px] flex items-baseline">
+                  <span className="text-3xl font-bold">{tier.price}</span>
+                  <span className="ml-1 text-sm leading-4">
+                    {tier.price.includes("$")
+                      ? tier.priceUnit
+                        ? `/ ${tier.priceUnit}`
+                        : "/ month"
+                      : ""}
+                  </span>
+                </div>
 
-              <div>
-                {tier.ctaCallout ? (
-                  <div className="flex gap-2">
+                <div>
+                  {tier.ctaCallout ? (
+                    <div className="flex gap-2">
+                      <Button
+                        variant={tier.featured ? "primary" : "secondary"}
+                        size="default"
+                        href={tier.href}
+                        {...(isCloudAppHref(tier.href)
+                          ? { "data-launch-app-cta": "" }
+                          : {})}
+                        wrapperClassName="flex-1"
+                        className={cn(
+                          "justify-center!",
+                          !tier.featured &&
+                            "group-hover:border-line-structure hover:border-line-cta",
+                        )}
+                      >
+                        {tier.cta}
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="default"
+                        href={tier.ctaCallout.href}
+                        wrapperClassName="flex-1"
+                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                      >
+                        {tier.ctaCallout.text}
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
                       variant={tier.featured ? "primary" : "secondary"}
                       size="default"
@@ -1923,7 +2023,7 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                       {...(isCloudAppHref(tier.href)
                         ? { "data-launch-app-cta": "" }
                         : {})}
-                      wrapperClassName="flex-1"
+                      wrapperClassName="w-full"
                       className={cn(
                         "justify-center!",
                         !tier.featured &&
@@ -1932,121 +2032,95 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
                     >
                       {tier.cta}
                     </Button>
-                    <Button
-                      variant="secondary"
-                      size="default"
-                      href={tier.ctaCallout.href}
-                      wrapperClassName="flex-1"
-                      className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-                    >
-                      {tier.ctaCallout.text}
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant={tier.featured ? "primary" : "secondary"}
-                    size="default"
-                    href={tier.href}
-                    {...(isCloudAppHref(tier.href)
-                      ? { "data-launch-app-cta": "" }
-                      : {})}
-                    className={cn(
-                      "justify-center!",
-                      !tier.featured &&
-                        "group-hover:border-line-structure hover:border-line-cta",
-                    )}
-                  >
-                    {tier.cta}
-                  </Button>
-                )}
-              </div>
-
-              {/* Callouts for different tiers - always render container for alignment */}
-              <div className="px-0 py-6 h-[30px] flex items-center justify-center">
-                {tier.calloutLink ? (
-                  <div className="text-xs text-center text-muted-foreground text-balance">
-                    <Link
-                      href={tier.calloutLink.href}
-                      className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
-                    >
-                      {tier.calloutLink.text}
-                    </Link>
-                  </div>
-                ) : null}
-              </div>
-            </CardContent>
-
-            {/* Trusted by section for cloud tiers */}
-            {variant === "cloud" && (
-              <>
-                <div className="border-t border-line-structure"></div>
-                <TrustedBy customers={trustedByData.cloud[tier.name]} />
-              </>
-            )}
-            <div className="border-t border-line-structure"></div>
-            <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6">
-              <ul className="space-y-2.5 text-sm">
-                {tier.mainFeatures.map((feature, index) => (
-                  <li key={index} className="flex space-x-2">
-                    <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                    <span className="text-muted-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              {tier.addOn && (
-                <div className="relative mt-3 w-full">
-                  <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
-                    + optional
-                  </div>
-                  <CornerBox className="p-3 pt-4 w-full">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-bold text-primary">
-                        {tier.addOn.name}
-                      </span>
-                      {tier.addOn.price && (
-                        <span className="text-sm font-bold text-primary">
-                          {tier.addOn.price}
-                        </span>
-                      )}
-                    </div>
-                    <ul className="mt-1 space-y-1 text-sm">
-                      {tier.addOn.mainFeatures.map((feature) => (
-                        <li key={feature} className="flex space-x-2">
-                          <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
-                          <span className="text-muted-foreground">
-                            {feature}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                    {tier.addOn.cta && (
-                      <Button
-                        variant="secondary"
-                        size="small"
-                        href={tier.addOn.cta.href}
-                        wrapperClassName="mt-3"
-                        className="justify-center! group-hover:border-line-structure hover:border-line-cta"
-                      >
-                        {tier.addOn.cta.text}
-                      </Button>
-                    )}
-                    {tier.addOn.calloutLink && (
-                      <div className="mt-2 text-xs text-center text-muted-foreground">
-                        <Link
-                          href={tier.addOn.calloutLink.href}
-                          className="underline hover:text-primary"
-                        >
-                          {tier.addOn.calloutLink.text}
-                        </Link>
-                      </div>
-                    )}
-                  </CornerBox>
+                  )}
                 </div>
+
+                {/* Callouts for different tiers - always render container for alignment */}
+                <div className="px-0 py-6 h-[30px] flex items-center justify-center">
+                  {tier.calloutLink ? (
+                    <div className="text-xs text-center text-muted-foreground text-balance">
+                      <Link
+                        href={tier.calloutLink.href}
+                        className="underline underline-offset-2 decoration-auto text-muted-foreground hover:text-primary"
+                      >
+                        {tier.calloutLink.text}
+                      </Link>
+                    </div>
+                  ) : null}
+                </div>
+              </CardContent>
+
+              {/* Trusted by section for cloud tiers */}
+              {variant === "cloud" && (
+                <TrustedBy
+                  customers={trustedByData.cloud[tier.name]}
+                  className="border-t border-line-structure"
+                />
               )}
-            </CardFooter>
-          </Card>
-        );
-      })}
+              <CardFooter className="flex-col gap-2 items-start p-4 lg:p-6 border-t border-line-structure">
+                <ul className="space-y-2.5 text-sm">
+                  {tier.mainFeatures.map((feature, index) => (
+                    <li key={index} className="flex space-x-2">
+                      <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                {tier.addOn && (
+                  <div className="relative mt-3 w-full">
+                    <div className="absolute top-0 left-1/2 z-10 px-2 text-xs -translate-x-1/2 -translate-y-1/2 bg-surface-bg text-muted-foreground">
+                      + optional
+                    </div>
+                    <CornerBox className="p-3 pt-4 w-full">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-bold text-primary">
+                          {tier.addOn.name}
+                        </span>
+                        {tier.addOn.price && (
+                          <span className="text-sm font-bold text-primary">
+                            {tier.addOn.price}
+                          </span>
+                        )}
+                      </div>
+                      <ul className="mt-1 space-y-1 text-sm">
+                        {tier.addOn.mainFeatures.map((feature) => (
+                          <li key={feature} className="flex space-x-2">
+                            <Check className="flex-shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                            <span className="text-muted-foreground">
+                              {feature}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      {tier.addOn.cta && (
+                        <Button
+                          variant="secondary"
+                          size="small"
+                          href={tier.addOn.cta.href}
+                          wrapperClassName="mt-3"
+                          className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+                        >
+                          {tier.addOn.cta.text}
+                        </Button>
+                      )}
+                      {tier.addOn.calloutLink && (
+                        <div className="mt-2 text-xs text-center text-muted-foreground">
+                          <Link
+                            href={tier.addOn.calloutLink.href}
+                            className="underline hover:text-primary"
+                          >
+                            {tier.addOn.calloutLink.text}
+                          </Link>
+                        </div>
+                      )}
+                    </CornerBox>
+                  </div>
+                )}
+              </CardFooter>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -292,7 +292,7 @@ export const SentimentClassifierCompare = ({
               })}
             </div>
             <span className="text-[11px] text-muted-foreground">
-              {selected.map((definition) => definition.name).join(" · ")}
+              {selected.map((definition) => definition.name).join(", ")}
             </span>
             <button
               onClick={() => handleSubmit()}
@@ -347,8 +347,8 @@ export const SentimentClassifierCompare = ({
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
                     {selected.length === 1
-                      ? "1 request · 1 question"
-                      : `1 request · ${selected.length} questions`}
+                      ? "1 request, 1 question"
+                      : `1 request, ${selected.length} questions`}
                   </p>
                 </div>
                 {jev?.result.model && (
@@ -440,8 +440,8 @@ export const SentimentClassifierCompare = ({
                   </h3>
                   <p className="text-[11px] text-muted-foreground">
                     {selected.length === 1
-                      ? "1 call · high reasoning"
-                      : `${selected.length} parallel calls · high reasoning`}
+                      ? "1 call, high reasoning"
+                      : `${selected.length} parallel calls, high reasoning`}
                   </p>
                 </div>
                 {firstLlmSuccess?.model && (

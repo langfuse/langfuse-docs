@@ -1,0 +1,22 @@
+---
+date: 2026-11-10
+title: Run code evaluators on your own executor
+description: Self-hosted Langfuse can send code evaluators to an HTTP executor you operate.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+Self-hosted Langfuse can now run [code evaluators](/docs/evaluation/evaluation-methods/code-evaluators) on an executor you operate. Set `LANGFUSE_CODE_EVAL_DISPATCHER=external` and an endpoint, and Langfuse sends each evaluation over HTTP and stores the returned scores. This lets you run code evaluators on GCP, Azure, or on premises, without AWS Lambda.
+
+<Cards num={1}>
+  <Card
+    title="Set up the external HTTP dispatcher"
+    href="/self-hosting/configuration/code-evaluators#external-dispatcher"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

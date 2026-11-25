@@ -18,7 +18,7 @@ sidebarTitle: Data Retention
 
 With Langfuse's Data Retention feature, you can control how long your event data (Traces, Observations, Scores, and Media Assets) is stored in Langfuse.
 
-The same project retention policy also applies to [Halo](/docs/halo) conversations, based on when each conversation was last updated.
+The same project retention policy also applies to [Halo](/docs/api-and-data-platform/features/halo) conversations, based on when each conversation was last updated.
 
 **Project data retention does not delete audit logs or dataset items.** If you add a trace to a dataset, the saved dataset item remains usable after the original trace expires. Adding a trace to a dataset does not protect the trace from deletion.
 
@@ -37,9 +37,13 @@ Project owners and administrators can change the setting in **Project Settings �
   retention](/faq/all/data-access-vs-data-retention) for details.
 </Callout>
 
-<Frame className="my-10" fullWidth>
-  ![Configure data retention in Langfuse](/images/docs/data-retention.png)
-</Frame>
+<Video
+  src="https://static.langfuse.com/docs-videos/data-retention.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+  title="Set data retention"
+  description="Project Settings > General > Data Retention. Enter 30 and click “Save”; the project now keeps data for 30 days."
+/>
 
 Data retention can also be configured via the [Organization Management API](/docs/administration/scim-and-org-api).
 

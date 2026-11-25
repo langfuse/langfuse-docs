@@ -94,8 +94,8 @@ def classify_intent(user_message: str) -> str:
 to_ts = datetime.now(timezone.utc)
 from_ts = to_ts - timedelta(days=1)
 
-# The advanced `filter` parameter takes precedence over the individual query
-# parameters, so the time window is expressed as filter conditions as well.
+# Each condition in the advanced `filter` parameter replaces the individual
+# query parameter for the same field; the other query parameters still apply.
 filters = json.dumps([
     {"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True},
     # the trace name your chatbot uses
@@ -112,8 +112,7 @@ while True:
         cursor=cursor,
         limit=50,
     )
-    if not response.data:
-        break
+    cursor = getattr(response.meta, "cursor", None)
     for observation in response.data:
         # Adjust extraction to your observation input structure
         message = (
@@ -131,7 +130,6 @@ while True:
             data_type="CATEGORICAL",
             score_id=f"intent-{trace_id}",  # idempotency key, same-day reruns overwrite
         )
-    cursor = getattr(response.meta, "cursor", None)
     if not cursor:
         break
 

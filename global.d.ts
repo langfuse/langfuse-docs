@@ -76,10 +76,6 @@ declare module "*.mdx?collection=integrations" {
   const mod: _MDXCollectionModule;
   export = mod;
 }
-declare module "*.mdx?collection=library" {
-  const mod: _MDXCollectionModule;
-  export = mod;
-}
 declare module "*.mdx?collection=marketing" {
   const mod: _MDXCollectionModule;
   export = mod;
@@ -126,10 +122,6 @@ declare module "*.md?collection=handbook" {
   export = mod;
 }
 declare module "*.md?collection=integrations" {
-  const mod: _MDXCollectionModule;
-  export = mod;
-}
-declare module "*.md?collection=library" {
   const mod: _MDXCollectionModule;
   export = mod;
 }

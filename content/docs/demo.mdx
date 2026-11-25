@@ -5,11 +5,27 @@ description: Try Langfuse in action with a live example project for free. Intera
 
 import { SignupCTA } from "@/components/SignupCTA";
 import { DemoTabs } from "@/components/demoTabs";
+import {
+  CinemaModeProvider,
+  CinemaModeTrigger,
+} from "@/components/demoTabs/CinemaMode";
 
 # Example Project
 
-Explore Langfuse's features with real data in a **live, shared project**.<br />
+<CinemaModeProvider>
+
+<div className="*:!m-0">
+
+Explore Langfuse's features with real data in a **live, shared project**.
+
+<div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 *:!m-0">
+
 Try an app below, then inspect its trace in Langfuse.
+
+<CinemaModeTrigger />
+
+</div>
+</div>
 
 <Callout type="info" emoji="🎥" className="py-2">
   <div className="not-prose @container">
@@ -34,6 +50,8 @@ Try an app below, then inspect its trace in Langfuse.
 </Callout>
 
 <DemoTabs id="generate-your-first-demo-trace" className="mt-5 scroll-mt-24" />
+
+</CinemaModeProvider>
 
 _Interested in implementation details? All demo apps are fully open source. Check out the [blog post about how the Q&A chatbot was built](/blog/qa-chatbot-for-langfuse-docs)._
 

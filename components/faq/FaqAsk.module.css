@@ -1,26 +1,29 @@
-/* Blink beside the invitation; the native caret takes over when editing. */
+/* Blink beside the invitation; the native caret takes over when editing.
+ *
+ * Do not use `steps(1, end)` on the animation shorthand. Chrome applies that
+ * timing function across the whole iteration, so the "off" keyframe lands on
+ * the same frame as the loop restart and the caret never paints as hidden.
+ *
+ * A caret is a functional I-beam, not decoration, so this keeps blinking even
+ * when `prefers-reduced-motion` is set — native <input> carets do too. */
 .cursor {
   display: inline-block;
-  width: 1px;
+  width: 0.125em;
+  min-width: 1px;
   height: 1em;
   align-self: center;
+  flex-shrink: 0;
   background: currentColor;
-  animation: caret-blink 1s steps(1, end) infinite;
+  transform: translateZ(0);
+  animation: caret-blink 1.2s linear infinite;
 }
 
 @keyframes caret-blink {
   0%,
-  49% {
+  100% {
     opacity: 1;
   }
-  50%,
-  100% {
+  50% {
     opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cursor {
-    animation: none;
   }
 }

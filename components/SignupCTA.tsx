@@ -1,3 +1,4 @@
+import { HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 
 type SignupCTAProps = {
@@ -5,6 +6,7 @@ type SignupCTAProps = {
   actionLabel?: string;
   href?: string;
   className?: string;
+  onClick?: () => void;
 };
 
 export function SignupCTA({
@@ -12,25 +14,28 @@ export function SignupCTA({
   actionLabel = "Sign up",
   href = "/cloud",
   className,
+  onClick,
 }: SignupCTAProps) {
   return (
     <aside
       aria-label="Langfuse signup"
       className={cn("not-prose w-full", className)}
     >
-      <div className="grid w-full overflow-hidden rounded-[2px] border border-line-cta sm:grid-cols-[1fr_auto]">
-        <div className="flex items-center bg-surface-bg px-4 py-3">
-          <span className="text-[14px] font-medium text-text-secondary">
+      <a
+        href={href}
+        onClick={onClick}
+        className="group button-wrapper relative -m-1 flex p-1 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <HoverCorners />
+        <span className="grid w-full rounded-[2px] border border-line-structure bg-surface-bg corner-box-hover-stripes transition-[background] duration-180 ease-out [box-shadow:0_4px_8px_0_rgba(0,0,0,0.05),0_4px_4px_0_rgba(0,0,0,0.03)] sm:grid-cols-[1fr_auto]">
+          <span className="flex items-center px-4 py-3 text-[14px] font-medium text-text-secondary">
             {message}
           </span>
-        </div>
-        <a
-          href={href}
-          className="flex items-center justify-between gap-6 border-t border-line-cta bg-surface-cta-primary px-4 py-3 text-[13px] font-medium text-text-primary no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:border-l sm:border-t-0"
-        >
-          {actionLabel} <span aria-hidden>→</span>
-        </a>
-      </div>
+          <span className="flex items-center justify-between gap-6 border-t border-line-structure bg-surface-cta-primary px-4 py-3 text-[13px] font-medium text-text-primary sm:border-l sm:border-t-0">
+            {actionLabel} <span aria-hidden>→</span>
+          </span>
+        </span>
+      </a>
     </aside>
   );
 }

@@ -1,0 +1,20 @@
+---
+title: How do I use Google AI Studio decision models?
+description: Connect Google AI Studio and run decision-model evaluators through the Gemini Decisions API.
+tags: [evaluation, decision-model-providers]
+---
+
+# How do I use Google AI Studio decision models?
+
+Add a **Google AI Studio** connection and select `gemini-decision-1` in a [decision-model evaluator](/docs/evaluation/evaluation-methods/decision-models). Langfuse calls the [Gemini Decisions API](https://blog.google/innovation-and-ai/technology/developers-tools/gemini-decisions-api/) through this connection.
+
+Map observation data to the single state named `input`. Questions evaluate that state as a whole and cannot reference individual fields. Score levels need a label and can include an optional description. `gemini-decision-1` accepts up to 256k tokens of input. Keep the input focused on the data needed for the decision.
+
+<Callout type="info">
+  Google bills only input tokens for decisions.
+</Callout>
+
+<Callout type="info">
+  Google Vertex AI connections can't run decision models. Use a Google AI
+  Studio connection.
+</Callout>

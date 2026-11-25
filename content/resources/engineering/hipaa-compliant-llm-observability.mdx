@@ -1,0 +1,95 @@
+---
+title: "HIPAA-compliant LLM observability: Cloud with a BAA or self-hosted"
+description: "Trace and evaluate healthcare AI with PHI: Langfuse's HIPAA region with a signed BAA, or self-hosting where PHI never leaves your network. Setup steps and safeguards."
+tags: [guide]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# HIPAA-compliant LLM observability: Cloud with a BAA or self-hosted
+
+Healthcare AI applications see protected health information (PHI) in prompts, retrieved records, and model outputs. Tracing those applications means the observability tool stores PHI too, so it has to be covered by your HIPAA program. There are two ways to do that with Langfuse: a dedicated Cloud region under a Business Associate Agreement, or a self-hosted deployment where Langfuse never receives the data.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** For Cloud, create an account in the [HIPAA region](/security/hipaa) (`hipaa.cloud.langfuse.com`, AWS `us-west-2`), subscribe to Pro or higher, and sign the BAA before you send PHI. For self-hosting, run Langfuse in your own environment: no BAA with Langfuse is involved, and the HIPAA safeguards are yours to implement. In both cases, mask PHI you don't need, restrict access per project, and set retention.
+
+<Frame fullWidth>
+  ![Langfuse trace view with a nested agent run, model calls, cost, and latency](/images/docs/ai-gateway/tracing-session.png)
+</Frame>
+
+## Choose Cloud or self-hosted [#choose]
+
+| Question                         | HIPAA Cloud region                                        | Self-hosted                                           |
+| -------------------------------- | --------------------------------------------------------- | ----------------------------------------------------- |
+| Who operates the infrastructure? | Langfuse                                                  | You                                                   |
+| BAA                              | Signed with Langfuse                                      | Not needed with Langfuse; it never receives your data |
+| Plan                             | Pro or higher                                             | Open source or Enterprise license                     |
+| Location                         | Oregon, AWS `us-west-2`, separate from other regions      | Wherever you deploy                                   |
+| Safeguards                       | Covered by Langfuse for its infrastructure, under the BAA | Yours: encryption, access control, logging, backups   |
+
+For the broader decision, see [self-hosted vs Cloud](/resources/engineering/self-hosted-vs-cloud).
+
+## Set up the HIPAA Cloud region [#cloud]
+
+1. Create a new account at [hipaa.cloud.langfuse.com](https://hipaa.cloud.langfuse.com). The region is separate from the EU, US, and Japan regions, including user accounts.
+2. Subscribe to the Pro plan or higher.
+3. Sign the BAA, as described on the [HIPAA page](/security/hipaa).
+4. Point your SDKs at `https://hipaa.cloud.langfuse.com`, and send PHI only to this region.
+
+<Callout type="warning">
+  Do not send PHI to Langfuse until the signed BAA is in place, and never to
+  the EU, US, or Japan regions. The AI Gateway has its own host for the HIPAA
+  region, `gateway.hipaa.cloud.langfuse.com`.
+</Callout>
+
+## Self-host for PHI [#self-hosted]
+
+When PHI may not leave your network, self-host Langfuse there. The building blocks for HIPAA safeguards:
+
+- **Encryption** in transit and at rest, plus application-level encryption of sensitive fields. See [encryption](/self-hosting/configuration/encryption).
+- **Access control** with SSO and project-level roles. See [authentication and SSO](/self-hosting/security/authentication-and-sso) and [RBAC](/docs/administration/rbac).
+- **Audit logs** of changes inside Langfuse. See [audit logs](/docs/administration/audit-logs).
+- **Retention** per project. See [data retention](/docs/administration/data-retention).
+- **Network isolation**, including deployments without internet access. See [networking](/self-hosting/security/networking).
+
+Audit logs, retention, project-level roles, and server-side masking need an Enterprise license on self-hosted deployments. See the [production checklist](/resources/engineering/self-hosted-langfuse-production-checklist).
+
+## Store less PHI [#minimize]
+
+The safest PHI is PHI you never store. Before you trace:
+
+- **Mask in the SDK.** A masking function removes identifiers from inputs, outputs, and metadata before they leave your application. See [masking](/docs/observability/features/masking) and [PII masking for LLM applications](/resources/engineering/pii-masking-llm-applications).
+- **Use IDs instead of names.** Set the trace [user ID](/docs/observability/features/users) to an internal pseudonymous ID, not a name or record number.
+- **Separate projects** for workloads with and without PHI, so access and retention can differ.
+
+## Review outputs with clinicians [#review]
+
+Clinicians and domain experts can review traces in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues), and their labels become scores. Give reviewers a [role](/docs/administration/rbac) that fits what they need to see. Combine them with LLM-as-a-Judge evaluators to monitor quality between reviews. See [Langfuse for healthcare](/healthcare).
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="is-langfuse-hipaa-compliant">
+<Summary>Is Langfuse HIPAA compliant?</Summary>
+
+Langfuse offers a HIPAA-ready Cloud region and signs a BAA for eligible customers on Pro or higher. HIPAA compliance also depends on how you configure and use the service, so review your setup with your compliance team.
+
+</Details>
+
+<Details id="move-to-hipaa-region">
+<Summary>Can I move an existing project to the HIPAA region?</Summary>
+
+Regions are separate, so create a new account in the HIPAA region. Prompts, datasets, and traces can be copied with the [data migration cookbook](/guides/cookbook/example_data_migration).
+
+</Details>
+
+<Details id="model-providers-phi">
+<Summary>Does the BAA with Langfuse cover my model provider?</Summary>
+
+No. Your model provider processes PHI in prompts too, and needs its own agreement with you.
+
+</Details>
+
+</FaqDetails>

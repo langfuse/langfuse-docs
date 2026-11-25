@@ -1,0 +1,16 @@
+---
+title: Can I set data retention for a whole organization?
+seoTitle: "Data Retention Is Configured per Project"
+description: Data retention in Langfuse is configured per project, not per organization. Plans, minimum retention, and how deletion works.
+tags: [administration, platform]
+---
+
+# Can I set data retention for a whole organization?
+
+No. Data retention is configured **per project**. To apply the same policy across an organization, set it on each project.
+
+Set it in **Project Settings → General → Data Retention**. The value is a number of days, with a minimum of 3. Set it to 0 to keep data indefinitely. You can also set it via the [Organization Management API](/docs/administration/scim-and-org-api). Changing it requires the `Owner` or `Admin` role on the project. Deletion happens asynchronously in the background.
+
+Configurable data retention is available on Langfuse Cloud Pro, Teams add-on, and Enterprise plans, and on Enterprise self-hosted. On self-hosted Langfuse you can also set a retention for the initial project with `LANGFUSE_INIT_PROJECT_RETENTION`.
+
+See [Data retention](/docs/administration/data-retention) for what retention deletes, and [Data access vs. data retention](/faq/all/data-access-vs-data-retention) for how retention relates to your plan's data access window.

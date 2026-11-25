@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 
 export type VideoCarouselItem = {
   title: string;
+  /** One sentence on what the video shows, printed under the title. */
+  description?: string;
   src?: string;
   poster?: string;
 };
@@ -65,6 +67,10 @@ export function VideoCarousel({
         return;
       }
 
+      media.playsInline = true;
+      media.setAttribute("playsinline", "");
+      media.setAttribute("webkit-playsinline", "");
+
       if (index === current) {
         media.muted = true;
         void media.play().catch(() => undefined);
@@ -111,6 +117,13 @@ export function VideoCarousel({
         opts={{
           align: showNavigation ? "center" : "start",
           loop: showNavigation,
+          watchDrag: (_api, event) =>
+            !(
+              event.target instanceof Element &&
+              event.target.closest(
+                "video, audio, media-player, [data-media-player]",
+              )
+            ),
         }}
         className="mx-auto w-full"
       >
@@ -131,12 +144,12 @@ export function VideoCarousel({
                   {src ? (
                     <Video
                       src={src}
+                      title={video.title}
                       poster={video.poster}
                       aspectRatio={VIDEO_FRAME.aspectRatio}
                       className="w-full rounded-none shadow-none"
                       autoPlay={index === current}
                       muted
-                      playsInline
                     />
                   ) : (
                     <div
@@ -158,6 +171,11 @@ export function VideoCarousel({
                     <p className="m-0 text-sm font-medium text-text-primary">
                       {video.title}
                     </p>
+                    {video.description ? (
+                      <p className="m-0 mt-1 text-sm text-text-secondary">
+                        {video.description}
+                      </p>
+                    ) : null}
                   </figcaption>
                 </figure>
               </CarouselItem>

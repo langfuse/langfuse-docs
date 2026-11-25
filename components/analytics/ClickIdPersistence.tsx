@@ -6,6 +6,8 @@ import { readAdvertisementConsent } from "@/lib/cookie-consent";
 // Ad-platform click-id URL params appended to landing pages by ad clicks.
 const CLICK_ID_PARAMS = [
   "gclid", // Google Ads
+  "gbraid", // Google Ads, iOS app-to-web
+  "wbraid", // Google Ads, iOS web-to-app
   "li_fat_id", // LinkedIn Ads
   "rdt_cid", // Reddit Ads
   "twclid", // X (Twitter) Ads

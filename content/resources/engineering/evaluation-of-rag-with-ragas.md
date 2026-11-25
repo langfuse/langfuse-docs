@@ -302,8 +302,8 @@ def parse_json_if_needed(value):
 
 
 def get_traces(name=None, limit=50):
-    # The advanced `filter` parameter takes precedence over the individual query
-    # parameters, so every condition has to be expressed inside the filter array.
+    # Each condition in the advanced `filter` parameter replaces the individual
+    # query parameter for the same field; the other query parameters still apply.
     all_data = []
     cursor = None
     filters = [{"type": "boolean", "column": "isRootObservation", "operator": "=", "value": True}]
@@ -318,12 +318,10 @@ def get_traces(name=None, limit=50):
             fields="core,basic,io,trace_context",
             filter=json.dumps(filters),
         )
-        if not response.data:
-            break
+        cursor = getattr(response.meta, "cursor", None)
         all_data.extend(response.data)
         if len(all_data) >= limit:
             break
-        cursor = getattr(response.meta, "cursor", None)
         if not cursor:
             break
 
@@ -331,11 +329,20 @@ def get_traces(name=None, limit=50):
 
 
 def get_trace_observations(trace_id):
-    return langfuse.api.observations.get_many(
-        trace_id=trace_id,
-        fields="core,basic,io",
-        limit=1000,
-    ).data
+    observations = []
+    cursor = None
+    while True:
+        response = langfuse.api.observations.get_many(
+            trace_id=trace_id,
+            fields="core,basic,io",
+            limit=1000,
+            cursor=cursor,
+        )
+        observations.extend(response.data)
+        cursor = getattr(response.meta, "cursor", None)
+        if not cursor:
+            break
+    return observations
 ```
 
 ```python

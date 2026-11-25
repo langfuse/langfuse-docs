@@ -1,0 +1,15 @@
+---
+title: How do I use OpenAI decision models?
+description: Connect OpenAI and run decision-model evaluators through the OpenAI Decisions API.
+tags: [evaluation, decision-model-providers]
+---
+
+# How do I use OpenAI decision models?
+
+Add an **OpenAI** connection with access to `gpt-6-luna` in a [decision-model evaluator](/docs/evaluation/evaluation-methods/decision-models). Langfuse calls the OpenAI Decisions API through this connection.
+
+Map observation data to the single state named `input`. Questions evaluate that state as a whole and cannot reference individual fields. Score levels need a label and can include an optional description.
+
+<Callout type="warning">
+  If OpenAI refuses any question, the run fails and writes no scores.
+</Callout>

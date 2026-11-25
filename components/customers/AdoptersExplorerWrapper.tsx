@@ -20,6 +20,7 @@ import merckLogo from "../home/img/merck.svg";
 import pigmentLogo from "../home/img/pigment.svg";
 import rampLogo from "../home/img/ramp.svg";
 import rocketMoneyLogo from "../home/img/rocket-money.svg";
+import rubyLogo from "../home/img/ruby.svg";
 import samsaraLogo from "../home/img/samsara.svg";
 import sumUpLogo from "../home/img/sumup.svg";
 import swisscomLogo from "../home/img/swisscom.svg";
@@ -35,10 +36,14 @@ const ADOPTERS_TABLE_PATH = join(
 
 const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Adobe: { src: adobeLogo },
+  "Blue Yonder": {
+    src: "/images/customers/blue-yonder/blue-yonder-light.png",
+  },
   "Bosch Power Tools": { src: boschLogo },
   Canva: { src: canvaLogo },
   Circleback: { src: circlebackLogo },
   Cisco: { src: ciscoLogo },
+  Criteo: { src: "/images/customers/criteo/criteo-light.svg" },
   DKB: { src: "/images/customers/dkb/dkb-light.svg" },
   EnBW: { src: enbwLogo },
   "Expedia Group": { src: expediaLogo },
@@ -51,6 +56,7 @@ const COMPANY_LOGOS: Record<string, NonNullable<Adopter["logo"]>> = {
   Pigment: { src: pigmentLogo },
   Ramp: { src: rampLogo },
   "Rocket Money": { src: rocketMoneyLogo },
+  Ruby: { src: rubyLogo },
   Samsara: { src: samsaraLogo },
   Slite: { src: "/images/customers/slite/slite-light.png" },
   SumUp: { src: sumUpLogo },
@@ -72,6 +78,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Cisco: "Networking and cybersecurity company",
   "City of Munich": "Municipal government",
   Cornelsen: "Educational publisher and learning provider",
+  Criteo: "Global commerce intelligence platform",
   CyberAgent: "Digital advertising, media, and internet services company",
   Cybozu: "Workplace collaboration software company",
   "Dep for Environment, Food & Rural Affairs": "UK government department",
@@ -84,6 +91,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Fletch: "Security and threat intelligence platform",
   freee: "Cloud accounting and HR software company",
   GoodData: "Analytics and business intelligence platform",
+  "G-Research": "Quantitative research and technology company",
   Groupon: "Local commerce marketplace",
   HP: "Personal computing and printing technology company",
   "Hugging Face": "Open-source AI platform and model hub",
@@ -115,6 +123,7 @@ const COMPANY_DESCRIPTIONS: Record<string, string> = {
   Posit: "Data science software company",
   Ramp: "Self-hosted agent observability",
   "Rocket Money": "Personal finance app",
+  Ruby: "AI sales assistant",
   Salesloft: "Sales engagement platform",
   Samsara: "Connected operations platform",
   Sanofi: "Healthcare and pharmaceutical company",
@@ -135,6 +144,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Bayer",
   "Canva",
   "City of Munich",
+  "Criteo",
   "CyberAgent",
   "Cybozu",
   "Dep for Environment, Food & Rural Affairs",
@@ -143,6 +153,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "Equinix",
   "freee",
   "GoodData",
+  "G-Research",
   "Groupon",
   "HP",
   "Hugging Face",
@@ -162,6 +173,7 @@ const COMPANIES_WITH_DOCUMENTED_USE_CASES = new Set([
   "NASA",
   "Pipedream",
   "Posit",
+  "Ruby",
   "Salesloft",
   "Samsara",
   "Sanofi",
