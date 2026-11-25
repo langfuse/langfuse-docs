@@ -184,13 +184,7 @@ export function SkillCoexistenceRoutingDiagram() {
               hoveredSkill === skill ||
               (hoveredRoute !== null &&
                 routeTarget(ROUTES[hoveredRoute - 1]) === skill);
-            const isBrokenTarget = skill === "C";
             const isNewSkill = skill === NEW_SKILL;
-            const textColor = isBrokenTarget
-              ? "var(--callout-error)"
-              : hot || isNewSkill
-                ? "var(--text-primary)"
-                : "var(--text-secondary)";
 
             return (
               <g
@@ -213,37 +207,14 @@ export function SkillCoexistenceRoutingDiagram() {
                   x={SX + 12}
                   y={y}
                   fontSize="13.5"
-                  fontWeight={hot || isBrokenTarget || isNewSkill ? 500 : 400}
-                  fill={textColor}
+                  fontWeight={hot ? 500 : 400}
+                  fill={hot ? "var(--text-primary)" : "var(--text-secondary)"}
                   dominantBaseline="central"
                   style={{ transition: "fill 150ms ease-out" }}
                 >
                   Skill {skill}
+                  {isNewSkill ? " (new)" : ""}
                 </text>
-                {isNewSkill ? (
-                  <>
-                    <rect
-                      x={SX + 62}
-                      y={y - 8}
-                      width={34}
-                      height={16}
-                      rx={8}
-                      fill="color-mix(in oklab, var(--callout-info) 22%, var(--surface-bg))"
-                      stroke="var(--callout-info)"
-                      strokeWidth={1}
-                    />
-                    <text
-                      x={SX + 79}
-                      y={y}
-                      fontSize="10.5"
-                      fill="var(--text-secondary)"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                    >
-                      new
-                    </text>
-                  </>
-                ) : null}
               </g>
             );
           })}
