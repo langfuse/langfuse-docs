@@ -13,6 +13,12 @@ We only change the owner after the verification below succeeds. Urgency, seniori
 
 </Callout>
 
+<Callout type="info">
+
+Avoid this situation: give at least two people the `Owner` role under **Organization Settings → Members**. A second owner can change roles at any time, without verification or support.
+
+</Callout>
+
 ## Process
 
 <Steps>
@@ -43,7 +49,7 @@ If your company controls the mailbox but cannot log in, we send a one-time code 
 
 1. We email all admins of the organization and the departed owner's address that an owner change was requested and by whom, and wait 24 hours for objections.
 2. We promote the requester to `Owner`. The departed owner's membership stays in place for the new owner to remove.
-3. We confirm the change and recommend keeping at least two owners, so this situation cannot recur.
+3. We confirm the change.
 
 </Steps>
 
@@ -54,7 +60,18 @@ This path applies only if your company cannot receive email at the owner's addre
 - **Domain control**: you add a DNS TXT record with a value we provide to the email domain of the requester.
 - **Authority over the account**: billing details that match our records (a recent invoice number and the last four digits of the card).
 
-If both cannot be provided, for example because the organization has no paid plan or uses a personal email domain, we do not transfer ownership.
+If both cannot be provided, for example because the organization has no paid plan or uses a personal email domain, we do not transfer ownership. In that case, [move to a new organization](#new-organization).
+
+## Moving to a new organization [#new-organization]
+
+If your company cannot access the owner's email, change DNS records, or provide billing details, create a new organization and migrate your data. This does not need the departed owner or support:
+
+1. Create a new organization and projects, and invite your team.
+2. Create API keys in the old projects. Project admins can do this under **Project Settings → API Keys**.
+3. Copy prompts, datasets, and traces to the new projects through the API. The [data migration guide](/faq/all/migrate-data-between-langfuse-instances) links to scripts for this.
+4. Point your applications to the API keys of the new projects.
+
+This is also the fastest route if you need full control right away. You can complete the verification above later.
 
 ## For the support team
 
