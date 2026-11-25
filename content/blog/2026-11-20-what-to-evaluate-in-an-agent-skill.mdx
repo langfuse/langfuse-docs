@@ -161,11 +161,10 @@ Looking at routing, trajectory efficiency, and multi-constraint outcome graders 
 
 As covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observing your agent's traces:
 
-1. **Prove the skill works when forced before testing routing.** Don't tune frontmatter for a skill whose instructions don't improve outcomes yet. Force-load it on a small set of real tasks and verify it beats `no-skill` first.
-2. **Read 10 to 20 traces and fix the obvious bugs directly.** Early failures are usually glaring instruction gaps—missing flags, stale paths, or unclear steps. Fix those in `SKILL.md` instead of building permanent evaluators around temporary bugs.
-3. **Lock in cheap, deterministic checks next.** Once the skill settles, automate the highest-signal regressions: routing (`SKILL.md` and `references/` loads, plus coexistence with existing skills), tool error rates, and objective outcome checks.
-4. **Add LLM judges last, and never collapse them into one score.** Only write narrow, boolean judges for qualitative failures you have actually seen in traces. Keeping metrics separate—rather than optimizing a single composite number—is what stops you from Goodharting your skill.
-5. **Re-run your `no-skill` baseline when models upgrade.** New frontier models quietly absorb instructions older skills had to spell out. Periodically check whether your skill still earns its context tokens, and delete what the model already knows.
+1. **Start by reading traces.** Run your agent on realistic prompts and inspect the traces before writing a single evaluator. Fix glaring gaps in `SKILL.md` directly, and let real failure modes tell you what is actually worth measuring.
+2. **Add routing evals first.** Once the skill is usable, verify that the agent loads it (and the right reference files) when it should, without breaking existing skills. Routing evals are fast to run and tell you immediately whether your skill is even reaching the model.
+3. **Layer in outcome and trajectory evals without collapsing them into one score.** Measure whether the agent accomplished the task and whether it got there cleanly (low tool errors, minimal workarounds, reasonable cost). Keep these metrics separate rather than optimizing a single composite number—that is what stops you from Goodharting your skill.
+4. **Re-run your `no-skill` baseline when models upgrade.** New frontier models quietly absorb instructions older skills had to spell out. Periodically check whether your skill still earns its context tokens, and delete what the model already knows.
 
 > **TODO (draft notes — remove before publishing):**
 >
