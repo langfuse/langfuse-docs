@@ -18,12 +18,10 @@ const COUNTS: Record<string, number> = {
   F: 2,
   G: 1,
   H: 1,
-  I: 1,
-  J: 1,
-  K: 1,
 };
 
-const LETTERS = [...Object.keys(COUNTS), "L"];
+const NEW_SKILL = "I";
+const LETTERS = [...Object.keys(COUNTS), NEW_SKILL];
 
 const ROUTES: RouteItem[] = [];
 Object.entries(COUNTS).forEach(([skill, count]) => {
@@ -31,21 +29,21 @@ Object.entries(COUNTS).forEach(([skill, count]) => {
     ROUTES.push({ id: ROUTES.length + 1, skill });
   }
 });
-ROUTES.push({ id: ROUTES.length + 1, skill: "L", isNew: true });
+ROUTES.push({ id: ROUTES.length + 1, skill: NEW_SKILL, isNew: true });
 
 const STOLEN_ROUTE_ID = 5;
 
 const W = 680;
-const H = 444;
+const H = 336;
 const AX = 8;
 const AW = 104;
 const SX = 540;
 
 const rowY = (index: number) => 24 + index * 36;
-const exitY = (index: number) => 72 + index * 20;
+const exitY = (index: number) => 60 + index * 18;
 
 function routeTarget(route: RouteItem): string {
-  return route.id === STOLEN_ROUTE_ID ? "L" : route.skill;
+  return route.id === STOLEN_ROUTE_ID ? NEW_SKILL : route.skill;
 }
 
 export function SkillCoexistenceRoutingDiagram() {
@@ -86,7 +84,7 @@ export function SkillCoexistenceRoutingDiagram() {
         <svg
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label="Skill routing coexistence diagram: an agent routes prompts across Skill A through Skill K. When Skill L (new) is added, a route that previously went to Skill C is pulled away to Skill L, shown as a dashed red broken route to Skill C and a solid red hijacked route to Skill L."
+          aria-label="Skill routing coexistence diagram: an agent routes prompts across Skill A through Skill H. When Skill I (new) is added, a route that previously went to Skill C is pulled away to Skill I, shown as a dashed red broken route to Skill C and a solid red hijacked route to Skill I."
           className="block h-auto w-full text-text-primary"
         >
           {/* Agent node */}
@@ -187,7 +185,7 @@ export function SkillCoexistenceRoutingDiagram() {
               (hoveredRoute !== null &&
                 routeTarget(ROUTES[hoveredRoute - 1]) === skill);
             const isBrokenTarget = skill === "C";
-            const isNewSkill = skill === "L";
+            const isNewSkill = skill === NEW_SKILL;
             const textColor = isBrokenTarget
               ? "var(--callout-error)"
               : hot || isNewSkill
@@ -256,27 +254,27 @@ export function SkillCoexistenceRoutingDiagram() {
       <div className={`${styles.mobile} space-y-3 text-sm text-text-secondary`}>
         <div className="border border-line-structure bg-surface-bg p-3.5 text-xs">
           <div className="font-medium text-text-primary">
-            Agent routing across Skill A through Skill L
+            Agent routing across Skill A through Skill I
           </div>
           <ul className="mt-2 space-y-1.5">
             <li>
               <span className="font-medium text-text-primary">
-                Skill A through Skill K:
+                Skill A through Skill H:
               </span>{" "}
               existing skills with established routing paths from the agent.
             </li>
             <li>
               <span className="font-medium text-text-primary">
-                Skill L (new):
+                Skill I (new):
               </span>{" "}
               added alongside the existing library with its own intended route.
             </li>
             <li>
               <span className="font-medium text-[var(--callout-error)]">
-                Skill C → Skill L:
+                Skill C → Skill I:
               </span>{" "}
               a prompt that previously routed to Skill C is silently pulled away
-              to Skill L.
+              to Skill I.
             </li>
           </ul>
         </div>
