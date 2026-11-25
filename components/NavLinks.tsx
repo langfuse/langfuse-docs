@@ -1,12 +1,13 @@
 "use client";
 
 import { Link } from "@/components/ui/link";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import {
   industryLinks,
+  productCtas,
   productLinks,
   resourcesLinks,
   simpleLinks,
@@ -28,32 +29,6 @@ type FeaturedItem = {
   description: string;
   cta: string;
   href: string;
-};
-
-const productFeatured: FeaturedItem = {
-  image: (
-    <div className="flex justify-center items-center px-5 h-full">
-      <div className="px-4 py-3 w-full rounded border shadow-sm border-line-structure bg-surface-1">
-        <div className="mb-2 flex items-center gap-1.5">
-          <div className="rounded-full size-2 bg-line-structure" />
-          <span className="font-sans text-[10px] font-semibold text-text-tertiary tracking-tight">
-            langfuse
-          </span>
-        </div>
-        <p className="font-sans text-[11px] font-semibold text-text-primary leading-snug">
-          Get Started with Tracing
-        </p>
-        <p className="mt-1 font-sans text-[10px] text-text-tertiary leading-relaxed">
-          Step-by-step guide to ingesting your first trace using OpenAI,
-          LangChain, or the SDKs.
-        </p>
-      </div>
-    </div>
-  ),
-  title: "Get Started with Tracing",
-  description: "This guide walks you through ingesting your first trace.",
-  cta: "Read docs",
-  href: "/docs/observability/get-started",
 };
 
 const resourcesFeatured: FeaturedItem = {
@@ -105,6 +80,315 @@ function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
       </div>
     </Link>
   );
+}
+
+// ── Product panel variants (temporary preview switch: ?navVariant=1..4) ────────
+
+export type ProductPanelVariant = 1 | 2 | 3 | 4;
+const DEFAULT_PRODUCT_VARIANT: ProductPanelVariant = 2;
+
+function CtaBadge({ label }: { label: string }) {
+  return (
+    <span className="border border-line-structure bg-surface-bg px-1 py-px font-mono text-[9px] leading-none tracking-[0.04em] text-text-secondary">
+      {label}
+    </span>
+  );
+}
+
+function CtaArrow() {
+  return (
+    <ArrowRight className="size-3 transition-transform group-hover/cta:translate-x-0.5" />
+  );
+}
+
+function ProductItemList({ withDescriptions }: { withDescriptions?: boolean }) {
+  return (
+    <div className="group/dropdown flex min-w-[240px] flex-col gap-[6px] p-3.5">
+      {productLinks.map((link) => {
+        const Icon = link.icon;
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className={cn(
+              "group/link link-box group relative flex gap-3 no-underline transition-colors hover:bg-surface-bg",
+              withDescriptions
+                ? "items-start px-1.5 py-1.5"
+                : "items-center p-1",
+            )}
+          >
+            <HoverCorners />
+            {withDescriptions ? (
+              <span className="flex size-7 shrink-0 items-center justify-center border border-line-structure bg-surface-bg">
+                <Icon className="size-[14px] text-text-tertiary transition-colors group-hover/link:text-text-primary" />
+              </span>
+            ) : (
+              <Icon className="size-[15px] shrink-0 text-text-tertiary transition-colors group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary" />
+            )}
+            <span className="flex flex-col gap-0.5">
+              <span
+                className={cn(
+                  "font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] transition-colors",
+                  withDescriptions
+                    ? "text-text-primary"
+                    : "text-text-tertiary group-hover/dropdown:text-text-disabled group-hover/dropdown:group-hover/link:text-text-tertiary",
+                )}
+              >
+                {link.name}
+              </span>
+              {withDescriptions && link.description ? (
+                <span className="font-sans text-[11.5px] leading-[1.3] text-text-tertiary">
+                  {link.description}
+                </span>
+              ) : null}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Variant 1: list only, with a column heading and a docs link footer. */
+function ProductPanelListOnly() {
+  return (
+    <div className="flex w-[300px] flex-col border border-line-structure bg-surface-1 shadow-md">
+      <p className="px-[18px] pt-3.5 font-mono text-[10px] uppercase tracking-[0.09em] text-text-tertiary">
+        Platform
+      </p>
+      <div className="-mt-1.5">
+        <ProductItemList />
+      </div>
+      <Link
+        href="/docs"
+        className="group/cta flex items-center justify-between border-t border-line-structure bg-surface-bg px-[18px] py-2.5 no-underline"
+      >
+        <span className="font-sans text-[12px] text-text-tertiary transition-colors group-hover/cta:text-text-primary">
+          Browse all documentation
+        </span>
+        <span className="text-text-tertiary">
+          <CtaArrow />
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/** Variant 2: two stacked CTA cards with an icon tile. */
+function ProductPanelStacked() {
+  return (
+    <div className="flex min-w-max border border-line-structure bg-surface-1 shadow-md">
+      <ProductItemList />
+      <div className="flex w-[300px] flex-col border-l border-line-structure bg-surface-bg">
+        {productCtas.map((cta, index) => {
+          const Icon = cta.icon;
+          return (
+            <Link
+              key={cta.href}
+              href={cta.href}
+              className={cn(
+                "group/cta relative flex flex-1 gap-3.5 p-4 no-underline transition-colors hover:bg-surface-1",
+                index > 0 && "border-t border-line-structure",
+              )}
+            >
+              <span className="with-stripes flex size-10 shrink-0 items-center justify-center border border-line-structure bg-surface-1">
+                <Icon className="size-[18px] text-text-secondary" />
+              </span>
+              <span className="flex flex-col gap-1">
+                <span className="flex items-center gap-2 font-sans text-[13px] font-semibold leading-snug text-text-primary">
+                  {cta.title}
+                  {cta.badge ? <CtaBadge label={cta.badge} /> : null}
+                </span>
+                <span className="font-sans text-[12px] leading-relaxed text-text-tertiary">
+                  {cta.description}
+                </span>
+                <span className="mt-1 flex items-center gap-1 font-mono text-[11px] text-text-tertiary transition-colors group-hover/cta:text-text-primary">
+                  {cta.cta}
+                  <CtaArrow />
+                </span>
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function TracePreview() {
+  const rows = [
+    { name: "agent-run", indent: 0, width: "w-full" },
+    { name: "retrieve-docs", indent: 1, width: "w-2/5" },
+    { name: "llm-call", indent: 1, width: "w-3/5" },
+    { name: "tool: search", indent: 2, width: "w-1/4" },
+  ];
+  return (
+    <div className="w-full border border-line-structure bg-surface-1 px-2.5 py-2 shadow-sm">
+      {rows.map((row) => (
+        <div
+          key={row.name}
+          className="flex items-center gap-2 py-[3px]"
+          style={{ paddingLeft: row.indent * 10 }}
+        >
+          <span className="w-[74px] shrink-0 truncate font-mono text-[8.5px] text-text-tertiary">
+            {row.name}
+          </span>
+          <span className="flex-1">
+            <span className={cn("block h-1.5 bg-line-structure", row.width)} />
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GatewayPreview() {
+  const node = (label: string, strong?: boolean) => (
+    <span
+      className={cn(
+        "border px-1.5 py-1 font-mono text-[8.5px] leading-none shadow-sm",
+        strong
+          ? "border-text-tertiary bg-surface-1 text-text-primary"
+          : "border-line-structure bg-surface-1 text-text-tertiary",
+      )}
+    >
+      {label}
+    </span>
+  );
+  const edge = <span className="h-px flex-1 bg-text-disabled" />;
+  return (
+    <div className="flex w-full flex-col items-center gap-2">
+      <div className="flex w-full items-center">
+        {node("app")}
+        {edge}
+        {node("gateway", true)}
+        {edge}
+        {node("model")}
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="h-3 w-px bg-text-disabled" />
+        {node("trace + cost")}
+      </div>
+    </div>
+  );
+}
+
+const ctaPreviews = [<TracePreview key="t" />, <GatewayPreview key="g" />];
+
+/** Variant 3: two side-by-side tiles with a small illustrative preview. */
+function ProductPanelTiles() {
+  return (
+    <div className="flex min-w-max border border-line-structure bg-surface-1 shadow-md">
+      <ProductItemList />
+      {productCtas.map((cta, index) => (
+        <Link
+          key={cta.href}
+          href={cta.href}
+          className="group/cta flex w-[220px] flex-col border-l border-line-structure no-underline"
+        >
+          <div className="with-stripes flex h-[118px] shrink-0 items-center border-b border-line-structure px-4">
+            {ctaPreviews[index]}
+          </div>
+          <div className="flex flex-1 flex-col gap-1.5 p-4 transition-colors group-hover/cta:bg-surface-bg">
+            <span className="flex items-center gap-2 font-sans text-[13px] font-semibold leading-snug text-text-primary">
+              {cta.title}
+              {cta.badge ? <CtaBadge label={cta.badge} /> : null}
+            </span>
+            <span className="font-sans text-[12px] leading-relaxed text-text-tertiary">
+              {cta.description}
+            </span>
+            <span className="mt-auto flex items-center gap-1 pt-1 font-mono text-[11px] text-text-tertiary transition-colors group-hover/cta:text-text-primary">
+              {cta.cta}
+              <CtaArrow />
+            </span>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/** Variant 4: described items in two columns, with a get-started footer. */
+function ProductPanelFooter() {
+  return (
+    <div className="flex w-[560px] flex-col border border-line-structure bg-surface-1 shadow-md">
+      <div className="group/dropdown grid grid-cols-2 gap-x-2 gap-y-1 p-3">
+        {productLinks.map((link) => {
+          const Icon = link.icon;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="group/link link-box group relative flex items-start gap-3 p-2 no-underline transition-colors hover:bg-surface-bg"
+            >
+              <HoverCorners />
+              <span className="flex size-7 shrink-0 items-center justify-center border border-line-structure bg-surface-bg">
+                <Icon className="size-[14px] text-text-tertiary transition-colors group-hover/link:text-text-primary" />
+              </span>
+              <span className="flex flex-col gap-0.5">
+                <span className="font-sans text-[13px] font-[430] leading-[1.2] tracking-[-0.26px] text-text-primary">
+                  {link.name}
+                </span>
+                <span className="font-sans text-[11.5px] leading-[1.3] text-text-tertiary">
+                  {link.description}
+                </span>
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+      <div className="grid grid-cols-2 border-t border-line-structure bg-surface-bg">
+        {productCtas.map((cta, index) => {
+          const Icon = cta.icon;
+          return (
+            <Link
+              key={cta.href}
+              href={cta.href}
+              className={cn(
+                "group/cta flex items-center gap-2.5 px-5 py-3 no-underline transition-colors hover:bg-surface-1",
+                index > 0 && "border-l border-line-structure",
+              )}
+            >
+              <Icon className="size-[14px] shrink-0 text-text-tertiary transition-colors group-hover/cta:text-text-primary" />
+              <span className="font-sans text-[12.5px] font-[480] text-text-secondary transition-colors group-hover/cta:text-text-primary">
+                {cta.title}
+              </span>
+              {cta.badge ? <CtaBadge label={cta.badge} /> : null}
+              <span className="ml-auto text-text-tertiary">
+                <CtaArrow />
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ProductPanel({ variant }: { variant: ProductPanelVariant }) {
+  switch (variant) {
+    case 1:
+      return <ProductPanelListOnly />;
+    case 2:
+      return <ProductPanelStacked />;
+    case 3:
+      return <ProductPanelTiles />;
+    default:
+      return <ProductPanelFooter />;
+  }
+}
+
+function useProductPanelVariant(): ProductPanelVariant {
+  const [variant, setVariant] = useState<ProductPanelVariant>(
+    DEFAULT_PRODUCT_VARIANT,
+  );
+  useEffect(() => {
+    const value = Number(
+      new URLSearchParams(window.location.search).get("navVariant"),
+    );
+    if (value >= 1 && value <= 4) setVariant(value as ProductPanelVariant);
+  }, []);
+  return variant;
 }
 
 // ── Mega dropdown panel ────────────────────────────────────────────────────────
@@ -178,6 +462,7 @@ function NavDropdown({
   label,
   columns,
   featured,
+  panel,
   openId,
   setOpenId,
   cancelScheduledClose,
@@ -185,8 +470,9 @@ function NavDropdown({
 }: {
   id: MegaMenuId;
   label: string;
-  columns: { heading?: string; links: NavPanelLink[] }[];
+  columns?: { heading?: string; links: NavPanelLink[] }[];
   featured?: FeaturedItem;
+  panel?: React.ReactNode;
   openId: MegaMenuId | null;
   setOpenId: React.Dispatch<React.SetStateAction<MegaMenuId | null>>;
   cancelScheduledClose: () => void;
@@ -299,7 +585,9 @@ function NavDropdown({
           left,
         }}
       >
-        <NavDropdownPanel columns={columns} featured={featured} />
+        {panel ?? (
+          <NavDropdownPanel columns={columns ?? []} featured={featured} />
+        )}
       </div>
     </div>
   );
@@ -313,6 +601,7 @@ export function NavLinks({
   sectionNavData: SectionNavData[];
 }) {
   const [openId, setOpenId] = useState<MegaMenuId | null>(null);
+  const productVariant = useProductPanelVariant();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cancelScheduledClose = useCallback(() => {
@@ -342,8 +631,7 @@ export function NavLinks({
         <NavDropdown
           id="product"
           label="Product"
-          columns={[{ links: productLinks }]}
-          featured={productFeatured}
+          panel={<ProductPanel variant={productVariant} />}
           openId={openId}
           setOpenId={setOpenId}
           cancelScheduledClose={cancelScheduledClose}

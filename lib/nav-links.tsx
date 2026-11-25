@@ -25,23 +25,74 @@ export type NavPanelLink = {
   name: string;
   href: string;
   icon: LucideIcon;
+  description?: string;
 };
 
 export const productLinks: NavPanelLink[] = [
-  { name: "Overview", href: "/docs", icon: LayoutGrid },
+  {
+    name: "Overview",
+    href: "/docs",
+    icon: LayoutGrid,
+    description: "Tour the Langfuse platform",
+  },
   {
     name: "AI Observability",
     href: "/docs/observability/overview",
     icon: Activity,
+    description: "Trace and debug LLM apps",
   },
   {
     name: "Prompt & Skill Management",
     href: "/docs/prompt-and-skill-management/overview",
     icon: MessageSquare,
+    description: "Version and deploy prompts",
   },
-  { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
-  { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
-  { name: "AI Gateway", href: "/docs/gateway/overview", icon: Network },
+  {
+    name: "Evaluation",
+    href: "/docs/evaluation/overview",
+    icon: FlaskConical,
+    description: "Measure quality with evals",
+  },
+  {
+    name: "Metrics",
+    href: "/docs/metrics/overview",
+    icon: BarChart2,
+    description: "Track cost, latency, and quality",
+  },
+  {
+    name: "AI Gateway",
+    href: "/docs/gateway/overview",
+    icon: Network,
+    description: "Route and trace model calls",
+  },
+];
+
+export type NavCta = {
+  title: string;
+  description: string;
+  cta: string;
+  href: string;
+  icon: LucideIcon;
+  badge?: string;
+};
+
+export const productCtas: NavCta[] = [
+  {
+    title: "Get started with tracing",
+    description: "Ingest your first trace with OpenAI, LangChain, or the SDKs.",
+    cta: "Read docs",
+    href: "/docs/observability/get-started",
+    icon: Activity,
+  },
+  {
+    title: "Set up AI Gateway",
+    description:
+      "Route OpenAI and Anthropic calls through Langfuse, with no code changes.",
+    cta: "Read setup guide",
+    href: "/docs/gateway/get-started/admin-setup",
+    icon: Network,
+    badge: "New",
+  },
 ];
 
 export const resourcesLinks: NavPanelLink[] = [
