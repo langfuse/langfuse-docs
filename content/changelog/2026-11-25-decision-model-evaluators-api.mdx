@@ -1,0 +1,34 @@
+---
+date: 2026-11-25
+title: Manage decision-model evaluators via the API
+description: Create, update, and version decision-model evaluators through the stable public evaluators API.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now manage [decision-model evaluators](/docs/evaluation/evaluation-methods/decision-models) through the stable `/api/public/v2/evaluators` endpoints, next to LLM-as-a-Judge and code evaluators. Create them with `type: "decision_model"`, keep them in version control, and attach them to evaluation rules from your deployment pipeline.
+
+A decision-model evaluator definition has three parts:
+
+- **`questions`**: typed `choice`, `score`, or `boolean` questions. Each question lists its allowed answers in `criteria`: options for `choice`, levels from lowest to highest for `score`, and optional `true` and `false` descriptions for `boolean`.
+- **`modelConfig`**: the connection `provider` and decision `model`. It is required for decision-model evaluators.
+- **`variableMapping`**: which observation data the model receives, mapped to named state keys that the questions refer to.
+
+<Cards num={2}>
+  <Card
+    title="Decision model evaluators"
+    href="/docs/evaluation/evaluation-methods/decision-models"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Evaluators API reference"
+    href="https://api.reference.langfuse.com/#tag/evaluators"
+    icon={<Code />}
+    arrow
+  />
+</Cards>
