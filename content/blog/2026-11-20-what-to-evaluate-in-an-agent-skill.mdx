@@ -29,7 +29,7 @@ Evaluating an agent skill differs from evaluating a prompt in two fundamental wa
 
 ### 1. Progressive disclosure
 
-Prompts are always loaded into an agent's context from the start. Skills load on demand: the agent initially sees only the frontmatter, and reads `SKILL.md` (and any reference files) only if it decides it needs them.
+Prompts are always immediately in an agent's context. A skill, on the other hand, uses a progressive disclosure mechanism: the agent starts with only the frontmatter in context, and loads `SKILL.md` (and any reference files) only if it decides it needs them.
 
 This means that, unlike for prompts, you can't just blindly evaluate every agent execution assuming the agent was aware of the skill content.
 
