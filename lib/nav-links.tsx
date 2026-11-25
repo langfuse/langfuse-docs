@@ -25,46 +25,23 @@ export type NavPanelLink = {
   name: string;
   href: string;
   icon: LucideIcon;
-  description?: string;
 };
 
 export const productLinks: NavPanelLink[] = [
-  {
-    name: "Overview",
-    href: "/docs",
-    icon: LayoutGrid,
-    description: "Tour the Langfuse platform",
-  },
+  { name: "Overview", href: "/docs", icon: LayoutGrid },
   {
     name: "AI Observability",
     href: "/docs/observability/overview",
     icon: Activity,
-    description: "Trace and debug LLM apps",
   },
   {
     name: "Prompt & Skill Management",
     href: "/docs/prompt-and-skill-management/overview",
     icon: MessageSquare,
-    description: "Version and deploy prompts",
   },
-  {
-    name: "Evaluation",
-    href: "/docs/evaluation/overview",
-    icon: FlaskConical,
-    description: "Measure quality with evals",
-  },
-  {
-    name: "Metrics",
-    href: "/docs/metrics/overview",
-    icon: BarChart2,
-    description: "Track cost, latency, and quality",
-  },
-  {
-    name: "AI Gateway",
-    href: "/docs/gateway/overview",
-    icon: Network,
-    description: "Route and trace model calls",
-  },
+  { name: "Evaluation", href: "/docs/evaluation/overview", icon: FlaskConical },
+  { name: "Metrics", href: "/docs/metrics/overview", icon: BarChart2 },
+  { name: "AI Gateway", href: "/docs/gateway/overview", icon: Network },
 ];
 
 export type NavCta = {
