@@ -28,7 +28,7 @@ If you drill it down, a software factory for agent loops needs 5 parts:
 2. **A way to pick which traces to look at:** on day one, the bot can simply sample and read recent traces on its own. As volume grows, signals like errors, latency/cost spikes, [topics](/docs/observability/features/topics), and [user feedback](/docs/observability/features/user-feedback) help narrow thousands of runs down to the handful worth checking.
 3. **A written sense of "good":** a short living doc of your expectations and edge cases that starts tiny on day one and grows from your feedback.
 4. **A scheduled sweep:** a daily routine that checks recent traces against that doc and brings you clear issues plus gray areas to judge.
-5. **An agent that can act:** repo access to update its written context from your replies and open PRs once you approve a fix.
+5. **An agent that can act and verify changes:** repo access to update its written context from your replies, run tests or [experiments](/docs/evaluation/experiments/experiments-via-sdk) to validate fixes, and open PRs once you approve.
 
 <Frame fullWidth className="w-full my-8">
   ![Loop diagram titled The simplest software factory loop for your agent (Langfuse + Grok Bot): production traces flow into a scheduled Grok Bot reading written instructions updated daily from feedback; human review either clarifies gray areas and updates context or approves a fix to optionally run an experiment and open a PR](/images/blog/2026-11-24-simplest-software-factory-loop/loop-diagram.png)
