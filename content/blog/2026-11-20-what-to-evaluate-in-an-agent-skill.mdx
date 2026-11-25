@@ -159,7 +159,7 @@ Track when the agent abandons the path your skill recommends, for example:
 
 Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite on day one—or worse, optimize against a flawed metric.
 
-As expansively covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observing your agent's traces:
+As covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observing your agent's traces:
 
 1. **Prove the skill works when forced before testing routing.** Don't tune frontmatter for a skill whose instructions don't improve outcomes yet. Force-load it on a small set of real tasks and verify it beats `no-skill` first.
 2. **Read 10 to 20 traces and fix the obvious bugs directly.** Early failures are usually glaring instruction gaps—missing flags, stale paths, or unclear steps. Fix those in `SKILL.md` instead of building permanent evaluators around temporary bugs.
