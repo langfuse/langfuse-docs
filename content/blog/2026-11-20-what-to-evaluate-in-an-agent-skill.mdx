@@ -57,9 +57,9 @@ This brings you to two things to test every time you edit your skill:
 
 ## Evaluating skill selection & progressive disclosure (routing) [#evaluating-skill-selection-and-routing]
 
-The mechanism here is straightforward: spin up agents in an environment with a prompt and check whether they read the skill you want, which is deterministic when you [link skills to traces](/docs/skill-management/tracing).
+Routing evals test whether the agent loads the right skill, and the right files inside it, when left on its own.
 
-<p className="bg-surface-cta-primary px-2 py-1 italic text-text-primary">TODO: add something about code based evaluators that check output against what is in expected_output in the dataset item</p>
+To test this, each dataset item pairs a prompt (`input`) and environment setup (`metadata`) with the skill or reference file that should be used (`expected_output`). When you [link skills to traces](/docs/skill-management/tracing), every skill load is recorded on the trace, so a [code-based evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can deterministically check the trace against `expected_output`.
 
 <SkillRoutingEvalFlowDiagram />
 
