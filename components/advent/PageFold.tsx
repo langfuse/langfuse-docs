@@ -401,7 +401,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
             cancel.current();
           }}
         >
-          Skip effect <kbd>Esc</kbd>
+          Skip effect
         </button>,
         document.body,
       )
