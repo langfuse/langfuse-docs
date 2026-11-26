@@ -17,6 +17,7 @@ This guide walks you through how to set up a dataset, run an experiment on it, a
 </Callout>
 
 import { Details, Summary } from "@/components/Details";
+import McpSkillInstall from "@/components-mdx/get-started/mcp-skill-install.mdx";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 
@@ -26,7 +27,7 @@ import { Link } from "@/components/ui/link";
 
 Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
 
-<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+<Tabs items={["Ask your coding agent", "Langfuse MCP", "Cursor plugin", "Manual installation"]}>
 
 <Tab>
 
@@ -36,6 +37,18 @@ Ask your coding agent to install the skill by pointing to the [GitHub repository
 Install the Langfuse Agent Skill from github.com/langfuse/skills
 and use it to create a first dataset for this application
 with Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+<McpSkillInstall />
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Set up offline evaluation for this application with Langfuse.
 ```
 
 </Tab>
