@@ -7,7 +7,7 @@ const marketplaceFaqByVariant: Record<"cloud" | "selfHosted", FAQItem> = {
   cloud: {
     question: MARKETPLACE_QUESTION,
     answer:
-      "Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available for Enterprise customers.",
+      "Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer.",
   },
   selfHosted: {
     question: MARKETPLACE_QUESTION,
