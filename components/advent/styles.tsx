@@ -138,12 +138,10 @@ export function AdventStyles() {
       .adv-title-night { opacity: clamp(0, var(--adv-scene) * 2 - 1, 1); font-weight: 800; color: var(--adv-gold); letter-spacing: -.07em; }
       .adv-figures { pointer-events: none; }
       .adv-figures > * { pointer-events: auto; }
-      .adv-santa-button { position: relative; flex-shrink: 0; border-radius: 12px; outline-offset: 8px; }
-      .adv-santa-button:focus-visible { outline: 2px solid var(--adv-accent-text); }
+      .adv-figures .adv-santa-figure { position: relative; flex-shrink: 0; pointer-events: none; }
       .adv-santa-harness { opacity: clamp(0, var(--adv-scene) * 2 - .45, 1); }
       .adv-santa-coat { fill: color-mix(in srgb, #b3262e, #191c29 calc(var(--adv-scene) * 100%)); }
       .adv-santa-heart { transform-origin: 70px 146px; transform: scale(calc(1 + var(--adv-pulse, 0) * .12)); }
-      .adv-santa-button:hover .adv-santa-heart { filter: drop-shadow(0 0 4px #ff526c); }
       .adv-page[data-scene-phase="berlin"] .adv-santa-wave { animation-duration: .6s; }
       .adv-page[data-scene-phase="berlin"] .adv-santa { animation-duration: .6s; }
       .adv-page[data-scene-phase="berlin"] .adv-bulb { opacity: calc(.35 + var(--adv-pulse, 0) * .65); }
@@ -919,6 +917,7 @@ export function AdventStyles() {
         .adv-slop-control input { width: 80px; }
       }
       @media (max-height: 600px) {
+        .adv-brand > svg { top: -4px; width: 24px; }
         .adv-page:not([data-experience="intro"]) { grid-template-rows: 46px 58px minmax(0,1fr) 42px; }
         .adv-page:not([data-experience="intro"]) .adv-heading { display: none; }
         .adv-page:not([data-experience="intro"]) .adv-experience-header { padding: 4px; }

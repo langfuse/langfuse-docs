@@ -34,3 +34,25 @@ export function LogoKnot() {
     </svg>
   );
 }
+
+export function SantaHat() {
+  return (
+    <svg
+      viewBox="0 0 40 30"
+      aria-hidden
+      className="pointer-events-none absolute -left-[3px] -top-[11px] z-10 w-[26px] -rotate-[18deg] sm:-top-[12px] sm:w-[28px]"
+    >
+      <path d="M4 24 Q10 4 30 6 Q24 12 28 24 Z" fill="#b3262e" />
+      <circle cx="32" cy="7" r="4" fill="#fbf7ef" stroke="#e5ddd0" />
+      <rect
+        x="2"
+        y="21"
+        width="30"
+        height="7"
+        rx="3.5"
+        fill="#fbf7ef"
+        stroke="#e5ddd0"
+      />
+    </svg>
+  );
+}

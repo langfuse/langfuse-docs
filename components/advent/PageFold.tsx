@@ -373,7 +373,11 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
   useEffect(() => {
     if (!active) return;
     const skip = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (
+        event.key === "Escape" &&
+        !event.defaultPrevented &&
+        !document.querySelector('.adv-dialog[data-state="open"]')
+      ) {
         event.preventDefault();
         cancel.current();
       }

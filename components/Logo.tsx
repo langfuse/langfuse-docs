@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const ContextMenu = dynamic(() => import("./LogoContextMenu"), {
@@ -43,30 +42,26 @@ export function Logo({
   variant?: keyof typeof WORDMARKS;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const pathname = usePathname();
   const wordmark = WORDMARKS[variant];
-  const showSantaHat = variant === "langfuse" && pathname === "/advent";
   const images = (
-    <div className="relative">
-      {showSantaHat ? <SantaHat /> : null}
-      <div className="logo-images flex gap-2 items-center cursor-pointer shrink-0">
-        <Image
-          src={wordmark.dark}
-          alt={wordmark.alt}
-          width={wordmark.width}
-          height={wordmark.height}
-          className={`hidden dark:block ${wordmark.className}`}
-          priority
-        />
-        <Image
-          src={wordmark.light}
-          alt={wordmark.alt}
-          width={wordmark.width}
-          height={wordmark.height}
-          className={`block dark:hidden ${wordmark.className}`}
-          priority
-        />
-        <style jsx>{`
+    <div className="logo-images flex gap-2 items-center cursor-pointer shrink-0">
+      <Image
+        src={wordmark.dark}
+        alt={wordmark.alt}
+        width={wordmark.width}
+        height={wordmark.height}
+        className={`hidden dark:block ${wordmark.className}`}
+        priority
+      />
+      <Image
+        src={wordmark.light}
+        alt={wordmark.alt}
+        width={wordmark.width}
+        height={wordmark.height}
+        className={`block dark:hidden ${wordmark.className}`}
+        priority
+      />
+      <style jsx>{`
         .logo-images {
           mask-image: linear-gradient(
             60deg,
@@ -84,7 +79,6 @@ export function Logo({
             -webkit-mask-position 1s ease;
         }
       `}</style>
-      </div>
     </div>
   );
 
@@ -116,27 +110,5 @@ export function Logo({
       </div>
       {menuOpen && <ContextMenu open={menuOpen} setOpen={setMenuOpen} />}
     </>
-  );
-}
-
-function SantaHat() {
-  return (
-    <svg
-      viewBox="0 0 40 30"
-      aria-hidden
-      className="pointer-events-none absolute -left-[3px] -top-[11px] z-10 w-[26px] -rotate-[18deg] sm:-top-[12px] sm:w-[28px]"
-    >
-      <path d="M4 24 Q10 4 30 6 Q24 12 28 24 Z" fill="#b3262e" />
-      <circle cx="32" cy="7" r="4" fill="#fbf7ef" stroke="#e5ddd0" />
-      <rect
-        x="2"
-        y="21"
-        width="30"
-        height="7"
-        rx="3.5"
-        fill="#fbf7ef"
-        stroke="#e5ddd0"
-      />
-    </svg>
   );
 }

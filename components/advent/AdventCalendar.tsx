@@ -30,7 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { PageFold, type PageFoldHandle } from "./PageFold";
 import { WelcomeFlight } from "./WelcomeFlight";
-import { LogoKnot } from "./LogoKnot";
+import { LogoKnot, SantaHat } from "./LogoKnot";
 import { SlopSlider, SlopDecorations, slopPhrase } from "./Slop";
 import { CalendarShatter, type CalendarShatterHandle } from "./CalendarShatter";
 import { useCalendarPhysics } from "./useCalendarPhysics";
@@ -433,8 +433,7 @@ function DoorDialog({
         onEscapeKeyDown={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          if (document.querySelector("[data-page-fold]")) onSkipEffect?.();
-          else onClose();
+          onClose();
         }}
         style={
           {
@@ -567,6 +566,8 @@ export function AdventCalendar() {
   const canvasRef = useRef<WinterCanvasHandle>(null);
   const foldRef = useRef<PageFoldHandle>(null);
   const openingRef = useRef(false);
+  const openingTaskRef = useRef<Promise<boolean> | null>(null);
+  const closingRef = useRef(false);
   const [entering, setEntering] = useState(false);
   const dialogOpenRef = useRef(false);
   const deepLinkHandled = useRef(false);
@@ -838,7 +839,7 @@ export function AdventCalendar() {
         }
         showDoor(day);
       };
-      const finished = await foldRef.current?.play(
+      const task = foldRef.current?.play(
         center,
         music.getFrame().mix > 0.5,
         () => {
@@ -848,37 +849,48 @@ export function AdventCalendar() {
         reveal,
         day,
       );
+      openingTaskRef.current = task ?? null;
+      const finished = await task;
       if (finished !== false) reveal();
     } finally {
+      openingTaskRef.current = null;
       openingRef.current = false;
       setEntering(false);
     }
   };
 
   const closeDoor = async () => {
-    if (openingRef.current) {
+    if (closingRef.current) {
       foldRef.current?.skip();
       return;
     }
     if (activeDay === null) return;
-    openingRef.current = true;
-    const day = activeDay;
-    const element = document.querySelector<HTMLElement>(
-      `[data-advent-door][data-day="${day}"]`,
-    );
-    const rect = element?.getBoundingClientRect();
-    const point = rect
-      ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-      : { x: innerWidth / 2, y: innerHeight / 2 };
-    let closed = false;
-    const close = () => {
-      if (!closed) {
-        closed = true;
-        showDoor(null);
-      }
-    };
-    const berlin = music.getFrame().mix > 0.5;
+    closingRef.current = true;
     try {
+      // A revealed window can close while its arrival is still finishing.
+      // Let that journey release its canvas/audio before starting the pullback.
+      if (openingRef.current) {
+        foldRef.current?.skip();
+        const finished = await openingTaskRef.current;
+        if (finished === false || !sceneRef.current) return;
+      }
+      openingRef.current = true;
+      const day = activeDay;
+      const element = document.querySelector<HTMLElement>(
+        `[data-advent-door][data-day="${day}"]`,
+      );
+      const rect = element?.getBoundingClientRect();
+      const point = rect
+        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        : { x: innerWidth / 2, y: innerHeight / 2 };
+      let closed = false;
+      const close = () => {
+        if (!closed) {
+          closed = true;
+          showDoor(null);
+        }
+      };
+      const berlin = music.getFrame().mix > 0.5;
       const finished = await foldRef.current?.play(
         point,
         berlin,
@@ -892,6 +904,7 @@ export function AdventCalendar() {
       );
       if (finished !== false) close();
     } finally {
+      closingRef.current = false;
       openingRef.current = false;
       setEntering(false);
     }
@@ -941,6 +954,7 @@ export function AdventCalendar() {
 
       <nav className="adv-nav" aria-label="Main navigation" data-no-snowball>
         <a className="adv-brand" href="/" aria-label="Langfuse home">
+          <SantaHat />
           <img
             src="/brand-assets/wordmark/light/langfuse-by-clickhouse.svg"
             width="150"
@@ -1010,7 +1024,7 @@ export function AdventCalendar() {
         </div>
       </header>
       <div className="adv-figures">
-        <div className="adv-santa-button" aria-hidden>
+        <div className="adv-santa-figure" aria-hidden>
           <Santa />
         </div>
         <Snowman
