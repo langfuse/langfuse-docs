@@ -109,7 +109,7 @@ function AiGatewayCard() {
               AI Gateway
             </Text>
             <span className="bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none uppercase tracking-wide text-text-primary">
-              New
+              Beta
             </span>
           </div>
           <Text size="s" className={toolDescriptionClassName}>

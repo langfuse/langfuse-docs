@@ -172,7 +172,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
       pill: "Unlimited Users",
       price: "$199",
       description:
-        "For scaling projects. Unlimited history, high rate limits, all features.",
+        "For scaling projects. 3 years of data access and high rate limits. Enterprise SSO and project-level RBAC come with the Teams add-on.",
       calloutLink: {
         text: "Discounts: Startups, EDU",
         href: "/pricing#discounts",
@@ -244,7 +244,7 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)",
         "Scalability of Langfuse Cloud",
         "Deployment docs & Helm chart",
-        "Enterprise SSO and RBAC",
+        "Enterprise SSO and organization-level RBAC",
         "Community support",
       ],
       cta: "Deployment guide",
@@ -959,7 +959,7 @@ const sections: Section[] = [
     href: "/docs/gateway/overview",
     features: [
       {
-        name: "AI Gateway",
+        name: "AI Gateway (beta)",
         tiers: {
           cloud: { Hobby: true, Core: true, Pro: true, Enterprise: true },
           selfHosted: {
