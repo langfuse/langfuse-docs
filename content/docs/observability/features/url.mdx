@@ -159,3 +159,25 @@ rootSpan.end();
 
 </Tab>
 </LangTabs>
+
+### Disable public sharing [#disable-public-sharing]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Organization owners and admins can turn off **Public sharing** in **Organization settings** → **General**. While it is off, traces and sessions cannot be made public, and existing share links show the same error as a private trace.
+
+<Callout type="warning">
+
+Langfuse keeps track of which traces and sessions were shared. When you turn public sharing back on, their links work again, including traces that an SDK marked as public while sharing was off. To keep one private, open it and click **Unshare** before you turn sharing back on.
+
+</Callout>
+
+Self-hosted instances can turn off public sharing for every organization with [`LANGFUSE_DISABLE_PUBLIC_SHARING`](/self-hosting/administration/ui-customization#public-sharing).

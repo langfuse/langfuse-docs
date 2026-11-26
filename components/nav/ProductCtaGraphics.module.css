@@ -1,0 +1,30 @@
+/* Visual language of the AI Gateway diagrams in the Langfuse app. */
+.chip {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.03))
+    drop-shadow(0 4px 12px rgb(0 0 0 / 0.05));
+}
+
+/* A traffic dot is a near-zero dash on a pathLength=100 copy of a line. */
+.pulse {
+  stroke-dasharray: 0.5 100;
+  stroke-dashoffset: 100.5;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pulse {
+    opacity: 0.55;
+    animation: nav-cta-traffic 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  /* The nav keeps closed dropdown panels mounted; don't animate them. */
+  :global(div[aria-hidden="true"]) .pulse {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes nav-cta-traffic {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

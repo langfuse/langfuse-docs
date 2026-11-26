@@ -1,0 +1,36 @@
+---
+date: 2026-11-26
+title: Filter observations by numeric metadata values
+description: Compare a metadata value as a number with >, <, >=, <=, and = in the observations table, custom dashboards, alerts, the public API, and the MCP server.
+author: Niklas
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, Code } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now filter observations by comparing a metadata value as a number, for example to find slow tool calls or retried requests:
+
+```
+metadata.latency_ms:>200
+```
+
+Type the comparison in the [filter search bar](/docs/observability/features/filter-search-bar) or pick a numeric operator in the filter builder. The same filters work on v2 observations widgets in [custom dashboards](/docs/metrics/features/custom-dashboards), in [alerts](/docs/observability/features/alerts), on the [v2 observations API](/docs/api-and-data-platform/features/public-api#observations-filters) (`numberObject` on `metadata`), and in the [MCP server](/docs/api-and-data-platform/features/mcp-server) observation tools. Observations where the key is missing or its value is not a number do not match.
+
+Numeric metadata filters are available on [Langfuse v4](/docs/v4).
+
+<Cards num={2}>
+  <Card
+    title="Filter search bar"
+    href="/docs/observability/features/filter-search-bar"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Observations API filters"
+    href="/docs/api-and-data-platform/features/public-api#observations-filters"
+    icon={<Code />}
+    arrow
+  />
+</Cards>
