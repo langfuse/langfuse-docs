@@ -18,6 +18,25 @@ import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
 
+function SnapshotBanner({ text }: { text: string }) {
+  const { asPath } = useRouter();
+  // trailingSlash adds a slash that langfuse.com would redirect away
+  const path = asPath.split("#")[0].split("?")[0].replace(/(.)\/$/, "$1");
+  return (
+    <span>
+      ⚠️ {text} ⚠️{"  "}
+      <Link
+        href={`https://langfuse.com${path}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline cursor-pointer"
+      >
+        Read this page in the current docs ↗
+      </Link>
+    </span>
+  );
+}
+
 const config: DocsThemeConfig = {
   logo: <Logo />,
   logoLink: false,
@@ -205,17 +224,7 @@ const config: DocsThemeConfig = {
     key: "snapshot-notice-js-sdk-v3",
     dismissible: false,
     content: (
-      <span>
-        ⚠️ Snapshot (as of JS SDK v3) ⚠️ {"  "}
-        <Link
-          href="https://langfuse.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline cursor-pointer"
-        >
-          view latest ↗
-        </Link>
-      </span>
+      <SnapshotBanner text="This is a snapshot of the Langfuse docs from when JS/TS SDK v3 was current, before 28 August 2025. It is out of date." />
     ),
   },
 };
