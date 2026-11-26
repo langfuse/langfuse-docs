@@ -10,18 +10,7 @@ import { Book } from "lucide-react";
 
 <ChangelogHeader />
 
-The [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) now serves the official agent skills from the [`langfuse/skills`](https://github.com/langfuse/skills) repository directly over MCP. Connect your client once, and any client that supports the [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview) (such as Claude Code 2.1.331 or later) automatically discovers the Langfuse playbooks alongside your project tools, with no separate skill installation required.
-
-## What the skills include
-
-Skills are focused bundles of instructions and reference guides that encode how to get good results with Langfuse. Instead of crowding your prompt up front, your agent sees each skill's short description at startup and loads the full playbook only when a task calls for it.
-
-The MCP server bundles both open-source skills from `langfuse/skills`:
-
-| Skill                 | What it covers                                                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse`            | Querying and managing traces, prompts, datasets, and scores; looking up current docs; and following Langfuse tracing and evaluation best practices               |
-| `migrate-to-langfuse` | Moving an existing LLM application from another observability or evaluation platform to Langfuse, from live tracing cutover to transferring datasets and prompts |
+The [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) now serves the official agent skills from the [`langfuse/skills`](https://github.com/langfuse/skills) repository directly over MCP. Connect your client once, and any client that supports the [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview) (see the [supported clients list](https://github.com/modelcontextprotocol/ext-skills/blob/main/docs/implementations.md#hosts-including-agent-harnesses-ides-and-web-applications)) automatically discovers the Langfuse playbooks alongside your project tools, with no separate skill installation required.
 
 ## Out of the box, always in sync
 
@@ -30,8 +19,6 @@ Serving skills through the MCP server removes the usual setup and maintenance fr
 - **One setup for tools and guidance.** Connecting the MCP server gives your agent both live access to your Langfuse project and the instructions to use it well — no `npx skills add`, cloned repositories, or symlinks to manage.
 - **Version-matched automatically.** Langfuse Cloud always serves the latest skills from `langfuse/skills`, while self-hosted deployments serve the skills matching their installed Langfuse version so playbooks stay aligned with your server.
 - **Lean context by default.** Skills load progressively via the MCP Skills extension (`io.modelcontextprotocol/skills`), keeping your agent's context window clean until you work on a Langfuse task.
-
-Using an MCP client that doesn't support MCP skills yet? You can still [install the Langfuse Agent Skill from GitHub](/docs/api-and-data-platform/features/agent-skill#install) or via the Cursor plugin, and use it alongside the MCP server or the [Langfuse CLI](/docs/api-and-data-platform/features/cli).
 
 ## Set up
 
@@ -84,6 +71,19 @@ Connect your MCP client to your Langfuse host's `/api/public/mcp` endpoint using
 </Tabs>
 
 </Steps>
+
+Using an MCP client that doesn't support MCP skills yet? You can still [install the Langfuse Agent Skill from GitHub](/docs/api-and-data-platform/features/agent-skill#install) or via the Cursor plugin, and use it alongside the MCP server or the [Langfuse CLI](/docs/api-and-data-platform/features/cli).
+
+## What the skills include
+
+Skills are focused bundles of instructions and reference guides that encode how to get good results with Langfuse. Instead of crowding your prompt up front, your agent sees each skill's short description at startup and loads the full playbook only when a task calls for it.
+
+The MCP server bundles both open-source skills from `langfuse/skills`:
+
+| Skill                 | What it covers                                                                                                                                                   |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `langfuse`            | Querying and managing traces, prompts, datasets, and scores; looking up current docs; and following Langfuse tracing and evaluation best practices               |
+| `migrate-to-langfuse` | Moving an existing LLM application from another observability or evaluation platform to Langfuse, from live tracing cutover to transferring datasets and prompts |
 
 ## Examples
 
