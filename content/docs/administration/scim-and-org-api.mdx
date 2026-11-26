@@ -21,7 +21,7 @@ Via organization-scoped API keys, you can administer projects, users, and projec
 Langfuse is open and meant to be extended via custom workflows and integrations.
 You can use these endpoints to automate project and user management on your Langfuse organization.
 
-This documentation covers organization management APIs, SCIM-compliant user provisioning endpoints, and includes a comprehensive guide for setting up Okta authentication and user provisioning with Langfuse.
+This documentation covers organization management APIs, SCIM-compliant user and group provisioning endpoints, and includes a comprehensive guide for setting up Okta authentication, user provisioning, and group push with Langfuse.
 
 <Callout type="info">
 
@@ -104,6 +104,40 @@ The following SCIM endpoints are available:
 - `PATCH /Users/{id}` (only `replace` of `active`, to provision or deprovision)
 - `DELETE /Users/{id}`
 
+## Group Management via SCIM [#scim-groups]
+
+Your identity provider (IdP) can push its groups to Langfuse with the SCIM `/Groups` endpoints.
+Langfuse keeps each group and its members in sync with the IdP, and you decide in Langfuse which organization or project role each group grants.
+This lets you manage access by team (for example, "everyone in `Langfuse-Engineering` is a Member of the organization") instead of user by user.
+
+### How groups work [#scim-groups-how-it-works]
+
+- **SCIM syncs groups and members, not roles.** A group pushed by your IdP starts with no role and grants no access until a Langfuse admin assigns it one.
+- **Members must be provisioned users.** A group can only contain users that are already members of the organization, provisioned via `/Users` or added manually. If a group references an unknown user, Langfuse rejects the request with `400` and the message `Members not found in organization: … Provision the users via /Users first.`
+- **Roles are assigned in Langfuse.** Owners and Admins set a group's role in the Langfuse UI:
+  - **Organization Settings** > **Groups**: the organization role the group grants (applies to all projects).
+  - **Project Settings** > **Groups**: the role the group grants on that project. Requires project-level roles to be available on your plan.
+- **Groups only add access.** A user's effective role is the highest of their direct role and the roles of every group they belong to. For example, a user in one group with `VIEWER` and another with `ADMIN` on the same project is an `ADMIN` there. A direct project role of `NONE` does not remove access that a group grants. To lower access, remove the user from the group in your IdP.
+- **Membership changes apply immediately.** When your IdP adds or removes a member, the user gains or loses the access the group grants on the next request.
+- **Renaming a group keeps its roles.** Langfuse updates the name; role assignments and members are unchanged.
+- **Deleting a group removes the access it grants.** When your IdP deletes the group, or unlinks it with the option to delete it in the target app, Langfuse deletes the group and its role assignments. Users keep their organization membership and any direct roles.
+- **Deprovisioning a user removes them from all groups.** When a user is deactivated or unassigned in the IdP, Langfuse removes their organization membership and, with it, their group memberships. If the user is provisioned again, the IdP's next group push restores their memberships.
+
+Group changes made via SCIM are recorded in the [audit log](/docs/administration/audit-logs), attributed to the organization API key used by your IdP.
+
+### Group endpoints [#scim-groups-endpoints]
+
+Use `/api/public/scim` as the base URI.
+
+- `GET /Groups` (supports `filter=displayName eq "…"` and `filter=externalId eq "…"`, `startIndex`, `count` up to 100, and `excludedAttributes=members`)
+- `POST /Groups`
+- `GET /Groups/{id}`
+- `PUT /Groups/{id}` (replace the display name and full member list)
+- `PATCH /Groups/{id}` (`add`, `remove`, and `replace` of `members`, `displayName`, and `externalId`, including `remove` with a `members[value eq "…"]` filter)
+- `DELETE /Groups/{id}`
+
+`GET /ResourceTypes` and `GET /Schemas` list the `Group` resource, so IdPs that read them detect group support automatically.
+
 ### SCIM Vendor Guides [#scim-vendor-guides]
 
 #### Okta [#okta]
@@ -148,7 +182,7 @@ After your OIDC SSO app is in place, create a second Okta application for SCIM:
    - Enter your credentials:
      - **SCIM connector base URL**: `https://your-langfuse-domain.com/api/public/scim`
      - **Unique identifier field for users**: `userName`
-     - **Supported provisioning actions**: `Import new Users and Profile Updates`, `Push New Users`, `Push Profile Updates`
+     - **Supported provisioning actions**: `Import new Users and Profile Updates`, `Push New Users`, `Push Profile Updates`, and `Push Groups` if you want to [sync groups](#okta-push-groups)
      - **Basic Auth - Username**: The public key of an organization API key. Create one in Langfuse under **Organization Settings** > **API Keys** > **Create new API keys**.
      - **Basic Auth - Password**: The secret key of the same organization API key.
    - Test the API credentials and press **Save**.
@@ -189,8 +223,28 @@ This requires **Push Profile Updates** (step 2) and **Update User Attributes** (
 
 Okta is the source of truth for roles it manages: if you change a user's role in the Langfuse UI, Okta overwrites it the next time it pushes that user's profile.
 
+##### Push groups [#okta-push-groups]
+
+Use Okta **Push Groups** to sync Okta groups and their members to Langfuse, then assign each group a role in Langfuse. See [Group Management via SCIM](#scim-groups) for how group roles combine.
+
+{/* Video: Okta push groups walkthrough, to be added */}
+
+1. **Enable group push**: In the **Provisioning** tab, edit the **SCIM Connection** and make sure `Push Groups` is selected under **Supported provisioning actions**.
+2. **Assign the group members to the application**: Every member of a pushed group must also be assigned to the Langfuse SCIM application (individually or through a group assignment), so that Okta provisions them as users first.
+3. **Push groups**: Open the **Push Groups** tab and click **Push Groups**:
+   - **Find groups by name** pushes specific groups. Select the group, choose **Create Group**, keep **Push group memberships immediately** checked, and click **Save**.
+   - **Find groups by rule** pushes every group that matches a rule, for example **Group name starts with** `Langfuse`. Groups created later that match the rule are pushed automatically.
+4. **Assign roles in Langfuse**: Open **Organization Settings** > **Groups** to give a group an organization role, or **Project Settings** > **Groups** to give it a role on a single project. The group lists its members as managed in your identity provider.
+
+From then on, Okta pushes membership changes, renames, and deletions to Langfuse automatically.
+To stop syncing a group, open the **Push Groups** tab, select **Unlink pushed group** in the group's status menu, and choose whether to delete the group in Langfuse (this removes the access it grants) or leave it in place.
+
 ##### Troubleshooting
 
 - **Users are provisioned with NONE/VIEWER permissions instead of their intended `role`**: This usually happens if the `roles` attribute has an attribute type `Group` instead of `Personal`.
 - **User lost their role after enabling SCIM**: During initial SCIM setup, if a user is deprovisioned and re-provisioned, their organization role is overwritten with the value from the SCIM `roles` attribute. If no role is configured in the IdP, the default is `NONE`. To fix this, ensure the correct role (including `OWNER` for organization owners) is set in the IdP profile before provisioning.
 - **A role change in Okta does not show up in Langfuse**: Check that **Update User Attributes** is enabled and that the `roles` attribute type is `Personal`. Failed pushes are listed in the Okta admin console under **Dashboard** > **Tasks**. A push that grants or removes `OWNER` fails with `403` unless the organization API key used for SCIM has full access.
+- **A group push fails with `Members not found in organization`**: A member of the group is not provisioned in Langfuse yet. Assign the user to the Langfuse SCIM application, wait until they appear under **Organization Settings** > **Members**, then retry the push.
+- **A pushed group shows `Linked group is missing in Langfuse`**: Okta still links the group to an ID that does not exist in this Langfuse organization, for example after you changed the **SCIM connector base URL** or the organization API key to another organization or instance. Okta keeps the old user and group IDs, so for each affected group select **Unlink pushed group** with **Leave the group in the target app**, unassign and reassign the affected users (or their assignment group) so Okta provisions them again, and then push the groups again. **Retry All Groups** reuses the old member IDs and fails again.
+- **A push rule does not pick up groups you unlinked**: Okta does not re-push groups that were unlinked from a rule. Deactivate and reactivate the rule from its status menu, or push the groups by name.
+- **A group is pushed but grants no access**: SCIM never assigns roles. Assign the group a role under **Organization Settings** > **Groups** or **Project Settings** > **Groups**.
