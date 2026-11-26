@@ -98,7 +98,7 @@ Langfuse is the most widely adopted open-source LLM engineering platform. Develo
 
 ## Get started
 
-The free tier includes 50k observations per month, with no credit card required.
+The free tier includes 50k [units](/docs/administration/billable-units) per month, with no credit card required.
 
 - [Sign up for Langfuse Cloud](/cloud) or [self-host](/self-hosting)
 - [Tracing quickstart](/docs/observability/get-started)
