@@ -183,10 +183,22 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
   }
 
   await context.addInitScript((consent) => {
-    // posthog-js treats navigator.webdriver === true as a bot and drops events;
-    // override only inside this E2E context so real PostHog capture runs without
-    // weakening production bot filtering.
+    // posthog-js treats navigator.webdriver === true and "HeadlessChrome" in
+    // navigator.userAgentData.brands (present in Playwright's headless shell)
+    // as bots and drops events; override only inside this E2E context so real
+    // PostHog capture runs without weakening production bot filtering.
     Object.defineProperty(navigator, "webdriver", { get: () => false });
+    Object.defineProperty(navigator, "userAgentData", {
+      get: () => ({
+        brands: [
+          { brand: "Chromium", version: "130" },
+          { brand: "Google Chrome", version: "130" },
+        ],
+        mobile: false,
+        platform: "macOS",
+      }),
+      configurable: true,
+    });
     window.__cookieWrites = [];
     const desc = Object.getOwnPropertyDescriptor(Document.prototype, "cookie");
     Object.defineProperty(document, "cookie", {
