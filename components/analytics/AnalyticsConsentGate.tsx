@@ -16,8 +16,8 @@ import { readAnalyticsConsent } from "@/lib/cookie-consent";
 //    their choices in the preference center.
 //
 // Once granted, the gate stays open for the lifetime of the page: loaded
-// scripts cannot be un-executed, so revoking consent takes effect on the next
-// page load, when the gate starts closed again.
+// scripts cannot be un-executed, so revoking stops loading them on the next
+// page load (manual SPA helpers like `crPageView` re-check consent directly).
 export function AnalyticsConsentGate({
   children,
 }: {

@@ -138,7 +138,61 @@ test("AnalyticsConsentGate opens only on granted and stays open for the page lif
   }
 });
 
-test("PostHogProvider starts cookieless with pageviews only and transitions cleanly on grant and revoke", () => {
+function createMiniReact() {
+  const states = [];
+  const refs = [];
+  const effects = [];
+  let stateIdx = 0;
+  let refIdx = 0;
+  let effectIdx = 0;
+
+  const hooks = {
+    useState(initial) {
+      const i = stateIdx++;
+      if (i >= states.length) {
+        states.push(typeof initial === "function" ? initial() : initial);
+      }
+      const setState = (next) => {
+        states[i] = typeof next === "function" ? next(states[i]) : next;
+      };
+      return [states[i], setState];
+    },
+    useRef(initial) {
+      const i = refIdx++;
+      if (i >= refs.length) refs.push({ current: initial });
+      return refs[i];
+    },
+    useEffect(fn, deps) {
+      const i = effectIdx++;
+      const prev = effects[i];
+      const changed =
+        !prev ||
+        !deps ||
+        !prev.deps ||
+        deps.length !== prev.deps.length ||
+        deps.some((d, idx) => !Object.is(d, prev.deps[idx]));
+      effects[i] = { fn, deps, changed };
+    },
+  };
+
+  function render(fn) {
+    stateIdx = 0;
+    refIdx = 0;
+    effectIdx = 0;
+    const out = fn();
+    for (const eff of effects) {
+      if (eff.changed) {
+        eff.changed = false;
+        eff.fn();
+      }
+    }
+    return out;
+  }
+
+  return { hooks, render };
+}
+
+test("PostHogProvider starts cookieless with pageviews only, recaptures landing page on grant, and cleans up on revoke", () => {
   const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
 
@@ -146,6 +200,7 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
   let optedIn = false;
   let explicitStatus = "pending";
   let initArgs = null;
+  let useCaseReady = null;
   const calls = [];
   const listeners = {};
   const sessionStore = new Map([
@@ -181,7 +236,7 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
       Object.assign(this.config, cfg);
     },
     capture(name) {
-      calls.push(["capture", name]);
+      calls.push(["capture", name, optedIn ? "consented" : "cookieless"]);
     },
     debug() {},
   };
@@ -198,24 +253,22 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
   };
 
   try {
+    const mini = createMiniReact();
     const mod = load(
       compile("components/analytics/PostHogProvider.tsx"),
       (name) => {
-        if (name === "react") {
-          return {
-            useState: (v) => [v, () => {}],
-            useRef: (v) => ({ current: v }),
-            useEffect: (fn) => fn(),
-          };
-        }
+        if (name === "react") return mini.hooks;
         if (name === "react/jsx-runtime") {
           return {
-            jsx: (type, props) => ({ type, props }),
+            jsx: (type, props) => {
+              if (type?.name === "UseCaseAnalytics") useCaseReady = props.ready;
+              return { type, props };
+            },
             jsxs: (type, props) => ({ type, props }),
           };
         }
         if (name === "next/navigation") {
-          return { usePathname: () => "/" };
+          return { usePathname: () => "/pricing" };
         }
         if (name === "posthog-js") return fakePosthog;
         if (name === "posthog-js/react") {
@@ -225,7 +278,11 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
           return { crPageView: () => {} };
         }
         if (name === "@/components/analytics/UseCaseAnalytics") {
-          return { UseCaseAnalytics: () => null };
+          return {
+            UseCaseAnalytics: function UseCaseAnalytics() {
+              return null;
+            },
+          };
         }
         if (name === "@/lib/cookie-consent") {
           return { readAnalyticsConsent: () => consentState };
@@ -234,7 +291,9 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
       },
     );
 
-    mod.PostHogProvider({ children: null });
+    // Mount -> loaded() sets ready=true, then re-render fires initial cookieless $pageview
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    mini.render(() => mod.PostHogProvider({ children: null }));
 
     assert.equal(initArgs.key, "phc_test_key");
     assert.equal(initArgs.options.cookieless_mode, "on_reject");
@@ -249,8 +308,10 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
     assert.equal(initArgs.options.capture_exceptions, false);
     assert.equal(initArgs.options.disable_surveys, true);
 
-    // No opt_out_capturing() call on unknown/pending so __ph_opt_in_out_* is not written
-    assert.deepEqual(calls, []);
+    // No opt_out_capturing() call on unknown/pending so __ph_opt_in_out_* is not written;
+    // one cookieless $pageview fires and UseCaseAnalytics stays inactive before consent.
+    assert.deepEqual(calls, [["capture", "$pageview", "cookieless"]]);
+    assert.equal(useCaseReady, false);
     assert.equal(sessionStore.size, 0);
 
     // before_send allows only $pageview while consent is unknown or denied
@@ -271,9 +332,12 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
       assert.equal(beforeSend({ event: "survey shown" }), null);
     }
 
-    // Granting analytics consent opts in and enables extensions
+    // Granting analytics consent opts in, restores remote-config defaults (without forcing
+    // heatmaps/dead-clicks/exceptions true), recaptures landing $pageview, and activates UseCaseAnalytics.
+    calls.length = 0;
     consentState = "granted";
     listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
     assert.deepEqual(calls, [
       ["opt_in_capturing", { captureEventName: false }],
       [
@@ -281,13 +345,22 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
         {
           disable_session_recording: false,
           autocapture: true,
-          capture_heatmaps: true,
-          capture_dead_clicks: true,
-          capture_exceptions: true,
           disable_surveys: false,
         },
       ],
+      ["capture", "$pageview", "consented"],
     ]);
+    assert.equal("capture_heatmaps" in fakePosthog.config, false);
+    assert.equal("capture_dead_clicks" in fakePosthog.config, false);
+    assert.equal("capture_exceptions" in fakePosthog.config, false);
+    assert.equal(useCaseReady, true);
+
+    // Repeated consent update while still granted does not double-capture $pageview
+    calls.length = 0;
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.deepEqual(calls, []);
+
     assert.deepEqual(beforeSend({ event: "use_case:page_viewed" }), {
       event: "use_case:page_viewed",
     });
@@ -295,12 +368,14 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
       event: "inkeep:user_message_submitted",
     });
 
-    // Revoking disables extensions, opts out, clears opt-in/out storage, and removes sessionStorage keys
+    // Revoking disables extensions, opts out, clears opt-in/out storage, removes sessionStorage keys,
+    // deactivates UseCaseAnalytics, and does not re-capture $pageview for the same page.
     calls.length = 0;
     sessionStore.set("ph_phc_test_key_window_id", "win-2");
     sessionStore.set("ph_phc_test_key_primary_window_exists", "true");
     consentState = "denied";
     listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
     assert.deepEqual(calls, [
       [
         "set_config",
@@ -316,6 +391,7 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
       ["opt_out_capturing"],
       ["clear_opt_in_out_capturing"],
     ]);
+    assert.equal(useCaseReady, false);
     assert.equal(sessionStore.size, 0);
   } finally {
     if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -326,11 +402,12 @@ test("PostHogProvider starts cookieless with pageviews only and transitions clea
   }
 });
 
-test("PostHogProvider enables full tracking immediately on first load for a returning consented visitor", () => {
+test("PostHogProvider enables full tracking immediately on first load for a returning consented visitor without double pageviews", () => {
   const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
 
   let optedIn = true;
+  let useCaseReady = null;
   const calls = [];
 
   const fakePosthog = {
@@ -356,7 +433,7 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
       Object.assign(this.config, cfg);
     },
     capture(name) {
-      calls.push(["capture", name]);
+      calls.push(["capture", name, optedIn ? "consented" : "cookieless"]);
     },
     debug() {},
   };
@@ -368,19 +445,17 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
   };
 
   try {
+    const mini = createMiniReact();
     const mod = load(
       compile("components/analytics/PostHogProvider.tsx"),
       (name) => {
-        if (name === "react") {
-          return {
-            useState: (v) => [v, () => {}],
-            useRef: (v) => ({ current: v }),
-            useEffect: (fn) => fn(),
-          };
-        }
+        if (name === "react") return mini.hooks;
         if (name === "react/jsx-runtime") {
           return {
-            jsx: (type, props) => ({ type, props }),
+            jsx: (type, props) => {
+              if (type?.name === "UseCaseAnalytics") useCaseReady = props.ready;
+              return { type, props };
+            },
             jsxs: (type, props) => ({ type, props }),
           };
         }
@@ -395,7 +470,11 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
           return { crPageView: () => {} };
         }
         if (name === "@/components/analytics/UseCaseAnalytics") {
-          return { UseCaseAnalytics: () => null };
+          return {
+            UseCaseAnalytics: function UseCaseAnalytics() {
+              return null;
+            },
+          };
         }
         if (name === "@/lib/cookie-consent") {
           return { readAnalyticsConsent: () => "granted" };
@@ -404,7 +483,8 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
       },
     );
 
-    mod.PostHogProvider({ children: null });
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    mini.render(() => mod.PostHogProvider({ children: null }));
 
     assert.deepEqual(calls, [
       [
@@ -412,18 +492,62 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
         {
           disable_session_recording: false,
           autocapture: true,
-          capture_heatmaps: true,
-          capture_dead_clicks: true,
-          capture_exceptions: true,
           disable_surveys: false,
         },
       ],
+      ["capture", "$pageview", "consented"],
     ]);
+    assert.equal("capture_heatmaps" in fakePosthog.config, false);
+    assert.equal("capture_dead_clicks" in fakePosthog.config, false);
+    assert.equal("capture_exceptions" in fakePosthog.config, false);
+    assert.equal(useCaseReady, true);
   } finally {
     if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
     else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
     delete globalThis.window;
     delete globalThis.document;
+  }
+});
+
+test("crPageView only reports SPA pageviews while analytics consent is granted", () => {
+  let consentState = "granted";
+  let pageCalls = 0;
+
+  globalThis.window = {
+    signals: {
+      page: () => {
+        pageCalls += 1;
+      },
+    },
+  };
+
+  try {
+    const mod = load(
+      compile("components/analytics/common-room.tsx"),
+      (name) => {
+        if (name === "next/script") return { default: "Script" };
+        if (name === "react/jsx-runtime") {
+          return { jsx: (type, props) => ({ type, props }) };
+        }
+        if (name === "@/lib/cookie-consent") {
+          return { readAnalyticsConsent: () => consentState };
+        }
+        throw Error(name);
+      },
+    );
+
+    mod.crPageView();
+    assert.equal(pageCalls, 1);
+
+    consentState = "denied";
+    mod.crPageView();
+    assert.equal(pageCalls, 1);
+
+    consentState = "unknown";
+    mod.crPageView();
+    assert.equal(pageCalls, 1);
+  } finally {
+    delete globalThis.window;
   }
 });
 

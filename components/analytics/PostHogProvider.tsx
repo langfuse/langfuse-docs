@@ -13,9 +13,6 @@ const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 const FULL_TRACKING_CONFIG = {
   disable_session_recording: false,
   autocapture: true,
-  capture_heatmaps: true,
-  capture_dead_clicks: true,
-  capture_exceptions: true,
   disable_surveys: false,
 };
 
@@ -31,18 +28,24 @@ const COOKIELESS_ONLY_CONFIG = {
 // PostHog starts opted out in cookieless mode (`cookieless_mode: "on_reject"`
 // with `opt_out_capturing_by_default: true` and `opt_out_persistence_by_default:
 // true`) and drops everything except `$pageview` in `before_send` until
-// CookieYes "analytics" consent is granted. Granting opts in and enables the
-// extensions; revoking returns to cookieless mode and clears PostHog storage.
-function applyAnalyticsConsent() {
+// CookieYes "analytics" consent is granted. Granting opts in and restores the
+// SDK/remote-config extension defaults; revoking returns to cookieless mode and
+// clears PostHog storage.
+function applyAnalyticsConsent(): boolean {
   const consent = readAnalyticsConsent();
   if (consent === "granted") {
     if (!posthog.has_opted_in_capturing()) {
       posthog.opt_in_capturing({ captureEventName: false });
     }
     if (posthog.config?.disable_session_recording) {
+      // Restore remote-config defaults for extensions the SDK leaves undefined
+      // (`posthog.set_config` ignores keys with `undefined` values).
+      delete posthog.config.capture_heatmaps;
+      delete posthog.config.capture_dead_clicks;
+      delete posthog.config.capture_exceptions;
       posthog.set_config(FULL_TRACKING_CONFIG);
     }
-    return;
+    return true;
   }
 
   if (posthog.config && !posthog.config.disable_session_recording) {
@@ -64,13 +67,15 @@ function applyAnalyticsConsent() {
   } catch {
     // storage unavailable: nothing was kept there either
   }
+  return false;
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isInitialPageView = useRef(true);
   const [ready, setReady] = useState(false);
-  const lastCapturedPath = useRef<string | null>(null);
+  const [analyticsGranted, setAnalyticsGranted] = useState(false);
+  const lastCaptured = useRef<{ path: string; granted: boolean } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -81,6 +86,10 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       console.warn("PostHog key is not set. PostHog will be disabled.");
       return;
     }
+
+    const syncConsent = () => {
+      setAnalyticsGranted(applyAnalyticsConsent());
+    };
 
     posthog.init(posthogKey, {
       api_host:
@@ -102,26 +111,17 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         return event.event === "$pageview" ? event : null;
       },
       loaded: (ph) => {
-        applyAnalyticsConsent();
+        syncConsent();
         setReady(true);
         if (process.env.NODE_ENV === "development") ph.debug();
       },
     });
 
-    document.addEventListener("cookieyes_banner_load", applyAnalyticsConsent);
-    document.addEventListener(
-      "cookieyes_consent_update",
-      applyAnalyticsConsent,
-    );
+    document.addEventListener("cookieyes_banner_load", syncConsent);
+    document.addEventListener("cookieyes_consent_update", syncConsent);
     return () => {
-      document.removeEventListener(
-        "cookieyes_banner_load",
-        applyAnalyticsConsent,
-      );
-      document.removeEventListener(
-        "cookieyes_consent_update",
-        applyAnalyticsConsent,
-      );
+      document.removeEventListener("cookieyes_banner_load", syncConsent);
+      document.removeEventListener("cookieyes_consent_update", syncConsent);
     };
   }, []);
 
@@ -138,15 +138,19 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (ready && pathname && lastCapturedPath.current !== pathname) {
-      lastCapturedPath.current = pathname;
+    if (!ready || !pathname) return;
+    const samePath = lastCaptured.current?.path === pathname;
+    const upgradedToGranted =
+      samePath && !lastCaptured.current?.granted && analyticsGranted;
+    if (!samePath || upgradedToGranted) {
+      lastCaptured.current = { path: pathname, granted: analyticsGranted };
       posthog.capture("$pageview");
     }
-  }, [pathname, ready]);
+  }, [pathname, ready, analyticsGranted]);
 
   return (
     <PHProvider client={posthog}>
-      <UseCaseAnalytics ready={ready} />
+      <UseCaseAnalytics ready={ready && analyticsGranted} />
       {children}
     </PHProvider>
   );
