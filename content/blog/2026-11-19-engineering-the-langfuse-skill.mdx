@@ -150,7 +150,7 @@ We bake these starter environments into our Modal sandbox image so every run sta
 
 ### 2. Triggering an experiment from Langfuse
 
-To test a change, we trigger a [remote experiment](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) directly from a dataset in the Langfuse UI. Langfuse sends a webhook `POST` to Modal with the dataset name and a JSON payload specifying which coding agents to run and which skill version (or label, such as `staging`) to test:
+To test a change, we trigger a [remote experiment](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) directly from a dataset in the Langfuse UI. Langfuse sends a webhook `POST` to Modal with the dataset name, the coding agents to test, and which skill version to use:
 
 ```json
 {
@@ -164,16 +164,16 @@ To test a change, we trigger a [remote experiment](/docs/evaluation/experiments/
 }
 ```
 
-Triggering runs from the Langfuse UI means anyone on the team can launch an experiment without local scripts or credentials. Because skill versions in Langfuse are immutable, we can benchmark a candidate version before promoting it to `production`, or omit the `skill` block to run the same dataset as a baseline side by side.
+Triggering runs from the Langfuse UI means **anyone on the team can launch an experiment** without local scripts or credentials. Because skill versions in Langfuse are immutable, we can benchmark a candidate version before promoting it to `production`.
 
 ### 3. Running agents in isolated Modal sandboxes
 
-Modal's orchestrator fetches the dataset items and spins up an isolated sandbox for each `(dataset item × coding agent)` pair across Claude Code, Codex, and Cursor. Before an agent starts, the sandbox loads the item's starter codebase (if any) and installs the requested skill version from Langfuse.
+Modal's orchestrator fetches the dataset items and spins up an isolated sandbox for each `(dataset item × coding agent)` pair. Before an agent starts, the sandbox loads the item's starter codebase (if any) and installs the requested skill version from Langfuse.
 
 Because many test prompts ask the coding agent to create prompts, datasets, or traces in Langfuse, we separate our setup into two Langfuse projects:
 
 - **The harness project** holds our benchmark datasets, versioned skills, coding-agent execution traces, and evaluation scores.
-- **The scratch project** provides the Langfuse credentials injected into the sandbox and is wiped clean before each run, so agent side effects never pollute our evaluation data or leak into later runs.
+- **A scratch project** provides the Langfuse credentials injected into the sandbox and is wiped clean before each run, so agent side effects never pollute our evaluation data or leak into later runs.
 
 ### 4. Collecting traces and comparing results in Langfuse
 
