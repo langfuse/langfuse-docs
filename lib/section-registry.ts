@@ -150,6 +150,7 @@ export const MARKETING_SLUGS = marketingSource
 export const USE_CASE_SECTIONS = new Set<string>([
   "chat-agents",
   "coding-agents",
+  "gateway",
   "workflow-automation",
   "financial-services",
   "healthcare",
@@ -162,6 +163,7 @@ export const USE_CASE_SECTIONS = new Set<string>([
  */
 export const NO_SIDEBAR_SECTIONS = new Set<string>([
   "financial-services",
+  "gateway",
   "healthcare",
 ]);
 

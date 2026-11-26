@@ -1,0 +1,96 @@
+---
+title: Langfuse AI Gateway
+seoTitle: "Langfuse AI Gateway (beta): see and control all AI usage"
+description: One open source entry point for all AI usage in your company. See every model call, who made it and what it cost, natively traced in Langfuse.
+contentWidth: full
+---
+
+{/* Markdown for agents and .md consumers lives in md-override/gateway.md. Keep both files in sync. */}
+
+import { AiGatewayOverviewDiagram } from "@/components/AiGatewayOverviewDiagram";
+import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
+import { customerLogoNames } from "@/components/gateway/content";
+import { GatewayCustomerQuote } from "@/components/gateway/GatewayCustomerQuote";
+import { GatewayFeatureGrid } from "@/components/gateway/GatewayFeatureGrid";
+import { GatewayHeroVisual } from "@/components/gateway/GatewayHeroVisual";
+import { GatewaySteps } from "@/components/gateway/GatewaySteps";
+import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
+import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
+import { Button } from "@/components/ui/button";
+
+<h1 className="sr-only">See and control all AI usage with the Langfuse AI Gateway</h1>
+
+<div className="not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  <section data-use-case-section="hero" className="grid items-center lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+    <div className="flex min-w-0 flex-col items-start gap-6 px-6 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12">
+      <span className="rounded-full border border-line-structure px-2 py-0.5 text-[12px] text-text-tertiary">
+        {"Public beta"}
+      </span>
+      <h2 className="text-[40px] leading-[1.02] text-text-primary sm:text-[52px] xl:text-[64px]">
+        <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"See and control"}</span>{" all AI usage"}
+      </h2>
+      <p className="max-w-[52ch] text-[15px] leading-[1.5] text-text-secondary">
+        {"AI governance across your organization: route all model calls through the gateway instead of losing track of keys and budgets."}
+      </p>
+      <div className="flex flex-wrap gap-3">
+        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
+        <Button href="/docs/gateway/overview" variant="secondary" size="default" shortcutKey="d" className="w-auto" wrapperClassName="w-fit">Documentation</Button>
+      </div>
+    </div>
+    <div className="flex min-w-0 items-center px-4 pb-8 sm:px-8 lg:py-8 lg:pl-0">
+      <GatewayHeroVisual />
+    </div>
+  </section>
+
+  <section data-use-case-section="logos" className="border-t border-line-structure px-2 py-2">
+    <EnterpriseLogoGrid names={customerLogoNames} className="sm:grid-cols-4 lg:grid-cols-8" />
+  </section>
+
+  <section data-use-case-section="value" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <h2 className="mb-10 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"Stop guessing"}</span>{" your AI cost."}
+    </h2>
+    <GatewayValueProps />
+  </section>
+
+  <section data-use-case-section="architecture" className="pattern-bg border-t border-line-structure px-5 py-10 sm:px-10 sm:py-14">
+    <div className="relative z-10 mx-auto max-w-[960px]">
+      <AiGatewayOverviewDiagram />
+    </div>
+  </section>
+
+  <section data-use-case-section="features" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <h2 className="text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+      {"All AI traffic, "}<span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"one gateway."}</span>
+    </h2>
+    <p className="mb-10 mt-4 max-w-[64ch] text-[15px] leading-[1.5] text-text-tertiary">
+      {"Connect your providers, hand out keys, cap spend and trace every call."}
+    </p>
+    <GatewayFeatureGrid />
+  </section>
+
+  <section data-use-case-section="how_it_works" className="pattern-bg border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <div className="relative z-10">
+      <p className="text-[13px] text-text-tertiary">{"How it works"}</p>
+      <h2 className="mb-10 mt-2 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+        {"Change the base URL. Keep everything else."}
+      </h2>
+      <GatewaySteps />
+    </div>
+  </section>
+
+  <section data-use-case-section="customers" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
+    <p className="mb-6 text-[13px] text-text-tertiary">{"Customers"}</p>
+    <GatewayCustomerQuote />
+  </section>
+
+  <section data-use-case-section="updates" className="flex flex-wrap items-center justify-between gap-x-12 gap-y-6 border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
+    <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2">
+      <h2 className="text-[24px] leading-[1.2] text-text-primary">{"Langfuse AI Gateway updates"}</h2>
+      <p className="max-w-[52ch] text-[14px] leading-[1.5] text-text-tertiary">
+        {"Get an email when we ship new gateway features and providers. Gateway updates only, no spam."}
+      </p>
+    </div>
+    <ProductUpdateSignup list="gateway" source="Gateway landing page" className="flex-[1_1_320px]" />
+  </section>
+</div>
