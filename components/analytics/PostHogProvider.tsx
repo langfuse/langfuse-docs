@@ -9,6 +9,9 @@ import { UseCaseAnalytics } from "@/components/analytics/UseCaseAnalytics";
 import { readAnalyticsConsent } from "@/lib/cookie-consent";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
+const posthogCookieName = posthogKey
+  ? `ph_${posthogKey.replace(/\+/g, "PL").replace(/\//g, "SL").replace(/=/g, "EQ")}_posthog`
+  : "";
 
 const FULL_TRACKING_CONFIG = {
   disable_session_recording: false,
@@ -24,6 +27,42 @@ const COOKIELESS_ONLY_CONFIG = {
   capture_exceptions: false,
   disable_surveys: true,
 };
+
+// When PostHog starts in "memory" persistence (to avoid pre-consent
+// `__ph_cookie_support_*` probe cookies), `opt_out_capturing()` only clears
+// in-memory state. If a leftover `ph_<key>_posthog` cookie from a prior grant
+// exists while analytics consent is not granted (e.g. after consent withdrawal
+// or CookieYes consent renewal), expire it directly without writing any probe
+// cookie on clean visits.
+function clearStalePostHogCookie() {
+  if (!posthogCookieName || typeof document === "undefined") return;
+  const prefix = `${posthogCookieName}=`;
+  const hasCookie = (document.cookie ?? "")
+    .split(";")
+    .some((entry) => entry.trim().startsWith(prefix));
+  if (!hasCookie) return;
+
+  const secure =
+    typeof window !== "undefined" && window.location?.protocol === "https:"
+      ? "; Secure"
+      : "";
+  document.cookie = `${posthogCookieName}=; Max-Age=0; Path=/; SameSite=Lax${secure}`;
+
+  const hostname =
+    typeof window !== "undefined" ? (window.location?.hostname ?? "") : "";
+  if (
+    !hostname ||
+    hostname === "localhost" ||
+    /^\d+(\.\d+){3}$/.test(hostname)
+  ) {
+    return;
+  }
+  const parts = hostname.split(".");
+  for (let i = 0; i <= parts.length - 2; i++) {
+    const domain = parts.slice(i).join(".");
+    document.cookie = `${posthogCookieName}=; Max-Age=0; Path=/; Domain=.${domain}; SameSite=Lax${secure}`;
+  }
+}
 
 // PostHog starts opted out in cookieless mode (`cookieless_mode: "on_reject"`
 // with `opt_out_capturing_by_default: true` and `opt_out_persistence_by_default:
@@ -73,6 +112,7 @@ function applyAnalyticsConsent(): boolean {
   ) {
     posthog.set_config({ ...COOKIELESS_ONLY_CONFIG, persistence: "memory" });
   }
+  clearStalePostHogCookie();
   // posthog-js can keep the tab's window id in sessionStorage after opting out
   try {
     sessionStorage.removeItem(`ph_${posthogKey}_window_id`);

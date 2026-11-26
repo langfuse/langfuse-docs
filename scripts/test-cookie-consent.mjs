@@ -547,6 +547,116 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
   }
 });
 
+test("PostHogProvider expires a leftover ph_*_posthog cookie when starting in memory mode without consent", () => {
+  const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
+  const cookieWrites = [];
+
+  try {
+    let cookieValue =
+      "ph_phc_test_key_posthog=%7B%22distinct_id%22%3A%22old%22%7D";
+    globalThis.window = {
+      location: { hostname: "docs.langfuse.com", protocol: "https:" },
+    };
+    globalThis.document = {
+      get cookie() {
+        return cookieValue;
+      },
+      set cookie(v) {
+        cookieWrites.push(v);
+      },
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+    globalThis.sessionStorage = { removeItem: () => {} };
+
+    const mini = createMiniReact();
+    const fakePosthog = {
+      config: null,
+      init: (_key, options) => {
+        fakePosthog.config = { ...options };
+        options.loaded(fakePosthog);
+      },
+      has_opted_in_capturing: () => false,
+      get_explicit_consent_status: () => "pending",
+      opt_in_capturing: () => {},
+      opt_out_capturing: () => {},
+      clear_opt_in_out_capturing: () => {},
+      set_config: () => {},
+      capture: () => {},
+      debug: () => {},
+    };
+
+    const mod = load(
+      compile("components/analytics/PostHogProvider.tsx"),
+      (name) => {
+        if (name === "react") return mini.hooks;
+        if (name === "react/jsx-runtime")
+          return {
+            jsx: (type, props) => ({ type, props }),
+            jsxs: (type, props) => ({ type, props }),
+          };
+        if (name === "next/navigation") return { usePathname: () => "/docs" };
+        if (name === "posthog-js")
+          return { __esModule: true, default: fakePosthog };
+        if (name === "posthog-js/react")
+          return { PostHogProvider: ({ children }) => children };
+        if (name === "@/components/analytics/common-room")
+          return { crPageView: () => {} };
+        if (name === "@/components/analytics/UseCaseAnalytics")
+          return { UseCaseAnalytics: () => null };
+        if (name === "@/lib/cookie-consent")
+          return { readAnalyticsConsent: () => "denied" };
+        throw Error(name);
+      },
+    );
+
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(fakePosthog.config.persistence, "memory");
+    assert.deepEqual(cookieWrites, [
+      "ph_phc_test_key_posthog=; Max-Age=0; Path=/; SameSite=Lax; Secure",
+      "ph_phc_test_key_posthog=; Max-Age=0; Path=/; Domain=.docs.langfuse.com; SameSite=Lax; Secure",
+      "ph_phc_test_key_posthog=; Max-Age=0; Path=/; Domain=.langfuse.com; SameSite=Lax; Secure",
+    ]);
+
+    // When no ph_*_posthog cookie exists, zero cookie writes occur
+    cookieWrites.length = 0;
+    cookieValue = "cookieyes-consent=action:no,analytics:no";
+    const miniClean = createMiniReact();
+    const modClean = load(
+      compile("components/analytics/PostHogProvider.tsx"),
+      (name) => {
+        if (name === "react") return miniClean.hooks;
+        if (name === "react/jsx-runtime")
+          return {
+            jsx: (type, props) => ({ type, props }),
+            jsxs: (type, props) => ({ type, props }),
+          };
+        if (name === "next/navigation") return { usePathname: () => "/docs" };
+        if (name === "posthog-js")
+          return { __esModule: true, default: fakePosthog };
+        if (name === "posthog-js/react")
+          return { PostHogProvider: ({ children }) => children };
+        if (name === "@/components/analytics/common-room")
+          return { crPageView: () => {} };
+        if (name === "@/components/analytics/UseCaseAnalytics")
+          return { UseCaseAnalytics: () => null };
+        if (name === "@/lib/cookie-consent")
+          return { readAnalyticsConsent: () => "unknown" };
+        throw Error(name);
+      },
+    );
+    miniClean.render(() => modClean.PostHogProvider({ children: null }));
+    assert.deepEqual(cookieWrites, []);
+  } finally {
+    delete globalThis.window;
+    delete globalThis.document;
+    delete globalThis.sessionStorage;
+    if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
+  }
+});
+
 test("crPageView only reports SPA pageviews while analytics consent is granted", () => {
   let consentState = "granted";
   let pageCalls = 0;
