@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useReducedMotion } from "framer-motion";
 import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import styles from "./Gateway.module.css";
@@ -238,8 +237,6 @@ const panels: Record<ValueProp["panel"], () => React.ReactElement> = {
 };
 
 export function GatewayValueProps() {
-  // Tabs rotate for everyone; reduced motion only stills the progress bar.
-  const animateProgress = !useReducedMotion();
   const [active, setActive] = useState(0);
   // Bumped on every change so the progress bar animation restarts.
   const [tick, setTick] = useState(0);
@@ -316,13 +313,9 @@ export function GatewayValueProps() {
                   aria-hidden
                   className={cn(
                     "absolute bottom-[-1px] left-0 h-0.5 bg-text-primary",
-                    animateProgress ? styles.progress : "w-full",
+                    styles.progress,
                   )}
-                  style={
-                    animateProgress
-                      ? { animationDuration: `${ROTATE_MS}ms` }
-                      : undefined
-                  }
+                  style={{ animationDuration: `${ROTATE_MS}ms` }}
                 />
               )}
             </button>

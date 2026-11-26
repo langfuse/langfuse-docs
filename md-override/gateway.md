@@ -13,6 +13,15 @@ AI governance across your organization: route all model calls through the gatewa
 
 Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Khan Academy](/users/khan-academy), [Hugging Face](/users/hugging-face), Intuit and [SumUp](/users/sumup).
 
+## One control point for every model call, natively traced in Langfuse
+
+Figure: AI Gateway overview.
+
+1. Coding agents such as Claude Code, Codex and OpenCode, and your own apps, send requests to the AI Gateway, which runs in Langfuse.
+2. The AI Gateway authorizes the gateway key and maps the model to a provider request.
+3. The AI Gateway calls the model provider (Anthropic, OpenAI, Google AI, Bedrock and more) and returns the response.
+4. Langfuse tracing captures every request.
+
 ## Bring order to your company's AI usage
 
 1. **See all spend.** Know what AI costs and who’s spending it.
@@ -40,15 +49,6 @@ Included in Langfuse.
 - **[Coding agents](/docs/gateway/get-started/first-request):** Point Claude Code, Codex and other coding agents at the gateway. Their sessions are grouped automatically.
 - **[Tracing and insights](/docs/gateway/features/tracing):** Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.
 - **[Open source](/self-hosting/configuration/ai-gateway):** Self-host the gateway as a single small Docker image, or use it on Langfuse Cloud.
-
-## One control point for every model call, natively traced in Langfuse
-
-Figure: AI Gateway overview.
-
-1. Coding agents such as Claude Code, Codex and OpenCode, and your own apps, send requests to the AI Gateway, which runs in Langfuse.
-2. The AI Gateway authorizes the gateway key and maps the model to a provider request.
-3. The AI Gateway calls the model provider (Anthropic, OpenAI, Google AI, Bedrock and more) and returns the response.
-4. Langfuse tracing captures every request.
 
 ## How it works: change the base URL, keep the rest
 

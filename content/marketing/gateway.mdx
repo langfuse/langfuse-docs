@@ -11,7 +11,7 @@ import { customerLogoNames } from "@/components/gateway/content";
 import { GatewayCustomerQuote } from "@/components/gateway/GatewayCustomerQuote";
 import { GatewayFeatureGrid } from "@/components/gateway/GatewayFeatureGrid";
 import { GatewayFlowDiagram } from "@/components/gateway/GatewayFlowDiagram";
-import { GatewayHeroVisual } from "@/components/gateway/GatewayHeroVisual";
+import { GatewayHeroArt } from "@/components/gateway/GatewayHeroArt";
 import { GatewaySteps } from "@/components/gateway/GatewaySteps";
 import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
@@ -38,12 +38,21 @@ import GatewayUpdateSignup from "@/components-mdx/gateway-update-signup.mdx";
       </div>
     </div>
     <div className="flex min-w-0 items-center px-4 pb-8 sm:px-8 @2xl:py-8 @2xl:pl-0">
-      <GatewayHeroVisual />
+      <GatewayHeroArt className="m-0 w-full" />
     </div>
   </section>
 
   <section data-use-case-section="logos" className="border-t border-line-structure px-2 py-2">
     <EnterpriseLogoGrid names={customerLogoNames} className="sm:grid-cols-4 lg:grid-cols-8" />
+  </section>
+
+  <section data-use-case-section="architecture" className="pattern-bg border-t border-line-structure px-5 py-10 sm:px-10 sm:py-14">
+    <div className="relative z-10 mx-auto max-w-[960px]">
+      <h2 id="control-point" className="mb-10 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+        {"One "}<span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"control point"}</span>{" for every model call, natively traced in Langfuse"}
+      </h2>
+      <GatewayFlowDiagram />
+    </div>
   </section>
 
   <section data-use-case-section="value" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
@@ -61,15 +70,6 @@ import GatewayUpdateSignup from "@/components-mdx/gateway-update-signup.mdx";
       {"Included in Langfuse."}
     </p>
     <GatewayFeatureGrid />
-  </section>
-
-  <section data-use-case-section="architecture" className="pattern-bg border-t border-line-structure px-5 py-10 sm:px-10 sm:py-14">
-    <div className="relative z-10 mx-auto max-w-[960px]">
-      <h2 id="control-point" className="mb-10 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
-        {"One "}<span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"control point"}</span>{" for every model call, natively traced in Langfuse"}
-      </h2>
-      <GatewayFlowDiagram />
-    </div>
   </section>
 
   <section data-use-case-section="how_it_works" className="border-t border-line-structure px-5 py-14 sm:px-10 sm:py-20">
