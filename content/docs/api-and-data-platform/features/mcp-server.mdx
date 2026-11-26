@@ -93,6 +93,12 @@ The Langfuse MCP server uses a stateless architecture where each API key is scop
    echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
    ```
 
+<Callout type="info">
+
+The server accepts only this Basic auth header, with a key pair from the same region as the endpoint. There is no OAuth or login flow, and a missing or wrong header returns `401`.
+
+</Callout>
+
 ### Client Setup
 
 <Tabs items={["Claude Code", "Codex", "Cursor", "Pi Agent", "Other MCP Clients"]}>
