@@ -41,17 +41,17 @@ Langfuse has a [Cursor Plugin](https://cursor.com/docs/plugins) that includes th
 
 <Tab>
 
-Install via npm ([skills CLI](https://www.npmjs.com/package/skills)). It needs git and Node.js. Pick your agent, or let a coding agent run it with `-y`:
+Install via npm ([skills CLI](https://www.npmjs.com/package/skills)):
 
 ```bash
-# Interactive, in your terminal
 npx skills add langfuse/skills --skill "langfuse"
-
-# Non-interactive, for scripts and coding agents
-npx skills add langfuse/skills --skill "langfuse" --agent claude-code -y
 ```
 
-Replace `claude-code` with the id of your agent, or use `--agent '*'` for every agent the CLI supports.
+If you want to target a specific agent directly:
+
+```bash
+npx skills add langfuse/skills --skill "langfuse" --agent "<agent-id>"
+```
 
 <details>
 <summary>Alternatively you can manually clone the skill</summary>
