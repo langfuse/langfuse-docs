@@ -92,7 +92,7 @@ Everything starts from a single source of truth in [`langfuse/skills`](https://g
 
 Both contribute value to the overall loop: Halo feeds live production traces (tracing & monitoring), while external coding agents are used more broadly and can give feedback through the feedback endpoints, although this is less frequent. These then feed into the evals used for measuring experiment results.
 
-## Online observability and choosing what to improve [#online-observability]
+## Online observability and choosing what to improve (tracing & monitoring) [#online-observability]
 
 The traces coming in from Langfuse Halo track skill interactions with tool observations like `skill` and `skill_read`.
 
@@ -125,7 +125,7 @@ On the skill-loading tool call, you see the exact skill version and the specific
 
 To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request.
 
-## Offline evaluation & experimentation setup [#offline-test-harness]
+## Offline evaluation & experimentation setup (datasets, experiment, evaluate) [#offline-test-harness]
 
 At a high level, our offline evaluation setup consists of a Langfuse project, Modal to spin up coding agents, and a [GitHub repo](https://github.com/langfuse/coding-agent-testing) for the code and test environment files we use to simulate realistic scenarios.
 
