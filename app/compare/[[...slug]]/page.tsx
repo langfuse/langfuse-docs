@@ -22,6 +22,7 @@ export default async function ComparePage({ params }: PageProps) {
   if (slug.length === 0) {
     return (
       <ContentColumns
+        showLeftSidebar={false}
         rightSidebar={<HomeAside toc={compareSections} />}
         footerClassName="px-4 sm:px-8 md:max-w-none md:px-8 xl:max-w-none"
       >

@@ -1,0 +1,23 @@
+---
+title: How do I use System One-compatible decision models?
+description: Point the TypeSafe System One adapter at a custom base URL to run decision-model evaluators with any System One-compatible model.
+tags: [evaluation, decision-model-providers]
+---
+
+# How do I use System One-compatible decision models?
+
+Other vendors serve decision models through TypeSafe's [System One API](https://docs.typesafe.ai/api/system-one) (`POST <base URL>/systemone`). Add a **TypeSafe (System One)** connection, select the **Custom** upstream, enter the vendor's base URL without the `/systemone` suffix, and add the model name under **Custom models**. Then select that connection in a [decision-model evaluator](/docs/evaluation/evaluation-methods/decision-models).
+
+Langfuse authenticates with `Authorization: Bearer <API key>`; use **Extra Headers** for any additional headers the vendor requires.
+
+| Vendor                                                                         | Model                                   | Base URL                                                       | Notes                                                                                                                           |
+| ------------------------------------------------------------------------------ | --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| [Subquadratic SubQ Snap](https://docs.subq.ai/endpoints/decisions-api/)        | `subq-snap-preview`                     | `https://api.subq.ai/v1`                                       | API key from the SubQ console.                                                                                                  |
+| [Strands Decider](https://strandsagents.com/blog/introducing-strands-decider/) | Any name, for example `strands-decider` | `<your server URL>/v1`, for example `http://localhost:8000/v1` | Open weights you serve yourself with `strands-decider serve`. The server has no authentication, so use any placeholder API key. |
+
+<Callout type="info">
+  On Langfuse Cloud, custom base URLs must use HTTPS and resolve to a public
+  address. Self-hosted Langfuse can reach `localhost` or internal hosts once you
+  allow them with `LANGFUSE_LLM_CONNECTION_WHITELISTED_HOST`; otherwise saving
+  the connection fails with `Blocked hostname detected`.
+</Callout>

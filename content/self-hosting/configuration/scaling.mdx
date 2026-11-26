@@ -74,14 +74,18 @@ The corresponding log message looks like this: `@smithy/node-http-handler:WARN -
 In this situation, we recommend to increase the number of concurrent writes by setting `LANGFUSE_S3_CONCURRENT_WRITES` to a value larger than 50 (the default).
 Each additional write socket comes with a small memory overhead, so we recommend to increase the value gradually and observe the behaviour of your service.
 
-## Slow UI queries or API calls
+## Slow UI queries or API calls [#slow-ui-queries-or-api-calls]
 
 If you notice long-loading screens within the UI or slow API calls, it is usually related to insufficient resources on the ClickHouse database or missing time filters.
 The tracing data is indexed by projectId and time, i.e. adding filter conditions on those should significantly improve performance.
 
+A query that exceeds a ClickHouse resource limit shows the toast **Query hit a resource limit**, and langfuse-web logs `ClickHouse resource limit exceeded` with an `errorType` of `MEMORY_LIMIT`, `OVERCOMMIT`, `RESULT_SIZE`, or `TIMEOUT`.
+Set [`LANGFUSE_SHOW_DETAILED_CLICKHOUSE_ERRORS`](/self-hosting/configuration) to `true` to show the error type in the toast title instead.
+If small queries fail too, ClickHouse is likely undersized. If only queries over wide time ranges fail, narrow the filters.
+
 If all filters are in place, a larger ClickHouse instance may increase the observed performance.
 ClickHouse is designed to scale vertically, i.e. adding more memory to the instance should yield faster response times.
-You can check the [ClickHouse Docs](https://clickhouse.com/docs/operations/tips#using-less-than-16gb-of-ram) on which memory size to choose for your workloads.
+For sizing, see the ClickHouse [usage recommendations](https://clickhouse.com/docs/operations/tips) and [debugging memory issues](https://clickhouse.com/docs/guides/developer/debugging-memory-issues) guides.
 In general, we recommend at least 16 GiB of memory for larger deployments.
 
 ### Routing reads to a separate ClickHouse compute group [#clickhouse-read-only-url]

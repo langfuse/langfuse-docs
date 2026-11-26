@@ -7,9 +7,9 @@ description: Govern coding agent spend centrally. See cost by team and developer
 
 Coding agents make engineers faster, but they also make AI spend unpredictable. Govern it centrally. See spend by team and by developer. Trace sessions to improve token efficiency.
 
-Engineering spend by task, last 30 days: Implementation $486, Code review $379, Planning $321, Bug fix $178, Documentation $104, Other $72. Total spend $1,540 · 4,812 sessions · 28% budget left.
+Engineering spend by task, last 30 days: Implementation $486, Code review $379, Planning $321, Bug fix $178, Documentation $104, Other $72. Total spend $1,540, 4,812 sessions, 28% budget left.
 
-[Start free](/cloud) · [Talk to sales](/talk-to-us)
+[Start free](/cloud), [Talk to sales](/talk-to-us)
 
 Pick the path that matches how your organization runs coding agents. Platform teams usually start with a **gateway**. Individual developers and team rollouts often start with **hooks**.
 
@@ -19,7 +19,7 @@ Route coding agent traffic through an LLM gateway so every model call is authent
 
 ### Allocate budgets centrally
 
-Give teams and departments a spend envelope on the gateway, then see what actually landed in Langfuse. A developer cannot disable a gateway the way they can a local hook.
+Give teams and departments a spend envelope on gateways that enforce budgets, such as LiteLLM, then see what actually landed in Langfuse. A developer cannot disable a gateway the way they can a local hook.
 
 ![Organization budget of $40,000 per month allocated across four teams, with each team's spend shown against its budget](/images/coding-agents/gateway-budget-allocation.png)
 
@@ -47,9 +47,9 @@ Use traces to find repeated context, failed tool loops, and prompts that should 
 
 ### Any gateway, one place for LLM calls
 
-Route coding-agent traffic through LiteLLM or OpenRouter today. Langfuse Gateway is coming soon: virtual keys, access control, and tracing built in.
+Route coding-agent traffic through the Langfuse AI Gateway (beta), LiteLLM, or OpenRouter. The Langfuse AI Gateway has gateway keys, access control, and tracing built in.
 
-**LLM gateways:** [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), [Langfuse Gateway (coming soon)](/docs/roadmap)
+**LLM gateways:** [LiteLLM](/integrations/gateways/litellm), [OpenRouter](/integrations/gateways/openrouter), [Langfuse AI Gateway (beta)](/docs/gateway/overview)
 
 ## Dive deep into session details
 

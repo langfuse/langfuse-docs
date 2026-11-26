@@ -7,10 +7,14 @@ import {
 } from "fumadocs-ui/components/sidebar/base";
 import type * as PageTree from "fumadocs-core/page-tree";
 import { cn } from "@/lib/utils";
+import { sidebarNavPaddingInlineStart } from "./SidebarFolderItem";
 
-/** Matches `getItemOffset` in fumadocs-ui’s docs sidebar layout. */
+/**
+ * Nested separators share the inset row box of `SidebarItem`, so they use its padding to keep
+ * labels aligned. Top-level separators span the full width and add the 8px inset themselves.
+ */
 function getItemOffset(depth: number) {
-  return `calc(${2 * depth} * var(--spacing) + 14px)`;
+  return depth === 0 ? "14px" : sidebarNavPaddingInlineStart(depth);
 }
 
 /**
@@ -19,7 +23,7 @@ function getItemOffset(depth: number) {
  */
 export function SidebarSeparatorItem({ item }: { item: PageTree.Separator }) {
   const depth = useFolderDepth();
-  const labelLeft = `calc(${3 * depth} * var(--spacing) + 4px)`;
+  const labelLeft = getItemOffset(depth);
 
   return (
     <SidebarSeparatorBase
@@ -33,7 +37,7 @@ export function SidebarSeparatorItem({ item }: { item: PageTree.Separator }) {
           "pt-3 mt-2 after:top-0 after:left-0 after:bg-[var(--line-structure)]",
         // depth > 0: 1px underline beneath the label
         depth > 0 &&
-          "mt-3 text-text-tertiary after:bottom-0 after:left-[calc(var(--sidebar-label-left)_+_2px)] after:bg-[var(--line-structure)]",
+          "mt-3 text-text-tertiary after:bottom-0 after:left-[var(--sidebar-label-left)] after:bg-[var(--line-structure)]",
       )}
       style={
         {

@@ -2,8 +2,10 @@ import {
   Box,
   HorizontalArrow,
   Label,
+  StackArrow,
   VerticalArrow,
 } from "./diagram-primitives";
+import styles from "./diagram-fit.module.css";
 
 function LabeledArrow({
   step,
@@ -16,7 +18,7 @@ function LabeledArrow({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <Label step={step} className="whitespace-nowrap px-1 text-center">
+      <Label step={step} className="px-1 text-center">
         {children}
       </Label>
       <HorizontalArrow direction={direction} />
@@ -49,8 +51,10 @@ function DownArrow({
 
 export function BackgroundRunDiagram() {
   return (
-    <figure className="not-prose my-8 overflow-x-auto">
-      <div className="grid min-w-[640px] grid-cols-[0.85fr_1.5fr_0.85fr_1.5fr_0.85fr] grid-rows-[auto_5rem_auto] text-xs text-text-secondary">
+    <figure className={`not-prose my-8 ${styles.figure} ${styles.wide}`}>
+      <div
+        className={`${styles.desktop} grid grid-cols-[0.85fr_1.5fr_0.85fr_1.5fr_0.85fr] grid-rows-[auto_5rem_auto] text-xs text-text-secondary`}
+      >
         <Box>User</Box>
         <div className="flex flex-col justify-center">
           <LabeledArrow step={1}>Send a message</LabeledArrow>
@@ -79,6 +83,25 @@ export function BackgroundRunDiagram() {
           </LabeledArrow>
         </div>
         <Box>Worker</Box>
+      </div>
+      <div className={`${styles.mobile} text-xs text-text-secondary`}>
+        <div className={styles.stack}>
+          <Box>User</Box>
+          <StackArrow step={1}>Send a message</StackArrow>
+          <Box>App server</Box>
+          <StackArrow step={2}>Save run as queued</StackArrow>
+          <Box>Postgres</Box>
+          <div className="mt-4">
+            <Box>App server</Box>
+          </div>
+          <StackArrow step={3}>Enqueue run ID</StackArrow>
+          <Box>BullMQ</Box>
+          <StackArrow step={4}>Deliver run ID</StackArrow>
+          <Box>Worker</Box>
+          <StackArrow step={5}>Claim the queued run</StackArrow>
+          <StackArrow step={6}>Heartbeat every five seconds</StackArrow>
+          <Box>Postgres</Box>
+        </div>
       </div>
     </figure>
   );

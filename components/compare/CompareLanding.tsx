@@ -1,24 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen } from "lucide-react";
+import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
+import { CredibilitySentence } from "@/components/CredibilitySentence";
 import { Button } from "@/components/ui/button";
 import { CornerBox } from "@/components/ui/corner-box";
 import { TextHighlight } from "@/components/ui/text-highlight";
-import {
-  compareLanding as content,
-  FORTUNE_50_TOKEN,
-  OBSERVATIONS_TOKEN,
-} from "@/lib/compare-landing-data";
-import {
-  FORTUNE_50_COMPANIES,
-  formatObservationsPerMonth,
-} from "@/lib/usage-stats";
-
-const heroDescription = content.hero.description
-  .replace(FORTUNE_50_TOKEN, String(FORTUNE_50_COMPANIES))
-  .replace(OBSERVATIONS_TOKEN, formatObservationsPerMonth());
+import { compareLanding as content } from "@/lib/compare-landing-data";
 import { cn } from "@/lib/utils";
 import styles from "./compare-landing.module.css";
+
+const heroParagraphs = content.hero.description
+  .split(/\n\n+/)
+  .map((paragraph) => paragraph.trim())
+  .filter(Boolean);
 
 const container = "mx-auto w-full max-w-[1200px] px-4 sm:px-8";
 const eyebrow =
@@ -132,7 +127,7 @@ export function CompareLanding() {
       <section
         className={cn(
           container,
-          "grid items-center gap-10 pb-12 pt-10 @min-[900px]/compare:grid-cols-2 @min-[900px]/compare:gap-12 lg:pb-16 lg:pt-12",
+          "grid items-start gap-10 pb-12 pt-10 @min-[900px]/compare:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)] @min-[900px]/compare:items-end @min-[900px]/compare:gap-12 lg:pb-16 lg:pt-12",
         )}
         aria-labelledby="compare-heading"
       >
@@ -157,9 +152,15 @@ export function CompareLanding() {
               </span>
             ))}
           </h1>
-          <p className="mt-6 max-w-[520px] text-pretty text-[16px] leading-[1.5] text-text-secondary">
-            {heroDescription}
-          </p>
+          <div className="mt-6 max-w-[640px] space-y-3 text-pretty text-[16px] leading-[1.5] text-text-secondary">
+            <CredibilitySentence
+              className="text-pretty text-[16px] leading-[1.5] text-text-secondary"
+              bold={false}
+            />
+            {heroParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
           <div className="mt-7 flex flex-wrap items-center gap-2.5">
             <Button
               href="https://cloud.langfuse.com"
@@ -510,58 +511,22 @@ export function CompareLanding() {
       </div>
 
       <section
-        className="border-t border-line-structure bg-surface-cta-primary"
+        className="border-t border-line-structure bg-surface-1"
         aria-labelledby="compare-cta"
       >
-        <div
-          className={cn(
-            container,
-            "flex flex-col items-center gap-5 py-12 text-center lg:py-20",
-          )}
-        >
-          <h2
-            id="compare-cta"
-            className={cn(
-              heading,
-              "max-w-[640px] text-balance text-[32px] leading-[1.04] sm:text-[40px]",
-            )}
-          >
-            {content.headings.cta}
-          </h2>
-          <p className="max-w-[520px] text-[15px] text-text-secondary">
-            {content.copy.cta}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            <Button
-              href="https://cloud.langfuse.com"
-              aria-label="Start free"
-              size="default"
-              className="h-9 px-3.5"
-            >
-              Start free
-            </Button>
-            <Button
-              href="#migrate"
-              aria-label="Migration guides"
-              variant="secondary"
-              size="default"
-              className="h-9 bg-transparent px-3.5"
-            >
-              Migration guides
-            </Button>
-            <span className="text-[13px] text-text-secondary">
-              or{" "}
-              <Link
-                href="/talk-to-us"
-                className="text-text-primary underline underline-offset-2"
-              >
-                Talk to us
-              </Link>
-            </span>
-          </div>
-          <p className="font-mono text-[11px] text-text-tertiary">
-            {content.copy.ctaNote}
-          </p>
+        <div className={cn(container, "py-10 sm:py-12")}>
+          <CustomerStoryCTA
+            className="mt-0"
+            headingAs="h2"
+            titleId="compare-cta"
+            title={content.headings.cta}
+            description={content.copy.cta}
+            primaryCtaHref="https://cloud.langfuse.com"
+            secondaryCtaLabel="Migration guides"
+            secondaryCtaHref="#migrate"
+            contactLabel="Talk to us"
+            footnote={content.copy.ctaNote}
+          />
         </div>
       </section>
     </div>

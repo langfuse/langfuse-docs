@@ -75,7 +75,7 @@ flowchart LR
 
 ## Production environments
 
-Our production infrastructure is deployed across multiple AWS regions with a fully automated CI/CD pipeline. All infrastructure is managed using Terraform. Cloudflare WAF (Web Application Firewall) serves as a central proxy in front of AWS.
+Langfuse Cloud runs entirely on AWS, with a separate AWS account for each data region (US, EU, HIPAA, Japan). All infrastructure is managed with Terraform (OpenTofu and Terragrunt) and applied through Atlantis. Every release is built and deployed by a fully automated CI/CD pipeline. Public traffic enters each region through an AWS Application Load Balancer protected by AWS WAF.
 
 ```mermaid
 ---
@@ -86,86 +86,83 @@ config:
 ---
 graph TB
 
+    subgraph Code["GitHub"]
+        MR["Langfuse monorepo<br/>(web, worker, AI gateway)"]
+        SDKs["Python and JS/TS SDKs"]
+        TF["Terraform<br/>(private repository)"]
+    end
 
-    MR["Turborepo Monorepository (web/worker/shared code)"]
-    Python["Python SDK"]
-    JS["JS/TS SDK"]
-
-    NPM["NPM Registry"]
-    PYPI["PyPI Registry"]
-
-
-    JS --> NPM
-    Python --> PYPI
-
-
-    GHA["GitHub Actions"]
+    subgraph CD["CI/CD"]
+        GHA["GitHub Actions"]
+        Atlantis["Atlantis<br/>(Terraform plan and apply)"]
+    end
 
     MR --> GHA
+    TF --> Atlantis
 
-    TF["Terraform <br/>(private repository)"]
-    TF --> ECR
-    TF --> VPN
-    TF --> Observability
+    GHA -->|Build and push per region| ECR["AWS ECR"]
+    GHA -->|Release tags| Registries["Docker Hub and GHCR<br/>(OSS releases)"]
+    SDKs -->|Publish| Packages["npm and PyPI"]
 
+    Clients["Users and SDKs"] --> Ingress
 
-    subgraph CD["CI/CD Pipeline"]
-        GHA -->|Build & Push| ECR[AWS ECR]
-        GHA -->|Build & Push| DockerHub["Docker Hub<br/>(OSS releases)"]
-    end
-    ECR -->|Deploy| VPN
-
-    subgraph CF["Cloudflare"]
-        WAF["WAF<br/>(Web Application Firewall)"]
-        Proxy["Central Proxy"]
-    end
-
-    CF -->|Traffic| VPN
-
-    subgraph VPN["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Langfuse Cloud (US, EU, HIPAA)</i></span>"]
-        ECS["AWS ECS Fargate (Web + Worker)"]
-
-        subgraph StorageInfra["Storage"]
-            ElastiCache["ElastiCache Redis (Clustered)"]
-            S3[S3 Buckets]
-            Aurora[Aurora PostgreSQL]
-            CH[ClickHouse Cloud]
+    subgraph Region["<span style='display:block; width:100%; text-align:left; white-space: nowrap;'><i>Langfuse Cloud (US, EU, HIPAA, Japan)</i></span>"]
+        subgraph Ingress["Ingress"]
+            WAF["AWS WAF"] --> ALB["Application Load Balancer"]
+            CloudFront["CloudFront<br/>(static assets)"] --> ALB
         end
 
-        subgraph EvaluationInfra["Evaluation Execution"]
-            Lambda["AWS Lambda<br/>(Tenant-Isolated Code Evaluator Runners)"]
+        subgraph ECS["AWS ECS Fargate"]
+            Web["Web<br/>(UI, API, ingestion)"]
+            Worker["Worker<br/>(queue consumers)"]
+            Gateway["AI Gateway"]
         end
 
-        ECS --> ElastiCache
-        ECS --> S3
-        ECS --> Aurora
-        ECS --> CH
-        ECS -->|CodeEvalDispatcher| Lambda
+        subgraph Storage["Storage"]
+            Aurora["Aurora PostgreSQL"]
+            Valkey["ElastiCache Valkey (Clustered)"]
+            S3["S3 Buckets"]
+            CH["ClickHouse Cloud<br/>(PrivateLink)"]
+        end
+
+        subgraph Isolated["Isolated execution"]
+            CodeEval["AWS Lambda<br/>(code evaluator runners)"]
+            Sandbox["AWS Lambda MicroVMs<br/>(in-app agent sandbox)"]
+        end
+
+        Bedrock["Amazon Bedrock<br/>(AI features)"]
+
+        ALB --> Web
+        ALB --> Gateway
+        ECS --> Storage
+        ECS --> Isolated
+        ECS --> Bedrock
     end
+
+    ECR -->|Deploy| ECS
+    Atlantis -->|Provision| Region
+    Gateway -->|Proxy| LLMs["Customer-configured<br/>LLM providers"]
 
     subgraph OSS["Managed OSS Deployment Templates"]
         direction LR
         DockerCompose["Docker Compose"]
+        HelmCharts["Helm Charts"]
         AWSCustomer["AWS"]
         AzureCustomer["Azure"]
         GCPCustomer["GCP"]
-        HelmCharts["Helm Charts"]
     end
 
-    DockerHub -->|Deploy| OSS
+    Registries -->|Deploy| OSS
 
-
-
-    subgraph "Observability"
-        DataDog
+    subgraph Observability["Observability"]
+        Datadog
         Sentry
-        Pagerduty
+        IncidentIO["incident.io"]
 
-        DataDog --> Pagerduty
-        Sentry --> Pagerduty
+        Datadog -->|Alerts| IncidentIO
     end
 
-    VPN --> Observability
+    Region --> Observability
 ```
 
 ## Data Ingestion from SDKs

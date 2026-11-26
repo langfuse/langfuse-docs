@@ -17,6 +17,7 @@ This guide walks you through how to set up a dataset, run an experiment on it, a
 </Callout>
 
 import { Details, Summary } from "@/components/Details";
+import McpSkillInstall from "@/components-mdx/get-started/mcp-skill-install.mdx";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 
@@ -26,7 +27,7 @@ import { Link } from "@/components/ui/link";
 
 Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
 
-<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+<Tabs items={["Ask your coding agent", "Langfuse MCP", "Cursor plugin", "Manual installation"]}>
 
 <Tab>
 
@@ -36,6 +37,18 @@ Ask your coding agent to install the skill by pointing to the [GitHub repository
 Install the Langfuse Agent Skill from github.com/langfuse/skills
 and use it to create a first dataset for this application
 with Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+<McpSkillInstall />
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Set up offline evaluation for this application with Langfuse.
 ```
 
 </Tab>
@@ -158,10 +171,10 @@ pip install langfuse openai
 
 ```bash
 # pnpm
-pnpm add @langfuse/client @langfuse/openai @langfuse/otel @opentelemetry/sdk-node openai tsx
+pnpm add @langfuse/client @langfuse/openai @langfuse/otel "@opentelemetry/sdk-node@>=0.202.0 <0.300.0" openai tsx
 
 # npm
-npm install @langfuse/client @langfuse/openai @langfuse/otel @opentelemetry/sdk-node openai tsx
+npm install @langfuse/client @langfuse/openai @langfuse/otel "@opentelemetry/sdk-node@>=0.202.0 <0.300.0" openai tsx
 ```
 
 </Tab>
@@ -337,6 +350,8 @@ Add items one by one, import a CSV, or add cases from existing traces. For the S
     src="https://static.langfuse.com/docs-videos/dataset-item-create.mp4"
     aspectRatio={16 / 9}
     gifStyle
+    title="Add a dataset item manually"
+    description="Datasets > san-francisco-sites. Click “New item”, enter the question “Which Art Deco tower stands on Telegraph Hill?” as Input and “Coit Tower” as Expected output, then click “Add to dataset”. The item appears at the top of the Items table."
   />
 </Tab>
 <Tab>
@@ -344,6 +359,8 @@ Add items one by one, import a CSV, or add cases from existing traces. For the S
     src="https://static.langfuse.com/docs-videos/dataset-item-upload.mp4"
     aspectRatio={16 / 9}
     gifStyle
+    title="Import dataset items from CSV"
+    description="An empty dataset > “Upload CSV”: choose a CSV file, then drag the CSV columns input, expected_output and metadata onto the Input, Expected Output and Metadata fields under “Map to Dataset Items” and click “Import”. The rows appear as dataset items."
   />
 </Tab>
 <Tab>
@@ -351,6 +368,8 @@ Add items one by one, import a CSV, or add cases from existing traces. For the S
     src="https://static.langfuse.com/docs-videos/datasets-add-from-trace.mp4"
     aspectRatio={16 / 9}
     gifStyle
+    title="Add a generation to a dataset"
+    description="Trace detail with the generate-reply generation selected. Click “Add to” in the observation header > “Dataset” > support-replies. The “Add item to datasets” dialog opens prefilled with the generation's input and output as expected output; click “Add to dataset”."
   />
 </Tab>
 </Tabs>

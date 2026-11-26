@@ -1,0 +1,1 @@
+.agents/page-types.md

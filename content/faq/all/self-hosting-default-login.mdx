@@ -1,0 +1,20 @@
+---
+title: What is the default login for self-hosted Langfuse?
+seoTitle: "Default Login and First Admin for Self-hosted Langfuse"
+description: Self-hosted Langfuse has no default username or password. Sign up to create the first user, or create a user, organization, project, and API keys on startup with headless initialization.
+tags: [self-hosting, auth]
+---
+
+# What is the default login for self-hosted Langfuse?
+
+There is no default username or password. After you start a new instance, open the UI (for example `http://localhost:3000`) and click **Sign up** to create the first user. The user who creates an organization becomes its `Owner`.
+
+To create a user, organization, project, and API keys automatically on startup, use [headless initialization](/self-hosting/administration/headless-initialization) with the `LANGFUSE_INIT_*` environment variables, for example `LANGFUSE_INIT_ORG_ID`, `LANGFUSE_INIT_PROJECT_ID`, `LANGFUSE_INIT_PROJECT_PUBLIC_KEY`, `LANGFUSE_INIT_PROJECT_SECRET_KEY`, `LANGFUSE_INIT_USER_EMAIL`, and `LANGFUSE_INIT_USER_PASSWORD`. The initial user is created only when both `LANGFUSE_INIT_USER_EMAIL` and `LANGFUSE_INIT_USER_PASSWORD` are set, and it becomes `Owner` of the initial organization. Initialization does not change the password of a user that already exists.
+
+To control who can access the instance afterwards:
+
+- Disable open sign-up with `AUTH_DISABLE_SIGNUP=true` ([hardening](/self-hosting/configuration/hardening#disable-signup)). This also blocks invited users who do not have an account yet.
+- Restrict who can create organizations with [`LANGFUSE_ALLOWED_ORGANIZATION_CREATORS`](/self-hosting/administration/organization-creators).
+- Add new users to an existing organization automatically with `LANGFUSE_DEFAULT_ORG_ID` and `LANGFUSE_DEFAULT_ORG_ROLE`.
+
+If you forgot the password of an existing user, see [I forgot my password](/faq/all/forgot-password).

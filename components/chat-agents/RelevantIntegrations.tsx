@@ -3,6 +3,7 @@ import IconPython from "@/components/icons/python";
 import IconTypescript from "@/components/icons/typescript";
 import Link from "next/link";
 import { IntegrationLabel } from "@/components/ui/integration-label";
+import { Text } from "@/components/ui/text";
 import { integrationsSource } from "@/lib/source";
 import { cn } from "@/lib/utils";
 
@@ -126,9 +127,12 @@ function IntegrationRow({
 }) {
   return (
     <div className="grid gap-3 border-b border-line-structure py-4 md:grid-cols-[170px_1fr] md:gap-6 md:py-5">
-      <p className="font-mono text-[9px] uppercase tracking-[0.08em] text-text-tertiary md:pt-1">
+      <Text
+        size="m"
+        className="text-left font-medium text-text-secondary md:pt-1"
+      >
         {title}
-      </p>
+      </Text>
       <div className="flex flex-wrap gap-1.5 md:gap-2">
         {items.map((item) => (
           <IntegrationLabel

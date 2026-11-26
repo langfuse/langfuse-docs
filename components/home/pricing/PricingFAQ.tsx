@@ -7,7 +7,7 @@ const marketplaceFaqByVariant: Record<"cloud" | "selfHosted", FAQItem> = {
   cloud: {
     question: MARKETPLACE_QUESTION,
     answer:
-      "Yes. Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available.",
+      "Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available for Enterprise customers.",
   },
   selfHosted: {
     question: MARKETPLACE_QUESTION,
@@ -59,9 +59,14 @@ const faqs: FAQItem[] = [
       "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
   },
   {
+    question: "Can I choose a yearly commitment?",
+    answer:
+      "Yearly commitments are always available for Enterprise; Core, Pro, and Teams customers can also choose a yearly commitment if they meet the minimum contract value threshold.",
+  },
+  {
     question: "What are Langfuse Cloud Credits, and how do they affect me?",
     answer:
-      "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you.",
+      "A Langfuse Cloud Credit is a prepaid unit of credit, equal to one (1) US dollar, to be applied to a customer's use of Langfuse Cloud. Credits are drawn down according to the then-current pricing at [langfuse.com/pricing](/pricing). Langfuse Cloud Credits only apply to customers with a committed spend contract for Langfuse Cloud. If you have questions about your credit balance, drawdown schedule, or committed spend contract, please contact your account team. If you use Langfuse Cloud on a Pay-as-you-Go basis, Langfuse Cloud Credits do not apply to you. Credits from the [discount programs](/pricing#discounts) are separate and apply to any paid plan.",
   },
   {
     question: "Can I set up alerts on the usage fees?",

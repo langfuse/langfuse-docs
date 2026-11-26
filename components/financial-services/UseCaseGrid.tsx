@@ -37,6 +37,7 @@ export type IndustryUseCase = {
   icon: keyof typeof useCaseIcons;
   description: string;
   proof?: string;
+  proofHref?: string;
   featured?: boolean;
   href?: string;
 };
@@ -66,9 +67,18 @@ export function UseCaseGrid({
               {useCase.description}
             </p>
             {useCase.proof ? (
-              <p className="mt-3 text-[12px] leading-[1.4] text-text-tertiary">
-                {useCase.proof}
-              </p>
+              useCase.proofHref && !useCase.href ? (
+                <a
+                  href={useCase.proofHref}
+                  className="mt-3 block w-fit text-[12px] leading-[1.4] text-text-tertiary underline decoration-line-structure underline-offset-4 hover:text-text-primary"
+                >
+                  {useCase.proof}
+                </a>
+              ) : (
+                <p className="mt-3 text-[12px] leading-[1.4] text-text-tertiary">
+                  {useCase.proof}
+                </p>
+              )
             ) : null}
           </>
         );

@@ -100,7 +100,7 @@ const buildFullMessage = ({
   );
 
   return {
-    text: `New Langfuse feedback · ${source}`,
+    text: `New Langfuse feedback: ${source}`,
     blocks,
     unfurl_links: false,
     unfurl_media: false,
@@ -116,7 +116,7 @@ export const buildDocsMcpFeedbackMessage = (input: {
   referenceUrl?: string;
 }): SlackPayload =>
   buildFullMessage({
-    source: `Langfuse Docs MCP · ${input.targetType} · ${input.id}`,
+    source: `Langfuse Docs MCP: ${input.targetType}, ${input.id}`,
     headerFields: [
       ["📬 SOURCE", "Langfuse Docs MCP"],
       ["🎯 TARGET", input.target],
@@ -142,7 +142,7 @@ export const buildDocsWebsiteFeedbackMessage = (input: {
   if (!input.comment) {
     return {
       text: truncateForSlack(
-        `${ratingEmoji} Docs page rating · ${input.page} · Langfuse Docs Website`,
+        `${ratingEmoji} Docs page rating: ${input.page} (Langfuse Docs Website)`,
         SLACK_SECTION_TEXT_LIMIT,
       ),
       unfurl_links: false,

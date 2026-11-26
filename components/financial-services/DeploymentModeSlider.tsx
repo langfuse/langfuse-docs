@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { controlTextClassName } from "@/components/ui/button";
+import { TabButton } from "@/components/ui/tab-button";
 import { cn } from "@/lib/utils";
 import { financialServicesDeploymentModes } from "./content";
 
@@ -62,7 +64,7 @@ export function DeploymentModeSlider({
         ref={groupRef}
         role="radiogroup"
         aria-labelledby={labelId}
-        className="inline-flex w-full overflow-hidden rounded-[1px] border border-line-structure sm:w-fit"
+        className="-m-1 flex flex-wrap"
       >
         <span id={labelId} className="sr-only">
           Deployment mode
@@ -70,26 +72,17 @@ export function DeploymentModeSlider({
         {modes.map((item, index) => {
           const active = item.id === modeId;
           return (
-            <button
+            <TabButton
               key={item.id}
-              type="button"
+              active={active}
               role="radio"
               aria-checked={active}
               tabIndex={active ? 0 : -1}
               onClick={() => selectMode(item.id)}
               onKeyDown={(event) => onRadioKeyDown(event, index)}
-              className={cn(
-                "flex-1 px-3 py-1.5 text-left sm:flex-none",
-                index > 0 && "border-l border-line-structure",
-                active
-                  ? "bg-surface-1 text-text-primary"
-                  : "bg-surface-bg text-text-primary hover:bg-surface-1",
-              )}
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.06em]">
-                {item.label}
-              </span>
-            </button>
+              {item.label}
+            </TabButton>
           );
         })}
       </div>
@@ -98,7 +91,12 @@ export function DeploymentModeSlider({
         <p className="text-[16px] leading-[1.35] text-text-primary">
           {mode.title}
         </p>
-        <p className="mt-3 flex flex-wrap items-center gap-2 font-mono text-[11px] text-text-secondary">
+        <p
+          className={cn(
+            "mt-3 flex flex-wrap items-center gap-2 text-text-secondary",
+            controlTextClassName,
+          )}
+        >
           {mode.flow.map((step, index) => (
             <span key={step} className="inline-flex items-center gap-2">
               <span
@@ -121,7 +119,10 @@ export function DeploymentModeSlider({
           {mode.specs.map((spec) => (
             <div
               key={spec.k}
-              className="flex justify-between gap-3 border-t border-line-structure pt-2 font-mono text-[11px]"
+              className={cn(
+                "flex justify-between gap-3 border-t border-line-structure pt-2",
+                controlTextClassName,
+              )}
             >
               <dt className="text-text-tertiary">{spec.k}</dt>
               <dd className="text-right text-text-primary">{spec.v}</dd>

@@ -19,6 +19,7 @@ import {
 import { AvailabilityBanner } from "@/components/Availability";
 import { Link as MdxLink, type LinkProps } from "@/components/ui/link";
 import { Callout } from "@/components/ui/callout";
+import { SignupCTA } from "@/components/SignupCTA";
 import { Table } from "@/components/ui/table";
 import { LoopDiagram } from "@/components/academy/LoopDiagram";
 import { OnlineLoop, OfflineLoop } from "@/components/academy/LoopSubset";
@@ -110,6 +111,8 @@ function MdxParagraph({
   return <p {...props}>{children}</p>;
 }
 
+MdxParagraph.displayName = "MdxParagraph";
+
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
@@ -122,6 +125,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     VideoCarousel,
     LangTabs,
     Callout,
+    SignupCTA,
     Tabs: LangTabsWithTab,
     Tab: LangTab,
     table: Table,

@@ -30,7 +30,7 @@ Customer‑managed keys are not supported. Langfuse Cloud uses AWS‑managed enc
 <Details>
 <Summary>What retention, deletion and export controls exist?</Summary>
 
-Each project can set its own retention window; data older than that is purged nightly, and users/API can trigger immediate deletion or export. See [data retention](/docs/administration/data-retention) and [data deletion](/docs/administration/data-deletion) documentation.
+Each project can set its own [retention window](/docs/administration/data-retention). Background jobs delete data older than that window. You can also [delete data on demand](/docs/administration/data-deletion) or [export it](/docs/api-and-data-platform/overview).
 
 </Details>
 
@@ -182,14 +182,23 @@ Every commit passes our CI pipeline of end-to-end, unit, and security tests.
 <Details>
 <Summary>Does Langfuse perform SAST or DAST?</Summary>
 
-We perform SAST (Static Application Security Testing) by scanning our container images with Snyk on commits to main ([example](https://github.com/langfuse/langfuse/actions/runs/19838910104/job/56842732608)). We also run static code scans using CodeQL ([example](https://github.com/langfuse/langfuse/actions/runs/19838910102/job/56842732711)).
+We perform SAST (Static Application Security Testing) by scanning our container images with automated vulnerability scanning tools on commits to main. We also run static code scans using CodeQL ([example](https://github.com/langfuse/langfuse/actions/runs/19838910102/job/56842732711)).
 
 </Details>
 
 <Details>
 <Summary>How does the Software Development Lifecycle Policy look like?</Summary>
 
-Our Software Development Life Cycle (SDLC) policy establishes a consistent process to ensure information security is integrated at every stage of development. The process follows defined phases, including planning and design, building the software, evaluating system readiness, and executing a secure deployment. Throughout this lifecycle, we enforce secure engineering principles, provide developers with ongoing training on practices like the OWASP Top 10, and perform vulnerability scanning to protect against threats. To protect data integrity, development and testing environments are strictly segregated from our production environment, and the use of production data for testing is prohibited without explicit authorization under strict controls. We ensure secure data interoperability and portability for our customers by default, using encrypted transport and providing a secure API for data access.
+Our Software Development Life Cycle (SDLC) policy establishes a consistent process to ensure information security is integrated at every stage of development. The process follows defined phases, including planning and design, building the software, evaluating system readiness, and executing a secure deployment. Throughout this lifecycle, we enforce secure engineering principles, provide developers with ongoing training on practices like the OWASP Top 10, and perform vulnerability scanning to protect against threats. We ensure secure data interoperability and portability for our customers by default, using encrypted transport and providing a secure API for data access.
+
+</Details>
+
+<Details>
+<Summary>How does Langfuse Cloud separate production from staging and development?</Summary>
+
+Langfuse Cloud isolates its production environments from staging, development, testing, and internal deployments.
+
+Testing with production data requires explicit authorization and strict controls. Any use of customer or employee data in a non-production environment requires explicit approval and appropriate de-identification.
 
 </Details>
 
@@ -198,7 +207,7 @@ Our Software Development Life Cycle (SDLC) policy establishes a consistent proce
 <Details>
 <Summary>What is the incident‑response process?</Summary>
 
-24 × 7 monitoring triggers an on‑call engineer; affected customers are notified and post‑mortems are published for larger incidents. See [incident and breach](/security/incident-and-breach) documentation for more details.
+Monitoring alerts the on-call team, which assesses impact, contains the incident, and coordinates recovery and customer communication. See [incident and breach response](/security/incident-and-breach) for the customer notification requirements and how they differ from public status updates.
 
 </Details>
 
@@ -212,7 +221,7 @@ Please check out the [details here](/security/data-regions#business-continuity--
 <Details>
 <Summary>How does your disaster recovery plan look like?</Summary>
 
-Our Disaster Recovery Plan outlines the procedures for recovering services following a catastrophic event and is formally activated by leadership when critical systems are projected to be unavailable for an extended period. The recovery phase involves systematically replicating our entire infrastructure in an alternate environment, conducting rigorous testing, and deploying the new environment to production by updating DNS records. The final reconstitution phase aims to restore full operations within 24 hours of the disaster, ensuring a seamless transition and secure handling of all temporary resources.
+Our disaster recovery plan covers restoring services following a major disruption, validating the recovered environment, and returning it to production. See [data regions and availability](/security/data-regions#business-continuity--availability) for the recovery objectives, backup coverage, and limits on recovery following a regional loss. These recovery objectives are separate from security incident notification requirements.
 
 </Details>
 
@@ -235,7 +244,7 @@ The Change Management Policy ensures that all modifications to our infrastructur
 <Details>
 <Summary>How is the disclosure program run?</Summary>
 
-Langfuse participates in the [ClickHouse Bugcrowd program](https://bugcrowd.com/engagements/clickhouse) for vulnerability disclosure; CVSS drives remediation SLAs. See [penetration testing](/security/penetration-testing) for more details.
+Langfuse participates in the [ClickHouse Bugcrowd program](https://bugcrowd.com/engagements/clickhouse) for vulnerability disclosure. See [vulnerability management](/security/vulnerability-management#triage-and-remediation) for severity assessment and remediation commitments, and [penetration testing](/security/penetration-testing) for our testing program.
 
 </Details>
 
@@ -249,7 +258,7 @@ Our Information Security Policy is the overarching framework for our entire secu
 <Details>
 <Summary>How does the vulnerability policy look like?</Summary>
 
-We continuously monitor our systems for security weaknesses using automated tools like Snyk and Dependabot, with all findings logged for remediation. Each vulnerability is triaged within 24 hours and assigned a priority level with a strict Service Level Agreement (SLA), requiring critical issues to be fixed within 24 hours. The entire lifecycle is documented, and resolution is achieved through a direct fix, confirmation as a false positive, or an approved exception with mitigating controls. Please refer to [vulnerability management](/security/vulnerability-management) for more information.
+We use automated vulnerability scanning tools and document findings for assessment and remediation. Our [vulnerability management documentation](/security/vulnerability-management#triage-and-remediation) explains the critical vulnerability remediation period, when it starts, and its qualifications under the [Information Security Addendum](/security-addendum). Internal triage targets do not replace security incident escalation or customer notification requirements.
 
 </Details>
 
