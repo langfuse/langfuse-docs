@@ -183,7 +183,7 @@ A **live map** follows a filtered set of traces over time. A **snapshot** analyz
 
 ## Get started [#get-started]
 
-The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
+The project setup is the same on Langfuse Cloud and self-hosted deployments (v4.86.0 or later; see the [self-hosting FAQ](#self-hosted-version)).
 
 <Callout type="warning">
   The summary model receives full inputs/outputs and some metadata of selected traces. The embedding and grouping models receive generated summaries, which can still contain sensitive data. Apply [masking](/docs/observability/features/masking) before ingestion to keep sensitive content out of model requests.
@@ -286,3 +286,18 @@ Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstablet
 ## Paused processing
 
 If Topics pauses because of a provider or billing error, resolve the error, then select **Turn back on** in the Topics banner and save. Updating model settings alone does not resume processing.
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="self-hosted-version">
+<Summary>Which version of self-hosted Langfuse do I need to use Topics?</Summary>
+
+Topics works on self-hosted Langfuse **v4.86.0 or later** with no extra environment variables. It runs on your existing web and worker services (the official worker image includes the native clustering module for amd64 and arm64).
+
+Configure [blob storage lifecycle expiry for Topics transcripts](/self-hosting/deployment/infrastructure/blobstorage#topics-transcript-expiry) (or enable the worker cleaner), and confirm both web and worker can reach your [LLM provider endpoints](/self-hosting/security/networking). For troubleshooting or tuning worker concurrency, see [Troubleshoot self-hosted Topics](/faq/all/troubleshoot-self-hosted-topics).
+
+</Details>
+
+</FaqDetails>
