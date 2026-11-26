@@ -18,14 +18,11 @@ import { Book } from "lucide-react";
   tier](/images/changelog/2026-11-27-organization-model-definitions.png)
 </Frame>
 
-Organization owners and admins can now define models once for the whole organization in **Organization Settings > Models**. If you have a provider contract with custom prices, or use model names Langfuse doesn't know, you no longer need to copy the same definition into every project.
+Organization owners and admins can now define models once for every project in **Organization Settings > Models**, instead of duplicating custom definitions per project.
 
-- **Clone a Langfuse default** to the organization to start from its prices and pricing tiers.
-- **Every project uses organization models** to [infer cost](/docs/observability/features/token-and-cost-tracking#infer). Project members see them read-only in **Project Settings > Models** and can clone one to override it for a single project.
-- **Precedence is explicit.** If a generation's model name matches a project model's pattern, that model is used. Otherwise a matching organization model applies, and otherwise the Langfuse default. The **Maintainer** column shows whether a definition comes from the project, the organization, or Langfuse.
-- **Automate it with the API.** Keep organization prices in sync from a file with the new [organization models API](/docs/observability/features/token-and-cost-tracking#organization-models-api): `PUT /api/public/organizations/models` creates or replaces a model by name. The project Models API now returns a `scope` for every model and rejects changes to organization models with `403`; `isLangfuseManaged` is deprecated.
-
-See [model resolution](/docs/observability/features/token-and-cost-tracking#model-resolution) for how ties between matching patterns are broken, with a worked example.
+- **Shared pricing across projects:** Define custom or negotiated rates once (or clone a Langfuse default) and every project uses them to [infer cost](/docs/observability/features/token-and-cost-tracking#infer).
+- **Clear precedence and overrides:** Matching follows project, then organization, then Langfuse defaults (see [model resolution](/docs/observability/features/token-and-cost-tracking#model-resolution)). Clone an organization model in **Project Settings > Models** to override it for one project.
+- **API support:** Sync organization definitions programmatically via the [Organization Models API](https://api.reference.langfuse.com/#tag/organizationmodels). The [project Models API](https://api.reference.langfuse.com/#tag/models) now returns `scope` on every model (deprecating `isLangfuseManaged`).
 
 <Cards num={2}>
   <Card

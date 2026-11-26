@@ -67,7 +67,7 @@ When cost is not ingested directly, Langfuse infers it. The `model` parameter of
 
 Langfuse comes with a **list of predefined popular models** including **OpenAI, Anthropic, Google**. Check out the [full list](https://cloud.langfuse.com/project/~/models) (you need to sign in).
 
-You can manage prices in **Project Settings > Models**, add your own [custom model definitions](#custom-model-definitions) for a project or for your [whole organization](#organization-model-definitions), or request official support for new models via [GitHub](/issue). The **Maintainer** column shows where a definition comes from: **Project**, **Organization**, or **Langfuse**.
+You can manage prices in **Project Settings > Models**, add [custom model definitions](#custom-model-definitions) per project or [organization-wide](#organization-model-definitions), or request official support for new models via [GitHub](/issue).
 
 <Frame>
   ![Model Definitions table in Langfuse Project Settings, showing match
@@ -123,7 +123,7 @@ Then you can add the prices per token type and save the model definition. Now al
 
 <Tab>
 
-Model definitions can also be managed programmatically via the Models [API](/docs/api):
+Model definitions can also be managed programmatically via the [Models API](https://api.reference.langfuse.com/#tag/models):
 
 ```bash
 GET    /api/public/models
@@ -133,7 +133,7 @@ PUT    /api/public/models/{id}
 DELETE /api/public/models/{id}
 ```
 
-Each model has a `scope` of `PROJECT`, `ORGANIZATION`, or `LANGFUSE`. Only `PROJECT` models can be changed through this API. `isLangfuseManaged` is deprecated; it is `true` for every model whose `scope` is not `PROJECT`.
+Each model includes a `scope` (`PROJECT`, `ORGANIZATION`, or `LANGFUSE`); only `PROJECT` models can be modified here. To manage organization models programmatically, use the [Organization Models API](https://api.reference.langfuse.com/#tag/organizationmodels).
 
 </Tab>
 
@@ -141,69 +141,16 @@ Each model has a `scope` of `PROJECT`, `ORGANIZATION`, or `LANGFUSE`. Only `PROJ
 
 ### Organization model definitions [#organization-model-definitions]
 
-If several projects pay the same custom prices or use the same custom model names, define the model once for the whole organization. Organization owners and admins manage these definitions in **Organization Settings > Models** or through the [organization models API](#organization-models-api). Every project in the organization uses them unless the project defines its own matching model (see [model resolution](#model-resolution)).
+Define models once for every project in **Organization Settings > Models**, or manage them via the [Organization Models API](https://api.reference.langfuse.com/#tag/organizationmodels) with an [organization-scoped API key](/docs/administration/scim-and-org-api). Every project inherits them unless it defines a matching project model (see [model resolution](#model-resolution)).
 
-Use **Clone to organization** on a Langfuse default to start from its prices and pricing tiers. **Test Model Match** on this page resolves a model name against organization models and Langfuse defaults only; a project model can still take precedence in individual projects.
-
-In **Project Settings > Models**, organization models are read-only; use **Clone to project** to override one for a single project. A model marked **Overridden** has the same name as a model with higher precedence. This label compares names only, while ingestion compares match patterns. Existing project models with a matching pattern keep taking precedence in their projects, so delete them if the organization model should apply. See [RBAC](/docs/administration/rbac#reading-scopes) for the required permissions.
-
-The project Models API returns organization models with `scope: "ORGANIZATION"`. Changing or deleting one through the project API returns `403`; use the [organization models API](#organization-models-api) instead, or create a project model with the same name to override it. Changes to organization models are recorded in the organization's [audit log](/docs/administration/audit-logs).
-
-#### Organization models via API [#organization-models-api]
-
-<AvailabilityBanner
-  availability={{
-    hobby: "not-available",
-    core: "not-available",
-    pro: "not-available",
-    enterprise: "full",
-    selfHosted: "ee",
-  }}
-/>
-
-Use an [organization-scoped API key](/docs/administration/scim-and-org-api) to manage organization models, for example to keep negotiated prices in sync from a file:
-
-```bash
-GET    /api/public/organizations/models
-GET    /api/public/organizations/models/{id}
-PUT    /api/public/organizations/models
-DELETE /api/public/organizations/models/{id}
-```
-
-- `PUT` creates or replaces the organization model with this exact `modelName`. It returns `201` when it creates the model and `200` when it replaces the match pattern and pricing tiers of an existing one. The id stays the same.
-- Prices are set only through `pricingTiers`, in USD per single unit of each usage key. Legacy fields such as `inputPrice`, `unit`, `startDate`, and the tokenizer fields are rejected with `400`.
-- `GET /api/public/organizations/models` returns only the organization's own models. Pass `scope=LANGFUSE` for Langfuse defaults or `scope=ALL` for both, and `search` to filter by model name. Langfuse defaults are read-only; to change one, `PUT` an organization model with the same `modelName`.
-- Changes apply to generations ingested after the write, usually within about 10 seconds.
-
-```bash
-# 🇪🇺 EU region. Other regions: 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com, ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-curl -X PUT https://cloud.langfuse.com/api/public/organizations/models \
-  -u "$ORG_PUBLIC_KEY:$ORG_SECRET_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "modelName": "my-fine-tuned-model",
-    "matchPattern": "(?i)^my-fine-tuned-model$",
-    "pricingTiers": [
-      {
-        "name": "Standard",
-        "isDefault": true,
-        "priority": 0,
-        "conditions": [],
-        "prices": { "input": 0.000002, "output": 0.000008 }
-      }
-    ]
-  }'
-```
-
-<Callout type="info">
-
-Organization API keys currently allow every organization action, not only model management. See the [API reference](https://api.reference.langfuse.com) for all fields and error codes.
-
-</Callout>
+- **Cloning and overrides:** Use **Clone to organization** on a Langfuse default to start from its prices, or **Clone to project** in **Project Settings > Models** to override an organization model for one project. Existing project models with matching patterns continue to win until deleted.
+- **Overridden label vs. ingestion:** The **Overridden** label compares model names only, while ingestion matches regex patterns.
+- **Test Model Match:** On the organization page, it tests against organization models and Langfuse defaults only; project models can still win inside a project.
+- **Permissions and auditing:** Managed by organization Owners and Admins ([RBAC](/docs/administration/rbac#reading-scopes)), with changes recorded in the [audit log](/docs/administration/audit-logs).
 
 ### Model resolution [#model-resolution]
 
-Langfuse picks one model definition per generation by matching the generation's `model` value against each definition's **match pattern**, a Postgres regular expression. For example, `(?i)^(openai/)?(gpt-4o)$` matches `gpt-4o` and `OpenAI/gpt-4o`, but not `gpt-4o-mini`.
+When cost is not [ingested directly](#ingest), Langfuse matches the generation's `model` value against each definition's **match pattern** (Postgres regex).
 
 ```mermaid
 flowchart TD
@@ -220,24 +167,17 @@ flowchart TD
   T --> C["Cost = usage x tier price,<br/>per usage type"]
 ```
 
-The resolution follows these rules:
+- **Level beats specificity:** Project > Organization > Langfuse. A broad project pattern like `(?i)^gpt-4o` also captures `gpt-4o-mini`, even if a Langfuse default matches it exactly.
+- **Same-level ties:** The latest start date wins (undated models come last), then the most recently updated model. The start date is a sort key only; it is not compared against the generation timestamp.
+- **No cross-definition fallback:** Langfuse picks one [pricing tier](#how-tier-matching-works) from the winning model only. Usage types missing from that tier stay unpriced, even if a lower level defines them.
 
-- **Level beats specificity.** Any matching project model wins over any matching organization model, which wins over any Langfuse model. A broad project pattern such as `(?i)^gpt-4o` also captures `gpt-4o-mini`, even though a Langfuse default matches it exactly.
-- **Ties within a level.** If several definitions on the same level match, the one with the latest start date wins. Definitions without a start date come after dated ones. Remaining ties go to the most recently updated definition.
-- **Start date is a sort key only.** It is not compared with the generation's timestamp, so the winning definition prices all new generations, including those with an earlier timestamp.
-- **One definition, its own tiers.** Langfuse then selects a [pricing tier](#how-tier-matching-works) of that definition only. Tiers and prices are never combined across definitions, and a usage type without a price in the selected tier gets no cost, even if a lower level would price it.
-
-[Ingested costs](#ingest) skip this resolution and are stored as sent.
-
-**Example.** An organization defines `gpt-4o` with the pattern `(?i)^(openai/)?(gpt-4o)$` at $0.000003 per input token and $0.000012 per output token. Project B also defines a project model with the pattern `(?i)^gpt-4o`.
+**Example:** An organization defines `gpt-4o` (`(?i)^(openai/)?(gpt-4o)$`), and Project B defines a project model with `(?i)^gpt-4o`.
 
 | Ingested `model` | Project A (no project models) | Project B                  |
 | ---------------- | ----------------------------- | -------------------------- |
 | `gpt-4o`         | Organization `gpt-4o`         | Project model              |
 | `gpt-4o-mini`    | Langfuse `gpt-4o-mini`        | Project model              |
 | `my-local-llm`   | No match, no inferred cost    | No match, no inferred cost |
-
-In project A, a `gpt-4o` generation with 1,000 input and 500 output tokens costs 1,000 x $0.000003 + 500 x $0.000012 = $0.009.
 
 ### Pricing Tiers [#pricing-tiers]
 
