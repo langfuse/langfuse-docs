@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type {
   InkeepAIChatSettings,
   InkeepSearchSettings,
@@ -9,6 +9,7 @@ import type {
 } from "@inkeep/cxkit-react";
 import { useTheme } from "next-themes";
 import { type PostHog, usePostHog } from "posthog-js/react";
+import { readAnalyticsConsent } from "@/lib/cookie-consent";
 
 const customAnalyticsCallback = (
   event: InkeepCallbackEvent,
@@ -35,11 +36,26 @@ type InkeepSharedSettings = {
 const useInkeepSettings = (): InkeepSharedSettings | null => {
   const { resolvedTheme } = useTheme();
   const posthog = usePostHog();
+  const [analyticsGranted, setAnalyticsGranted] = useState(false);
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
       console.warn("Inkeep API key is missing.");
     }
+  }, []);
+
+  useEffect(() => {
+    const sync = () => {
+      setAnalyticsGranted(readAnalyticsConsent() === "granted");
+    };
+
+    sync();
+    document.addEventListener("cookieyes_banner_load", sync);
+    document.addEventListener("cookieyes_consent_update", sync);
+    return () => {
+      document.removeEventListener("cookieyes_banner_load", sync);
+      document.removeEventListener("cookieyes_consent_update", sync);
+    };
   }, []);
 
   if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
@@ -52,6 +68,17 @@ const useInkeepSettings = (): InkeepSharedSettings | null => {
     organizationDisplayName: "Langfuse",
     colorMode: {
       forcedColorMode: resolvedTheme,
+    },
+    privacyPreferences: {
+      optOutAnalyticalCookies: !analyticsGranted,
+    },
+    theme: {
+      disableLoadingDefaultFont: true,
+      fontFamily: {
+        heading:
+          'var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+        body: 'var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+      },
     },
     onEvent: (event) => customAnalyticsCallback(event, posthog),
   };

@@ -10,32 +10,59 @@ import { readAnalyticsConsent } from "@/lib/cookie-consent";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 
-// Once a visitor rejects analytics in the CookieYes banner, PostHog runs
-// cookieless (the mode the Tag Manager copy is configured with): no cookie and
-// no stored id. A visitor PostHog has on record as opted out stays cookieless
-// while the banner's answer is unknown. Accepting later turns the cookie back
-// on, with a new id. Other visitors who haven't answered are unchanged.
+const FULL_TRACKING_CONFIG = {
+  disable_session_recording: false,
+  autocapture: true,
+  capture_heatmaps: true,
+  capture_dead_clicks: true,
+  capture_exceptions: true,
+  disable_surveys: false,
+};
+
+const COOKIELESS_ONLY_CONFIG = {
+  disable_session_recording: true,
+  autocapture: false,
+  capture_heatmaps: false,
+  capture_dead_clicks: false,
+  capture_exceptions: false,
+  disable_surveys: true,
+};
+
+// PostHog starts opted out in cookieless mode (`cookieless_mode: "on_reject"`
+// with `opt_out_capturing_by_default: true` and `opt_out_persistence_by_default:
+// true`) and drops everything except `$pageview` in `before_send` until
+// CookieYes "analytics" consent is granted. Granting opts in and enables the
+// extensions; revoking returns to cookieless mode and clears PostHog storage.
 function applyAnalyticsConsent() {
   const consent = readAnalyticsConsent();
-  const recorded = posthog.get_explicit_consent_status();
-  if (
-    consent === "denied" ||
-    (consent === "unknown" && recorded === "denied")
-  ) {
-    // cookieless first, so opting out drops the id instead of keeping it
-    if (posthog.config.cookieless_mode !== "on_reject")
-      posthog.set_config({ cookieless_mode: "on_reject" });
-    posthog.opt_out_capturing();
-    // posthog-js (key format read from 1.442.0) keeps the tab's window id in
-    // sessionStorage after opting out
-    try {
-      sessionStorage.removeItem(`ph_${posthogKey}_window_id`);
-      sessionStorage.removeItem(`ph_${posthogKey}_primary_window_exists`);
-    } catch {
-      // storage unavailable: nothing was kept there either
+  if (consent === "granted") {
+    if (!posthog.has_opted_in_capturing()) {
+      posthog.opt_in_capturing({ captureEventName: false });
     }
-  } else if (consent === "granted" && recorded === "denied") {
-    posthog.opt_in_capturing({ captureEventName: false });
+    if (posthog.config?.disable_session_recording) {
+      posthog.set_config(FULL_TRACKING_CONFIG);
+    }
+    return;
+  }
+
+  if (posthog.config && !posthog.config.disable_session_recording) {
+    posthog.set_config(COOKIELESS_ONLY_CONFIG);
+  }
+  if (posthog.has_opted_in_capturing()) {
+    posthog.opt_out_capturing();
+  }
+  // opt_out_capturing() persists `__ph_opt_in_out_<key>` in localStorage;
+  // clearing it keeps the visitor opted out via `opt_out_capturing_by_default`
+  // without leaving PostHog storage behind on denial or revoke.
+  if (posthog.get_explicit_consent_status() !== "pending") {
+    posthog.clear_opt_in_out_capturing();
+  }
+  // posthog-js can keep the tab's window id in sessionStorage after opting out
+  try {
+    sessionStorage.removeItem(`ph_${posthogKey}_window_id`);
+    sessionStorage.removeItem(`ph_${posthogKey}_primary_window_exists`);
+  } catch {
+    // storage unavailable: nothing was kept there either
   }
 }
 
@@ -63,14 +90,17 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       cross_subdomain_cookie: true,
       // Route changes are captured below, including the initial page exactly once.
       capture_pageview: false,
-      // no cookie for a visitor PostHog has on record as opted out, even when
-      // the CookieYes answer can't be read yet; others are unaffected
+      // Fail closed: start opted out (cookieless capture, no client storage)
+      // until CookieYes "analytics" consent is explicitly granted.
+      cookieless_mode: "on_reject",
+      opt_out_capturing_by_default: true,
       opt_out_persistence_by_default: true,
-      // a visitor who rejected earlier is cookieless from the first event
-      ...(readAnalyticsConsent() === "denied" && {
-        cookieless_mode: "on_reject",
-        opt_out_capturing_by_default: true,
-      }),
+      ...COOKIELESS_ONLY_CONFIG,
+      before_send: (event) => {
+        if (!event) return null;
+        if (readAnalyticsConsent() === "granted") return event;
+        return event.event === "$pageview" ? event : null;
+      },
       loaded: (ph) => {
         applyAnalyticsConsent();
         setReady(true);

@@ -44,6 +44,15 @@ function syncClickIdCookies(clickIds: Partial<Record<string, string>>) {
   // do nothing, so click ids stored on an earlier consented visit survive
   if (consent === "unknown") return;
 
+  if (consent === "denied") {
+    try {
+      localStorage.removeItem("_gcl_ls");
+      localStorage.removeItem("li_adsId");
+    } catch {
+      // storage unavailable: nothing was kept there either
+    }
+  }
+
   for (const param of CLICK_ID_PARAMS) {
     if (consent === "denied") {
       // consent absent or revoked: expire any previously stored value —

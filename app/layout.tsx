@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { AppRootProvider } from "@/components/AppRootProvider";
 import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
@@ -19,8 +18,10 @@ import { SpotifyPixel } from "@/components/analytics/spotify-ads";
 import { TwitterPixel } from "@/components/analytics/twitter-ads";
 import { ConversionTracker } from "@/components/analytics/ConversionTracker";
 import { AdConsentGate } from "@/components/analytics/AdConsentGate";
+import { AnalyticsConsentGate } from "@/components/analytics/AnalyticsConsentGate";
 import { ClickIdPersistence } from "@/components/analytics/ClickIdPersistence";
 import { CommonRoom } from "@/components/analytics/common-room";
+import { Reo } from "@/components/analytics/reo";
 import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../style.css";
@@ -108,14 +109,13 @@ export default function RootLayout({
             </AdConsentGate>
             <ConversionTracker />
             <ClickIdPersistence />
-            <CommonRoom />
+            {/* Visitor identification scripts require prior consent (CookieYes
+                "analytics" category). */}
+            <AnalyticsConsentGate>
+              <CommonRoom />
+              <Reo />
+            </AnalyticsConsentGate>
             <AhrefsAnalytics />
-            <Script
-              id="cookieyes"
-              type="text/javascript"
-              src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
-              strategy="beforeInteractive"
-            />
           </>
         )}
         <SpeedInsights sampleRate={0.1} />

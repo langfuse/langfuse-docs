@@ -40,11 +40,12 @@ export function readAdvertisementConsent(): ConsentState {
   return "unknown";
 }
 
-// CookieYes "analytics"-category consent as the visitor answered it, read by
-// the site's PostHog. Unlike the advertisement reader above, "denied" means the
-// visitor rejected: before any answer CookieYes already records every optional
-// category as off, and that reads "unknown" here, so the site's analytics keep
-// their pre-answer behaviour until the visitor actually decides.
+// CookieYes "analytics"-category consent as the visitor answered it, shared by
+// PostHogProvider and AnalyticsConsentGate. Returns "granted" as soon as
+// either the live API or the persisted cookie records analytics consent,
+// "denied" once the visitor has answered negatively, and "unknown" before an
+// answer or when CookieYes fails to load. Callers fail closed and only enable
+// full tracking or analytics scripts on "granted".
 export function readAnalyticsConsent(): ConsentState {
   if (typeof window === "undefined") return "unknown";
 

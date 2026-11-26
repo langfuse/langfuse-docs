@@ -53,6 +53,7 @@ export default function InkeepSearchBar({ className }: InkeepSearchProps) {
     baseSettings: {
       ...baseSettings,
       theme: {
+        ...baseSettings.theme,
         styles: [
           {
             key: "1",
