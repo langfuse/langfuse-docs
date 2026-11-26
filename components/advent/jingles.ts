@@ -1017,7 +1017,7 @@ export class JinglePlayer {
     return bus;
   }
 
-  shatter(pan: number) {
+  shatter(pan: number, power = 1) {
     const ctx = this.ctx,
       graph = this.graph;
     if (!ctx || !graph || ctx.state !== "running") return;
@@ -1029,9 +1029,24 @@ export class JinglePlayer {
       1.8,
       pan < 0 ? -1 : 1,
     );
-    this.lowTone(ctx, bus, 80, time, 1.1, 0.6);
-    this.noiseHit(ctx, bus, time, 0.35, 0.35, 1200, "lowpass");
-    for (let i = 0; i < 5; i++)
+    this.lowTone(
+      ctx,
+      bus,
+      110 - power * 45,
+      time,
+      0.25 + power * 0.85,
+      0.18 + power * 0.42,
+    );
+    this.noiseHit(
+      ctx,
+      bus,
+      time,
+      0.12 + power * 0.23,
+      0.08 + power * 0.27,
+      600 + power * 600,
+      "lowpass",
+    );
+    for (let i = 0; i < Math.floor(power * 5); i++)
       this.lowTone(
         ctx,
         bus,

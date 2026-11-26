@@ -53,20 +53,33 @@ export function SlopSlider({
   power: number;
   onChange: (power: number) => void;
 }) {
+  const level = [
+    "No slop",
+    "Slop curious",
+    "Premium slop",
+    "Weaponized slop",
+    "Maximum brainrot",
+  ][Math.min(4, Math.ceil(power / 25))];
   return (
     <label className="adv-slop-control" data-no-snowball>
-      <span>
-        Slop power <output>{power}%</output>
+      <span className="adv-slop-title">
+        SLOP POWER <output>{power}%</output>
       </span>
+      <span className="adv-slop-level">{level}</span>
       <input
         type="range"
         aria-label="Slop power"
+        aria-valuetext={`${power}% slop: ${level}`}
+        aria-describedby="adv-slop-description"
         min="0"
         max="100"
         step="1"
         value={power}
         onChange={(event) => onChange(Number(event.target.value))}
       />
+      <span id="adv-slop-description">
+        AI slop: weirder visuals, sound + snowballs
+      </span>
     </label>
   );
 }

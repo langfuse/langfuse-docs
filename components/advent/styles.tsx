@@ -793,8 +793,8 @@ export function AdventStyles() {
       }
 
       html:has(.adv-page), html:has(.adv-page) body { height: 100%; overflow: hidden; overscroll-behavior: none; }
-      .adv-page { height: 100dvh; max-height: 100dvh; min-height: 0; display: grid; grid-template-rows: 64px minmax(0,1fr) 52px; overflow: hidden; --adv-pointer-x: 0; --adv-pointer-y: 0; }
-      .adv-page:not([data-experience="intro"]) { grid-template-rows: 64px 112px minmax(0,1fr) 52px; }
+      .adv-page { height: 100dvh; max-height: 100dvh; min-height: 0; display: grid; grid-template-rows: 64px minmax(0,1fr) 88px; overflow: hidden; --adv-pointer-x: 0; --adv-pointer-y: 0; }
+      .adv-page:not([data-experience="intro"]) { grid-template-rows: 64px 112px minmax(0,1fr) 88px; }
       .adv-nav { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; border-bottom: 1px solid var(--line-structure); background: color-mix(in srgb,var(--surface-bg) 85%,transparent); }
       .adv-brand { position: relative; display: block; width: 150px; }
       .adv-brand img { width: 100%; height: auto; display: block; }
@@ -857,11 +857,13 @@ export function AdventStyles() {
       .adv-mixer { position: relative; z-index: 5; display: flex; align-items: center; justify-content: center; gap: 24px; border-top: 1px solid var(--line-structure); background: color-mix(in srgb,var(--surface-bg) 90%,transparent); padding: 5px 18px; }
       .adv-volume { min-height: 36px; padding: 6px 10px; border: 1px solid var(--line-structure); border-radius: 24px; }
       .adv-volume input { cursor: pointer !important; width: 76px; }
-      .adv-slop-control { display: flex; align-items: center; gap: 12px; min-height: 36px; font: 10px/1.4 var(--font-geist-mono),monospace; }
-      .adv-slop-control > span { min-width: 110px; }
-      .adv-slop-control output { display: inline-block; width: 30px; text-align: right; color: var(--adv-accent-text); }
-      .adv-slop-control input { width: 130px; accent-color: #9764f5; cursor: pointer !important; }
-      .adv-slop-caption { font-size: 10px; color: var(--text-secondary); width: 270px; }
+      .adv-slop-control { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px 24px; width: min(520px,65vw); padding: 7px 16px; border: 1px solid #b996ef; border-radius: 14px; color: #3d1664; background: linear-gradient(115deg,#f1e5ff,#ffe5f4); box-shadow: 0 2px 16px #a85bff20; }
+      .adv-slop-title { display: flex; gap: 12px; align-items: baseline; font: 750 16px/1.3 var(--font-geist-mono),monospace; letter-spacing: .06em; }
+      .adv-slop-control output { font-size: 14px; letter-spacing: 0; color: #7d26ba; }
+      .adv-slop-level { font-size: 11px; font-weight: 600; text-align: right; }
+      .adv-slop-control input { grid-column: 1 / -1; width: 100%; height: 24px; margin: 0; accent-color: #8733ce; cursor: pointer !important; }
+      .adv-slop-control input:focus-visible { outline: 2px solid #8733ce; outline-offset: 2px; border-radius: 5px; }
+      #adv-slop-description { grid-column: 1 / -1; font-size: 10px; line-height: 1.2; color: #6a457d; }
       .adv-slop-decorations { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
       .adv-slop-decorations span { position: absolute; padding: 8px 14px; border-radius: 30px; background: linear-gradient(120deg,#9e5cffd9,#f28bd1e8); color: white; border: 1px solid #ffffff99; font-size: 12px; font-weight: 600; box-shadow: 0 6px 35px #a85bff80; animation: adv-brainrot 4s ease-in-out infinite alternate; }
       @keyframes adv-brainrot { to { transform: translate(24px,-35px) rotate(18deg) scale(1.2); } }
@@ -872,15 +874,20 @@ export function AdventStyles() {
       .adv-welcome-flight canvas { width: 100vw; height: 100dvh; }
       .adv-welcome-flight .adv-fold-skip { z-index: 111; }
       .adv-shatter-canvas { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 59; pointer-events: none; }
+      @media (min-width: 701px) and (max-height: 850px) {
+        .adv-door-recess { padding: 5px 7px; gap: 4px; }
+        .adv-door-recess-icon { width: 24px; height: 24px; flex-shrink: 0; }
+        .adv-door-recess-icon svg { width: 14px; height: 14px; }
+        .adv-door-recess-title { font-size: 11px; -webkit-line-clamp: 2; }
+      }
       @media (max-width: 1050px) {
         .adv-calendar { width: calc(100% - 180px); }
         .adv-nav { padding: 0 20px; }
         .adv-nav-links { gap: 20px; }
-        .adv-slop-caption { display: none; }
       }
       @media (max-width: 700px) {
-        .adv-page { grid-template-rows: 54px minmax(0,1fr) 52px; }
-        .adv-page:not([data-experience="intro"]) { grid-template-rows: 54px 108px minmax(0,1fr) 52px; }
+        .adv-page { grid-template-rows: 54px minmax(0,1fr) 88px; }
+        .adv-page:not([data-experience="intro"]) { grid-template-rows: 54px 108px minmax(0,1fr) 88px; }
         .adv-nav { padding: 0 14px; }
         .adv-brand { width: 120px; }
         .adv-nav-links { gap: 16px; font-size: 11px; }
@@ -901,8 +908,9 @@ export function AdventStyles() {
         .adv-door-grid { grid-template-columns: repeat(4,minmax(0,1fr)); grid-template-rows: repeat(6,minmax(0,1fr)); gap: 7px; padding: 7px 10px 10px; }
         .adv-door-number { font-size: 24px; }
         .adv-door-recess-title { font-size: 9px; -webkit-line-clamp: 2; }
-        .adv-door-recess-icon { width: 22px; height: 22px; }
-        .adv-door-recess { padding: 4px; gap: 3px; }
+        .adv-door-recess-icon { width: 18px; height: 18px; flex-shrink: 0; }
+        .adv-door-recess { padding: 3px; gap: 2px; }
+        .adv-door-recess-title { flex-shrink: 1; min-height: 0; }
         .adv-door-recess-icon svg { width: 12px; height: 12px; }
         .adv-door-face::before { inset: 4px; border-width: 1px; }
         .adv-door-lock { left: 7px; top: 7px; width: 9px; height: 9px; }
@@ -912,13 +920,21 @@ export function AdventStyles() {
         .adv-calendar-footer .adv-hint-row { font-size: 9px; }
         .adv-mixer { gap: 14px; padding: 5px 10px; }
         .adv-volume input { width: 50px; }
-        .adv-slop-control { gap: 8px; font-size: 9px; }
-        .adv-slop-control > span { min-width: 97px; }
-        .adv-slop-control input { width: 80px; }
+        .adv-slop-control { flex: 1; width: auto; min-width: 0; gap: 0 4px; padding: 7px 10px; }
+        .adv-slop-title { font-size: 13px; gap: 8px; }
+        .adv-slop-title output { font-size: 11px; }
+        .adv-slop-level { font-size: 8px; }
+        #adv-slop-description { font-size: 8px; }
+        .adv-volume { padding: 6px; }
+        .adv-volume input { width: 38px; }
       }
       @media (max-height: 600px) {
+        .adv-slop-control { padding: 4px 12px; gap: 0 12px; }
+        .adv-slop-title { font-size: 13px; }
+        .adv-slop-control input { height: 18px; }
+        #adv-slop-description { font-size: 9px; }
         .adv-brand > svg { top: -4px; width: 24px; }
-        .adv-page:not([data-experience="intro"]) { grid-template-rows: 46px 58px minmax(0,1fr) 42px; }
+        .adv-page:not([data-experience="intro"]) { grid-template-rows: 42px 58px minmax(0,1fr) 64px; }
         .adv-page:not([data-experience="intro"]) .adv-heading { display: none; }
         .adv-page:not([data-experience="intro"]) .adv-experience-header { padding: 4px; }
         .adv-calendar { grid-template-rows: 14px minmax(0,1fr); gap: 3px; padding-bottom: 4px; }

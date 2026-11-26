@@ -1,10 +1,13 @@
 "use client";
 
+import { captureAdvent } from "./capture";
+import { canvasScale } from "./render-budget";
+
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 
 export type CalendarShatterHandle = {
   prepare: () => void;
-  hit: (x: number, y: number) => void;
+  hit: (x: number, y: number, power: number) => void;
   cancel: () => void;
 };
 type Shard = {
@@ -17,6 +20,7 @@ type Shard = {
   angle: number;
   spin: number;
   points: [number, number][];
+  crop: [number, number, number, number];
 };
 
 /** The real calendar, fractured into textured triangles and pulled back by springs. */
@@ -25,36 +29,54 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const snapshot = useRef<{
       image: HTMLCanvasElement;
-      rect: DOMRect;
+      mode: number;
       board: HTMLElement;
     } | null>(null);
     const shards = useRef<Shard[]>([]);
     const frame = useRef(0);
     const capturing = useRef(false);
     const generation = useRef(0);
-    const cancel = () => {
-      generation.current++;
+    const stop = () => {
       cancelAnimationFrame(frame.current);
       frame.current = 0;
       if (snapshot.current)
         snapshot.current.board.style.removeProperty("opacity");
-      snapshot.current = null;
       shards.current = [];
       const canvas = canvasRef.current;
       canvas?.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
       if (canvas) delete canvas.dataset.shattering;
     };
+    const cancel = () => {
+      generation.current++;
+      stop();
+      snapshot.current = null;
+    };
     useEffect(() => {
+      const visibility = () => {
+        if (document.hidden) cancel();
+      };
+      document.addEventListener("visibilitychange", visibility);
       window.addEventListener("resize", cancel);
       return () => {
         cancel();
         window.removeEventListener("resize", cancel);
+        document.removeEventListener("visibilitychange", visibility);
       };
     }, []);
     useImperativeHandle(ref, () => ({
       cancel,
       prepare() {
+        const mode = Number(
+          document
+            .querySelector<HTMLElement>(".adv-page")
+            ?.style.getPropertyValue("--adv-scene") || 0,
+        );
+        if (snapshot.current && Math.abs(snapshot.current.mode - mode) > 0.01)
+          cancel();
+        // The theme is morphing: wait for a stable image instead of recapturing every throw.
+        if (mode > 0.001 && mode < 0.999) return;
         if (
+          snapshot.current ||
           capturing.current ||
           frame.current ||
           matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -64,14 +86,14 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
         if (!board) return;
         const version = generation.current;
         capturing.current = true;
-        void import("html-to-image")
-          .then(({ toCanvas }) =>
-            toCanvas(board, {
-              pixelRatio: Math.min(1.5, 1400 / board.offsetWidth),
-              preferredFontFormat: "woff2",
-              style: { transform: "none", opacity: "1" },
-            }),
-          )
+        void captureAdvent(board, {
+          pixelRatio: canvasScale(
+            board.offsetWidth,
+            board.offsetHeight,
+            650_000,
+          ),
+          style: { transform: "none", opacity: "1" },
+        })
           .then((image) => {
             if (
               version === generation.current &&
@@ -80,7 +102,7 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
             )
               snapshot.current = {
                 image,
-                rect: board.getBoundingClientRect(),
+                mode,
                 board,
               };
           })
@@ -91,7 +113,7 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
             capturing.current = false;
           });
       },
-      hit(x, y) {
+      hit(x, y, power) {
         const capture = snapshot.current;
         const canvas = canvasRef.current;
         const ctx = canvas?.getContext("2d");
@@ -105,16 +127,17 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
         if (frame.current) {
           for (const s of shards.current) {
             const distance = Math.max(20, Math.hypot(s.x - x, s.y - y));
-            s.vx += ((s.x - x) / distance) * 150;
-            s.vy += ((s.y - y) / distance) * 150 - 60;
+            s.vx += ((s.x - x) / distance) * (50 + power * 100);
+            s.vy += ((s.y - y) / distance) * (50 + power * 100) - power * 60;
           }
           return;
         }
-        const dpr = Math.min(devicePixelRatio, 1.5);
+        const dpr = canvasScale(innerWidth, innerHeight);
         canvas.width = innerWidth * dpr;
         canvas.height = innerHeight * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const { rect, image, board } = capture;
+        const { image, board } = capture;
+        const rect = board.getBoundingClientRect();
         shards.current = [];
         for (let row = 0; row < 6; row++)
           for (let col = 0; col < 8; col++) {
@@ -140,17 +163,19 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
               const dx = hx - x,
                 dy = hy - y,
                 distance = Math.max(30, Math.hypot(dx, dy));
-              const force = 350 + 450 * Math.exp(-distance / 400);
+              const force =
+                (100 + 700 * power) * Math.exp(-distance / (250 + power * 400));
               shards.current.push({
                 x: hx,
                 y: hy,
                 hx,
                 hy,
                 points,
+                crop: [x0, y0, x1 - x0, y1 - y0],
                 vx: (dx / distance) * force,
-                vy: (dy / distance) * force - 160,
+                vy: (dy / distance) * force - 160 * power,
                 angle: 0,
-                spin: (col % 2 ? 1 : -1) * (2 + row * 0.2),
+                spin: (col % 2 ? 1 : -1) * (0.5 + power * 1.5 + row * 0.2),
               });
             }
           }
@@ -159,6 +184,10 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
         const start = performance.now();
         let last = start;
         const draw = (now: number) => {
+          if (now - last < 1000 / 30) {
+            frame.current = requestAnimationFrame(draw);
+            return;
+          }
           const age = (now - start) / 1000;
           const dt = Math.min(0.033, (now - last) / 1000);
           last = now;
@@ -188,16 +217,20 @@ export const CalendarShatter = forwardRef<CalendarShatterHandle>(
             ctx.clip();
             ctx.drawImage(
               image,
-              rect.x - s.hx,
-              rect.y - s.hy,
-              rect.width,
-              rect.height,
+              ((s.crop[0] - rect.x) / rect.width) * image.width,
+              ((s.crop[1] - rect.y) / rect.height) * image.height,
+              (s.crop[2] / rect.width) * image.width,
+              (s.crop[3] / rect.height) * image.height,
+              s.crop[0] - s.hx,
+              s.crop[1] - s.hy,
+              s.crop[2],
+              s.crop[3],
             );
             ctx.restore();
           }
           canvas.dataset.progress = Math.min(1, age / 2.4).toFixed(3);
           if (age < 2.4) frame.current = requestAnimationFrame(draw);
-          else cancel();
+          else stop();
         };
         frame.current = requestAnimationFrame(draw);
       },

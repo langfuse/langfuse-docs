@@ -1,5 +1,7 @@
 "use client";
 
+import { captureAdvent } from "./capture";
+
 import {
   forwardRef,
   useEffect,
@@ -166,6 +168,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
         let canvas: HTMLCanvasElement | undefined;
         let gl: WebGLRenderingContext | null = null;
         let frame = 0;
+        let dialogResize: ResizeObserver | undefined;
         let timer: ReturnType<typeof setTimeout> | undefined;
         let finish: (value: boolean) => void = () => {};
         let cancelled = false;
@@ -183,12 +186,13 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
           const capture =
             closing && lastSnapshot.current
               ? Promise.resolve(lastSnapshot.current)
-              : import("html-to-image").then(({ toCanvas }) =>
-                  toCanvas(document.body, {
+              : captureAdvent(
+                  document.querySelector<HTMLElement>(".adv-page") ??
+                    document.body,
+                  {
                     width,
                     height,
                     pixelRatio: Math.min(1, 1200 / width, 1200 / height),
-                    preferredFontFormat: "woff2",
                     style: {
                       transform: `translateY(${-scrollY}px)`,
                       transformOrigin: "top left",
@@ -198,7 +202,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
                       !["SCRIPT", "STYLE", "NEXTJS-PORTAL", "IFRAME"].includes(
                         node.tagName,
                       ) && !node.hasAttribute?.("data-fold-exclude"),
-                  }),
+                  },
                 );
           const snapshot = await Promise.race([
             capture,
@@ -298,8 +302,24 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
           const result = await new Promise<boolean>((resolve, reject) => {
             finish = resolve;
             const start = performance.now();
+            let last = 0;
+            let measured: HTMLElement | null = null;
+            let cardWidth = 560,
+              cardHeight = 600;
+            dialogResize = new ResizeObserver(([entry]) => {
+              const box = entry.borderBoxSize[0];
+              if (box) {
+                cardWidth = box.inlineSize;
+                cardHeight = box.blockSize;
+              }
+            });
             const draw = (now: number) => {
               try {
+                if (last && now - last < 1000 / 30) {
+                  frame = requestAnimationFrame(draw);
+                  return;
+                }
+                last = now;
                 const elapsed = Math.min(
                   1,
                   (now - start) / (getFoldSeconds(berlin, closing) * 1000),
@@ -314,6 +334,11 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
                 }
                 const dialog =
                   document.querySelector<HTMLElement>(".adv-dialog");
+                if (dialog && dialog !== measured) {
+                  dialogResize!.disconnect();
+                  dialogResize!.observe(dialog);
+                  measured = dialog;
+                }
                 const linear = Math.max(
                   0,
                   Math.min(1, (t - FOLD_REVEAL) / (1 - FOLD_REVEAL)),
@@ -328,8 +353,8 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
                 }
                 gl!.uniform2f(
                   cardSize,
-                  (dialog?.offsetWidth ?? 560) / height,
-                  (dialog?.offsetHeight ?? 600) / height,
+                  cardWidth / height,
+                  cardHeight / height,
                 );
                 gl!.uniform1f(progress, t);
                 gl!.drawArrays(gl!.TRIANGLES, 0, 3);
@@ -353,6 +378,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
         } finally {
           clearTimeout(timer);
           cancelAnimationFrame(frame);
+          dialogResize?.disconnect();
           canvas?.remove();
           const dialog = document.querySelector<HTMLElement>(".adv-dialog");
           if (dialog) {

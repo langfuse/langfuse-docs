@@ -1,5 +1,7 @@
 "use client";
 
+import { canvasScale } from "./render-budget";
+
 import { useEffect, useRef } from "react";
 import type { MusicFrame } from "./jingles";
 
@@ -283,6 +285,11 @@ export function ShaderAtmosphere({
     }
     initialize();
 
+    const root = canvas.parentElement;
+    const setStyle = (el: HTMLElement | null, key: string, value: string) => {
+      if (el && el.style.getPropertyValue(key) !== value)
+        el.style.setProperty(key, value);
+    };
     function schedule() {
       if (!frame && !disposed && inView && !document.hidden) {
         frame = requestAnimationFrame(draw);
@@ -311,20 +318,26 @@ export function ShaderAtmosphere({
       const target = input.techno ? 1 : 0;
       mode = input.reducedMotion ? target : music.mix;
       const build = input.reducedMotion ? 0 : music.build;
-      const root = canvas.parentElement;
-      root?.style.setProperty("--adv-scene", mode.toFixed(4));
-      root?.style.setProperty("--adv-tension", build.toFixed(4));
-      root?.style.setProperty(
-        "--adv-pulse",
-        input.reducedMotion ? "0" : (music.pulse * mode).toFixed(4),
-      );
-      root?.style.setProperty("--adv-ink", mode > 0.5 ? "1" : "0");
-      if (root) root.dataset.scenePhase = mode > 0.5 ? "berlin" : "winter";
+      setStyle(root, "--adv-scene", mode.toFixed(3));
+      setStyle(root, "--adv-tension", build.toFixed(3));
+      const pulse = input.reducedMotion ? "0" : (music.pulse * mode).toFixed(2);
+      root
+        ?.querySelectorAll<HTMLElement>(".adv-santa-heart, .adv-garland")
+        .forEach((el) => setStyle(el, "--adv-pulse", pulse));
+      setStyle(root, "--adv-ink", mode > 0.5 ? "1" : "0");
+      const phase = mode > 0.5 ? "berlin" : "winter";
+      if (root && root.dataset.scenePhase !== phase)
+        root.dataset.scenePhase = phase;
       const dialog = document.querySelector<HTMLElement>(".adv-dialog");
-      dialog?.style.setProperty("--adv-scene", mode.toFixed(4));
-      dialog?.style.setProperty("--adv-ink", mode > 0.5 ? "1" : "0");
+      setStyle(dialog, "--adv-scene", mode.toFixed(3));
+      setStyle(dialog, "--adv-ink", mode > 0.5 ? "1" : "0");
       if (!input.reducedMotion) travel += dt * (1 + mode * 3 + build * 4);
-      if (gl && program && !lost) {
+      if (
+        gl &&
+        program &&
+        !lost &&
+        !document.querySelector("[data-page-fold], [data-welcome-flight]")
+      ) {
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.uniform2f(uniforms.u_resolution, canvas.width, canvas.height);
         gl.uniform2f(uniforms.u_size, width, height);
@@ -347,11 +360,7 @@ export function ShaderAtmosphere({
       const bounds = canvas.getBoundingClientRect();
       width = Math.max(1, bounds.width);
       height = Math.max(1, bounds.height);
-      const scale = Math.min(
-        window.devicePixelRatio || 1,
-        1.5,
-        Math.sqrt(1_800_000 / (width * height)),
-      );
+      const scale = canvasScale(width, height, 700_000);
       canvas.width = Math.max(1, Math.round(width * scale));
       canvas.height = Math.max(1, Math.round(height * scale));
       invalidate();

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { canvasScale } from "./render-budget";
 import { WELCOME_SECONDS } from "./fold-timing";
 
 type Props = {
@@ -51,16 +52,32 @@ export function WelcomeFlight({
     };
     document.addEventListener("keydown", keydown);
     const resize = () => {
-      const dpr = Math.min(devicePixelRatio, 1.5);
+      const dpr = canvasScale(innerWidth, innerHeight);
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
+    // Seven tiny cached sprites replace thousands of path operations per frame.
+    const sprites = Array.from({ length: 7 }, (_, kind) => {
+      const sprite = document.createElement("canvas");
+      sprite.width = sprite.height = 192;
+      const paint = sprite.getContext("2d")!;
+      paint.translate(96, 96);
+      paint.scale(1.2, 1.2);
+      drawDecoration(paint, kind);
+      return sprite;
+    });
     const start = performance.now();
+    let last = 0;
     const draw = (now: number) => {
       if (finished) return;
+      if (last && now - last < 1000 / 30) {
+        frame = requestAnimationFrame(draw);
+        return;
+      }
+      last = now;
       const t = Math.min(1, (now - start) / (WELCOME_SECONDS * 1000));
       const w = innerWidth,
         h = innerHeight;
@@ -125,7 +142,7 @@ export function WelcomeFlight({
         ctx.translate(x, y);
         ctx.rotate(Math.sin(angle + t * 3) * 0.2);
         ctx.scale(size / 100, size / 100);
-        drawDecoration(ctx, i % 7);
+        ctx.drawImage(sprites[i % 7], -80, -80, 160, 160);
         ctx.restore();
       }
       ctx.globalAlpha = 1;

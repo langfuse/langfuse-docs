@@ -26,7 +26,9 @@ export function useCalendarPhysics(
   active: boolean,
   reduced: boolean,
 ) {
-  const impactRef = useRef<(x: number, y: number) => void>(() => {});
+  const impactRef = useRef<
+    (x: number, y: number, power: number, mode: number) => void
+  >(() => {});
   useEffect(() => {
     const scene = root.current;
     if (!scene || !active || reduced) return;
@@ -49,6 +51,10 @@ export function useCalendarPhysics(
       vrx: 0,
       vry: 0,
     }));
+    const setStyle = (el: HTMLElement, key: string, value: string) => {
+      if (el.style.getPropertyValue(key) !== value)
+        el.style.setProperty(key, value);
+    };
     const board = scene.querySelector<HTMLElement>(".adv-board");
     const pointer = { x: innerWidth / 2, y: innerHeight / 2, live: false };
     let frame = 0,
@@ -70,7 +76,8 @@ export function useCalendarPhysics(
       const py = pointer.live ? pointer.y / innerHeight - 0.5 : 0;
       tiltX += (-py * 4 - tiltX) * Math.min(1, dt * 6);
       tiltY += (px * 5 - tiltY) * Math.min(1, dt * 6);
-      if (board)
+      const hidden = board?.style.opacity === "0";
+      if (board && !hidden)
         board.style.transform = `perspective(1400px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
       let moving = Math.abs(tiltX + py * 4) + Math.abs(tiltY - px * 5) > 0.005;
       for (const body of bodies) {
@@ -87,18 +94,23 @@ export function useCalendarPhysics(
         body.x += body.vx * dt;
         body.y += body.vy * dt;
         body.turn += body.spin * dt;
-        body.el.style.setProperty(
-          "--adv-physics",
-          `translate3d(${body.x}px,${body.y}px,${near * 14}px) rotateX(${body.rx}deg) rotateY(${body.ry}deg) rotateZ(${body.turn}deg)`,
-        );
-        body.el.style.setProperty(
-          "--adv-shine-x",
-          `${Math.max(0, Math.min(100, 50 + dx * 50))}%`,
-        );
-        body.el.style.setProperty(
-          "--adv-shine-y",
-          `${Math.max(0, Math.min(100, 50 + dy * 50))}%`,
-        );
+        if (!hidden) {
+          setStyle(
+            body.el,
+            "--adv-physics",
+            `translate3d(${body.x.toFixed(2)}px,${body.y.toFixed(2)}px,${(near * 14).toFixed(2)}px) rotateX(${body.rx.toFixed(2)}deg) rotateY(${body.ry.toFixed(2)}deg) rotateZ(${body.turn.toFixed(2)}deg)`,
+          );
+          setStyle(
+            body.el,
+            "--adv-shine-x",
+            `${Math.round(Math.max(0, Math.min(100, 50 + dx * 50)))}%`,
+          );
+          setStyle(
+            body.el,
+            "--adv-shine-y",
+            `${Math.round(Math.max(0, Math.min(100, 50 + dy * 50)))}%`,
+          );
+        }
         moving ||=
           Math.abs(body.vx) +
             Math.abs(body.vy) +
@@ -128,15 +140,21 @@ export function useCalendarPhysics(
       pointer.live = false;
       wake();
     };
-    impactRef.current = (x, y) => {
+    impactRef.current = (x, y, power, mode) => {
       for (const body of bodies) {
         const dx = body.cx - x,
           dy = body.cy - y;
         const distance = Math.max(40, Math.hypot(dx, dy));
-        const force = 650 * Math.exp(-distance / 600) + 100;
-        body.vx += (dx / distance) * force;
-        body.vy += (dy / distance) * force - 180;
-        body.spin += (dx < 0 ? -1 : 1) * force * 0.16;
+        const chaos = power * power;
+        const force =
+          650 *
+          Math.exp(-distance / (150 + chaos * 500)) *
+          (0.045 + mode * 0.04 + chaos * 1.4);
+        body.vx +=
+          (dx / distance + (Math.random() - 0.5) * power * 0.4) * force;
+        body.vy +=
+          (dy / distance - 0.15 + (Math.random() - 0.5) * power * 0.4) * force;
+        body.spin += (dx < 0 ? -1 : 1) * force * (0.035 + power * 0.17);
       }
       wake();
     };
@@ -158,5 +176,9 @@ export function useCalendarPhysics(
       impactRef.current = () => {};
     };
   }, [active, reduced, root]);
-  return useCallback((x: number, y: number) => impactRef.current(x, y), []);
+  return useCallback(
+    (x: number, y: number, power: number, mode: number) =>
+      impactRef.current(x, y, power, mode),
+    [],
+  );
 }

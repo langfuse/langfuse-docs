@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  memo,
   useCallback,
   useEffect,
   useRef,
@@ -41,7 +42,6 @@ import { JinglePlayer, type MusicFrame } from "./jingles";
 import { ShaderAtmosphere } from "./ShaderAtmosphere";
 import {
   SNOWBALL_DURATION,
-  THROW_BACK_DURATION,
   WinterCanvas,
   type WinterCanvasHandle,
 } from "./WinterCanvas";
@@ -203,17 +203,13 @@ function useJingles() {
     [],
   );
   const shatter = useCallback(
-    (pan: number) => playerRef.current?.shatter(pan),
+    (pan: number, power: number) => playerRef.current?.shatter(pan, power),
     [],
   );
   const hover = useCallback(
     (day: number, pan: number) => playerRef.current?.hover(day, pan),
     [],
   );
-
-  const thud = useCallback((delay: number) => {
-    if (enabledRef.current) playerRef.current?.thud(delay);
-  }, []);
 
   const getFrame = useCallback(
     (): MusicFrame =>
@@ -246,7 +242,6 @@ function useJingles() {
     hover,
     volume,
     changeVolume,
-    thud,
     fold,
     getFrame,
     setTechno,
@@ -290,7 +285,7 @@ function MusicVolume({
   );
 }
 
-function DoorTile({
+const DoorTile = memo(function DoorTile({
   door,
   index,
   state,
@@ -380,7 +375,7 @@ function DoorTile({
       </span>
     </button>
   );
-}
+});
 
 function DoorDialog({
   techno,
@@ -599,6 +594,8 @@ export function AdventCalendar() {
   const finishFlight = useCallback(() => setExperience("ready"), []);
   const [techno, setTechno] = useState(false);
   const [slop, setSlop] = useState(0);
+  const slopRef = useRef(0);
+  slopRef.current = slop / 100;
   const changeSlop = (value: number) => {
     setSlop(value);
     music.setSlop(value / 100);
@@ -612,11 +609,12 @@ export function AdventCalendar() {
     (x: number, y: number) => {
       if (experience !== "ready" || dialogOpenRef.current || openingRef.current)
         return;
-      impulse(x, y);
-      shatterRef.current?.hit(x, y);
-      music.shatter((x / innerWidth) * 2 - 1);
+      const power = slopRef.current;
+      impulse(x, y, power, music.getFrame().mix);
+      if (power > 0.5) shatterRef.current?.hit(x, y, (power - 0.5) * 2);
+      music.shatter((x / innerWidth) * 2 - 1, power);
     },
-    [experience, impulse, music.shatter],
+    [experience, impulse, music.shatter, music.getFrame],
   );
   const hoverDoor = useCallback(
     (day: number, x: number) => {
@@ -625,10 +623,12 @@ export function AdventCalendar() {
     [experience, music.hover],
   );
   useEffect(() => {
-    if (experience !== "ready") return;
-    const timer = setTimeout(() => shatterRef.current?.prepare(), 600);
+    // Capture only after the slider settles, and reuse it across throws.
+    shatterRef.current?.cancel();
+    if (experience !== "ready" || activeDay !== null || slop <= 50) return;
+    const timer = setTimeout(() => shatterRef.current?.prepare(), 450);
     return () => clearTimeout(timer);
-  }, [experience]);
+  }, [experience, activeDay, slop, techno, opened]);
   const changeScene = useCallback(
     (value: boolean) => {
       setTechno(value);
@@ -641,7 +641,6 @@ export function AdventCalendar() {
       changeScene(true);
     }
   }, [changeScene]);
-  const { thud } = music;
 
   dialogOpenRef.current = activeDay !== null;
   useEffect(() => {
@@ -682,15 +681,11 @@ export function AdventCalendar() {
    * even with reduced motion: each one is the visitor's own click, not ambient
    * motion.
    */
-  const throwAt = useCallback(
-    (x: number, y: number) => {
-      shatterRef.current?.prepare();
-      canvasRef.current?.throwSnowball(x, y);
-      thud(SNOWBALL_DURATION / 1000);
-      return SNOWBALL_DURATION;
-    },
-    [thud],
-  );
+  const throwAt = useCallback((x: number, y: number) => {
+    if (slopRef.current > 0.5) shatterRef.current?.prepare();
+    canvasRef.current?.throwSnowball(x, y);
+    return SNOWBALL_DURATION;
+  }, []);
 
   /** The snowman winds up and throws a snowball at the viewer. */
   const throwBack = useCallback(() => {
@@ -712,11 +707,10 @@ export function AdventCalendar() {
       // Not at the pointer: that is usually on the snowman himself.
       const toX = window.innerWidth * (0.3 + Math.random() * 0.4);
       const toY = window.innerHeight * (0.3 + Math.random() * 0.3);
-      shatterRef.current?.prepare();
+      if (slopRef.current > 0.5) shatterRef.current?.prepare();
       canvasRef.current?.throwBack(fromX, fromY, toX, toY);
-      thud(THROW_BACK_DURATION / 1000);
     }, SNOWMAN_RELEASE_MS);
-  }, [thud]);
+  }, []);
 
   const hitSnowman = useCallback(() => {
     if (crumblingRef.current) return;
@@ -796,68 +790,80 @@ export function AdventCalendar() {
     window.history.replaceState(null, "", url);
   }, []);
 
-  const handleSelect = async (
-    day: number,
-    element: HTMLElement,
-    point: { x: number; y: number } | null,
-  ) => {
-    if (openingRef.current) return;
-    if (experience !== "ready") {
-      begin();
-      return;
-    }
-    const state = getDoorState(day, unlocked, opened);
-    if (state === "locked") {
-      const landsIn = point ? throwAt(point.x, point.y) : 0;
-      setTimeout(() => {
-        setWiggleDay(null);
-        requestAnimationFrame(() => setWiggleDay(day));
-        setToast(
-          unlocked === null
-            ? "Loading the calendar…"
-            : `Not yet! Door ${day} opens on December ${day}.`,
+  const handleSelect = useCallback(
+    async (
+      day: number,
+      element: HTMLElement,
+      point: { x: number; y: number } | null,
+    ) => {
+      if (openingRef.current) return;
+      if (experience !== "ready") {
+        begin();
+        return;
+      }
+      const state = getDoorState(day, unlocked, opened);
+      if (state === "locked") {
+        const landsIn = point ? throwAt(point.x, point.y) : 0;
+        setTimeout(() => {
+          setWiggleDay(null);
+          requestAnimationFrame(() => setWiggleDay(day));
+          setToast(
+            unlocked === null
+              ? "Loading the calendar…"
+              : `Not yet! Door ${day} opens on December ${day}.`,
+          );
+        }, landsIn);
+        return;
+      }
+      shatterRef.current?.cancel();
+      openingRef.current = true;
+      try {
+        const rect = element.getBoundingClientRect();
+        const center = point ?? {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+        let revealed = false;
+        const reveal = () => {
+          if (revealed) return;
+          revealed = true;
+          if (state !== "open") {
+            const next = new Set(opened).add(day);
+            setOpened(next);
+            writeStorage(OPENED_KEY, JSON.stringify([...next]));
+          }
+          showDoor(day);
+        };
+        const task = foldRef.current?.play(
+          center,
+          music.getFrame().mix > 0.5,
+          () => {
+            setEntering(true);
+            return music.fold(day, music.getFrame().mix > 0.5);
+          },
+          reveal,
+          day,
         );
-      }, landsIn);
-      return;
-    }
-    shatterRef.current?.cancel();
-    openingRef.current = true;
-    try {
-      const rect = element.getBoundingClientRect();
-      const center = point ?? {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-      };
-      let revealed = false;
-      const reveal = () => {
-        if (revealed) return;
-        revealed = true;
-        if (state !== "open") {
-          const next = new Set(opened).add(day);
-          setOpened(next);
-          writeStorage(OPENED_KEY, JSON.stringify([...next]));
-        }
-        showDoor(day);
-      };
-      const task = foldRef.current?.play(
-        center,
-        music.getFrame().mix > 0.5,
-        () => {
-          setEntering(true);
-          return music.fold(day, music.getFrame().mix > 0.5);
-        },
-        reveal,
-        day,
-      );
-      openingTaskRef.current = task ?? null;
-      const finished = await task;
-      if (finished !== false) reveal();
-    } finally {
-      openingTaskRef.current = null;
-      openingRef.current = false;
-      setEntering(false);
-    }
-  };
+        openingTaskRef.current = task ?? null;
+        const finished = await task;
+        if (finished !== false) reveal();
+      } finally {
+        openingTaskRef.current = null;
+        openingRef.current = false;
+        setEntering(false);
+      }
+    },
+    [
+      experience,
+      begin,
+      unlocked,
+      opened,
+      throwAt,
+      showDoor,
+      music.getFrame,
+      music.fold,
+    ],
+  );
 
   const closeDoor = async () => {
     if (closingRef.current) {
@@ -950,6 +956,7 @@ export function AdventCalendar() {
         ref={canvasRef}
         active={activeDay === null}
         onImpact={impact}
+        slop={slop / 100}
       />
 
       <nav className="adv-nav" aria-label="Main navigation" data-no-snowball>
@@ -1087,9 +1094,6 @@ export function AdventCalendar() {
       <div className="adv-mixer" data-no-snowball>
         <MusicVolume volume={music.volume} onVolume={music.changeVolume} />
         <SlopSlider power={slop} onChange={changeSlop} />
-        <span className="adv-slop-caption">
-          {slop > 0 ? slopPhrase(slop) : "Turn up the strange."}
-        </span>
       </div>
       <SlopDecorations power={slop} />
 
