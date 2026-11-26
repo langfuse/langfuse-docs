@@ -1,6 +1,7 @@
 // Abstract line art for the /gateway hero: sheets of lines flow in from the
-// left and converge on the Langfuse mark, the way traffic converges on the
-// gateway. Ported from the line-art visual in the landing page design.
+// left and converge on a yellow pane (the gateway), and a single line leaves
+// it towards the model provider. Ported from the line-art visual in the
+// landing page design.
 
 const XE = 1222;
 const END_Y = 496;
@@ -71,15 +72,7 @@ function sheet(upper: Curve, lower: Curve, count: number, phase: number) {
       width: edge ? 1.1 : 1,
     };
   });
-  const fill =
-    path(u) +
-    xs
-      .slice()
-      .reverse()
-      .map((x) => `L${x} ${l(x).toFixed(1)}`)
-      .join("") +
-    "Z";
-  return { fill, lines };
+  return lines;
 }
 
 const sheets = [
@@ -90,8 +83,26 @@ const sheets = [
 ];
 const redLine = path(curve(RED));
 
-const MARK_W = 64;
-const VIEW = { x: 0, y: 120, w: XE + 24 + MARK_W, h: 920 };
+// Langfuse logo red and blue.
+const RED_INK = "#FF5D5F";
+const BLUE_INK = "#4E9CFF";
+
+// The pane leans back: its right edge sits SKEW units higher than its left.
+const PANE = { w: 26, h: 230, skew: 40 };
+const OUT_LEN = 330;
+const paneTop = END_Y - PANE.h / 2;
+const panePoints = [
+  [XE, paneTop + PANE.skew / 2],
+  [XE + PANE.w, paneTop - PANE.skew / 2],
+  [XE + PANE.w, paneTop + PANE.h - PANE.skew / 2],
+  [XE, paneTop + PANE.h + PANE.skew / 2],
+]
+  .map((point) => point.join(","))
+  .join(" ");
+const outX = XE + PANE.w;
+const outLine = `M${outX} ${END_Y}C${outX + 120} ${END_Y} ${outX + 190} ${END_Y - 46} ${outX + OUT_LEN} ${END_Y - 46}`;
+
+const VIEW = { x: 0, y: 120, w: outX + OUT_LEN, h: 920 };
 
 export function GatewayHeroArt({ className }: { className?: string }) {
   return (
@@ -127,10 +138,9 @@ export function GatewayHeroArt({ className }: { className?: string }) {
           </mask>
         </defs>
         <g mask="url(#gateway-hero-art-mask)">
-          {sheets.map((s, i) => (
+          {sheets.map((lines, i) => (
             <g key={i}>
-              <path d={s.fill} fill="var(--surface-1)" fillOpacity={0.55} />
-              {s.lines.map((line, j) => (
+              {lines.map((line, j) => (
                 <path
                   key={j}
                   d={line.d}
@@ -146,17 +156,35 @@ export function GatewayHeroArt({ className }: { className?: string }) {
           <path
             d={redLine}
             fill="none"
-            stroke="var(--callout-error)"
-            strokeWidth={1.6}
+            stroke={RED_INK}
+            strokeWidth={1.1}
             vectorEffect="non-scaling-stroke"
           />
         </g>
-        <image
-          href="/langfuse-icon.svg"
-          x={XE + 18}
-          y={END_Y - MARK_W / 2}
-          width={MARK_W}
-          height={MARK_W}
+        <path
+          d={outLine}
+          fill="none"
+          stroke={BLUE_INK}
+          strokeWidth={1.1}
+          vectorEffect="non-scaling-stroke"
+        />
+        <polygon
+          points={panePoints}
+          fill="var(--surface-cta-primary)"
+          stroke="var(--text-primary)"
+          strokeWidth={0.75}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+        <rect
+          x={XE + 7}
+          y={END_Y - 15}
+          width={8}
+          height={26}
+          fill="var(--surface-bg)"
+          stroke="var(--text-primary)"
+          strokeWidth={0.75}
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
     </figure>
