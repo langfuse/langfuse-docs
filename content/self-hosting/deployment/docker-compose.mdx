@@ -58,6 +58,7 @@ Production deployments size each service separately. The [scaling page](/self-ho
 ### Requirements
 
 - git
+- openssl
 - docker & docker compose -> use [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows
 
 <Callout type="info">
@@ -79,7 +80,9 @@ cd langfuse
 Run this in the `langfuse` folder. It writes a `.env` with a random value for every secret the compose file marks `# CHANGEME`, and it leaves an existing `.env` untouched.
 
 ```bash
-[ -f .env ] && echo ".env exists, not overwriting" || {
+if [ -f .env ]; then echo ".env exists, not overwriting"
+elif ! command -v openssl >/dev/null; then echo "openssl not found, install it first"
+else
 PG=$(openssl rand -hex 16)
 MINIO=$(openssl rand -hex 16)
 cat > .env <<ENV
@@ -95,7 +98,7 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
 LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
 LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY=${MINIO}
 ENV
-}
+fi
 ```
 
 `DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`.
@@ -109,7 +112,8 @@ docker compose up -d
 ### Wait until it is ready
 
 ```bash
-for i in $(seq 1 60); do curl -sf http://localhost:3000/api/public/health && break; sleep 5; done
+ok=; for i in $(seq 1 60); do curl -sf http://localhost:3000/api/public/health && { ok=1; break; }; sleep 5; done
+[ -n "$ok" ] || echo "Not ready after 5 minutes, check: docker compose logs langfuse-web"
 docker compose ps
 ```
 
@@ -187,7 +191,9 @@ cd langfuse
 Run this in the `langfuse` folder. It writes a `.env` with a random value for every secret the compose file marks `# CHANGEME`, and it leaves an existing `.env` untouched.
 
 ```bash
-[ -f .env ] && echo ".env exists, not overwriting" || {
+if [ -f .env ]; then echo ".env exists, not overwriting"
+elif ! command -v openssl >/dev/null; then echo "openssl not found, install it first"
+else
 PG=$(openssl rand -hex 16)
 MINIO=$(openssl rand -hex 16)
 cat > .env <<ENV
@@ -204,7 +210,7 @@ LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
 LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
 LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY=${MINIO}
 ENV
-}
+fi
 ```
 
 Replace `<instance-ip>` with the instance address, because `NEXTAUTH_URL` must match the address users open.
@@ -226,7 +232,8 @@ docker compose up -d
 ### Wait until it is ready
 
 ```bash
-for i in $(seq 1 60); do curl -sf http://localhost:3000/api/public/health && break; sleep 5; done
+ok=; for i in $(seq 1 60); do curl -sf http://localhost:3000/api/public/health && { ok=1; break; }; sleep 5; done
+[ -n "$ok" ] || echo "Not ready after 5 minutes, check: docker compose logs langfuse-web"
 docker compose ps
 ```
 
