@@ -393,6 +393,25 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     ]);
     assert.equal(useCaseReady, false);
     assert.equal(sessionStore.size, 0);
+
+    // Re-granting on the same page recaptures a consented $pageview for the new identity
+    calls.length = 0;
+    consentState = "granted";
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.deepEqual(calls, [
+      ["opt_in_capturing", { captureEventName: false }],
+      [
+        "set_config",
+        {
+          disable_session_recording: false,
+          autocapture: true,
+          disable_surveys: false,
+        },
+      ],
+      ["capture", "$pageview", "consented"],
+    ]);
+    assert.equal(useCaseReady, true);
   } finally {
     if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
     else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;

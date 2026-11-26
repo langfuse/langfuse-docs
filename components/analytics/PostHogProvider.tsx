@@ -38,8 +38,12 @@ function applyAnalyticsConsent(): boolean {
       posthog.opt_in_capturing({ captureEventName: false });
     }
     if (posthog.config?.disable_session_recording) {
-      // Restore remote-config defaults for extensions the SDK leaves undefined
-      // (`posthog.set_config` ignores keys with `undefined` values).
+      // Restore remote-config defaults for extensions the SDK leaves undefined:
+      // `posthog.set_config` ignores `undefined` values when merging, then
+      // unconditionally re-runs `heatmaps.startIfEnabled()`,
+      // `deadClicksAutocapture.startIfEnabledOrStop()`, and
+      // `exceptionObserver.onConfigChange()` / `startIfEnabledOrStop()` against
+      // `posthog.config`, which falls back to remote config when unset.
       delete posthog.config.capture_heatmaps;
       delete posthog.config.capture_dead_clicks;
       delete posthog.config.capture_exceptions;
@@ -140,12 +144,18 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ready || !pathname) return;
     const samePath = lastCaptured.current?.path === pathname;
-    const upgradedToGranted =
-      samePath && !lastCaptured.current?.granted && analyticsGranted;
-    if (!samePath || upgradedToGranted) {
-      lastCaptured.current = { path: pathname, granted: analyticsGranted };
-      posthog.capture("$pageview");
+    if (!analyticsGranted) {
+      if (samePath) {
+        // Clear the granted flag so re-granting on the same page recaptures a
+        // consented $pageview for the new opted-in identity.
+        lastCaptured.current = { path: pathname, granted: false };
+        return;
+      }
+    } else if (samePath && lastCaptured.current?.granted) {
+      return;
     }
+    lastCaptured.current = { path: pathname, granted: analyticsGranted };
+    posthog.capture("$pageview");
   }, [pathname, ready, analyticsGranted]);
 
   return (
