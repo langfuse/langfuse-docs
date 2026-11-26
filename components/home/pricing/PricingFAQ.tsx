@@ -30,7 +30,7 @@ const faqs: FAQItem[] = [
   {
     question: "What is a billable unit?",
     answer:
-      "Each trace, observation, and score counts as one unit. Topics adds one unit for each new [facet result](/docs/observability/features/topics#models-and-costs) that Langfuse stores from a model response. For example, an Intent result and a Sentiment result for the same trace add two units. See how to [track billable units](/docs/administration/billable-units#monitor-usage).",
+      "Each trace, observation, score, and [facet result](/docs/observability/features/topics#models-and-costs) counts as one unit.",
   },
   {
     question: "How does the graduated pricing work?",

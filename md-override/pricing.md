@@ -270,7 +270,7 @@ You can view the [public example project](/docs/demo) or sign up for a [free acc
 Yes, Langfuse is open source and you can self-host it for free. Use Docker Compose to run Langfuse locally, or use one of the templates to self-host in production on Kubernetes. See the [self-hosting documentation](/self-hosting) to learn more.
 
 **What is a billable unit?**
-Each trace, observation, and score counts as one unit. Topics adds one unit for each new [facet result](/docs/observability/features/topics#models-and-costs) that Langfuse stores from a model response. For example, an Intent result and a Sentiment result for the same trace add two units. See how to [track billable units](/docs/administration/billable-units#monitor-usage).
+Each trace, observation, score, and [facet result](/docs/observability/features/topics#models-and-costs) counts as one unit.
 
 **How does the graduated pricing work?**
 Graduated pricing means you pay different rates for different volume tiers. The first 100k units are included in paid plans, then you pay $8/100k for 100k--1M, $7/100k for 1M--10M, $6.50/100k for 10M--50M, and $6/100k for 50M+ units. Use the pricing calculator on [langfuse.com/pricing](https://langfuse.com/pricing#pricing-calculator) to estimate your bill.
