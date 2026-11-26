@@ -30,8 +30,9 @@ See [security documentation](/security) of Langfuse Cloud for more details.
 
 Langfuse does not require internet access.
 
-Some optional components, like the LLM Playground and LLM-evals require access to an [LLM API/Gateway](/self-hosting/deployment/infrastructure/llm-api).
-This can be deployed in the same VPC or peered with the VPC.
+Some optional features, such as the LLM Playground, LLM-as-a-Judge evaluations, prompt experiments, and [Topics](/docs/observability/features/topics), require access to an [LLM API or gateway](/self-hosting/deployment/infrastructure/llm-api). This can be deployed in the same VPC or peered with the VPC.
+
+Both the web and worker containers need network access to configured LLM provider endpoints (web validates connections and serves Playground requests, and worker executes background evaluation and Topics jobs). If you use [outbound URL allowlists](/self-hosting/configuration/hardening#outbound-url-allowlists), allow the provider endpoints on both services. Both services also need the same [`ENCRYPTION_KEY`](/self-hosting/configuration/encryption#application-level-encryption) to decrypt stored credentials.
 
 Langfuse pings a cached version of the GitHub API to check for updates to the Langfuse Server. If internet access is not available, this check will fail gracefully.
 
