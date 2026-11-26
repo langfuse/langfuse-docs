@@ -28,7 +28,7 @@ Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Kha
    - **Automatic tracing:** every call becomes a Langfuse trace, with full content or usage only.
    - **Evals and analysis:** run evals, topics and alerts, or tell Halo what’s on your mind.
 
-## One control point for all model calls
+## One control point for every model call
 
 Natively traced in Langfuse.
 
