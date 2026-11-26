@@ -12,7 +12,6 @@ import {
 import { PostHogProvider } from "@/components/analytics/PostHogProvider";
 import { WebMcpDocsTools } from "@/components/WebMcpDocsTools";
 import { AISearch } from "@/components/inkeep/search";
-import { Hubspot } from "@/components/analytics/hubspot";
 import { GoogleAds } from "@/components/analytics/google-ads";
 import { LinkedInInsightTag } from "@/components/analytics/linkedin-ads";
 import { RedditPixel } from "@/components/analytics/reddit-ads";
@@ -109,7 +108,6 @@ export default function RootLayout({
             </AdConsentGate>
             <ConversionTracker />
             <ClickIdPersistence />
-            <Hubspot />
             <CommonRoom />
             <AhrefsAnalytics />
             <Script
