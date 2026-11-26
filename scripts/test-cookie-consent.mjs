@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import vm from "node:vm";
 import { transformSync } from "esbuild";
 
 const compile = (path) =>
@@ -1247,5 +1248,172 @@ test("Reo component loads static.reo.dev and initializes with the Langfuse clien
     assert.deepEqual(inits, [{ clientID: "38b2e79cdb32fa7" }]);
   } finally {
     delete globalThis.window;
+  }
+});
+
+test("reportGoogleAdsConversion requires advertisement consent even when window.gtag is defined pre-consent", () => {
+  let adConsent = "unknown";
+  const gtagCalls = [];
+
+  globalThis.window = {
+    gtag: (...args) => gtagCalls.push(args),
+  };
+
+  try {
+    const mod = load(compile("lib/google-ads.ts"), (name) => {
+      if (name === "@/lib/cookie-consent") {
+        return { readAdvertisementConsent: () => adConsent };
+      }
+      throw Error(name);
+    });
+
+    mod.reportGoogleAdsConversion(mod.GOOGLE_ADS_CONVERSIONS.launchApp, {
+      value: 1,
+      currency: "USD",
+    });
+    assert.deepEqual(gtagCalls, []);
+
+    adConsent = "denied";
+    mod.reportGoogleAdsConversion(mod.GOOGLE_ADS_CONVERSIONS.launchApp, {
+      value: 1,
+      currency: "USD",
+    });
+    assert.deepEqual(gtagCalls, []);
+
+    adConsent = "granted";
+    mod.reportGoogleAdsConversion(mod.GOOGLE_ADS_CONVERSIONS.launchApp, {
+      value: 1,
+      currency: "USD",
+    });
+    assert.deepEqual(gtagCalls, [
+      [
+        "event",
+        "conversion",
+        {
+          send_to: "AW-10855791654/Lb8RCKvkmqkcEKb4uLgo",
+          transport_type: "beacon",
+          value: 1,
+          currency: "USD",
+        },
+      ],
+    ]);
+
+    // Revoking advertisement consent suppresses subsequent conversions
+    adConsent = "denied";
+    mod.reportGoogleAdsConversion(
+      mod.GOOGLE_ADS_CONVERSIONS.talkToUsFormSubmit,
+    );
+    assert.equal(gtagCalls.length, 1);
+  } finally {
+    delete globalThis.window;
+  }
+});
+
+test("RootLayout renders Consent Mode defaults before CookieYes in <head> in production and removes GTM", () => {
+  const layoutSource = readFileSync(
+    new URL("../app/layout.tsx", import.meta.url),
+    "utf8",
+  );
+  const pkgSource = readFileSync(
+    new URL("../package.json", import.meta.url),
+    "utf8",
+  );
+  assert.equal(layoutSource.includes("GTM-NGLK4TZX"), false);
+  assert.equal(layoutSource.includes("googletagmanager.com/gtm.js"), false);
+  assert.equal(layoutSource.includes("GoogleTagManager"), false);
+  assert.equal(layoutSource.includes("@next/third-parties"), false);
+  assert.equal(pkgSource.includes("@next/third-parties"), false);
+
+  const prevNodeEnv = process.env.NODE_ENV;
+  const noop = () => null;
+  const loadLayout = () =>
+    load(compile("app/layout.tsx"), (name) => {
+      if (name === "react/jsx-runtime") {
+        return {
+          Fragment: Symbol.for("react.fragment"),
+          jsx: (type, props) => ({ type, props }),
+          jsxs: (type, props) => ({ type, props }),
+        };
+      }
+      if (name === "next/font/local" || name === "next/font/google") {
+        return {
+          __esModule: true,
+          default: () => ({ variable: "" }),
+          Inter: () => ({ variable: "" }),
+        };
+      }
+      if (name === "@/lib/og-url") {
+        return {
+          buildDefaultSiteOgImageUrl: () => "https://langfuse.com/og.png",
+          SITE_DEFAULT_OG_DESCRIPTION: "Langfuse",
+        };
+      }
+      if (name.endsWith(".css")) return {};
+      return new Proxy({}, { get: () => noop });
+    });
+
+  const collectScripts = (node, out = []) => {
+    if (!node || typeof node !== "object") return out;
+    if (Array.isArray(node)) {
+      for (const item of node) collectScripts(item, out);
+      return out;
+    }
+    if (node.type === "script") out.push(node);
+    if (node.props?.children) collectScripts(node.props.children, out);
+    return out;
+  };
+
+  try {
+    process.env.NODE_ENV = "production";
+    const prodTree = loadLayout().default({ children: null });
+    const headNode = prodTree.props.children.find((el) => el?.type === "head");
+    assert.ok(headNode, "Expected <head> element in RootLayout");
+
+    const headScripts = collectScripts(headNode);
+    assert.equal(headScripts.length, 2);
+    assert.equal(headScripts[0].props.id, "consent-defaults");
+    assert.equal(headScripts[1].props.id, "cookieyes");
+    assert.equal(
+      headScripts[1].props.src,
+      "https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js",
+    );
+    assert.equal(headScripts[1].props.defer, true);
+
+    // Execute the inline consent-defaults script in an isolated browser-like global
+    const sandbox = {};
+    sandbox.window = sandbox;
+    vm.runInNewContext(
+      headScripts[0].props.dangerouslySetInnerHTML.__html,
+      sandbox,
+    );
+    assert.equal(typeof sandbox.gtag, "function");
+    const entries = JSON.parse(
+      JSON.stringify(sandbox.dataLayer.map((args) => Array.from(args))),
+    );
+    assert.deepEqual(entries, [
+      [
+        "consent",
+        "default",
+        {
+          ad_storage: "denied",
+          ad_user_data: "denied",
+          ad_personalization: "denied",
+          analytics_storage: "denied",
+          functionality_storage: "denied",
+          personalization_storage: "denied",
+          security_storage: "granted",
+          wait_for_update: 2000,
+        },
+      ],
+      ["set", "url_passthrough", true],
+    ]);
+
+    process.env.NODE_ENV = "development";
+    const devTree = loadLayout().default({ children: null });
+    const devHead = devTree.props.children.find((el) => el?.type === "head");
+    assert.deepEqual(collectScripts(devHead), []);
+  } finally {
+    if (prevNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = prevNodeEnv;
   }
 });

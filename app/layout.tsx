@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { AppRootProvider } from "@/components/AppRootProvider";
-import { GoogleTagManager } from "@next/third-parties/google";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import { DevAriaHiddenConsoleFilter } from "@/components/DevAriaHiddenConsoleFilter";
@@ -83,6 +82,36 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
     >
+      <head>
+        {process.env.NODE_ENV === "production" && (
+          <>
+            <script
+              id="consent-defaults"
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied',
+  analytics_storage: 'denied',
+  functionality_storage: 'denied',
+  personalization_storage: 'denied',
+  security_storage: 'granted',
+  wait_for_update: 2000
+});
+gtag('set', 'url_passthrough', true);`,
+              }}
+            />
+            <script
+              id="cookieyes"
+              type="text/javascript"
+              src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
+              defer
+            />
+          </>
+        )}
+      </head>
       <body className="font-sans antialiased">
         {process.env.NODE_ENV === "development" && (
           <DevAriaHiddenConsoleFilter />
@@ -95,11 +124,12 @@ export default function RootLayout({
         </PostHogProvider>
         {process.env.NODE_ENV === "production" && (
           <>
-            <GoogleTagManager gtmId="GTM-NGLK4TZX" />
             {/* Ad pixels require prior consent (CookieYes "advertisement"
                 category). The gate keeps them from loading or setting cookies
-                until it is granted; every conversion helper already no-ops
-                when its tag is absent, so nothing else needs gating. */}
+                until it is granted; reportGoogleAdsConversion also checks ad
+                consent because consent-defaults defines window.gtag before
+                consent, and the other conversion helpers no-op when their tag
+                is absent. */}
             <AdConsentGate>
               <GoogleAds />
               <LinkedInInsightTag />

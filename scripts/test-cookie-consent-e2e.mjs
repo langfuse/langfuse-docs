@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import net from "node:net";
+import path from "node:path";
 import zlib from "node:zlib";
 import { spawn } from "node:child_process";
 import { chromium } from "playwright";
@@ -8,6 +9,24 @@ import { chromium } from "playwright";
 const POSTHOG_KEY = "phc_test_cookie_consent";
 const POSTHOG_HOST = "https://eu.posthog.com";
 const POSTHOG_COOKIE_NAME = `ph_${POSTHOG_KEY}_posthog`;
+const COOKIEYES_SCRIPT_URL =
+  "https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js";
+const GOOGLE_ADS_ID = "AW-10855791654";
+const GOOGLE_ADS_TAG_URL = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ADS_ID}`;
+const EXPECTED_CONSENT_DEFAULT = [
+  "consent",
+  "default",
+  {
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    analytics_storage: "denied",
+    functionality_storage: "denied",
+    personalization_storage: "denied",
+    security_storage: "granted",
+    wait_for_update: 2000,
+  },
+];
 const DESKTOP_CHROME_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
@@ -54,46 +73,73 @@ function stopProcessTree(proc) {
   }
 }
 
+function runBuild(env) {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(
+      process.platform === "win32" ? "pnpm.cmd" : "pnpm",
+      ["build"],
+      {
+        env,
+        stdio: "inherit",
+      },
+    );
+    proc.on("error", reject);
+    proc.on("exit", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`pnpm build exited with code ${code}`));
+    });
+  });
+}
+
 async function startLocalServer() {
-  const port = await getFreePort();
-  const baseUrl = `http://127.0.0.1:${port}`;
-  const env = {
+  const buildEnv = {
     ...process.env,
     NEXT_PUBLIC_POSTHOG_KEY: POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: POSTHOG_HOST,
     NEXT_TELEMETRY_DISABLED: "1",
   };
 
-  // Next.js can exit on first run after printing an upgrade notice; retry once.
-  for (let attempt = 0; attempt < 2; attempt++) {
-    let logs = "";
-    const proc = spawn(
-      process.platform === "win32" ? "pnpm.cmd" : "pnpm",
-      ["exec", "next", "dev", "-p", String(port), "-H", "127.0.0.1"],
-      {
-        env,
-        detached: process.platform !== "win32",
-        stdio: ["ignore", "pipe", "pipe"],
-      },
-    );
-    proc.stdout.on("data", (chunk) => {
-      logs += chunk.toString();
-    });
-    proc.stderr.on("data", (chunk) => {
-      logs += chunk.toString();
-    });
+  const skipBuild =
+    process.env.COOKIE_CONSENT_E2E_SKIP_BUILD === "1" &&
+    fs.existsSync(path.join(process.cwd(), ".next", "BUILD_ID"));
 
-    try {
-      await waitForServer(`${baseUrl}/docs`, proc);
-      return { baseUrl, proc };
-    } catch (err) {
-      stopProcessTree(proc);
-      if (attempt === 1) {
-        throw new Error(
-          `Failed to start Next.js dev server: ${err.message}\n${logs.slice(-2000)}`,
-        );
-      }
-    }
+  if (!skipBuild) {
+    await runBuild(buildEnv);
+  }
+
+  const port = await getFreePort();
+  const baseUrl = `http://127.0.0.1:${port}`;
+  const startEnv = {
+    ...process.env,
+    NODE_ENV: "production",
+    NEXT_TELEMETRY_DISABLED: "1",
+  };
+
+  let logs = "";
+  const proc = spawn(
+    process.platform === "win32" ? "pnpm.cmd" : "pnpm",
+    ["exec", "next", "start", "-p", String(port), "-H", "127.0.0.1"],
+    {
+      env: startEnv,
+      detached: process.platform !== "win32",
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+  proc.stdout.on("data", (chunk) => {
+    logs += chunk.toString();
+  });
+  proc.stderr.on("data", (chunk) => {
+    logs += chunk.toString();
+  });
+
+  try {
+    await waitForServer(`${baseUrl}/docs`, proc);
+    return { baseUrl, proc };
+  } catch (err) {
+    stopProcessTree(proc);
+    throw new Error(
+      `Failed to start Next.js production server: ${err.message}\n${logs.slice(-2000)}`,
+    );
   }
 }
 
@@ -174,8 +220,15 @@ function isPostHogStorageKey(key) {
   );
 }
 
+const allGtmRequests = [];
+
 async function createIsolatedContext(browser, baseUrl, options = {}) {
-  const { cookieyesCookie, initialConsent } = options;
+  const {
+    cookieyesCookie,
+    initialConsent,
+    cookieyesScriptBody,
+    blockCookieYes = false,
+  } = options;
   const context = await browser.newContext({
     locale: "de-DE",
     userAgent: DESKTOP_CHROME_UA,
@@ -234,6 +287,7 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
   }, initialConsent ?? null);
 
   const capturedEvents = [];
+  const requestedUrls = [];
 
   await context.route("**/*", async (route) => {
     const request = route.request();
@@ -244,17 +298,21 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
       return;
     }
 
+    requestedUrls.push(url);
+    if (url.includes("googletagmanager.com/gtm.js") || url.includes("GTM-")) {
+      allGtmRequests.push(url);
+    }
     const parsed = new URL(url);
+    const corsHeaders = {
+      "access-control-allow-origin": baseUrl,
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "*",
+    };
+
     if (
       parsed.hostname === "eu.posthog.com" ||
       parsed.hostname.endsWith(".posthog.com")
     ) {
-      const corsHeaders = {
-        "access-control-allow-origin": baseUrl,
-        "access-control-allow-credentials": "true",
-        "access-control-allow-headers": "*",
-      };
-
       if (request.method() === "OPTIONS") {
         await route.fulfill({ status: 204, headers: corsHeaders });
         return;
@@ -302,17 +360,88 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
       return;
     }
 
-    // Stub all non-local third-party scripts/requests (GTM, CookieYes, etc.)
-    // so tests are deterministic and never reach external services.
+    if (
+      parsed.hostname === "cdn-cookieyes.com" ||
+      parsed.hostname.endsWith(".cookieyes.com")
+    ) {
+      if (blockCookieYes) {
+        await route.abort("blockedbyclient");
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: "application/javascript",
+        body: cookieyesScriptBody ?? "",
+      });
+      return;
+    }
+
+    // Cloud region sign-in probes from ConversionTracker: respond signed-out.
+    if (
+      parsed.hostname.endsWith("cloud.langfuse.com") &&
+      parsed.pathname === "/api/auth/session"
+    ) {
+      await route.fulfill({
+        status: 200,
+        headers: corsHeaders,
+        contentType: "application/json",
+        body: "{}",
+      });
+      return;
+    }
+
+    // Stub all remaining non-local third-party requests so tests are
+    // deterministic and never reach external services.
+    const isScript =
+      parsed.pathname.endsWith(".js") || parsed.pathname.includes("/gtag/js");
     await route.fulfill({
       status: 200,
-      contentType: "text/plain",
+      contentType: isScript ? "application/javascript" : "text/plain",
       body: "",
     });
   });
 
   const page = await context.newPage();
-  return { context, page, capturedEvents };
+  return { context, page, capturedEvents, requestedUrls };
+}
+
+function assertNoGtm(requestedUrls, label) {
+  const gtmRequests = requestedUrls.filter(
+    (u) => u.includes("googletagmanager.com/gtm.js") || u.includes("GTM-"),
+  );
+  assert.deepEqual(
+    gtmRequests,
+    [],
+    `Expected no GTM requests on ${label}, got: ${JSON.stringify(gtmRequests)}`,
+  );
+}
+
+async function clickLaunchAppCta(page) {
+  await page.evaluate(() => {
+    let btn = document.getElementById("e2e-launch-app-cta");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.id = "e2e-launch-app-cta";
+      btn.type = "button";
+      btn.setAttribute("data-launch-app-cta", "true");
+      btn.textContent = "Launch app";
+      document.body.appendChild(btn);
+    }
+  });
+  await page.locator("#e2e-launch-app-cta").click();
+}
+
+async function readDataLayerEntries(page) {
+  return page.evaluate(() =>
+    Array.isArray(window.dataLayer)
+      ? window.dataLayer.map((entry) =>
+          Array.isArray(entry) ||
+          (entry && typeof entry === "object" && "length" in entry)
+            ? Array.from(entry)
+            : entry,
+        )
+      : [],
+  );
 }
 
 async function waitForCondition(predicate, timeoutMs = 10_000) {
@@ -478,13 +607,251 @@ async function run() {
   const browser = await launchChromium();
 
   try {
-    // 1. Returning visitor with stored consent: identified pageview immediately, no delay.
+    // 0a. Production HTML has no GTM; Consent Mode defaults run before CookieYes in <head>,
+    // no Google requests fire before consent, and pre-consent CTA clicks do not push conversions.
     {
-      const { context, page, capturedEvents } = await createIsolatedContext(
+      const htmlRes = await fetch(`${baseUrl}/docs`);
+      assert.equal(htmlRes.status, 200);
+      const html = await htmlRes.text();
+      assert.equal(
+        html.includes("GTM-NGLK4TZX"),
+        false,
+        "Production HTML must not contain GTM-NGLK4TZX",
+      );
+      assert.equal(
+        html.includes("googletagmanager.com/gtm.js"),
+        false,
+        "Production HTML must not reference googletagmanager.com/gtm.js",
+      );
+      const headCloseIdx = html.indexOf("</head>");
+      const consentDefaultsHtmlIdx = html.indexOf('id="consent-defaults"');
+      const cookieYesHtmlIdx = html.indexOf('id="cookieyes"');
+      assert.ok(
+        consentDefaultsHtmlIdx !== -1 && consentDefaultsHtmlIdx < headCloseIdx,
+        "Expected #consent-defaults inside SSR <head>",
+      );
+      assert.ok(
+        cookieYesHtmlIdx !== -1 && cookieYesHtmlIdx < headCloseIdx,
+        "Expected #cookieyes inside SSR <head>",
+      );
+      assert.ok(
+        consentDefaultsHtmlIdx < cookieYesHtmlIdx,
+        `Expected #consent-defaults before #cookieyes in SSR <head> (${consentDefaultsHtmlIdx} vs ${cookieYesHtmlIdx})`,
+      );
+
+      const { context, page, requestedUrls } = await createIsolatedContext(
         browser,
         baseUrl,
-        GRANTED_CONTEXT,
+        {
+          ...UNDECIDED_CONTEXT,
+          cookieyesScriptBody:
+            "window.__dataLayerAtCookieYesRun = Array.isArray(window.dataLayer) ? window.dataLayer.map((e) => Array.from(e)) : null;",
+        },
       );
+      try {
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
+        const cookieYesRan = await waitForCondition(
+          () =>
+            page.evaluate(() => window.__dataLayerAtCookieYesRun !== undefined),
+          6_000,
+        );
+        assert.ok(cookieYesRan, "Expected CookieYes script to execute");
+
+        const headOrder = await page.evaluate(() => {
+          const headScripts = Array.from(
+            document.head.querySelectorAll("script"),
+          ).map((el) => ({ id: el.id || null, src: el.src || null }));
+          const allScripts = Array.from(
+            document.querySelectorAll("script"),
+          ).map((el) => ({ id: el.id || null, src: el.src || null }));
+          return {
+            headScripts,
+            allScripts,
+            dataLayerAtCookieYesRun: window.__dataLayerAtCookieYesRun,
+          };
+        });
+
+        const defaultsIdx = headOrder.headScripts.findIndex(
+          (s) => s.id === "consent-defaults",
+        );
+        const cookieYesIdx = headOrder.headScripts.findIndex(
+          (s) => s.id === "cookieyes",
+        );
+        assert.ok(
+          defaultsIdx !== -1,
+          `Expected #consent-defaults in <head>, got: ${JSON.stringify(headOrder.headScripts)}`,
+        );
+        assert.equal(
+          cookieYesIdx,
+          defaultsIdx + 1,
+          `Expected #cookieyes directly after #consent-defaults in <head>, got: ${JSON.stringify(headOrder.headScripts)}`,
+        );
+        assert.equal(
+          headOrder.headScripts[cookieYesIdx].src,
+          COOKIEYES_SCRIPT_URL,
+        );
+        assert.equal(
+          headOrder.allScripts.some(
+            (s) =>
+              s.src?.includes("googletagmanager.com/gtm.js") ||
+              s.src?.includes("GTM-"),
+          ),
+          false,
+          `Expected no GTM script tags in DOM, got: ${JSON.stringify(headOrder.allScripts)}`,
+        );
+
+        assert.deepEqual(
+          headOrder.dataLayerAtCookieYesRun[0],
+          EXPECTED_CONSENT_DEFAULT,
+          `Expected first dataLayer entry before CookieYes runs to be Consent Mode default, got: ${JSON.stringify(headOrder.dataLayerAtCookieYesRun)}`,
+        );
+        assert.deepEqual(headOrder.dataLayerAtCookieYesRun[1], [
+          "set",
+          "url_passthrough",
+          true,
+        ]);
+
+        // Wait for sign-in probes to settle, then click a launch-app CTA pre-consent.
+        await page.waitForTimeout(500);
+        await clickLaunchAppCta(page);
+        await page.waitForTimeout(300);
+        const entriesPreConsent = await readDataLayerEntries(page);
+        assert.equal(
+          entriesPreConsent.some(
+            (e) =>
+              Array.isArray(e) && e[0] === "event" && e[1] === "conversion",
+          ),
+          false,
+          `Expected no pre-consent Google Ads conversion in dataLayer, got: ${JSON.stringify(entriesPreConsent)}`,
+        );
+
+        assertNoGtm(requestedUrls, "undecided consent defaults");
+        assert.deepEqual(
+          requestedUrls.filter((u) => u.includes("googletagmanager.com")),
+          [],
+          `Expected zero Google requests before consent, got: ${JSON.stringify(requestedUrls)}`,
+        );
+        console.log(
+          "PASS: Consent Mode defaults set before CookieYes in <head> and no GTM/Google pre-consent",
+        );
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 0b. Reject keeps Google unrequested; Accept loads gtag.js after defaults and fires launchApp conversion.
+    {
+      const { context, page, requestedUrls } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        UNDECIDED_CONTEXT,
+      );
+      try {
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
+        await dispatchConsentUpdate(page, { analytics: false });
+        await page.waitForTimeout(500);
+        await clickLaunchAppCta(page);
+        await page.waitForTimeout(300);
+
+        assertNoGtm(requestedUrls, "reject Google Ads check");
+        assert.deepEqual(
+          requestedUrls.filter((u) => u.includes("googletagmanager.com")),
+          [],
+          `Expected zero Google requests after Reject, got: ${JSON.stringify(requestedUrls)}`,
+        );
+        const entries = await readDataLayerEntries(page);
+        assert.equal(
+          entries.some(
+            (e) =>
+              Array.isArray(e) && e[0] === "event" && e[1] === "conversion",
+          ),
+          false,
+          `Expected no conversion event after Reject, got: ${JSON.stringify(entries)}`,
+        );
+      } finally {
+        await context.close();
+      }
+    }
+
+    {
+      const { context, page, requestedUrls } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        UNDECIDED_CONTEXT,
+      );
+      try {
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
+        const probed = await waitForCondition(
+          () =>
+            requestedUrls.some(
+              (u) =>
+                u.includes("cloud.langfuse.com") &&
+                u.includes("/api/auth/session"),
+            ),
+          4_000,
+        );
+        assert.ok(probed, "Expected cloud region sign-in probe to run");
+
+        await dispatchConsentUpdate(page, { analytics: true });
+        const gtagLoaded = await waitForCondition(
+          () => requestedUrls.includes(GOOGLE_ADS_TAG_URL),
+          6_000,
+        );
+        assert.ok(
+          gtagLoaded,
+          `Expected ${GOOGLE_ADS_TAG_URL} after Accept, got: ${JSON.stringify(requestedUrls)}`,
+        );
+        assertNoGtm(requestedUrls, "accept Google Ads check");
+
+        const configured = await waitForCondition(async () => {
+          const entries = await readDataLayerEntries(page);
+          return entries.some(
+            (e) =>
+              Array.isArray(e) && e[0] === "config" && e[1] === GOOGLE_ADS_ID,
+          );
+        }, 6_000);
+        assert.ok(configured, "Expected gtag config call after Accept");
+
+        await clickLaunchAppCta(page);
+        const entries = await readDataLayerEntries(page);
+        assert.deepEqual(entries[0], EXPECTED_CONSENT_DEFAULT);
+        const configIdx = entries.findIndex(
+          (e) =>
+            Array.isArray(e) && e[0] === "config" && e[1] === GOOGLE_ADS_ID,
+        );
+        assert.ok(
+          configIdx > 0,
+          `Expected gtag config after consent default, got: ${JSON.stringify(entries)}`,
+        );
+        const conversionEntry = entries.find(
+          (e) =>
+            Array.isArray(e) &&
+            e[0] === "event" &&
+            e[1] === "conversion" &&
+            e[2]?.send_to === `${GOOGLE_ADS_ID}/Lb8RCKvkmqkcEKb4uLgo`,
+        );
+        assert.deepEqual(conversionEntry, [
+          "event",
+          "conversion",
+          {
+            send_to: `${GOOGLE_ADS_ID}/Lb8RCKvkmqkcEKb4uLgo`,
+            transport_type: "beacon",
+            value: 1,
+            currency: "USD",
+          },
+        ]);
+        console.log(
+          "PASS: Google Ads tag and launchApp conversion gated on advertisement consent",
+        );
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 1. Returning visitor with stored consent: identified pageview immediately, no delay.
+    {
+      const { context, page, capturedEvents, requestedUrls } =
+        await createIsolatedContext(browser, baseUrl, GRANTED_CONTEXT);
       try {
         const startAt = Date.now();
         await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
@@ -530,9 +897,9 @@ async function run() {
         const storage = await inspectStorage(page);
         assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
 
-        // Pre-warm the first internal /docs/* link so later SPA navigation tests
-        // do not pay a cold Next.js dev compile inside the 10s consent window.
+        // Pre-warm the first internal /docs/* link and confirm no GTM request.
         await navigateDocsLink(page);
+        assertNoGtm(requestedUrls, "returning visitor with stored consent");
         console.log("PASS: returning visitor with stored consent");
       } finally {
         await context.close();
@@ -951,10 +1318,10 @@ async function run() {
         }
       })(),
       (async () => {
-        const { context, page, capturedEvents } = await createIsolatedContext(
-          browser,
-          baseUrl,
-        );
+        const { context, page, capturedEvents, requestedUrls } =
+          await createIsolatedContext(browser, baseUrl, {
+            blockCookieYes: true,
+          });
         try {
           const loadStart = Date.now();
           await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
@@ -994,6 +1361,7 @@ async function run() {
             `Expected original load timestamp when CookieYes is blocked, got ${ts}`,
           );
           await assertNoPostHogStorage(page, "CookieYes blocked timeout");
+          assertNoGtm(requestedUrls, "CookieYes blocked timeout");
           console.log("PASS: CookieYes blocked (10s timeout)");
         } finally {
           await context.close();
@@ -1058,6 +1426,12 @@ async function run() {
         }
       })(),
     ]);
+
+    assert.deepEqual(
+      allGtmRequests,
+      [],
+      `Expected zero GTM requests across all scenarios, got: ${JSON.stringify(allGtmRequests)}`,
+    );
   } finally {
     await browser.close();
     stopProcessTree(started?.proc);

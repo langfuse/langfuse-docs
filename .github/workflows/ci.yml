@@ -202,7 +202,9 @@ jobs:
       - pre-job
     if: needs.pre-job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -215,10 +217,18 @@ jobs:
           cache: true
           require-lockfile: true
 
+      - name: Build next.js app
+        env:
+          NEXT_PUBLIC_POSTHOG_KEY: phc_test_cookie_consent
+          NEXT_PUBLIC_POSTHOG_HOST: https://eu.posthog.com
+        run: pnpm build
+
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run cookie consent tests
+        env:
+          COOKIE_CONSENT_E2E_SKIP_BUILD: "1"
         run: pnpm run test:cookie-consent
 
   # Summary job that depends on all other jobs
