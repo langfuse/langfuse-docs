@@ -44,6 +44,33 @@ export const productLinks: NavPanelLink[] = [
   { name: "AI Gateway", href: "/docs/gateway/overview", icon: Network },
 ];
 
+export type NavCta = {
+  id: "tracing" | "gateway";
+  title: string;
+  description: string;
+  cta: string;
+  href: string;
+  badge?: string;
+};
+
+export const productCtas: NavCta[] = [
+  {
+    id: "tracing",
+    title: "Get started with tracing",
+    description: "Debug agents step by step, from prompt to tool call.",
+    cta: "Get started",
+    href: "/docs/observability/get-started",
+  },
+  {
+    id: "gateway",
+    title: "Set up AI Gateway",
+    description: "One key for every model, with spend tracked per user.",
+    cta: "Get started",
+    href: "/docs/gateway/get-started/admin-setup",
+    badge: "New",
+  },
+];
+
 export const resourcesLinks: NavPanelLink[] = [
   { name: "Academy", href: "/academy", icon: BookOpen },
   { name: "Workshop", href: "/workshop", icon: Presentation },
