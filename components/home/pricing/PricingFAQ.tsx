@@ -30,7 +30,7 @@ const faqs: FAQItem[] = [
   {
     question: "What is a billable unit?",
     answer:
-      "Each trace, observation, score, and [facet result](/docs/observability/features/topics#models-and-costs) counts as one unit.",
+      "Each trace, observation, score, and facet result counts as one unit. [See how to track billable units](/docs/administration/billable-units#monitor-usage).",
   },
   {
     question: "How does the graduated pricing work?",
