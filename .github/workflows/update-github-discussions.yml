@@ -117,7 +117,7 @@ jobs:
           stars="${BASH_REMATCH[1]}"
 
           jq -e 'type == "object" and all(to_entries[];
-              (.key | test("^/[A-Za-z0-9/_.-]+$"))
+              (.key | test("^/[A-Za-z0-9/_.\\[\\]-]+$"))
               and (.value | type == "array" and all(.[]; type == "string" and test("^[A-Za-z0-9](-?[A-Za-z0-9])*(\\[bot\\])?$"))))' \
             "$src/contributors.json" > /dev/null || fail "contributors.json has unexpected content"
 
