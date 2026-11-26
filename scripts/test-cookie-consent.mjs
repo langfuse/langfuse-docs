@@ -203,12 +203,12 @@ function createMiniReact() {
   return { hooks, render };
 }
 
-test("PostHogProvider starts cookieless with pageviews only, recaptures landing page on grant, and cleans up on revoke", () => {
+test("PostHogProvider models pending/denied/granted states and transitions without reload", () => {
   const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
 
   let consentState = "unknown";
-  let optedIn = false;
+  let currentPath = "/pricing";
   let explicitStatus = "pending";
   let initArgs = null;
   let useCaseReady = null;
@@ -219,6 +219,9 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     ["ph_phc_test_key_primary_window_exists", "true"],
   ]);
 
+  // Models posthog-js cookieless_mode: "on_reject" without
+  // opt_out_capturing_by_default: capture() is a no-op while "pending",
+  // cookieless while "denied", and full while "granted".
   const fakePosthog = {
     config: {},
     init(key, options) {
@@ -226,16 +229,14 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       this.config = { ...options };
       options.loaded(this);
     },
-    has_opted_in_capturing: () => optedIn,
+    has_opted_in_capturing: () => explicitStatus === "granted",
     get_explicit_consent_status: () => explicitStatus,
     opt_in_capturing(opts) {
       calls.push(["opt_in_capturing", opts]);
-      optedIn = true;
       explicitStatus = "granted";
     },
     opt_out_capturing() {
       calls.push(["opt_out_capturing"]);
-      optedIn = false;
       explicitStatus = "denied";
     },
     clear_opt_in_out_capturing() {
@@ -247,13 +248,19 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       Object.assign(this.config, cfg);
     },
     capture(name) {
-      calls.push(["capture", name, optedIn ? "consented" : "cookieless"]);
+      if (explicitStatus === "pending") return;
+      calls.push([
+        "capture",
+        name,
+        explicitStatus === "granted" ? "consented" : "cookieless",
+      ]);
     },
     debug() {},
   };
 
   globalThis.window = {};
   globalThis.document = {
+    cookie: "",
     addEventListener: (type, fn) => {
       listeners[type] = fn;
     },
@@ -279,7 +286,7 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
           };
         }
         if (name === "next/navigation") {
-          return { usePathname: () => "/pricing" };
+          return { usePathname: () => currentPath };
         }
         if (name === "posthog-js") return fakePosthog;
         if (name === "posthog-js/react") {
@@ -302,13 +309,13 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       },
     );
 
-    // Mount -> loaded() sets ready=true, then re-render fires initial cookieless $pageview
+    // 1. Initial load with "unknown": stays pending, persistence "memory", zero events, zero opt-out flag
     mini.render(() => mod.PostHogProvider({ children: null }));
     mini.render(() => mod.PostHogProvider({ children: null }));
 
     assert.equal(initArgs.key, "phc_test_key");
     assert.equal(initArgs.options.cookieless_mode, "on_reject");
-    assert.equal(initArgs.options.opt_out_capturing_by_default, true);
+    assert.equal(initArgs.options.opt_out_capturing_by_default, undefined);
     assert.equal(initArgs.options.opt_out_persistence_by_default, true);
     assert.equal(initArgs.options.persistence, "memory");
     assert.equal(initArgs.options.cross_subdomain_cookie, true);
@@ -319,37 +326,56 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     assert.equal(initArgs.options.capture_exceptions, false);
     assert.equal(initArgs.options.disable_surveys, true);
 
-    // No opt_out_capturing() call on unknown/pending so __ph_opt_in_out_* is not written;
-    // one cookieless $pageview fires and UseCaseAnalytics stays inactive before consent.
-    assert.deepEqual(calls, [["capture", "$pageview", "cookieless"]]);
+    assert.equal(explicitStatus, "pending");
+    assert.deepEqual(calls, []);
     assert.equal(useCaseReady, false);
     assert.equal(sessionStore.size, 0);
 
-    // before_send allows only $pageview while consent is unknown or denied
+    // before_send drops everything while "unknown", allows only $pageview while "denied", and allows all while "granted"
     const beforeSend = initArgs.options.before_send;
-    for (const state of ["unknown", "denied"]) {
-      consentState = state;
-      assert.deepEqual(beforeSend({ event: "$pageview" }), {
-        event: "$pageview",
-      });
-      assert.equal(beforeSend({ event: "use_case:page_viewed" }), null);
-      assert.equal(
-        beforeSend({ event: "inkeep:user_message_submitted" }),
-        null,
-      );
-      assert.equal(beforeSend({ event: "$autocapture" }), null);
-      assert.equal(beforeSend({ event: "$exception" }), null);
-      assert.equal(beforeSend({ event: "$dead_click" }), null);
-      assert.equal(beforeSend({ event: "survey shown" }), null);
-    }
+    consentState = "unknown";
+    assert.equal(beforeSend({ event: "$pageview" }), null);
+    assert.equal(beforeSend({ event: "use_case:page_viewed" }), null);
 
-    // Granting analytics consent switches persistence to cookie before opting in,
-    // restores remote-config defaults (without forcing heatmaps/dead-clicks/exceptions true),
+    consentState = "denied";
+    assert.deepEqual(beforeSend({ event: "$pageview" }), {
+      event: "$pageview",
+    });
+    assert.equal(beforeSend({ event: "use_case:page_viewed" }), null);
+    assert.equal(beforeSend({ event: "inkeep:user_message_submitted" }), null);
+    assert.equal(beforeSend({ event: "$autocapture" }), null);
+    assert.equal(beforeSend({ event: "$exception" }), null);
+    assert.equal(beforeSend({ event: "$dead_click" }), null);
+    assert.equal(beforeSend({ event: "survey shown" }), null);
+
+    // 2. Transition: unknown -> denied (Reject All) without reload:
+    // opts out (does NOT clear back to pending) and immediately sends a cookieless $pageview.
+    calls.length = 0;
+    consentState = "denied";
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(explicitStatus, "denied");
+    assert.equal(fakePosthog.config.persistence, "memory");
+    assert.deepEqual(calls, [
+      ["opt_out_capturing"],
+      ["capture", "$pageview", "cookieless"],
+    ]);
+    assert.equal(useCaseReady, false);
+
+    // Repeated denied update does not re-opt-out or double-capture
+    calls.length = 0;
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.deepEqual(calls, []);
+
+    // 3. Transition: denied -> granted (Accept All) without reload:
+    // switches persistence to cookie before opting in, restores remote-config defaults,
     // recaptures landing $pageview, and activates UseCaseAnalytics.
     calls.length = 0;
     consentState = "granted";
     listeners.cookieyes_consent_update();
     mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(explicitStatus, "granted");
     assert.deepEqual(calls, [
       ["set_config", { persistence: "cookie" }],
       ["opt_in_capturing", { captureEventName: false }],
@@ -369,12 +395,6 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     assert.equal("capture_exceptions" in fakePosthog.config, false);
     assert.equal(useCaseReady, true);
 
-    // Repeated consent update while still granted does not double-capture $pageview
-    calls.length = 0;
-    listeners.cookieyes_consent_update();
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.deepEqual(calls, []);
-
     assert.deepEqual(beforeSend({ event: "use_case:page_viewed" }), {
       event: "use_case:page_viewed",
     });
@@ -382,15 +402,74 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       event: "inkeep:user_message_submitted",
     });
 
-    // Revoking opts out while persistence is still cookie, clears opt-in/out storage,
-    // switches back to memory + disabled extensions, removes sessionStorage keys,
-    // deactivates UseCaseAnalytics, and does not re-capture $pageview for the same page.
+    // Repeated consent update while still granted does not double-capture $pageview
+    calls.length = 0;
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.deepEqual(calls, []);
+
+    // 4. Transition: granted -> denied (Revoke) without reload:
+    // opts out while persistence is still cookie (NO clear_opt_in_out_capturing),
+    // switches back to memory + disabled extensions, clears sessionStorage,
+    // and captures cookieless $pageview on subsequent route navigation.
     calls.length = 0;
     sessionStore.set("ph_phc_test_key_window_id", "win-2");
     sessionStore.set("ph_phc_test_key_primary_window_exists", "true");
     consentState = "denied";
     listeners.cookieyes_consent_update();
     mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(explicitStatus, "denied");
+    assert.deepEqual(calls, [
+      ["opt_out_capturing"],
+      [
+        "set_config",
+        {
+          disable_session_recording: true,
+          autocapture: false,
+          capture_heatmaps: false,
+          capture_dead_clicks: false,
+          capture_exceptions: false,
+          disable_surveys: true,
+          persistence: "memory",
+        },
+      ],
+    ]);
+    assert.equal(fakePosthog.config.persistence, "memory");
+    assert.equal(useCaseReady, false);
+    assert.equal(sessionStore.size, 0);
+
+    // Subsequent SPA route navigation while denied captures cookieless $pageview
+    calls.length = 0;
+    currentPath = "/docs";
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.deepEqual(calls, [["capture", "$pageview", "cookieless"]]);
+
+    // 5. Transition: denied -> granted -> unknown (withdrawn without a "denied" reading):
+    // opts out so the cookie is deleted, then clears back to "pending", leaving nothing stored.
+    calls.length = 0;
+    consentState = "granted";
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(explicitStatus, "granted");
+    assert.deepEqual(calls, [
+      ["set_config", { persistence: "cookie" }],
+      ["opt_in_capturing", { captureEventName: false }],
+      [
+        "set_config",
+        {
+          disable_session_recording: false,
+          autocapture: true,
+          disable_surveys: false,
+        },
+      ],
+      ["capture", "$pageview", "consented"],
+    ]);
+
+    calls.length = 0;
+    consentState = "unknown";
+    listeners.cookieyes_consent_update();
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(explicitStatus, "pending");
     assert.deepEqual(calls, [
       ["opt_out_capturing"],
       ["clear_opt_in_out_capturing"],
@@ -409,27 +488,103 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     ]);
     assert.equal(fakePosthog.config.persistence, "memory");
     assert.equal(useCaseReady, false);
-    assert.equal(sessionStore.size, 0);
 
-    // Re-granting on the same page recaptures a consented $pageview for the new identity
+    // Navigation while unknown/pending sends nothing
     calls.length = 0;
-    consentState = "granted";
-    listeners.cookieyes_consent_update();
+    currentPath = "/blog";
     mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.deepEqual(calls, []);
+  } finally {
+    if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
+    delete globalThis.window;
+    delete globalThis.document;
+    delete globalThis.sessionStorage;
+  }
+});
+
+test("PostHogProvider sends cookieless $pageview immediately on initial load when analytics consent is already denied", () => {
+  const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
+
+  let explicitStatus = "pending";
+  const calls = [];
+  const fakePosthog = {
+    config: {},
+    init(_key, options) {
+      this.config = { ...options };
+      options.loaded(this);
+    },
+    has_opted_in_capturing: () => explicitStatus === "granted",
+    get_explicit_consent_status: () => explicitStatus,
+    opt_in_capturing() {
+      explicitStatus = "granted";
+    },
+    opt_out_capturing() {
+      calls.push(["opt_out_capturing"]);
+      explicitStatus = "denied";
+    },
+    clear_opt_in_out_capturing() {
+      calls.push(["clear_opt_in_out_capturing"]);
+      explicitStatus = "pending";
+    },
+    set_config(cfg) {
+      calls.push(["set_config", cfg]);
+      Object.assign(this.config, cfg);
+    },
+    capture(name) {
+      if (explicitStatus === "pending") return;
+      calls.push([
+        "capture",
+        name,
+        explicitStatus === "granted" ? "consented" : "cookieless",
+      ]);
+    },
+    debug() {},
+  };
+
+  globalThis.window = {};
+  globalThis.document = {
+    cookie: "",
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  };
+  globalThis.sessionStorage = { removeItem: () => {} };
+
+  try {
+    const mini = createMiniReact();
+    const mod = load(
+      compile("components/analytics/PostHogProvider.tsx"),
+      (name) => {
+        if (name === "react") return mini.hooks;
+        if (name === "react/jsx-runtime") {
+          return {
+            jsx: (type, props) => ({ type, props }),
+            jsxs: (type, props) => ({ type, props }),
+          };
+        }
+        if (name === "next/navigation") return { usePathname: () => "/docs" };
+        if (name === "posthog-js") return fakePosthog;
+        if (name === "posthog-js/react") return { PostHogProvider: () => null };
+        if (name === "@/components/analytics/common-room")
+          return { crPageView: () => {} };
+        if (name === "@/components/analytics/UseCaseAnalytics")
+          return { UseCaseAnalytics: () => null };
+        if (name === "@/lib/cookie-consent")
+          return { readAnalyticsConsent: () => "denied" };
+        throw Error(name);
+      },
+    );
+
+    mini.render(() => mod.PostHogProvider({ children: null }));
+    mini.render(() => mod.PostHogProvider({ children: null }));
+
+    assert.equal(fakePosthog.config.persistence, "memory");
+    assert.equal(explicitStatus, "denied");
     assert.deepEqual(calls, [
-      ["set_config", { persistence: "cookie" }],
-      ["opt_in_capturing", { captureEventName: false }],
-      [
-        "set_config",
-        {
-          disable_session_recording: false,
-          autocapture: true,
-          disable_surveys: false,
-        },
-      ],
-      ["capture", "$pageview", "consented"],
+      ["opt_out_capturing"],
+      ["capture", "$pageview", "cookieless"],
     ]);
-    assert.equal(useCaseReady, true);
   } finally {
     if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
     else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
