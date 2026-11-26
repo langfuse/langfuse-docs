@@ -15,6 +15,7 @@ Langfuse is open source. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free 
 <SignupCTA className="my-6" />
 
 import { Details, Summary } from "@/components/Details";
+import McpSkillInstall from "@/components-mdx/get-started/mcp-skill-install.mdx";
 import GetStartedPythonSdk from "@/components-mdx/get-started/python-sdk.mdx";
 import GetStartedJsSdk from "@/components-mdx/get-started/js-sdk.mdx";
 import GetStartedOpenaiSdk from "@/components-mdx/get-started/openai-sdk.mdx";
@@ -33,7 +34,7 @@ import { Link } from "@/components/ui/link";
 
 Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features. If your agent supports MCP, also add the [Langfuse Docs MCP server](/docs/docs-mcp) (`https://langfuse.com/api/mcp`, no authentication) so it can look up current documentation while it works.
 
-<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+<Tabs items={["Ask your coding agent", "Langfuse MCP", "Cursor plugin", "Manual installation"]}>
 
 <Tab>
 
@@ -43,6 +44,18 @@ Ask your coding agent to install the skill by pointing to the [GitHub repository
 Install the Langfuse Agent Skill from github.com/langfuse/skills
 and use it to add tracing to this application with Langfuse
 following best practices.
+```
+
+</Tab>
+
+<Tab>
+
+<McpSkillInstall />
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Add tracing to this application with Langfuse following best practices.
 ```
 
 </Tab>

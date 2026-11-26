@@ -15,11 +15,11 @@ This is the public MCP server for the Langfuse documentation. There is also an a
 
 </Callout>
 
-### Pair with the Agent Skill [#agent-skill]
+## Pair with the Agent Skill [#agent-skill]
 
 You'll get better results when your agent also has the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) installed, next to the MCP server.
 
-Install it from [GitHub](https://github.com/langfuse/skills) or follow the [Agent Skill setup](/docs/api-and-data-platform/features/agent-skill).
+Install it from [GitHub](https://github.com/langfuse/skills), get it bundled via the [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server#bundled-skills), or follow the [Agent Skill setup](/docs/api-and-data-platform/features/agent-skill#install).
 
 ## Install
 
@@ -58,9 +58,13 @@ curl "https://langfuse.com/api/search-docs?query=Langfuse+Docs+MCP+Server"
 
 Use this endpoint directly when you need lightweight semantic search outside of MCP.
 
+## Submit feedback [#submit-feedback]
+
+Use `submitFeedback` to send user-approved feedback when you are not connected to a Langfuse project. Prefer the authenticated [submit feedback](/docs/api-and-data-platform/features/mcp-server#feedback) path when a project is available.
+
 ## WebMCP [#webmcp]
 
-langfuse.com also registers the read-only docs tools (`searchLangfuseDocs`, `getLangfuseDocsPage`, `getLangfuseOverview`) with [WebMCP](https://github.com/webmachinelearning/webmcp). Browser agents can call them on any page of the site without connecting to the MCP endpoint. `submitFeedback` is only available through the MCP server.
+langfuse.com also registers the read-only docs tools (`searchLangfuseDocs`, `getLangfuseDocsPage`, `getLangfuseOverview`) with [WebMCP](https://github.com/webmachinelearning/webmcp). Browser agents can call them on any page of the site without connecting to the MCP endpoint. [`submitFeedback`](#submit-feedback) is not registered with WebMCP.
 
 <Callout type="info">
 

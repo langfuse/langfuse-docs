@@ -12,7 +12,7 @@ If you have feedback or ideas for new tools, please [share them on GitHub](https
 
 <Callout type="info">
 
-If you are running AI agents in an environment where you can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) instead of the MCP server.
+If your agent can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) with the [Langfuse CLI](/docs/api-and-data-platform/features/cli). This MCP server also [bundles the Langfuse skills](#bundled-skills) for clients that support MCP skills.
 
 </Callout>
 
@@ -406,6 +406,10 @@ http_headers = { "Authorization" = "Basic {your-base64-token}" }
 
 </Steps>
 
+## Bundled skills [#bundled-skills]
+
+The MCP server bundles the official [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) (`langfuse`) and migration skill (`migrate-to-langfuse`) via the [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview) (`io.modelcontextprotocol/skills`). Clients that support MCP skills, such as Claude Code 2.1.331 or later, discover and load them automatically once connected, and self-hosted deployments serve the skills matching their Langfuse version. If your client does not support MCP skills, [install the skill from GitHub](/docs/api-and-data-platform/features/agent-skill#install) instead.
+
 ## Filter logical root observations [#logical-root-observations]
 
 The observation tools distinguish logical roots from physical parentage:
@@ -417,9 +421,15 @@ The observation tools distinguish logical roots from physical parentage:
 
 For the complete tool schemas and request examples, see the [MCP Reference](https://mcp.reference.langfuse.com).
 
-## Feedback
+## Feedback [#feedback]
 
 We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
+
+<Callout type="info">
+
+The `submitFeedback` tool is also available as [`POST /api/public/feedback`](https://api.reference.langfuse.com/#tag/feedback/POST/api/public/feedback).
+
+</Callout>
 
 ## Related Documentation
 

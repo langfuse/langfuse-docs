@@ -57,6 +57,7 @@ When the tool already has an integration page for another Langfuse product area,
 - A changelog entry can be updated to record that something was retired. Do not copy that history onto a docs or integration page unless readers of that page would otherwise follow a dead path.
 - For new features, follow the intro immediately with 2-3 concrete use cases, not in a separate section. For additions to existing features, such as a new provider or endpoint, use cases are optional. A one-sentence entry that restates the title and links to docs is incomplete.
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
+- Do not reproduce durable conceptual breakdowns, schema inventories, or general how-it-works explanations. Link to evergreen docs instead.
 - Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Frontmatter `ogImage` or `ogVideo` counts only when `showOgInHeader` is not `false`. When that flag is `false`, the visual has to be in the body. Do not invent a visual.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
 - Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."

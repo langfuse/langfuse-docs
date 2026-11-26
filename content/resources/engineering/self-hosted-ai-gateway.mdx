@@ -37,7 +37,7 @@ Self-hosting adds one ingestion mode that Cloud doesn't have: `NONE`, which rout
 | Langfuse Web                           | Resolves gateway keys, stores encrypted provider connections, ingests generations          | Uses your Postgres            |
 | Langfuse Worker, ClickHouse, Redis, S3 | Store and serve traces, like any other Langfuse trace                                      | Your existing stack           |
 
-The gateway has no database, Redis, ClickHouse, or S3 credentials. It only talks to Langfuse Web and to the providers. Keep the connection between gateway and web on a private network or encrypted, because web's responses contain provider API keys.
+The gateway has no Postgres, ClickHouse, or S3 credentials. It talks to Langfuse Web, the providers, and optionally Redis when you use [budgets](/docs/gateway/features/budgets). Keep the connection between gateway and web on a private network or encrypted, because web's responses contain provider API keys.
 
 ## Requirements [#requirements]
 

@@ -4,7 +4,7 @@ This repository powers the Langfuse website hosted on `langfuse.com`, including 
 
 ## Quickstart
 
-- Use **Node.js 22** (`package.json#engines`).
+- Use **Node.js 24** (`package.json#engines`).
 - Use **pnpm** (`packageManager` is configured in `package.json`).
 - Local dev server runs on **http://localhost:3333**.
 
@@ -190,6 +190,8 @@ Read [Review guidelines](review-guidelines.md) before commenting on a pull reque
 
 - **Single service**: This is a Next.js website (not a monorepo). The only service to run is `pnpm dev` on port 3333. No databases, Docker, or external services are required for local development.
 - **Dev server bind address**: The dev script binds to `127.0.0.1` (`-H 127.0.0.1`), so use `http://127.0.0.1:3333` (not `localhost`) when curling or testing.
+- **Letting the user preview pages**: The browser tab in the Cursor interface cannot reach a server bound to `127.0.0.1`. When the user wants to look at pages themselves, run `pnpm exec next dev -p 3333 -H 0.0.0.0` in a tmux session instead of `pnpm dev`, and send them `http://127.0.0.1:3333/<path>` (or the VM address from `hostname -I` if that refuses to connect). Live reload is blocked from that origin, so tell them to refresh after edits. Keep the branch under review checked out while the server runs, because it serves the working tree.
+- **Next.js upgrade prompt on first start**: The first `next dev` run on a fresh VM can exit right after printing a `next upgrade` recommendation. Start it again; the second run starts normally. Do not run the upgrade unless the user asks.
 - **First page load is slow**: After `pnpm dev` starts ("Ready in ~1s"), the first HTTP request compiles on-demand and can take 20-40 seconds. Subsequent pages are much faster.
 - **Langfuse SDK warnings are expected**: The dev server logs `[Langfuse SDK] [WARN] No exporter configured…` on startup. These are harmless — the SDK keys are only needed for optional demo API routes and are not required for the docs site itself.
 - **No env file needed**: All external integrations (OpenAI, Supabase, PostHog, etc.) degrade gracefully when keys are absent. You do not need a `.env` file for routine development.

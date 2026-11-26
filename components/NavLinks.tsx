@@ -1,18 +1,23 @@
 "use client";
 
 import { Link } from "@/components/ui/link";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { HoverCorners } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import {
   industryLinks,
+  productCtas,
   productLinks,
   resourcesLinks,
   simpleLinks,
   useCaseLinks,
 } from "@/lib/nav-links";
-import type { NavPanelLink } from "@/lib/nav-links";
+import type { NavCta, NavPanelLink } from "@/lib/nav-links";
+import {
+  GatewayCtaGraphic,
+  TracingCtaGraphic,
+} from "@/components/nav/ProductCtaGraphics";
 import type { SectionNavData } from "@/lib/nav-tree";
 
 // ── Nav trigger style ─────────────────────────────────────────────────────────
@@ -28,32 +33,6 @@ type FeaturedItem = {
   description: string;
   cta: string;
   href: string;
-};
-
-const productFeatured: FeaturedItem = {
-  image: (
-    <div className="flex justify-center items-center px-5 h-full">
-      <div className="px-4 py-3 w-full rounded border shadow-sm border-line-structure bg-surface-1">
-        <div className="mb-2 flex items-center gap-1.5">
-          <div className="rounded-full size-2 bg-line-structure" />
-          <span className="font-sans text-[10px] font-semibold text-text-tertiary tracking-tight">
-            langfuse
-          </span>
-        </div>
-        <p className="font-sans text-[11px] font-semibold text-text-primary leading-snug">
-          Get Started with Tracing
-        </p>
-        <p className="mt-1 font-sans text-[10px] text-text-tertiary leading-relaxed">
-          Step-by-step guide to ingesting your first trace using OpenAI,
-          LangChain, or the SDKs.
-        </p>
-      </div>
-    </div>
-  ),
-  title: "Get Started with Tracing",
-  description: "This guide walks you through ingesting your first trace.",
-  cta: "Read docs",
-  href: "/docs/observability/get-started",
 };
 
 const resourcesFeatured: FeaturedItem = {
@@ -107,6 +86,61 @@ function NavFeaturedCard({ featured }: { featured: FeaturedItem }) {
   );
 }
 
+// ── Product panel ──────────────────────────────────────────────────────────────
+
+const ctaGraphics: Record<NavCta["id"], React.ComponentType> = {
+  tracing: TracingCtaGraphic,
+  gateway: GatewayCtaGraphic,
+};
+
+function CtaBadge({ label }: { label: string }) {
+  return (
+    <span className="border border-line-structure bg-surface-bg px-1 py-px font-mono text-[9px] leading-none tracking-[0.04em] text-text-secondary">
+      {label}
+    </span>
+  );
+}
+
+function ProductCtaCard({ cta, divider }: { cta: NavCta; divider: boolean }) {
+  const Graphic = ctaGraphics[cta.id];
+  return (
+    <Link
+      href={cta.href}
+      className={cn(
+        "group/cta relative flex w-[430px] flex-1 overflow-hidden no-underline transition-colors hover:bg-surface-bg",
+        divider && "border-t border-line-structure",
+      )}
+    >
+      <div className="pointer-events-none absolute right-1 top-1/2 w-[240px] -translate-y-1/2 opacity-90 transition-opacity [mask-image:linear-gradient(to_right,transparent,black_35%)] group-hover/cta:opacity-100">
+        <Graphic />
+      </div>
+      <span className="relative flex w-[200px] flex-col gap-1 p-4">
+        <span className="flex items-center gap-2 font-sans text-[13px] font-semibold leading-snug text-text-primary">
+          {cta.title}
+          {cta.badge ? <CtaBadge label={cta.badge} /> : null}
+        </span>
+        <span className="font-sans text-[12px] leading-relaxed text-text-tertiary">
+          {cta.description}
+        </span>
+        <span className="mt-auto flex items-center gap-1 pt-1 font-mono text-[11px] text-text-tertiary transition-colors group-hover/cta:text-text-primary">
+          {cta.cta}
+          <ArrowRight className="size-3 transition-transform group-hover/cta:translate-x-0.5" />
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function ProductCtas() {
+  return (
+    <div className="flex flex-col border-l border-line-structure">
+      {productCtas.map((cta, index) => (
+        <ProductCtaCard key={cta.href} cta={cta} divider={index > 0} />
+      ))}
+    </div>
+  );
+}
+
 // ── Mega dropdown panel ────────────────────────────────────────────────────────
 
 function NavLinkColumn({
@@ -146,9 +180,11 @@ function NavLinkColumn({
 function NavDropdownPanel({
   columns,
   featured,
+  aside,
 }: {
   columns: { heading?: string; links: NavPanelLink[] }[];
   featured?: FeaturedItem;
+  aside?: React.ReactNode;
 }) {
   return (
     <div className="flex min-w-max border border-line-structure bg-surface-1 p-0 shadow-md">
@@ -165,6 +201,7 @@ function NavDropdownPanel({
           <NavFeaturedCard featured={featured} />
         </div>
       ) : null}
+      {aside}
     </div>
   );
 }
@@ -178,6 +215,7 @@ function NavDropdown({
   label,
   columns,
   featured,
+  aside,
   openId,
   setOpenId,
   cancelScheduledClose,
@@ -187,6 +225,7 @@ function NavDropdown({
   label: string;
   columns: { heading?: string; links: NavPanelLink[] }[];
   featured?: FeaturedItem;
+  aside?: React.ReactNode;
   openId: MegaMenuId | null;
   setOpenId: React.Dispatch<React.SetStateAction<MegaMenuId | null>>;
   cancelScheduledClose: () => void;
@@ -299,7 +338,7 @@ function NavDropdown({
           left,
         }}
       >
-        <NavDropdownPanel columns={columns} featured={featured} />
+        <NavDropdownPanel columns={columns} featured={featured} aside={aside} />
       </div>
     </div>
   );
@@ -343,7 +382,7 @@ export function NavLinks({
           id="product"
           label="Product"
           columns={[{ links: productLinks }]}
-          featured={productFeatured}
+          aside={<ProductCtas />}
           openId={openId}
           setOpenId={setOpenId}
           cancelScheduledClose={cancelScheduledClose}

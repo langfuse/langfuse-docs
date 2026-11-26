@@ -1,7 +1,7 @@
 ---
 title: How to set up a user feedback loop for your application
 sidebarTitle: User feedback loop
-description: Capture explicit and implicit user feedback as scores on your traces, surface the responses worth reviewing, and turn what you learn into datasets and automated evaluators.
+description: Capture user signals as scores on your traces, surface the responses worth reviewing, and turn what you learn into datasets and automated evaluators.
 category: Evaluation
 ---
 
@@ -30,21 +30,21 @@ You already have traces coming into Langfuse. See [tracing](/docs/observability/
 
 ### Choose your feedback signals [#choose-signals]
 
-Feedback comes in two forms. **Explicit feedback** is a rating the user gives on purpose, like a thumbs up or down or a star rating: unambiguous, but rare and skewed toward unhappy users. **Implicit feedback** is derived from what users do, like retrying a query or editing a draft: you have data on every trace, but it needs interpretation.
+Signals come in [four kinds](/academy/monitoring/capturing-signals#four-kinds). **Explicit ratings**, like a thumbs up or down, are the only ones users give on purpose: unambiguous, but rare and skewed toward users with strong reactions. **Behavioral**, **conversation**, and **outcome** signals are implicit in what users do or say next, or in what happens to the output: they cover far more traces, but need interpretation. Outcome signals are the strongest, because they come from the environment rather than from someone's opinion.
 
 The best signals depend heavily on your use case. Some examples as inspiration:
 
-| Signal                                                | What it tells you                       | Typically captured via |
-| ----------------------------------------------------- | --------------------------------------- | ---------------------- |
-| Thumbs up or down on a response                       | Direct rating of that response          | Browser SDK            |
-| A user rephrasing the same question                   | The previous answer didn't land         | LLM-as-a-Judge         |
-| A user asking to speak to a human                     | The user stopped trusting the assistant | LLM-as-a-Judge         |
-| A response copied by the user                         | The output was good enough to reuse     | Browser SDK            |
-| A drafted reply edited before it is sent              | What was wrong or missing in the draft  | SDK / API              |
-| A copilot suggestion accepted or dismissed            | Whether the suggestion fit the context  | Browser SDK            |
-| An extracted field corrected in a review step         | Which field was extracted incorrectly   | SDK / API              |
-| A search query reformulated without clicking a result | The results missed the intent           | SDK / API              |
-| A recommended item skipped right after it starts      | The pick missed the user's taste        | SDK / API              |
+| Signal                                                | Kind         | What it tells you                       | Typically captured via |
+| ----------------------------------------------------- | ------------ | --------------------------------------- | ---------------------- |
+| Thumbs up or down on a response                       | Explicit     | Direct rating of that response          | Browser SDK            |
+| A response copied by the user                         | Behavioral   | The output was good enough to reuse     | Browser SDK            |
+| A copilot suggestion accepted or dismissed            | Behavioral   | Whether the suggestion fit the context  | Browser SDK            |
+| A search query reformulated without clicking a result | Behavioral   | The results missed the intent           | SDK / API              |
+| A recommended item skipped right after it starts      | Behavioral   | The pick missed the user's taste        | SDK / API              |
+| A user rephrasing the same question                   | Conversation | The previous answer didn't land         | Decision model         |
+| A user asking to speak to a human                     | Conversation | The user stopped trusting the assistant | Decision model         |
+| A drafted reply edited before it is sent              | Outcome      | What was wrong or missing in the draft  | SDK / API              |
+| An extracted field corrected in a review step         | Outcome      | Which field was extracted incorrectly   | SDK / API              |
 
 Tips:
 
@@ -60,7 +60,7 @@ Every signal ends up as a [score](/docs/evaluation/scores/data-model) on the tra
 
 The route into that score depends on where the signal originates:
 
-<Tabs items={["Signal from UI", "App event from backend", "Via LLM-as-a-Judge"]}>
+<Tabs items={["Signal from UI", "App event from backend", "Via a decision model"]}>
 <Tab>
 
 Ratings from your UI go straight from the browser using your public key:
@@ -136,7 +136,7 @@ See [Scores via API/SDK](/docs/evaluation/evaluation-methods/scores-via-sdk) for
 </Tab>
 <Tab>
 
-Signals that live in free text, like a user asking for a human or rephrasing a question, leave no event your code can catch. An [LLM-as-a-Judge evaluator](/docs/evaluation/evaluation-methods/llm-as-a-judge) on your production traces reads the conversation and writes the score, with no change to your application.
+Signals that live in free text, like a user asking for a human or rephrasing a question, leave no event your code can catch. A [decision model evaluator](/docs/evaluation/evaluation-methods/decision-models) on your production traces reads the conversation and writes the score, with no change to your application. It can check a message for several signals in one call, cheaply enough to cover all traffic.
 
 </Tab>
 </Tabs>
@@ -145,7 +145,7 @@ Signals that live in free text, like a user asking for a human or rephrasing a q
 
 #### Monitor how quality is trending [#monitor-trends]
 
-[Score analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) chart how each signal moves over time. One caveat: not every signal is a clean quality metric, e.g. thumbs feedback skews toward unhappy users.
+[Score analytics](/docs/evaluation/scores/score-analytics) and [custom dashboards](/docs/metrics/features/custom-dashboards) chart how each signal moves over time. One caveat: not every signal is a clean quality metric. A positive signal shows acceptance rather than quality, and ratings come mostly from users with strong reactions, so [read signals with their biases in mind](/academy/monitoring/capturing-signals#how-to-interpret-signals).
 
 #### Surface interesting traces [#surface-traces]
 

@@ -16,7 +16,7 @@ Error analysis is a structured way to do that reading. The mechanic is borrowed 
 
 The process is five steps:
 
-1. **Gather traces.** Pull a representative sample from production traffic, a dataset, or experiment outputs.
+1. **Gather traces.** Pull a representative sample from production traffic, a dataset, or experiment outputs. Traces with negative [user signals](/academy/monitoring/capturing-signals) are a good place to start.
 2. **Open coding.** Read each trace and write a free-text note about the first thing that went wrong. No predefined categories yet — let the failures define themselves.
 3. **Cluster.** Group similar observations into named failure categories. An LLM can draft a taxonomy from your notes; you refine the names and split anything that conflates two root causes.
 4. **Label and measure.** Tag every trace in the sample against the taxonomy and compute failure rates per category — qualitative reading turns into a chart.

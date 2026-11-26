@@ -12,51 +12,42 @@ We use Slack mostly asynchronously to reduce noise and allow everyone to focus o
 ## Suggested configuration
 
 - Enable notifications only for mentions and direct messages and the sync/notifying channels mentioned below.
-- Set up `queue-<name>-x-<name>` private channels to send non-notifying messages to colleagues. SLA to respond within 24 hours.
+- Set up `lf-queue-<name>-x-<name>` private channels to send non-notifying messages to colleagues. SLA to respond within 24 hours.
 - Set up `All unreads` in the main menu in order to quickly get through the backlog of unread messages.
 
 ## Most important channels
 
-| Channel                                                                                                      | Purpose                                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `team`                                                                                                       | General team chat (notifying)                                                                                                                              |
-| `team-async`                                                                                                 | General team chat (non-notifying, suitable for most messages)                                                                                              |
-| `engineering`, `product`, `user-feedback`, `market-insights`, `media-recommendations`, `marketing`, `growth` | Topical channels (non-notifying)                                                                                                                           |
-| `incidents`                                                                                                  | Incident communication (notifying)                                                                                                                         |
-| `memehq`                                                                                                     | Arguably the most fun channel                                                                                                                              |
-| `ai-trickshots`                                                                                              | Show off what you've got done with AI (non-notifying)                                                                                                      |
-| `queue-<name>-x-<name>`                                                                                      | Private channel for non-notifying messages between team members                                                                                            |
-| `ext-*`                                                                                                      | Customer communication. Sales/GTM has some notifying in order to drive the conversation forward. Rest of team can mute them as they are managed via Pylon. |
-| `vendor-*`                                                                                                   | Vendor communication. Join the channels which are relevant to you.                                                                                         |
-| `partner-*`                                                                                                  | Partner communication. Join the channels which are relevant to you.                                                                                        |
+Most internal Langfuse channels in the ClickHouse Slack workspace start with `lf-`.
+
+| Channel                                                                                                                                     | Purpose                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `lf-team`                                                                                                                                   | General team chat (notifying)                                             |
+| `lf-team-engineering`, `lf-product`, `lf-user-feedback`, `lf-market-insights`, `lf-media-recommendations`, `lf-team-marketing`, `lf-growth` | Topical channels (non-notifying)                                          |
+| `langfuse-incidents`                                                                                                                        | Incident communication (notifying)                                        |
+| `lf-memes`                                                                                                                                  | Arguably the most fun channel                                             |
+| `lf-queue-<name>-x-<name>`                                                                                                                  | Private channel for non-notifying messages between team members           |
+| `clickhouse-*-external`                                                                                                                     | Customer, partner, and vendor channels in the ClickHouse Slack workspace. |
+| `ext-*`                                                                                                                                     | Existing customer channels in the Langfuse Slack workspace.               |
 
 ## External channels
 
 For some prioritized customer groups, we use shared Slack Connect channels for support and sales.
 
-### Sync to Pylon
+New customer, partner, and vendor channels in the ClickHouse Slack workspace use the `clickhouse-[name]-external` format.
 
-We use the following prefixes for channels
+### Create a customer Slack channel [#create-new-external-slack-connect-channel]
 
-- customers: `ext-` (synced in Pylon, Pylon app joins automatically)
-- partners: `partner-` (**not** synced in Pylon)
-- vendors: `vendor-` (**not** synced in Pylon)
+1. Create the channel in the ClickHouse Slack workspace and name it `clickhouse-[customer]-external`.
+2. Add the Pylon app. Open the channel, click its name, then go to **Integrations** → **Add apps** and search for **Pylon**.
+3. Invite the customer through Slack Connect.
 
-All support/sales communication in `ext-*` channels happens via Pylon.
+Use Pylon to handle support and sales messages from customer channels.
 
-### Create new external Slack connect channel
+### Existing Langfuse customer channels [#sync-to-pylon]
 
-- Use the appropriate channel prefix (e.g., `ext-`, `partner-`, `vendor-`)
-- Shared channels should be public channels as this allows for discovery within the customer's Slack organization.
-- When creating an `ext-*` channel (customers):
-  - Invite external members
-  - Invite internal members explicitly, do not make the channel a default channel for everyone. Only invite Clemens and Akio who want to be a member of all external channels. Everyone else can help out in this channel via the Pylon integration, the App automatically joins all `ext-*` channels.
-  - **Private channels:** The Pylon app cannot automatically join private channels. You need to manually:
-    1. Add the Pylon app to the channel (in Slack, open the channel → click the channel name → _Integrations_ → _Add apps_ → search for Pylon).
-    2. Add the Slack channel as an account in Pylon: [app.usepylon.com/customers/accounts/add](https://app.usepylon.com/customers/accounts/add).
-  - Optionally: once you see that the external members joined, share a welcome message in the channel and then mute the channel on Slack. From then on, you can help out in this channel via the Pylon integration.
+Existing customer channels in the Langfuse Slack workspace use the `ext-` prefix. The Pylon app joins public `ext-*` channels automatically. For a private `ext-*` channel, add the Pylon app manually and [link the channel to a Pylon account](https://app.usepylon.com/customers/accounts/add).
 
 ### Configure Slack for external channels
 
-- For most channels and most team members: you can mute or leave the existing `ext-*` channels. You will get assigned to threads via Pylon.
+- Most team members can mute or leave customer channels. Pylon assigns you to threads that need your help.
 - For high-value accounts, the person managing the relationship should stay in the channel as this makes it easier to outbound engage the customer → use direct channel to our advantage to be close to the most important customers.

@@ -86,7 +86,7 @@ Langfuse v4 queries observations directly. Attributes that exist only on the roo
 Copy these attributes to every span where they must be queryable:
 
 - `langfuse.user.id` or `user.id`
-- `langfuse.session.id` or `session.id`
+- `langfuse.session.id`, `session.id`, or `gen_ai.conversation.id`
 - `langfuse.trace.name`
 - `langfuse.trace.tags`
 - `langfuse.trace.metadata.<key>`
@@ -110,7 +110,7 @@ The legacy trace input/output attributes remain available only for backward comp
 
 It is normal to update an active span in memory before ending it. After Langfuse has accepted the span, however, do not export another record with the same span ID to add or change attributes.
 
-Langfuse v4 does not reliably deduplicate repeated records on the read path. Re-ingesting the same ID can create duplicate observations, inflate metrics, and produce inconsistent query results. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#traces-and-observations).
+Langfuse v4 does not reliably deduplicate repeated records on the read path. Re-ingesting the same ID can create duplicate observations, or, if the start time is unchanged, silently keep an earlier, incomplete version. See [How to update traces, observations, and scores](/faq/all/tracing-data-updates#traces-and-observations).
 
 ### Make metadata filterable
 
