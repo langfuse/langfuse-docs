@@ -21,16 +21,15 @@ const INDIA_TALK_TO_US_HREF =
 
 const AGENT_PROMPT = `# Paste directly into your coding agent:
 Add Langfuse tracing to this app.
-Configure LANGFUSE_BASE_URL via environment variables so we can switch regions when Langfuse Cloud India launches in early 2027.
+Configure LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_BASE_URL via environment variables so we can switch regions and project keys when Langfuse Cloud India launches in early 2027.
 
 # Reference context:
 https://langfuse.com/llms.txt
 https://github.com/langfuse/skills`;
 
-const ENV_SNIPPET = `LANGFUSE_PUBLIC_KEY="pk-lf-..."
+const ENV_SNIPPET = `# Replace with your Mumbai project keys and URL at launch:
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
 LANGFUSE_SECRET_KEY="sk-lf-..."
-# Point to your self-hosted Mumbai VPC or EU/US Cloud now,
-# then switch to the Mumbai Cloud URL at launch:
 LANGFUSE_BASE_URL="https://<your-langfuse-host>"`;
 
 const CUSTOMER_LOGOS: ReadonlyArray<{
@@ -72,6 +71,9 @@ function CodeBox({ value }: { value: string }) {
         </button>
       </div>
       <div className="p-3 overflow-auto">
+        <div className="india-code-comment mb-1">
+          # Update keys and host for Mumbai at launch
+        </div>
         <div className="india-code-key">LANGFUSE_PUBLIC_KEY</div>
         <div>
           {"  = "}
@@ -81,9 +83,6 @@ function CodeBox({ value }: { value: string }) {
         <div>
           {"  = "}
           <span className="india-code-val">&quot;sk-lf-...&quot;</span>
-        </div>
-        <div className="india-code-comment mt-1">
-          # Switch to Mumbai Cloud at launch
         </div>
         <div className="india-code-key">LANGFUSE_BASE_URL</div>
         <div>
@@ -131,9 +130,12 @@ function AgentPromptBox() {
         </span>
         {"\n"}
         Add Langfuse tracing to this app.{"\n"}
-        Configure <span className="india-code-key">LANGFUSE_BASE_URL</span> via
-        environment variables so we can switch regions when Langfuse Cloud India
-        launches in early 2027.
+        Configure <span className="india-code-key">
+          LANGFUSE_PUBLIC_KEY
+        </span>, <span className="india-code-key">LANGFUSE_SECRET_KEY</span>,
+        and <span className="india-code-key">LANGFUSE_BASE_URL</span> via
+        environment variables so we can switch regions and project keys when
+        Langfuse Cloud India launches in early 2027.
         {"\n\n"}
         <span className="india-code-comment"># Reference context:</span>
         {"\n"}
@@ -353,6 +355,7 @@ function WaitlistSection() {
           email: trimmed,
           source: "india-cloud-waitlist",
           list: "product",
+          eventName: "india_cloud_waitlist",
         }),
       });
 
@@ -767,13 +770,13 @@ function GetStarted() {
     {
       n: "02",
       title: "Instrument your app today",
-      body: "Start now on EU/US Cloud or self-host MIT open-source Langfuse in your own AWS Mumbai VPC. Every SDK reads one base URL environment variable.",
+      body: "Start now on EU/US Cloud or self-host MIT open-source Langfuse in your own AWS Mumbai VPC. Keep your project keys and base URL in environment variables.",
       code: true,
     },
     {
       n: "03",
       title: "Switch to Mumbai at launch",
-      body: "When Langfuse Cloud India opens, export your prompts, datasets, and traces, import them into your Mumbai project, and update LANGFUSE_BASE_URL.",
+      body: "When Langfuse Cloud India opens, create a Mumbai project, export and import your prompts, datasets, and traces, and update LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_BASE_URL.",
       action: [
         "View migration cookbook",
         "/guides/cookbook/example_data_migration",
@@ -1116,7 +1119,7 @@ function Migration() {
     "Create a project in the Mumbai region once launched",
     "Export prompts, datasets, and traces from your current setup",
     "Import your exported data into the India project",
-    "Point LANGFUSE_BASE_URL to the India region",
+    "Update LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, and LANGFUSE_BASE_URL for your Mumbai project",
   ];
 
   return (
@@ -1133,7 +1136,7 @@ function Migration() {
           <p className="india-body-sm m-0 max-w-[44ch]">
             Start on EU or US Cloud or self-host in your own infrastructure
             today. Moving to Langfuse Cloud India at launch is export, import,
-            and a single base URL change.
+            and updating your project keys and base URL.
           </p>
           <div className="mt-4">
             <Button
@@ -1237,7 +1240,10 @@ function FAQ() {
           Yes. Because each Langfuse Cloud region is isolated, migration takes
           four steps: create a project in the India region, export your existing
           data, import it into the Mumbai project, and update{" "}
-          <span className="india-code-inline">LANGFUSE_BASE_URL</span>. See the{" "}
+          <span className="india-code-inline">LANGFUSE_PUBLIC_KEY</span>,{" "}
+          <span className="india-code-inline">LANGFUSE_SECRET_KEY</span>, and{" "}
+          <span className="india-code-inline">LANGFUSE_BASE_URL</span> with your
+          new Mumbai project credentials. See the{" "}
           <Link
             className="india-link"
             href="/guides/cookbook/example_data_migration"
