@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export interface EvaluatorBlockEvaluator {
   name: string;
-  /** "LLM-as-a-judge" | "Code" | "Human" */
+  /** "LLM-as-a-judge" | "Decision model" | "Code" | "Human" */
   type: string;
   /** The one-line check, shown in the collapsed row. */
   check?: React.ReactNode;

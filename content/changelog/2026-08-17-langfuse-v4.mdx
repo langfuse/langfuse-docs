@@ -14,6 +14,7 @@ import { V4CutoverDate } from "@/components/V4CutoverDate";
 import {
   Bell,
   Book,
+  BookOpen,
   Bot,
   ChartLine,
   Cloud,
@@ -21,6 +22,8 @@ import {
   Database,
   GitCompare,
   Github,
+  MessagesSquare,
+  Network,
   Rocket,
   Search,
   ServerCog,
@@ -79,28 +82,43 @@ Langfuse Cloud becomes v4-only on <V4CutoverDate />. Most projects need no migra
 
 ## What we shipped in Langfuse v4
 
-Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate, and query your application data. Check them out:
+Langfuse v4 brings faster performance and new ways to build, debug, and evaluate AI applications. Here are the highlights from v4 and the releases since launch.
 
 <Cards num={2} className="gap-3">
   <Card
-    title="Monitors"
-    description="Watch cost, quality, and latency thresholds and notify teams through Slack, webhooks, or GitHub Actions."
-    href="/changelog/2026-06-19-monitors"
+    title="AI Gateway (beta)"
+    description="Route model calls through Langfuse, manage provider access, and track usage and cost by user, key, and model."
+    href="/docs/gateway/overview"
     target="_blank"
     rel="noopener noreferrer"
     arrow
     icon={
-      <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
-        <Bell />
+      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
+        <Network />
       </span>
     }
     contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
     contentWrapperClassName="gap-1.5 [&>p]:text-left!"
   />
   <Card
-    title="Code evaluators"
-    description="Run deterministic Python or TypeScript checks on live observations and experiments."
-    href="/changelog/2026-05-28-code-evaluators"
+    title="Skill Management (beta)"
+    description="Version agent skills alongside prompts and connect skill versions and loaded files to your traces."
+    href="/docs/skill-management/overview"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
+        <BookOpen />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Enhanced evals"
+    description="Evaluate with deterministic Python or TypeScript checks and decision models."
+    href="/docs/evaluation/get-started/online"
     target="_blank"
     rel="noopener noreferrer"
     arrow
@@ -113,24 +131,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     contentWrapperClassName="gap-1.5 [&>p]:text-left!"
   />
   <Card
-    title="Filter search bar"
-    description="Combine typed filters, metadata, and scores in one shareable query."
+    title="Search and filtering"
+    description="Combine full-text search, metadata, and score filters in one shareable query."
     href="/docs/observability/features/filter-search-bar"
-    target="_blank"
-    rel="noopener noreferrer"
-    arrow
-    icon={
-      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
-        <Search />
-      </span>
-    }
-    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
-    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
-  />
-  <Card
-    title="Full-text search"
-    description="Find words and phrases across observation inputs, outputs, and metadata."
-    href="/docs/observability/features/full-text-search"
     target="_blank"
     rel="noopener noreferrer"
     arrow
@@ -143,9 +146,39 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     contentWrapperClassName="gap-1.5 [&>p]:text-left!"
   />
   <Card
-    title="Pulse"
-    description="Plot count, cost, or latency above the Observations table and select a spike to inspect its operations."
-    href="/changelog/2026-07-28-langfuse-pulse"
+    title="Trace and session views"
+    description="Read conversations more easily with a cleaner session view and an improved trace timeline."
+    href="/docs/observability/features/sessions"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-muted-green/10 text-muted-green">
+        <MessagesSquare />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Alerts"
+    description="Watch cost, quality, and latency thresholds. Notify your team through Slack, PagerDuty, webhooks, or GitHub Actions."
+    href="/docs/observability/features/alerts"
+    target="_blank"
+    rel="noopener noreferrer"
+    arrow
+    icon={
+      <span className="flex size-9 items-center justify-center bg-surface-2 text-text-secondary">
+        <Bell />
+      </span>
+    }
+    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
+    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
+  />
+  <Card
+    title="Pulse and charts"
+    description="Spot cost, latency, and volume outliers, then investigate the underlying observations or save charts to dashboards."
+    href="/docs/observability/features/pulse"
     target="_blank"
     rel="noopener noreferrer"
     arrow
@@ -173,8 +206,8 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     contentWrapperClassName="gap-1.5 [&>p]:text-left!"
   />
   <Card
-    title="Observations API v2"
-    description="Retrieve selected observation fields with cursor-based pagination."
+    title="Observations and Metrics APIs"
+    description="Retrieve observations with cursor-based pagination or aggregate cost, usage, latency, and scores through the v2 APIs."
     href="/docs/api-and-data-platform/features/public-api#v2"
     target="_blank"
     rel="noopener noreferrer"
@@ -187,22 +220,9 @@ Langfuse v4 is much faster and also ships new ways to search, monitor, evaluate,
     contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
     contentWrapperClassName="gap-1.5 [&>p]:text-left!"
   />
-  <Card
-    title="Metrics API v2"
-    description="Aggregate cost, tokens, volume, latency, and scores across observations."
-    href="/docs/metrics/features/metrics-api#v2"
-    target="_blank"
-    rel="noopener noreferrer"
-    arrow
-    icon={
-      <span className="flex size-9 items-center justify-center bg-muted-blue/10 text-muted-blue">
-        <ChartLine />
-      </span>
-    }
-    contentClassName="min-h-36 flex-col! items-start! gap-3! p-4"
-    contentWrapperClassName="gap-1.5 [&>p]:text-left!"
-  />
 </Cards>
+
+These are the highlights. See the [full changelog](/changelog) for SDK releases, integrations, security updates, and more.
 
 ## Upgrade Langfuse Cloud projects
 

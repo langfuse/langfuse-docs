@@ -13,12 +13,16 @@ const {
 } = require("../lib/markdown-component-renderers.js");
 const { CONTENT_DIR_TO_URL_PREFIX } = require("../lib/content-dir-map.js");
 const { hasResourceSignupCta } = require("../lib/resource-signup-cta.js");
+const { hasGatewaySignupFooter } = require("../lib/gateway-update-signup.js");
 const {
   injectIntegrationSignupCta,
 } = require("../lib/integration-signup-cta.js");
 const {
   buildAgentInstructionsFooter,
 } = require("../lib/agent-instructions-footer.js");
+const {
+  interpolateImportedMdxProps,
+} = require("../lib/inline-components-mdx-props.js");
 
 const SITE_URL = "https://langfuse.com";
 
@@ -29,6 +33,11 @@ const SELF_HOSTING_FOOTER_PATH = path.join(
   process.cwd(),
   "components-mdx",
   "self-host-help-footer.mdx",
+);
+const GATEWAY_SIGNUP_FOOTER_PATH = path.join(
+  process.cwd(),
+  "components-mdx",
+  "gateway-update-signup.mdx",
 );
 
 // Directories whose .md output is historical changelog content. Agents fetch
@@ -203,8 +212,13 @@ function copyAll() {
     const destRel = path.relative(OUTPUT_DIR, dest).split(path.sep).join("/");
     const isSelfHostingPage =
       destRel === "self-hosting.md" || destRel.startsWith("self-hosting/");
-    const contentWithSharedFooter = isSelfHostingPage
-      ? `${originalContent}\n\n${fs.readFileSync(SELF_HOSTING_FOOTER_PATH, "utf8")}`
+    const sharedFooterPath = isSelfHostingPage
+      ? SELF_HOSTING_FOOTER_PATH
+      : hasGatewaySignupFooter(`/${destRel.replace(/\.md$/, "")}`)
+        ? GATEWAY_SIGNUP_FOOTER_PATH
+        : null;
+    const contentWithSharedFooter = sharedFooterPath
+      ? `${originalContent}\n\n${fs.readFileSync(sharedFooterPath, "utf8")}`
       : originalContent;
     const inlined = replaceComponentsWithMarkdown(
       inlineComponentsMdx(contentWithSharedFooter, file),
@@ -341,8 +355,12 @@ function inlineComponentsMdx(fileContent, sourceFilePath) {
         "g",
       );
 
-      finalContent = finalContent.replace(selfClosing, `\n${childInlined}\n`);
-      finalContent = finalContent.replace(paired, `\n${childInlined}\n`);
+      finalContent = finalContent.replace(selfClosing, (_, attrs) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, "")}\n`;
+      });
+      finalContent = finalContent.replace(paired, (_, attrs, children) => {
+        return `\n${interpolateImportedMdxProps(childInlined, attrs, children)}\n`;
+      });
     }
 
     return finalContent;

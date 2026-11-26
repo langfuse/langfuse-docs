@@ -51,7 +51,10 @@ Retention is a per-project setting. There is no organization- or team-level rete
 
 ## Details
 
-On a nightly basis, Langfuse selects traces, observations, scores, and media assets that are older than the configured retention period and deletes them, except for media associated with saved dataset items (see [Dataset media](#dataset-media)).
+Langfuse deletes traces, observations, scores, and media assets that are older than the configured retention period. Media associated with saved dataset items is excluded (see [Dataset media](#dataset-media)).
+
+On Langfuse Cloud, background jobs check for expired traces, observations, and scores throughout the day, roughly once an hour. Media cleanup runs separately. On self-hosted instances, retention cleanup runs once a day by default. A trace under a 30-day policy is eligible for deletion as soon as its timestamp is more than 30 days old. The exact time of deletion varies.
+
 We use the following properties per entity to decide whether they are outside the retention window:
 
 - **Traces**: `timestamp`
@@ -76,7 +79,7 @@ Deleted assets cannot be recovered. If you need to preserve data beyond the rete
 
 Halo conversations expire when their last update (`updated_at`) falls outside the project's retention window. Without a project retention policy, conversations are not automatically deleted by retention.
 
-Conversation cleanup runs separately from the nightly event-data cleanup. Deletion is asynchronous: conversations with unfinished runs are retained until those runs finish or are reconciled, and run-specific MCP API keys must be revoked before deletion. Deleting a conversation also deletes its runs and events and cannot be undone.
+Conversation cleanup runs separately from event data cleanup. Deletion is asynchronous: conversations with unfinished runs are retained until those runs finish or are reconciled, and run-specific MCP API keys must be revoked before deletion. Deleting a conversation also deletes its runs and events and cannot be undone.
 
 Disabling Halo does not pause conversation retention. For worker controls and licensing requirements, see [self-hosted Halo retention](/self-hosting/configuration/halo#conversation-retention).
 

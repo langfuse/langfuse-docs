@@ -48,7 +48,12 @@ model_provider = "langfuse"
 
 [model_providers.langfuse]
 name = "Langfuse AI Gateway"
+# 🇪🇺 EU region
 base_url = "https://gateway.cloud.langfuse.com/openai/v1"
+# 🇺🇸 US region: https://gateway.us.cloud.langfuse.com
+# 🇯🇵 Japan region: https://gateway.jp.cloud.langfuse.com
+# ⚕️ HIPAA region: https://gateway.hipaa.cloud.langfuse.com
+# Self-hosted: the gateway URL of your deployment
 env_key = "LANGFUSE_GATEWAY_KEY"
 wire_api = "responses"
 ```
@@ -58,7 +63,7 @@ export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
 codex
 ```
 
-The [Codex gateway guide](/integrations/developer-tools/codex-gateway) lists the version requirements and other regions.
+The [Codex gateway guide](/integrations/developer-tools/codex-gateway) lists the version requirements.
 
 Codex sends its own turn ID, so the gateway groups all model rounds of one turn into a single trace with no extra setup, and each Codex thread becomes one session. On top of that:
 

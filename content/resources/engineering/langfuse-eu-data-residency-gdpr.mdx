@@ -8,7 +8,7 @@ tags: [guide]
 
 Traces from an LLM application carry prompts, completions, and user identifiers, so the first question an EU team asks about an observability platform is where that data is stored and who can reach it. Langfuse answers it two ways: Langfuse Cloud has a dedicated EU region, and the same software can be self-hosted in infrastructure you control. This page collects what the Langfuse documentation states about the EU region, its backups, GDPR, and the controls a reviewer will ask about, as of September 2026. Where the documentation points to an agreement, a form, or a contact instead of stating a fact, this page says so.
 
-**TL;DR:** Langfuse Cloud's EU region runs in Ireland (AWS `eu-west-1`) at `https://cloud.langfuse.com`, with data, user accounts, and infrastructure completely separated from the US, Japan, and HIPAA regions. Primary storage and backups stay in the EU: Postgres backups are copied daily to a second EU region (`eu-central-1`) for disaster recovery. Langfuse offers a DPA, a DSAR process, a published sub-processor list, project-level retention, deletion through the UI and API, client-side masking in the SDKs, and SOC 2 Type II and ISO 27001 attestations for Langfuse Cloud. Teams that need infrastructure-level isolation can self-host the same MIT-licensed codebase in the EU.
+**TL;DR:** Langfuse Cloud's EU region runs in Ireland (AWS `eu-west-1`) at `https://cloud.langfuse.com`, with data, user accounts, and infrastructure completely separated from the US, Japan, and HIPAA regions. Primary storage and backups stay in the EU: Postgres backups are copied daily to a second EU region (`eu-central-1`) for disaster recovery. Langfuse offers a DPA, a DSAR process, a published sub-processor list, project-level retention, deletion through the UI and API, and client-side masking in the SDKs. Langfuse Cloud has completed a SOC 2 Type II audit, is ISO 27001 certified, and is in scope for ClickHouse, Inc.’s [ISO/IEC 27701:2025 certification](/security/iso27701). Teams that need infrastructure-level isolation can self-host the same MIT-licensed codebase in the EU.
 
 ## The EU region [#eu-region]
 
@@ -53,10 +53,11 @@ For Langfuse Cloud, the documentation states the following as of September 2026:
 
 - **SOC 2 Type II.** Langfuse Cloud has completed the SOC 2 Type II audit. The report is available on request to customers on the Pro, Team, or Enterprise plans through the [security document request form](/request-security-docs).
 - **ISO 27001.** Langfuse Cloud is ISO 27001 certified. The certificate is available on request under the same conditions.
+- **[ISO/IEC 27701:2025](/security/iso27701).** ClickHouse, Inc. holds this certification for its privacy information management system, which covers Langfuse Cloud. Request access to the certificate through the [ClickHouse Trust Center](https://trust.clickhouse.com/).
 - **Penetration testing.** Independent penetration tests run annually, with continuous vulnerability scanning between them.
 - **HIPAA.** A HIPAA-ready region with a Business Associate Agreement exists for eligible customers on the Pro plan or higher. It is in Oregon (`us-west-2`) and separate from the EU region, so it is not a residency option for EU teams.
 
-The certifications are described for Langfuse Cloud; a self-hosted deployment runs the same codebase, but the audit scope is the managed service. The documentation lists no framework beyond SOC 2 Type II and ISO 27001.
+These audits and certifications cover the managed service. Customers operate their own self-hosted deployments under their own controls.
 
 ## When the EU region is not enough [#self-hosting]
 

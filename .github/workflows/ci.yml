@@ -38,7 +38,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Run H1 heading check
         run: node scripts/check-h1-headings.js
@@ -57,7 +57,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Run middle dot check
         run: node scripts/check-middle-dot.js
@@ -74,9 +74,9 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         with:
-          runtime: node@22
+          runtime: node@24
           cache: true
           require-lockfile: true
 
@@ -132,10 +132,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         id: pnpm-install
         with:
-          runtime: node@22
+          runtime: node@24
           cache: true
           require-lockfile: true
 
@@ -171,10 +171,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         id: pnpm-install
         with:
-          runtime: node@22
+          runtime: node@24
           cache: true
           require-lockfile: true
 

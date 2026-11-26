@@ -11,7 +11,7 @@ export function ProductUpdateSignup(props: {
   small?: boolean;
   compact?: boolean;
   /** Which Loops mailing list to subscribe to. Defaults to the general product update list. */
-  list?: "product" | "oss";
+  list?: "product" | "oss" | "gateway";
 }) {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

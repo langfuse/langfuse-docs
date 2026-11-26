@@ -12,9 +12,9 @@ Repo for [langfuse.com](https://langfuse.com). Built with [Fumadocs](https://fum
 
 ## Local Development
 
-Pre-requisites: Node.js 22 (22.13+), pnpm v12.8.1
+Pre-requisites: Node.js 24, pnpm v12.8.1
 
-To use Node 22 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 22` then `nvm use` (or `nvm use 22`). The repo includes an `.nvmrc` so `nvm use` picks 22 automatically.
+To use Node 24 (e.g. with [nvm](https://github.com/nvm-sh/nvm)): `nvm install 24` then `nvm use` (or `nvm use 24`). The repo includes an `.nvmrc` so `nvm use` picks 24 automatically.
 
 1. Optional: Create env based on [.env.template](./.env.template)
 2. Run `pnpm i` to install the dependencies.

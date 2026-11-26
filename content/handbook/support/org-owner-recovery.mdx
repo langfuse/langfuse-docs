@@ -1,0 +1,75 @@
+---
+title: Org Owner Recovery
+description: How Langfuse support verifies and handles requests to promote a new organization owner when the only owner has left the company.
+---
+
+# Org Owner Recovery
+
+Sometimes the only `Owner` of a Langfuse Cloud organization leaves their company, and an admin or member asks [support](/support) to make them the new owner. An owner can delete the organization, manage billing, and create organization API keys, so we verify every such request before changing anything. This page describes how that works, both for the team handling the request and for anyone who wants to know what to expect.
+
+<Callout type="warning">
+
+We only change the owner after the verification below succeeds. Urgency, seniority, or plan never replace it. This protects every organization from a takeover through a convincing support request.
+
+</Callout>
+
+<Callout type="info">
+
+Avoid this situation: give at least two people the `Owner` role under **Organization Settings → Members**. A second owner can change roles at any time, without verification or support.
+
+</Callout>
+
+## Process
+
+<Steps>
+
+### We check the request
+
+All of the following must be true before we continue:
+
+- The organization is on Langfuse Cloud. Self-hosted deployments control their own database and can change roles themselves.
+- The organization has no other owner. If it does, that owner can change roles under **Organization Settings → Members**.
+- The requester is already a member of the organization. We only promote existing members, never a new email address.
+- The departed owner's email and the requester's email are on the same company domain. If the owner signed up with a personal address (for example Gmail), we cannot verify that the requester speaks for the organization and do not transfer ownership. In that case, [move to a new organization](#new-organization).
+- Roles are not synced from an identity provider. If your organization provisions users through [SCIM](/docs/administration/scim-and-org-api), set the `Owner` role in your identity provider instead, because it overwrites a role we change by hand.
+
+We do not share details about an organization, such as who its members are, with someone who is not a member.
+
+### Your company recovers the owner account
+
+Companies usually keep control of the mailboxes and SSO accounts of former employees. The fastest path is to have your IT team restore the departed owner's mailbox or identity provider account, log in to Langfuse as that user (resetting the password if needed), and promote a new owner under **Organization Settings → Members**. This needs no action from us.
+
+### We send a one-time code to the owner's email
+
+If your company controls the mailbox but cannot log in, we send a one-time code to the owner's email address on file. The requester returns the code in the existing support thread within 24 hours.
+
+- We never send the code to the requester or to an address the requester supplies.
+- An email that arrives "from" the owner's address is not proof, because sender addresses can be spoofed. Only a returned code counts.
+
+### We notify, wait, and promote
+
+1. We email all admins of the organization and the departed owner's address that an owner change was requested and by whom, and wait 24 hours for objections.
+2. We promote the requester to `Owner`. The departed owner's membership stays in place for the new owner to remove.
+3. We confirm the change.
+
+</Steps>
+
+## Fallback when the mailbox cannot be restored [#fallback]
+
+This path applies only if your company cannot receive email at the owner's address. It requires both of the following, plus the notification and 24-hour wait from the last step:
+
+- **Domain control**: you add a DNS TXT record with a value we provide to the email domain of the departed owner.
+- **Authority over the account**: billing details that match our records (a recent invoice number and the last four digits of the card).
+
+If both cannot be provided, for example because the organization has no paid plan, we do not transfer ownership. In that case, [move to a new organization](#new-organization).
+
+## Moving to a new organization [#new-organization]
+
+If your company cannot access the owner's email, change DNS records, or provide billing details, create a new organization and migrate your data. This does not need the departed owner or support:
+
+1. Create a new organization and projects, and invite your team.
+2. Create API keys in the old projects. Project admins can do this under **Project Settings → API Keys**.
+3. Copy prompts, datasets, and traces to the new projects through the API. The [data migration guide](/faq/all/migrate-data-between-langfuse-instances) links to scripts for this.
+4. Point your applications to the API keys of the new projects.
+
+This is also the fastest route if you need full control right away. You can complete the verification above later.
