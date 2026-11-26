@@ -1,0 +1,40 @@
+---
+date: 2026-11-27
+title: Organization-level model definitions
+description: Define model prices once for every project in your organization instead of repeating custom model definitions per project.
+author: Hassieb
+ogImage: /images/changelog/2026-11-27-organization-model-definitions.png
+showOgInHeader: false
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+<Frame className="my-6" fullWidth>
+  ![Test Model Match dialog on the organization Models page, resolving gpt-4o to
+  an organization model with its standard pricing
+  tier](/images/changelog/2026-11-27-organization-model-definitions.png)
+</Frame>
+
+Organization owners and admins can now define models once for every project in **Organization Settings > Models**, instead of duplicating custom definitions per project.
+
+- **Shared pricing across projects:** Define custom or negotiated rates once (or clone a Langfuse default) and every project uses them to [infer cost](/docs/observability/features/token-and-cost-tracking#infer).
+- **Clear precedence and overrides:** Matching follows project, then organization, then Langfuse defaults (see [model resolution](/docs/observability/features/token-and-cost-tracking#model-resolution)). Clone an organization model in **Project Settings > Models** to override it for one project.
+- **API support:** Sync organization definitions programmatically via the [Organization Models API](https://api.reference.langfuse.com/#tag/organizationmodels). The [project Models API](https://api.reference.langfuse.com/#tag/models) now returns `scope` on every model (deprecating `isLangfuseManaged`).
+
+<Cards num={2}>
+  <Card
+    title="Organization model definitions"
+    href="/docs/observability/features/token-and-cost-tracking#organization-model-definitions"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Model resolution"
+    href="/docs/observability/features/token-and-cost-tracking#model-resolution"
+    icon={<Book />}
+    arrow
+  />
+</Cards>
