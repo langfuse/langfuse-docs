@@ -56,17 +56,17 @@ export type NavCta = {
 export const productCtas: NavCta[] = [
   {
     id: "tracing",
-    title: "Get started with tracing",
-    description: "Debug agents step by step, from prompt to tool call.",
-    cta: "Get started",
-    href: "/docs/observability/get-started",
+    title: "AI Observability",
+    description: "Trace every prompt, tool call, latency, and cost.",
+    cta: "Learn more",
+    href: "/docs/observability/overview",
   },
   {
     id: "gateway",
-    title: "Set up AI Gateway",
-    description: "One key for every model, with spend tracked per user.",
-    cta: "Get started",
-    href: "/docs/gateway/get-started/admin-setup",
+    title: "AI Gateway",
+    description: "Route model calls, control access, and track spend.",
+    cta: "Learn more",
+    href: "/docs/gateway/overview",
     badge: "New",
   },
 ];
