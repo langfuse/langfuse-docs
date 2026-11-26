@@ -1,6 +1,6 @@
 ---
 title: Topics
-description: Continously surface topics in your traces to understand which traces matter most.
+description: Use topic maps to discover what users ask for, how interactions end, and which issues recur across traces.
 ---
 
 import { Steps, Step } from "@/components/docs";
@@ -8,7 +8,9 @@ import { TopicsArchitectureDiagram } from "@/components/TopicsArchitectureDiagra
 
 # Topics
 
-Topics groups similar traces into clusters to easily discover patterns in your trace data. See what users ask for, how interactions go, and where your application struggles without having to look at all of your traces by hand.
+A **topic map** groups a selection of [traces](/docs/observability/data-model#observations-and-traces) into topics separately for each **facet** you choose. Each facet asks a different question about the same traces. For example, a support team can use **Intent** to see what customers asked for and **Issues** to see what went wrong.
+
+Filters and a sampling rate determine which traces the map analyzes. A **live map** analyzes new matching traces and refreshes its topics daily. A **snapshot** analyzes a selected time window once.
 
 <Video
   src="https://static.langfuse.com/docs-videos/topics-views.mp4?v=2"
@@ -20,7 +22,7 @@ Topics groups similar traces into clusters to easily discover patterns in your t
 
 ## How Topics works [#how-it-works]
 
-A **facet** is a question about a trace. Choose the facets you want Topics to analyze.
+Choose which questions your map should answer from the four built-in facets.
 
 | Facet     | Question                                         |
 | --------- | ------------------------------------------------ |
@@ -29,9 +31,11 @@ A **facet** is a question about a trace. Choose the facets you want Topics to an
 | Outcome   | What was delivered, and is the result confirmed? |
 | Issues    | What problems affected the final result?         |
 
-Suppose a traveler asks to move a Friday flight to Sunday and the agent confirms the change. Topics records a **facet result** for each question the model answers. For Intent, the result includes a **facet summary**, a short description such as “Move a flight from Friday to Sunday.” For Issues, the model can return `not_applicable` because the change succeeded without a problem.
+Suppose a traveler asks to move a Friday flight to Sunday and the agent confirms the change. The model returns two **facet results** if you select Intent and Issues. The Intent result contains a **facet summary** such as “Move a flight from Friday to Sunday.” For Issues, the model can return `not_applicable` because the change succeeded without a problem.
 
-Topics turns each text summary into an **embedding**, a list of numbers that represents its meaning. Within each facet, Topics uses these embeddings to group similar summaries into **clusters**. A **topic** is a cluster with a name and description. On the trace, a **topic assignment** such as **Intent → Flight changes** tells you which group the trace belongs to in that map.
+Langfuse turns each text summary into an **embedding**, a numerical representation of its meaning. Within each facet of the map, Langfuse groups similar summaries into **clusters** and gives each cluster a name and description. That named group is a **topic**.
+
+A **topic assignment** links a trace to a topic. Each trace can have at most one topic per facet in a given map. The flight trace might show **Intent → Flight changes** and have no Issues topic. Another map can reuse the same Intent result and assign the trace to a different topic because it groups a different selection of traces.
 
 <Details id="facet-prompts">
 <Summary>View default facet prompts</Summary>
@@ -183,8 +187,6 @@ Examples:
 
 <TopicsArchitectureDiagram />
 
-A **live map** follows a filtered set of traces over time. A **snapshot** analyzes a chosen time window once. Use separate maps for different applications or workflows so unrelated traffic does not dominate the results. Topics are discovered from your data; you do not need to define categories beforehand.
-
 ## Get started [#get-started]
 
 The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
@@ -216,7 +218,7 @@ Add an [LLM connection](/docs/administration/llm-connection) under **Settings > 
 
 ### Select your traces
 
-Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate, as to not loose topics. Consider costs.
+Use separate maps for different agents or workflows. For example, filter by `traceName` to group a support agent’s traces together. A 100% sample gives rare topics the best chance to appear. A lower rate reduces [analysis costs](#models-and-costs).
 
 <Callout type="info">
   Topics needs recorded model conversations on `GENERATION` observations. Therefore,
@@ -239,16 +241,11 @@ Review the selection and start processing. Setup reuses existing summaries and s
 
 Open the map picker to create a **New live map** or **New snapshot**.
 
-| Type     | Behavior                                                                    |
-| -------- | --------------------------------------------------------------------------- |
-| Live map | Analyzes new matching traces continuously and updates topics daily.         |
-| Snapshot | Groups traces from a selected time window once, without changing live maps. |
-
 Live maps wait for a trace to finish before analyzing it. The default is five minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
 
 Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand instead of waiting for the daily refresh.
 
-Snapshots also reuse existing summaries and summarize more traces if required. Choose the time window, filters, and facets. This lets you investigate traffic that your live maps have not processed.
+For a snapshot, choose the time window, filters, and facets. Langfuse reuses existing facet results and analyzes additional traces as needed. This lets you investigate a period of interest without changing your live maps.
 
 <Callout type="info">
   A snapshot needs at least 10 applicable summarized traces per selected facet.
@@ -258,9 +255,9 @@ Snapshots also reuse existing summaries and summarize more traces if required. C
 
 ## Explore your topics [#explore]
 
-Select a live map or snapshot and a facet. Use **Treemap** to see the largest topics or **Scatter** to explore similar traces spatially. Select a topic to read its description and summaries, then open a trace to inspect the conversation and model calls.
+Select a map and a facet. **Treemap** and **Scatter** are two views of that facet’s topics. Use Treemap to see the largest groups or Scatter to see which traces are similar. Select a topic to read its description and summaries, then open a trace to inspect the conversation and model calls.
 
-Within each map, a trace can belong to one topic per facet. Unassigned includes traces that do not fit a discovered topic, are awaiting an update, or lack enough applicable content.
+**Unassigned** includes traces that do not fit a discovered topic, are awaiting an update, or lack enough applicable content for the selected facet.
 
 Treat topics as starting points for investigation. Similar conversations can have different outcomes, and a generated label may not describe every trace in a group. Review examples before turning a pattern into an evaluation or product decision (see the [Error Analysis chapter](/academy/monitoring/error-analysis) in the Academy).
 
@@ -272,7 +269,7 @@ Treat topics as starting points for investigation. Similar conversations can hav
 
 ## Models and costs [#models-and-costs]
 
-Langfuse Cloud counts one [billable unit](/docs/administration/billable-units) for each new facet result the model returns and Langfuse stores. In the flight example, analyzing Intent and Issues adds **two units**, even if only Intent gets a topic assignment. The Issues result counts when the model finds no issue (`not_applicable`) or too little evidence to decide (`insufficient_input`).
+Langfuse Cloud counts one [billable unit](/docs/administration/billable-units) for each new facet result the model returns and Langfuse stores. In the flight example, the two new results add **two units**, even though only Intent receives a topic assignment. The Issues result counts when the model finds no issue (`not_applicable`) or too little evidence to decide (`insufficient_input`).
 
 Skipping analysis because the transcript is empty or too large adds zero units. Reusing stored results in another map or snapshot and regrouping them into topics also add zero units.
 
