@@ -66,7 +66,7 @@ Coding agents that send plain model names also work for OpenAI (`gpt-`, `codex-`
 
 ## Restrict models per API key [#restrict-models-per-key]
 
-You can limit each [gateway API key](/docs/gateway/features/api-keys) to some of the models. Add model patterns under **More options → Models** when you create a key, or select **Edit key** in **AI Gateway → Gateway keys** to change them later.
+You can limit each [gateway API key](/docs/gateway/features/api-keys) to some of the models. Add model patterns under **Restrict models** when you create a key, or select **Edit key** in **AI Gateway → Gateway keys** to change them later.
 
 Patterns only narrow what admins [enabled for a connection](#manage-models); they never turn a model on. A key without patterns can call every enabled model, including ones enabled later. A pattern matches the [model ID](#model-ids) `<connection>:<model>`, ignoring case. `*` matches any characters, and a leading `-` excludes the matching models:
 
@@ -84,11 +84,11 @@ Patterns only narrow what admins [enabled for a connection](#manage-models); the
 
 ## Advanced connection settings [#advanced-connection-settings]
 
-Most connections don't need these. Use them when you add or edit an OpenAI or Anthropic connection and want to send requests through your own endpoint or attach extra HTTP headers.
+Most connections don't need these. Use them when you add or edit an OpenAI, Anthropic, or OpenRouter connection and want to pick a regional endpoint, send requests through your own endpoint, or attach extra HTTP headers.
 
 ### Custom base URL [#custom-base-url]
 
-OpenAI and Anthropic connections can send requests to another endpoint that serves the same API, such as an internal LLM proxy. When you add or edit the connection, set **API Base URL** under **Show advanced settings**.
+OpenAI, Anthropic, and OpenRouter connections can send requests to another endpoint that serves the same API, such as a regional data-residency endpoint or an internal LLM proxy. When you add or edit the connection, set **API Base URL** under **Show advanced settings**. OpenAI connections include regional data-residency presets alongside **Custom URL**.
 
 - End the URL at the API version, for example `https://llm.example.com/v1`. Anthropic URLs get `/v1` appended if it's missing. Query strings, fragments, and `{model}` aren't supported.
 - Changing the base URL of a saved connection requires its API key and extra header values again.
@@ -142,7 +142,7 @@ A Microsoft Azure connection takes the name of a [Microsoft Foundry](https://ai.
 <Details id="vertex-models">
 <Summary>Which Google Vertex AI models can I call?</Summary>
 
-A Google Vertex AI connection takes a [service account key](https://cloud.google.com/iam/docs/keys-create-delete) (JSON) with the Vertex AI User role and a location, for example `global` or `us-central1`. The gateway calls Vertex AI's OpenAI-compatible Chat Completions endpoint, so it supports the models served there: Gemini and the open models Google hosts, such as Llama, DeepSeek, Qwen, and gpt-oss.
+A Google Vertex AI connection takes a [service account key](https://cloud.google.com/iam/docs/keys-create-delete) (JSON) with the Vertex AI User role and a location: `global`, multi-region `us` or `eu`, or a single region such as `us-central1`. The gateway calls Vertex AI's OpenAI-compatible Chat Completions endpoint, so it supports the models served there: Gemini and the open models Google hosts, such as Llama, DeepSeek, Qwen, and gpt-oss.
 
 The connection lists Gemini models as `google/<model>`, for example `vertex-prod:google/<model>`. Add open models as custom models on the connection's models page, using their Vertex AI model ID, for example `<publisher>/<model>`.
 

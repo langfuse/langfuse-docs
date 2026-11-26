@@ -19,7 +19,7 @@ You can filter by metadata keys in the Langfuse UI and API.
 
 ## Metadata values
 
-With Python SDK v5 and JS/TS SDK v6 on Langfuse v4.59.0 and later, nested objects become filterable dotted paths, such as `a.b`. If two keys map to the same dotted path, the first value wins. Metadata values are stored as strings, so numbers and booleans are filtered as text; numeric and boolean comparisons are not supported yet.
+With Python SDK v5 and JS/TS SDK v6 on Langfuse v4.59.0 and later, nested objects become filterable dotted paths, such as `a.b`. If two keys map to the same dotted path, the first value wins. Metadata values are stored as strings. Numeric comparisons (`=`, `>`, `<`, `>=`, `<=`) work on values that parse as numbers, in the UI and in the [Observations API](/docs/api-and-data-platform/features/public-api#observations-filters). Booleans are filtered as text.
 
 ## Propagated Metadata
 

@@ -31,9 +31,9 @@ A request counts against every budget that applies to it: its key's budget, the 
 
 ## Set a budget [#set-a-budget]
 
-Select **Add budget**, or **Edit budget** on a row in the **Users** or **API keys** table. You can also set a budget when you [create a key](/docs/gateway/features/api-keys#create-a-key).
+Select **Add budget**, or **Edit budget** on a row in the **Users** or **API keys** table. You can also set a budget when you [create a key](/docs/gateway/features/api-keys#create-a-key). [Show traces](/docs/gateway/features/api-keys#show-traces) on a row opens that user's or key's traces.
 
-A budget resets daily (00:00 UTC), weekly (Monday), monthly (on the 1st), or never. It counts spend from when you set it. Changing the amount keeps the spend counted so far; changing the reset interval starts counting again.
+A budget resets daily (00:00 UTC), weekly (Monday), monthly (on the 1st), or never (default). It counts spend from when you set it. Changing the amount keeps the spend counted so far; changing the reset interval starts counting again.
 
 <Callout type="info">
   Spend is calculated from model prices, so a key with a budget can only call
@@ -51,8 +51,37 @@ A key's or user's own budget replaces the default. Removing it puts the key or u
 
 The organization budget caps the total gateway spend of the organization, across all users and keys. An organization has one organization budget. Admins and owners set it on the Budgets page, which also shows its current spend.
 
+## Email alerts [#email-alerts]
+
+Under **Email alerts** on any budget, select which thresholds trigger an email: **85%**, **95%**, or **100%**. New budgets select **100%** by default.
+
+| Budget       | Recipients                        |
+| ------------ | --------------------------------- |
+| API key      | Key owner and organization owners |
+| User         | The user and organization owners  |
+| Organization | Organization owners               |
+
+Each threshold emails once per reset period. If one request crosses multiple thresholds, only the highest newly crossed threshold sends an email. Changing only alert thresholds doesn't re-send alerts already sent in the current period.
+
+<Callout type="info">
+  On self-hosted Langfuse, budget emails require [transactional
+  emails](/self-hosting/configuration/transactional-emails).
+</Callout>
+
+## Reset a budget [#reset-a-budget]
+
+Select **Reset budget** in the row menu of a user or API key on **AI Gateway → Budgets**, or on a key in **AI Gateway → Gateway keys**.
+
+Resetting zeroes current-period spend immediately while keeping the limit, reset interval, and alert thresholds intact, so alerts can fire again in the new period. Admins and owners can reset any user or API key budget; users can reset budgets on their own API keys. Resets are recorded in the [audit log](/docs/administration/audit-logs).
+
+<Callout type="info">
+  Resetting a user or key on a [default budget](#default-budgets) creates a
+  custom budget for it at the current default limit, so later changes to the
+  default no longer apply to it. Organization budgets can't be reset.
+</Callout>
+
 ## When a budget is reached [#budget-reached]
 
 The gateway responds with `429` and the error code `spend_limit_exceeded`, and the message names the budget, for example: `This key's user has spent $12.00 of its $10.00 monthly budget.` See [AI Gateway errors](/faq/all/ai-gateway-error-codes) for the full list of error codes.
 
-When a key or user budget is reached, the key owner or user and the organization's owners get an email.
+To unblock a user or key before its next scheduled reset, [reset its budget](#reset-a-budget) or raise its limit.

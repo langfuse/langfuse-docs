@@ -587,6 +587,15 @@ Where `<DAYS>` matches the configured bucket lifecycle expiration period.
 
 </Callout>
 
+### Topics temporary transcripts [#topics-transcript-expiry]
+
+[Topics](/docs/observability/features/topics) stages temporary trace transcripts under `events-dispatch/trace-transcript/` in the event-upload bucket (prefixed with `LANGFUSE_S3_EVENT_UPLOAD_PREFIX` if set). Add a lifecycle expiration rule for that path after 3 days, or set `LANGFUSE_EVENTS_DISPATCH_TRANSCRIPT_CLEANER_ENABLED=true` on the worker (requires list and delete permissions). On versioned or soft-delete buckets, expire noncurrent versions as well.
+
+<Callout type="warning">
+  These objects contain trace content. Deleting traces or projects does not
+  remove them. Only the lifecycle rule or the worker cleaner does.
+</Callout>
+
 ## Endpoint validation (SSRF defense) [#endpoint-validation]
 
 In addition to the platform-level `LANGFUSE_S3_*` buckets configured via environment variables, project members can configure a blob storage **integration** in the Langfuse UI (Project Settings → Integrations → Blob Storage Export). Because that endpoint is user-supplied, Langfuse validates the host it points at — both when the integration is saved and again every time a connection is opened — to prevent the worker from being pointed at internal services (cloud metadata endpoints, link-local addresses, private RFC1918 / ULA ranges, NAT64/6to4 transition ranges) or being redirected there via DNS rebinding.

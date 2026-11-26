@@ -1,0 +1,38 @@
+---
+date: 2026-11-25
+title: Reset AI Gateway budget spend and set warnings
+description: Reset a user's or API key's current AI Gateway spend without changing its limit, and get email warnings at 85% and 95% of any budget.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, KeyRound } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now [reset spend](/docs/gateway/features/budgets#reset-a-budget) for a user or API key on the [Langfuse AI Gateway](/docs/gateway/overview) without changing its limit, and configure [email warning thresholds](/docs/gateway/features/budgets#email-alerts) on any budget.
+
+- **Unblock users and keys immediately:** Select **Reset budget** in a row's menu on **AI Gateway → Budgets** or **Gateway keys** to zero current-period spend while keeping the limit, reset interval, and alert thresholds intact.
+- **Self-serve for personal keys:** Admins and owners can reset any user or API key budget, and gateway users can reset budgets on their own API keys.
+- **Warn before requests get blocked:** Enable **85%** and **95%** email alerts alongside the default **100%** alert on any API key, user, default, or organization budget to catch runaway agent loops early.
+
+<Cards num={3}>
+  <Card
+    title="Budgets"
+    href="/docs/gateway/features/budgets"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="AI Gateway overview"
+    href="/docs/gateway/overview"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Send your first request"
+    href="/docs/gateway/get-started/first-request"
+    icon={<KeyRound />}
+    arrow
+  />
+</Cards>

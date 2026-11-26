@@ -10,6 +10,8 @@ import EnvPython from "@/components-mdx/env-python.mdx";
 
 <EnvPython />
 
+The SDK reads environment variables, not the file itself, so load the file into your shell first with `set -a; . ./.env; set +a`.
+
 **3. Instrument your application:**
 
 Instrumentation means adding code that records what’s happening in your application so it can be sent to Langfuse. There are three main ways of instrumenting your code with the Python SDK.
@@ -20,6 +22,9 @@ In this example we will use the [context manager](/docs/observability/sdk/instru
 from langfuse import get_client
 
 langfuse = get_client()
+
+# Raises an error that names invalid credentials if the keys or the host are wrong
+langfuse.auth_check()
 
 # Create a span using a context manager
 with langfuse.start_as_current_observation(as_type="span", name="process-request") as span:
