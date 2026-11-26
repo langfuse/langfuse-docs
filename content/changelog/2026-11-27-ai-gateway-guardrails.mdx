@@ -1,0 +1,40 @@
+---
+date: 2026-11-27
+title: Block and redact PII and secrets with AI Gateway guardrails
+description: Configure built-in guardrails on the Langfuse AI Gateway to block, redact, or log PII, secrets, keywords, and custom regexes across requests and responses.
+author: Tobias Wochinger
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, KeyRound, ShieldCheck } from "lucide-react";
+
+<ChangelogHeader />
+
+{/* Screenshot slot: set ogImage: /images/docs/ai-gateway/guardrails.png */}
+
+You can now add [guardrails](/docs/gateway/features/guardrails) to the [Langfuse AI Gateway](/docs/gateway/overview) to block, redact, or log sensitive content in both requests and model responses under **AI Gateway → Guardrails**.
+
+- **Detect PII, secrets, keywords, and custom regex:** Match emails, US SSNs, credit cards, IBANs, IP addresses, API keys, JWTs, private keys, custom secret prefixes, word lists, or custom Rust regexes, with live match previews.
+- **Block, redact, or log both directions:** Reject matching traffic with `400`, replace matched text with a label such as `[REDACTED]` before forwarding or returning (and before `FULL` trace capture), or log matches for monitoring.
+- **Choose scope and targets:** Run each rule on the latest turn, the entire request history, model responses (including streamed SSE outputs), or both sides, and assign it to everyone or to specific users and API keys.
+
+<Cards num={3}>
+  <Card
+    title="Guardrails"
+    href="/docs/gateway/features/guardrails"
+    icon={<ShieldCheck />}
+    arrow
+  />
+  <Card
+    title="AI Gateway overview"
+    href="/docs/gateway/overview"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Send your first request"
+    href="/docs/gateway/get-started/first-request"
+    icon={<KeyRound />}
+    arrow
+  />
+</Cards>
