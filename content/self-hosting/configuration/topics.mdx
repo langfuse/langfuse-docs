@@ -7,47 +7,54 @@ label: "Version: v4"
 
 # Topics
 
-Topics runs on your existing Langfuse web and worker services, using Postgres, ClickHouse, Redis, and blob storage. Clustering runs inside the worker and the official worker image includes the required native module.
+Topics works on self-hosted Langfuse **v4.86.0 or later** with no extra environment variables. It runs on your existing web and worker services (Postgres, ClickHouse, Redis, blob storage). The official worker image includes the native clustering module for amd64 and arm64.
 
-This page covers infrastructure configuration. For project setup and usage, see the [Topics guide](/docs/observability/features/topics).
+For project setup and usage, see the [Topics guide](/docs/observability/features/topics).
 
-## Configure the dispatch worker [#enable-topics]
+## Enable Topics [#enable-topics]
 
-Topics is enabled by default. To process traces, set `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED=true` on one worker service and redeploy it. If you run a single worker service, use that service.
-
-Event dispatch defaults to `true`. If you set `LANGFUSE_EVENTS_DISPATCH_ENABLED=false` on the dispatch worker or any OpenTelemetry ingestion worker, remove the override and redeploy the affected services. In each project, map filters and sampling determine which recorded traces Topics analyzes.
-
-## Configure model access [#model-access]
-
-Create project or inherited organization [LLM connections](/docs/administration/llm-connection), then follow the [Topics setup steps](/docs/observability/features/topics#get-started) to select your models.
-
-Both **web and worker** need access to the configured provider endpoints. Web validates the model configuration, and the worker processes traces and names topics. Use the deployment's existing [`ENCRYPTION_KEY`](/self-hosting/configuration/encryption#application-level-encryption) on both services so they can read the stored credentials.
-
-If you use a private model endpoint or gateway, [allow outbound requests to that endpoint](/self-hosting/configuration/hardening#outbound-url-allowlists) from both services.
-
-### Embedding compatibility
-
-Choose a dimension count supported by your embedding model. Langfuse accepts **64–2,048 dimensions**, with **1,024** as the default. The model must return the configured number of dimensions.
-
-## Configure storage retention [#storage-retention]
-
-Live maps stage temporary transcripts under `events-dispatch/trace-transcript/` in the event-upload bucket. If your deployment sets `LANGFUSE_S3_EVENT_UPLOAD_PREFIX`, prepend its existing value to that path.
-
-Configure a [blob storage lifecycle policy](/self-hosting/deployment/infrastructure/blobstorage) to expire objects at that path after three days, or set `LANGFUSE_EVENTS_DISPATCH_TRANSCRIPT_CLEANER_ENABLED=true` on the worker. The cleaner is disabled by default and needs permission to list and delete those objects.
-
-For versioned storage or soft delete, configure lifecycle expiry for retained versions too.
+1. **Upgrade** web and worker to v4.86.0 or later.
+2. **Add an LLM connection** to the project or organization ([LLM connections](/docs/administration/llm-connection)), then select the models in the [Topics setup steps](/docs/observability/features/topics#get-started). Web and worker both need network access to the provider endpoint. If you use outbound URL allowlists, [allow the endpoint](/self-hosting/configuration/hardening#outbound-url-allowlists) on both services. Both services also need the deployment's existing [`ENCRYPTION_KEY`](/self-hosting/configuration/encryption#application-level-encryption) to read the stored credentials.
+3. **Expire temporary transcripts.** Topics stores trace transcripts under `events-dispatch/trace-transcript/` in the event-upload bucket (prefixed with `LANGFUSE_S3_EVENT_UPLOAD_PREFIX` if you set one). Add a [lifecycle rule](/self-hosting/deployment/infrastructure/blobstorage) that expires that path after 3 days, or set `LANGFUSE_EVENTS_DISPATCH_TRANSCRIPT_CLEANER_ENABLED=true` on the worker (it needs list and delete permissions). On versioned or soft-delete buckets, also expire noncurrent versions.
 
 <Callout type="warning">
-  These temporary objects contain trace content. Trace and project deletion do
-  not remove them; cleanup depends on the configured cleaner or lifecycle policy.
+  These objects contain trace content. Deleting traces or projects does not remove them. Only the lifecycle rule or the cleaner does.
 </Callout>
 
-## Start processing
+## Verify processing [#start-processing]
 
-To verify live processing, create a live map filtered to a test workflow with 100% sampling. Send a matching trace with a recorded model conversation and check that its summary appears after the readiness delay and processing.
+To check that it works, create a live map for a test workflow with 100% sampling. Send a matching trace and wait for its summary to appear. This takes about 10 minutes after the trace goes idle.
 
-## Tune worker load [#worker-load]
+## Advanced configuration and troubleshooting [#advanced]
 
-The worker runs up to 20 per-trace jobs concurrently per queue shard by default. Set `LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` only if you need to tune this, for example to stay within provider rate limits.
+You only need this section if something isn't working or you want to tune load. The defaults suit most deployments.
 
-Clustering consumes worker CPU and memory too. Allow headroom alongside ingestion and evaluation jobs; see [sizing and scaling](/self-hosting/configuration/scaling) for worker deployment options.
+### No traces are processed
+
+- Topics only processes traces ingested through OpenTelemetry into the v4 events table. Make sure `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not `legacy`.
+- Don't set `LANGFUSE_EVENTS_DISPATCH_ENABLED=false` or `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED=false` on your workers. Both default to `true`. If you set either, remove it and redeploy.
+- Check the map's filters and sampling rate. Together they decide which traces Topics analyzes.
+
+### Provider rate limits or cost [#worker-load]
+
+Each Topics job makes one summary call and one embedding call. By default, each worker runs up to **20** jobs at once. Lower the limit if your provider returns 429 errors:
+
+| Variable                                             | Default  | Purpose                                                                            |
+| ---------------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
+| `LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` | `20`     | Topics jobs run at once, per worker and queue shard                                |
+| `LANGFUSE_TOPICS_MAX_INPUT_CHARACTERS`               | `500000` | Maximum transcript characters sent per summary request (about 135k to 150k tokens) |
+| `LANGFUSE_TOPICS_NIGHTLY_REFIT_HOUR_UTC`             | `4`      | UTC hour when the nightly map refit starts                                         |
+
+Total concurrency grows with the number of worker replicas.
+
+### Dedicated worker for dispatch (optional)
+
+On large deployments you can run dispatch on a dedicated worker pool. Set `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED=false` on the other workers. You don't have to do this to keep things correct, because only one worker at a time runs the dispatcher.
+
+### Worker resources
+
+Clustering uses worker CPU and memory. Leave headroom next to ingestion and evaluation jobs. See [sizing and scaling](/self-hosting/configuration/scaling).
+
+### Embedding dimensions [#embedding-compatibility]
+
+Langfuse accepts 64 to 2,048 embedding dimensions and defaults to 1,024. Pick a value your embedding model supports. The model must return exactly that many dimensions.
