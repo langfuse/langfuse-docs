@@ -30,7 +30,7 @@ Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Kha
 
 ## Everything you need in a gateway
 
-Connect your providers, hand out keys, cap spend and trace every call.
+Included in Langfuse.
 
 - **[Your providers, one endpoint](/docs/gateway/features/models#supported-providers):** Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Change one URL to switch over. Supported providers: OpenAI, Anthropic, Amazon Bedrock, Google AI Studio, Google Vertex AI, Microsoft Azure (Foundry), OpenRouter, Vercel AI Gateway and xAI.
 - **[Gateway keys](/docs/gateway/features/api-keys):** Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.
