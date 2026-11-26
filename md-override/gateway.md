@@ -13,7 +13,7 @@ AI governance across your organization: route all model calls through the gatewa
 
 Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Khan Academy](/users/khan-academy), [Hugging Face](/users/hugging-face), Intuit and [SumUp](/users/sumup).
 
-## Stop guessing your AI cost
+## Stop guessing how your company uses AI
 
 1. **See all spend.** Know what AI costs and who’s spending it.
    - **Spend dashboard:** cost by model, provider, user and gateway key.
@@ -28,18 +28,7 @@ Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Kha
    - **Automatic tracing:** every call becomes a Langfuse trace, with full content or usage only.
    - **Evals and analysis:** run evals, topics and alerts, or tell Halo what’s on your mind.
 
-## One control point for every model call
-
-Natively traced in Langfuse.
-
-Figure: AI Gateway overview.
-
-1. A coding agent or AI application sends a request to the AI gateway, which runs in Langfuse.
-2. The AI gateway authorizes the user with the gateway key and maps the model name and URL to a valid model provider request.
-3. The AI gateway calls the external model provider (OpenAI, Anthropic) and returns the response to the client.
-4. Langfuse tracing captures the request data, with different tracing options.
-
-## All AI traffic, one gateway
+## Everything you need in a gateway
 
 Connect your providers, hand out keys, cap spend and trace every call.
 
@@ -52,7 +41,16 @@ Connect your providers, hand out keys, cap spend and trace every call.
 - **[Tracing and insights](/docs/gateway/features/tracing):** Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.
 - **[Open source](/self-hosting/configuration/ai-gateway):** Self-host the gateway as a single small Docker image, or use it on Langfuse Cloud.
 
-## How it works: change the base URL, keep everything else
+## One control point for every model call, natively traced in Langfuse
+
+Figure: AI Gateway overview.
+
+1. A coding agent or AI application sends a request to the AI gateway, which runs in Langfuse.
+2. The AI gateway authorizes the user with the gateway key and maps the model name and URL to a valid model provider request.
+3. The AI gateway calls the external model provider (OpenAI, Anthropic) and returns the response to the client.
+4. Langfuse tracing captures the request data, with different tracing options.
+
+## How it works: change the base URL, keep the rest
 
 1. **Connect your providers.** Add your own OpenAI, Anthropic, Bedrock, Vertex, Azure or other provider accounts. Your keys stay in the gateway, and you keep your own contracts and pricing with no markup. [Read the docs](/docs/gateway/features/models)
 2. **Hand out gateway keys.** Give each person or service its own gateway key instead of a provider key. Each key carries who it belongs to, which models it can use and its budget, and you can revoke it anytime. [Read the docs](/docs/gateway/features/api-keys)
