@@ -45,10 +45,10 @@ Connect your providers, hand out keys, cap spend and trace every call.
 
 Figure: AI Gateway overview.
 
-1. A coding agent or AI application sends a request to the AI gateway, which runs in Langfuse.
-2. The AI gateway authorizes the user with the gateway key and maps the model name and URL to a valid model provider request.
-3. The AI gateway calls the external model provider (OpenAI, Anthropic) and returns the response to the client.
-4. Langfuse tracing captures the request data, with different tracing options.
+1. Coding agents such as Claude Code, Codex and OpenCode, and your own apps, send requests to the AI Gateway, which runs in Langfuse.
+2. The AI Gateway authorizes the gateway key and maps the model to a provider request.
+3. The AI Gateway calls the model provider (Anthropic, OpenAI, Google AI, Bedrock and more) and returns the response.
+4. Langfuse tracing captures every request.
 
 ## How it works: change the base URL, keep the rest
 
