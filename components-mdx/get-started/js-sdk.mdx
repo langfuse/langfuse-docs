@@ -9,7 +9,6 @@ npm install @langfuse/tracing @langfuse/otel "@opentelemetry/sdk-node@>=0.202.0 
 **Add credentials**
 
 import EnvJS from "@/components-mdx/env-js.mdx";
-import SetupOtelJS from "@/components-mdx/setup-otel-js.mdx"
 
 Add your Langfuse credentials to your environment variables so the tracing SDK knows which Langfuse project it should send your recorded data to.
 
@@ -17,41 +16,66 @@ Add your Langfuse credentials to your environment variables so the tracing SDK k
 
 **Initialize OpenTelemetry**
 
-<SetupOtelJS />
+Create an `instrumentation.ts` to register the Langfuse span processor so traces reach Langfuse.
+
+```ts filename="instrumentation.ts" /LangfuseSpanProcessor/
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+export const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
 
 **Instrument application**
 
 Instrumentation means adding code that records what’s happening in your application so it can be sent to Langfuse. Here, OpenTelemetry acts as the system that collects those recordings.
 
-```ts filename="server.ts"
+```ts filename="index.ts"
+import { sdk } from "./instrumentation"; // Must be the first import
 import { startActiveObservation, startObservation } from "@langfuse/tracing";
 
-// startActiveObservation creates a trace for this block of work.
-// Everything inside automatically becomes part of that trace.
-await startActiveObservation("user-request", async (span) => {
-  span.update({
-    input: { query: "What is the capital of France?" },
+async function main() {
+  // startActiveObservation creates a trace for this block of work.
+  // Everything inside automatically becomes part of that trace.
+  await startActiveObservation("user-request", async (span) => {
+    span.update({
+      input: { query: "What is the capital of France?" },
+    });
+
+    // This generation will automatically be a child of "user-request" because of the startObservation function.
+    const generation = startObservation(
+      "llm-call",
+      {
+        model: "gpt-4",
+        input: [{ role: "user", content: "What is the capital of France?" }],
+      },
+      { asType: "generation" },
+    );
+
+    // ... your real LLM call would happen here ...
+
+    generation
+      .update({
+        output: { content: "The capital of France is Paris." }, // update the output of the generation
+      })
+      .end(); // mark this nested observation as complete
+
+    // Add final information about the overall request
+    span.update({ output: "Successfully answered." });
   });
+}
 
-  // This generation will automatically be a child of "user-request" because of the startObservation function.
-  const generation = startObservation(
-    "llm-call",
-    {
-      model: "gpt-4",
-      input: [{ role: "user", content: "What is the capital of France?" }],
-    },
-    { asType: "generation" },
-  );
+// Shutdown flushes events and is required for short-lived applications
+main().finally(() => sdk.shutdown());
+```
 
-  // ... your real LLM call would happen here ...
+_[When do I need to use `shutdown()`?](/docs/observability/data-model#background-processing)_
 
-  generation
-    .update({
-      output: { content: "The capital of France is Paris." }, // update the output of the generation
-    })
-    .end(); // mark this nested observation as complete
+**Run application**
 
-  // Add final information about the overall request
-  span.update({ output: "Successfully answered." });
-});
+```bash
+npx tsx index.ts
 ```
