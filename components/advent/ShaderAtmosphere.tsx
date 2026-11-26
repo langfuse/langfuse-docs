@@ -80,7 +80,7 @@ void main() {
   float hero = exp(-p.y * p.y * 2.56);
   float grain = (hash(gl_FragCoord.xy) - .5) * .014;
 
-  vec3 winter = vec3(.948, .954, .947);
+  vec3 winter = vec3(.985, .963, .914);
   winter += vec3(.038, .018, -.015) * exp(-dot(p - vec2(-.45, -.1), p - vec2(-.45, -.1)) * 2.5);
   float mist = noise(uv * 5. + vec2(u_time * .016, -u_time * .008));
   float ribbon = sin(p.x * 4.5 + noise(p * 2. + u_time * .015) * 4. + u_time * .07);
@@ -114,6 +114,10 @@ void main() {
   club += silver * pow(max(0., pressure), 16.) * side * hero * u_build * .10;
   float ray = abs(sin(atan(portal.y, portal.x) * 9. + u_time * .08));
   club += acid * exp(-ray * 110.) * side * hero * (.035 + u_beat * .06) * u_mode;
+  // Red/blue light catches the steel as the room opens into afterhours.
+  float beam = pow(max(0., cos(p.x * 5. + sin(u_time * .13) * 2.)), 24.);
+  club += mix(vec3(.10, .25, .95), vec3(.95, .08, .16), step(0., p.x))
+    * beam * side * hero * (.10 + u_build * .35);
   club += vec3(noise(css * .4) - .5) * .025;
 
   float horizon = p.y + .10;
@@ -292,6 +296,10 @@ export function ShaderAtmosphere({
       const root = canvas.parentElement;
       root?.style.setProperty("--adv-scene", mode.toFixed(4));
       root?.style.setProperty("--adv-tension", build.toFixed(4));
+      root?.style.setProperty(
+        "--adv-pulse",
+        input.reducedMotion ? "0" : (music.pulse * mode).toFixed(4),
+      );
       root?.style.setProperty("--adv-ink", mode > 0.5 ? "1" : "0");
       if (root) root.dataset.scenePhase = mode > 0.5 ? "berlin" : "winter";
       const dialog = document.querySelector<HTMLElement>(".adv-dialog");

@@ -1,3 +1,5 @@
+import { createDubSpace } from "./dub-space";
+
 // Public-domain carols, synthesized in the browser so no recording rights apply.
 // Each bar is "pitch:beats" tokens; "r" is a rest. `chords` holds one bass
 // root per bar (or null for none).
@@ -182,7 +184,6 @@ const LOOKAHEAD_SECONDS = 0.12;
 const SONG_GAP_BEATS = 2;
 export const TECHNO_BPM = 200;
 export const SCENE_TRANSITION_SECONDS = 24;
-const CUTE_INTRO_SECONDS = 4;
 
 export type MusicFrame = {
   mix: number;
@@ -193,6 +194,9 @@ export type MusicFrame = {
 };
 
 type MusicGraph = {
+  space: ReturnType<typeof createDubSpace>;
+  spaceSend: GainNode;
+  effects: GainNode;
   winter: GainNode;
   lead: GainNode;
   rhythm: GainNode;
@@ -237,7 +241,6 @@ export class JinglePlayer {
   private contextState: AudioContextState | null = null;
   private transition = { from: 0, to: 0, at: 0, duration: 0 };
   private disposed = false;
-  private showStarted = false;
   private playbackGeneration = 0;
 
   private now() {
@@ -334,10 +337,6 @@ export class JinglePlayer {
     this.graph = this.createGraph(ctx, this.master);
     this.anchors = [];
     this.nextStepTime = this.now() + 0.08;
-    if (!this.showStarted) {
-      this.showStarted = true;
-      this.setTechno(true, CUTE_INTRO_SECONDS + 0.08);
-    }
     this.timer = setInterval(() => this.schedule(), 25);
     this.schedule();
     return true;
@@ -381,6 +380,13 @@ export class JinglePlayer {
     output.gain.value = 1.3;
     compressor.connect(output).connect(out);
 
+    const space = createDubSpace(ctx, compressor);
+    const spaceSend = ctx.createGain();
+    spaceSend.connect(space.input);
+    const effects = ctx.createGain();
+    effects.gain.value = 0.55;
+    effects.connect(compressor);
+    effects.connect(space.input);
     const lead = ctx.createGain();
     const leadFilter = ctx.createBiquadFilter();
     leadFilter.type = "lowpass";
@@ -389,6 +395,7 @@ export class JinglePlayer {
     leadDrive.curve = SYNTH_DRIVE;
     leadDrive.oversample = "2x";
     lead.connect(leadDrive).connect(leadFilter).connect(compressor);
+    leadFilter.connect(spaceSend);
     const echo = ctx.createDelay(1);
     const feedback = ctx.createGain();
     const echoFilter = ctx.createBiquadFilter();
@@ -420,6 +427,9 @@ export class JinglePlayer {
     rumble.connect(compressor);
     rumbleFilter.connect(rumbleFeedback).connect(rumbleDelay);
     const nodes: AudioNode[] = [
+      ...space.nodes,
+      spaceSend,
+      effects,
       winter,
       compressor,
       output,
@@ -438,6 +448,9 @@ export class JinglePlayer {
       rumbleFeedback,
     ];
     const graph = {
+      space,
+      spaceSend,
+      effects,
       winter,
       lead,
       rhythm,
@@ -455,6 +468,9 @@ export class JinglePlayer {
   private updateGraph(ctx: AudioContext, g: MusicGraph) {
     const { mix, bpm } = this.getFrame();
     const time = ctx.currentTime;
+    g.spaceSend.gain.setTargetAtTime(0.12 + mix * 0.48, time, 0.1);
+    g.space.left.delayTime.setTargetAtTime((60 / bpm) * 1.5, time, 0.25);
+    g.space.right.delayTime.setTargetAtTime((60 / bpm) * 2.5, time, 0.25);
     g.winter.gain.setTargetAtTime(1 - smooth(0.05, 0.88, mix), time, 0.035);
     g.lead.gain.setTargetAtTime(smooth(0.04, 0.8, mix) * 0.42, time, 0.035);
     g.rhythm.gain.setTargetAtTime(smooth(0.18, 0.82, mix) * 0.85, time, 0.035);
@@ -462,7 +478,7 @@ export class JinglePlayer {
     g.rumble.gain.setTargetAtTime(smooth(0.45, 1, mix) * 0.65, time, 0.035);
     g.feedback.gain.setTargetAtTime(0.12 + mix * 0.25, time, 0.04);
     g.echo.delayTime.setTargetAtTime((60 / bpm) * 0.75, time, 0.08);
-    g.leadFilter.frequency.setTargetAtTime(500 + mix * 10500, time, 0.05);
+    g.leadFilter.frequency.setTargetAtTime(500 + mix * 6500, time, 0.05);
   }
 
   private ensureContext(): AudioContext | null {
@@ -562,6 +578,13 @@ export class JinglePlayer {
     mix: number,
   ) {
     if (step % 4 === 0) {
+      // Let the kick speak, then let the room swell into the offbeat.
+      g.space.wet.gain.cancelScheduledValues(time);
+      g.space.wet.gain.setValueAtTime(0.08 + mix * 0.04, time);
+      g.space.wet.gain.linearRampToValueAtTime(
+        0.22 + mix * 0.2,
+        time + beat * 0.7,
+      );
       const body = ctx.createOscillator();
       const gain = ctx.createGain();
       body.frequency.setValueAtTime(190, time);
@@ -691,45 +714,55 @@ export class JinglePlayer {
     };
   }
 
-  /** Plays a snowball impact `delay` seconds from now, independent of the music. */
+  /** Low percussive snow impact, with the same room as the running music. */
   thud(delay = 0) {
-    const ctx = this.ensureContext();
-    if (!ctx || !this.noise) return;
-    if (ctx.state === "suspended") void ctx.resume().catch(() => {});
+    const ctx = this.ctx,
+      graph = this.graph;
+    if (!ctx || !graph || ctx.state !== "running") return;
     const time = ctx.currentTime + delay;
-    const pitch = 0.85 + Math.random() * 0.3;
+    this.lowTone(ctx, graph.effects, 110, time, 0.28, 0.65);
+    this.noiseHit(ctx, graph.effects, time, 0.15, 0.18, 700, "lowpass");
+  }
 
-    const out = ctx.createGain();
-    out.gain.value = 0.55;
-    out.connect(ctx.destination);
-    setTimeout(() => out.disconnect(), (delay + 0.5) * 1000);
+  /** The page folding into itself: descending sub, detuned fifth, filtered air. */
+  fold(day = 0) {
+    const ctx = this.ctx,
+      graph = this.graph;
+    if (!ctx || !graph || ctx.state !== "running") return;
+    const time = ctx.currentTime;
+    const root = [82.4, 65.4, 98][day % 3];
+    this.lowTone(ctx, graph.effects, root, time, 2.1, 0.55);
+    this.lowTone(ctx, graph.effects, root * 1.498, time + 0.09, 1.7, 0.23);
+    this.lowTone(ctx, graph.effects, root * 2, time + 0.19, 1.4, 0.12);
+    this.noiseHit(ctx, graph.effects, time, 1.3, 0.18, 320, "bandpass");
+  }
 
-    const body = ctx.createOscillator();
-    const bodyGain = ctx.createGain();
-    body.type = "sine";
-    body.frequency.setValueAtTime(150 * pitch, time);
-    body.frequency.exponentialRampToValueAtTime(45 * pitch, time + 0.16);
-    bodyGain.gain.setValueAtTime(0.0001, time);
-    bodyGain.gain.exponentialRampToValueAtTime(0.9, time + 0.006);
-    bodyGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.22);
-    body.connect(bodyGain).connect(out);
-    body.start(time);
-    body.stop(time + 0.25);
-
-    // Muffled noise burst gives the soft crunch of packed snow.
-    const crunch = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    const crunchGain = ctx.createGain();
-    crunch.buffer = this.noise;
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(1400 * pitch, time);
-    filter.frequency.exponentialRampToValueAtTime(300, time + 0.12);
-    crunchGain.gain.setValueAtTime(0.0001, time);
-    crunchGain.gain.exponentialRampToValueAtTime(0.5, time + 0.004);
-    crunchGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.14);
-    crunch.connect(filter).connect(crunchGain).connect(out);
-    crunch.start(time);
-    crunch.stop(time + 0.16);
+  private lowTone(
+    ctx: AudioContext,
+    out: AudioNode,
+    hz: number,
+    time: number,
+    duration: number,
+    level: number,
+  ) {
+    const osc = ctx.createOscillator(),
+      gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(hz, time);
+    osc.frequency.exponentialRampToValueAtTime(
+      Math.max(35, hz * 0.45),
+      time + duration,
+    );
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(level, time + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    osc.connect(gain).connect(out);
+    osc.start(time);
+    osc.stop(time + duration + 0.02);
+    osc.onended = () => {
+      osc.disconnect();
+      gain.disconnect();
+    };
   }
 
   private bell(

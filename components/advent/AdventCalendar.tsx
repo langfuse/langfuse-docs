@@ -15,7 +15,6 @@ import {
   Lock,
   MousePointer2,
   Music,
-  AudioLines,
   Snowflake,
   Star,
   TreePine,
@@ -29,6 +28,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { PageFold, type PageFoldHandle } from "./PageFold";
+import { AfterhoursPass, SceneSwitch } from "./Afterhours";
 import { AdventStyles } from "./styles";
 import { DoorAnimation } from "./DoorAnimation";
 import { JinglePlayer, TECHNO_BPM, type MusicFrame } from "./jingles";
@@ -65,15 +66,12 @@ const ORNAMENTS = [Snowflake, Star, Gift, TreePine];
 const OPENED_KEY = `langfuse-advent-${ADVENT_YEAR}-opened`;
 const MUSIC_KEY = "langfuse-advent-music";
 
-const DOOR_OPEN_DELAY_MS = 800;
 const ALL_OPEN = 25;
 const CRUMBLE_MS = 750;
 const HIT_WOBBLE_MS = 350;
 
-/** Each snowman level takes two or three hits. */
-function nextHitsNeeded() {
-  return 2 + Math.round(Math.random());
-}
+/** Two visible hits per level make the snowman a learnable little game. */
+const SNOWMAN_HITS_PER_LEVEL = 2;
 const SNOWBALL_IGNORE =
   "a, button, input, textarea, select, label, summary, [role='dialog'], [data-no-snowball]";
 
@@ -149,7 +147,6 @@ function useJingles() {
   const enabledRef = useRef(true);
   const [enabled, setEnabled] = useState(true);
   const [playing, setPlaying] = useState(false);
-  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     const player = new JinglePlayer();
@@ -168,7 +165,6 @@ function useJingles() {
       if (started) {
         removeListeners();
         setPlaying(true);
-        setStarted(true);
       }
     }
     events.forEach((e) => window.addEventListener(e, tryStart));
@@ -196,11 +192,10 @@ function useJingles() {
     writeStorage(MUSIC_KEY, "on");
     const didStart = await player.start();
     setPlaying(didStart);
-    if (didStart) setStarted(true);
   }, [playing]);
 
   const thud = useCallback((delay: number) => {
-    playerRef.current?.thud(delay);
+    if (enabledRef.current) playerRef.current?.thud(delay);
   }, []);
 
   const getFrame = useCallback(
@@ -214,7 +209,13 @@ function useJingles() {
       },
     [],
   );
-  return { enabled, playing, started, toggle, thud, getFrame };
+  const setTechno = useCallback((value: boolean) => {
+    playerRef.current?.setTechno(value);
+  }, []);
+  const fold = useCallback((day: number) => {
+    if (enabledRef.current) playerRef.current?.fold(day);
+  }, []);
+  return { enabled, playing, toggle, thud, fold, getFrame, setTechno };
 }
 
 function SnowballHint() {
@@ -536,6 +537,8 @@ export function AdventCalendar() {
   const [wiggleDay, setWiggleDay] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const canvasRef = useRef<WinterCanvasHandle>(null);
+  const foldRef = useRef<PageFoldHandle>(null);
+  const openingRef = useRef(false);
   const dialogOpenRef = useRef(false);
   const deepLinkHandled = useRef(false);
   const snowmanRef = useRef<HTMLDivElement>(null);
@@ -544,7 +547,8 @@ export function AdventCalendar() {
   const crumblingRef = useRef(false);
   const snowmanBallsRef = useRef(0);
   const snowmanHitsRef = useRef(0);
-  const hitsNeededRef = useRef(nextHitsNeeded());
+  const [snowmanHits, setSnowmanHits] = useState(0);
+  const wobbleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [snowmanHit, setSnowmanHit] = useState(false);
   const [annoyed, setAnnoyed] = useState(false);
   const annoyedRef = useRef(false);
@@ -552,10 +556,23 @@ export function AdventCalendar() {
   const throwEndTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reducedMotion = usePrefersReducedMotion();
   const music = useJingles();
-  const techno = music.started;
+  const [techno, setTechno] = useState(false);
+  const [passOpen, setPassOpen] = useState(false);
+  const changeScene = useCallback(
+    (value: boolean) => {
+      setTechno(value);
+      music.setTechno(value);
+    },
+    [music.setTechno],
+  );
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("afterhours") === "1") {
+      changeScene(true);
+    }
+  }, [changeScene]);
   const { thud } = music;
 
-  dialogOpenRef.current = activeDay !== null;
+  dialogOpenRef.current = activeDay !== null || passOpen;
   useEffect(() => {
     const update = () => {
       const now = new Date();
@@ -627,6 +644,44 @@ export function AdventCalendar() {
     }, SNOWMAN_RELEASE_MS);
   }, [thud]);
 
+  const hitSnowman = useCallback(() => {
+    if (crumblingRef.current) return;
+    clearTimeout(wobbleTimer.current);
+    setSnowmanHit(false);
+    requestAnimationFrame(() => setSnowmanHit(true));
+    wobbleTimer.current = setTimeout(() => setSnowmanHit(false), HIT_WOBBLE_MS);
+    snowmanHitsRef.current += 1;
+    setSnowmanHits(snowmanHitsRef.current);
+    if (snowmanHitsRef.current < SNOWMAN_HITS_PER_LEVEL) {
+      if (annoyedRef.current) setTimeout(throwBack, HIT_WOBBLE_MS);
+      return;
+    }
+    snowmanHitsRef.current = 0;
+    setSnowmanHits(0);
+    if (snowmanBallsRef.current < SNOWMAN_MAX_BALLS) {
+      snowmanBallsRef.current += 1;
+      setSnowmanBalls(snowmanBallsRef.current);
+      return;
+    }
+    // A full snowman fights back for one more round before crumbling.
+    if (!annoyedRef.current) {
+      annoyedRef.current = true;
+      setAnnoyed(true);
+      setTimeout(throwBack, HIT_WOBBLE_MS);
+      return;
+    }
+    annoyedRef.current = false;
+    setAnnoyed(false);
+    crumblingRef.current = true;
+    setCrumbling(true);
+    setTimeout(() => {
+      crumblingRef.current = false;
+      snowmanBallsRef.current = 0;
+      setCrumbling(false);
+      setSnowmanBalls(0);
+    }, CRUMBLE_MS);
+  }, [throwBack]);
+
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0 || dialogOpenRef.current) return;
@@ -638,6 +693,7 @@ export function AdventCalendar() {
       const landsIn = throwAt(e.clientX, e.clientY);
       const rect = snowmanRef.current?.getBoundingClientRect();
       if (
+        !target.closest("[data-snowman]") &&
         rect &&
         e.clientX >= rect.left &&
         e.clientX <= rect.right &&
@@ -647,46 +703,9 @@ export function AdventCalendar() {
         setTimeout(hitSnowman, landsIn);
       }
     };
-    let wobbleTimer: ReturnType<typeof setTimeout> | undefined;
-    const hitSnowman = () => {
-      if (crumblingRef.current) return;
-      clearTimeout(wobbleTimer);
-      setSnowmanHit(false);
-      requestAnimationFrame(() => setSnowmanHit(true));
-      wobbleTimer = setTimeout(() => setSnowmanHit(false), HIT_WOBBLE_MS);
-      snowmanHitsRef.current += 1;
-      if (snowmanHitsRef.current < hitsNeededRef.current) {
-        if (annoyedRef.current) setTimeout(throwBack, HIT_WOBBLE_MS);
-        return;
-      }
-      snowmanHitsRef.current = 0;
-      hitsNeededRef.current = nextHitsNeeded();
-      if (snowmanBallsRef.current < SNOWMAN_MAX_BALLS) {
-        snowmanBallsRef.current += 1;
-        setSnowmanBalls(snowmanBallsRef.current);
-        return;
-      }
-      // A full snowman fights back for one more round before crumbling.
-      if (!annoyedRef.current) {
-        annoyedRef.current = true;
-        setAnnoyed(true);
-        setTimeout(throwBack, HIT_WOBBLE_MS);
-        return;
-      }
-      annoyedRef.current = false;
-      setAnnoyed(false);
-      crumblingRef.current = true;
-      setCrumbling(true);
-      setTimeout(() => {
-        crumblingRef.current = false;
-        snowmanBallsRef.current = 0;
-        setCrumbling(false);
-        setSnowmanBalls(0);
-      }, CRUMBLE_MS);
-    };
     window.addEventListener("pointerdown", onPointerDown);
     return () => window.removeEventListener("pointerdown", onPointerDown);
-  }, [throwAt, throwBack]);
+  }, [throwAt, hitSnowman]);
 
   useEffect(() => {
     if (!toast) return;
@@ -702,11 +721,12 @@ export function AdventCalendar() {
     window.history.replaceState(null, "", url);
   }, []);
 
-  const handleSelect = (
+  const handleSelect = async (
     day: number,
     element: HTMLElement,
     point: { x: number; y: number } | null,
   ) => {
+    if (openingRef.current) return;
     const state = getDoorState(day, unlocked, opened);
     if (state === "locked") {
       const landsIn = point ? throwAt(point.x, point.y) : 0;
@@ -721,21 +741,29 @@ export function AdventCalendar() {
       }, landsIn);
       return;
     }
-    if (state === "open") {
-      showDoor(day);
-      return;
-    }
-    const next = new Set(opened).add(day);
-    setOpened(next);
-    writeStorage(OPENED_KEY, JSON.stringify([...next]));
-    if (!reducedMotion) {
+    openingRef.current = true;
+    try {
       const rect = element.getBoundingClientRect();
-      canvasRef.current?.burst(
-        rect.left + rect.width / 2,
-        rect.top + rect.height / 2,
+      const center = point ?? {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+      };
+      const finished = await foldRef.current?.play(
+        center,
+        music.getFrame().mix > 0.5,
+        () => music.fold(day),
+        day,
       );
+      if (finished === false) return;
+      if (state !== "open") {
+        const next = new Set(opened).add(day);
+        setOpened(next);
+        writeStorage(OPENED_KEY, JSON.stringify([...next]));
+      }
+      showDoor(day);
+    } finally {
+      openingRef.current = false;
     }
-    setTimeout(() => showDoor(day), reducedMotion ? 0 : DOOR_OPEN_DELAY_MS);
   };
 
   const openDays = ADVENT_DOORS.filter(
@@ -756,26 +784,26 @@ export function AdventCalendar() {
         getFrame={music.getFrame}
       />
       <AdventStyles />
-      <WinterCanvas ref={canvasRef} active={activeDay === null} />
+      <PageFold ref={foldRef} />
+      <WinterCanvas ref={canvasRef} active={activeDay === null && !passOpen} />
 
       <section className="adv-hero relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-8 text-center sm:px-8 md:pt-10">
         <div className="adv-mode-bar" data-no-snowball>
-          <span className="adv-location">
-            <span className="adv-live-dot" /> Christmas in Berlin
-          </span>
-          <span className="adv-show-note">
-            <AudioLines className="size-4" /> Stay for the afterparty
-          </span>
-        </div>
-        <div className="adv-morph-track" aria-hidden>
-          <span />
-        </div>
-        <div className="adv-scene-label" aria-hidden>
-          <Snowflake className="size-3.5" />
-          <span>December 01—24 / The Advent edition</span>
+          <span className="adv-location">December 01—24</span>
+          <SceneSwitch
+            techno={techno}
+            onChange={changeScene}
+            getFrame={music.getFrame}
+          />
         </div>
         <h1 className="max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
-          Gateway to <span className="adv-title-accent">Christmas</span>
+          Gateway to{" "}
+          <span className="adv-title-swap">
+            <span className="adv-title-day adv-title-accent">Christmas</span>
+            <span className="adv-title-night" aria-hidden>
+              afterhours
+            </span>
+          </span>
         </h1>
         <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
           The Langfuse AI Gateway Advent Calendar. 24 doors, 24 features. From
@@ -799,15 +827,43 @@ export function AdventCalendar() {
         <SnowballHint />
         {/* In a row below the hint on small screens, free in the side space on wide ones. */}
         <div className="adv-figures flex w-full items-end justify-around pt-2 lg:absolute lg:inset-x-8 lg:bottom-10 lg:w-auto lg:justify-between">
-          <Santa className="w-28 sm:w-32 lg:w-28 lg:-rotate-6" />
+          <button
+            type="button"
+            className="adv-santa-button w-24 sm:w-40 lg:w-36"
+            aria-label="Discover Santa’s secret"
+            onClick={() => {
+              if (music.getFrame().mix > 0.65 || (reducedMotion && techno))
+                setPassOpen(true);
+              else
+                setToast(
+                  techno
+                    ? "Santa’s still getting dressed. Stay for the drop."
+                    : "Santa has a second shift. Try afterhours.",
+                );
+            }}
+          >
+            <Santa />
+            <span className="adv-santa-secret">Follow the heart ↗</span>
+          </button>
           <Snowman
             ref={snowmanRef}
+            hits={snowmanHits}
+            onThrow={() => {
+              const rect = snowmanRef.current?.getBoundingClientRect();
+              if (rect) {
+                const delay = throwAt(
+                  rect.left + rect.width / 2,
+                  rect.top + rect.height * 0.65,
+                );
+                setTimeout(hitSnowman, delay);
+              }
+            }}
             balls={snowmanBalls}
             crumbling={crumbling}
             hit={snowmanHit}
             annoyed={annoyed}
             throwing={throwing}
-            className="w-28 sm:w-32 lg:w-28"
+            className="w-24 sm:w-32 lg:w-28"
           />
         </div>
       </section>
@@ -845,6 +901,8 @@ export function AdventCalendar() {
           {toast}
         </div>
       ) : null}
+
+      <AfterhoursPass open={passOpen} onOpenChange={setPassOpen} />
 
       <MusicToggle
         getFrame={music.getFrame}

@@ -17,7 +17,11 @@ export function Santa({ className }: { className?: string }) {
       <rect x="44" y="166" width="22" height="16" rx="5" fill="#1d1d1b" />
       <rect x="74" y="166" width="22" height="16" rx="5" fill="#1d1d1b" />
       {/* sweater */}
-      <path d="M30 172 Q26 104 70 94 Q114 104 110 172 Z" fill="#b3262e" />
+      <path
+        d="M30 172 Q26 104 70 94 Q114 104 110 172 Z"
+        className="adv-santa-coat"
+        fill="#b3262e"
+      />
       <rect x="28" y="162" width="84" height="11" rx="5.5" fill="#fbf7ef" />
       <rect x="31" y="146" width="78" height="10" fill="#1d1d1b" />
       <rect
@@ -40,6 +44,58 @@ export function Santa({ className }: { className?: string }) {
         strokeWidth="1"
       />
       <image href="/langfuse-icon.svg" x="54" y="105" width="32" height="32" />
+      {/* The ad's red/blue leather, rivets and heart-shaped chrome hardware. */}
+      <g className="adv-santa-harness">
+        <path
+          d="M45 103 L58 143 M95 103 L82 143"
+          fill="none"
+          stroke="#ef4557"
+          strokeWidth="9"
+        />
+        <path
+          d="M34 130 Q70 143 106 130"
+          fill="none"
+          stroke="#315ca8"
+          strokeWidth="12"
+        />
+        <path
+          d="M45 103 L58 143 M95 103 L82 143"
+          fill="none"
+          stroke="#ff8993"
+          strokeWidth="1"
+          strokeDasharray="2 3"
+        />
+        {[39, 49, 91, 101].map((x) => (
+          <circle
+            key={x}
+            cx={x}
+            cy={x < 50 || x > 90 ? 132 : 135}
+            r="2"
+            fill="#e3e8ef"
+          />
+        ))}
+        <g fill="none" stroke="#dce3ea" strokeWidth="2.5">
+          <circle cx="49" cy="117" r="5" />
+          <circle cx="91" cy="117" r="5" />
+          <path
+            d="M37 137 Q32 172 61 157 M103 137 Q108 172 79 157"
+            strokeDasharray="3 2"
+          />
+          <path d="M49 121 Q70 147 91 121" strokeDasharray="3 2" />
+        </g>
+        <g className="adv-santa-heart">
+          <path
+            d="M70 141 C58 129 52 145 70 157 C88 145 82 129 70 141Z"
+            fill="#15171e"
+            stroke="#e9edf6"
+            strokeWidth="3"
+          />
+          <path
+            d="M70 145 C64 139 61 145 70 151 C79 145 76 139 70 145Z"
+            fill="#ef4557"
+          />
+        </g>
+      </g>
       {/* resting arm */}
       <path
         d="M36 108 Q20 126 26 146"
@@ -75,6 +131,15 @@ export function Santa({ className }: { className?: string }) {
         strokeLinecap="round"
         fill="none"
       />
+      <g
+        className="adv-santa-harness"
+        fill="#11131c"
+        stroke="#8697b1"
+        strokeWidth="1.5"
+      >
+        <path d="M46 52 L66 52 L65 62 Q55 67 49 60 Z M74 52 L94 52 L91 60 Q81 67 75 62 Z" />
+        <path d="M66 55 Q70 52 74 55" fill="none" />
+      </g>
       {/* beard and mustache */}
       <path
         d="M44 62 Q42 98 70 106 Q98 98 96 62 Q90 78 70 74 Q50 78 44 62 Z"
@@ -100,6 +165,8 @@ export const SNOWMAN_THROW_MS = 500;
 export const SNOWMAN_RELEASE_MS = 280;
 
 type SnowmanProps = {
+  hits: number;
+  onThrow: () => void;
   balls: number;
   crumbling: boolean;
   hit: boolean;
@@ -110,7 +177,7 @@ type SnowmanProps = {
 
 export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
   function Snowman(
-    { balls, crumbling, hit, annoyed, throwing, className },
+    { hits, onThrow, balls, crumbling, hit, annoyed, throwing, className },
     ref,
   ) {
     const label = crumbling
@@ -118,7 +185,7 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
       : annoyed
         ? "Hey! Take that!"
         : balls === 0
-          ? "Hit me with snowballs"
+          ? "Build me. Then try me."
           : balls < SNOWMAN_MAX_BALLS
             ? `${balls} of ${SNOWMAN_MAX_BALLS}, keep going!`
             : "Done! Dare to hit me again?";
@@ -127,157 +194,188 @@ export const Snowman = forwardRef<HTMLDivElement, SnowmanProps>(
         ref={ref}
         className={cn("flex flex-col items-center gap-1", className)}
       >
-        <svg
-          viewBox="0 0 120 160"
-          role="img"
-          aria-label={`Snowman with ${balls} of ${SNOWMAN_MAX_BALLS} snowballs`}
-          className={cn(
-            "adv-snowman w-full overflow-visible",
-            crumbling && "is-crumbling",
-            hit && "is-hit",
-            annoyed && "is-annoyed",
-            throwing && "is-throwing",
-          )}
+        <button
+          type="button"
+          onClick={onThrow}
+          className="adv-snowman-target"
+          aria-label="Throw a snowball at the snowman"
+          data-snowman
         >
-          <ellipse cx="60" cy="154" rx="44" ry="5" className="adv-shadow" />
-          <path
-            d="M18 154 Q30 138 46 146 Q58 134 74 146 Q90 138 102 154 Z"
-            fill="#fff"
-            stroke="#c9d4e2"
-            strokeWidth="1.5"
-          />
-          {balls >= 1 ? (
-            <g className="adv-snowman-ball">
-              <circle
-                cx="60"
-                cy="124"
-                r="28"
-                fill="#fff"
-                stroke="#c9d4e2"
-                strokeWidth="1.5"
-              />
-              <circle cx="60" cy="116" r="2.5" fill="#1d1d1b" />
-              <circle cx="60" cy="128" r="2.5" fill="#1d1d1b" />
-            </g>
-          ) : null}
-          {balls >= 2 ? (
-            <g className="adv-snowman-ball">
-              <path
-                d="M42 84 L18 70 M24 74 L16 78"
-                stroke="#6b4a2b"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <g className="adv-snowman-arm">
-                <path
-                  d="M78 84 L102 70 M96 74 L104 78"
-                  stroke="#6b4a2b"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {annoyed ? (
-                  <circle
-                    cx="103"
-                    cy="68"
-                    r="5"
-                    fill="#fff"
-                    stroke="#c9d4e2"
-                    strokeWidth="1.2"
-                    className="adv-snowman-ammo"
-                  />
-                ) : null}
+          <svg
+            viewBox="0 0 120 160"
+            role="img"
+            aria-label={`Snowman with ${balls} of ${SNOWMAN_MAX_BALLS} snowballs`}
+            className={cn(
+              "adv-snowman w-full overflow-visible",
+              crumbling && "is-crumbling",
+              hit && "is-hit",
+              annoyed && "is-annoyed",
+              throwing && "is-throwing",
+            )}
+          >
+            <ellipse cx="60" cy="154" rx="44" ry="5" className="adv-shadow" />
+            <path
+              d="M18 154 Q30 138 46 146 Q58 134 74 146 Q90 138 102 154 Z"
+              fill="#fff"
+              stroke="#c9d4e2"
+              strokeWidth="1.5"
+            />
+            {balls === 0 ? (
+              <g
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeDasharray="3 5"
+                opacity=".25"
+              >
+                <circle cx="60" cy="124" r="28" />
+                <circle cx="60" cy="84" r="20" />
+                <circle cx="60" cy="52" r="15" />
               </g>
-              <circle
-                cx="60"
-                cy="84"
-                r="20"
-                fill="#fff"
-                stroke="#c9d4e2"
-                strokeWidth="1.5"
-              />
-              <circle cx="60" cy="80" r="2.2" fill="#1d1d1b" />
-              <circle cx="60" cy="90" r="2.2" fill="#1d1d1b" />
-            </g>
-          ) : null}
-          {balls >= 3 ? (
-            <g className="adv-snowman-ball">
-              <g className="adv-snowman-head">
+            ) : null}
+            {balls >= 1 ? (
+              <g className="adv-snowman-ball">
                 <circle
                   cx="60"
-                  cy="52"
-                  r="15"
+                  cy="124"
+                  r="28"
                   fill="#fff"
                   stroke="#c9d4e2"
                   strokeWidth="1.5"
                 />
-                {annoyed ? (
-                  <>
-                    <circle
-                      cx="51"
-                      cy="56"
-                      r="3"
-                      fill="#ff8a7a"
-                      opacity=".55"
-                    />
-                    <circle
-                      cx="69"
-                      cy="56"
-                      r="3"
-                      fill="#ff8a7a"
-                      opacity=".55"
-                    />
-                    <path
-                      d="M51 44 L58 47 M69 44 L62 47"
-                      stroke="#1d1d1b"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    />
-                  </>
-                ) : null}
-                <circle cx="55" cy="49" r="1.8" fill="#1d1d1b" />
-                <circle cx="65" cy="49" r="1.8" fill="#1d1d1b" />
-                <path d="M60 53 L74 56 L60 57 Z" fill="#f08a24" />
+                <circle cx="60" cy="116" r="2.5" fill="#1d1d1b" />
+                <circle cx="60" cy="128" r="2.5" fill="#1d1d1b" />
+              </g>
+            ) : null}
+            {balls >= 2 ? (
+              <g className="adv-snowman-ball">
                 <path
-                  d={annoyed ? "M54 61 Q60 57 66 61" : "M54 59 Q60 63 66 59"}
-                  stroke="#1d1d1b"
-                  strokeWidth="1.5"
-                  fill="none"
+                  d="M42 84 L18 70 M24 74 L16 78"
+                  stroke="#6b4a2b"
+                  strokeWidth="2.5"
                   strokeLinecap="round"
                 />
-                <path
-                  d="M44 66 Q60 74 76 66 L76 71 Q60 79 44 71 Z"
-                  fill="#b3262e"
+                <g className="adv-snowman-arm">
+                  <path
+                    d="M78 84 L102 70 M96 74 L104 78"
+                    stroke="#6b4a2b"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  {annoyed ? (
+                    <circle
+                      cx="103"
+                      cy="68"
+                      r="5"
+                      fill="#fff"
+                      stroke="#c9d4e2"
+                      strokeWidth="1.2"
+                      className="adv-snowman-ammo"
+                    />
+                  ) : null}
+                </g>
+                <circle
+                  cx="60"
+                  cy="84"
+                  r="20"
+                  fill="#fff"
+                  stroke="#c9d4e2"
+                  strokeWidth="1.5"
                 />
-                <rect
-                  x="66"
-                  y="68"
-                  width="7"
-                  height="16"
-                  rx="2"
-                  fill="#b3262e"
-                />
-                <rect
-                  x="46"
-                  y="36"
-                  width="28"
-                  height="4"
-                  rx="2"
-                  fill="#1d1d1b"
-                />
-                <rect
-                  x="50"
-                  y="20"
-                  width="20"
-                  height="18"
-                  rx="2"
-                  fill="#1d1d1b"
-                />
-                <rect x="50" y="32" width="20" height="3" fill="#1f5c3f" />
+                <circle cx="60" cy="80" r="2.2" fill="#1d1d1b" />
+                <circle cx="60" cy="90" r="2.2" fill="#1d1d1b" />
               </g>
-            </g>
-          ) : null}
-        </svg>
-        <span className="text-center text-[11px] leading-tight text-text-tertiary sm:text-[12px]">
+            ) : null}
+            {balls >= 3 ? (
+              <g className="adv-snowman-ball">
+                <g className="adv-snowman-head">
+                  <circle
+                    cx="60"
+                    cy="52"
+                    r="15"
+                    fill="#fff"
+                    stroke="#c9d4e2"
+                    strokeWidth="1.5"
+                  />
+                  {annoyed ? (
+                    <>
+                      <circle
+                        cx="51"
+                        cy="56"
+                        r="3"
+                        fill="#ff8a7a"
+                        opacity=".55"
+                      />
+                      <circle
+                        cx="69"
+                        cy="56"
+                        r="3"
+                        fill="#ff8a7a"
+                        opacity=".55"
+                      />
+                      <path
+                        d="M51 44 L58 47 M69 44 L62 47"
+                        stroke="#1d1d1b"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  ) : null}
+                  <circle cx="55" cy="49" r="1.8" fill="#1d1d1b" />
+                  <circle cx="65" cy="49" r="1.8" fill="#1d1d1b" />
+                  <path d="M60 53 L74 56 L60 57 Z" fill="#f08a24" />
+                  <path
+                    d={annoyed ? "M54 61 Q60 57 66 61" : "M54 59 Q60 63 66 59"}
+                    stroke="#1d1d1b"
+                    strokeWidth="1.5"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M44 66 Q60 74 76 66 L76 71 Q60 79 44 71 Z"
+                    fill="#b3262e"
+                  />
+                  <rect
+                    x="66"
+                    y="68"
+                    width="7"
+                    height="16"
+                    rx="2"
+                    fill="#b3262e"
+                  />
+                  <rect
+                    x="46"
+                    y="36"
+                    width="28"
+                    height="4"
+                    rx="2"
+                    fill="#1d1d1b"
+                  />
+                  <rect
+                    x="50"
+                    y="20"
+                    width="20"
+                    height="18"
+                    rx="2"
+                    fill="#1d1d1b"
+                  />
+                  <rect x="50" y="32" width="20" height="3" fill="#1f5c3f" />
+                </g>
+              </g>
+            ) : null}
+          </svg>
+          <span className="adv-snowman-score" aria-hidden>
+            {hit ? "Direct hit!" : throwing ? "Incoming!" : ""}
+          </span>
+        </button>
+        <span className="adv-snowman-progress" aria-hidden>
+          <i data-filled={hits > 0} />
+          <i data-filled={hits > 1} />
+        </span>
+        <span
+          role="status"
+          className="text-center text-[11px] leading-tight text-text-tertiary sm:text-[12px]"
+        >
           {label}
         </span>
       </div>
