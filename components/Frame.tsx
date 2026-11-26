@@ -198,6 +198,7 @@ export const Frame = ({
         ref={frameRef}
         className={cn(
           "mt-4 border rounded inline-block overflow-hidden",
+          fullWidth && "w-full",
           className,
         )}
       >
