@@ -18,7 +18,7 @@ Instrument your agents with the SDKs or OpenTelemetry, or route model calls thro
 
 - **Your agents** — personal agents (coding and desktop assistants such as Claude Code, Codex, Cursor, and GitHub Copilot), custom agents (support, voice, RAG, workflows), and copilots and no-code tools (low-code and workflow builders such as Copilot Studio, n8n, Dify, and Flowise). See all [integrations](/integrations).
 - **SDKs / OpenTelemetry** — instrument your agents with the [Langfuse SDKs](/docs/observability/sdk/overview) or any [OpenTelemetry](/integrations/native/opentelemetry) exporter.
-- **[Langfuse AI Gateway](/docs/gateway/overview) (beta)** — gateway keys, model access, and cost per user for OpenAI and Anthropic calls, all traced automatically. You can also bring your own gateway.
+- **[Langfuse AI Gateway](/docs/gateway/overview) (new)** — gateway keys, model access, and cost per user for OpenAI and Anthropic calls, all traced automatically. You can also bring your own gateway.
 - **Langfuse** — observe with [tracing](/docs/observability/overview), [dashboards](/docs/metrics/features/custom-dashboards), and [alerts](/docs/observability/features/alerts); manage [prompts](/docs/prompt-management/overview) and [skills](/docs/skill-management/overview); evaluate with [evals](/docs/evaluation/overview), [datasets](/docs/evaluation/experiments/datasets), and [experiments](/docs/evaluation/experiments/experiments-via-sdk). The in-app agent [Halo](/docs/api-and-data-platform/features/halo) works with your Langfuse data, or you can [bring your own agent](/docs/api-and-data-platform/features/agent-skill). Every feature is available via [MCP](/docs/api-and-data-platform/features/mcp-server), [CLI](/docs/api-and-data-platform/features/cli), [API](/docs/api-and-data-platform/features/public-api), and [SDKs](/docs/observability/sdk/overview).
 
 ## Learn how the best teams build with AI
@@ -30,7 +30,7 @@ Langfuse is the platform. The [Langfuse Academy](/academy) is how you, and your 
 One integrated platform to trace, manage prompts, evaluate, and experiment from prototype to production scale. Every component works standalone, and they excel when used together.
 
 - **[Observability](/docs/observability/overview)** — hierarchical traces capture every LLM call, tool invocation, and retrieval step. Filter by user, session, cost, latency, or custom metadata.
-- **[AI Gateway](/docs/gateway/overview)** (beta) — swap the base URL and API key to route your OpenAI and Anthropic calls through Langfuse. Gateway keys show cost per user and key, and every call is traced automatically.
+- **[AI Gateway](/docs/gateway/overview)** (new) — swap the base URL and API key to route your OpenAI and Anthropic calls through Langfuse. Gateway keys show cost per user and key, and every call is traced automatically.
 - **[Evaluation](/docs/evaluation/overview)** — LLM-as-a-judge, heuristic functions, or human review. Run evaluators on production data or during experiments.
 - **[Prompt management](/docs/prompt-management/overview)** — separate prompts from code with one-click deployments and rollbacks.
 - **[Playground](/docs/prompt-management/features/playground)** — test prompts on real production inputs and compare models side by side.
@@ -54,7 +54,7 @@ Langfuse works with any language and framework supporting OpenTelemetry instrume
 
 Langfuse is built on open standards and data portability, and will not lock in your data.
 
-- **MIT license** — the core is MIT licensed, enterprise features need a license key, it scales to billions of monthly events, and you can fork, modify, and contribute. See [open source](/handbook/chapters/open-source).
+- **MIT license** — all product features are MIT licensed, scale to billions of monthly events, and you can fork, modify, and contribute. See [open source](/handbook/chapters/open-source).
 - **[Self-host at scale](/self-hosting)** — [Docker Compose](/self-hosting/deployment/docker-compose), [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm), and Terraform for [AWS](/self-hosting/deployment/aws), [GCP](/self-hosting/deployment/gcp), and [Azure](/self-hosting/deployment/azure).
 - **APIs and exports** — [REST APIs](/docs/api-and-data-platform/features/public-api) for everything, a [query SDK](/docs/api-and-data-platform/features/query-via-sdk), and [S3 blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage).
 - **Active community** — 35,000+ GitHub stars, 5,000+ Discord members, weekly releases and community hours.
