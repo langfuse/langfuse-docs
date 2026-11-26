@@ -197,6 +197,30 @@ jobs:
         if: always()
         run: kill "$SERVER_PID" || true
 
+  test-cookie-consent:
+    needs:
+      - pre-job
+    if: needs.pre-job.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
+        with:
+          runtime: node@24
+          cache: true
+          require-lockfile: true
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run cookie consent tests
+        run: pnpm run test:cookie-consent
+
   # Summary job that depends on all other jobs
   # This allows you to require only this single check in branch protection rules
   all-checks-pass:
@@ -209,6 +233,7 @@ jobs:
         # check-notebook-docs-sync,
         build-and-check-links,
         check-sitemap-links,
+        test-cookie-consent,
       ]
     if: always()
     steps:
