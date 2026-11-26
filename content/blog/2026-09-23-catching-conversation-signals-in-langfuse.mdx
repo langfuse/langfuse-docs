@@ -30,7 +30,7 @@ There are different types of signals in chat applications that can be used to mo
 
 Especially **conversation signals** help you steer your attention to the relevant traces from production as soon as manual review is not feasible anymore. They tell you something is going wrong. See the table below for a typical list of conversation signals.
 
-<Frame fullWidth className="w-full my-8">
+<Frame fullWidth className="my-8">
   ![Table of conversation signals including rephrase, correction, human hand-off, repeat, error quote, frustration, and success confirmation](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/conversation-signals-table.png)
 </Frame>
 
@@ -50,7 +50,7 @@ This means the same conversation can concurrently be evaluated for follow-up que
 
 Let us look at an example conversation in a support resolution. The user wants to rebook a flight. Over the course of the interaction she has to first correct the AI, then ask a follow up question, but then finally gets the request resolved. Multiple things are true here. The conversation outcome was successful. Nevertheless, the AI made a mistake first, and was apparently not effective enough in their answers to not cause a follow-up by a user.
 
-<Frame fullWidth className="w-full my-8">
+<Frame fullWidth className="my-8">
   ![Annotated rebooking chat where the user corrects the agent, asks a follow-up about bags and seat, then confirms the booking is resolved](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/rebooking-conversation.png)
 </Frame>
 
@@ -70,7 +70,7 @@ Go to the [Evaluator tab](https://cloud.langfuse.com/project/~/evals) and click 
 
 Choose the ‘User Conversation Signal’ template.
 
-<Frame fullWidth className="w-full my-8">
+<Frame fullWidth className="my-8">
   ![Configure evaluator dialog with Decision model selected and seven User Conversation Signal questions listed](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/template-questions.png)
 </Frame>
 
@@ -82,7 +82,7 @@ Add your [Jev connection](/faq/all/decision-model-typesafe-jev) if you have not 
 
 Choose the observations to run on and test.
 
-<Frame fullWidth className="w-full my-8">
+<Frame fullWidth className="my-8">
   ![Test the evaluator panel showing sample observations and Decision Model Output with yes or no verdicts and confidence for user conversation signal questions](/images/blog/2026-09-23-catching-conversation-signals-in-langfuse/test-evaluator.png)
 </Frame>
 
