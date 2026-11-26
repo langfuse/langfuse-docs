@@ -283,14 +283,27 @@ function createPostHogHarness(
       const cookieless =
         this.config.cookieless_mode === "always" ||
         explicitStatus !== "granted";
+      // Mirror posthog-js calculateEventProperties overwriting `title` with
+      // `document.title` on `$pageview`, followed by `before_send`.
+      const computedProps = properties ? { ...properties } : {};
+      if (name === "$pageview") {
+        computedProps.title = globalThis.document.title;
+      }
+      const eventPayload = { event: name, properties: computedProps };
+      const finalEvent = this.config.before_send
+        ? this.config.before_send(eventPayload)
+        : eventPayload;
+      if (!finalEvent) return;
+      const finalProps = finalEvent.properties;
       const record = {
         event: name,
         cookieless,
-        properties: properties ? { ...properties } : undefined,
+        properties: properties ? { ...finalProps } : undefined,
         options: options ? { ...options } : undefined,
         capturedAt: new Date(),
-        url: properties?.$current_url ?? globalThis.window.location.href,
-        pathname: properties?.$pathname ?? globalThis.window.location.pathname,
+        url: finalProps.$current_url ?? globalThis.window.location.href,
+        pathname: finalProps.$pathname ?? globalThis.window.location.pathname,
+        title: finalProps.title,
         timestamp: options?.timestamp ?? new Date(),
       };
       calls.push(["capture", name, cookieless ? "cookieless" : "consented"]);

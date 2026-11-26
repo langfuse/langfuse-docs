@@ -487,7 +487,7 @@ async function run() {
       );
       try {
         const startAt = Date.now();
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const loadedAt = Date.now();
         const gotPageview = await waitForCondition(
           () => capturedEvents.some((ev) => ev.event === "$pageview"),
@@ -529,6 +529,10 @@ async function run() {
 
         const storage = await inspectStorage(page);
         assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
+
+        // Pre-warm the first internal /docs/* link so later SPA navigation tests
+        // do not pay a cold Next.js dev compile inside the 10s consent window.
+        await navigateDocsLink(page);
         console.log("PASS: returning visitor with stored consent");
       } finally {
         await context.close();
@@ -544,7 +548,7 @@ async function run() {
       );
       try {
         const startAt = Date.now();
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const loadedAt = Date.now();
         const gotPageview = await waitForCondition(
           () => capturedEvents.some((ev) => ev.event === "$pageview"),
@@ -584,7 +588,7 @@ async function run() {
       );
       try {
         const loadStart = Date.now();
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const loadEnd = Date.now();
         await page.waitForTimeout(1_500);
         assert.deepEqual(
@@ -641,7 +645,7 @@ async function run() {
       );
       try {
         const loadStart = Date.now();
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const loadEnd = Date.now();
         await page.waitForTimeout(1_500);
         assert.deepEqual(capturedEvents, []);
@@ -685,7 +689,7 @@ async function run() {
       );
       try {
         const loadStart = Date.now();
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const loadEnd = Date.now();
         await page.waitForTimeout(1_200);
         assert.deepEqual(capturedEvents, []);
@@ -745,14 +749,25 @@ async function run() {
       );
       try {
         const loadStart = Date.now();
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const loadEnd = Date.now();
+        const firstTitle = await page.title();
         await page.waitForTimeout(1_000);
         assert.deepEqual(capturedEvents, []);
 
         const navStart = Date.now();
         const secondPathname = await navigateDocsLink(page);
         const navEnd = Date.now();
+        await waitForCondition(
+          async () => (await page.title()) !== firstTitle,
+          5_000,
+        );
+        const secondTitle = await page.title();
+        assert.notEqual(
+          secondTitle,
+          firstTitle,
+          `Expected distinct page titles across SPA navigation, both were ${JSON.stringify(firstTitle)}`,
+        );
         await page.waitForTimeout(1_000);
         assert.deepEqual(
           capturedEvents,
@@ -780,11 +795,21 @@ async function run() {
         assert.equal(pageviews[0].cookieless, false);
         assert.equal(pageviews[0].pathname, "/docs");
         assert.equal(pageviews[0].current_url, `${baseUrl}/docs`);
+        assert.equal(
+          pageviews[0].title,
+          firstTitle,
+          `Expected first queued $pageview to keep its original title ${JSON.stringify(firstTitle)}, got ${JSON.stringify(pageviews[0].title)}`,
+        );
         assert.ok(pageviews[0].session_id);
 
         assert.equal(pageviews[1].cookieless, false);
         assert.equal(pageviews[1].pathname, secondPathname);
         assert.equal(pageviews[1].current_url, `${baseUrl}${secondPathname}`);
+        assert.equal(
+          pageviews[1].title,
+          secondTitle,
+          `Expected second queued $pageview to keep its original title ${JSON.stringify(secondTitle)}, got ${JSON.stringify(pageviews[1].title)}`,
+        );
         assert.ok(pageviews[1].session_id);
 
         const ts0 = Date.parse(pageviews[0].timestamp);
@@ -817,7 +842,7 @@ async function run() {
         GRANTED_CONTEXT,
       );
       try {
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
         const gotInitial = await waitForCondition(
           () =>
             capturedEvents.some(
@@ -886,7 +911,7 @@ async function run() {
         );
         try {
           const loadStart = Date.now();
-          await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+          await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
           const loadEnd = Date.now();
           await page.waitForTimeout(5_000);
           assert.deepEqual(
@@ -932,7 +957,7 @@ async function run() {
         );
         try {
           const loadStart = Date.now();
-          await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+          await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
           const loadEnd = Date.now();
           await page.waitForTimeout(5_000);
           assert.deepEqual(
@@ -981,7 +1006,7 @@ async function run() {
           UNDECIDED_CONTEXT,
         );
         try {
-          await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+          await page.goto(`${baseUrl}/docs`, { waitUntil: "load" });
           const gotTimeout = await waitForCondition(
             () =>
               capturedEvents.some(

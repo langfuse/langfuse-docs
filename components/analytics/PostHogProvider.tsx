@@ -173,6 +173,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const lastCapturedPath = useRef<string | null>(null);
   const holdingRef = useRef(false);
   const queueRef = useRef<QueuedPageView[]>([]);
+  const flushingTitleRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -209,10 +210,15 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       if (queued.length === 0) return;
       queueRef.current = [];
       for (const entry of queued) {
-        posthog.capture("$pageview", entry.properties, {
-          timestamp: entry.timestamp,
-          ...extraOptions,
-        });
+        flushingTitleRef.current = entry.properties.title;
+        try {
+          posthog.capture("$pageview", entry.properties, {
+            timestamp: entry.timestamp,
+            ...extraOptions,
+          });
+        } finally {
+          flushingTitleRef.current = null;
+        }
       }
     };
 
@@ -290,8 +296,22 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         ...COOKIELESS_ONLY_CONFIG,
         before_send: (event) => {
           if (!event) return null;
-          if (readAnalyticsConsent() === "granted") return event;
-          return event.event === "$pageview" ? event : null;
+          if (
+            readAnalyticsConsent() !== "granted" &&
+            event.event !== "$pageview"
+          ) {
+            return null;
+          }
+          // posthog-js overwrites `title` with `document.title` at send time
+          // inside `calculateEventProperties`; restore the queued view's title.
+          if (
+            event.event === "$pageview" &&
+            flushingTitleRef.current !== null &&
+            event.properties
+          ) {
+            event.properties.title = flushingTitleRef.current;
+          }
+          return event;
         },
         loaded: (ph) => {
           initializedRef.current = true;
