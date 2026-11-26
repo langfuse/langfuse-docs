@@ -6,7 +6,7 @@ import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { crPageView } from "@/components/analytics/common-room";
 import { UseCaseAnalytics } from "@/components/analytics/UseCaseAnalytics";
-import { type ConsentState, readAnalyticsConsent } from "@/lib/cookie-consent";
+import { readAnalyticsConsent } from "@/lib/cookie-consent";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 const posthogCookieName = posthogKey
@@ -74,26 +74,20 @@ function clearPostHogSessionStorage() {
   }
 }
 
-// PostHog uses `cookieless_mode: "on_reject"` with `opt_out_persistence_by_default:
-// true` (without `opt_out_capturing_by_default`):
-// - "unknown": leave PostHog in "pending" with "memory" persistence (sends nothing,
-//   stores nothing).
-// - "denied": call `opt_out_capturing()` with "memory" persistence (sends cookieless
-//   `$pageview`s only via `before_send`; stores only PostHog's opt-out flag).
-// - "granted": switch to "cookie" persistence, opt in, and restore remote-config
-//   extension defaults.
-function applyAnalyticsConsent(): ConsentState {
-  const consent = readAnalyticsConsent();
-  if (consent === "granted") {
-    if (posthog.config?.persistence !== "cookie") {
-      // Switch from "memory" to "cookie" while persistence is still disabled
-      // so any existing cross-subdomain cookie is preserved before opt-in.
-      posthog.set_config({ persistence: "cookie" });
-    }
-    if (!posthog.has_opted_in_capturing()) {
-      posthog.opt_in_capturing({ captureEventName: false });
-    }
-    if (posthog.config?.disable_session_recording) {
+// PostHog runs in two states:
+// - Not "granted" ("unknown" or "denied"): `cookieless_mode: "always"` with
+//   "memory" persistence and `COOKIELESS_ONLY_CONFIG` (cookieless `$pageview`s
+//   only via `before_send`; no cookies, localStorage, or sessionStorage).
+// - "granted": switches to `cookieless_mode: "on_reject"`, "cookie"
+//   persistence, and `FULL_TRACKING_CONFIG`, then opts in.
+function applyAnalyticsConsent(): boolean {
+  if (readAnalyticsConsent() === "granted") {
+    if (
+      posthog.config &&
+      (posthog.config.cookieless_mode !== "on_reject" ||
+        posthog.config.persistence !== "cookie" ||
+        posthog.config.disable_session_recording)
+    ) {
       // Restore remote-config defaults for extensions the SDK leaves undefined:
       // `posthog.set_config` ignores `undefined` values when merging, then
       // unconditionally re-runs `heatmaps.startIfEnabled()`,
@@ -103,61 +97,50 @@ function applyAnalyticsConsent(): ConsentState {
       delete posthog.config.capture_heatmaps;
       delete posthog.config.capture_dead_clicks;
       delete posthog.config.capture_exceptions;
-      posthog.set_config(FULL_TRACKING_CONFIG);
+      posthog.set_config({
+        cookieless_mode: "on_reject",
+        persistence: "cookie",
+        ...FULL_TRACKING_CONFIG,
+      });
     }
-    return "granted";
+    if (!posthog.has_opted_in_capturing()) {
+      posthog.opt_in_capturing({ captureEventName: false });
+    }
+    return true;
   }
 
-  if (consent === "denied") {
-    // Opt out while persistence is still "cookie" (on a granted -> denied
-    // transition) so posthog-js deletes `ph_<key>_posthog` and enters
-    // cookieless mode with its refusal flag recorded.
-    if (posthog.get_explicit_consent_status() !== "denied") {
-      posthog.opt_out_capturing();
-    }
-    if (
-      posthog.config &&
-      (!posthog.config.disable_session_recording ||
-        posthog.config.persistence !== "memory")
-    ) {
-      posthog.set_config({ ...COOKIELESS_ONLY_CONFIG, persistence: "memory" });
-    }
-    clearStalePostHogCookie();
-    clearPostHogSessionStorage();
-    return "denied";
-  }
-
-  // "unknown": if PostHog was opted in (consent withdrawn without a "denied"
-  // reading), opt out first so the cookie is deleted, then clear back to
-  // "pending". Never write an opt-out flag for a visitor who never refused.
+  // Opt out while persistence is still "cookie" so posthog-js deletes
+  // `ph_<key>_posthog`, then clear the opt-out flag so nothing stays in
+  // localStorage, and switch back to `cookieless_mode: "always"` + "memory".
   if (posthog.has_opted_in_capturing()) {
     posthog.opt_out_capturing();
-    posthog.clear_opt_in_out_capturing();
-  } else if (posthog.get_explicit_consent_status() !== "pending") {
+  }
+  if (posthog.get_explicit_consent_status() !== "pending") {
     posthog.clear_opt_in_out_capturing();
   }
   if (
     posthog.config &&
-    (!posthog.config.disable_session_recording ||
-      posthog.config.persistence !== "memory")
+    (posthog.config.cookieless_mode !== "always" ||
+      posthog.config.persistence !== "memory" ||
+      !posthog.config.disable_session_recording)
   ) {
-    posthog.set_config({ ...COOKIELESS_ONLY_CONFIG, persistence: "memory" });
+    posthog.set_config({
+      ...COOKIELESS_ONLY_CONFIG,
+      cookieless_mode: "always",
+      persistence: "memory",
+    });
   }
   clearStalePostHogCookie();
   clearPostHogSessionStorage();
-  return "unknown";
+  return false;
 }
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isInitialPageView = useRef(true);
   const [ready, setReady] = useState(false);
-  const [analyticsConsent, setAnalyticsConsent] =
-    useState<ConsentState>("unknown");
-  const lastCaptured = useRef<{
-    path: string;
-    consent: "denied" | "granted";
-  } | null>(null);
+  const [analyticsGranted, setAnalyticsGranted] = useState(false);
+  const lastCaptured = useRef<{ path: string; granted: boolean } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -170,7 +153,7 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
 
     const syncConsent = () => {
-      setAnalyticsConsent(applyAnalyticsConsent());
+      setAnalyticsGranted(applyAnalyticsConsent());
     };
 
     const initialGranted = readAnalyticsConsent() === "granted";
@@ -179,27 +162,25 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       api_host:
         process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
       ui_host: "https://eu.posthog.com",
-      // Start in "memory" when analytics consent is not already granted so
-      // posthog-js does not write `__ph_cookie_support_<uuid>` or `dmn_chk_*`
-      // probe cookies during init.
+      // Start in `cookieless_mode: "always"` with "memory" persistence when
+      // analytics consent is not already granted so no cookies, localStorage,
+      // or sessionStorage keys (including `__ph_cookie_support_*`) are written.
+      // `opt_out_capturing_by_default: true` also ensures that switching to
+      // `cookieless_mode: "on_reject"` before `opt_in_capturing()` keeps
+      // posthog-js in cookieless/persistence-disabled state until opt-in runs
+      // so SessionIdManager and SessionRecording are initialized on grant.
+      cookieless_mode: initialGranted ? "on_reject" : "always",
       persistence: initialGranted ? "cookie" : "memory",
       cross_subdomain_cookie: true,
       // Route changes are captured below, including the initial page exactly once.
       capture_pageview: false,
-      // Fail closed: start pending (sends nothing, stores nothing) until the
-      // visitor answers. On rejection (`opt_out_capturing()`), capture
-      // cookieless `$pageview`s only.
-      cookieless_mode: "on_reject",
+      opt_out_capturing_by_default: true,
       opt_out_persistence_by_default: true,
       ...COOKIELESS_ONLY_CONFIG,
       before_send: (event) => {
         if (!event) return null;
-        const consent = readAnalyticsConsent();
-        if (consent === "granted") return event;
-        if (consent === "denied") {
-          return event.event === "$pageview" ? event : null;
-        }
-        return null;
+        if (readAnalyticsConsent() === "granted") return event;
+        return event.event === "$pageview" ? event : null;
       },
       loaded: (ph) => {
         syncConsent();
@@ -235,30 +216,24 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready || !pathname) return;
-    if (analyticsConsent === "unknown") {
-      if (lastCaptured.current?.path === pathname) {
-        lastCaptured.current = null;
-      }
-      return;
-    }
     const samePath = lastCaptured.current?.path === pathname;
-    if (analyticsConsent === "denied") {
+    if (!analyticsGranted) {
       if (samePath) {
-        // Record denied state so a later re-grant on the same page recaptures
-        // a consented $pageview, without emitting a second pageview on revoke.
-        lastCaptured.current = { path: pathname, consent: "denied" };
+        // Clear the granted flag so re-granting on the same page recaptures a
+        // consented $pageview for the new opted-in identity.
+        lastCaptured.current = { path: pathname, granted: false };
         return;
       }
-    } else if (samePath && lastCaptured.current?.consent === "granted") {
+    } else if (samePath && lastCaptured.current?.granted) {
       return;
     }
-    lastCaptured.current = { path: pathname, consent: analyticsConsent };
+    lastCaptured.current = { path: pathname, granted: analyticsGranted };
     posthog.capture("$pageview");
-  }, [pathname, ready, analyticsConsent]);
+  }, [pathname, ready, analyticsGranted]);
 
   return (
     <PHProvider client={posthog}>
-      <UseCaseAnalytics ready={ready && analyticsConsent === "granted"} />
+      <UseCaseAnalytics ready={ready && analyticsGranted} />
       {children}
     </PHProvider>
   );
