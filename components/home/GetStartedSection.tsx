@@ -279,8 +279,9 @@ export function GetStartedSection() {
               in under 5 minutes.
             </Heading>
             <Text className="text-left">
-              Free tier: <span className="text-primary">50k units/month</span>.
-              No credit card required.
+              Free tier:{" "}
+              <span className="text-primary">50k observations/month</span>. No
+              credit card required.
             </Text>
           </div>
           <div className="flex md:flex-col gap-0 items-start shrink-0 w-full sm:w-[150px] mt-2">

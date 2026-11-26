@@ -74,10 +74,7 @@ const cards = [
   {
     title: "MIT license",
     bullets: [
-      {
-        label: "Core MIT licensed, enterprise features need a license key",
-        href: "/self-hosting",
-      },
+      { label: "All product features MIT licensed", href: "/self-hosting" },
       {
         label: "Scales to billions of monthly events",
         href: "/self-hosting/configuration/scaling",

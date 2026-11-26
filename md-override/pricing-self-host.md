@@ -17,7 +17,7 @@ Self-host all core Langfuse features for free without any limitations.
 - All core platform features and APIs (observability, evaluation, prompt management, datasets, etc.)
 - Scalability of Langfuse Cloud
 - Deployment docs & Helm chart
-- Enterprise SSO and organization-level RBAC
+- Enterprise SSO and RBAC
 - Community support
 - Unlimited units / usage
 
@@ -98,7 +98,7 @@ Dedicated Langfuse deployment for government and regulated industries.
 | Projects                                                                                                                | Unlimited                   | Unlimited                                  | Unlimited             |
 | Users                                                                                                                   | Unlimited                   | Unlimited                                  | Unlimited             |
 | **AI Gateway**                                                                                                          |                             |                                            |                       |
-| AI Gateway (beta)                                                                                                       | Yes                         | Yes                                        | Yes                   |
+| AI Gateway                                                                                                              | Yes                         | Yes                                        | Yes                   |
 | **API**                                                                                                                 |                             |                                            |                       |
 | [Extensive public API](/docs/api-and-data-platform/features/public-api)                                                 | Yes                         | Yes                                        | Yes                   |
 | [Metrics & Observations APIs (v2)](/docs/metrics/features/metrics-api#v2)                                               | Langfuse v4+                | Langfuse v4+                               | Langfuse v4+          |

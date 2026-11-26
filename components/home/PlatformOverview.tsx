@@ -221,7 +221,7 @@ function GatewayNode({ className }: { className?: string }) {
             className="h-auto max-h-7 w-auto min-w-0 max-w-full"
           />
           <span className="shrink-0 bg-surface-cta-primary px-1.5 py-0.5 font-mono text-[10px] leading-none text-text-primary">
-            beta
+            new
           </span>
         </div>
         <Title>AI Gateway</Title>
