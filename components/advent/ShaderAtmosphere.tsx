@@ -18,6 +18,7 @@ uniform float u_mode;
 uniform float u_beat;
 uniform float u_build;
 uniform float u_travel;
+uniform float u_slop;
 
 float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -141,12 +142,27 @@ void main() {
   club += silver * snowfall.y * .18;
   vec3 color = mix(winter, club, u_mode);
   color += grain * mix(.3, .5, u_mode);
+  // Slop escalates from glossy aurora into repeated, mirrored inversions.
+  if (u_slop > .001) {
+    vec2 goo=(css-u_size*.5)/min(u_size.x,u_size.y);
+    float a=atan(goo.y,goo.x)+u_time*.13*u_slop;
+    float sectors=3.+floor(u_slop*6.);
+    a=abs(mod(a+3.14159/sectors,6.28318/sectors)-3.14159/sectors);
+    vec2 fold=length(goo)*vec2(cos(a),sin(a));
+    for(int i=0;i<4;i++) fold=abs(fold)/max(dot(fold,fold),.22)-vec2(.82,.63)+sin(u_time*.17)*.03*u_slop;
+    vec3 rainbow=.55+.45*cos(vec3(.2,2.4,4.5)+length(fold)*2.+u_time*.3);
+    vec3 gloss=mix(vec3(.77,.58,.95),vec3(.98,.64,.84),.5+.5*sin(goo.x*4.+goo.y*3.+u_time*.3));
+    color=mix(color,gloss,u_slop*.24);
+    color=mix(color,rainbow,smoothstep(.22,1.,u_slop)*.72);
+    color+=pow(max(0.,sin(length(fold)*9.-u_time)),16.)*u_slop*.15;
+  }
   gl_FragColor = vec4(color, 1.);
 }
 `;
 
 type ShaderAtmosphereProps = {
   techno: boolean;
+  slop?: number;
   reducedMotion: boolean;
   getFrame: () => MusicFrame;
 };
@@ -167,13 +183,14 @@ function compileShader(
 
 export function ShaderAtmosphere({
   techno,
+  slop = 0,
   reducedMotion,
   getFrame,
 }: ShaderAtmosphereProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const inputRef = useRef({ techno, reducedMotion, getFrame });
+  const inputRef = useRef({ techno, slop, reducedMotion, getFrame });
   const invalidateRef = useRef<() => void>(() => {});
-  inputRef.current = { techno, reducedMotion, getFrame };
+  inputRef.current = { techno, slop, reducedMotion, getFrame };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -258,6 +275,7 @@ export function ShaderAtmosphere({
           "u_beat",
           "u_build",
           "u_travel",
+          "u_slop",
         ].map((name) => [name, gl.getUniformLocation(program, name)]),
       );
       canvas.dataset.renderer = "webgl";
@@ -314,6 +332,7 @@ export function ShaderAtmosphere({
         gl.uniform1f(uniforms.u_mode, mode);
         gl.uniform1f(uniforms.u_build, build);
         gl.uniform1f(uniforms.u_travel, travel);
+        gl.uniform1f(uniforms.u_slop, input.slop);
         gl.uniform1f(
           uniforms.u_beat,
           input.reducedMotion ? 0 : music.pulse * mode,
@@ -391,7 +410,7 @@ export function ShaderAtmosphere({
 
   useEffect(() => {
     invalidateRef.current();
-  }, [techno, reducedMotion]);
+  }, [techno, reducedMotion, slop]);
 
   return (
     <canvas

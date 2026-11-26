@@ -60,6 +60,9 @@ export function createDubSpace(ctx: AudioContext, destination: AudioNode) {
     left,
     right,
     feedback,
+    panL,
+    panR,
+    lowpass,
     nodes: [
       input,
       highpass,

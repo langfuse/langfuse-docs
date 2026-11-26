@@ -204,6 +204,12 @@ type MusicGraph = {
   spaceSend: GainNode;
   effects: GainNode;
   winter: GainNode;
+  duck: GainNode;
+  winterDuck: GainNode;
+  winterSpace: GainNode;
+  clean: GainNode;
+  crushed: GainNode;
+  orbit: StereoPannerNode;
   lead: GainNode;
   answer: GainNode;
   rhythm: GainNode;
@@ -235,6 +241,12 @@ export class JinglePlayer {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private volume = 1;
+  private slop = 0;
+  private transitionSound: GainNode | null = null;
+  private journey: { at: number; duration: number } | null = null;
+  setSlop(value: number) {
+    this.slop = clamp(value);
+  }
 
   setVolume(volume: number) {
     this.volume = Math.max(0, Math.min(1, volume));
@@ -286,6 +298,30 @@ export class JinglePlayer {
       duration:
         (techno ? SCENE_TRANSITION_SECONDS : 5) * Math.abs(target - from),
     };
+    if (this.transitionSound && this.ctx) {
+      this.transitionSound.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+      this.transitionSound = null;
+    }
+    if (this.ctx?.state === "running" && this.graph) {
+      const duration = this.transition.duration;
+      const time = this.ctx.currentTime + delay;
+      const bus = this.spatialBus(
+        this.ctx,
+        this.graph.effects,
+        time,
+        duration,
+        techno ? -1 : 1,
+      );
+      this.transitionSound = bus;
+      this.lowTone(
+        this.ctx,
+        bus,
+        techno ? 98 : 130.8,
+        time,
+        Math.max(0.1, duration),
+        0.15,
+      );
+    }
   }
 
   getFrame = (): MusicFrame => {
@@ -389,9 +425,21 @@ export class JinglePlayer {
     this.ctx = null;
   }
 
-  private createGraph(ctx: AudioContext, out: AudioNode): MusicGraph {
+  private createGraph(ctx: AudioContext, destination: AudioNode): MusicGraph {
+    const out = ctx.createGain();
+    const clean = ctx.createGain(),
+      crushed = ctx.createGain();
+    const distort = ctx.createWaveShaper(),
+      orbit = ctx.createStereoPanner();
+    distort.curve = SYNTH_DRIVE;
+    distort.oversample = "2x";
+    clean.gain.value = 1;
+    crushed.gain.value = 0;
+    out.connect(clean).connect(orbit).connect(destination);
+    out.connect(distort).connect(crushed).connect(orbit);
     const winter = ctx.createGain();
-    winter.connect(out);
+    const winterDuck = ctx.createGain();
+    winter.connect(winterDuck).connect(out);
     const compressor = ctx.createDynamicsCompressor();
     compressor.threshold.value = -12;
     compressor.knee.value = 3;
@@ -402,12 +450,17 @@ export class JinglePlayer {
     output.gain.value = 1.3;
     compressor.connect(output).connect(out);
 
-    const space = createDubSpace(ctx, compressor);
+    const duck = ctx.createGain();
+    duck.connect(compressor);
+    const space = createDubSpace(ctx, duck);
+    const winterSpace = ctx.createGain();
+    winterSpace.gain.value = 0;
+    winter.connect(winterSpace).connect(space.input);
     const spaceSend = ctx.createGain();
     spaceSend.connect(space.input);
     const effects = ctx.createGain();
     effects.gain.value = 0.55;
-    effects.connect(compressor);
+    effects.connect(duck);
     effects.connect(space.input);
     const lead = ctx.createGain();
     const leadFilter = ctx.createBiquadFilter();
@@ -416,7 +469,7 @@ export class JinglePlayer {
     const leadDrive = ctx.createWaveShaper();
     leadDrive.curve = SYNTH_DRIVE;
     leadDrive.oversample = "2x";
-    lead.connect(leadDrive).connect(leadFilter).connect(compressor);
+    lead.connect(leadDrive).connect(leadFilter).connect(duck);
     leadFilter.connect(spaceSend);
     const echo = ctx.createDelay(1);
     const feedback = ctx.createGain();
@@ -428,7 +481,7 @@ export class JinglePlayer {
       .connect(echoFilter)
       .connect(feedback)
       .connect(echo);
-    feedback.connect(compressor);
+    feedback.connect(duck);
 
     const answer = ctx.createGain();
     const answerDrive = ctx.createWaveShaper();
@@ -437,9 +490,9 @@ export class JinglePlayer {
     const answerFilter = ctx.createBiquadFilter();
     answerFilter.type = "lowpass";
     answerFilter.frequency.value = 900;
-    answer.connect(answerDrive).connect(answerFilter).connect(compressor);
+    answer.connect(answerDrive).connect(answerFilter).connect(duck);
     const rhythm = ctx.createGain();
-    rhythm.connect(compressor);
+    rhythm.connect(duck);
     const kick = ctx.createGain();
     const kickDrive = ctx.createWaveShaper();
     kickDrive.curve = KICK_DRIVE;
@@ -454,13 +507,21 @@ export class JinglePlayer {
     const rumbleFeedback = ctx.createGain();
     rumbleFeedback.gain.value = 0.48;
     kickDrive.connect(rumbleDelay).connect(rumbleFilter).connect(rumble);
-    rumble.connect(compressor);
+    rumble.connect(duck);
     rumbleFilter.connect(rumbleFeedback).connect(rumbleDelay);
     const nodes: AudioNode[] = [
+      out,
+      clean,
+      crushed,
+      distort,
+      orbit,
       ...space.nodes,
       spaceSend,
       effects,
       winter,
+      duck,
+      winterDuck,
+      winterSpace,
       compressor,
       output,
       lead,
@@ -481,10 +542,16 @@ export class JinglePlayer {
       rumbleFeedback,
     ];
     const graph = {
+      clean,
+      crushed,
+      orbit,
       space,
       spaceSend,
       effects,
       winter,
+      duck,
+      winterDuck,
+      winterSpace,
       lead,
       answer,
       rhythm,
@@ -500,9 +567,46 @@ export class JinglePlayer {
   }
 
   private updateGraph(ctx: AudioContext, g: MusicGraph) {
-    const { mix, bpm } = this.getFrame();
+    const { mix, bpm, build } = this.getFrame();
     const time = ctx.currentTime;
-    g.spaceSend.gain.setTargetAtTime(0.12 + mix * 0.48, time, 0.1);
+    const journey = this.journey;
+    const progress = journey
+      ? clamp((time - journey.at) / journey.duration)
+      : 0;
+    const spaceMotion = Math.max(build, Math.sin(progress * Math.PI));
+    g.winterSpace.gain.setTargetAtTime(
+      spaceMotion * 0.5 + this.slop * 0.22,
+      time,
+      0.08,
+    );
+    g.clean.gain.setTargetAtTime(1 - this.slop * 0.6, time, 0.08);
+    g.crushed.gain.setTargetAtTime(this.slop * 0.28, time, 0.08);
+    g.orbit.pan.setTargetAtTime(
+      Math.sin(time * (1 + this.slop * 5)) * this.slop * 0.95,
+      time,
+      0.035,
+    );
+    g.spaceSend.gain.setTargetAtTime(
+      0.12 + mix * 0.48 + spaceMotion * 0.4,
+      time,
+      0.1,
+    );
+    g.space.panL.pan.setTargetAtTime(
+      Math.max(-1, -0.45 - spaceMotion * 0.5 - mix * 0.2),
+      time,
+      0.08,
+    );
+    g.space.panR.pan.setTargetAtTime(
+      Math.min(1, 0.45 + spaceMotion * 0.5 + mix * 0.2),
+      time,
+      0.08,
+    );
+    g.space.lowpass.frequency.setTargetAtTime(
+      1800 - spaceMotion * 1000,
+      time,
+      0.1,
+    );
+    g.space.feedback.gain.setTargetAtTime(0.5 + spaceMotion * 0.14, time, 0.1);
     g.space.left.delayTime.setTargetAtTime((60 / bpm) * 1.5, time, 0.25);
     g.space.right.delayTime.setTargetAtTime((60 / bpm) * 2.5, time, 0.25);
     g.winter.gain.setTargetAtTime(1 - smooth(0.05, 0.88, mix), time, 0.035);
@@ -513,7 +617,11 @@ export class JinglePlayer {
     g.rumble.gain.setTargetAtTime(smooth(0.45, 1, mix) * 0.65, time, 0.035);
     g.feedback.gain.setTargetAtTime(0.12 + mix * 0.25, time, 0.04);
     g.echo.delayTime.setTargetAtTime((60 / bpm) * 0.75, time, 0.08);
-    g.leadFilter.frequency.setTargetAtTime(500 + mix * 6500, time, 0.05);
+    g.leadFilter.frequency.setTargetAtTime(
+      (500 + mix * 6500) * (1 + this.slop * Math.sin(time * 7) * 0.65),
+      time,
+      0.05,
+    );
   }
 
   private ensureContext(): AudioContext | null {
@@ -637,13 +745,19 @@ export class JinglePlayer {
     mix: number,
   ) {
     if (step % 4 === 0) {
-      // Let the kick speak, then let the room swell into the offbeat.
-      g.space.wet.gain.cancelScheduledValues(time);
-      g.space.wet.gain.setValueAtTime(0.08 + mix * 0.04, time);
-      g.space.wet.gain.linearRampToValueAtTime(
-        0.22 + mix * 0.2,
-        time + beat * 0.7,
-      );
+      // Both the dry voices and all delay/reverb returns duck on the audio clock.
+      const depth = 0.9 * smooth(0.05, 0.7, mix);
+      for (const bus of [g.duck, g.winterDuck]) {
+        const attack = Math.max(ctx.currentTime, time - 0.003);
+        bus.gain.cancelScheduledValues(attack);
+        bus.gain.setValueAtTime(1, attack);
+        bus.gain.linearRampToValueAtTime(1 - depth, time + 0.002);
+        bus.gain.setValueAtTime(1 - depth, time + 0.025);
+        bus.gain.exponentialRampToValueAtTime(
+          1,
+          time + Math.min(0.16, beat * 0.65),
+        );
+      }
       const body = ctx.createOscillator();
       const gain = ctx.createGain();
       body.frequency.setValueAtTime(190, time);
@@ -737,7 +851,8 @@ export class JinglePlayer {
       const osc = ctx.createOscillator();
       osc.type = direction < 0 ? "sawtooth" : "square";
       osc.frequency.value = freq;
-      osc.detune.value = direction * (3 + mix * 13);
+      osc.detune.value =
+        direction * (3 + mix * 13) + (Math.random() - 0.5) * this.slop * 700;
       osc.connect(filter);
       osc.start(time);
       osc.stop(time + release + 0.02);
@@ -799,11 +914,19 @@ export class JinglePlayer {
     if (!ctx || !graph || ctx.state !== "running") return;
     const time = ctx.currentTime;
     const root = [82.4, 65.4, 98][day % 3];
-    const bus = ctx.createGain();
-    bus.connect(graph.effects);
     const duration = seconds ?? getFoldSeconds(berlin, closing);
+    const journey = { at: time, duration };
+    this.journey = journey;
+    const bus = this.spatialBus(
+      ctx,
+      graph.effects,
+      time,
+      duration,
+      closing ? 1 : -1,
+    );
     const cleanup = setTimeout(() => bus.disconnect(), (duration + 1) * 1000);
     const cancel = () => {
+      if (this.journey === journey) this.journey = null;
       bus.gain.cancelScheduledValues(ctx.currentTime);
       bus.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
       clearTimeout(cleanup);
@@ -870,6 +993,73 @@ export class JinglePlayer {
     return cancel;
   }
 
+  private spatialBus(
+    ctx: AudioContext,
+    out: AudioNode,
+    time: number,
+    duration: number,
+    direction: number,
+  ) {
+    const bus = ctx.createGain();
+    const pan = ctx.createStereoPanner();
+    pan.pan.setValueAtTime(0, time);
+    pan.pan.linearRampToValueAtTime(direction * 0.8, time + duration * 0.28);
+    pan.pan.linearRampToValueAtTime(direction * -0.8, time + duration * 0.65);
+    pan.pan.linearRampToValueAtTime(0, time + duration);
+    bus.connect(pan).connect(out);
+    setTimeout(
+      () => {
+        bus.disconnect();
+        pan.disconnect();
+      },
+      (Math.max(0, time - ctx.currentTime) + duration + 1) * 1000,
+    );
+    return bus;
+  }
+
+  shatter(pan: number) {
+    const ctx = this.ctx,
+      graph = this.graph;
+    if (!ctx || !graph || ctx.state !== "running") return;
+    const time = ctx.currentTime;
+    const bus = this.spatialBus(
+      ctx,
+      graph.effects,
+      time,
+      1.8,
+      pan < 0 ? -1 : 1,
+    );
+    this.lowTone(ctx, bus, 80, time, 1.1, 0.6);
+    this.noiseHit(ctx, bus, time, 0.35, 0.35, 1200, "lowpass");
+    for (let i = 0; i < 5; i++)
+      this.lowTone(
+        ctx,
+        bus,
+        180 + i * 67,
+        time + i * 0.035,
+        0.22 + i * 0.04,
+        0.08,
+      );
+  }
+
+  hover(day: number, pan: number) {
+    const ctx = this.ctx,
+      graph = this.graph;
+    if (!ctx || !graph || ctx.state !== "running") return;
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = Math.max(-1, Math.min(1, pan));
+    panner.connect(graph.effects);
+    this.lowTone(
+      ctx,
+      panner,
+      98 * Math.pow(2, (day % 5) / 12),
+      ctx.currentTime,
+      0.22,
+      0.07,
+    );
+    setTimeout(() => panner.disconnect(), 350);
+  }
+
   private lowTone(
     ctx: AudioContext,
     out: AudioNode,
@@ -922,6 +1112,7 @@ export class JinglePlayer {
       const partial = ctx.createGain();
       osc.type = "sine";
       osc.frequency.setValueAtTime(freq * 2 * ratio, time);
+      osc.detune.setValueAtTime((Math.random() - 0.5) * this.slop * 500, time);
       partial.gain.value = level;
       osc.connect(partial).connect(gain);
       osc.start(time);

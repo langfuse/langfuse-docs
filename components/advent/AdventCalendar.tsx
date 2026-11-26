@@ -30,7 +30,11 @@ import {
 import { cn } from "@/lib/utils";
 import { PageFold, type PageFoldHandle } from "./PageFold";
 import { WelcomeFlight } from "./WelcomeFlight";
-import { AfterhoursPass, SceneSwitch } from "./Afterhours";
+import { LogoKnot } from "./LogoKnot";
+import { SlopSlider, SlopDecorations, slopPhrase } from "./Slop";
+import { CalendarShatter, type CalendarShatterHandle } from "./CalendarShatter";
+import { useCalendarPhysics } from "./useCalendarPhysics";
+import { SceneSwitch } from "./Afterhours";
 import { AdventStyles } from "./styles";
 import { DoorAnimation } from "./DoorAnimation";
 import { JinglePlayer, type MusicFrame } from "./jingles";
@@ -194,6 +198,18 @@ function useJingles() {
     };
   }, [start]);
   const welcome = useCallback(() => playerRef.current?.welcome(), []);
+  const setSlop = useCallback(
+    (value: number) => playerRef.current?.setSlop(value),
+    [],
+  );
+  const shatter = useCallback(
+    (pan: number) => playerRef.current?.shatter(pan),
+    [],
+  );
+  const hover = useCallback(
+    (day: number, pan: number) => playerRef.current?.hover(day, pan),
+    [],
+  );
 
   const thud = useCallback((delay: number) => {
     if (enabledRef.current) playerRef.current?.thud(delay);
@@ -225,6 +241,9 @@ function useJingles() {
   return {
     start,
     welcome,
+    shatter,
+    setSlop,
+    hover,
     volume,
     changeVolume,
     thud,
@@ -277,11 +296,13 @@ function DoorTile({
   state,
   wiggle,
   onSelect,
+  onHover,
 }: {
   door: AdventDoor;
   index: number;
   state: DoorState;
   wiggle: boolean;
+  onHover: (day: number, x: number) => void;
   onSelect: (
     day: number,
     element: HTMLElement,
@@ -310,6 +331,7 @@ function DoorTile({
         } as CSSProperties
       }
       aria-label={label}
+      onPointerEnter={(event) => onHover(door.day, event.clientX)}
       onClick={(e) =>
         onSelect(
           door.day,
@@ -531,6 +553,8 @@ function StatusLine({
 }
 
 export function AdventCalendar() {
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const shatterRef = useRef<CalendarShatterHandle>(null);
   const [experience, setExperience] = useState<
     "intro" | "flying" | "arriving" | "ready"
   >("intro");
@@ -553,6 +577,8 @@ export function AdventCalendar() {
   const snowmanBallsRef = useRef(0);
   const snowmanHitsRef = useRef(0);
   const [snowmanHits, setSnowmanHits] = useState(0);
+  const hitResetTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(hitResetTimer.current), []);
   const wobbleTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [snowmanHit, setSnowmanHit] = useState(false);
   const [annoyed, setAnnoyed] = useState(false);
@@ -571,7 +597,37 @@ export function AdventCalendar() {
   const revealCalendar = useCallback(() => setExperience("arriving"), []);
   const finishFlight = useCallback(() => setExperience("ready"), []);
   const [techno, setTechno] = useState(false);
-  const [passOpen, setPassOpen] = useState(false);
+  const [slop, setSlop] = useState(0);
+  const changeSlop = (value: number) => {
+    setSlop(value);
+    music.setSlop(value / 100);
+  };
+  const impulse = useCalendarPhysics(
+    sceneRef,
+    experience === "ready" && activeDay === null,
+    reducedMotion,
+  );
+  const impact = useCallback(
+    (x: number, y: number) => {
+      if (experience !== "ready" || dialogOpenRef.current || openingRef.current)
+        return;
+      impulse(x, y);
+      shatterRef.current?.hit(x, y);
+      music.shatter((x / innerWidth) * 2 - 1);
+    },
+    [experience, impulse, music.shatter],
+  );
+  const hoverDoor = useCallback(
+    (day: number, x: number) => {
+      if (experience === "ready") music.hover(day, (x / innerWidth) * 2 - 1);
+    },
+    [experience, music.hover],
+  );
+  useEffect(() => {
+    if (experience !== "ready") return;
+    const timer = setTimeout(() => shatterRef.current?.prepare(), 600);
+    return () => clearTimeout(timer);
+  }, [experience]);
   const changeScene = useCallback(
     (value: boolean) => {
       setTechno(value);
@@ -586,7 +642,7 @@ export function AdventCalendar() {
   }, [changeScene]);
   const { thud } = music;
 
-  dialogOpenRef.current = activeDay !== null || passOpen;
+  dialogOpenRef.current = activeDay !== null;
   useEffect(() => {
     const update = () => {
       const now = new Date();
@@ -627,6 +683,7 @@ export function AdventCalendar() {
    */
   const throwAt = useCallback(
     (x: number, y: number) => {
+      shatterRef.current?.prepare();
       canvasRef.current?.throwSnowball(x, y);
       thud(SNOWBALL_DURATION / 1000);
       return SNOWBALL_DURATION;
@@ -654,6 +711,7 @@ export function AdventCalendar() {
       // Not at the pointer: that is usually on the snowman himself.
       const toX = window.innerWidth * (0.3 + Math.random() * 0.4);
       const toY = window.innerHeight * (0.3 + Math.random() * 0.3);
+      shatterRef.current?.prepare();
       canvasRef.current?.throwBack(fromX, fromY, toX, toY);
       thud(THROW_BACK_DURATION / 1000);
     }, SNOWMAN_RELEASE_MS);
@@ -665,6 +723,7 @@ export function AdventCalendar() {
     setSnowmanHit(false);
     requestAnimationFrame(() => setSnowmanHit(true));
     wobbleTimer.current = setTimeout(() => setSnowmanHit(false), HIT_WOBBLE_MS);
+    clearTimeout(hitResetTimer.current);
     snowmanHitsRef.current += 1;
     setSnowmanHits(snowmanHitsRef.current);
     if (snowmanHitsRef.current < SNOWMAN_HITS_PER_LEVEL) {
@@ -672,7 +731,7 @@ export function AdventCalendar() {
       return;
     }
     snowmanHitsRef.current = 0;
-    setSnowmanHits(0);
+    hitResetTimer.current = setTimeout(() => setSnowmanHits(0), 300);
     if (snowmanBallsRef.current < SNOWMAN_MAX_BALLS) {
       snowmanBallsRef.current += 1;
       setSnowmanBalls(snowmanBallsRef.current);
@@ -760,6 +819,7 @@ export function AdventCalendar() {
       }, landsIn);
       return;
     }
+    shatterRef.current?.cancel();
     openingRef.current = true;
     try {
       const rect = element.getBoundingClientRect();
@@ -846,6 +906,7 @@ export function AdventCalendar() {
 
   return (
     <div
+      ref={sceneRef}
       className="adv-page relative overflow-hidden"
       onDragStart={(event) => {
         if (!(event.target as HTMLElement).closest('[role="dialog"]'))
@@ -853,12 +914,15 @@ export function AdventCalendar() {
       }}
       data-mode={techno ? "techno" : "winter"}
       data-experience={experience}
+      data-slop-level={Math.floor(slop / 25)}
+      style={{ "--adv-slop": slop / 100 } as CSSProperties}
       onClickCapture={begin}
     >
       <ShaderAtmosphere
         techno={techno}
         reducedMotion={reducedMotion}
         getFrame={music.getFrame}
+        slop={slop / 100}
       />
       <AdventStyles />
       <PageFold ref={foldRef} />
@@ -868,15 +932,51 @@ export function AdventCalendar() {
         onComplete={finishFlight}
         onSound={music.welcome}
       />
-      <WinterCanvas ref={canvasRef} active={activeDay === null && !passOpen} />
+      <CalendarShatter ref={shatterRef} />
+      <WinterCanvas
+        ref={canvasRef}
+        active={activeDay === null}
+        onImpact={impact}
+      />
 
-      <header className="adv-experience-header">
-        <a className="adv-home" href="/" aria-label="Langfuse home">
-          langfuse<span>December 01—24</span>
+      <nav className="adv-nav" aria-label="Main navigation" data-no-snowball>
+        <a className="adv-brand" href="/" aria-label="Langfuse home">
+          <img
+            src="/brand-assets/wordmark/light/langfuse-by-clickhouse.svg"
+            width="150"
+            height="40"
+            alt="Langfuse by ClickHouse"
+          />
+          <img
+            className="adv-brand-night"
+            src="/brand-assets/wordmark/dark/langfuse-by-clickhouse-white.svg"
+            width="150"
+            height="40"
+            alt=""
+            aria-hidden
+          />
         </a>
+        <div className="adv-nav-links">
+          <a href="/docs">Docs</a>
+          <a href="/docs/gateway/overview">
+            AI Gateway <ArrowUpRight size={13} />
+          </a>
+          <a href="https://cloud.langfuse.com">
+            Launch app <ArrowUpRight size={13} />
+          </a>
+        </div>
+      </nav>
+      <header className="adv-experience-header">
+        <div className="adv-knot-stage">
+          <LogoKnot />
+        </div>
         <div className="adv-heading">
           <h1>
-            Gateway to{" "}
+            {slop >= 75
+              ? "Unlock your"
+              : slop >= 50
+                ? "Delve into"
+                : "Gateway to"}{" "}
             <span className="adv-title-swap">
               <span className="adv-title-day adv-title-accent">Christmas</span>
               <span className="adv-title-night" aria-hidden>
@@ -887,7 +987,7 @@ export function AdventCalendar() {
           <p className="adv-intro-copy">
             The Langfuse AI Gateway Advent Calendar.
             <br />
-            24 doors, 24 features. A little magic behind each one.
+            24 doors, 24 features. {slopPhrase(slop)}
           </p>
         </div>
         <div className="adv-start-action">
@@ -902,7 +1002,6 @@ export function AdventCalendar() {
           <span>Turn the sound up. Step inside.</span>
         </div>
         <div className="adv-header-controls" data-no-snowball>
-          <MusicVolume volume={music.volume} onVolume={music.changeVolume} />
           <SceneSwitch
             techno={techno}
             onChange={changeScene}
@@ -911,24 +1010,9 @@ export function AdventCalendar() {
         </div>
       </header>
       <div className="adv-figures">
-        <button
-          type="button"
-          className="adv-santa-button"
-          aria-label="Discover Santa’s secret"
-          onClick={() => {
-            if (music.getFrame().mix > 0.65 || (reducedMotion && techno))
-              setPassOpen(true);
-            else
-              setToast(
-                techno
-                  ? "Santa’s still getting dressed. Stay for the drop."
-                  : "Santa has a second shift. Try afterhours.",
-              );
-          }}
-        >
+        <div className="adv-santa-button" aria-hidden>
           <Santa />
-          <span className="adv-santa-secret">Follow the heart ↗</span>
-        </button>
+        </div>
         <Snowman
           ref={snowmanRef}
           hits={snowmanHits}
@@ -972,6 +1056,7 @@ export function AdventCalendar() {
                   state={getDoorState(day, unlocked, opened)}
                   wiggle={wiggleDay === day}
                   onSelect={handleSelect}
+                  onHover={hoverDoor}
                 />
               );
             })}
@@ -985,6 +1070,15 @@ export function AdventCalendar() {
         </footer>
       </section>
 
+      <div className="adv-mixer" data-no-snowball>
+        <MusicVolume volume={music.volume} onVolume={music.changeVolume} />
+        <SlopSlider power={slop} onChange={changeSlop} />
+        <span className="adv-slop-caption">
+          {slop > 0 ? slopPhrase(slop) : "Turn up the strange."}
+        </span>
+      </div>
+      <SlopDecorations power={slop} />
+
       {toast ? (
         <div
           role="status"
@@ -993,8 +1087,6 @@ export function AdventCalendar() {
           {toast}
         </div>
       ) : null}
-
-      <AfterhoursPass open={passOpen} onOpenChange={setPassOpen} />
 
       <DoorDialog
         sceneMix={reducedMotion ? Number(techno) : music.getFrame().mix}
