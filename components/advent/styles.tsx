@@ -35,6 +35,7 @@ export function AdventStyles() {
         color: var(--text-primary);
       }
       .adv-page {
+        user-select: none; -webkit-user-select: none;
         isolation: isolate;
         min-height: 100vh;
         background: var(--surface-bg);
@@ -102,7 +103,24 @@ export function AdventStyles() {
       }
 
 
-      .adv-fold-skip { position: fixed; z-index: 101; right: 20px; bottom: 20px; background: #101219; color: #edf0fa; border: 1px solid #596279; border-radius: 6px; padding: 10px 14px; font-size: 12px; }
+      .adv-page :is(img, svg) { -webkit-user-drag: none; }
+      .adv-dialog, .adv-pass { user-select: text; -webkit-user-select: text; }
+      .adv-audio-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; min-height: 44px; }
+      .adv-audio-controls .adv-music { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 24px; font-size: 14px; font-weight: 600; border: 1px solid var(--line-structure); }
+      .adv-audio-hint { font-size: 12px; color: var(--text-secondary); }
+      .adv-volume { display: flex; align-items: center; gap: 6px; padding: 8px; }
+      .adv-volume input { width: 80px; accent-color: var(--adv-accent-text); }
+      .adv-dialog-skip { position: absolute; right: 46px; top: 14px; font-size: 11px; padding: 4px 8px; border: 1px solid var(--line-structure); border-radius: 4px; }
+      .adv-dialog[data-folded][data-state="open"] { animation: none !important; }
+      .adv-dialog[data-arriving] {
+        z-index: 102;
+        animation: none !important;
+        scale: calc(.12 + var(--adv-arrival, 0) * .88);
+        filter: blur(calc((1 - var(--adv-arrival, 0)) * 12px));
+        opacity: clamp(0, var(--adv-arrival, 0) * 3, 1);
+        transform-origin: center;
+      }
+      .adv-fold-skip { pointer-events: auto; position: fixed; z-index: 101; right: 20px; bottom: 20px; background: #101219; color: #edf0fa; border: 1px solid #596279; border-radius: 6px; padding: 10px 14px; font-size: 12px; }
       .adv-fold-skip kbd { margin-left: 8px; opacity: .6; }
       .adv-scene-control { position: relative; min-width: 244px; text-align: right; }
       .adv-scene-switch { display: flex; align-items: center; justify-content: flex-end; gap: 12px; min-height: 44px; font-size: 12px; }
@@ -118,6 +136,8 @@ export function AdventStyles() {
       .adv-title-swap > span { grid-area: 1 / 1; }
       .adv-title-day { opacity: clamp(0, 1 - var(--adv-scene) * 2, 1); }
       .adv-title-night { opacity: clamp(0, var(--adv-scene) * 2 - 1, 1); font-weight: 800; color: var(--adv-gold); letter-spacing: -.07em; }
+      .adv-figures { pointer-events: none; }
+      .adv-figures > * { pointer-events: auto; }
       .adv-santa-button { position: relative; flex-shrink: 0; border-radius: 12px; outline-offset: 8px; }
       .adv-santa-button:focus-visible { outline: 2px solid var(--adv-accent-text); }
       .adv-santa-secret { display: block; font: 10px/1.5 var(--font-geist-mono), monospace; color: var(--text-secondary); opacity: clamp(0, var(--adv-scene) * 2 - 1, 1); }
@@ -151,6 +171,69 @@ export function AdventStyles() {
         .adv-scene-switch { gap: 7px; font-size: 11px; }
         .adv-scene-switch svg { display: none; }
         .adv-pass { padding: 24px; }
+      }
+
+      .adv-experience-header { position: relative; z-index: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100svh; padding: 90px 24px; gap: 36px; text-align: center; transition: min-height 1.6s cubic-bezier(.22,1,.36,1), padding 1.6s, gap 1.6s; }
+      .adv-home { position: absolute; left: 32px; top: 24px; font-weight: 750; font-size: 22px; letter-spacing: -.06em; }
+      .adv-home span { display: block; font: 9px/2 var(--font-geist-mono), monospace; color: var(--text-secondary); letter-spacing: .08em; text-transform: uppercase; }
+      .adv-heading h1 { font-size: clamp(52px, 7.4vw, 112px); font-weight: 650; letter-spacing: -.06em; line-height: 1.05; transition: font-size 1.6s cubic-bezier(.22,1,.36,1); }
+      .adv-intro-copy { font-size: clamp(16px, 1.7vw, 22px); line-height: 1.65; color: var(--text-secondary); margin-top: 30px; }
+      .adv-start-action { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+      .adv-start-action > span { font: 11px/1.5 var(--font-geist-mono), monospace; color: var(--text-secondary); }
+      .adv-start-action button { min-width: 160px; min-height: 52px; }
+      .adv-start-action button > span { font-size: 16px; gap: 10px; }
+      .adv-header-controls { display: none; align-items: center; gap: 22px; }
+      .adv-page:not([data-experience="intro"]) .adv-experience-header { min-height: 108px; padding: 24px 32px; flex-direction: row; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line-structure); text-align: left; }
+      .adv-page:not([data-experience="intro"]) .adv-home { position: static; font-size: 18px; }
+      .adv-page:not([data-experience="intro"]) .adv-home span { display: none; }
+      .adv-page:not([data-experience="intro"]) .adv-heading h1 { font-size: clamp(23px, 2.5vw, 38px); }
+      .adv-page:not([data-experience="intro"]) :is(.adv-intro-copy, .adv-start-action) { display: none; }
+      .adv-page:not([data-experience="intro"]) .adv-header-controls { display: flex; }
+      .adv-volume { min-height: 44px; border: 1px solid var(--line-structure); border-radius: 24px; padding: 8px 12px; }
+      .adv-volume input { cursor: pointer !important; width: 76px; }
+      .adv-figures { position: absolute; z-index: 2; left: 3vw; right: 3vw; bottom: 5vh; display: flex; align-items: end; justify-content: space-between; pointer-events: none; }
+      .adv-figures > * { width: clamp(100px, 13vw, 180px); pointer-events: auto; }
+      .adv-page:not([data-experience="intro"]) .adv-figures { position: fixed; top: 45vh; bottom: auto; left: 20px; right: 20px; }
+      .adv-page:not([data-experience="intro"]) .adv-figures > * { width: 130px; }
+      .adv-calendar { position: relative; width: min(1120px, calc(100% - 340px), calc((100svh - 220px) * 1.55)); margin: 0 auto; padding: 18px 0 24px; transition: opacity 1s, transform 1.5s cubic-bezier(.22,1,.36,1); }
+      .adv-page[data-experience="intro"] .adv-calendar { display: none; }
+      .adv-page[data-experience="flying"] .adv-calendar { opacity: 0; transform: perspective(1000px) rotateX(14deg) scale(.7); }
+      .adv-calendar-status { text-align: center; margin-bottom: 16px; font-size: 12px; color: var(--adv-accent-text); }
+      .adv-door-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(8px, 1vw, 16px); padding: 12px 18px 18px; }
+      .adv-calendar .adv-board { overflow: visible; }
+      .adv-page[data-experience="arriving"] .adv-door { animation: adv-door-arrive 1.5s cubic-bezier(.16,1,.3,1) both; animation-delay: var(--adv-enter-delay); }
+      @keyframes adv-door-arrive { from { opacity: 0; transform: translate3d(var(--adv-enter-x),var(--adv-enter-y),0) scale(.12) rotate(var(--adv-enter-turn)); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+      .adv-calendar-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 22px; color: var(--text-secondary); }
+      .adv-calendar-footer a { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+      .adv-calendar-footer .adv-hint-row { font-size: 11px; }
+      .adv-welcome-flight { position: fixed; inset: 0; z-index: 110; }
+      .adv-welcome-flight canvas { width: 100vw; height: 100dvh; }
+      .adv-welcome-flight .adv-fold-skip { z-index: 111; }
+      @media (max-width: 1050px) {
+        .adv-page:not([data-experience="intro"]) .adv-experience-header { flex-wrap: wrap; gap: 10px; padding: 18px 24px; }
+        .adv-page:not([data-experience="intro"]) .adv-home { display: none; }
+        .adv-calendar { width: calc(100% - 210px); }
+        .adv-page:not([data-experience="intro"]) .adv-figures > * { width: 85px; }
+        .adv-page:not([data-experience="intro"]) .adv-figures { left: 12px; right: 12px; }
+        .adv-header-controls { gap: 12px; }
+      }
+      @media (max-width: 700px) {
+        .adv-experience-header { padding: 80px 20px 170px; gap: 28px; }
+        .adv-heading h1 { font-size: clamp(44px, 10vw, 65px); max-width: 12ch; }
+        .adv-intro-copy { font-size: 15px; margin-top: 24px; }
+        .adv-page:not([data-experience="intro"]) .adv-experience-header { justify-content: center; min-height: 130px; text-align: center; padding: 20px 12px 12px; }
+        .adv-page:not([data-experience="intro"]) .adv-heading h1 { max-width: none; font-size: 27px; }
+        .adv-header-controls { width: 100%; justify-content: space-between; }
+        .adv-header-controls .adv-scene-control { min-width: 0; }
+        .adv-header-controls .adv-scene-status { font-size: 9px; }
+        .adv-header-controls .adv-scene-progress { margin-top: 3px; }
+        .adv-page:not([data-experience="intro"]) .adv-figures { position: relative; top: auto; left: auto; right: auto; margin: 12px 28px 0; height: 100px; }
+        .adv-page:not([data-experience="intro"]) .adv-figures > * { width: 72px; }
+        .adv-santa-secret { font-size: 8px; }
+        .adv-calendar { width: calc(100% - 28px); padding-top: 10px; }
+        .adv-calendar-status { font-size: 11px; margin-bottom: 12px; }
+        .adv-door-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; padding: 8px 12px 12px; }
+        .adv-calendar-footer { justify-content: center; margin-top: 16px; }
       }
 
       html:has(.adv-page) body {
@@ -789,6 +872,9 @@ export function AdventStyles() {
       }
 
       @media (prefers-reduced-motion: reduce) {
+        .adv-experience-header, .adv-heading h1, .adv-calendar { transition: none !important; }
+        .adv-page[data-experience="arriving"] .adv-door { animation: none !important; }
+
         .adv-page *, .adv-page *::before, .adv-page *::after,
         .adv-dialog *, .adv-dialog *::before, .adv-dialog *::after,
         .adv-pass *, .adv-pass *::before, .adv-pass *::after {

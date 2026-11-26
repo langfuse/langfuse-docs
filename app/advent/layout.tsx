@@ -1,14 +1,6 @@
 import type { ReactNode } from "react";
-import { HomeLayout } from "@/components/layout";
 
+// The calendar owns its full-screen introduction and compact navigation.
 export default function AdventLayout({ children }: { children: ReactNode }) {
-  return (
-    <HomeLayout
-      showAside={false}
-      showLeftSidebar={false}
-      footerClassName="md:max-w-none xl:max-w-none px-4 sm:px-6 md:px-8"
-    >
-      {children}
-    </HomeLayout>
-  );
+  return <main>{children}</main>;
 }

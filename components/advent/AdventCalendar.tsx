@@ -14,11 +14,11 @@ import {
   Gift,
   Lock,
   MousePointer2,
-  Music,
+  Play,
+  Volume2,
   Snowflake,
   Star,
   TreePine,
-  VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +29,11 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { PageFold, type PageFoldHandle } from "./PageFold";
+import { WelcomeFlight } from "./WelcomeFlight";
 import { AfterhoursPass, SceneSwitch } from "./Afterhours";
 import { AdventStyles } from "./styles";
 import { DoorAnimation } from "./DoorAnimation";
-import { JinglePlayer, TECHNO_BPM, type MusicFrame } from "./jingles";
+import { JinglePlayer, type MusicFrame } from "./jingles";
 import { ShaderAtmosphere } from "./ShaderAtmosphere";
 import {
   SNOWBALL_DURATION,
@@ -64,7 +65,7 @@ const DOOR_ORDER = [
 const DOOR_STYLES = ["adv-door-paper", "adv-door-red", "adv-door-forest"];
 const ORNAMENTS = [Snowflake, Star, Gift, TreePine];
 const OPENED_KEY = `langfuse-advent-${ADVENT_YEAR}-opened`;
-const MUSIC_KEY = "langfuse-advent-music";
+const VOLUME_KEY = "langfuse-advent-volume";
 
 const ALL_OPEN = 25;
 const CRUMBLE_MS = 750;
@@ -144,55 +145,55 @@ function usePrefersReducedMotion() {
 
 function useJingles() {
   const playerRef = useRef<JinglePlayer | null>(null);
-  const enabledRef = useRef(true);
-  const [enabled, setEnabled] = useState(true);
-  const [playing, setPlaying] = useState(false);
+  const enabledRef = useRef(false);
+  const [volume, setVolume] = useState(1);
+  const starting = useRef<Promise<boolean> | null>(null);
 
   useEffect(() => {
     const player = new JinglePlayer();
     playerRef.current = player;
-    enabledRef.current = readStorage(MUSIC_KEY) !== "off";
-    setEnabled(enabledRef.current);
-
-    const events = ["pointerdown", "pointerup", "keydown", "touchend"];
-    const removeListeners = () =>
-      events.forEach((e) => window.removeEventListener(e, tryStart));
-    // Browsers block audio until the first interaction, so retry on each
-    // gesture until playback starts.
-    async function tryStart() {
-      if (!enabledRef.current) return;
-      const started = await player.start();
-      if (started) {
-        removeListeners();
-        setPlaying(true);
-      }
-    }
-    events.forEach((e) => window.addEventListener(e, tryStart));
-    void tryStart();
-
-    return () => {
-      removeListeners();
-      player.dispose();
-    };
+    const storedVolume = Number(readStorage(VOLUME_KEY) ?? "1");
+    const initialVolume = Number.isFinite(storedVolume)
+      ? Math.max(0, Math.min(1, storedVolume))
+      : 1;
+    player.setVolume(initialVolume);
+    setVolume(initialVolume);
+    return () => player.dispose();
   }, []);
 
-  const toggle = useCallback(async () => {
+  const start = useCallback(() => {
     const player = playerRef.current;
-    if (!player) return;
-    if (playing) {
-      player.stop();
-      setPlaying(false);
-      enabledRef.current = false;
-      setEnabled(false);
-      writeStorage(MUSIC_KEY, "off");
-      return;
-    }
-    enabledRef.current = true;
-    setEnabled(true);
-    writeStorage(MUSIC_KEY, "on");
-    const didStart = await player.start();
-    setPlaying(didStart);
-  }, [playing]);
+    if (!player) return Promise.resolve(false);
+    if (enabledRef.current && player.state === "running")
+      return Promise.resolve(true);
+    if (starting.current) return starting.current;
+    starting.current = player
+      .start()
+      .then((didStart) => {
+        enabledRef.current = didStart;
+        return didStart;
+      })
+      .finally(() => {
+        starting.current = null;
+      });
+    return starting.current;
+  }, []);
+
+  useEffect(() => {
+    const gesture = () => {
+      void start();
+    };
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key === "Enter" || event.key === " ") gesture();
+    };
+    window.addEventListener("pointerdown", gesture, { capture: true });
+    window.addEventListener("keydown", keyboard);
+    return () => {
+      window.removeEventListener("pointerdown", gesture, { capture: true });
+      window.removeEventListener("keydown", keyboard);
+    };
+  }, [start]);
+  const welcome = useCallback(() => playerRef.current?.welcome(), []);
 
   const thud = useCallback((delay: number) => {
     if (enabledRef.current) playerRef.current?.thud(delay);
@@ -212,10 +213,25 @@ function useJingles() {
   const setTechno = useCallback((value: boolean) => {
     playerRef.current?.setTechno(value);
   }, []);
-  const fold = useCallback((day: number) => {
-    if (enabledRef.current) playerRef.current?.fold(day);
+  const fold = useCallback((day: number, berlin: boolean, closing = false) => {
+    if (enabledRef.current)
+      return playerRef.current?.fold(day, berlin, closing);
   }, []);
-  return { enabled, playing, toggle, thud, fold, getFrame, setTechno };
+  const changeVolume = useCallback((value: number) => {
+    setVolume(value);
+    playerRef.current?.setVolume(value);
+    writeStorage(VOLUME_KEY, String(value));
+  }, []);
+  return {
+    start,
+    welcome,
+    volume,
+    changeVolume,
+    thud,
+    fold,
+    getFrame,
+    setTechno,
+  };
 }
 
 function SnowballHint() {
@@ -232,76 +248,26 @@ function SnowballHint() {
   );
 }
 
-function MusicToggle({
-  getFrame,
-  enabled,
-  playing,
-  onToggle,
+function MusicVolume({
+  volume,
+  onVolume,
 }: {
-  getFrame: () => MusicFrame;
-  enabled: boolean;
-  playing: boolean;
-  onToggle: () => void;
+  volume: number;
+  onVolume: (value: number) => void;
 }) {
-  const [transport, setTransport] = useState({
-    bpm: 168,
-    moving: false,
-    berlin: false,
-  });
-  useEffect(() => {
-    const update = () => {
-      const frame = getFrame();
-      const bpm = Math.round(frame.bpm);
-      const moving = frame.mix > 0.001 && frame.mix < 0.999;
-      const berlin = frame.mix >= 0.999;
-      setTransport((previous) =>
-        previous.bpm === bpm &&
-        previous.moving === moving &&
-        previous.berlin === berlin
-          ? previous
-          : { bpm, moving, berlin },
-      );
-    };
-    update();
-    const timer = setInterval(update, 200);
-    return () => clearInterval(timer);
-  }, [getFrame]);
-  const label = playing
-    ? transport.moving
-      ? `Morphing / ${transport.bpm} BPM`
-      : transport.berlin
-        ? `Berlin live / ${TECHNO_BPM} BPM`
-        : "Jingles on"
-    : enabled
-      ? "Click anywhere for jingles"
-      : "Jingles off";
   return (
-    <button
-      type="button"
-      // The page starts the music on any gesture; this button's own gesture
-      // must only toggle, or keyboard Space would start and then stop it.
-      onPointerDown={(e) => e.stopPropagation()}
-      onPointerUp={(e) => e.stopPropagation()}
-      onTouchEnd={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.stopPropagation()}
-      onClick={onToggle}
-      aria-pressed={playing}
-      aria-label={playing ? "Turn off the jingles" : "Turn on the jingles"}
-      className="adv-music fixed bottom-4 left-4 z-[70] inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] font-medium shadow-lg"
-    >
-      {playing ? (
-        <span className="adv-music-bars" aria-hidden>
-          <span />
-          <span />
-          <span />
-        </span>
-      ) : enabled ? (
-        <Music className="size-3.5" />
-      ) : (
-        <VolumeX className="size-3.5" />
-      )}
-      {label}
-    </button>
+    <label className="adv-volume" data-no-snowball>
+      <Volume2 size={16} aria-hidden />
+      <span className="sr-only">Music volume</span>
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value={volume}
+        onChange={(event) => onVolume(Number(event.target.value))}
+      />
+    </label>
   );
 }
 
@@ -334,6 +300,15 @@ function DoorTile({
     <button
       type="button"
       data-advent-door
+      data-day={door.day}
+      style={
+        {
+          "--adv-enter-delay": `${((index * 7) % 24) * 32}ms`,
+          "--adv-enter-x": `${((index % 6) - 2.5) * 110}px`,
+          "--adv-enter-y": `${(Math.floor(index / 6) - 1.5) * 100}px`,
+          "--adv-enter-turn": `${index % 2 ? 24 : -24}deg`,
+        } as CSSProperties
+      }
       aria-label={label}
       onClick={(e) =>
         onSelect(
@@ -392,6 +367,7 @@ function DoorDialog({
   openDays,
   onNavigate,
   onClose,
+  onSkipEffect,
 }: {
   techno: boolean;
   sceneMix: number;
@@ -399,6 +375,7 @@ function DoorDialog({
   openDays: number[];
   onNavigate: (day: number) => void;
   onClose: () => void;
+  onSkipEffect?: () => void;
 }) {
   // Keep showing the last door while the dialog animates out.
   const [lastDoor, setLastDoor] = useState(activeDoor);
@@ -423,6 +400,20 @@ function DoorDialog({
       onOpenChange={(open) => !open && onClose()}
     >
       <DialogContent
+        onInteractOutside={(event) => {
+          const target = event.detail.originalEvent.target;
+          if (
+            document.querySelector("[data-page-fold]") ||
+            (target instanceof Element && target.closest(".adv-fold-skip"))
+          )
+            event.preventDefault();
+        }}
+        onEscapeKeyDown={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (document.querySelector("[data-page-fold]")) onSkipEffect?.();
+          else onClose();
+        }}
         style={
           {
             "--adv-scene": sceneMix,
@@ -432,6 +423,15 @@ function DoorDialog({
         data-mode={techno ? "techno" : "winter"}
         className="adv-dialog max-h-[90vh] max-w-[calc(100vw-2rem)] overflow-y-auto rounded-[10px] p-5 sm:max-w-xl sm:p-6"
       >
+        {onSkipEffect ? (
+          <button
+            type="button"
+            className="adv-dialog-skip"
+            onClick={onSkipEffect}
+          >
+            Skip effect
+          </button>
+        ) : null}
         {door ? (
           <div key={door.day} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5 pr-6">
@@ -531,6 +531,10 @@ function StatusLine({
 }
 
 export function AdventCalendar() {
+  const [experience, setExperience] = useState<
+    "intro" | "flying" | "arriving" | "ready"
+  >("intro");
+  const experienceRef = useRef(false);
   const [unlocked, setUnlocked] = useState<number | null>(null);
   const [opened, setOpened] = useState<Set<number>>(new Set());
   const [activeDay, setActiveDay] = useState<number | null>(null);
@@ -539,6 +543,7 @@ export function AdventCalendar() {
   const canvasRef = useRef<WinterCanvasHandle>(null);
   const foldRef = useRef<PageFoldHandle>(null);
   const openingRef = useRef(false);
+  const [entering, setEntering] = useState(false);
   const dialogOpenRef = useRef(false);
   const deepLinkHandled = useRef(false);
   const snowmanRef = useRef<HTMLDivElement>(null);
@@ -556,6 +561,15 @@ export function AdventCalendar() {
   const throwEndTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const reducedMotion = usePrefersReducedMotion();
   const music = useJingles();
+  const begin = useCallback(() => {
+    void music.start();
+    if (experienceRef.current) return;
+    experienceRef.current = true;
+    void music.start().then(() => setExperience("flying"));
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [music.start]);
+  const revealCalendar = useCallback(() => setExperience("arriving"), []);
+  const finishFlight = useCallback(() => setExperience("ready"), []);
   const [techno, setTechno] = useState(false);
   const [passOpen, setPassOpen] = useState(false);
   const changeScene = useCallback(
@@ -591,7 +605,8 @@ export function AdventCalendar() {
   }, []);
 
   useEffect(() => {
-    if (unlocked === null || deepLinkHandled.current) return;
+    if (unlocked === null || experience !== "ready" || deepLinkHandled.current)
+      return;
     deepLinkHandled.current = true;
     const match = /^#day-(\d+)$/.exec(window.location.hash);
     const day = match ? Number(match[1]) : null;
@@ -603,7 +618,7 @@ export function AdventCalendar() {
       writeStorage(OPENED_KEY, JSON.stringify([...next]));
     }
     if (state !== "locked") setActiveDay(day);
-  }, [unlocked, opened]);
+  }, [unlocked, opened, experience]);
 
   /**
    * Throws a snowball at a point and returns the ms until it lands. Throws run
@@ -727,6 +742,10 @@ export function AdventCalendar() {
     point: { x: number; y: number } | null,
   ) => {
     if (openingRef.current) return;
+    if (experience !== "ready") {
+      begin();
+      return;
+    }
     const state = getDoorState(day, unlocked, opened);
     if (state === "locked") {
       const landsIn = point ? throwAt(point.x, point.y) : 0;
@@ -748,21 +767,73 @@ export function AdventCalendar() {
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
       };
+      let revealed = false;
+      const reveal = () => {
+        if (revealed) return;
+        revealed = true;
+        if (state !== "open") {
+          const next = new Set(opened).add(day);
+          setOpened(next);
+          writeStorage(OPENED_KEY, JSON.stringify([...next]));
+        }
+        showDoor(day);
+      };
       const finished = await foldRef.current?.play(
         center,
         music.getFrame().mix > 0.5,
-        () => music.fold(day),
+        () => {
+          setEntering(true);
+          return music.fold(day, music.getFrame().mix > 0.5);
+        },
+        reveal,
         day,
       );
-      if (finished === false) return;
-      if (state !== "open") {
-        const next = new Set(opened).add(day);
-        setOpened(next);
-        writeStorage(OPENED_KEY, JSON.stringify([...next]));
-      }
-      showDoor(day);
+      if (finished !== false) reveal();
     } finally {
       openingRef.current = false;
+      setEntering(false);
+    }
+  };
+
+  const closeDoor = async () => {
+    if (openingRef.current) {
+      foldRef.current?.skip();
+      return;
+    }
+    if (activeDay === null) return;
+    openingRef.current = true;
+    const day = activeDay;
+    const element = document.querySelector<HTMLElement>(
+      `[data-advent-door][data-day="${day}"]`,
+    );
+    const rect = element?.getBoundingClientRect();
+    const point = rect
+      ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+      : { x: innerWidth / 2, y: innerHeight / 2 };
+    let closed = false;
+    const close = () => {
+      if (!closed) {
+        closed = true;
+        showDoor(null);
+      }
+    };
+    const berlin = music.getFrame().mix > 0.5;
+    try {
+      const finished = await foldRef.current?.play(
+        point,
+        berlin,
+        () => {
+          setEntering(true);
+          return music.fold(day, berlin, true);
+        },
+        close,
+        day,
+        true,
+      );
+      if (finished !== false) close();
+    } finally {
+      openingRef.current = false;
+      setEntering(false);
     }
   };
 
@@ -776,7 +847,13 @@ export function AdventCalendar() {
   return (
     <div
       className="adv-page relative overflow-hidden"
+      onDragStart={(event) => {
+        if (!(event.target as HTMLElement).closest('[role="dialog"]'))
+          event.preventDefault();
+      }}
       data-mode={techno ? "techno" : "winter"}
+      data-experience={experience}
+      onClickCapture={begin}
     >
       <ShaderAtmosphere
         techno={techno}
@@ -785,97 +862,106 @@ export function AdventCalendar() {
       />
       <AdventStyles />
       <PageFold ref={foldRef} />
+      <WelcomeFlight
+        active={experience === "flying" || experience === "arriving"}
+        onReveal={revealCalendar}
+        onComplete={finishFlight}
+        onSound={music.welcome}
+      />
       <WinterCanvas ref={canvasRef} active={activeDay === null && !passOpen} />
 
-      <section className="adv-hero relative mx-auto flex max-w-[1100px] flex-col items-center gap-5 px-4 pb-10 pt-8 text-center sm:px-8 md:pt-10">
-        <div className="adv-mode-bar" data-no-snowball>
-          <span className="adv-location">December 01—24</span>
+      <header className="adv-experience-header">
+        <a className="adv-home" href="/" aria-label="Langfuse home">
+          langfuse<span>December 01—24</span>
+        </a>
+        <div className="adv-heading">
+          <h1>
+            Gateway to{" "}
+            <span className="adv-title-swap">
+              <span className="adv-title-day adv-title-accent">Christmas</span>
+              <span className="adv-title-night" aria-hidden>
+                afterhours
+              </span>
+            </span>
+          </h1>
+          <p className="adv-intro-copy">
+            The Langfuse AI Gateway Advent Calendar.
+            <br />
+            24 doors, 24 features. A little magic behind each one.
+          </p>
+        </div>
+        <div className="adv-start-action">
+          <Button
+            variant="primary"
+            size="default"
+            onClick={begin}
+            aria-label="Start"
+          >
+            <Play size={16} fill="currentColor" /> Start
+          </Button>
+          <span>Turn the sound up. Step inside.</span>
+        </div>
+        <div className="adv-header-controls" data-no-snowball>
+          <MusicVolume volume={music.volume} onVolume={music.changeVolume} />
           <SceneSwitch
             techno={techno}
             onChange={changeScene}
             getFrame={music.getFrame}
           />
         </div>
-        <h1 className="max-w-[12ch] text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:max-w-none md:text-6xl">
-          Gateway to{" "}
-          <span className="adv-title-swap">
-            <span className="adv-title-day adv-title-accent">Christmas</span>
-            <span className="adv-title-night" aria-hidden>
-              afterhours
-            </span>
-          </span>
-        </h1>
-        <p className="max-w-[56ch] text-[16px] leading-relaxed text-text-secondary sm:text-[17px]">
-          The Langfuse AI Gateway Advent Calendar. 24 doors, 24 features. From
-          Dec 1 to 24, a new door opens every day.
-        </p>
-        <p
-          className="text-[14px] font-medium text-[var(--adv-accent-text)]"
-          aria-live="polite"
+      </header>
+      <div className="adv-figures">
+        <button
+          type="button"
+          className="adv-santa-button"
+          aria-label="Discover Santa’s secret"
+          onClick={() => {
+            if (music.getFrame().mix > 0.65 || (reducedMotion && techno))
+              setPassOpen(true);
+            else
+              setToast(
+                techno
+                  ? "Santa’s still getting dressed. Stay for the drop."
+                  : "Santa has a second shift. Try afterhours.",
+              );
+          }}
         >
+          <Santa />
+          <span className="adv-santa-secret">Follow the heart ↗</span>
+        </button>
+        <Snowman
+          ref={snowmanRef}
+          hits={snowmanHits}
+          onThrow={() => {
+            const rect = snowmanRef.current?.getBoundingClientRect();
+            if (rect) {
+              const delay = throwAt(
+                rect.left + rect.width / 2,
+                rect.top + rect.height * 0.65,
+              );
+              setTimeout(hitSnowman, delay);
+            }
+          }}
+          balls={snowmanBalls}
+          crumbling={crumbling}
+          hit={snowmanHit}
+          annoyed={annoyed}
+          throwing={throwing}
+          className="adv-snowman-figure"
+        />
+      </div>
+
+      <section className="adv-calendar" aria-label="Advent calendar">
+        <p className="adv-calendar-status" aria-live="polite">
           <StatusLine unlocked={unlocked} todayOpened={todayOpened} />
         </p>
-        <Button
-          variant="primary"
-          size="default"
-          href="/docs/gateway/overview"
-          wrapperClassName="w-auto"
-          className="px-4"
-        >
-          Get started with the AI Gateway
-        </Button>
-        <SnowballHint />
-        {/* In a row below the hint on small screens, free in the side space on wide ones. */}
-        <div className="adv-figures flex w-full items-end justify-around pt-2 lg:absolute lg:inset-x-8 lg:bottom-10 lg:w-auto lg:justify-between">
-          <button
-            type="button"
-            className="adv-santa-button w-24 sm:w-40 lg:w-36"
-            aria-label="Discover Santa’s secret"
-            onClick={() => {
-              if (music.getFrame().mix > 0.65 || (reducedMotion && techno))
-                setPassOpen(true);
-              else
-                setToast(
-                  techno
-                    ? "Santa’s still getting dressed. Stay for the drop."
-                    : "Santa has a second shift. Try afterhours.",
-                );
-            }}
-          >
-            <Santa />
-            <span className="adv-santa-secret">Follow the heart ↗</span>
-          </button>
-          <Snowman
-            ref={snowmanRef}
-            hits={snowmanHits}
-            onThrow={() => {
-              const rect = snowmanRef.current?.getBoundingClientRect();
-              if (rect) {
-                const delay = throwAt(
-                  rect.left + rect.width / 2,
-                  rect.top + rect.height * 0.65,
-                );
-                setTimeout(hitSnowman, delay);
-              }
-            }}
-            balls={snowmanBalls}
-            crumbling={crumbling}
-            hit={snowmanHit}
-            annoyed={annoyed}
-            throwing={throwing}
-            className="w-24 sm:w-32 lg:w-28"
-          />
-        </div>
-      </section>
-
-      <section className="relative mx-auto max-w-[1100px] px-3 pb-16 sm:px-8 md:pb-24">
         <div className="adv-board overflow-hidden">
           <div className="adv-garland" aria-hidden>
             {Array.from({ length: 14 }, (_, i) => (
               <span key={i} className="adv-bulb" />
             ))}
           </div>
-          <div className="grid grid-cols-3 gap-2.5 p-3 pt-4 sm:grid-cols-4 sm:gap-4 sm:p-6 lg:grid-cols-6">
+          <div className="adv-door-grid">
             {DOOR_ORDER.map((day, index) => {
               const door = ADVENT_DOORS[day - 1];
               return (
@@ -891,6 +977,12 @@ export function AdventCalendar() {
             })}
           </div>
         </div>
+        <footer className="adv-calendar-footer">
+          <SnowballHint />
+          <a href="/docs/gateway/overview">
+            Get started with the AI Gateway <ArrowUpRight size={13} />
+          </a>
+        </footer>
       </section>
 
       {toast ? (
@@ -904,20 +996,14 @@ export function AdventCalendar() {
 
       <AfterhoursPass open={passOpen} onOpenChange={setPassOpen} />
 
-      <MusicToggle
-        getFrame={music.getFrame}
-        enabled={music.enabled}
-        playing={music.playing}
-        onToggle={music.toggle}
-      />
-
       <DoorDialog
         sceneMix={reducedMotion ? Number(techno) : music.getFrame().mix}
         techno={techno}
         door={activeDoor}
         openDays={openDays}
         onNavigate={showDoor}
-        onClose={() => showDoor(null)}
+        onClose={() => void closeDoor()}
+        onSkipEffect={entering ? () => foldRef.current?.skip() : undefined}
       />
     </div>
   );

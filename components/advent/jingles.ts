@@ -1,3 +1,9 @@
+import {
+  FOLD_SECONDS,
+  FOLD_REVEAL,
+  getFoldSeconds,
+  WELCOME_SECONDS,
+} from "./fold-timing";
 import { createDubSpace } from "./dub-space";
 
 // Public-domain carols, synthesized in the browser so no recording rights apply.
@@ -199,6 +205,7 @@ type MusicGraph = {
   effects: GainNode;
   winter: GainNode;
   lead: GainNode;
+  answer: GainNode;
   rhythm: GainNode;
   kick: GainNode;
   rumble: GainNode;
@@ -222,11 +229,22 @@ function saturation(drive: number) {
   return curve;
 }
 const KICK_DRIVE = saturation(5);
-const SYNTH_DRIVE = saturation(9);
+const SYNTH_DRIVE = saturation(18);
 
 export class JinglePlayer {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
+  private volume = 1;
+
+  setVolume(volume: number) {
+    this.volume = Math.max(0, Math.min(1, volume));
+    if (this.master && this.ctx)
+      this.master.gain.setTargetAtTime(
+        0.32 * this.volume,
+        this.ctx.currentTime,
+        0.05,
+      );
+  }
   private graph: MusicGraph | null = null;
   private noise: AudioBuffer | null = null;
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -265,7 +283,8 @@ export class JinglePlayer {
       from,
       to: target,
       at: time + delay,
-      duration: SCENE_TRANSITION_SECONDS * Math.abs(target - from),
+      duration:
+        (techno ? SCENE_TRANSITION_SECONDS : 5) * Math.abs(target - from),
     };
   }
 
@@ -332,7 +351,10 @@ export class JinglePlayer {
     this.contextState = ctx.state;
     this.master = ctx.createGain();
     this.master.gain.setValueAtTime(0, ctx.currentTime);
-    this.master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.3);
+    this.master.gain.linearRampToValueAtTime(
+      0.32 * this.volume,
+      ctx.currentTime + 0.3,
+    );
     this.master.connect(ctx.destination);
     this.graph = this.createGraph(ctx, this.master);
     this.anchors = [];
@@ -390,7 +412,7 @@ export class JinglePlayer {
     const lead = ctx.createGain();
     const leadFilter = ctx.createBiquadFilter();
     leadFilter.type = "lowpass";
-    leadFilter.Q.value = 1;
+    leadFilter.Q.value = 3.5;
     const leadDrive = ctx.createWaveShaper();
     leadDrive.curve = SYNTH_DRIVE;
     leadDrive.oversample = "2x";
@@ -408,6 +430,14 @@ export class JinglePlayer {
       .connect(echo);
     feedback.connect(compressor);
 
+    const answer = ctx.createGain();
+    const answerDrive = ctx.createWaveShaper();
+    answerDrive.curve = KICK_DRIVE;
+    answerDrive.oversample = "2x";
+    const answerFilter = ctx.createBiquadFilter();
+    answerFilter.type = "lowpass";
+    answerFilter.frequency.value = 900;
+    answer.connect(answerDrive).connect(answerFilter).connect(compressor);
     const rhythm = ctx.createGain();
     rhythm.connect(compressor);
     const kick = ctx.createGain();
@@ -436,6 +466,9 @@ export class JinglePlayer {
       lead,
       leadFilter,
       leadDrive,
+      answer,
+      answerDrive,
+      answerFilter,
       echo,
       feedback,
       echoFilter,
@@ -453,6 +486,7 @@ export class JinglePlayer {
       effects,
       winter,
       lead,
+      answer,
       rhythm,
       kick,
       rumble,
@@ -472,6 +506,7 @@ export class JinglePlayer {
     g.space.left.delayTime.setTargetAtTime((60 / bpm) * 1.5, time, 0.25);
     g.space.right.delayTime.setTargetAtTime((60 / bpm) * 2.5, time, 0.25);
     g.winter.gain.setTargetAtTime(1 - smooth(0.05, 0.88, mix), time, 0.035);
+    g.answer.gain.setTargetAtTime(smooth(0.3, 0.9, mix) * 0.5, time, 0.035);
     g.lead.gain.setTargetAtTime(smooth(0.04, 0.8, mix) * 0.42, time, 0.035);
     g.rhythm.gain.setTargetAtTime(smooth(0.18, 0.82, mix) * 0.85, time, 0.035);
     g.kick.gain.setTargetAtTime(smooth(0.28, 0.94, mix) * 1.15, time, 0.035);
@@ -508,8 +543,9 @@ export class JinglePlayer {
     if (!ctx || !g || ctx.state !== "running") return;
     const now = this.now();
     this.updateGraph(ctx, g);
-    // A suspended tab resumes its phrase instead of scheduling missed audio.
-    if (this.nextStepTime < now - 1) this.nextStepTime = now + 0.02;
+    // DOM capture can stall timers. Resume the next phrase subdivision in the
+    // future instead of scheduling a burst of notes with expired envelopes.
+    if (this.nextStepTime < now + 0.005) this.nextStepTime = now + 0.025;
     while (this.nextStepTime < now + LOOKAHEAD_SECONDS) {
       const song = COMPILED[this.songIndex];
       if (this.songStep >= (song.length + SONG_GAP_BEATS) * 4) {
@@ -519,7 +555,10 @@ export class JinglePlayer {
         continue;
       }
       const at = this.nextStepTime;
-      const time = ctx.currentTime + at - now;
+      const time = Math.max(
+        ctx.currentTime + 0.005,
+        ctx.currentTime + at - now,
+      );
       const mix = this.mixAt(at);
       const bpm = song.bpm * (1 - mix) + TECHNO_BPM * mix;
       const beatLength = 60 / bpm;
@@ -536,7 +575,13 @@ export class JinglePlayer {
               time,
               event.beats * beatLength,
             );
-          if (mix > 0.001)
+          if (mix > 0.001) {
+            const accent =
+              this.absoluteStep % 8 === 0
+                ? 1.4
+                : this.absoluteStep % 4 === 0
+                  ? 1.15
+                  : 0.85;
             this.acid(
               ctx,
               g.lead,
@@ -544,7 +589,21 @@ export class JinglePlayer {
               time,
               event.beats * beatLength,
               mix,
+              false,
+              accent,
             );
+            // Same notes, two octaves below; answer three sixteenths later.
+            this.acid(
+              ctx,
+              g.answer,
+              event.freq / 4,
+              time + beatLength * 0.75,
+              event.beats * beatLength,
+              mix,
+              true,
+              accent,
+            );
+          }
         } else if (event.voice === "bass") {
           this.root = event.freq;
           if (mix < 0.999)
@@ -648,25 +707,30 @@ export class JinglePlayer {
     duration: number,
     mix: number,
     bass = false,
+    accent = 1,
   ) {
     const gain = ctx.createGain();
     const filter = ctx.createBiquadFilter();
     const release = Math.max(
       0.07,
-      Math.min(bass ? 0.16 : 0.38, duration * 0.8),
+      Math.min(bass ? 0.26 : 0.42, duration * 0.95),
     );
     filter.type = "lowpass";
-    filter.Q.value = bass ? 7 : 11;
-    filter.frequency.setValueAtTime(
-      (bass ? 450 : 1100) + mix * (bass ? 1600 : 6500),
-      time,
+    filter.Q.value = bass ? 7 : 17 + accent * 3;
+    filter.frequency.setValueAtTime(bass ? 240 : 500, time);
+    filter.frequency.exponentialRampToValueAtTime(
+      ((bass ? 500 : 1600) + mix * (bass ? 1000 : 9000)) * accent,
+      time + 0.012,
     );
     filter.frequency.exponentialRampToValueAtTime(
-      bass ? 80 : 350,
+      bass ? 70 : 180,
       time + release,
     );
     gain.gain.setValueAtTime(0.0001, time);
-    gain.gain.exponentialRampToValueAtTime(bass ? 0.38 : 0.25, time + 0.004);
+    gain.gain.exponentialRampToValueAtTime(
+      (bass ? 0.32 : 0.3) * accent,
+      time + 0.004,
+    );
     gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
     filter.connect(gain).connect(out);
     const oscillators = [-1, 1].map((direction) => {
@@ -725,16 +789,85 @@ export class JinglePlayer {
   }
 
   /** The page folding into itself: descending sub, detuned fifth, filtered air. */
-  fold(day = 0) {
+  welcome() {
+    return this.fold(0, false, false, WELCOME_SECONDS);
+  }
+
+  fold(day = 0, berlin = true, closing = false, seconds?: number) {
     const ctx = this.ctx,
       graph = this.graph;
     if (!ctx || !graph || ctx.state !== "running") return;
     const time = ctx.currentTime;
     const root = [82.4, 65.4, 98][day % 3];
-    this.lowTone(ctx, graph.effects, root, time, 2.1, 0.55);
-    this.lowTone(ctx, graph.effects, root * 1.498, time + 0.09, 1.7, 0.23);
-    this.lowTone(ctx, graph.effects, root * 2, time + 0.19, 1.4, 0.12);
-    this.noiseHit(ctx, graph.effects, time, 1.3, 0.18, 320, "bandpass");
+    const bus = ctx.createGain();
+    bus.connect(graph.effects);
+    const duration = seconds ?? getFoldSeconds(berlin, closing);
+    const cleanup = setTimeout(() => bus.disconnect(), (duration + 1) * 1000);
+    const cancel = () => {
+      bus.gain.cancelScheduledValues(ctx.currentTime);
+      bus.gain.setTargetAtTime(0, ctx.currentTime, 0.04);
+      clearTimeout(cleanup);
+      setTimeout(() => bus.disconnect(), 300);
+    };
+    if (closing) {
+      // A single falling sub follows the camera's continuous pullback.
+      this.lowTone(ctx, bus, root * 2, time, duration * 0.92, 0.45);
+      this.lowTone(ctx, bus, root * 1.498, time + 0.04, duration * 0.85, 0.18);
+      this.noiseHit(ctx, bus, time, duration * 0.6, 0.12, 240, "lowpass");
+      return cancel;
+    }
+    const rate = duration / FOLD_SECONDS;
+    const reveal = duration * FOLD_REVEAL;
+    // Descent, accelerating dub echoes, then a low chord as the portal opens.
+    this.lowTone(ctx, bus, root, time, 3.8 * rate, 0.48);
+    this.lowTone(ctx, bus, root * 1.498, time + 0.12 * rate, 3.1 * rate, 0.2);
+    for (const [offset, ratio] of [
+      [1.25, 1],
+      [2.25, 1.5],
+      [3.1, 2],
+      [3.8, 1.5],
+      [4.3, 1],
+    ] as const) {
+      this.lowTone(
+        ctx,
+        bus,
+        root * ratio,
+        time + offset * rate,
+        1.25 * rate,
+        0.16,
+      );
+    }
+    this.noiseHit(ctx, bus, time, 2.6 * rate, 0.12, 280, "bandpass");
+    const breath = ctx.createBufferSource(),
+      filter = ctx.createBiquadFilter(),
+      swell = ctx.createGain();
+    breath.buffer = this.noise;
+    breath.loop = true;
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(100, time);
+    filter.frequency.exponentialRampToValueAtTime(900, time + reveal);
+    filter.frequency.exponentialRampToValueAtTime(150, time + duration);
+    swell.gain.setValueAtTime(0.0001, time);
+    swell.gain.exponentialRampToValueAtTime(0.16, time + reveal);
+    swell.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    breath.connect(filter).connect(swell).connect(bus);
+    breath.start(time);
+    breath.stop(time + duration + 0.1);
+    breath.onended = () => {
+      breath.disconnect();
+      filter.disconnect();
+      swell.disconnect();
+    };
+    this.lowTone(ctx, bus, root * 0.75, time + reveal, 2.3 * rate, 0.4);
+    this.lowTone(
+      ctx,
+      bus,
+      root * 1.5,
+      time + reveal + 0.1 * rate,
+      2 * rate,
+      0.16,
+    );
+    return cancel;
   }
 
   private lowTone(
@@ -778,6 +911,7 @@ export class JinglePlayer {
     gain.gain.exponentialRampToValueAtTime(0.28, time + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + release);
     gain.connect(out);
+    let remaining = 3;
     // Inharmonic upper partial gives the tone its glockenspiel shimmer.
     for (const [ratio, level] of [
       [1, 1],
@@ -792,6 +926,11 @@ export class JinglePlayer {
       osc.connect(partial).connect(gain);
       osc.start(time);
       osc.stop(time + release + 0.05);
+      osc.onended = () => {
+        osc.disconnect();
+        partial.disconnect();
+        if (--remaining === 0) gain.disconnect();
+      };
     }
   }
 
@@ -812,6 +951,10 @@ export class JinglePlayer {
     osc.connect(gain).connect(out);
     osc.start(time);
     osc.stop(time + duration);
+    osc.onended = () => {
+      osc.disconnect();
+      gain.disconnect();
+    };
   }
 
   private sleigh(ctx: AudioContext, out: AudioNode, time: number) {
@@ -828,6 +971,11 @@ export class JinglePlayer {
     source.connect(filter).connect(gain).connect(out);
     source.start(time);
     source.stop(time + 0.1);
+    source.onended = () => {
+      source.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+    };
   }
 
   private createNoise(ctx: AudioContext): AudioBuffer {
