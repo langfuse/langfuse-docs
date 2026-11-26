@@ -1,6 +1,6 @@
 ---
 title: Pricing
-description: Simple pricing for projects of all sizes. Get started on our Hobby plan without a credit card.
+description: Hobby is free with 50k units a month. Core is $29 a month and Pro is $199 a month with 3 years of data access. No credit card to start.
 ---
 
 # Pricing
