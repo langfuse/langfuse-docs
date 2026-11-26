@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { hsPageView } from "@/components/analytics/hubspot";
 import { crPageView } from "@/components/analytics/common-room";
 import { UseCaseAnalytics } from "@/components/analytics/UseCaseAnalytics";
 import { readAnalyticsConsent } from "@/lib/cookie-consent";
@@ -98,7 +97,6 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (pathname) {
-      hsPageView(pathname);
       // Common Room's snippet auto-tracks the first page load, so only report
       // subsequent client-side navigations to avoid double counting.
       if (isInitialPageView.current) {
