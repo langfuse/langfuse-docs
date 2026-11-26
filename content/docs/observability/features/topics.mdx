@@ -239,17 +239,20 @@ Review the selection and start processing. Setup reuses existing summaries and s
 
 ## Live maps and snapshots [#maps-and-snapshots]
 
-Open the map picker to create a **New live map** or **New snapshot**.
+| Type     | Behavior                                                                    |
+| -------- | --------------------------------------------------------------------------- |
+| Live map | Analyzes new matching traces continuously and updates topics daily.         |
+| Snapshot | Groups traces from a selected time window once, without changing live maps. |
 
-Live maps wait for a trace to finish before analyzing it. The default is five minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
+To monitor incoming traces, choose **New live map** in the map picker. By default, Langfuse waits five minutes after a trace’s last observation before analyzing it. You can adjust this delay under **Topics > ⋮ > Settings > Trace readiness**.
 
-Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand instead of waiting for the daily refresh.
+Use **Edit map** to change the live map’s filters, facets, or sampling rate. Turn off **Live updates** to pause processing and keep the results, or choose **Refresh map** in the map picker to rebuild topics before the next daily refresh.
 
-For a snapshot, choose the time window, filters, and facets. Langfuse reuses existing facet results and analyzes additional traces as needed. This lets you investigate a period of interest without changing your live maps.
+To investigate a specific period, choose **New snapshot** in the map picker and select the time window, filters, and facets. Langfuse reuses existing facet results and analyzes additional traces as needed.
 
 <Callout type="info">
   A snapshot needs at least 10 applicable summarized traces per selected facet.
-  Small samples can produce broad topics. We recommend at least more than 150 traces
+  Small samples can produce broad topics. We recommend at least 150 traces
   to see meaningful clusters.
 </Callout>
 
