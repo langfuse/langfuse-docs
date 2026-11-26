@@ -21,21 +21,23 @@ import { HiringBadge } from "@/components/HiringBadge";
 // import IconYoutube from "./components/icons/youtube";
 
 function SnapshotBanner({ text }: { text: string }) {
-  const { asPath } = useRouter();
-  // trailingSlash adds a slash that langfuse.com would redirect away
-  const path = asPath.split("#")[0].split("?")[0].replace(/(.)\/$/, "$1");
+  const { asPath, pathname } = useRouter();
+  // The 404 page is prerendered once, so its asPath is "/404" for every
+  // missing URL. trailingSlash adds a slash that langfuse.com redirects away.
+  const path =
+    pathname === "/404" || pathname === "/_error"
+      ? ""
+      : asPath.split("#")[0].split("?")[0].replace(/(.)\/$/, "$1");
+  // Nextra truncates the banner to one line, so the whole text is the link.
   return (
-    <span>
-      ⚠️ {text} ⚠️{"  "}
-      <Link
-        href={`https://langfuse.com${path}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="underline cursor-pointer"
-      >
-        Read this page in the current docs ↗
-      </Link>
-    </span>
+    <Link
+      href={`https://langfuse.com${path}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline cursor-pointer"
+    >
+      ⚠️ {text} Read this page in the current docs ↗
+    </Link>
   );
 }
 
@@ -244,7 +246,7 @@ const config: DocsThemeConfig = {
     key: "snapshot-notice-python-sdk-v3-js-sdk-v4",
     dismissible: false,
     content: (
-      <SnapshotBanner text="This is a snapshot of the Langfuse docs from when Python SDK v3 and JS/TS SDK v4 were current, before 10 March 2026. It is out of date." />
+      <SnapshotBanner text="Outdated snapshot: Python SDK v3 and JS/TS SDK v4, before 10 March 2026." />
     ),
   },
 };
