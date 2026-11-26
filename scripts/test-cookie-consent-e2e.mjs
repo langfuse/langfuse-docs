@@ -148,12 +148,21 @@ function decodePostHogEvents(request) {
     : Array.isArray(parsed.batch)
       ? parsed.batch
       : [parsed];
+  const receivedAt = Date.now();
+  const resourceType = request.resourceType();
   return batch.map((ev) => ({
     event: ev.event,
     distinct_id: ev.properties?.distinct_id ?? ev.distinct_id ?? null,
     cookieless: ev.properties?.$cookieless_mode === true,
     session_id: ev.properties?.$session_id ?? null,
+    current_url: ev.properties?.$current_url ?? null,
     pathname: ev.properties?.$pathname ?? null,
+    host: ev.properties?.$host ?? null,
+    referrer: ev.properties?.$referrer ?? null,
+    title: ev.properties?.title ?? null,
+    timestamp: ev.timestamp ?? null,
+    receivedAt,
+    resourceType,
   }));
 }
 
@@ -211,6 +220,14 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
       },
       configurable: true,
     });
+    window.__beaconUrls = [];
+    if (typeof navigator.sendBeacon === "function") {
+      const origSendBeacon = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = function (url, data) {
+        window.__beaconUrls.push(String(url));
+        return origSendBeacon(url, data);
+      };
+    }
     if (consent) {
       window.getCkyConsent = () => consent;
     }
@@ -309,7 +326,8 @@ async function waitForCondition(predicate, timeoutMs = 10_000) {
 
 async function inspectStorage(page) {
   return page.evaluate(() => ({
-    cookieWrites: window.__cookieWrites ?? [],
+    cookieWrites: [...(window.__cookieWrites ?? [])],
+    beaconUrls: [...(window.__beaconUrls ?? [])],
     cookies: document.cookie
       .split(";")
       .map((s) => s.trim())
@@ -334,49 +352,29 @@ async function clickAutocaptureTarget(page) {
   await page.locator("#e2e-posthog-click-target").click();
 }
 
-async function assertCookielessOnlyNoStorage(page, capturedEvents, label) {
-  const gotPageview = await waitForCondition(
-    () => capturedEvents.some((ev) => ev.event === "$pageview"),
-    10_000,
-  );
-  assert.ok(
-    gotPageview,
-    `Expected cookieless $pageview on ${label}, got: ${JSON.stringify(capturedEvents)}`,
-  );
-  // Click a real button to verify autocapture stays disabled while unconsented.
-  await clickAutocaptureTarget(page);
-  await page.waitForTimeout(1000);
-
-  const nonPageviews = capturedEvents.filter((ev) => ev.event !== "$pageview");
-  assert.deepEqual(
-    nonPageviews,
-    [],
-    `Expected only $pageview events on ${label}, got: ${JSON.stringify(capturedEvents)}`,
-  );
-  assert.ok(
-    capturedEvents.every(
-      (ev) =>
-        ev.cookieless === true && ev.distinct_id === "$posthog_cookieless",
-    ),
-    `Expected every event on ${label} to have $cookieless_mode: true, got: ${JSON.stringify(capturedEvents)}`,
-  );
-
+async function assertNoPostHogStorage(
+  page,
+  label,
+  { checkWrites = true } = {},
+) {
   const storage = await inspectStorage(page);
   assert.deepEqual(
     storage.cookies.filter((c) => c.startsWith("ph_")),
     [],
     `Expected no ph_* cookies on ${label}, got: ${JSON.stringify(storage.cookies)}`,
   );
-  assert.deepEqual(
-    storage.cookieWrites.filter(
-      (w) =>
-        w.startsWith("ph_") ||
-        w.startsWith("__ph_cookie_support_") ||
-        w.startsWith("dmn_chk_"),
-    ),
-    [],
-    `Expected no PostHog cookie writes (including __ph_cookie_support_*) on ${label}, got: ${JSON.stringify(storage.cookieWrites)}`,
-  );
+  if (checkWrites) {
+    assert.deepEqual(
+      storage.cookieWrites.filter(
+        (w) =>
+          w.startsWith("ph_") ||
+          w.startsWith("__ph_cookie_support_") ||
+          w.startsWith("dmn_chk_"),
+      ),
+      [],
+      `Expected no PostHog cookie writes on ${label}, got: ${JSON.stringify(storage.cookieWrites)}`,
+    );
+  }
   assert.deepEqual(
     storage.localStorageKeys.filter(isPostHogStorageKey),
     [],
@@ -387,7 +385,91 @@ async function assertCookielessOnlyNoStorage(page, capturedEvents, label) {
     [],
     `Expected no PostHog sessionStorage keys on ${label}, got: ${JSON.stringify(storage.sessionStorageKeys)}`,
   );
+  return storage;
 }
+
+async function navigateDocsLink(page) {
+  const targetPathname = await page.evaluate(() => {
+    const link = Array.from(document.querySelectorAll("a[href]")).find((a) => {
+      const href = a.getAttribute("href") || "";
+      return (
+        href.startsWith("/docs/") &&
+        href !== "/docs" &&
+        !href.includes("#") &&
+        !href.includes("?")
+      );
+    });
+    if (!link) throw new Error("No internal /docs/* link found to click");
+    const href = link.getAttribute("href");
+    link.click();
+    return href;
+  });
+  await page.waitForURL((u) => new URL(u).pathname === targetPathname, {
+    timeout: 20_000,
+  });
+  return targetPathname;
+}
+
+async function dispatchConsentUpdate(page, { analytics }) {
+  await page.evaluate((granted) => {
+    window.getCkyConsent = () => ({
+      activeLaw: "gdpr",
+      categories: {
+        necessary: true,
+        functional: granted,
+        analytics: granted,
+        advertisement: granted,
+      },
+      isUserActionCompleted: true,
+    });
+    document.dispatchEvent(new Event("cookieyes_consent_update"));
+  }, analytics);
+}
+
+const UNDECIDED_CONTEXT = {
+  cookieyesCookie:
+    "consentid:test,consent:no,action:no,necessary:yes,functional:no,analytics:no,advertisement:no",
+  initialConsent: {
+    activeLaw: "gdpr",
+    categories: {
+      necessary: true,
+      functional: false,
+      analytics: false,
+      advertisement: false,
+    },
+    isUserActionCompleted: false,
+  },
+};
+
+const GRANTED_CONTEXT = {
+  cookieyesCookie:
+    "consentid:test,consent:yes,action:yes,necessary:yes,functional:yes,analytics:yes,advertisement:yes",
+  initialConsent: {
+    activeLaw: "gdpr",
+    categories: {
+      necessary: true,
+      functional: true,
+      analytics: true,
+      advertisement: true,
+    },
+    isUserActionCompleted: true,
+  },
+};
+
+const DENIED_CONTEXT = {
+  cookieyesCookie:
+    "consentid:test,consent:no,action:yes,necessary:yes,functional:no,analytics:no,advertisement:no",
+  initialConsent: {
+    activeLaw: "gdpr",
+    categories: {
+      necessary: true,
+      functional: false,
+      analytics: false,
+      advertisement: false,
+    },
+    isUserActionCompleted: true,
+  },
+};
 
 async function run() {
   const externalBaseUrl = process.env.COOKIE_CONSENT_E2E_URL;
@@ -396,125 +478,43 @@ async function run() {
   const browser = await launchChromium();
 
   try {
-    // 1. No answer (CookieYes loaded, visitor has not chosen yet):
-    // cookieless $pageview only, zero PostHog cookies/localStorage/sessionStorage.
+    // 1. Returning visitor with stored consent: identified pageview immediately, no delay.
     {
       const { context, page, capturedEvents } = await createIsolatedContext(
         browser,
         baseUrl,
-        {
-          cookieyesCookie:
-            "consentid:test,consent:no,action:no,necessary:yes,functional:no,analytics:no,advertisement:no",
-          initialConsent: {
-            activeLaw: "gdpr",
-            categories: {
-              necessary: true,
-              functional: false,
-              analytics: false,
-              advertisement: false,
-            },
-            isUserActionCompleted: false,
-          },
-        },
+        GRANTED_CONTEXT,
       );
       try {
+        const startAt = Date.now();
         await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
-        await assertCookielessOnlyNoStorage(page, capturedEvents, "no answer");
-        console.log("PASS: no answer");
-      } finally {
-        await context.close();
-      }
-    }
-
-    // 2. CookieYes blocked (no cookie, no window.getCkyConsent):
-    // identical to no answer — cookieless $pageview only, zero PostHog storage.
-    {
-      const { context, page, capturedEvents } = await createIsolatedContext(
-        browser,
-        baseUrl,
-      );
-      try {
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
-        await assertCookielessOnlyNoStorage(
-          page,
-          capturedEvents,
-          "CookieYes blocked",
-        );
-        console.log("PASS: CookieYes blocked");
-      } finally {
-        await context.close();
-      }
-    }
-
-    // 3. Rejected (denied):
-    // identical to no answer — cookieless $pageview only, zero PostHog storage
-    // (including no __ph_opt_in_out_* flag and no __ph_cookie_support_* cookie).
-    {
-      const { context, page, capturedEvents } = await createIsolatedContext(
-        browser,
-        baseUrl,
-        {
-          cookieyesCookie:
-            "consentid:test,consent:no,action:yes,necessary:yes,functional:no,analytics:no,advertisement:no",
-          initialConsent: {
-            activeLaw: "gdpr",
-            categories: {
-              necessary: true,
-              functional: false,
-              analytics: false,
-              advertisement: false,
-            },
-            isUserActionCompleted: true,
-          },
-        },
-      );
-      try {
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
-        await assertCookielessOnlyNoStorage(page, capturedEvents, "rejected");
-        console.log("PASS: rejected");
-      } finally {
-        await context.close();
-      }
-    }
-
-    // 4. Granted:
-    // non-cookieless $pageview + autocapture on click, and ph_<key>_posthog cookie is set.
-    {
-      const { context, page, capturedEvents } = await createIsolatedContext(
-        browser,
-        baseUrl,
-        {
-          cookieyesCookie:
-            "consentid:test,consent:yes,action:yes,necessary:yes,functional:yes,analytics:yes,advertisement:yes",
-          initialConsent: {
-            activeLaw: "gdpr",
-            categories: {
-              necessary: true,
-              functional: true,
-              analytics: true,
-              advertisement: true,
-            },
-            isUserActionCompleted: true,
-          },
-        },
-      );
-      try {
-        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        const loadedAt = Date.now();
         const gotPageview = await waitForCondition(
-          () =>
-            capturedEvents.some(
-              (ev) =>
-                ev.event === "$pageview" &&
-                !ev.cookieless &&
-                ev.distinct_id &&
-                ev.distinct_id !== "$posthog_cookieless" &&
-                ev.session_id,
-            ),
-          10_000,
+          () => capturedEvents.some((ev) => ev.event === "$pageview"),
+          4_000,
         );
         assert.ok(
           gotPageview,
-          `Expected non-cookieless $pageview with session_id on granted consent, got: ${JSON.stringify(capturedEvents)}`,
+          `Expected immediate identified $pageview for returning granted visitor, got: ${JSON.stringify(capturedEvents)}`,
+        );
+        await page.waitForTimeout(500);
+
+        const pageviews = capturedEvents.filter(
+          (ev) => ev.event === "$pageview",
+        );
+        assert.equal(pageviews.length, 1);
+        assert.equal(pageviews[0].cookieless, false);
+        assert.notEqual(pageviews[0].distinct_id, "$posthog_cookieless");
+        assert.ok(pageviews[0].session_id);
+        assert.equal(pageviews[0].current_url, `${baseUrl}/docs`);
+        assert.equal(pageviews[0].pathname, "/docs");
+        assert.ok(
+          pageviews[0].receivedAt - loadedAt < 4_000,
+          `Expected immediate send (no 10s wait), took ${pageviews[0].receivedAt - loadedAt}ms`,
+        );
+        const ts = Date.parse(pageviews[0].timestamp);
+        assert.ok(
+          ts >= startAt - 1_000 && ts <= pageviews[0].receivedAt + 1_000,
         );
 
         await clickAutocaptureTarget(page);
@@ -523,189 +523,516 @@ async function run() {
             capturedEvents.some(
               (ev) => ev.event === "$autocapture" && !ev.cookieless,
             ),
-          10_000,
+          6_000,
         );
-        assert.ok(
-          gotAutocapture,
-          `Expected non-pageview ($autocapture) event on granted consent, got: ${JSON.stringify(capturedEvents)}`,
-        );
+        assert.ok(gotAutocapture, "Expected $autocapture on granted consent");
 
         const storage = await inspectStorage(page);
-        assert.ok(
-          storage.cookies.includes(POSTHOG_COOKIE_NAME),
-          `Expected ${POSTHOG_COOKIE_NAME} cookie on granted consent, got: ${JSON.stringify(storage.cookies)}`,
-        );
-        console.log("PASS: granted");
+        assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
+        console.log("PASS: returning visitor with stored consent");
       } finally {
         await context.close();
       }
     }
 
-    // 5. Transitions without reload:
-    // - unknown -> granted on the same page: one consented $pageview, cookie set,
-    //   session_id initialized, and non-pageview events enabled.
-    // - granted -> denied: cookie removed, zero PostHog storage (including no
-    //   __ph_opt_in_out_*), and back to cookieless $pageview only on navigation.
+    // 2. Returning visitor who rejected earlier: cookieless pageview immediately, no delay.
     {
       const { context, page, capturedEvents } = await createIsolatedContext(
         browser,
         baseUrl,
+        DENIED_CONTEXT,
       );
       try {
+        const startAt = Date.now();
         await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
-        await assertCookielessOnlyNoStorage(
-          page,
-          capturedEvents,
-          "initial unknown before grant",
-        );
-
-        // unknown -> granted on the same page
-        const beforeGrant = capturedEvents.length;
-        await page.evaluate(() => {
-          window.getCkyConsent = () => ({
-            activeLaw: "gdpr",
-            categories: {
-              necessary: true,
-              functional: true,
-              analytics: true,
-              advertisement: true,
-            },
-            isUserActionCompleted: true,
-          });
-          document.dispatchEvent(new Event("cookieyes_consent_update"));
-        });
-        const gotGrantedPageview = await waitForCondition(
-          () =>
-            capturedEvents
-              .slice(beforeGrant)
-              .some(
-                (ev) =>
-                  ev.event === "$pageview" &&
-                  !ev.cookieless &&
-                  ev.distinct_id &&
-                  ev.distinct_id !== "$posthog_cookieless" &&
-                  ev.session_id,
-              ),
-          10_000,
+        const loadedAt = Date.now();
+        const gotPageview = await waitForCondition(
+          () => capturedEvents.some((ev) => ev.event === "$pageview"),
+          4_000,
         );
         assert.ok(
-          gotGrantedPageview,
-          `Expected consented $pageview with session_id after unknown -> granted, got: ${JSON.stringify(capturedEvents.slice(beforeGrant))}`,
+          gotPageview,
+          `Expected immediate cookieless $pageview for returning denied visitor, got: ${JSON.stringify(capturedEvents)}`,
         );
-        await page.waitForTimeout(800);
-        const consentedPageviews = capturedEvents
-          .slice(beforeGrant)
-          .filter((ev) => ev.event === "$pageview" && !ev.cookieless);
-        assert.equal(
-          consentedPageviews.length,
-          1,
-          `Expected exactly one consented $pageview on unknown -> granted, got: ${JSON.stringify(consentedPageviews)}`,
-        );
-
         await clickAutocaptureTarget(page);
-        const gotAutocaptureAfterGrant = await waitForCondition(
-          () =>
-            capturedEvents
-              .slice(beforeGrant)
-              .some((ev) => ev.event === "$autocapture" && !ev.cookieless),
-          10_000,
-        );
-        assert.ok(
-          gotAutocaptureAfterGrant,
-          `Expected $autocapture after unknown -> granted, got: ${JSON.stringify(capturedEvents.slice(beforeGrant))}`,
-        );
-
-        let storage = await inspectStorage(page);
-        assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
-
-        // granted -> denied: cookie removed, zero PostHog storage, back to cookieless pageviews
-        await page.evaluate(() => {
-          window.getCkyConsent = () => ({
-            activeLaw: "gdpr",
-            categories: {
-              necessary: true,
-              functional: false,
-              analytics: false,
-              advertisement: false,
-            },
-            isUserActionCompleted: true,
-          });
-          document.dispatchEvent(new Event("cookieyes_consent_update"));
-        });
-        await page.waitForTimeout(500);
-        storage = await inspectStorage(page);
-        assert.deepEqual(
-          storage.cookies.filter((c) => c.startsWith("ph_")),
-          [],
-          "Expected ph_* cookie removed on granted -> denied",
-        );
-        assert.deepEqual(
-          storage.localStorageKeys.filter(isPostHogStorageKey),
-          [],
-          "Expected no PostHog localStorage keys (including __ph_opt_in_out_*) on granted -> denied",
-        );
-        assert.deepEqual(
-          storage.sessionStorageKeys.filter(isPostHogStorageKey),
-          [],
-          "Expected no PostHog sessionStorage keys on granted -> denied",
-        );
-
-        // Navigate SPA to another page while denied and verify cookieless $pageview resumes
-        const beforeNav = capturedEvents.length;
-        await page.evaluate(() => {
-          const link = Array.from(document.querySelectorAll("a[href]")).find(
-            (a) => {
-              const href = a.getAttribute("href") || "";
-              return href.startsWith("/docs/") && href !== "/docs";
-            },
-          );
-          if (link) link.click();
-        });
-        const gotCookielessAfterRevoke = await waitForCondition(
-          () =>
-            capturedEvents
-              .slice(beforeNav)
-              .some(
-                (ev) =>
-                  ev.event === "$pageview" &&
-                  ev.cookieless === true &&
-                  ev.distinct_id === "$posthog_cookieless",
-              ),
-          10_000,
-        );
-        assert.ok(
-          gotCookielessAfterRevoke,
-          `Expected cookieless $pageview after navigation post-revoke, got: ${JSON.stringify(capturedEvents.slice(beforeNav))}`,
-        );
         await page.waitForTimeout(800);
-        const nonPageviewsAfterRevoke = capturedEvents
-          .slice(beforeNav)
-          .filter((ev) => ev.event !== "$pageview");
-        assert.deepEqual(
-          nonPageviewsAfterRevoke,
-          [],
-          `Expected only $pageview events after revoke, got: ${JSON.stringify(capturedEvents.slice(beforeNav))}`,
+
+        assert.equal(capturedEvents.length, 1);
+        assert.equal(capturedEvents[0].event, "$pageview");
+        assert.equal(capturedEvents[0].cookieless, true);
+        assert.equal(capturedEvents[0].distinct_id, "$posthog_cookieless");
+        assert.equal(capturedEvents[0].current_url, `${baseUrl}/docs`);
+        assert.equal(capturedEvents[0].pathname, "/docs");
+        assert.ok(capturedEvents[0].receivedAt - loadedAt < 4_000);
+        const ts = Date.parse(capturedEvents[0].timestamp);
+        assert.ok(
+          ts >= startAt - 1_000 && ts <= capturedEvents[0].receivedAt + 1_000,
         );
-        storage = await inspectStorage(page);
-        assert.deepEqual(
-          storage.cookies.filter((c) => c.startsWith("ph_")),
-          [],
-        );
-        assert.deepEqual(
-          storage.localStorageKeys.filter(isPostHogStorageKey),
-          [],
-        );
-        assert.deepEqual(
-          storage.sessionStorageKeys.filter(isPostHogStorageKey),
-          [],
-        );
-        console.log(
-          "PASS: transitions (unknown -> granted, granted -> denied)",
-        );
+        await assertNoPostHogStorage(page, "returning denied visitor");
+        console.log("PASS: returning visitor who rejected earlier");
       } finally {
         await context.close();
       }
     }
+
+    // 3. Accept within 10s: exactly one identified $pageview with original load timestamp and URL; no cookieless pageview.
+    {
+      const { context, page, capturedEvents } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        UNDECIDED_CONTEXT,
+      );
+      try {
+        const loadStart = Date.now();
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        const loadEnd = Date.now();
+        await page.waitForTimeout(1_500);
+        assert.deepEqual(
+          capturedEvents,
+          [],
+          "Expected zero events while waiting for consent choice",
+        );
+        await assertNoPostHogStorage(page, "undecided before accept");
+
+        const acceptAt = Date.now();
+        await dispatchConsentUpdate(page, { analytics: true });
+        const gotPageview = await waitForCondition(
+          () => capturedEvents.some((ev) => ev.event === "$pageview"),
+          6_000,
+        );
+        assert.ok(gotPageview, "Expected identified $pageview after accept");
+        await page.waitForTimeout(800);
+
+        const pageviews = capturedEvents.filter(
+          (ev) => ev.event === "$pageview",
+        );
+        assert.equal(
+          pageviews.length,
+          1,
+          `Expected exactly one $pageview on accept within 10s, got: ${JSON.stringify(pageviews)}`,
+        );
+        assert.equal(pageviews[0].cookieless, false);
+        assert.notEqual(pageviews[0].distinct_id, "$posthog_cookieless");
+        assert.ok(pageviews[0].session_id);
+        assert.equal(pageviews[0].current_url, `${baseUrl}/docs`);
+        assert.equal(pageviews[0].pathname, "/docs");
+        const ts = Date.parse(pageviews[0].timestamp);
+        assert.ok(
+          ts >= loadStart - 500 &&
+            ts <= loadEnd + 500 &&
+            ts <= acceptAt - 1_000,
+          `Expected original load timestamp (${loadStart}..${loadEnd}, well before accept ${acceptAt}), got ${ts}`,
+        );
+
+        const storage = await inspectStorage(page);
+        assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
+        console.log("PASS: accept within 10s");
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 4. Reject within 10s: exactly one cookieless $pageview with original timestamp and URL.
+    {
+      const { context, page, capturedEvents } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        UNDECIDED_CONTEXT,
+      );
+      try {
+        const loadStart = Date.now();
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        const loadEnd = Date.now();
+        await page.waitForTimeout(1_500);
+        assert.deepEqual(capturedEvents, []);
+
+        const rejectAt = Date.now();
+        await dispatchConsentUpdate(page, { analytics: false });
+        const gotPageview = await waitForCondition(
+          () => capturedEvents.some((ev) => ev.event === "$pageview"),
+          6_000,
+        );
+        assert.ok(gotPageview, "Expected cookieless $pageview after reject");
+        await clickAutocaptureTarget(page);
+        await page.waitForTimeout(800);
+
+        assert.equal(capturedEvents.length, 1);
+        assert.equal(capturedEvents[0].event, "$pageview");
+        assert.equal(capturedEvents[0].cookieless, true);
+        assert.equal(capturedEvents[0].distinct_id, "$posthog_cookieless");
+        assert.equal(capturedEvents[0].current_url, `${baseUrl}/docs`);
+        assert.equal(capturedEvents[0].pathname, "/docs");
+        const ts = Date.parse(capturedEvents[0].timestamp);
+        assert.ok(
+          ts >= loadStart - 500 &&
+            ts <= loadEnd + 500 &&
+            ts <= rejectAt - 1_000,
+          `Expected original load timestamp before reject, got ${ts} vs reject ${rejectAt}`,
+        );
+        await assertNoPostHogStorage(page, "reject within 10s");
+        console.log("PASS: reject within 10s");
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 5. Page hidden (visibilitychange) or left (pagehide) before 10s: one cookieless $pageview via beacon.
+    for (const exitKind of ["visibilitychange", "pagehide"]) {
+      const { context, page, capturedEvents } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        UNDECIDED_CONTEXT,
+      );
+      try {
+        const loadStart = Date.now();
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        const loadEnd = Date.now();
+        await page.waitForTimeout(1_200);
+        assert.deepEqual(capturedEvents, []);
+
+        const exitAt = Date.now();
+        await page.evaluate((kind) => {
+          if (kind === "visibilitychange") {
+            Object.defineProperty(document, "visibilityState", {
+              configurable: true,
+              get: () => "hidden",
+            });
+            document.dispatchEvent(new Event("visibilitychange"));
+          } else {
+            window.dispatchEvent(new PageTransitionEvent("pagehide"));
+          }
+        }, exitKind);
+
+        const gotBeacon = await waitForCondition(
+          () => capturedEvents.some((ev) => ev.event === "$pageview"),
+          6_000,
+        );
+        assert.ok(
+          gotBeacon,
+          `Expected cookieless $pageview via beacon on ${exitKind}`,
+        );
+        await page.waitForTimeout(500);
+
+        assert.equal(capturedEvents.length, 1);
+        assert.equal(capturedEvents[0].event, "$pageview");
+        assert.equal(capturedEvents[0].cookieless, true);
+        assert.equal(capturedEvents[0].distinct_id, "$posthog_cookieless");
+        assert.equal(capturedEvents[0].current_url, `${baseUrl}/docs`);
+        assert.equal(capturedEvents[0].pathname, "/docs");
+        const ts = Date.parse(capturedEvents[0].timestamp);
+        assert.ok(
+          ts >= loadStart - 500 && ts <= loadEnd + 500 && ts <= exitAt - 800,
+          `Expected original load timestamp on ${exitKind}, got ${ts} vs exit ${exitAt}`,
+        );
+
+        const storage = await assertNoPostHogStorage(page, exitKind);
+        assert.ok(
+          storage.beaconUrls.some((u) => u.includes("posthog.com")),
+          `Expected navigator.sendBeacon call to PostHog on ${exitKind}, got: ${JSON.stringify(storage.beaconUrls)}`,
+        );
+        console.log(`PASS: page exit before 10s (${exitKind})`);
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 6. Client-side navigation during the wait, then accept: two identified pageviews with own URLs and timestamps in order.
+    {
+      const { context, page, capturedEvents } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        UNDECIDED_CONTEXT,
+      );
+      try {
+        const loadStart = Date.now();
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        const loadEnd = Date.now();
+        await page.waitForTimeout(1_000);
+        assert.deepEqual(capturedEvents, []);
+
+        const navStart = Date.now();
+        const secondPathname = await navigateDocsLink(page);
+        const navEnd = Date.now();
+        await page.waitForTimeout(1_000);
+        assert.deepEqual(
+          capturedEvents,
+          [],
+          "Expected both pageviews queued while consent is still unknown",
+        );
+
+        const acceptAt = Date.now();
+        await dispatchConsentUpdate(page, { analytics: true });
+        const gotBoth = await waitForCondition(
+          () =>
+            capturedEvents.filter((ev) => ev.event === "$pageview").length >= 2,
+          6_000,
+        );
+        assert.ok(
+          gotBoth,
+          `Expected 2 identified $pageviews after SPA nav + accept, got: ${JSON.stringify(capturedEvents)}`,
+        );
+        await page.waitForTimeout(800);
+
+        const pageviews = capturedEvents.filter(
+          (ev) => ev.event === "$pageview",
+        );
+        assert.equal(pageviews.length, 2);
+        assert.equal(pageviews[0].cookieless, false);
+        assert.equal(pageviews[0].pathname, "/docs");
+        assert.equal(pageviews[0].current_url, `${baseUrl}/docs`);
+        assert.ok(pageviews[0].session_id);
+
+        assert.equal(pageviews[1].cookieless, false);
+        assert.equal(pageviews[1].pathname, secondPathname);
+        assert.equal(pageviews[1].current_url, `${baseUrl}${secondPathname}`);
+        assert.ok(pageviews[1].session_id);
+
+        const ts0 = Date.parse(pageviews[0].timestamp);
+        const ts1 = Date.parse(pageviews[1].timestamp);
+        assert.ok(
+          ts0 >= loadStart - 500 && ts0 <= loadEnd + 500,
+          `Expected first pageview timestamp near load (${loadStart}..${loadEnd}), got ${ts0}`,
+        );
+        assert.ok(
+          ts1 > ts0 &&
+            ts1 >= navStart - 500 &&
+            ts1 <= navEnd + 1_000 &&
+            ts1 <= acceptAt - 500,
+          `Expected second pageview timestamp (${ts1}) after first (${ts0}) and before accept (${acceptAt})`,
+        );
+
+        const storage = await inspectStorage(page);
+        assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
+        console.log("PASS: client-side navigation during wait then accept");
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 7. Revoke after granting: cookie removed, no resend for current page, next navigation is cookieless.
+    {
+      const { context, page, capturedEvents } = await createIsolatedContext(
+        browser,
+        baseUrl,
+        GRANTED_CONTEXT,
+      );
+      try {
+        await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+        const gotInitial = await waitForCondition(
+          () =>
+            capturedEvents.some(
+              (ev) => ev.event === "$pageview" && !ev.cookieless,
+            ),
+          6_000,
+        );
+        assert.ok(gotInitial);
+        let storage = await inspectStorage(page);
+        assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
+
+        const countBeforeRevoke = capturedEvents.filter(
+          (ev) => ev.event === "$pageview",
+        ).length;
+        await dispatchConsentUpdate(page, { analytics: false });
+        await page.waitForTimeout(800);
+
+        assert.equal(
+          capturedEvents.filter((ev) => ev.event === "$pageview").length,
+          countBeforeRevoke,
+          "Expected no resend on revoke",
+        );
+        await assertNoPostHogStorage(page, "after revoke", {
+          checkWrites: false,
+        });
+
+        const beforeNav = capturedEvents.length;
+        const nextPathname = await navigateDocsLink(page);
+        const gotCookieless = await waitForCondition(
+          () =>
+            capturedEvents
+              .slice(beforeNav)
+              .some((ev) => ev.event === "$pageview"),
+          6_000,
+        );
+        assert.ok(gotCookieless, "Expected cookieless $pageview after revoke");
+        await clickAutocaptureTarget(page);
+        await page.waitForTimeout(800);
+
+        const postRevoke = capturedEvents.slice(beforeNav);
+        assert.equal(postRevoke.length, 1);
+        assert.equal(postRevoke[0].event, "$pageview");
+        assert.equal(postRevoke[0].cookieless, true);
+        assert.equal(postRevoke[0].distinct_id, "$posthog_cookieless");
+        assert.equal(postRevoke[0].pathname, nextPathname);
+        assert.equal(postRevoke[0].current_url, `${baseUrl}${nextPathname}`);
+        await assertNoPostHogStorage(page, "navigation after revoke", {
+          checkWrites: false,
+        });
+        console.log("PASS: revoke after granting");
+      } finally {
+        await context.close();
+      }
+    }
+
+    // 8-10. Timeout scenarios (run concurrently in isolated contexts so total wait is ~10s):
+    // - No answer (~10s cookieless)
+    // - CookieYes blocked (~10s cookieless)
+    // - Accept after timeout (no resend for current page; next navigation is identified)
+    await Promise.all([
+      (async () => {
+        const { context, page, capturedEvents } = await createIsolatedContext(
+          browser,
+          baseUrl,
+          UNDECIDED_CONTEXT,
+        );
+        try {
+          const loadStart = Date.now();
+          await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+          const loadEnd = Date.now();
+          await page.waitForTimeout(5_000);
+          assert.deepEqual(
+            capturedEvents,
+            [],
+            "Expected no events at 5s while no answer",
+          );
+
+          const gotTimeout = await waitForCondition(
+            () => capturedEvents.some((ev) => ev.event === "$pageview"),
+            10_000,
+          );
+          assert.ok(gotTimeout, "Expected cookieless $pageview at ~10s");
+          await clickAutocaptureTarget(page);
+          await page.waitForTimeout(800);
+
+          assert.equal(capturedEvents.length, 1);
+          assert.equal(capturedEvents[0].event, "$pageview");
+          assert.equal(capturedEvents[0].cookieless, true);
+          assert.equal(capturedEvents[0].distinct_id, "$posthog_cookieless");
+          assert.equal(capturedEvents[0].current_url, `${baseUrl}/docs`);
+          assert.equal(capturedEvents[0].pathname, "/docs");
+          const elapsed = capturedEvents[0].receivedAt - loadStart;
+          assert.ok(
+            elapsed >= 9_000 && elapsed <= 15_000,
+            `Expected ~10s flush on no answer, got ${elapsed}ms`,
+          );
+          const ts = Date.parse(capturedEvents[0].timestamp);
+          assert.ok(
+            ts >= loadStart - 500 && ts <= loadEnd + 500,
+            `Expected original load timestamp on no answer, got ${ts}`,
+          );
+          await assertNoPostHogStorage(page, "no answer timeout");
+          console.log("PASS: no answer (10s timeout)");
+        } finally {
+          await context.close();
+        }
+      })(),
+      (async () => {
+        const { context, page, capturedEvents } = await createIsolatedContext(
+          browser,
+          baseUrl,
+        );
+        try {
+          const loadStart = Date.now();
+          await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+          const loadEnd = Date.now();
+          await page.waitForTimeout(5_000);
+          assert.deepEqual(
+            capturedEvents,
+            [],
+            "Expected no events at 5s when CookieYes is blocked",
+          );
+
+          const gotTimeout = await waitForCondition(
+            () => capturedEvents.some((ev) => ev.event === "$pageview"),
+            10_000,
+          );
+          assert.ok(
+            gotTimeout,
+            "Expected cookieless $pageview at ~10s when CookieYes is blocked",
+          );
+          await clickAutocaptureTarget(page);
+          await page.waitForTimeout(800);
+
+          assert.equal(capturedEvents.length, 1);
+          assert.equal(capturedEvents[0].event, "$pageview");
+          assert.equal(capturedEvents[0].cookieless, true);
+          assert.equal(capturedEvents[0].distinct_id, "$posthog_cookieless");
+          assert.equal(capturedEvents[0].current_url, `${baseUrl}/docs`);
+          assert.equal(capturedEvents[0].pathname, "/docs");
+          const elapsed = capturedEvents[0].receivedAt - loadStart;
+          assert.ok(
+            elapsed >= 9_000 && elapsed <= 15_000,
+            `Expected ~10s flush when CookieYes is blocked, got ${elapsed}ms`,
+          );
+          const ts = Date.parse(capturedEvents[0].timestamp);
+          assert.ok(
+            ts >= loadStart - 500 && ts <= loadEnd + 500,
+            `Expected original load timestamp when CookieYes is blocked, got ${ts}`,
+          );
+          await assertNoPostHogStorage(page, "CookieYes blocked timeout");
+          console.log("PASS: CookieYes blocked (10s timeout)");
+        } finally {
+          await context.close();
+        }
+      })(),
+      (async () => {
+        const { context, page, capturedEvents } = await createIsolatedContext(
+          browser,
+          baseUrl,
+          UNDECIDED_CONTEXT,
+        );
+        try {
+          await page.goto(`${baseUrl}/docs`, { waitUntil: "networkidle" });
+          const gotTimeout = await waitForCondition(
+            () =>
+              capturedEvents.some(
+                (ev) => ev.event === "$pageview" && ev.cookieless === true,
+              ),
+            15_000,
+          );
+          assert.ok(gotTimeout, "Expected timeout cookieless $pageview first");
+
+          // Accept after timeout: no second $pageview for /docs
+          await dispatchConsentUpdate(page, { analytics: true });
+          await page.waitForTimeout(1_000);
+          assert.equal(
+            capturedEvents.filter((ev) => ev.event === "$pageview").length,
+            1,
+            `Expected no duplicate $pageview after late accept, got: ${JSON.stringify(capturedEvents)}`,
+          );
+          const storage = await inspectStorage(page);
+          assert.ok(storage.cookies.includes(POSTHOG_COOKIE_NAME));
+
+          // Next navigation sends identified $pageview
+          const beforeNav = capturedEvents.length;
+          const nextPathname = await navigateDocsLink(page);
+          const gotNext = await waitForCondition(
+            () =>
+              capturedEvents
+                .slice(beforeNav)
+                .some(
+                  (ev) =>
+                    ev.event === "$pageview" &&
+                    ev.cookieless === false &&
+                    ev.pathname === nextPathname,
+                ),
+            6_000,
+          );
+          assert.ok(
+            gotNext,
+            `Expected identified $pageview on next nav after late accept, got: ${JSON.stringify(capturedEvents.slice(beforeNav))}`,
+          );
+          const nextPageview = capturedEvents
+            .slice(beforeNav)
+            .find((ev) => ev.event === "$pageview");
+          assert.equal(nextPageview.current_url, `${baseUrl}${nextPathname}`);
+          assert.notEqual(nextPageview.distinct_id, "$posthog_cookieless");
+          assert.ok(nextPageview.session_id);
+          console.log("PASS: accept after timeout");
+        } finally {
+          await context.close();
+        }
+      })(),
+    ]);
   } finally {
     await browser.close();
     stopProcessTree(started?.proc);

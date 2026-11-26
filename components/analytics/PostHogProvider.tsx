@@ -128,6 +128,7 @@ function applyAnalyticsConsent(): boolean {
       ...COOKIELESS_ONLY_CONFIG,
       cookieless_mode: "always",
       persistence: "memory",
+      ...(posthog.config.debug ? { debug: false } : {}),
     });
   }
   clearStalePostHogCookie();
@@ -135,12 +136,43 @@ function applyAnalyticsConsent(): boolean {
   return false;
 }
 
+export const CONSENT_WAIT_MS = 10_000;
+
+type QueuedPageView = {
+  timestamp: Date;
+  properties: {
+    $current_url: string;
+    $pathname: string;
+    $host: string;
+    $referrer: string;
+    title: string;
+  };
+};
+
+function createQueuedPageView(pathname: string): QueuedPageView {
+  const loc = typeof window !== "undefined" ? window.location : undefined;
+  const doc = typeof document !== "undefined" ? document : undefined;
+  return {
+    timestamp: new Date(),
+    properties: {
+      $current_url: loc?.href ?? pathname,
+      $pathname: loc?.pathname ?? pathname,
+      $host: loc?.host ?? "",
+      $referrer: doc?.referrer || "$direct",
+      title: doc?.title ?? "",
+    },
+  };
+}
+
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isInitialPageView = useRef(true);
   const [ready, setReady] = useState(false);
   const [analyticsGranted, setAnalyticsGranted] = useState(false);
-  const lastCaptured = useRef<{ path: string; granted: boolean } | null>(null);
+  const initializedRef = useRef(false);
+  const lastCapturedPath = useRef<string | null>(null);
+  const holdingRef = useRef(false);
+  const queueRef = useRef<QueuedPageView[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -152,53 +184,138 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const syncConsent = () => {
-      setAnalyticsGranted(applyAnalyticsConsent());
+    let waitTimer: ReturnType<typeof setTimeout> | null = null;
+    let exitListenersAttached = false;
+
+    const clearHoldHooks = () => {
+      if (waitTimer !== null) {
+        clearTimeout(waitTimer);
+        waitTimer = null;
+      }
+      if (exitListenersAttached) {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        window.removeEventListener("pagehide", onPageHide);
+        exitListenersAttached = false;
+      }
     };
 
-    const initialGranted = readAnalyticsConsent() === "granted";
+    const flushQueue = (extraOptions?: {
+      transport: "sendBeacon";
+      send_instantly: true;
+    }) => {
+      holdingRef.current = false;
+      clearHoldHooks();
+      const queued = queueRef.current;
+      if (queued.length === 0) return;
+      queueRef.current = [];
+      for (const entry of queued) {
+        posthog.capture("$pageview", entry.properties, {
+          timestamp: entry.timestamp,
+          ...extraOptions,
+        });
+      }
+    };
 
-    posthog.init(posthogKey, {
-      api_host:
-        process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
-      ui_host: "https://eu.posthog.com",
-      // Start in `cookieless_mode: "always"` with "memory" persistence when
-      // analytics consent is not already granted so no cookies, localStorage,
-      // or sessionStorage keys (including `__ph_cookie_support_*`) are written.
-      // `opt_out_capturing_by_default: true` also ensures that switching to
-      // `cookieless_mode: "on_reject"` before `opt_in_capturing()` keeps
-      // posthog-js in cookieless/persistence-disabled state until opt-in runs
-      // so SessionIdManager and SessionRecording are initialized on grant.
-      cookieless_mode: initialGranted ? "on_reject" : "always",
-      persistence: initialGranted ? "cookie" : "memory",
-      cross_subdomain_cookie: true,
-      // Route changes are captured below, including the initial page exactly once.
-      capture_pageview: false,
-      opt_out_capturing_by_default: true,
-      opt_out_persistence_by_default: true,
-      ...COOKIELESS_ONLY_CONFIG,
-      before_send: (event) => {
-        if (!event) return null;
-        if (readAnalyticsConsent() === "granted") return event;
-        return event.event === "$pageview" ? event : null;
-      },
-      loaded: (ph) => {
-        syncConsent();
-        setReady(true);
-        if (
-          process.env.NODE_ENV === "development" &&
-          readAnalyticsConsent() === "granted"
-        ) {
-          ph.debug();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flushQueue({ transport: "sendBeacon", send_instantly: true });
+      }
+    };
+
+    const onPageHide = () => {
+      flushQueue({ transport: "sendBeacon", send_instantly: true });
+    };
+
+    const startHolding = () => {
+      holdingRef.current = true;
+      clearHoldHooks();
+      waitTimer = setTimeout(() => {
+        waitTimer = null;
+        flushQueue();
+      }, CONSENT_WAIT_MS);
+      document.addEventListener("visibilitychange", onVisibilityChange);
+      window.addEventListener("pagehide", onPageHide);
+      exitListenersAttached = true;
+    };
+
+    const onBannerLoad = () => {
+      const granted = applyAnalyticsConsent();
+      setAnalyticsGranted(granted);
+      if (holdingRef.current && readAnalyticsConsent() !== "unknown") {
+        flushQueue();
+      }
+    };
+
+    const onConsentUpdate = () => {
+      const granted = applyAnalyticsConsent();
+      setAnalyticsGranted(granted);
+      if (holdingRef.current) {
+        flushQueue();
+      }
+    };
+
+    if (initializedRef.current) {
+      // Re-arm wait hooks after React StrictMode dev remount if still holding.
+      const consent = readAnalyticsConsent();
+      setAnalyticsGranted(applyAnalyticsConsent());
+      if (holdingRef.current) {
+        if (consent === "unknown") {
+          startHolding();
+        } else {
+          flushQueue();
         }
-      },
-    });
+      }
+      setReady(true);
+    } else {
+      const initialGranted = readAnalyticsConsent() === "granted";
 
-    document.addEventListener("cookieyes_banner_load", syncConsent);
-    document.addEventListener("cookieyes_consent_update", syncConsent);
+      posthog.init(posthogKey, {
+        api_host:
+          process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
+        ui_host: "https://eu.posthog.com",
+        // Start in `cookieless_mode: "always"` with "memory" persistence when
+        // analytics consent is not already granted so no cookies, localStorage,
+        // or sessionStorage keys (including `__ph_cookie_support_*`) are written.
+        // `opt_out_capturing_by_default: true` also ensures that switching to
+        // `cookieless_mode: "on_reject"` before `opt_in_capturing()` keeps
+        // posthog-js in cookieless/persistence-disabled state until opt-in runs
+        // so SessionIdManager and SessionRecording are initialized on grant.
+        cookieless_mode: initialGranted ? "on_reject" : "always",
+        persistence: initialGranted ? "cookie" : "memory",
+        cross_subdomain_cookie: true,
+        // Route changes are captured below, including the initial page exactly once.
+        capture_pageview: false,
+        opt_out_capturing_by_default: true,
+        opt_out_persistence_by_default: true,
+        ...COOKIELESS_ONLY_CONFIG,
+        before_send: (event) => {
+          if (!event) return null;
+          if (readAnalyticsConsent() === "granted") return event;
+          return event.event === "$pageview" ? event : null;
+        },
+        loaded: (ph) => {
+          initializedRef.current = true;
+          const consent = readAnalyticsConsent();
+          setAnalyticsGranted(applyAnalyticsConsent());
+          if (consent === "unknown") {
+            startHolding();
+          } else {
+            holdingRef.current = false;
+          }
+          setReady(true);
+          if (process.env.NODE_ENV === "development" && consent === "granted") {
+            ph.debug();
+          }
+        },
+      });
+    }
+
+    document.addEventListener("cookieyes_banner_load", onBannerLoad);
+    document.addEventListener("cookieyes_consent_update", onConsentUpdate);
     return () => {
-      document.removeEventListener("cookieyes_banner_load", syncConsent);
-      document.removeEventListener("cookieyes_consent_update", syncConsent);
+      clearHoldHooks();
+      document.removeEventListener("cookieyes_banner_load", onBannerLoad);
+      document.removeEventListener("cookieyes_consent_update", onConsentUpdate);
     };
   }, []);
 
@@ -216,20 +333,15 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready || !pathname) return;
-    const samePath = lastCaptured.current?.path === pathname;
-    if (!analyticsGranted) {
-      if (samePath) {
-        // Clear the granted flag so re-granting on the same page recaptures a
-        // consented $pageview for the new opted-in identity.
-        lastCaptured.current = { path: pathname, granted: false };
-        return;
-      }
-    } else if (samePath && lastCaptured.current?.granted) {
-      return;
+    if (lastCapturedPath.current === pathname) return;
+    lastCapturedPath.current = pathname;
+
+    if (holdingRef.current) {
+      queueRef.current.push(createQueuedPageView(pathname));
+    } else {
+      posthog.capture("$pageview");
     }
-    lastCaptured.current = { path: pathname, granted: analyticsGranted };
-    posthog.capture("$pageview");
-  }, [pathname, ready, analyticsGranted]);
+  }, [pathname, ready]);
 
   return (
     <PHProvider client={posthog}>

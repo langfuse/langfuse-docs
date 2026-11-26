@@ -182,7 +182,7 @@ function createMiniReact() {
         !prev.deps ||
         deps.length !== prev.deps.length ||
         deps.some((d, idx) => !Object.is(d, prev.deps[idx]));
-      effects[i] = { fn, deps, changed };
+      effects[i] = { fn, deps, changed, cleanup: prev?.cleanup };
     },
   };
 
@@ -194,26 +194,52 @@ function createMiniReact() {
     for (const eff of effects) {
       if (eff.changed) {
         eff.changed = false;
-        eff.fn();
+        if (typeof eff.cleanup === "function") eff.cleanup();
+        eff.cleanup = eff.fn();
       }
     }
     return out;
   }
 
-  return { hooks, render };
+  function unmount() {
+    for (const eff of effects) {
+      if (typeof eff.cleanup === "function") {
+        eff.cleanup();
+        eff.cleanup = undefined;
+      }
+    }
+  }
+
+  return { hooks, render, unmount };
 }
 
-test("PostHogProvider runs in cookieless_mode always before consent, switches to cookie mode on grant, and cleans up on revoke", () => {
+function createPostHogHarness(
+  t,
+  {
+    initialConsent = "unknown",
+    initialPath = "/docs",
+    initialHref = "https://langfuse.com/docs",
+    initialHost = "langfuse.com",
+    initialReferrer = "https://google.com/",
+    initialTitle = "Docs - Langfuse",
+    now = new Date("2026-11-26T12:00:00.000Z"),
+  } = {},
+) {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now });
+
   const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
 
-  let consentState = "unknown";
-  let currentPath = "/pricing";
-  let explicitStatus = "pending";
+  let consentState = initialConsent;
+  let currentPath = initialPath;
+  let explicitStatus = initialConsent === "granted" ? "granted" : "pending";
   let initArgs = null;
   let useCaseReady = null;
+  let visibilityState = "visible";
   const calls = [];
-  const listeners = {};
+  const pageviews = [];
+  const docListeners = new Map();
+  const winListeners = new Map();
   const sessionStore = new Map([
     ["ph_phc_test_key_window_id", "win-1"],
     ["ph_phc_test_key_primary_window_exists", "true"],
@@ -253,94 +279,214 @@ test("PostHogProvider runs in cookieless_mode always before consent, switches to
       calls.push(["set_config", cfg]);
       Object.assign(this.config, cfg);
     },
-    capture(name) {
-      const mode =
-        this.config.cookieless_mode === "always" || explicitStatus !== "granted"
-          ? "cookieless"
-          : "consented";
-      calls.push(["capture", name, mode]);
+    capture(name, properties, options) {
+      const cookieless =
+        this.config.cookieless_mode === "always" ||
+        explicitStatus !== "granted";
+      const record = {
+        event: name,
+        cookieless,
+        properties: properties ? { ...properties } : undefined,
+        options: options ? { ...options } : undefined,
+        capturedAt: new Date(),
+        url: properties?.$current_url ?? globalThis.window.location.href,
+        pathname: properties?.$pathname ?? globalThis.window.location.pathname,
+        timestamp: options?.timestamp ?? new Date(),
+      };
+      calls.push(["capture", name, cookieless ? "cookieless" : "consented"]);
+      if (name === "$pageview") pageviews.push(record);
     },
     debug() {},
   };
 
-  globalThis.window = {};
+  globalThis.window = {
+    location: {
+      href: initialHref,
+      pathname: initialPath,
+      host: initialHost,
+      hostname: initialHost,
+      protocol: "https:",
+    },
+    addEventListener(type, fn) {
+      if (!winListeners.has(type)) winListeners.set(type, new Set());
+      winListeners.get(type).add(fn);
+    },
+    removeEventListener(type, fn) {
+      winListeners.get(type)?.delete(fn);
+    },
+  };
   globalThis.document = {
     cookie: "",
-    addEventListener: (type, fn) => {
-      listeners[type] = fn;
+    referrer: initialReferrer,
+    title: initialTitle,
+    get visibilityState() {
+      return visibilityState;
     },
-    removeEventListener: () => {},
+    addEventListener(type, fn) {
+      if (!docListeners.has(type)) docListeners.set(type, new Set());
+      docListeners.get(type).add(fn);
+    },
+    removeEventListener(type, fn) {
+      docListeners.get(type)?.delete(fn);
+    },
   };
   globalThis.sessionStorage = {
     removeItem: (k) => sessionStore.delete(k),
   };
 
+  const mini = createMiniReact();
+  const mod = load(
+    compile("components/analytics/PostHogProvider.tsx"),
+    (name) => {
+      if (name === "react") return mini.hooks;
+      if (name === "react/jsx-runtime") {
+        return {
+          jsx: (type, props) => {
+            if (type?.name === "UseCaseAnalytics") useCaseReady = props.ready;
+            return { type, props };
+          },
+          jsxs: (type, props) => ({ type, props }),
+        };
+      }
+      if (name === "next/navigation") {
+        return { usePathname: () => currentPath };
+      }
+      if (name === "posthog-js") return fakePosthog;
+      if (name === "posthog-js/react") {
+        return { PostHogProvider: () => null };
+      }
+      if (name === "@/components/analytics/common-room") {
+        return { crPageView: () => {} };
+      }
+      if (name === "@/components/analytics/UseCaseAnalytics") {
+        return {
+          UseCaseAnalytics: function UseCaseAnalytics() {
+            return null;
+          },
+        };
+      }
+      if (name === "@/lib/cookie-consent") {
+        return { readAnalyticsConsent: () => consentState };
+      }
+      throw Error(name);
+    },
+  );
+
+  function render() {
+    mini.render(() => mod.PostHogProvider({ children: null }));
+  }
+
+  function mount() {
+    render();
+    render();
+  }
+
+  function setConsent(next) {
+    consentState = next;
+  }
+
+  function dispatchDoc(type) {
+    for (const fn of [...(docListeners.get(type) ?? [])]) fn();
+    render();
+  }
+
+  function dispatchWin(type) {
+    for (const fn of [...(winListeners.get(type) ?? [])]) fn();
+    render();
+  }
+
+  function navigate({ path, href, host, referrer, title }) {
+    currentPath = path;
+    globalThis.window.location.pathname = path;
+    globalThis.window.location.href = href ?? `https://langfuse.com${path}`;
+    if (host !== undefined) globalThis.window.location.host = host;
+    if (referrer !== undefined) globalThis.document.referrer = referrer;
+    if (title !== undefined) globalThis.document.title = title;
+    render();
+  }
+
+  function setVisibility(state) {
+    visibilityState = state;
+    dispatchDoc("visibilitychange");
+  }
+
+  function cleanup() {
+    mini.unmount();
+    t.mock.timers.reset();
+    if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
+    delete globalThis.window;
+    delete globalThis.document;
+    delete globalThis.sessionStorage;
+  }
+
+  return {
+    mod,
+    fakePosthog,
+    calls,
+    pageviews,
+    sessionStore,
+    docListeners,
+    winListeners,
+    get initArgs() {
+      return initArgs;
+    },
+    get useCaseReady() {
+      return useCaseReady;
+    },
+    get explicitStatus() {
+      return explicitStatus;
+    },
+    mount,
+    render,
+    setConsent,
+    dispatchDoc,
+    dispatchWin,
+    navigate,
+    setVisibility,
+    cleanup,
+  };
+}
+
+test("PostHogProvider: accept within 10s sends one identified $pageview with original timestamp and URL", (t) => {
+  const loadTime = new Date("2026-11-26T12:00:00.000Z");
+  const h = createPostHogHarness(t, {
+    initialConsent: "unknown",
+    initialPath: "/pricing",
+    initialHref: "https://langfuse.com/pricing?utm=abc",
+    initialHost: "langfuse.com",
+    initialReferrer: "https://google.com/",
+    initialTitle: "Pricing - Langfuse",
+    now: loadTime,
+  });
+
   try {
-    const mini = createMiniReact();
-    const mod = load(
-      compile("components/analytics/PostHogProvider.tsx"),
-      (name) => {
-        if (name === "react") return mini.hooks;
-        if (name === "react/jsx-runtime") {
-          return {
-            jsx: (type, props) => {
-              if (type?.name === "UseCaseAnalytics") useCaseReady = props.ready;
-              return { type, props };
-            },
-            jsxs: (type, props) => ({ type, props }),
-          };
-        }
-        if (name === "next/navigation") {
-          return { usePathname: () => currentPath };
-        }
-        if (name === "posthog-js") return fakePosthog;
-        if (name === "posthog-js/react") {
-          return { PostHogProvider: () => null };
-        }
-        if (name === "@/components/analytics/common-room") {
-          return { crPageView: () => {} };
-        }
-        if (name === "@/components/analytics/UseCaseAnalytics") {
-          return {
-            UseCaseAnalytics: function UseCaseAnalytics() {
-              return null;
-            },
-          };
-        }
-        if (name === "@/lib/cookie-consent") {
-          return { readAnalyticsConsent: () => consentState };
-        }
-        throw Error(name);
-      },
-    );
+    h.mount();
 
-    // 1. Initial load with "unknown": cookieless_mode "always", persistence "memory",
-    // sends one cookieless $pageview, no opt-out flag written.
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    mini.render(() => mod.PostHogProvider({ children: null }));
+    assert.equal(h.initArgs.key, "phc_test_key");
+    assert.equal(h.initArgs.options.cookieless_mode, "always");
+    assert.equal(h.initArgs.options.opt_out_capturing_by_default, true);
+    assert.equal(h.initArgs.options.opt_out_persistence_by_default, true);
+    assert.equal(h.initArgs.options.persistence, "memory");
+    assert.equal(h.initArgs.options.cross_subdomain_cookie, true);
+    assert.equal(h.initArgs.options.disable_session_recording, true);
+    assert.equal(h.initArgs.options.autocapture, false);
+    assert.equal(h.initArgs.options.capture_heatmaps, false);
+    assert.equal(h.initArgs.options.capture_dead_clicks, false);
+    assert.equal(h.initArgs.options.capture_exceptions, false);
+    assert.equal(h.initArgs.options.disable_surveys, true);
 
-    assert.equal(initArgs.key, "phc_test_key");
-    assert.equal(initArgs.options.cookieless_mode, "always");
-    assert.equal(initArgs.options.opt_out_capturing_by_default, true);
-    assert.equal(initArgs.options.opt_out_persistence_by_default, true);
-    assert.equal(initArgs.options.persistence, "memory");
-    assert.equal(initArgs.options.cross_subdomain_cookie, true);
-    assert.equal(initArgs.options.disable_session_recording, true);
-    assert.equal(initArgs.options.autocapture, false);
-    assert.equal(initArgs.options.capture_heatmaps, false);
-    assert.equal(initArgs.options.capture_dead_clicks, false);
-    assert.equal(initArgs.options.capture_exceptions, false);
-    assert.equal(initArgs.options.disable_surveys, true);
+    // Nothing sent while waiting; banner load with unknown keeps holding
+    assert.equal(h.pageviews.length, 0);
+    assert.equal(h.useCaseReady, false);
+    assert.equal(h.sessionStore.size, 0);
+    h.dispatchDoc("cookieyes_banner_load");
+    assert.equal(h.pageviews.length, 0);
 
-    assert.equal(explicitStatus, "pending");
-    assert.deepEqual(calls, [["capture", "$pageview", "cookieless"]]);
-    assert.equal(useCaseReady, false);
-    assert.equal(sessionStore.size, 0);
-
-    // before_send allows only $pageview when not granted ("unknown" or "denied")
-    const beforeSend = initArgs.options.before_send;
+    // before_send drops non-pageview events while not granted
+    const beforeSend = h.initArgs.options.before_send;
     for (const state of ["unknown", "denied"]) {
-      consentState = state;
+      h.setConsent(state);
       assert.deepEqual(beforeSend({ event: "$pageview" }), {
         event: "$pageview",
       });
@@ -350,76 +496,287 @@ test("PostHogProvider runs in cookieless_mode always before consent, switches to
         null,
       );
       assert.equal(beforeSend({ event: "$autocapture" }), null);
-      assert.equal(beforeSend({ event: "$exception" }), null);
-      assert.equal(beforeSend({ event: "$dead_click" }), null);
-      assert.equal(beforeSend({ event: "survey shown" }), null);
     }
 
-    // Rejecting on the same page keeps cookieless_mode "always" + memory, writes no opt-out flag,
-    // and does not emit a duplicate $pageview for the same page.
-    calls.length = 0;
-    consentState = "denied";
-    listeners.cookieyes_consent_update();
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.equal(explicitStatus, "pending");
-    assert.equal(fakePosthog.config.cookieless_mode, "always");
-    assert.equal(fakePosthog.config.persistence, "memory");
-    assert.deepEqual(calls, []);
+    // Accept at t=3s
+    t.mock.timers.tick(3_000);
+    h.setConsent("granted");
+    h.dispatchDoc("cookieyes_consent_update");
 
-    // 2. Transition: not-granted -> granted on the same page:
-    // switches to cookieless_mode "on_reject" + persistence "cookie" + FULL_TRACKING_CONFIG
-    // (restoring remote-config defaults), calls opt_in_capturing, and recaptures one consented $pageview.
-    calls.length = 0;
-    consentState = "granted";
-    listeners.cookieyes_consent_update();
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.equal(explicitStatus, "granted");
-    assert.deepEqual(calls, [
-      [
-        "set_config",
-        {
-          cookieless_mode: "on_reject",
-          persistence: "cookie",
-          disable_session_recording: false,
-          autocapture: true,
-          disable_surveys: false,
-        },
-      ],
-      ["opt_in_capturing", { captureEventName: false }],
-      ["capture", "$pageview", "consented"],
-    ]);
-    assert.equal(fakePosthog.config.cookieless_mode, "on_reject");
-    assert.equal(fakePosthog.config.persistence, "cookie");
-    assert.equal("capture_heatmaps" in fakePosthog.config, false);
-    assert.equal("capture_dead_clicks" in fakePosthog.config, false);
-    assert.equal("capture_exceptions" in fakePosthog.config, false);
-    assert.equal(useCaseReady, true);
+    assert.equal(h.explicitStatus, "granted");
+    assert.equal(h.fakePosthog.config.cookieless_mode, "on_reject");
+    assert.equal(h.fakePosthog.config.persistence, "cookie");
+    assert.equal("capture_heatmaps" in h.fakePosthog.config, false);
+    assert.equal("capture_dead_clicks" in h.fakePosthog.config, false);
+    assert.equal("capture_exceptions" in h.fakePosthog.config, false);
+    assert.equal(h.useCaseReady, true);
 
+    assert.equal(h.pageviews.length, 1);
+    assert.equal(h.pageviews[0].cookieless, false);
+    assert.deepEqual(h.pageviews[0].properties, {
+      $current_url: "https://langfuse.com/pricing?utm=abc",
+      $pathname: "/pricing",
+      $host: "langfuse.com",
+      $referrer: "https://google.com/",
+      title: "Pricing - Langfuse",
+    });
+    assert.equal(
+      h.pageviews[0].options.timestamp.getTime(),
+      loadTime.getTime(),
+    );
+
+    // Timer and exit listeners were cleared; ticking past 10s sends nothing more
+    assert.equal(h.docListeners.get("visibilitychange")?.size ?? 0, 0);
+    assert.equal(h.winListeners.get("pagehide")?.size ?? 0, 0);
+    t.mock.timers.tick(15_000);
+    assert.equal(h.pageviews.length, 1);
+
+    // before_send allows all events once granted
     assert.deepEqual(beforeSend({ event: "use_case:page_viewed" }), {
       event: "use_case:page_viewed",
     });
-    assert.deepEqual(beforeSend({ event: "inkeep:user_message_submitted" }), {
-      event: "inkeep:user_message_submitted",
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("PostHogProvider: reject within 10s sends one cookieless $pageview with no opt-out flag", (t) => {
+  const loadTime = new Date("2026-11-26T12:00:00.000Z");
+  const h = createPostHogHarness(t, {
+    initialConsent: "unknown",
+    initialPath: "/docs",
+    initialHref: "https://langfuse.com/docs",
+    now: loadTime,
+  });
+
+  try {
+    h.mount();
+    assert.equal(h.pageviews.length, 0);
+
+    t.mock.timers.tick(2_000);
+    h.setConsent("denied");
+    h.dispatchDoc("cookieyes_consent_update");
+
+    assert.equal(h.explicitStatus, "pending");
+    assert.equal(h.fakePosthog.config.cookieless_mode, "always");
+    assert.equal(h.fakePosthog.config.persistence, "memory");
+    assert.equal(h.pageviews.length, 1);
+    assert.equal(h.pageviews[0].cookieless, true);
+    assert.equal(h.pageviews[0].url, "https://langfuse.com/docs");
+    assert.equal(
+      h.pageviews[0].options.timestamp.getTime(),
+      loadTime.getTime(),
+    );
+
+    // Timer cleared; no duplicate at 10s
+    t.mock.timers.tick(10_000);
+    assert.equal(h.pageviews.length, 1);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("PostHogProvider: no answer and CookieYes blocked flush one cookieless $pageview at 10s", (t) => {
+  for (const bannerLoaded of [true, false]) {
+    const loadTime = new Date("2026-11-26T12:00:00.000Z");
+    const h = createPostHogHarness(t, {
+      initialConsent: "unknown",
+      initialPath: "/docs",
+      initialHref: "https://langfuse.com/docs",
+      now: loadTime,
     });
 
-    // Repeated consent update while still granted does not double-capture $pageview
-    calls.length = 0;
-    listeners.cookieyes_consent_update();
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.deepEqual(calls, []);
+    try {
+      h.mount();
+      if (bannerLoaded) h.dispatchDoc("cookieyes_banner_load");
 
-    // 3. Transition: granted -> denied:
-    // opts out first (to delete cookie), clears opt-out flag, switches back to
-    // cookieless_mode "always" + persistence "memory" + COOKIELESS_ONLY_CONFIG,
-    // clears sessionStorage, and captures cookieless $pageview on next route navigation.
-    calls.length = 0;
-    sessionStore.set("ph_phc_test_key_window_id", "win-2");
-    sessionStore.set("ph_phc_test_key_primary_window_exists", "true");
-    consentState = "denied";
-    listeners.cookieyes_consent_update();
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.equal(explicitStatus, "pending");
-    assert.deepEqual(calls, [
+      t.mock.timers.tick(9_999);
+      assert.equal(h.pageviews.length, 0);
+
+      t.mock.timers.tick(1);
+      assert.equal(h.pageviews.length, 1);
+      assert.equal(h.pageviews[0].cookieless, true);
+      assert.equal(h.pageviews[0].url, "https://langfuse.com/docs");
+      assert.equal(
+        h.pageviews[0].options.timestamp.getTime(),
+        loadTime.getTime(),
+      );
+      assert.equal(
+        h.pageviews[0].capturedAt.getTime() - loadTime.getTime(),
+        10_000,
+      );
+      assert.equal(h.docListeners.get("visibilitychange")?.size ?? 0, 0);
+      assert.equal(h.winListeners.get("pagehide")?.size ?? 0, 0);
+    } finally {
+      h.cleanup();
+    }
+  }
+});
+
+test("PostHogProvider: page hidden or pagehide before 10s flushes cookieless via sendBeacon", (t) => {
+  for (const trigger of ["visibilitychange", "pagehide"]) {
+    const loadTime = new Date("2026-11-26T12:00:00.000Z");
+    const h = createPostHogHarness(t, {
+      initialConsent: "unknown",
+      initialPath: "/docs",
+      initialHref: "https://langfuse.com/docs",
+      now: loadTime,
+    });
+
+    try {
+      h.mount();
+      t.mock.timers.tick(2_500);
+      assert.equal(h.pageviews.length, 0);
+
+      if (trigger === "visibilitychange") {
+        // Staying visible must not flush
+        h.setVisibility("visible");
+        assert.equal(h.pageviews.length, 0);
+        h.setVisibility("hidden");
+      } else {
+        h.dispatchWin("pagehide");
+      }
+
+      assert.equal(h.pageviews.length, 1);
+      assert.equal(h.pageviews[0].cookieless, true);
+      assert.equal(h.pageviews[0].url, "https://langfuse.com/docs");
+      assert.equal(
+        h.pageviews[0].options.timestamp.getTime(),
+        loadTime.getTime(),
+      );
+      assert.equal(h.pageviews[0].options.transport, "sendBeacon");
+      assert.equal(h.pageviews[0].options.send_instantly, true);
+
+      // Exit listeners and timer cleared; neither subsequent pagehide nor 10s tick re-sends
+      assert.equal(h.docListeners.get("visibilitychange")?.size ?? 0, 0);
+      assert.equal(h.winListeners.get("pagehide")?.size ?? 0, 0);
+      h.dispatchWin("pagehide");
+      t.mock.timers.tick(10_000);
+      assert.equal(h.pageviews.length, 1);
+    } finally {
+      h.cleanup();
+    }
+  }
+});
+
+test("PostHogProvider: client-side navigation during wait then accept sends both identified pageviews in order", (t) => {
+  const t0 = new Date("2026-11-26T12:00:00.000Z");
+  const h = createPostHogHarness(t, {
+    initialConsent: "unknown",
+    initialPath: "/docs",
+    initialHref: "https://langfuse.com/docs",
+    initialTitle: "Docs",
+    now: t0,
+  });
+
+  try {
+    h.mount();
+    assert.equal(h.pageviews.length, 0);
+
+    t.mock.timers.tick(3_000);
+    const t1 = new Date(t0.getTime() + 3_000);
+    h.navigate({
+      path: "/pricing",
+      href: "https://langfuse.com/pricing",
+      title: "Pricing",
+    });
+    assert.equal(h.pageviews.length, 0);
+
+    t.mock.timers.tick(2_000);
+    h.setConsent("granted");
+    h.dispatchDoc("cookieyes_consent_update");
+
+    assert.equal(h.pageviews.length, 2);
+    assert.equal(h.pageviews[0].cookieless, false);
+    assert.equal(h.pageviews[0].url, "https://langfuse.com/docs");
+    assert.equal(h.pageviews[0].pathname, "/docs");
+    assert.equal(h.pageviews[0].properties.title, "Docs");
+    assert.equal(h.pageviews[0].options.timestamp.getTime(), t0.getTime());
+
+    assert.equal(h.pageviews[1].cookieless, false);
+    assert.equal(h.pageviews[1].url, "https://langfuse.com/pricing");
+    assert.equal(h.pageviews[1].pathname, "/pricing");
+    assert.equal(h.pageviews[1].properties.title, "Pricing");
+    assert.equal(h.pageviews[1].options.timestamp.getTime(), t1.getTime());
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("PostHogProvider: accept after timeout does not resend current page; next navigation is identified", (t) => {
+  const t0 = new Date("2026-11-26T12:00:00.000Z");
+  const h = createPostHogHarness(t, {
+    initialConsent: "unknown",
+    initialPath: "/docs",
+    initialHref: "https://langfuse.com/docs",
+    now: t0,
+  });
+
+  try {
+    h.mount();
+    t.mock.timers.tick(10_000);
+    assert.equal(h.pageviews.length, 1);
+    assert.equal(h.pageviews[0].cookieless, true);
+    assert.equal(h.pageviews[0].url, "https://langfuse.com/docs");
+
+    // Accept at t=12s: no second pageview for /docs
+    t.mock.timers.tick(2_000);
+    h.setConsent("granted");
+    h.dispatchDoc("cookieyes_consent_update");
+    assert.equal(h.pageviews.length, 1);
+    assert.equal(h.useCaseReady, true);
+
+    // Next navigation sends an identified pageview immediately
+    t.mock.timers.tick(1_000);
+    h.navigate({ path: "/pricing", href: "https://langfuse.com/pricing" });
+    assert.equal(h.pageviews.length, 2);
+    assert.equal(h.pageviews[1].cookieless, false);
+    assert.equal(h.pageviews[1].url, "https://langfuse.com/pricing");
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("PostHogProvider: returning visitor with stored consent sends identified pageview immediately, and revoke switches next nav to cookieless without resend", (t) => {
+  const t0 = new Date("2026-11-26T12:00:00.000Z");
+  const h = createPostHogHarness(t, {
+    initialConsent: "granted",
+    initialPath: "/docs",
+    initialHref: "https://langfuse.com/docs",
+    now: t0,
+  });
+
+  try {
+    h.mount();
+
+    assert.equal(h.fakePosthog.config.cookieless_mode, "on_reject");
+    assert.equal(h.fakePosthog.config.persistence, "cookie");
+    assert.equal("capture_heatmaps" in h.fakePosthog.config, false);
+    assert.equal("capture_dead_clicks" in h.fakePosthog.config, false);
+    assert.equal("capture_exceptions" in h.fakePosthog.config, false);
+    assert.equal(h.useCaseReady, true);
+
+    // Immediate identified pageview at t=0, no exit listeners or wait timer
+    assert.equal(h.pageviews.length, 1);
+    assert.equal(h.pageviews[0].cookieless, false);
+    assert.equal(h.pageviews[0].capturedAt.getTime(), t0.getTime());
+    assert.equal(h.docListeners.get("visibilitychange")?.size ?? 0, 0);
+    assert.equal(h.winListeners.get("pagehide")?.size ?? 0, 0);
+
+    // Revoke after granting: cleans up storage, no resend for /docs
+    h.sessionStore.set("ph_phc_test_key_window_id", "win-2");
+    h.sessionStore.set("ph_phc_test_key_primary_window_exists", "true");
+    h.calls.length = 0;
+    h.setConsent("denied");
+    h.dispatchDoc("cookieyes_consent_update");
+
+    assert.equal(h.explicitStatus, "pending");
+    assert.equal(h.fakePosthog.config.cookieless_mode, "always");
+    assert.equal(h.fakePosthog.config.persistence, "memory");
+    assert.equal(h.useCaseReady, false);
+    assert.equal(h.sessionStore.size, 0);
+    assert.equal(h.pageviews.length, 1);
+    assert.deepEqual(h.calls, [
       ["opt_out_capturing"],
       ["clear_opt_in_out_capturing"],
       [
@@ -436,246 +793,39 @@ test("PostHogProvider runs in cookieless_mode always before consent, switches to
         },
       ],
     ]);
-    assert.equal(fakePosthog.config.cookieless_mode, "always");
-    assert.equal(fakePosthog.config.persistence, "memory");
-    assert.equal(useCaseReady, false);
-    assert.equal(sessionStore.size, 0);
 
-    // Subsequent SPA route navigation while denied captures cookieless $pageview
-    calls.length = 0;
-    currentPath = "/docs";
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.deepEqual(calls, [["capture", "$pageview", "cookieless"]]);
-
-    // Re-granting on the same page recaptures one consented $pageview
-    calls.length = 0;
-    consentState = "granted";
-    listeners.cookieyes_consent_update();
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    assert.deepEqual(calls, [
-      [
-        "set_config",
-        {
-          cookieless_mode: "on_reject",
-          persistence: "cookie",
-          disable_session_recording: false,
-          autocapture: true,
-          disable_surveys: false,
-        },
-      ],
-      ["opt_in_capturing", { captureEventName: false }],
-      ["capture", "$pageview", "consented"],
-    ]);
-    assert.equal(useCaseReady, true);
+    // Next navigation is cookieless immediately
+    h.navigate({ path: "/pricing", href: "https://langfuse.com/pricing" });
+    assert.equal(h.pageviews.length, 2);
+    assert.equal(h.pageviews[1].cookieless, true);
+    assert.equal(h.pageviews[1].url, "https://langfuse.com/pricing");
   } finally {
-    if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
-    delete globalThis.window;
-    delete globalThis.document;
-    delete globalThis.sessionStorage;
+    h.cleanup();
   }
 });
 
-test("PostHogProvider sends cookieless $pageview with no opt-out flag on initial load when analytics consent is denied", () => {
-  const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
-
-  let explicitStatus = "pending";
-  const calls = [];
-  const fakePosthog = {
-    config: {},
-    init(_key, options) {
-      this.config = { ...options };
-      options.loaded(this);
-    },
-    has_opted_in_capturing() {
-      return (
-        this.config.cookieless_mode !== "always" && explicitStatus === "granted"
-      );
-    },
-    get_explicit_consent_status: () => explicitStatus,
-    opt_in_capturing() {
-      explicitStatus = "granted";
-    },
-    opt_out_capturing() {
-      calls.push(["opt_out_capturing"]);
-      explicitStatus = "denied";
-    },
-    clear_opt_in_out_capturing() {
-      calls.push(["clear_opt_in_out_capturing"]);
-      explicitStatus = "pending";
-    },
-    set_config(cfg) {
-      calls.push(["set_config", cfg]);
-      Object.assign(this.config, cfg);
-    },
-    capture(name) {
-      calls.push([
-        "capture",
-        name,
-        this.config.cookieless_mode === "always" ? "cookieless" : "consented",
-      ]);
-    },
-    debug() {},
-  };
-
-  globalThis.window = {};
-  globalThis.document = {
-    cookie: "",
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  };
-  globalThis.sessionStorage = { removeItem: () => {} };
+test("PostHogProvider: returning visitor who rejected earlier sends cookieless pageview immediately with no delay or opt-out flag", (t) => {
+  const t0 = new Date("2026-11-26T12:00:00.000Z");
+  const h = createPostHogHarness(t, {
+    initialConsent: "denied",
+    initialPath: "/docs",
+    initialHref: "https://langfuse.com/docs",
+    now: t0,
+  });
 
   try {
-    const mini = createMiniReact();
-    const mod = load(
-      compile("components/analytics/PostHogProvider.tsx"),
-      (name) => {
-        if (name === "react") return mini.hooks;
-        if (name === "react/jsx-runtime") {
-          return {
-            jsx: (type, props) => ({ type, props }),
-            jsxs: (type, props) => ({ type, props }),
-          };
-        }
-        if (name === "next/navigation") return { usePathname: () => "/docs" };
-        if (name === "posthog-js") return fakePosthog;
-        if (name === "posthog-js/react") return { PostHogProvider: () => null };
-        if (name === "@/components/analytics/common-room")
-          return { crPageView: () => {} };
-        if (name === "@/components/analytics/UseCaseAnalytics")
-          return { UseCaseAnalytics: () => null };
-        if (name === "@/lib/cookie-consent")
-          return { readAnalyticsConsent: () => "denied" };
-        throw Error(name);
-      },
-    );
+    h.mount();
 
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    mini.render(() => mod.PostHogProvider({ children: null }));
-
-    assert.equal(fakePosthog.config.cookieless_mode, "always");
-    assert.equal(fakePosthog.config.persistence, "memory");
-    assert.equal(explicitStatus, "pending");
-    assert.deepEqual(calls, [["capture", "$pageview", "cookieless"]]);
+    assert.equal(h.fakePosthog.config.cookieless_mode, "always");
+    assert.equal(h.fakePosthog.config.persistence, "memory");
+    assert.equal(h.explicitStatus, "pending");
+    assert.equal(h.pageviews.length, 1);
+    assert.equal(h.pageviews[0].cookieless, true);
+    assert.equal(h.pageviews[0].capturedAt.getTime(), t0.getTime());
+    assert.equal(h.docListeners.get("visibilitychange")?.size ?? 0, 0);
+    assert.equal(h.winListeners.get("pagehide")?.size ?? 0, 0);
   } finally {
-    if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
-    delete globalThis.window;
-    delete globalThis.document;
-    delete globalThis.sessionStorage;
-  }
-});
-
-test("PostHogProvider enables full tracking immediately on first load for a returning consented visitor without double pageviews", () => {
-  const prevKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test_key";
-
-  let optedIn = true;
-  let useCaseReady = null;
-  const calls = [];
-
-  const fakePosthog = {
-    config: {},
-    init(_key, options) {
-      this.config = { ...options };
-      options.loaded(this);
-    },
-    has_opted_in_capturing: () => optedIn,
-    get_explicit_consent_status: () => "granted",
-    opt_in_capturing(opts) {
-      calls.push(["opt_in_capturing", opts]);
-      optedIn = true;
-    },
-    opt_out_capturing() {
-      calls.push(["opt_out_capturing"]);
-    },
-    clear_opt_in_out_capturing() {
-      calls.push(["clear_opt_in_out_capturing"]);
-    },
-    set_config(cfg) {
-      calls.push(["set_config", cfg]);
-      Object.assign(this.config, cfg);
-    },
-    capture(name) {
-      calls.push(["capture", name, optedIn ? "consented" : "cookieless"]);
-    },
-    debug() {},
-  };
-
-  globalThis.window = {};
-  globalThis.document = {
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  };
-
-  try {
-    const mini = createMiniReact();
-    const mod = load(
-      compile("components/analytics/PostHogProvider.tsx"),
-      (name) => {
-        if (name === "react") return mini.hooks;
-        if (name === "react/jsx-runtime") {
-          return {
-            jsx: (type, props) => {
-              if (type?.name === "UseCaseAnalytics") useCaseReady = props.ready;
-              return { type, props };
-            },
-            jsxs: (type, props) => ({ type, props }),
-          };
-        }
-        if (name === "next/navigation") {
-          return { usePathname: () => "/" };
-        }
-        if (name === "posthog-js") return fakePosthog;
-        if (name === "posthog-js/react") {
-          return { PostHogProvider: () => null };
-        }
-        if (name === "@/components/analytics/common-room") {
-          return { crPageView: () => {} };
-        }
-        if (name === "@/components/analytics/UseCaseAnalytics") {
-          return {
-            UseCaseAnalytics: function UseCaseAnalytics() {
-              return null;
-            },
-          };
-        }
-        if (name === "@/lib/cookie-consent") {
-          return { readAnalyticsConsent: () => "granted" };
-        }
-        throw Error(name);
-      },
-    );
-
-    mini.render(() => mod.PostHogProvider({ children: null }));
-    mini.render(() => mod.PostHogProvider({ children: null }));
-
-    assert.equal(fakePosthog.config.cookieless_mode, "on_reject");
-    assert.equal(fakePosthog.config.persistence, "cookie");
-    assert.deepEqual(calls, [
-      [
-        "set_config",
-        {
-          cookieless_mode: "on_reject",
-          persistence: "cookie",
-          disable_session_recording: false,
-          autocapture: true,
-          disable_surveys: false,
-        },
-      ],
-      ["capture", "$pageview", "consented"],
-    ]);
-    assert.equal("capture_heatmaps" in fakePosthog.config, false);
-    assert.equal("capture_dead_clicks" in fakePosthog.config, false);
-    assert.equal("capture_exceptions" in fakePosthog.config, false);
-    assert.equal(useCaseReady, true);
-  } finally {
-    if (prevKey === undefined) delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
-    else process.env.NEXT_PUBLIC_POSTHOG_KEY = prevKey;
-    delete globalThis.window;
-    delete globalThis.document;
+    h.cleanup();
   }
 });
 
@@ -689,6 +839,8 @@ test("PostHogProvider expires a leftover ph_*_posthog cookie when starting in me
       "ph_phc_test_key_posthog=%7B%22distinct_id%22%3A%22old%22%7D";
     globalThis.window = {
       location: { hostname: "docs.langfuse.com", protocol: "https:" },
+      addEventListener: () => {},
+      removeEventListener: () => {},
     };
     globalThis.document = {
       get cookie() {
@@ -780,6 +932,8 @@ test("PostHogProvider expires a leftover ph_*_posthog cookie when starting in me
     );
     miniClean.render(() => modClean.PostHogProvider({ children: null }));
     assert.deepEqual(cookieWrites, []);
+    miniClean.unmount();
+    mini.unmount();
   } finally {
     delete globalThis.window;
     delete globalThis.document;
