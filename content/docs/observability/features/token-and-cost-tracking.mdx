@@ -129,8 +129,11 @@ Model definitions can also be managed programmatically via the Models [API](/doc
 GET    /api/public/models
 POST   /api/public/models
 GET    /api/public/models/{id}
+PUT    /api/public/models/{id}
 DELETE /api/public/models/{id}
 ```
+
+Each model has a `scope` of `PROJECT`, `ORGANIZATION`, or `LANGFUSE`. Only `PROJECT` models can be changed through this API. `isLangfuseManaged` is deprecated; it is `true` for every model whose `scope` is not `PROJECT`.
 
 </Tab>
 
@@ -138,7 +141,7 @@ DELETE /api/public/models/{id}
 
 ### Organization model definitions [#organization-model-definitions]
 
-If several projects pay the same custom prices or use the same custom model names, define the model once for the whole organization. Organization owners and admins manage these definitions in **Organization Settings > Models**. Every project in the organization uses them unless the project defines its own matching model (see [model resolution](#model-resolution)).
+If several projects pay the same custom prices or use the same custom model names, define the model once for the whole organization. Organization owners and admins manage these definitions in **Organization Settings > Models** or through the [organization models API](#organization-models-api). Every project in the organization uses them unless the project defines its own matching model (see [model resolution](#model-resolution)).
 
 The page lists your organization models and the Langfuse defaults. Use **Clone to organization** on a default to start from its prices and pricing tiers. **Test Model Match** on this page resolves a model name against organization models and Langfuse defaults only; a project model can still take precedence in individual projects.
 
@@ -149,7 +152,59 @@ In **Project Settings > Models**, organization models are listed with the mainta
 | Organization owners and admins | View, create, edit, clone, and delete organization models (`organizationModels:read`, `organizationModels:CUD`) |
 | Project members and viewers    | See organization models read-only in **Project Settings > Models** (`models:read`)                              |
 
-Organization models are managed in the UI. The project-scoped Models API returns them in `GET /api/public/models` and `GET /api/public/models/{id}` with `isLangfuseManaged: false`, but you can't change or delete them through it. Changes to organization models are recorded in the organization's [audit log](/docs/administration/audit-logs).
+The project Models API returns organization models with `scope: "ORGANIZATION"`. Changing or deleting one through the project API returns `403`; use the [organization models API](#organization-models-api) instead, or create a project model with the same name to override it. Changes to organization models are recorded in the organization's [audit log](/docs/administration/audit-logs).
+
+#### Organization models via API [#organization-models-api]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "not-available",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Use an [organization-scoped API key](/docs/administration/scim-and-org-api) to manage organization models, for example to keep negotiated prices in sync from a file:
+
+```bash
+GET    /api/public/organizations/models
+GET    /api/public/organizations/models/{id}
+PUT    /api/public/organizations/models
+DELETE /api/public/organizations/models/{id}
+```
+
+- `PUT` creates or replaces the organization model with this exact `modelName`. It returns `201` when it creates the model and `200` when it replaces the match pattern and pricing tiers of an existing one. The id stays the same.
+- Prices are set only through `pricingTiers`, in USD per single unit of each usage key. Legacy fields such as `inputPrice`, `unit`, `startDate`, and the tokenizer fields are rejected with `400`.
+- `GET /api/public/organizations/models` returns only the organization's own models. Pass `scope=LANGFUSE` for Langfuse defaults or `scope=ALL` for both, and `search` to filter by model name. Langfuse defaults are read-only; to change one, `PUT` an organization model with the same `modelName`.
+- Changes apply to generations ingested after the write, usually within about 10 seconds.
+
+```bash
+# 🇪🇺 EU region. Other regions: 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com, ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+curl -X PUT https://cloud.langfuse.com/api/public/organizations/models \
+  -u "$ORG_PUBLIC_KEY:$ORG_SECRET_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "modelName": "my-fine-tuned-model",
+    "matchPattern": "(?i)^my-fine-tuned-model$",
+    "pricingTiers": [
+      {
+        "name": "Standard",
+        "isDefault": true,
+        "priority": 0,
+        "conditions": [],
+        "prices": { "input": 0.000002, "output": 0.000008 }
+      }
+    ]
+  }'
+```
+
+<Callout type="info">
+
+Organization API keys currently allow every organization action, not only model management. See the [API reference](https://api.reference.langfuse.com) for all fields and error codes.
+
+</Callout>
 
 ### Model resolution [#model-resolution]
 

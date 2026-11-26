@@ -23,6 +23,7 @@ Organization owners and admins can now define models once for the whole organiza
 - **Clone a Langfuse default** to the organization to start from its prices and pricing tiers.
 - **Every project uses organization models** to [infer cost](/docs/observability/features/token-and-cost-tracking#infer). Project members see them read-only in **Project Settings > Models** and can clone one to override it for a single project.
 - **Precedence is explicit.** If a generation's model name matches a project model's pattern, that model is used. Otherwise a matching organization model applies, and otherwise the Langfuse default. The **Maintainer** column shows whether a definition comes from the project, the organization, or Langfuse.
+- **Automate it with the API.** Keep organization prices in sync from a file with the new [organization models API](/docs/observability/features/token-and-cost-tracking#organization-models-api): `PUT /api/public/organizations/models` creates or replaces a model by name. The project Models API now returns a `scope` for every model and rejects changes to organization models with `403`; `isLangfuseManaged` is deprecated.
 
 See [model resolution](/docs/observability/features/token-and-cost-tracking#model-resolution) for how ties between matching patterns are broken, with a worked example.
 
