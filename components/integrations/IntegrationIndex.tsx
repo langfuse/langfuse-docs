@@ -102,13 +102,14 @@ const categoryConfig: Record<
       },
     ],
   },
-  memory: {
-    title: "Memory",
-    description: "Trace agent memory operations in Langfuse",
-  },
   "model-providers": {
     title: "Model Providers",
     description: "Direct integrations with AI model providers",
+  },
+  "developer-tools": {
+    title: "Developer Tools",
+    description:
+      "Trace AI coding assistants, editors, and CLIs, or use Langfuse directly from your editor",
   },
   gateways: {
     title: "Gateways",
@@ -125,8 +126,12 @@ const categoryConfig: Record<
     ],
   },
   "no-code": {
-    title: "No-Code",
+    title: "No-Code Agent Builders",
     description: "No-code agent builders and tools",
+  },
+  memory: {
+    title: "Memory",
+    description: "Trace agent memory operations in Langfuse",
   },
   analytics: {
     title: "Analytics",
@@ -137,11 +142,6 @@ const categoryConfig: Record<
     title: "ClickHouse Products",
     description:
       "Use Langfuse with ClickStack, warehouse exports, and the Agentic Data Stack",
-  },
-  "developer-tools": {
-    title: "Developer Tools",
-    description:
-      "Trace AI coding assistants, editors, and CLIs, or use Langfuse directly from your editor",
   },
   other: {
     title: "Other",
