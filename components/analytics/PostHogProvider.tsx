@@ -34,6 +34,11 @@ const COOKIELESS_ONLY_CONFIG = {
 function applyAnalyticsConsent(): boolean {
   const consent = readAnalyticsConsent();
   if (consent === "granted") {
+    if (posthog.config?.persistence !== "cookie") {
+      // Switch from "memory" to "cookie" while persistence is still disabled
+      // so any existing cross-subdomain cookie is preserved before opt-in.
+      posthog.set_config({ persistence: "cookie" });
+    }
     if (!posthog.has_opted_in_capturing()) {
       posthog.opt_in_capturing({ captureEventName: false });
     }
@@ -52,17 +57,21 @@ function applyAnalyticsConsent(): boolean {
     return true;
   }
 
-  if (posthog.config && !posthog.config.disable_session_recording) {
-    posthog.set_config(COOKIELESS_ONLY_CONFIG);
-  }
+  // Opt out while persistence is still "cookie" so posthog-js deletes
+  // `ph_<key>_posthog`, then clear `__ph_opt_in_out_<key>` in localStorage and
+  // switch back to "memory" so no cookie support probes run without consent.
   if (posthog.has_opted_in_capturing()) {
     posthog.opt_out_capturing();
   }
-  // opt_out_capturing() persists `__ph_opt_in_out_<key>` in localStorage;
-  // clearing it keeps the visitor opted out via `opt_out_capturing_by_default`
-  // without leaving PostHog storage behind on denial or revoke.
   if (posthog.get_explicit_consent_status() !== "pending") {
     posthog.clear_opt_in_out_capturing();
+  }
+  if (
+    posthog.config &&
+    (!posthog.config.disable_session_recording ||
+      posthog.config.persistence !== "memory")
+  ) {
+    posthog.set_config({ ...COOKIELESS_ONLY_CONFIG, persistence: "memory" });
   }
   // posthog-js can keep the tab's window id in sessionStorage after opting out
   try {
@@ -95,11 +104,16 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       setAnalyticsGranted(applyAnalyticsConsent());
     };
 
+    const initialGranted = readAnalyticsConsent() === "granted";
+
     posthog.init(posthogKey, {
       api_host:
         process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com",
       ui_host: "https://eu.posthog.com",
-      persistence: "cookie",
+      // Start in "memory" when analytics consent is not already granted so
+      // posthog-js does not write `__ph_cookie_support_<uuid>` or `dmn_chk_*`
+      // probe cookies during init.
+      persistence: initialGranted ? "cookie" : "memory",
       cross_subdomain_cookie: true,
       // Route changes are captured below, including the initial page exactly once.
       capture_pageview: false,

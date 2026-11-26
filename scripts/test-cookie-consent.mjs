@@ -25,39 +25,50 @@ const cookieConsent = load(compile("lib/cookie-consent.ts"), () => {
   throw Error("Unexpected import");
 });
 
-test("readAnalyticsConsent handles returning visitors, live API revokes, and unknown states", () => {
+test("readAnalyticsConsent and readFunctionalConsent handle returning visitors, live API revokes, and unknown states", () => {
   try {
     globalThis.window = {};
     globalThis.document = { cookie: "" };
     assert.equal(cookieConsent.readAnalyticsConsent(), "unknown");
+    assert.equal(cookieConsent.readFunctionalConsent(), "unknown");
 
     // Pre-answer cookie written by CookieYes before the visitor chooses
     globalThis.document.cookie =
-      "cookieyes-consent=consentid:abc,consent:no,action:no,necessary:yes,analytics:no,advertisement:no";
+      "cookieyes-consent=consentid:abc,consent:no,action:no,necessary:yes,functional:no,analytics:no,advertisement:no";
     assert.equal(cookieConsent.readAnalyticsConsent(), "unknown");
+    assert.equal(cookieConsent.readFunctionalConsent(), "unknown");
 
     // Returning visitor who accepted earlier, before CookieYes script loads
     globalThis.document.cookie =
-      "cookieyes-consent=consentid:abc,consent:yes,action:yes,necessary:yes,analytics:yes,advertisement:yes";
+      "cookieyes-consent=consentid:abc,consent:yes,action:yes,necessary:yes,functional:yes,analytics:yes,advertisement:yes";
     assert.equal(cookieConsent.readAnalyticsConsent(), "granted");
+    assert.equal(cookieConsent.readFunctionalConsent(), "granted");
+
+    // Independent category answers from persisted cookie
+    globalThis.document.cookie =
+      "cookieyes-consent=consentid:abc,consent:yes,action:yes,necessary:yes,functional:yes,analytics:no,advertisement:no";
+    assert.equal(cookieConsent.readAnalyticsConsent(), "denied");
+    assert.equal(cookieConsent.readFunctionalConsent(), "granted");
 
     // Live API revocation wins over stale cookie
     globalThis.window.getCkyConsent = () => ({
       activeLaw: "gdpr",
-      categories: { analytics: false, advertisement: false },
+      categories: { functional: false, analytics: false, advertisement: false },
       isUserActionCompleted: true,
     });
     assert.equal(cookieConsent.readAnalyticsConsent(), "denied");
+    assert.equal(cookieConsent.readFunctionalConsent(), "denied");
 
     // Live API before user action in opt-in region still reads "unknown" if cookie has no prior grant
     globalThis.document.cookie =
-      "cookieyes-consent=consentid:abc,consent:no,action:no,necessary:yes,analytics:no";
+      "cookieyes-consent=consentid:abc,consent:no,action:no,necessary:yes,functional:no,analytics:no";
     globalThis.window.getCkyConsent = () => ({
       activeLaw: "gdpr",
-      categories: { analytics: false },
+      categories: { functional: false, analytics: false },
       isUserActionCompleted: false,
     });
     assert.equal(cookieConsent.readAnalyticsConsent(), "unknown");
+    assert.equal(cookieConsent.readFunctionalConsent(), "unknown");
   } finally {
     delete globalThis.window;
     delete globalThis.document;
@@ -299,7 +310,7 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     assert.equal(initArgs.options.cookieless_mode, "on_reject");
     assert.equal(initArgs.options.opt_out_capturing_by_default, true);
     assert.equal(initArgs.options.opt_out_persistence_by_default, true);
-    assert.equal(initArgs.options.persistence, "cookie");
+    assert.equal(initArgs.options.persistence, "memory");
     assert.equal(initArgs.options.cross_subdomain_cookie, true);
     assert.equal(initArgs.options.disable_session_recording, true);
     assert.equal(initArgs.options.autocapture, false);
@@ -332,13 +343,15 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       assert.equal(beforeSend({ event: "survey shown" }), null);
     }
 
-    // Granting analytics consent opts in, restores remote-config defaults (without forcing
-    // heatmaps/dead-clicks/exceptions true), recaptures landing $pageview, and activates UseCaseAnalytics.
+    // Granting analytics consent switches persistence to cookie before opting in,
+    // restores remote-config defaults (without forcing heatmaps/dead-clicks/exceptions true),
+    // recaptures landing $pageview, and activates UseCaseAnalytics.
     calls.length = 0;
     consentState = "granted";
     listeners.cookieyes_consent_update();
     mini.render(() => mod.PostHogProvider({ children: null }));
     assert.deepEqual(calls, [
+      ["set_config", { persistence: "cookie" }],
       ["opt_in_capturing", { captureEventName: false }],
       [
         "set_config",
@@ -350,6 +363,7 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       ],
       ["capture", "$pageview", "consented"],
     ]);
+    assert.equal(fakePosthog.config.persistence, "cookie");
     assert.equal("capture_heatmaps" in fakePosthog.config, false);
     assert.equal("capture_dead_clicks" in fakePosthog.config, false);
     assert.equal("capture_exceptions" in fakePosthog.config, false);
@@ -368,7 +382,8 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
       event: "inkeep:user_message_submitted",
     });
 
-    // Revoking disables extensions, opts out, clears opt-in/out storage, removes sessionStorage keys,
+    // Revoking opts out while persistence is still cookie, clears opt-in/out storage,
+    // switches back to memory + disabled extensions, removes sessionStorage keys,
     // deactivates UseCaseAnalytics, and does not re-capture $pageview for the same page.
     calls.length = 0;
     sessionStore.set("ph_phc_test_key_window_id", "win-2");
@@ -377,6 +392,8 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     listeners.cookieyes_consent_update();
     mini.render(() => mod.PostHogProvider({ children: null }));
     assert.deepEqual(calls, [
+      ["opt_out_capturing"],
+      ["clear_opt_in_out_capturing"],
       [
         "set_config",
         {
@@ -386,11 +403,11 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
           capture_dead_clicks: false,
           capture_exceptions: false,
           disable_surveys: true,
+          persistence: "memory",
         },
       ],
-      ["opt_out_capturing"],
-      ["clear_opt_in_out_capturing"],
     ]);
+    assert.equal(fakePosthog.config.persistence, "memory");
     assert.equal(useCaseReady, false);
     assert.equal(sessionStore.size, 0);
 
@@ -400,6 +417,7 @@ test("PostHogProvider starts cookieless with pageviews only, recaptures landing 
     listeners.cookieyes_consent_update();
     mini.render(() => mod.PostHogProvider({ children: null }));
     assert.deepEqual(calls, [
+      ["set_config", { persistence: "cookie" }],
       ["opt_in_capturing", { captureEventName: false }],
       [
         "set_config",
@@ -505,6 +523,7 @@ test("PostHogProvider enables full tracking immediately on first load for a retu
     mini.render(() => mod.PostHogProvider({ children: null }));
     mini.render(() => mod.PostHogProvider({ children: null }));
 
+    assert.equal(fakePosthog.config.persistence, "cookie");
     assert.deepEqual(calls, [
       [
         "set_config",
@@ -681,69 +700,71 @@ test("CookieSettingsButton invokes revisitCkyConsent or falls back to /cookie-po
   }
 });
 
-test("Inkeep settings disable Google Fonts, opt out of analytical cookies before consent, and InkeepSearchBar preserves base theme settings", () => {
+test("Inkeep settings disable Google Fonts, gate functional and analytical privacy preferences on consent, and InkeepSearchBar preserves base theme settings", () => {
   const prevKey = process.env.NEXT_PUBLIC_INKEEP_API_KEY;
   process.env.NEXT_PUBLIC_INKEEP_API_KEY = "inkeep_test_key";
-  let consentState = "unknown";
-  let currentAnalyticsGranted = false;
-  let rerender = 0;
+  let analyticsState = "unknown";
+  let functionalState = "unknown";
+  const listeners = {};
 
   try {
+    const mini = createMiniReact();
     const useInkeepSettings = load(
       compile("components/inkeep/useInkeepSettings.ts"),
       (name) => {
-        if (name === "react") {
-          return {
-            useState: (init) => {
-              if (rerender === 0) {
-                currentAnalyticsGranted =
-                  typeof init === "function" ? init() : init;
-              }
-              return [
-                currentAnalyticsGranted,
-                (v) => {
-                  currentAnalyticsGranted = v;
-                },
-              ];
-            },
-            useEffect: (fn) => fn(),
-          };
-        }
+        if (name === "react") return mini.hooks;
         if (name === "next-themes")
           return { useTheme: () => ({ resolvedTheme: "light" }) };
         if (name === "posthog-js/react")
           return { usePostHog: () => ({ capture: () => {} }) };
         if (name === "@/lib/cookie-consent") {
-          return { readAnalyticsConsent: () => consentState };
+          return {
+            readAnalyticsConsent: () => analyticsState,
+            readFunctionalConsent: () => functionalState,
+          };
         }
         throw Error(name);
       },
     ).default;
 
     globalThis.document = {
-      addEventListener: () => {},
+      addEventListener: (type, fn) => {
+        listeners[type] = fn;
+      },
       removeEventListener: () => {},
     };
 
-    const settings = useInkeepSettings();
-    rerender += 1;
+    const settings = mini.render(() => useInkeepSettings());
     assert.equal(settings.baseSettings.theme?.disableLoadingDefaultFont, true);
-    assert.equal(
-      settings.baseSettings.privacyPreferences?.optOutAnalyticalCookies,
-      true,
-    );
+    assert.deepEqual(settings.baseSettings.privacyPreferences, {
+      optOutFunctionalCookies: true,
+      optOutAnalyticalCookies: true,
+      optOutAllAnalytics: true,
+    });
     assert.match(
       settings.baseSettings.theme?.fontFamily?.body ?? "",
       /var\(--font-inter\)/,
     );
 
-    consentState = "granted";
-    useInkeepSettings();
-    const grantedSettings = useInkeepSettings();
-    assert.equal(
-      grantedSettings.baseSettings.privacyPreferences?.optOutAnalyticalCookies,
-      false,
-    );
+    // Granting only functional enables functional cookies while keeping analytics opted out
+    functionalState = "granted";
+    listeners.cookieyes_consent_update();
+    const functionalOnly = mini.render(() => useInkeepSettings());
+    assert.deepEqual(functionalOnly.baseSettings.privacyPreferences, {
+      optOutFunctionalCookies: false,
+      optOutAnalyticalCookies: true,
+      optOutAllAnalytics: true,
+    });
+
+    // Granting analytics as well enables analytical cookies and Inkeep analytics
+    analyticsState = "granted";
+    listeners.cookieyes_consent_update();
+    const bothGranted = mini.render(() => useInkeepSettings());
+    assert.deepEqual(bothGranted.baseSettings.privacyPreferences, {
+      optOutFunctionalCookies: false,
+      optOutAnalyticalCookies: false,
+      optOutAllAnalytics: false,
+    });
 
     let capturedSearchBarProps = null;
     const searchBarMod = load(
@@ -764,7 +785,10 @@ test("Inkeep settings disable Google Fonts, opt out of analytical cookies before
           };
         }
         if (name === "./useInkeepSettings") {
-          return { __esModule: true, default: useInkeepSettings };
+          return {
+            __esModule: true,
+            default: () => mini.render(() => useInkeepSettings()),
+          };
         }
         if (name === "@/components/ui/button") return { Button: () => null };
         if (name === "lucide-react") return { Search: () => null };

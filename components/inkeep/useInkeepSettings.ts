@@ -9,7 +9,10 @@ import type {
 } from "@inkeep/cxkit-react";
 import { useTheme } from "next-themes";
 import { type PostHog, usePostHog } from "posthog-js/react";
-import { readAnalyticsConsent } from "@/lib/cookie-consent";
+import {
+  readAnalyticsConsent,
+  readFunctionalConsent,
+} from "@/lib/cookie-consent";
 
 const customAnalyticsCallback = (
   event: InkeepCallbackEvent,
@@ -37,6 +40,7 @@ const useInkeepSettings = (): InkeepSharedSettings | null => {
   const { resolvedTheme } = useTheme();
   const posthog = usePostHog();
   const [analyticsGranted, setAnalyticsGranted] = useState(false);
+  const [functionalGranted, setFunctionalGranted] = useState(false);
 
   useEffect(() => {
     if (!process.env.NEXT_PUBLIC_INKEEP_API_KEY) {
@@ -47,6 +51,7 @@ const useInkeepSettings = (): InkeepSharedSettings | null => {
   useEffect(() => {
     const sync = () => {
       setAnalyticsGranted(readAnalyticsConsent() === "granted");
+      setFunctionalGranted(readFunctionalConsent() === "granted");
     };
 
     sync();
@@ -70,7 +75,9 @@ const useInkeepSettings = (): InkeepSharedSettings | null => {
       forcedColorMode: resolvedTheme,
     },
     privacyPreferences: {
+      optOutFunctionalCookies: !functionalGranted,
       optOutAnalyticalCookies: !analyticsGranted,
+      optOutAllAnalytics: !analyticsGranted,
     },
     theme: {
       disableLoadingDefaultFont: true,
