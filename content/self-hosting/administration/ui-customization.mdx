@@ -79,6 +79,14 @@ Notes:
 - Names must be unique, and URLs must use `http` or `https`. Names are what users pick from in the menu, and other URL schemes would not open a Langfuse deployment.
 - If the value is not valid JSON in the expected shape, the switcher is hidden and a warning naming the problem is logged; the deployment still starts.
 
+## Public sharing [#public-sharing]
+
+Turn off [public sharing of traces and sessions](/docs/observability/features/url#disable-public-sharing) for every organization on the instance. The organization setting is then shown as off and cannot be changed.
+
+| Variable                          | Description                                                    |
+| --------------------------------- | -------------------------------------------------------------- |
+| `LANGFUSE_DISABLE_PUBLIC_SHARING` | Set to `true` to turn off public sharing. Defaults to `false`. |
+
 ## LLM API/Gateway Connection defaults
 
 LLM connections are configured in the Langfuse project settings. You can customize the default values via the following environment variables.
