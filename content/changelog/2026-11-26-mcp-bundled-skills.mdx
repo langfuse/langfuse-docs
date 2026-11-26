@@ -7,17 +7,10 @@ author: tobiasklesel
 
 import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
 import { Book } from "lucide-react";
-import McpSkillInstall from "@/components-mdx/get-started/mcp-skill-install.mdx";
 
 <ChangelogHeader />
 
 The [Langfuse MCP server](/docs/api-and-data-platform/features/mcp-server) now serves the official agent skills from the [`langfuse/skills`](https://github.com/langfuse/skills) repository directly over MCP. Connect your client once, and any client that supports the [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview) (such as Claude Code 2.1.331 or later) automatically discovers the Langfuse playbooks alongside your project tools, with no separate skill installation required.
-
-With both the tools and the playbooks available out of the box, you can ask your coding agent to:
-
-- **Investigate production issues from your editor.** Pull failing or slow traces, inspect observations, and collect edge cases straight into a dataset.
-- **Instrument and manage prompts with best practices built in.** Add tracing or migrate hardcoded prompts into Langfuse prompt management following our recommended patterns.
-- **Migrate from another observability platform.** Walk through a guided cutover from tools like LangSmith, Arize, or Braintrust, including historical traces, datasets, and prompts.
 
 ## What the skills include
 
@@ -42,7 +35,63 @@ Using an MCP client that doesn't support MCP skills yet? You can still [install 
 
 ## Set up
 
-<McpSkillInstall />
+Connect your MCP client to your Langfuse host's `/api/public/mcp` endpoint using a project-scoped API key. For regional Cloud endpoints and other MCP clients, see [MCP server setup](/docs/api-and-data-platform/features/mcp-server#set-up).
+
+<Steps>
+
+### Get authentication header
+
+1. Navigate to your project settings and create or copy a **project-scoped API key**:
+   - Public Key: `pk-lf-...`
+   - Secret Key: `sk-lf-...`
+2. Encode the credentials to base64 format:
+   ```bash filename="your-base64-token"
+   echo -n "pk-lf-your-public-key:sk-lf-your-secret-key" | base64
+   ```
+
+### Client setup
+
+<Tabs items={["Claude Code", "Codex"]}>
+
+<Tab>
+
+1. Register the Langfuse MCP server with a single command, replacing `{your-langfuse-host}` with your Langfuse host and `{your-base64-token}` with your encoded credentials:
+
+   ```bash filename="terminal" /{your-base64-token}/
+   claude mcp add --transport http langfuse https://{your-langfuse-host}/api/public/mcp \
+       --header "Authorization: Basic {your-base64-token}"
+   ```
+
+2. Verify the connection by asking Claude Code to `list all prompts in the project`. Claude Code should use the `listPrompts` tool to return the list of prompts.
+
+</Tab>
+
+<Tab>
+
+1. Add the Langfuse MCP server to `~/.codex/config.toml`, replacing `{your-langfuse-host}` with your Langfuse host and `{your-base64-token}` with your encoded credentials:
+
+   ```toml filename="~/.codex/config.toml" /{your-base64-token}/
+   [mcp_servers.langfuse]
+   url = "https://{your-langfuse-host}/api/public/mcp"
+   http_headers = { "Authorization" = "Basic {your-base64-token}" }
+   ```
+
+2. Restart Codex and run `codex mcp list` to confirm the server is registered.
+3. Verify the connection by asking Codex to `list all prompts in the project`. Codex should use the `listPrompts` tool to return the list of prompts.
+
+</Tab>
+
+</Tabs>
+
+</Steps>
+
+## Examples
+
+With both the tools and the playbooks available out of the box, you can ask your coding agent to:
+
+- **Investigate production issues from your editor.** Pull failing or slow traces, inspect observations, and collect edge cases straight into a dataset.
+- **Instrument and manage prompts with best practices built in.** Add tracing or migrate hardcoded prompts into Langfuse prompt management following our recommended patterns.
+- **Migrate from another observability platform.** Walk through a guided cutover from tools like LangSmith, Arize, or Braintrust, including historical traces, datasets, and prompts.
 
 Once connected, try prompting your agent with a real task:
 
