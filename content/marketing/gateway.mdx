@@ -7,7 +7,6 @@ contentWidth: full
 
 {/* Markdown for agents and .md consumers lives in md-override/gateway.md. Keep both files in sync. */}
 
-import { ProductUpdateSignup } from "@/components/ProductUpdateSignup";
 import { customerLogoNames } from "@/components/gateway/content";
 import { GatewayCustomerQuote } from "@/components/gateway/GatewayCustomerQuote";
 import { GatewayFeatureGrid } from "@/components/gateway/GatewayFeatureGrid";
@@ -17,6 +16,7 @@ import { GatewaySteps } from "@/components/gateway/GatewaySteps";
 import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Button } from "@/components/ui/button";
+import GatewayUpdateSignup from "@/components-mdx/gateway-update-signup.mdx";
 
 <h1 className="sr-only">See and control all AI usage with the Langfuse AI Gateway</h1>
 
@@ -87,13 +87,7 @@ import { Button } from "@/components/ui/button";
     <GatewayCustomerQuote />
   </section>
 
-  <section data-use-case-section="updates" className="flex flex-wrap items-center justify-between gap-x-12 gap-y-6 border-t border-line-structure bg-surface-1 px-5 py-10 sm:px-10 sm:py-12">
-    <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-2">
-      <h2 id="updates" className="text-[24px] leading-[1.2] text-text-primary">{"Langfuse AI Gateway updates"}</h2>
-      <p className="max-w-[52ch] text-[14px] leading-[1.5] text-text-tertiary">
-        {"Get an email when we ship new gateway features and providers. Gateway updates only, no spam."}
-      </p>
-    </div>
-    <ProductUpdateSignup list="gateway" source="Gateway landing page" className="flex-[1_1_320px]" />
+  <section data-use-case-section="updates" className="border-t border-line-structure px-5 py-10 sm:px-10 sm:py-12">
+    <GatewayUpdateSignup />
   </section>
 </div>

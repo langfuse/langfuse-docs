@@ -73,6 +73,4 @@ Figure: AI Gateway overview.
 
 [Read the SumUp story](/users/sumup), [All customer stories](/users)
 
-## Langfuse AI Gateway updates
-
-Get an email when we ship new gateway features and providers. Gateway updates only, no spam. Subscribe on [the AI Gateway docs](/docs/gateway/overview).
+**Langfuse AI Gateway updates:** get an email when we ship new gateway features and providers. Gateway updates only, no spam. Subscribe on [the AI Gateway launch post](/blog/introducing-gateway).

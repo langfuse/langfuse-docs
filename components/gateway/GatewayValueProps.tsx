@@ -238,20 +238,19 @@ const panels: Record<ValueProp["panel"], () => React.ReactElement> = {
 };
 
 export function GatewayValueProps() {
-  const reduceMotion = useReducedMotion();
-  const autoRotate = !reduceMotion;
+  // Tabs rotate for everyone; reduced motion only stills the progress bar.
+  const animateProgress = !useReducedMotion();
   const [active, setActive] = useState(0);
   // Bumped on every change so the progress bar animation restarts.
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (!autoRotate) return;
     const timer = setTimeout(() => {
       setActive((a) => (a + 1) % valueProps.length);
       setTick((t) => t + 1);
     }, ROTATE_MS);
     return () => clearTimeout(timer);
-  }, [autoRotate, tick]);
+  }, [tick]);
 
   const select = useCallback((index: number) => {
     setActive(index);
@@ -317,10 +316,10 @@ export function GatewayValueProps() {
                   aria-hidden
                   className={cn(
                     "absolute bottom-[-1px] left-0 h-0.5 bg-text-primary",
-                    autoRotate ? styles.progress : "w-full",
+                    animateProgress ? styles.progress : "w-full",
                   )}
                   style={
-                    autoRotate
+                    animateProgress
                       ? { animationDuration: `${ROTATE_MS}ms` }
                       : undefined
                   }

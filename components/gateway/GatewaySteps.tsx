@@ -67,7 +67,7 @@ function DialogFrame({
     <div
       {...handlers}
       aria-hidden
-      className="relative mt-2 @2xl:mt-0 @6xl:mt-2 overflow-hidden rounded-[10px] border border-line-structure bg-card shadow-[0_8px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.05)]"
+      className="relative mt-2 @2xl:mt-0 @3xl:mt-2 overflow-hidden rounded-[10px] border border-line-structure bg-card shadow-[0_8px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.05)]"
     >
       <div className="flex items-center justify-between border-b border-line-structure px-4 py-3 text-[16px] font-semibold tracking-[-0.01em] text-text-primary">
         <span>{title}</span>
@@ -253,7 +253,7 @@ const diff: DiffLine[] = [
 
 function CodeDiff() {
   return (
-    <div className="mt-2 @2xl:mt-0 @6xl:mt-2 overflow-hidden rounded-[2px] border border-line-structure bg-card font-mono text-[12.5px] leading-[1.7]">
+    <div className="mt-2 @2xl:mt-0 @3xl:mt-2 overflow-hidden rounded-[2px] border border-line-structure bg-card font-mono text-[12.5px] leading-[1.7]">
       <div className="border-b border-line-structure bg-surface-1 px-3 py-1.5 text-[11px] text-text-tertiary">
         client.py
       </div>
@@ -300,8 +300,8 @@ function Step({
     <div
       className={cn(
         // Stacked on phones, text beside the visual at medium widths, and
-        // stacked again inside each of the three columns on wide cards.
-        "grid min-w-0 items-start gap-x-8 gap-y-2.5 bg-surface-bg px-5 pb-7 pt-6 @2xl:grid-cols-2 @6xl:grid-cols-1",
+        // stacked again inside each of the three columns from medium-wide cards.
+        "grid min-w-0 items-start gap-x-8 gap-y-2.5 bg-surface-bg px-5 pb-7 pt-6 @2xl:grid-cols-2 @3xl:grid-cols-1",
         className,
       )}
     >
@@ -327,7 +327,7 @@ function Step({
 
 export function GatewaySteps() {
   return (
-    <CornerBox className="grid gap-px bg-line-structure @6xl:grid-cols-3">
+    <CornerBox className="grid gap-px bg-line-structure @3xl:grid-cols-3">
       <Step number="01" step={steps.connect}>
         <AddConnectionDialog />
       </Step>
