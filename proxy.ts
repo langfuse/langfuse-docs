@@ -56,11 +56,12 @@ function strippedPathname(pathname: string): string | null {
 
 // Pages whose Markdown mirror lives in public/md-src (see
 // scripts/copy_md_sources.js and md-override/). Every page under these
-// prefixes has a mirror, except the virtual /faq/tag/<tag> listings. Agents
-// that fetch a page for a person ("agent" category, for example ChatGPT-User,
-// which Codex's web tool uses) get the mirror even when they do not ask for
-// Markdown. Agents that drive a browser ("browser" kind), crawlers, and
-// browsers keep the HTML page.
+// prefixes has a mirror, except the virtual /faq/tag/<tag> listings.
+// ChatGPT-User (ChatGPT and Codex fetching a page for a person) gets the
+// mirror even though it does not ask for Markdown. Every other client keeps
+// the HTML page: browsers, search crawlers (including OAI-SearchBot), ChatGPT
+// agent (drives a real browser), and agents that already send
+// `Accept: text/markdown`, such as Claude Code.
 const MARKDOWN_FOR_AGENT_PATHS =
   /^\/(?:(?:docs|integrations|self-hosting|faq|guides|security|compare)(?:\/.*)?|pricing|pricing-self-host)\/?$/;
 const NO_MARKDOWN_MIRROR = /^\/faq\/tag(?:\/|$)|\.(?:md|txt|json|xml)$/;
@@ -106,8 +107,8 @@ export function proxy(
   const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
 
   // Requests that ask for Markdown are served by the rewrites in
-  // next.config.mjs. This covers agents that fetch pages like a browser does.
-  // The rewrite targets a separate file, so the CDN caches the Markdown under
+  // next.config.mjs. This covers ChatGPT-User, which fetches pages like a
+  // browser does. The rewrite targets a separate file, so the CDN caches the Markdown under
   // /md-src/... and the HTML under the page URL: the two never mix, and no
   // `Vary: User-Agent` is needed.
   let markdownRewrite: URL | null = null;
@@ -115,10 +116,10 @@ export function proxy(
     (request.method === "GET" || request.method === "HEAD") &&
     MARKDOWN_FOR_AGENT_PATHS.test(pathname) &&
     !NO_MARKDOWN_MIRROR.test(pathname) &&
-    !accept?.includes("text/markdown")
+    !accept?.includes("text/markdown") &&
+    /chatgpt-user/i.test(headers.get("user-agent") ?? "")
   ) {
-    const traffic = classifyAgentTraffic(headers, ip);
-    if (traffic.category === "agent" && traffic.kind !== "browser") {
+    if (classifyAgentTraffic(headers, ip).id === "chatgpt-user") {
       markdownRewrite = request.nextUrl.clone();
       markdownRewrite.pathname = markdownMirrorPath(pathname);
     }
@@ -188,9 +189,7 @@ export function proxy(
   }
 
   if (markdownRewrite) {
-    const response = NextResponse.rewrite(markdownRewrite);
-    response.headers.set("X-Robots-Tag", "noindex");
-    return response;
+    return NextResponse.rewrite(markdownRewrite);
   }
 
   return NextResponse.next();
