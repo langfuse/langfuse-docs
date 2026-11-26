@@ -151,6 +151,23 @@ domain). Update an existing row instead of adding a duplicate.
 - One H1 per markdown file already exists in consumers; do not add a `# ` heading
   to the table file.
 
+## Adopters explorer
+
+The `/users` explorer looks up three maps in
+`components/customers/AdoptersExplorerWrapper.tsx` by the **exact** company
+label in the table. A missing key leaves the card without a logo, and the
+use-case sentence is shown as the company description.
+
+Logo and description are separate from a documented use case.
+
+- `COMPANY_LOGOS`: the light logo, when you have one
+- `COMPANY_DESCRIPTIONS`: one short public description of the company, not the use-case sentence
+- `COMPANIES_WITH_DOCUMENTED_USE_CASES`: only when the table cell describes how the company uses Langfuse, and that sentence is not the same as the company description
+
+A logo by itself is not a reason to add the company to the use-case set. A cell that only describes the company, such as a product line, stays out of that set. Otherwise the card repeats the same sentence under the description.
+
+Keep each list alphabetical, and use the same spelling as the table label.
+
 ## Optional companion updates (only if they already apply)
 
 Do these only when the company is already on that surface, or the user asks:
@@ -179,5 +196,6 @@ Do **not** add a homepage logo in this skill. That needs a tight wordmark SVG
 - [ ] Use case is a brief, sourced summary (not a long paragraph)
 - [ ] Company cell links to the official website
 - [ ] Row is alphabetical and not a duplicate
+- [ ] Explorer logo and description use the same company label. The documented-use-case set includes the company only when the table cell describes Langfuse use and differs from the description
 - [ ] Table column alignment preserved
 - [ ] `pnpm run format` if you edited Prettier-covered files
