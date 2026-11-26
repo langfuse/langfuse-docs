@@ -1,0 +1,219 @@
+---
+title: "Harbor integration with Langfuse"
+sidebarTitle: Harbor
+logo: /images/integrations/harbor_icon.png
+description: "Analyze Harbor agent evaluations in Langfuse: trace trials through the AI Gateway or from their trajectories, turn jobs into experiment runs with verifier rewards as scores, and test Langfuse-managed skills."
+category: Integrations
+---
+
+# Harbor integration with Langfuse
+
+Use Langfuse to inspect what agents did in [Harbor](https://github.com/harbor-framework/harbor) runs: trace each trial's model calls or its full trajectory, compare jobs as experiment runs with the verifier's rewards as scores, and test skill versions you manage in Langfuse.
+
+> **What is Harbor?** [Harbor](https://github.com/harbor-framework/harbor) is an open-source framework for evaluating agents in sandboxed environments. A task bundles an instruction, a container environment, and a verifier that grades the result. Harbor runs agents such as Claude Code, Codex, or OpenHands on tasks locally with Docker or in cloud sandboxes, and shares datasets of tasks on the [Harbor Hub](https://hub.harborframework.com).
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+## Integration options [#integration-options]
+
+|            | [AI Gateway](#ai-gateway)                           | [Experiment runs](#experiment-runs)                                                               |
+| ---------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Records    | each model call, with tokens and cost               | each trial as a trace with model and tool calls, each job as an experiment run, rewards as scores |
+| When       | while the trial runs                                | after the job                                                                                     |
+| Works with | every agent that lets Harbor set its model endpoint | agents that write a Harbor trajectory ([agent support](#agent-support))                           |
+
+Use one option per job. With both, each model call is recorded twice.
+
+## Trace model calls with the AI Gateway [#ai-gateway]
+
+<Steps>
+
+### Create a gateway key [#create-a-gateway-key]
+
+Create a gateway API key under **AI Gateway → Gateway keys**. See [API keys](/docs/gateway/features/api-keys#create-a-key).
+
+### Run Harbor against the gateway [#run-harbor-against-the-gateway]
+
+Point the agent at the gateway with `--base-url` and name the variable that holds the key with `--api-key-name`:
+
+```bash
+export LANGFUSE_GATEWAY_KEY="<your-gateway-key>"
+
+harbor run -d terminal-bench/terminal-bench-2-1 -e modal \
+  -a claude-code -m anthropic/claude-sonnet-5-5 \
+  --base-url https://gateway.cloud.langfuse.com/anthropic \
+  --api-key-name LANGFUSE_GATEWAY_KEY
+# 🇪🇺 EU region. 🇺🇸 US: https://gateway.us.cloud.langfuse.com, 🇯🇵 Japan: https://gateway.jp.cloud.langfuse.com
+# OpenAI models (e.g. -a codex -m openai/gpt-5.5): --base-url https://gateway.cloud.langfuse.com/openai/v1
+# OpenCode: add /v1 to the Anthropic base URL
+```
+
+To filter Harbor runs in Langfuse, set the gateway's [request headers](/docs/gateway/features/tracing#request-headers) through the agent's environment, for example for Claude Code:
+
+```bash
+--ae "ANTHROPIC_CUSTOM_HEADERS=langfuse-environment: harbor"
+```
+
+### View traces [#view-gateway-traces]
+
+Each model call is a generation with its model, tokens, and cost. For coding agents the gateway recognizes, such as Claude Code and Codex, the calls of one trial are grouped into a [session](/docs/observability/features/sessions). Tool calls appear in the generations' input and output, not as separate observations.
+
+</Steps>
+
+## Send jobs as experiment runs [#experiment-runs]
+
+<Steps>
+
+### Install the converter [#install-the-converter]
+
+[`harbor-atif2otel`](https://pypi.org/project/harbor-atif2otel/) converts the trajectory Harbor saves for each trial into OpenTelemetry spans:
+
+```bash
+pip install harbor-atif2otel
+```
+
+### Send a job to Langfuse [#send-a-job-to-langfuse]
+
+Save this script as `harbor_to_langfuse.py`. For each trial of a finished job, it adds the task to a Langfuse dataset named after the Harbor dataset, sends the trial's spans to the [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry) with [experiment attributes](/integrations/native/opentelemetry/experiments), and records each verifier reward as a score:
+
+```python filename="harbor_to_langfuse.py"
+"""Send a finished Harbor job to Langfuse as experiment runs: python harbor_to_langfuse.py jobs/<job-name>"""
+import base64
+import hashlib
+import json
+import os
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+import uuid
+from pathlib import Path
+
+from harbor_atif2otel.convert import convert_trajectory
+from opentelemetry.proto.collector.trace.v1.trace_service_pb2 import ExportTraceServiceRequest
+from opentelemetry.proto.common.v1.common_pb2 import AnyValue, KeyValue
+
+BASE_URL = os.environ.get("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+KEYS = f"{os.environ['LANGFUSE_PUBLIC_KEY']}:{os.environ['LANGFUSE_SECRET_KEY']}"
+AUTH = "Basic " + base64.b64encode(KEYS.encode()).decode()
+
+
+def request(method: str, path: str, body: bytes | None = None, content_type: str = "application/json") -> dict:
+    headers = {"Authorization": AUTH, "Content-Type": content_type, "x-langfuse-ingestion-version": "4"}
+    req = urllib.request.Request(BASE_URL + path, data=body, headers=headers, method=method)
+    with urllib.request.urlopen(req, timeout=30) as response:
+        return json.loads(response.read() or b"{}")
+
+
+def api(method: str, path: str, body: dict | None = None) -> dict:
+    return request(method, path, json.dumps(body).encode() if body is not None else None)
+
+
+def dataset_id(name: str) -> str:
+    try:
+        return api("GET", "/api/public/v2/datasets/" + urllib.parse.quote(name, safe=""))["id"]
+    except urllib.error.HTTPError:
+        return api("POST", "/api/public/v2/datasets", {"name": name})["id"]
+
+
+def attribute(key: str, value: str) -> KeyValue:
+    return KeyValue(key=key, value=AnyValue(string_value=value))
+
+
+job_dir = Path(sys.argv[1])
+datasets = {}
+for trajectory in sorted(job_dir.glob("*/agent/trajectory.json")):
+    trial_dir = trajectory.parent.parent
+    result = json.loads((trial_dir / "result.json").read_text())
+    task, agent = result["task_name"], result["config"]["agent"]
+    dataset = result.get("source") or "harbor"  # the Harbor dataset, e.g. terminal-bench/terminal-bench-2-1
+    if dataset not in datasets:
+        datasets[dataset] = dataset_id(dataset)
+    item_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{dataset}/{task}"))  # one dataset item per task
+    run_name = f"{job_dir.name} ({agent['name']}, {agent.get('model_name')})"  # one run per job, agent, model
+
+    spans = convert_trajectory(json.loads(trajectory.read_text()), trace_seed=trial_dir.name)
+    span_list = spans.scope_spans[0].spans
+    root = next(span for span in span_list if not span.parent_span_id)
+    instruction = next((a.value.string_value for a in root.attributes if a.key == "input.value"), task)
+    api("POST", "/api/public/dataset-items", {"id": item_id, "datasetName": dataset, "input": instruction,
+                                              "metadata": {"harbor_task": task}})
+    experiment = {
+        "langfuse.experiment.id": hashlib.sha256(run_name.encode()).hexdigest()[:16],
+        "langfuse.experiment.name": run_name,
+        "langfuse.experiment.dataset.id": datasets[dataset],
+        "langfuse.experiment.item.id": item_id,
+        "langfuse.experiment.item.root_observation_id": root.span_id.hex(),
+        "langfuse.environment": "harbor",
+    }
+    for span in span_list:
+        kind = next((a.value.string_value for a in span.attributes if a.key == "openinference.span.kind"), "")
+        if kind != "LLM":  # agent spans repeat their model calls' usage, which would double the cost
+            kept = [a for a in span.attributes if not a.key.startswith(("llm.token_count.", "llm.cost."))]
+            del span.attributes[:]
+            span.attributes.extend(kept)
+        span.attributes.extend(attribute(key, value) for key, value in experiment.items())
+    root.attributes.extend([
+        attribute("langfuse.trace.name", task),
+        attribute("langfuse.trace.metadata.harbor_trial", trial_dir.name),
+    ])
+    request("POST", "/api/public/otel/v1/traces", ExportTraceServiceRequest(resource_spans=[spans]).SerializeToString(),
+            "application/x-protobuf")
+
+    rewards = (result.get("verifier_result") or {}).get("rewards") or {}
+    for name, value in rewards.items():  # item scores on the trial's root observation
+        api("POST", "/api/public/scores", {"traceId": root.trace_id.hex(), "observationId": root.span_id.hex(),
+                                           "name": name, "value": value, "environment": "harbor"})
+    print(f"{trial_dir.name}: run '{run_name}', trace {root.trace_id.hex()}, scores {rewards}")
+```
+
+Run it with your Langfuse API keys:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+python harbor_to_langfuse.py jobs/<job-name>
+```
+
+### Compare runs [#compare-runs]
+
+Each job appears as one experiment run per agent and model on the dataset, for example `terminal-bench/terminal-bench-2-1`. Each trial is the run's result for its task: a trace with a generation per model call and a tool observation per tool call, scored with the verifier's rewards, such as `reward`. Because the dataset item for a task is the same in every job, you can [compare runs](/docs/evaluation/experiments/compare-experiments) task by task.
+
+</Steps>
+
+### Agent support [#agent-support]
+
+What a trace shows depends on what the agent records in its trajectory:
+
+| Agent                                                    | Tool calls  | Tokens and cost |
+| -------------------------------------------------------- | ----------- | --------------- |
+| Claude Code, Codex, OpenCode, Terminus-2                 | yes         | yes             |
+| mini-SWE-agent                                           | inputs only | yes             |
+| OpenHands SDK                                            | yes         | no              |
+| Goose                                                    | no          | no              |
+| Aider (no trajectory, use the [AI Gateway](#ai-gateway)) | no          | no              |
+
+Trajectories don't record how long a tool call took, so tool observations have no duration.
+
+## Test Langfuse-managed skills [#skills]
+
+Install a skill version from [Langfuse Skill Management](/docs/skill-management/overview) with the [Langfuse CLI](/docs/skill-management/get-started#cli-install) and pass its folder to Harbor:
+
+```bash
+npm install -g @langfuse/cli
+langfuse skills install my-skill --label staging
+
+harbor run -d terminal-bench/terminal-bench-2-1 -e modal \
+  -a claude-code -m anthropic/claude-sonnet-5-5 \
+  --skill .agents/skills/my-skill --job-name my-skill-staging
+```
+
+Run one job per label or version, send each with [`harbor_to_langfuse.py`](#send-a-job-to-langfuse), and [compare the runs](#compare-runs).
+
+## Harbor tasks or Langfuse datasets? [#tasks-or-datasets]
+
+- Use **Harbor tasks** when the result depends on the agent's environment: files, tools, services, or a multi-step session in a versioned container, graded by a verifier that inspects the final state.
+- Use **Langfuse [datasets](/docs/evaluation/experiments/datasets)** when an input and its output are enough to judge a result, for example to compare prompts or models in [experiments](/docs/evaluation/experiments/experiments-via-sdk).
