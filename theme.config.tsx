@@ -18,6 +18,27 @@ import { CloudflareVideo, Video } from "./components/Video";
 import InkeepSearchBar from "./components/inkeep/InkeepSearchBar";
 import { LangTabs } from "./components/LangTabs";
 
+function SnapshotBanner({ text }: { text: string }) {
+  const { asPath, pathname } = useRouter();
+  // The 404 page is prerendered once, so its asPath is "/404" for every
+  // missing URL. trailingSlash adds a slash that langfuse.com redirects away.
+  const path =
+    pathname === "/404" || pathname === "/_error"
+      ? ""
+      : asPath.split("#")[0].split("?")[0].replace(/(.)\/$/, "$1");
+  // Nextra truncates the banner to one line, so the whole text is the link.
+  return (
+    <Link
+      href={`https://langfuse.com${path}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline cursor-pointer"
+    >
+      ⚠️ {text} Read this page in the current docs ↗
+    </Link>
+  );
+}
+
 const config: DocsThemeConfig = {
   logo: <Logo />,
   logoLink: false,
@@ -205,17 +226,7 @@ const config: DocsThemeConfig = {
     key: "snapshot-notice-js-sdk-v3",
     dismissible: false,
     content: (
-      <span>
-        ⚠️ Snapshot (as of JS SDK v3) ⚠️ {"  "}
-        <Link
-          href="https://langfuse.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline cursor-pointer"
-        >
-          view latest ↗
-        </Link>
-      </span>
+      <SnapshotBanner text="Outdated snapshot: JS/TS SDK v3, before 28 August 2025." />
     ),
   },
 };
