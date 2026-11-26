@@ -13,7 +13,7 @@ AI governance across your organization: route all model calls through the gatewa
 
 Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Khan Academy](/users/khan-academy), [Hugging Face](/users/hugging-face), Intuit and [SumUp](/users/sumup).
 
-## Stop guessing how your company uses AI
+## Bring order to your company's AI usage
 
 1. **See all spend.** Know what AI costs and who’s spending it.
    - **Spend dashboard:** cost by model, provider, user and gateway key.
