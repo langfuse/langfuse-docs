@@ -112,9 +112,9 @@ Enforcing guardrails (**Block**, **Redact**, and **Enforce**) fail closed if a p
 <Details id="supported-endpoints">
 <Summary>Which endpoints run request and response guardrails?</Summary>
 
-Request guardrails run on every model-call POST endpoint, including `/openai/v1/responses`, `/openai/v1/responses/compact`, `/openai/v1/chat/completions`, `/openai/v1/decisions`, `/openai/v1/embeddings`, `/anthropic/v1/messages`, and `/anthropic/v1/messages/count_tokens`.
+Request guardrails run on every model-call POST [endpoint](/docs/gateway/features/rest-api#routes).
 
-Response guardrails run on successful (`2xx`) JSON and SSE responses from `/openai/v1/responses`, `/openai/v1/chat/completions`, and `/anthropic/v1/messages`, inspecting assistant text, refusals, thinking or reasoning blocks, and tool call arguments. Decisions, Embeddings, Responses compaction, and `count_tokens` skip response guardrails. See [Endpoints](/docs/gateway/features/rest-api#routes) for the full route list.
+Response guardrails run on successful (`2xx`) JSON and SSE responses from `/openai/v1/responses`, `/openai/v1/chat/completions`, and `/anthropic/v1/messages`, inspecting assistant text, refusals, thinking or reasoning blocks, and tool call arguments. Decisions, Embeddings, Responses compaction, and `count_tokens` skip response guardrails.
 
 </Details>
 
