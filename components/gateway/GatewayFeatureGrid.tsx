@@ -128,8 +128,8 @@ export function GatewayFeatureGrid() {
         tooltip="Read the docs"
         className="flex w-full min-w-0 flex-col items-stretch overflow-hidden p-0"
       >
-        <div className="grid w-full min-w-0 items-center md:grid-cols-2">
-          <div className="flex flex-col gap-1 p-4 md:py-10">
+        <div className="grid w-full min-w-0 items-center @2xl:grid-cols-2">
+          <div className="flex flex-col gap-1 p-4 @2xl:py-10">
             <div className={titleClass}>{providerCard.title}</div>
             <p className={cn(descriptionClass, "max-w-[52ch]")}>
               {providerCard.description}
@@ -148,12 +148,12 @@ export function GatewayFeatureGrid() {
           </div>
         </div>
       </ChipCard>
-      <div className="grid gap-2 lg:grid-cols-3">
+      <div className="grid gap-2 @3xl:grid-cols-3">
         {featureCardsTop.map((card) => (
           <Card key={card.title} card={card} />
         ))}
       </div>
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-2 @xl:grid-cols-2 @6xl:grid-cols-4">
         {featureCardsBottom.map((card) => (
           <Card key={card.title} card={card} />
         ))}

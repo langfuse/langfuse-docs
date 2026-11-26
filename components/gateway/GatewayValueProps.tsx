@@ -51,7 +51,7 @@ function SpendPanel() {
             )}
           >
             <div className={panelLabel}>{stat.label}</div>
-            <div className="mt-1.5 truncate font-mono text-[17px] text-text-primary sm:text-[24px]">
+            <div className="mt-1.5 truncate font-mono text-[15px] text-text-primary @md/panel:text-[24px]">
               {stat.value}
             </div>
           </div>
@@ -259,7 +259,7 @@ export function GatewayValueProps() {
   }, []);
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-2">
+    <div className="grid items-start gap-10 @3xl:grid-cols-2">
       <div
         className="flex flex-col border-t border-line-structure"
         role="tablist"
@@ -296,7 +296,7 @@ export function GatewayValueProps() {
                   <span className="text-[15px] leading-[1.5] text-text-secondary">
                     {prop.body}
                   </span>
-                  <span className="mt-1.5 flex flex-col lg:min-h-[200px]">
+                  <span className="mt-1.5 flex flex-col @3xl:min-h-[200px]">
                     {prop.features.map((feature) => (
                       <span
                         key={feature.label}
@@ -335,7 +335,7 @@ export function GatewayValueProps() {
         id="gateway-value-panel"
         role="tabpanel"
         aria-labelledby={`gateway-value-tab-${active}`}
-        className="min-w-0 rounded-[2px] shadow-[-8px_18px_12px_rgba(0,0,0,0.02),-4px_8px_9px_rgba(0,0,0,0.03),-1px_2px_5px_rgba(0,0,0,0.04)]"
+        className="@container/panel min-w-0 rounded-[2px] shadow-[-8px_18px_12px_rgba(0,0,0,0.02),-4px_8px_9px_rgba(0,0,0,0.03),-1px_2px_5px_rgba(0,0,0,0.04)]"
       >
         <div className="flex h-9 items-center gap-2 border-b border-line-structure bg-surface-1 px-3.5 font-mono text-[11px] text-text-tertiary">
           <span aria-hidden className="size-2 rounded-full bg-line-structure" />

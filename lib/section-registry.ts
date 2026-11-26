@@ -163,7 +163,6 @@ export const USE_CASE_SECTIONS = new Set<string>([
  */
 export const NO_SIDEBAR_SECTIONS = new Set<string>([
   "financial-services",
-  "gateway",
   "healthcare",
 ]);
 
