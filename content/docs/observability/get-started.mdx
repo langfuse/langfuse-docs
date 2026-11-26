@@ -145,6 +145,8 @@ This guide helps you get started with Langfuse tracing manually.
 
 ### Ingest your first trace
 
+The Python SDK needs Python 3.11 or later, and the JS/TS SDK needs Node.js 22 or later. On an older version, the package manager installs an older SDK major without a message.
+
 Choose your framework, SDK, or OpenTelemetry setup to get started. If your
 application already emits OTEL spans, start with the OpenTelemetry guide.
 (Langfuse calls spans [observations](/docs/observability/data-model#observations-traces-and-sessions); `span` is also a specific observation type.)
@@ -156,7 +158,7 @@ application already emits OTEL spans, start with the OpenTelemetry guide.
 
 Langfuse's OpenAI SDK is a drop-in replacement for the OpenAI client that automatically records your model calls without changing how you write code. If you already use the OpenAI python SDK, you can start using Langfuse with minimal changes to your code.
 
-Start by installing the Langfuse OpenAI SDK. It includes the wrapped OpenAI client and sends traces in the background.
+Start by installing the Langfuse SDK and the OpenAI SDK. The Langfuse wrapper uses the OpenAI client that you install, and it sends traces in the background.
 
 <GetStartedOpenaiSdk />
 
