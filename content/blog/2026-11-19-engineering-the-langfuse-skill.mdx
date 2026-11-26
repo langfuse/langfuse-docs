@@ -177,7 +177,7 @@ Because many test prompts ask the coding agent to create prompts, datasets, or t
 
 ### 4. Collecting traces and comparing results in Langfuse
 
-Each sandbox runs with our open-source observability plugins ([Claude Code](https://github.com/langfuse/claude-observability-plugin), [Codex](https://github.com/langfuse/codex-observability-plugin), and [Cursor](https://github.com/langfuse/cursor-observability-plugin)) pointed at the harness project, capturing the agent's full trajectory: prompts, tool calls, skill reads, and final outputs. When a run finishes, Modal links each trace back to its dataset item and groups results into one experiment run per agent (`<run_name>-claude-code`, `<run_name>-codex`, `<run_name>-cursor`) alongside evaluation scores. From there, we inspect individual traces and compare skill versions and agents side by side directly in the Langfuse UI.
+Each sandbox sends traces to the harness project via our open-source observability plugins ([Claude Code](https://github.com/langfuse/claude-observability-plugin), [Codex](https://github.com/langfuse/codex-observability-plugin), and [Cursor](https://github.com/langfuse/cursor-observability-plugin)), where Modal links them to dataset items so we can score and compare runs side by side in Langfuse.
 
 ## Putting the loop into practice [#putting-the-loop-into-practice]
 
