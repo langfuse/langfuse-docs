@@ -145,6 +145,7 @@ const IGNORED_SECTION_PATHS = new Set([
   "support",
   "why-langfuse",
   "cn",
+  "india",
   "japan",
   "kr",
   "launch-week-5",
