@@ -80,31 +80,6 @@ For other MCP clients (such as Cursor, Pi Agent, or any client supporting `strea
 
 Using an MCP client that doesn't support MCP skills yet? You can still [install the Langfuse Agent Skill from GitHub](/docs/api-and-data-platform/features/agent-skill#install) or via the Cursor plugin, and use it alongside the MCP server or the [Langfuse CLI](/docs/api-and-data-platform/features/cli).
 
-## What the skills include
-
-Skills are focused bundles of instructions and reference guides that encode how to get good results with Langfuse. Instead of crowding your prompt up front, your agent sees each skill's short description at startup and loads the full playbook only when a task calls for it.
-
-The MCP server bundles both open-source skills from `langfuse/skills`:
-
-| Skill                 | What it covers                                                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `langfuse`            | Querying and managing traces, prompts, datasets, and scores; looking up current docs; and following Langfuse tracing and evaluation best practices               |
-| `migrate-to-langfuse` | Moving an existing LLM application from another observability or evaluation platform to Langfuse, from live tracing cutover to transferring datasets and prompts |
-
-## Examples
-
-With both the tools and the playbooks available out of the box, you can ask your coding agent to:
-
-- **Investigate production issues from your editor.** Pull failing or slow traces, inspect observations, and collect edge cases straight into a dataset.
-- **Instrument and manage prompts with best practices built in.** Add tracing or migrate hardcoded prompts into Langfuse prompt management following our recommended patterns.
-- **Migrate from another observability platform.** Walk through a guided cutover from tools like LangSmith, Arize, or Braintrust, including historical traces, datasets, and prompts.
-
-Once connected, try prompting your agent with a real task:
-
-- _Show me the last 10 traces with a score below 0.5 and add them to a dataset called "edge-cases"._
-- _Investigate why latency spiked in production yesterday._
-- _Migrate the system prompt in `src/agent.ts` to Langfuse prompt management._
-
 ## Learn more
 
 <Cards num={2}>
