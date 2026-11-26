@@ -30,6 +30,8 @@ Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Kha
 
 ## One control point for all model calls
 
+Natively traced in Langfuse.
+
 Figure: AI Gateway overview.
 
 1. A coding agent or AI application sends a request to the AI gateway, which runs in Langfuse.
