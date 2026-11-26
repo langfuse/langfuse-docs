@@ -7,7 +7,7 @@ const marketplaceFaqByVariant: Record<"cloud" | "selfHosted", FAQItem> = {
   cloud: {
     question: MARKETPLACE_QUESTION,
     answer:
-      "Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace or invoice. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer.",
+      "Yes. Core, Pro, and Enterprise customers with a yearly commitment can bill via AWS Marketplace. [Talk to us](/talk-to-us?deployment=cloud) to request a private offer. Invoice billing is also available for Enterprise customers.",
   },
   selfHosted: {
     question: MARKETPLACE_QUESTION,
@@ -56,7 +56,7 @@ const faqs: FAQItem[] = [
   {
     question: "When do I get billed?",
     answer:
-      "You get one bill each month. We charge your Core or Pro plan, and the Teams add-on if you have it, at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
+      "You get one bill each month. We charge your Core, Pro, or Team plan at the start of the month. We charge for your usage at the end of the month. The bill you get at the start of the month shows two things: the plan cost for the new month and the usage from last month.",
   },
   {
     question: "Can I choose a yearly commitment?",
