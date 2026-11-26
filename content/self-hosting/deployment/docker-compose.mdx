@@ -58,7 +58,7 @@ Production deployments size each service separately. The [scaling page](/self-ho
 ### Requirements
 
 - git
-- openssl
+- a POSIX shell with openssl (on Windows, use WSL or Git Bash)
 - docker & docker compose -> use [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows
 
 <Callout type="info">
@@ -101,7 +101,7 @@ ENV
 fi
 ```
 
-`DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`.
+`DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`. If you started Langfuse on this machine before with the default secrets, the existing volumes keep the old passwords: remove them with `docker compose down -v`, which deletes all data.
 
 ### Start Langfuse
 
@@ -188,7 +188,7 @@ cd langfuse
 
 ### Create the secrets
 
-Run this in the `langfuse` folder. It writes a `.env` with a random value for every secret the compose file marks `# CHANGEME`, and it leaves an existing `.env` untouched.
+Run this in the `langfuse` folder. It writes a `.env` with a random value for every secret the compose file marks `# CHANGEME`, and it leaves an existing `.env` untouched. Before you run it, replace `<instance-ip>` with the instance address, because `NEXTAUTH_URL` must match the address users open.
 
 ```bash
 if [ -f .env ]; then echo ".env exists, not overwriting"
@@ -213,9 +213,7 @@ ENV
 fi
 ```
 
-Replace `<instance-ip>` with the instance address, because `NEXTAUTH_URL` must match the address users open.
-
-`DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`.
+`DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`. If you started Langfuse on this machine before with the default secrets, the existing volumes keep the old passwords: remove them with `docker compose down -v`, which deletes all data.
 
 ### Update network parameters (optional)
 
