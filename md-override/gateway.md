@@ -5,7 +5,7 @@ description: One open source entry point for all AI usage in your company. See e
 
 # See and control all AI usage
 
-[AI Gateway](/docs/gateway/overview) is in public beta.
+Langfuse AI Gateway (public beta)
 
 AI governance across your organization: route all model calls through the gateway instead of losing track of keys and budgets.
 
