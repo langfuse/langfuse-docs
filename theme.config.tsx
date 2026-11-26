@@ -20,6 +20,25 @@ import { Video } from "./components/Video";
 import { HiringBadge } from "@/components/HiringBadge";
 // import IconYoutube from "./components/icons/youtube";
 
+function SnapshotBanner({ text }: { text: string }) {
+  const { asPath } = useRouter();
+  // trailingSlash adds a slash that langfuse.com would redirect away
+  const path = asPath.split("#")[0].split("?")[0].replace(/(.)\/$/, "$1");
+  return (
+    <span>
+      ⚠️ {text} ⚠️{"  "}
+      <Link
+        href={`https://langfuse.com${path}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline cursor-pointer"
+      >
+        Read this page in the current docs ↗
+      </Link>
+    </span>
+  );
+}
+
 const config: DocsThemeConfig = {
   logo: (
     <div className="flex items-center gap-4">
@@ -225,17 +244,7 @@ const config: DocsThemeConfig = {
     key: "snapshot-notice-python-sdk-v3-js-sdk-v4",
     dismissible: false,
     content: (
-      <span>
-        ⚠️ Snapshot (as of Python SDK v3 / JS SDK v4) ⚠️ {"  "}
-        <Link
-          href="https://langfuse.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline cursor-pointer"
-        >
-          view latest ↗
-        </Link>
-      </span>
+      <SnapshotBanner text="This is a snapshot of the Langfuse docs from when Python SDK v3 and JS/TS SDK v4 were current, before 10 March 2026. It is out of date." />
     ),
   },
 };
