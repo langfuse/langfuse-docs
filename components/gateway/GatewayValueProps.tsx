@@ -17,7 +17,7 @@ import {
   type ValueProp,
 } from "./content";
 
-const ROTATE_MS = 7000;
+const ROTATE_MS = 5000;
 
 const panelLabel = "font-mono text-[10px] text-text-tertiary";
 const panelBox = "rounded-[2px] border border-line-structure";

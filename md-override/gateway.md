@@ -5,7 +5,7 @@ description: One open source entry point for all AI usage in your company. See e
 
 # See and control all AI usage
 
-The Langfuse AI Gateway is in public beta.
+[AI Gateway](/docs/gateway/overview) is in public beta.
 
 AI governance across your organization: route all model calls through the gateway instead of losing track of keys and budgets.
 
@@ -27,6 +27,8 @@ Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Kha
 4. **Improve AI usage.** See what AI is used for and improve it.
    - **Automatic tracing:** every call becomes a Langfuse trace, with full content or usage only.
    - **Evals and analysis:** run evals, topics and alerts, or tell Halo what’s on your mind.
+
+## Add a control point between your agents and model providers
 
 Figure: AI Gateway overview.
 

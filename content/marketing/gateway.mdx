@@ -17,16 +17,20 @@ import { GatewaySteps } from "@/components/gateway/GatewaySteps";
 import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Button } from "@/components/ui/button";
+import { Network } from "lucide-react";
 
 <h1 className="sr-only">See and control all AI usage with the Langfuse AI Gateway</h1>
 
 <div className="@container not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
-  <section data-use-case-section="hero" className="grid items-center @5xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-    <div className="flex min-w-0 flex-col items-start gap-6 px-6 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12">
-      <span className="rounded-full border border-line-structure px-2 py-0.5 text-[12px] text-text-tertiary">
-        {"Public beta"}
-      </span>
-      <h2 id="see-and-control" className="text-[40px] leading-[1.02] text-text-primary sm:text-[52px] xl:text-[64px]">
+  <section data-use-case-section="hero" className="grid items-center @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+    <div className="flex min-w-0 flex-col items-start gap-6 px-6 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12 @2xl:py-12 @2xl:pr-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Button href="/docs/gateway/overview" variant="secondary" size="small" icon={<Network className="size-3.5" />} className="w-auto" wrapperClassName="w-fit">AI Gateway</Button>
+        <span className="rounded-full border border-line-structure px-2 py-0.5 text-[12px] text-text-tertiary">
+          {"Public beta"}
+        </span>
+      </div>
+      <h2 id="see-and-control" className="text-[40px] leading-[1.02] text-text-primary @lg:text-[52px] @2xl:text-[44px] @4xl:text-[52px] @6xl:text-[64px]">
         <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"See and control"}</span>{" all AI usage"}
       </h2>
       <p className="max-w-[52ch] text-[15px] leading-[1.5] text-text-secondary">
@@ -37,7 +41,7 @@ import { Button } from "@/components/ui/button";
         <Button href="/docs/gateway/overview" variant="secondary" size="default" shortcutKey="d" className="w-auto" wrapperClassName="w-fit">Documentation</Button>
       </div>
     </div>
-    <div className="flex min-w-0 items-center px-4 pb-8 sm:px-8 @5xl:py-8 @5xl:pl-0">
+    <div className="flex min-w-0 items-center px-4 pb-8 sm:px-8 @2xl:py-8 @2xl:pl-0">
       <GatewayHeroVisual />
     </div>
   </section>
@@ -55,6 +59,9 @@ import { Button } from "@/components/ui/button";
 
   <section data-use-case-section="architecture" className="pattern-bg border-t border-line-structure px-5 py-10 sm:px-10 sm:py-14">
     <div className="relative z-10 mx-auto max-w-[960px]">
+      <h2 id="control-point" className="mb-10 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
+        {"Add a control point between your agents and model providers"}
+      </h2>
       <AiGatewayOverviewDiagram />
     </div>
   </section>
