@@ -17,7 +17,6 @@ import { GatewaySteps } from "@/components/gateway/GatewaySteps";
 import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Button } from "@/components/ui/button";
-import { Network } from "lucide-react";
 
 <h1 className="sr-only">See and control all AI usage with the Langfuse AI Gateway</h1>
 
@@ -25,7 +24,7 @@ import { Network } from "lucide-react";
   <section data-use-case-section="hero" className="grid items-center @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
     <div className="flex min-w-0 flex-col items-start gap-6 px-6 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12 @2xl:py-12 @2xl:pr-4">
       <div className="flex flex-wrap items-center gap-2">
-        <Button href="/docs/gateway/overview" variant="secondary" size="small" icon={<Network className="size-3.5" />} className="w-auto" wrapperClassName="w-fit">AI Gateway</Button>
+        <Button href="/docs/gateway/overview" variant="secondary" size="small" icon={<img src="/langfuse-icon.svg" alt="" aria-hidden className="block h-3 w-auto" />} className="w-auto" wrapperClassName="w-fit">AI Gateway</Button>
         <span className="rounded-full border border-line-structure px-2 py-0.5 text-[12px] text-text-tertiary">
           {"Public beta"}
         </span>
@@ -60,7 +59,7 @@ import { Network } from "lucide-react";
   <section data-use-case-section="architecture" className="pattern-bg border-t border-line-structure px-5 py-10 sm:px-10 sm:py-14">
     <div className="relative z-10 mx-auto max-w-[960px]">
       <h2 id="control-point" className="mb-10 text-[34px] leading-[1.08] text-text-primary sm:text-[42px]">
-        {"Add a control point between your agents and model providers"}
+        {"One "}<span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"control point"}</span>{" for all model calls."}
       </h2>
       <AiGatewayOverviewDiagram />
     </div>

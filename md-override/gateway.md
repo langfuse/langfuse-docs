@@ -28,7 +28,7 @@ Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Kha
    - **Automatic tracing:** every call becomes a Langfuse trace, with full content or usage only.
    - **Evals and analysis:** run evals, topics and alerts, or tell Halo what’s on your mind.
 
-## Add a control point between your agents and model providers
+## One control point for all model calls
 
 Figure: AI Gateway overview.
 
