@@ -21,7 +21,7 @@ const GATEWAY_INTEGRATIONS_META_PATH = path.join(
 );
 const TITLE = "Langfuse";
 const INTRO_DESCRIPTION =
-  "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) that helps teams collaboratively debug, analyze, and iterate on their LLM applications. All platform features are natively integrated to accelerate the development workflow.";
+  "Langfuse is an **open-source AI engineering platform** ([GitHub](https://github.com/langfuse/langfuse)) for agent evals and observability. [Trace](https://langfuse.com/docs/observability/get-started.md) your agent or LLM application, evaluate it [with datasets](https://langfuse.com/docs/evaluation/get-started/offline.md) or [on production traces](https://langfuse.com/docs/evaluation/get-started/online.md), manage prompts, and route model calls through the [AI gateway](https://langfuse.com/docs/gateway/overview.md) (beta). Use [Langfuse Cloud](https://langfuse.com/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](https://langfuse.com/self-hosting.md) it.";
 // Every content section that should appear in llms.txt, in output order.
 // Each entry gets its own llms-<section>.txt sub-file. Sections present in the
 // sitemap but missing from this map are reported by warnUnlistedSections()
@@ -47,7 +47,7 @@ const SECTION_CONFIG = {
   },
   "self-hosting": {
     file: "llms-self-hosting.txt",
-    heading: "Optional: Self-Hosting",
+    heading: "Self-Hosting",
     subFileHeading: "Langfuse Self-Hosting",
     inlineTitles: true,
   },
