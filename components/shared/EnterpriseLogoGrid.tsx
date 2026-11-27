@@ -58,6 +58,18 @@ const companies: CompanyLogo[] = enterpriseLogoCompanies.map((company) => ({
   logo: logosByName[company.name],
 }));
 
+// Size correction per logo so a row reads as one size; heavy marks shrink, thin wordmarks grow.
+const opticalScale: Record<string, number> = {
+  Ramp: 1.1,
+  Canva: 1.15,
+  "Expedia Group": 0.95,
+  Pigment: 0.95,
+  "Khan Academy": 1.02,
+  "Hugging Face": 0.88,
+  Intuit: 1.15,
+  SumUp: 0.95,
+};
+
 const LogoImage = ({
   logo,
   name,
@@ -67,7 +79,10 @@ const LogoImage = ({
   name: string;
   hoverable?: boolean;
 }) => {
-  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
+  const { width, height } = wordmarkDisplaySize(
+    logo,
+    LOGO_DISPLAY_HEIGHT * (opticalScale[name] ?? 1),
+  );
 
   return (
     <Image
