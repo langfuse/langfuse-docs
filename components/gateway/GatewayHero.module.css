@@ -1,0 +1,49 @@
+/* Line field colour, edge fades and the text clearing for the /gateway hero. */
+
+.moire {
+  --gateway-moire-accent: #8f88e3;
+}
+
+:global(.dark) .moire {
+  --gateway-moire-accent: var(--callout-info);
+}
+
+.fadeVertical {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.fadeAllEdges {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 20%,
+      #000 80%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 0,
+      #000 20%,
+      #000 80%,
+      transparent 100%
+    );
+  mask-composite: intersect;
+}
+
+.clearing {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 560px 340px at 300px 50%,
+    var(--surface-bg) 45%,
+    transparent 100%
+  );
+}
