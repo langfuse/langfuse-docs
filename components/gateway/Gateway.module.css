@@ -152,3 +152,544 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* App-screen mockups in the value prop panels. */
+.screen {
+  --app-hatch: #f4f4f0;
+  --app-hatch-line: #eeeee9;
+  --app-window: #f7f7f4;
+  --app-raised: #f9f9f7;
+  --app-line: #e4e4df;
+  --app-control-line: #d7d7d1;
+  --app-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.25);
+  --app-text: var(--text-primary);
+  --app-text-soft: var(--text-secondary);
+  --app-text-muted: var(--text-tertiary);
+  --app-button: var(--text-primary);
+  --app-button-text: var(--surface-bg);
+  --app-chip: #ecece7;
+  --app-chip-revoked: #f7d9d6;
+  --app-chip-revoked-text: #b4372b;
+  --app-data: #8f88e3;
+  --app-data-soft: #dcd9f6;
+  --app-grid: #ddddd7;
+  --app-limit: #404039;
+  --app-warn: #bdbdb6;
+
+  padding: 20px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--app-hatch-line) 0 1px,
+    var(--app-hatch) 1px 7px
+  );
+  color: var(--app-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+:global(.dark) .screen {
+  --app-hatch: #121210;
+  --app-hatch-line: #1b1b18;
+  --app-window: #1c1c19;
+  --app-raised: #21211e;
+  --app-line: #2c2c29;
+  --app-control-line: #3a3a36;
+  --app-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.7);
+  --app-chip: #2e2e2a;
+  --app-chip-revoked: #4a1f1b;
+  --app-chip-revoked-text: #f0a39b;
+  --app-data: #8f88e3;
+  --app-data-soft: #3a3763;
+  --app-grid: #33332f;
+  --app-limit: #b4b4ae;
+  --app-warn: #5a5a54;
+}
+
+.appWindow {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--app-line);
+  border-radius: 8px;
+  background: var(--app-window);
+  box-shadow: var(--app-shadow);
+}
+
+.appHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 56px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--app-line);
+}
+
+.appTitle {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appTitlePrefix {
+  margin-right: 4px;
+  color: var(--app-text-muted);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.appSelect,
+.appButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 34px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.appSelect {
+  gap: 8px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--app-control-line);
+  background: var(--app-raised);
+  color: var(--app-text-soft);
+}
+
+.appSelect svg {
+  width: 14px;
+  height: 14px;
+  color: var(--app-text-muted);
+}
+
+.appButton {
+  gap: 6px;
+  padding: 0 12px;
+  background: var(--app-button);
+  color: var(--app-button-text);
+  font-weight: 500;
+}
+
+.appButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+.appBody {
+  display: flex;
+  flex-direction: column;
+  height: 560px;
+  overflow: hidden;
+}
+
+.appBody > * {
+  flex: none;
+}
+
+.appBody > * + * {
+  border-top: 1px solid var(--app-line);
+}
+
+/* The last block gives up height, so its list fades out at the window edge. */
+.appBody > :last-child {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.appStats {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+}
+
+.appStat {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 18px 20px;
+}
+
+.appStat + .appStat {
+  border-left: 1px solid var(--app-line);
+}
+
+.appStatLabel {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  text-wrap: balance;
+}
+
+.appStatValue {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 30px;
+}
+
+.appSection {
+  padding: 18px 20px 14px;
+}
+
+.appSectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.appSectionTitle {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.appSectionNote {
+  color: var(--app-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.appChip {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--app-chip);
+  color: var(--app-text-soft);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.appHeader > .appChip {
+  flex: none;
+}
+
+.appChipRevoked {
+  background: var(--app-chip-revoked);
+  color: var(--app-chip-revoked-text);
+}
+
+.appFade {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+/* Rows share the table's column tracks. */
+.appTable {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  column-gap: 16px;
+  border: 1px solid var(--app-line);
+  border-radius: 6px;
+  background: var(--app-raised);
+}
+
+.appRow {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  min-width: 0;
+  height: 52px;
+  padding: 0 16px;
+  border-top: 1px solid var(--app-line);
+}
+
+.appRow > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appRowHead {
+  height: 44px;
+  border-top: 0;
+  color: var(--app-text-muted);
+}
+
+.appCellEnd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.appBars {
+  --bar-reserve: 68px;
+
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 12px;
+  align-items: center;
+}
+
+.appBarsWide {
+  --bar-reserve: 124px;
+}
+
+.appBarTrack {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.appBar {
+  flex: none;
+  min-width: 2px;
+  height: 26px;
+  border-radius: 2px;
+  background: var(--app-data-soft);
+}
+
+.appBarStrong {
+  background: var(--app-data);
+}
+
+.appBarValue {
+  white-space: nowrap;
+}
+
+/* SVG marks stretch with the plot; labels and dots are HTML and keep their size. */
+.appChart {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  line-height: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.appChartY {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.appChartY span {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 0;
+  white-space: nowrap;
+}
+
+.appChartPlot {
+  position: relative;
+  min-width: 0;
+}
+
+.appChartPlot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.appChartX {
+  position: relative;
+  grid-column: 2;
+  height: 14px;
+  margin-top: 8px;
+}
+
+.appChartX span,
+.appChartNote {
+  position: absolute;
+  white-space: nowrap;
+}
+
+/* Notes sit on the window colour so gridlines do not run through them. */
+.appChartNote {
+  margin: 0 -3px;
+  padding: 0 3px;
+  background: var(--app-window);
+  color: var(--app-text-soft);
+}
+
+.appGridLine,
+.appLimitLine,
+.appWarnLine,
+.appLine {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+
+.appGridLine {
+  stroke: var(--app-grid);
+  stroke-width: 1px;
+  stroke-dasharray: 3 4;
+}
+
+.appLimitLine {
+  stroke: var(--app-limit);
+  stroke-width: 1.2px;
+  stroke-dasharray: 5 4;
+}
+
+.appWarnLine {
+  stroke: var(--app-warn);
+  stroke-width: 1.5px;
+  stroke-dasharray: 0.01 5;
+  stroke-linecap: round;
+}
+
+.appLine {
+  stroke: var(--app-data);
+  stroke-width: 1.8px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.appBarMark {
+  fill: var(--app-data);
+}
+
+.appDot {
+  position: absolute;
+  box-sizing: border-box;
+  width: 8.7px;
+  height: 8.7px;
+  margin: -4.35px 0 0 -4.35px;
+  border: 1.5px solid var(--app-data);
+  border-radius: 50%;
+  background: var(--app-window);
+}
+
+.appDotFilled {
+  background: var(--app-data);
+}
+
+/* Stacked table rows: the middle cell drops to a second line. */
+@container panel (max-width: 559px) {
+  .appTable {
+    column-gap: 8px;
+  }
+
+  .appTableKeys {
+    display: block;
+  }
+
+  .appTableKeys .appRow {
+    grid-template: "name end" auto "detail detail" auto / minmax(0, 1fr) auto;
+    gap: 2px 8px;
+    height: auto;
+    padding: 8px 16px;
+  }
+
+  .appTableKeys .appRow > :nth-child(1) {
+    grid-area: name;
+  }
+
+  .appTableKeys .appRow > :nth-child(2) {
+    grid-area: detail;
+  }
+
+  .appTableKeys .appRow > :nth-child(3) {
+    grid-area: end;
+  }
+
+  .appTableKeys .appRowHead > :nth-child(2) {
+    display: none;
+  }
+}
+
+/* Small panels: tighter gutters. */
+@container panel (max-width: 379px) {
+  .screen {
+    padding: 12px;
+  }
+
+  .appHeader {
+    padding: 0 14px;
+  }
+
+  .appTitlePrefix {
+    display: block;
+    margin: 0 0 -3px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .appStat {
+    padding: 16px 14px;
+  }
+
+  .appStatValue {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .appSection {
+    padding: 16px 14px 12px;
+  }
+}
+
+/* Phones: every table stacks its rows. */
+@container panel (max-width: 359px) {
+  .appTable {
+    display: block;
+  }
+
+  .appTable .appRow {
+    grid-template: "name end" auto "detail detail" auto / minmax(0, 1fr) auto;
+    gap: 2px 8px;
+    height: auto;
+    padding: 8px 12px;
+  }
+
+  .appTable .appRow > :nth-child(1) {
+    grid-area: name;
+  }
+
+  .appTable .appRow > :nth-child(2) {
+    grid-area: detail;
+  }
+
+  .appTable .appRow > :nth-child(3) {
+    grid-area: end;
+  }
+
+  .appTable .appRowHead > :nth-child(2) {
+    display: none;
+  }
+}
+
+/* Smallest phones: minimal gutters. */
+@container panel (max-width: 309px) {
+  .screen {
+    padding: 8px;
+  }
+
+  .appHeader {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
+  .appStat {
+    padding: 14px 12px;
+  }
+
+  .appSection {
+    padding: 16px 12px 12px;
+  }
+
+  .appTable .appRow {
+    padding: 8px 10px;
+  }
+}
