@@ -1,7 +1,7 @@
 ---
 date: 2026-11-27
 title: Block and redact PII and secrets with AI Gateway guardrails
-description: Configure built-in guardrails on the Langfuse AI Gateway to block, redact, or log PII, secrets, prompt injection patterns, keywords, and custom regexes across requests and responses.
+description: Add guardrails to the Langfuse AI Gateway to block, redact, or log PII, secrets, prompt injection, and custom patterns across requests and responses.
 author: Tobias Wochinger
 ogImage: /images/docs/ai-gateway/guardrails.png
 ---
@@ -13,9 +13,9 @@ import { Book, KeyRound, ShieldCheck } from "lucide-react";
 
 You can now add [guardrails](/docs/gateway/features/guardrails) to the [Langfuse AI Gateway](/docs/gateway/overview) to block, redact, or log sensitive content in both requests and model responses under **AI Gateway → Guardrails**.
 
-- **Detect PII, secrets, prompt injection, keywords, and custom regex:** Match PII (emails, SSNs, tax IDs, phone numbers, cards, IBANs, IPs), API keys and database URLs (plus custom prefixes), heuristic prompt injection and hidden Unicode patterns (defaulting to **Log**), word lists, or custom Rust regexes, with live match previews.
-- **Block, redact, or log both directions:** Reject matching traffic with `400`, replace matched text with a label such as `[REDACTED]` before forwarding or returning (and before `FULL` trace capture), or log matches for monitoring.
-- **Choose scope and targets:** Run each rule on the latest turn, the entire request history, model responses (including streamed SSE outputs), or both sides, and assign it to everyone or to specific users and API keys.
+- **Built-in and external detection:** Match PII, secrets, prompt injection, and custom patterns out of the box, or connect an existing [Amazon Bedrock guardrail](/docs/gateway/features/guardrails#amazon-bedrock).
+- **Block, redact, or log inputs and outputs:** Reject matching traffic, replace sensitive text with a label such as `[REDACTED]` before forwarding or returning (and before `FULL` trace capture), or log matches for monitoring.
+- **Fine-grained targeting:** Apply guardrails to your entire organization or to specific users and API keys, scoped to the latest turn, full input, model output, or both.
 
 <Cards num={3}>
   <Card
