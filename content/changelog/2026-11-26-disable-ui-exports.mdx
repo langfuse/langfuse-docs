@@ -1,0 +1,27 @@
+---
+date: 2026-11-26
+title: Disable exports from the UI
+description: Organization admins can disable UI-based data exports and downloads, and self-hosted instances can disable them for every organization.
+author: Marc
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now disable all UI-based data exports and downloads for an organization. While disabled, Langfuse blocks batch exports from tables (and downloads in **Project settings** → **Exports**), single trace and session JSON downloads, field downloads, prompt exports, and dashboard CSV downloads. The public API, SDKs, Metrics API, and scheduled blob storage exports are not affected.
+
+**How to disable UI exports**
+
+- Go to **Organization settings** → **General** to disable exports from the UI.
+- On self-hosted instances, set `LANGFUSE_DISABLE_UI_EXPORTS=true` on the web container to disable UI exports for every organization and lock the organization toggle.
+
+<Cards num={1}>
+  <Card
+    title="Disable exports from the UI"
+    href="/docs/api-and-data-platform/features/export-from-ui#disable-ui-exports"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

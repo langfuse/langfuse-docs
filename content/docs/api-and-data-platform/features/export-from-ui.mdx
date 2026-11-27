@@ -32,3 +32,29 @@ You can also export data via:
 - [Blob Storage](/docs/api-and-data-platform/features/export-to-blob-storage) - Scheduled automated exports to cloud storage
 - [SDKs/API](/docs/api-and-data-platform/features/public-api) - Programmatic access using Langfuse SDKs or API
 - [Metrics API](/docs/metrics/features/metrics-api) - Query aggregated metrics (cost, token usage, scores) for use in external BI tools
+
+## Disable exports from the UI [#disable-ui-exports]
+
+<AvailabilityBanner
+  availability={{
+    hobby: "not-available",
+    core: "not-available",
+    pro: "team-add-on",
+    enterprise: "full",
+    selfHosted: "ee",
+  }}
+/>
+
+Organization owners and admins can disable exports from the UI in **Organization settings** → **General**. Re-enabling UI exports works on any plan.
+
+While UI exports are disabled, Langfuse blocks all browser-based downloads in the organization:
+
+- Batch exports from tables (traces, observations, sessions, scores, datasets, experiments, and audit logs) and their downloads in **Project settings** → **Exports**
+- Single trace and session JSON downloads
+- Field downloads
+- Prompt exports
+- Dashboard CSV downloads
+
+The [public API](/docs/api-and-data-platform/features/public-api), [SDKs](/docs/api-and-data-platform/features/query-via-sdk), [Metrics API](/docs/metrics/features/metrics-api), and scheduled [blob storage exports](/docs/api-and-data-platform/features/export-to-blob-storage) are not affected.
+
+Self-hosted instances can disable UI exports for every organization and lock the organization toggle with [`LANGFUSE_DISABLE_UI_EXPORTS`](/self-hosting/administration/ui-customization#ui-exports).
