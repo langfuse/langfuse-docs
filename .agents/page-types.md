@@ -28,7 +28,7 @@ Give each major concept a diagram or a table, and answer the questions a newcome
 
 1. one or two sentences on what the feature does, who can use it, and where to find it in the UI
 2. a screenshot or screen recording of the feature in a `<Frame>` or `<Video>`
-3. how to set up/get started with the feature
+3. how to set up/get started with the feature, preceded by anything readers need to decide whether to use this or another adjacent langfuse feature (optional)
 4. any other sections that are important enough are below this. These sections are ordered in terms of how often users need it. If all users need something, it should be higher up, edge cases and advanced features (only a small subgroup needs this) are lower
 5. Troubleshooting and FAQ are always at the bottom. When adding a section, always consider if it's important enough to have it featured on the main docs page, or if it could be linked in a troubleshooting/faq page
 

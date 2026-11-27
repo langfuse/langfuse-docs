@@ -140,7 +140,7 @@ These rules cover pages in `content/docs/`, integration guides in `content/integ
 - **Self-hosting details** do not belong at the top of a product docs page (`content/docs/`) or as a dedicated `content/self-hosting/configuration/` page when a feature needs no separate infrastructure. Keep infrastructure setup and troubleshooting in existing `content/self-hosting/` pages or `content/faq/all/` (tagged `self-hosting`). On a product page, if self-hosters really need to know something, put it in a callout below the page intro; if it is minimal (such as a minimum version), put it in a closing FAQ entry instead.
 
 - Before you add or restructure a page, open one or more equivalent pages in an established product area, such as `content/docs/observability/` or `content/docs/evaluation/`, and match their structure, components, and sidebar position. When a product area has these pages, keep this sidebar order: Overview, Get started, Concepts, Features, Integrations, Troubleshooting and FAQ.
-- each docs fact has 1 home (source of truth), if the fact is relevant on other pages, these pages link to that source of truth instead of replicating the content.
+- each docs fact has 1 home (source of truth), if the fact is relevant on other pages, these pages link to that source of truth instead of replicating the content. When the fact matters equally on several pages and no single page owns it, keep it in one shared component that each page embeds.
 
 Once you decide what type of page the content should be on, always read the section about that page type in [Page type structure and content](page-types.md). It's imperative that you judge your change/addition with this context in mind.
 
