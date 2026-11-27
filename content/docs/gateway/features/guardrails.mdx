@@ -46,13 +46,13 @@ When multiple guardrails apply, all of them evaluate; **Block** takes precedence
 
 Choose what each guardrail inspects under **Runs on**:
 
-| Scope                     | Evaluated text                                                                                  | Allowed with **Block** |
-| ------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------- |
-| **Last turn** (default)   | Latest user turn and tool outputs since the last model reply (system prompts on the first turn) | Yes                    |
-| **Entire input**          | All messages and system prompts in the request, including conversation history                  | No                     |
-| **Output**                | Provider responses before returning them to the client                                          | Yes                    |
-| **Last turn & output**    | Latest user turn and tool outputs, plus provider responses                                      | Yes                    |
-| **Entire input & output** | All messages and system prompts in the request, plus provider responses                         | No                     |
+| Scope                     | Evaluated text                                                                                  |
+| ------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Last turn** (default)   | Latest user turn and tool outputs since the last model reply (system prompts on the first turn) |
+| **Entire input**          | All messages and system prompts in the request, including conversation history                  |
+| **Output**                | Provider responses before returning them to the client                                          |
+| **Last turn & output**    | Latest user turn and tool outputs, plus provider responses                                      |
+| **Entire input & output** | All messages and system prompts in the request, plus provider responses                         |
 
 **Block** only needs **Last turn** on input because every turn is checked before reaching the provider — nothing blocked is sent, so earlier turns have already passed and checking full history would permanently lock existing conversations. Use **Entire input** (or **Entire input & output**) for **Redact** rules so earlier turns aren't resent to the provider unredacted.
 
