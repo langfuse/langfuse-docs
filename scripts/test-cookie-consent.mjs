@@ -1377,7 +1377,8 @@ test("RootLayout renders Consent Mode defaults before CookieYes in <head> in pro
       headScripts[1].props.src,
       "https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js",
     );
-    assert.equal(headScripts[1].props.defer, true);
+    assert.equal(headScripts[1].props.defer, undefined);
+    assert.equal(headScripts[1].props.async, undefined);
 
     // Execute the inline consent-defaults script in an isolated browser-like global
     const sandbox = {};

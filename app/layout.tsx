@@ -107,7 +107,6 @@ gtag('set', 'url_passthrough', true);`,
               id="cookieyes"
               type="text/javascript"
               src="https://cdn-cookieyes.com/client_data/40247147630c6589ad01a874/script.js"
-              defer
             />
           </>
         )}
