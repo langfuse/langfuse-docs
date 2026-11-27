@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { customerLogoNames } from "@/components/gateway/content";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Button } from "@/components/ui/button";
@@ -52,12 +52,48 @@ function HeroCopy() {
   );
 }
 
+// How far the hero may grow or shrink to end on a sidebar line.
+const SEAM_REACH = 24;
+
+/**
+ * Ends the hero on the nearest edge between two left sidebar panels, so the
+ * logo band's top line continues that line when the page is at the top.
+ */
+function useSidebarSeam(ref: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const hero = ref.current;
+    if (!hero) return;
+    const align = () => {
+      hero.style.height = "";
+      const { left, height } = hero.getBoundingClientRect();
+      // Measured from the sidebar's own top, so page scroll does not matter.
+      const offsets = Array.from(document.querySelectorAll("aside nav > *"))
+        .map((panel) => {
+          const aside = panel.closest("aside")!.getBoundingClientRect();
+          const nav = panel.parentElement!;
+          const { bottom, width } = panel.getBoundingClientRect();
+          if (width === 0 || aside.right > left + 1) return Infinity;
+          // Each panel wrapper draws its line as its bottom pixel.
+          // Not rounded: the sidebar's lines sit on fractions of a pixel.
+          return bottom - 1 - aside.top + nav.scrollTop - height;
+        })
+        .filter((offset) => Math.abs(offset) <= SEAM_REACH)
+        .sort((a, b) => Math.abs(a) - Math.abs(b));
+      if (offsets.length) hero.style.height = `${height + offsets[0]}px`;
+    };
+    align();
+    window.addEventListener("resize", align);
+    return () => window.removeEventListener("resize", align);
+  }, [ref]);
+}
+
 // Cancels the page column padding so the hero runs edge to edge under the nav.
 const BLEED = "not-prose -mx-4 -mt-4 sm:-mx-6 md:-mx-8 md:-mt-8";
 
 /** Full-bleed hero above the page panel: the line field behind the copy. */
 export function GatewayHero() {
   const heroRef = useRef<HTMLElement>(null);
+  useSidebarSeam(heroRef);
 
   return (
     <section
