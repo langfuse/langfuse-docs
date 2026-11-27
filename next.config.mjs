@@ -53,6 +53,8 @@ const cspHeader =
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Keep local previews interactive when the dev server binds to 0.0.0.0.
+  allowedDevOrigins: ["127.0.0.1"],
   // Enable static export when STATIC_EXPORT env var is set
   ...(process.env.STATIC_EXPORT === "true" && {
     output: "export",
