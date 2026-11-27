@@ -82,9 +82,17 @@ def querit_search(query: str, count: int = 5, chunks_per_doc: int = 1,
         raise RuntimeError("Querit search returned invalid JSON") from None
     if not isinstance(data, dict) or data.get("error_code") != 200:
         raise RuntimeError("Querit search returned an API error")
-    results = data.get("results", {}).get("result")
+    search_results = data.get("results")
+    if not isinstance(search_results, dict):
+        raise RuntimeError("Querit search returned an invalid results object")
+    results = search_results.get("result")
     if not isinstance(results, list):
         raise RuntimeError("Querit search returned an invalid result list")
+    for result in results:
+        if not isinstance(result, dict) or not all(
+            isinstance(result.get(field), str) for field in ("title", "url")
+        ):
+            raise RuntimeError("Querit search returned an invalid search result")
     langfuse.update_current_span(metadata={
         "actual_count": len(results),
         "search_id": str(data.get("search_id", "")),
