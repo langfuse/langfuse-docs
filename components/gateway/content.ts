@@ -10,7 +10,11 @@ export type ProviderIcon = {
 };
 
 export const heroProviders: ProviderIcon[] = [
-  { name: "Anthropic", icon: "/images/integrations/anthropic_icon.png" },
+  {
+    name: "Anthropic",
+    icon: "/images/integrations/anthropic_icon.png",
+    monochrome: true,
+  },
   {
     name: "OpenAI",
     icon: "/images/integrations/openai_icon.svg",
@@ -50,8 +54,6 @@ export const customerLogoNames = [
 export type ValueProp = {
   title: string;
   body: string;
-  /** UI path shown in the product panel title bar. */
-  crumb: string;
   panel: "spend" | "budgets" | "models" | "trace";
   features: { label: string; text: string }[];
 };
@@ -60,7 +62,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "See all spend",
     body: "Know what AI costs and who’s spending it.",
-    crumb: "AI Gateway → Overview → Analytics",
     panel: "spend",
     features: [
       {
@@ -76,7 +77,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "Cap model costs",
     body: "Set budgets and enforce limits across the organization.",
-    crumb: "AI Gateway → Budgets",
     panel: "budgets",
     features: [
       {
@@ -92,7 +92,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "Control access",
     body: "Allow or block models centrally or individually.",
-    crumb: "AI Gateway → Connections & Models",
     panel: "models",
     features: [
       {
@@ -108,7 +107,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "Improve AI usage",
     body: "See what AI is used for and improve it.",
-    crumb: "Tracing → Sessions",
     panel: "trace",
     features: [
       {
@@ -125,85 +123,118 @@ export const valueProps: ValueProp[] = [
 
 // Mock data for the product panels. Names, models and amounts are invented.
 export const spendStats = [
-  { label: "Total cost", value: "$18,204" },
-  { label: "Requests", value: "1.24M" },
-  { label: "Tokens", value: "9.8B" },
+  { label: "Total cost", value: "$1,366.92" },
+  { label: "Requests", value: "19.23K" },
 ];
 
-export const spendBars = Array.from({ length: 30 }, (_, i) => {
-  const v = 28 + 22 * Math.abs(Math.sin(i * 0.9)) + i * 1.1;
-  return { a: Math.round(v * 0.35), b: Math.round(v * 0.65) };
-});
+// Daily cost in dollars, Oct 5 to Nov 2.
+export const spendBars = [
+  59, 38, 50, 68, 58, 8, 0, 73, 81, 60, 80, 64, 1, 1, 53, 63, 40, 54, 78, 16, 0,
+  80, 56, 68, 70, 72, 14, 14, 24,
+];
+
+export const spendBarLabels = [
+  { text: "Oct 5", index: 0 },
+  { text: "Oct 15", index: 10 },
+  { text: "Oct 25", index: 20 },
+  { text: "Nov 2", index: 28 },
+];
 
 export const topModels = [
-  { name: "claude-opus", pct: 92, cost: "$8,410" },
-  { name: "gpt-codex", pct: 58, cost: "$5,302" },
-  { name: "claude-sonnet", pct: 34, cost: "$3,118" },
+  { name: "claude-sonnet", cost: 452.02 },
+  { name: "claude-opus", cost: 434.49 },
+  { name: "gpt-5.6", cost: 300.76 },
+  { name: "gpt-5.3-codex", cost: 85.5 },
+  { name: "gpt-5.6-terra", cost: 72.14 },
 ];
+
+// One team's daily spend from Nov 1 to Nov 27, in relative units.
+export const budgetChart = {
+  team: "support",
+  spent: 2340,
+  budget: 2500,
+  warnAt: 0.85,
+  daily: [
+    62, 48, 95, 110, 104, 30, 22, 96, 118, 101, 92, 88, 26, 18, 99, 112, 124,
+    97, 90, 24, 20, 104, 131, 120, 95, 30, 61,
+  ],
+};
 
 export const budgetRows = [
-  { team: "platform", cc: "4711", pct: 78, label: "$3,900 / $5,000" },
-  { team: "support", cc: "5102", pct: 94, label: "$2,340 / $2,500" },
-  { team: "growth", cc: "4720", pct: 49, label: "$986 / $2,000" },
-  { team: "data", cc: "4802", pct: 20, label: "$305 / $1,500" },
+  { team: "support", spent: 2340, budget: 2500, highlight: true },
+  { team: "platform", spent: 3900, budget: 5000 },
+  { team: "growth", spent: 986, budget: 2000 },
+  { team: "data", spent: 305, budget: 1500 },
 ];
 
-export const connections = [
+export const keyStats = [
+  { label: "Active keys", value: "46" },
+  { label: "Shared provider keys", value: "0" },
+];
+
+export const gatewayKeys = [
+  { name: "Priya – Claude Code", models: "anthropic-prod:*", revoked: false },
   {
-    name: "anthropic-prod",
-    provider: "Anthropic",
-    models: [
-      { name: "claude-opus", on: true },
-      { name: "claude-sonnet", on: true },
-      { name: "claude-haiku", on: false },
-    ],
+    name: "support-bot",
+    models: "anthropic-prod:claude-haiku*",
+    revoked: false,
   },
   {
-    name: "openai-prod",
-    provider: "OpenAI",
-    models: [
-      { name: "gpt-5", on: true },
-      { name: "gpt-codex", on: true },
-      { name: "gpt-pro", on: false },
-    ],
+    name: "Amara – agents",
+    models: "anthropic-prod:claude-sonnet*",
+    revoked: false,
+  },
+  { name: "ci-release", models: "openai-prod:gpt-5*", revoked: false },
+  { name: "Lukas – Claude Code", models: "anthropic-prod:*", revoked: true },
+  {
+    name: "contractor-q4",
+    models: "anthropic-prod:claude-sonnet*",
+    revoked: true,
   },
 ];
 
-export const sessionSpans = [
-  { name: "refactor billing export", cost: "$1.92", child: false },
-  { name: "claude-opus", cost: "$0.42", child: true, selected: true },
-  { name: "claude-opus", cost: "$0.38", child: true },
-  { name: "claude-sonnet", cost: "$0.11", child: true },
-  { name: "claude-opus", cost: "$0.61", child: true },
-  { name: "claude-opus", cost: "$0.40", child: true },
-];
-
-export const spanDetails = [
-  { k: "in", v: "18.4k" },
-  { k: "out", v: "1.2k" },
-  { k: "cached", v: "14.9k" },
-  { k: "cost", v: "$0.42" },
-  { k: "latency", v: "6.8s" },
-  { k: "ttft", v: "0.9s" },
-  { k: "user", v: "anna" },
-  { k: "key", v: "anna-laptop" },
-];
-
-export type SketchRow = {
-  label: string;
-  value?: string;
-  tone?: "ok" | "warn" | "error";
-  toggle?: boolean;
+export const session = {
+  name: "refactor-billing-export",
+  user: "anna",
+  // Cost of each model call in dollars, in order.
+  calls: [0.42, 0.06, 0.38, 0.04, 0.61, 0.4, 0.01, 0.22, 0.05, 0.31],
+  rows: [
+    { name: "fix-failing-test", model: "claude-opus", cost: "$0.61" },
+    { name: "plan-changes", model: "claude-opus", cost: "$0.42" },
+    { name: "summarize-diff", model: "claude-opus", cost: "$0.40" },
+    { name: "edit-export.ts", model: "claude-opus", cost: "$0.38" },
+    { name: "read-files", model: "claude-sonnet", cost: "$0.06" },
+  ],
 };
+
+export type SketchTone = "ok" | "warn" | "error";
+
+// What each feature-card drawing shows; the layout lives in GatewayFeatureSketch.
+export type FeatureSketch =
+  | {
+      kind: "keys";
+      group: string;
+      heading: string;
+      rows: { label: string; value: string; tone?: SketchTone }[];
+    }
+  | {
+      kind: "budget";
+      label: string;
+      usedPercent: number;
+      warnAtPercent: [number, number];
+      warning: string;
+    }
+  | { kind: "spend"; points: number[]; highlight: number; tag: string[] }
+  | { kind: "models"; rows: { label: string; on: boolean }[] }
+  | { kind: "agents"; agents: string[]; result: string }
+  | { kind: "tracing"; spans: { label: string; cost: string }[] }
+  | { kind: "hosting"; options: { label: string; detail: string }[] };
 
 export type FeatureCard = {
   title: string;
   description: string;
   href: string;
-  sketch:
-    | { kind: "rows"; rows: SketchRow[] }
-    | { kind: "budget" }
-    | { kind: "bars" };
+  sketch: FeatureSketch;
 };
 
 export const providerCard = {
@@ -211,6 +242,7 @@ export const providerCard = {
   description:
     "Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Change one URL to switch over.",
   href: "/docs/gateway/features/models#supported-providers",
+  hub: "AI Gateway",
   chips: [
     "OpenAI",
     "Anthropic",
@@ -231,7 +263,9 @@ export const featureCardsTop: FeatureCard[] = [
       "Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.",
     href: "/docs/gateway/features/api-keys",
     sketch: {
-      kind: "rows",
+      kind: "keys",
+      group: "platform",
+      heading: "Gateway keys",
       rows: [
         { label: "maria", value: "active", tone: "ok" },
         { label: "ci-release", value: "service" },
@@ -244,14 +278,25 @@ export const featureCardsTop: FeatureCard[] = [
     description:
       "Per key, per user, a default for everyone, or for the whole organization. Email warnings at 85%, 95% and 100%.",
     href: "/docs/gateway/features/budgets",
-    sketch: { kind: "budget" },
+    sketch: {
+      kind: "budget",
+      label: "platform",
+      usedPercent: 86,
+      warnAtPercent: [85, 95],
+      warning: "warning",
+    },
   },
   {
     title: "Spend dashboard",
     description:
       "Spend by model, provider, user and key, with alerts on cost or request count and export to your data lake.",
     href: "/docs/gateway/features/analytics",
-    sketch: { kind: "bars" },
+    sketch: {
+      kind: "spend",
+      points: [30, 42, 36, 55, 48, 66, 60, 78, 72, 90, 84, 100],
+      highlight: 9,
+      tag: ["30d cost", "$18,204"],
+    },
   },
 ];
 
@@ -262,11 +307,11 @@ export const featureCardsBottom: FeatureCard[] = [
       "Turn models on or off per provider connection and limit each gateway key to certain models.",
     href: "/docs/gateway/features/models",
     sketch: {
-      kind: "rows",
+      kind: "models",
       rows: [
-        { label: "openai:*", toggle: true },
-        { label: "anthropic:*", toggle: true },
-        { label: "openrouter:*", toggle: false },
+        { label: "openai:*", on: true },
+        { label: "anthropic:*", on: true },
+        { label: "openrouter:*", on: false },
       ],
     },
   },
@@ -276,12 +321,9 @@ export const featureCardsBottom: FeatureCard[] = [
       "Point Claude Code, Codex and other coding agents at the gateway. Their sessions are grouped automatically.",
     href: "/docs/gateway/get-started/first-request",
     sketch: {
-      kind: "rows",
-      rows: [
-        { label: "claude-code", value: "traced", tone: "ok" },
-        { label: "codex", value: "traced" },
-        { label: "opencode", value: "traced" },
-      ],
+      kind: "agents",
+      agents: ["claude-code", "codex", "opencode"],
+      result: "traced",
     },
   },
   {
@@ -290,11 +332,11 @@ export const featureCardsBottom: FeatureCard[] = [
       "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
     href: "/docs/gateway/features/tracing",
     sketch: {
-      kind: "rows",
-      rows: [
-        { label: "opus", value: "$0.42" },
-        { label: "sonnet", value: "$0.11" },
-        { label: "gpt-5", value: "$0.08" },
+      kind: "tracing",
+      spans: [
+        { label: "opus", cost: "$4.2k" },
+        { label: "sonnet", cost: "$1.1k" },
+        { label: "gpt-5", cost: "$0.8k" },
       ],
     },
   },
@@ -304,10 +346,10 @@ export const featureCardsBottom: FeatureCard[] = [
       "Self-host the gateway as a single small Docker image, or use it on Langfuse Cloud.",
     href: "/self-hosting/configuration/ai-gateway",
     sketch: {
-      kind: "rows",
-      rows: [
-        { label: "Cloud", value: "managed" },
-        { label: "Self-hosted", value: "Docker" },
+      kind: "hosting",
+      options: [
+        { label: "Cloud", detail: "managed" },
+        { label: "Self-hosted", detail: "Docker" },
       ],
     },
   },
