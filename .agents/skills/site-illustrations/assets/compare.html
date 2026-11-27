@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Compare drawings</title>
+    <!-- Side-by-side page for a review. Copy it next to your pictures and open it with a query string:
+           compare.html?title=Rate%20limits&img=Original|evaluation.png&img=New|card.png
+         Every picture must be at one plane unit per pixel: an export from components/home/img/tools,
+         or a screenshot taken at device scale 1.6667. Then they all show at the same scale.
+           k=0.6    CSS px per picture pixel. 0.6 is the size on the site (default); 1.8 is 3x.
+           bg=dark  for screenshots of the dark theme. -->
+    <style>
+      body { margin: 0; padding: 32px; background: #f6f6f3; color: #222220; font: 13px/1.4 system-ui, sans-serif; }
+      body.dark { background: #171714; color: #e8e8e4; }
+      h1 { margin: 0 0 24px; font-size: 15px; font-weight: 500; }
+      #row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; }
+      figure { margin: 0; }
+      figcaption { margin-bottom: 8px; font: 12px/1 ui-monospace, monospace; color: #6b6b66; }
+      img { display: block; border: 1px solid #cfcfc9; }
+      body.dark img { border-color: #2c2c29; }
+    </style>
+  </head>
+  <body>
+    <h1></h1>
+    <div id="row"></div>
+    <script>
+      const query = new URLSearchParams(location.search), k = Number(query.get("k")) || 0.6;
+      const title = query.get("title") || "Compare drawings";
+      document.title = title;
+      document.querySelector("h1").textContent = `${title}, ${k} px per unit`;
+      if (query.get("bg") === "dark") document.body.classList.add("dark");
+      for (const item of query.getAll("img")) {
+        const cut = item.indexOf("|"), figure = document.createElement("figure"), img = new Image();
+        figure.innerHTML = "<figcaption></figcaption>";
+        figure.firstChild.textContent = item.slice(0, cut);
+        img.onload = () => { img.style.width = `${img.naturalWidth * k}px`; };
+        if (k > 1) img.style.imageRendering = "pixelated";
+        img.src = item.slice(cut + 1);
+        figure.append(img);
+        document.querySelector("#row").append(figure);
+      }
+    </script>
+  </body>
+</html>

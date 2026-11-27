@@ -1,0 +1,26 @@
+{
+  "skill_name": "site-illustrations",
+  "evals": [
+    {
+      "id": 0,
+      "name": "tilted-new-card",
+      "prompt": "Add a feature card \"Rate limits\" to the gateway page mock: requests per minute per gateway key, with one key over its limit. Rows: maria 42 / 60, ci-release 60 / 60 (over the limit), alex 8 / 60. Draw it in the same style as the other cards and show me the mock.",
+      "expected_output": "A copy of assets/tilted-mock.html with a new scene built only from kit calls (block, row, branch, put, bracket), laid out flat in plane units on the 36 grid. One raised button, rows that hug their content with the value after the label, one accent colour for the key over its limit, nothing added that is not in the prompt. measure.py check on a 1.6667-scale screenshot of the card alone prints RESULT: all pass. The reply quotes that output, shows the card next to an original at the same scale, lists any choice the copy did not settle, and names what was not checked.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "flat-redraw-academy-diagram",
+      "prompt": "Redraw components/academy/ErrorAnalysisProcessDiagram.tsx so it matches the diagrams on the homepage. Keep all of its copy.",
+      "expected_output": "A React diagram on a CSS grid: CornerBox panels with square corners and bracket corners, 1 px line-cta connectors at right angles ending in filled 8 px triangles (HArrow, VArrow, ArrowHead), MonoLabel captions at 10 px, at most one yellow accent as a Highlight band or small tag, no shadows, no curves, no dashed lines, no hex colours. A separate compact layout below md. Every label of the old diagram is still present, in its own case. Screenshots at 1440 and 375 px, light and dark. The reply shows before and after at the same scale, lists which of the ten flat-spec rules were checked, and names every choice from the spec's 'What the homepage originals do not settle' section as open.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "tilted-review",
+      "prompt": "Review this mock of a tilted card drawing before I show it to design: the button has a dark line on every edge, its shadow sits down and to the left, the labels are straight (only rotated) in the medium weight, and the two options are drawn as a button with the second option hanging under it.",
+      "expected_output": "Four findings, each tied to a rule in references/tilted-rules.md: outline on the silhouette only (rule 3), shadow straight below and about 6% (rule 4), text on the plane in the regular weight (rules 2 and 5), equal options as one slab (rule 10). Each finding says how to check it (measure.py check, a 7x crop of letter stems). No invented rules.",
+      "files": []
+    }
+  ]
+}
