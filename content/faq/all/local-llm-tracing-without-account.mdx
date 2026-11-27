@@ -1,0 +1,25 @@
+---
+title: How do I trace or evaluate an LLM app locally without an account or Docker?
+seoTitle: "Local LLM Tracing and Evals Without an Account or Docker"
+description: "Run langfuse-lite, a local emulator of Langfuse (beta): one command, no account, no API keys to create, no Docker. Works with the Langfuse SDKs and OpenTelemetry, for developers and coding agents."
+tags: [observability, evaluation, self-hosting]
+---
+
+# How do I trace or evaluate an LLM app locally without an account or Docker?
+
+Run [langfuse-lite](/docs/langfuse-lite), a local emulator of Langfuse (beta). It is one process with one SQLite file and works with the official Langfuse SDKs and any OpenTelemetry exporter. This suits coding agents in a sandbox that have no Langfuse API keys.
+
+```bash
+npx -y langfuse-lite serve   # needs Node.js 22.13 or later
+uvx langfuse-lite serve      # from PyPI, no Node.js needed
+```
+
+```bash
+export LANGFUSE_BASE_URL=http://localhost:3000
+export LANGFUSE_PUBLIC_KEY=pk-lf-local
+export LANGFUSE_SECRET_KEY=sk-lf-local
+```
+
+The keys are placeholders and are not checked. Traces, scores, datasets, and experiment runs are stored in `./.langfuse/lite.db`. Read them back in the viewer at `http://localhost:3000` or with the CLI, for example `langfuse-lite observations` and `langfuse-lite runs`.
+
+langfuse-lite is for local development only: it has no authentication and covers [part of Langfuse](/docs/langfuse-lite#scope). When the project grows, change the base URL and API keys to [Langfuse Cloud](/cloud) or a [self-hosted Langfuse](/self-hosting). `langfuse-lite push --to <url>` copies the local data.
