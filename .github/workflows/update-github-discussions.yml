@@ -61,7 +61,7 @@ jobs:
           out="$RUNNER_TEMP/generated"
           mkdir -p "$out"
           cp data/generated/contributors.json src/github-stars.ts src/langfuse_github_discussions.json public/github-discussions-sitemap.xml "$out/"
-          cat public/llms.txt public/llms-docs.txt public/llms-integrations.txt public/llms-self-hosting.txt > "$out/llms-combined.txt"
+          cat public/llms-docs.txt public/llms-integrations.txt public/llms-self-hosting.txt > "$out/llms-pages.txt"
 
       - name: Upload generated files
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -100,7 +100,7 @@ jobs:
           fail() { echo "::error::$1"; exit 1; }
 
           [ -z "$(find "$src" -mindepth 1 ! -type f)" ] || fail "artifact contains non-regular files"
-          expected=$'contributors.json\ngithub-discussions-sitemap.xml\ngithub-stars.ts\nlangfuse_github_discussions.json\nllms-combined.txt'
+          expected=$'contributors.json\ngithub-discussions-sitemap.xml\ngithub-stars.ts\nlangfuse_github_discussions.json\nllms-pages.txt'
           [ "$(cd "$src" && find . -type f -printf '%P\n' | LC_ALL=C sort)" = "$expected" ] || fail "unexpected artifact file set"
 
           # Roughly 3x current sizes
@@ -109,7 +109,7 @@ jobs:
           check_size contributors.json 300000
           check_size langfuse_github_discussions.json 7000000
           check_size github-discussions-sitemap.xml 1500000
-          check_size llms-combined.txt 300000
+          check_size llms-pages.txt 210000
 
           # github-stars.ts is compiled into the site, so it is rewritten from the validated number only.
           stars_file=$(cat "$src/github-stars.ts")
@@ -138,11 +138,37 @@ jobs:
           cp "$src/langfuse_github_discussions.json" src/langfuse_github_discussions.json
           cp "$src/github-discussions-sitemap.xml" public/github-discussions-sitemap.xml
 
-          # The rule's header always comes from main; only the part after the marker is generated.
+          # The rule is loaded into every agent session, so its header comes from main and it only lists
+          # pages whose title and description equal a frontmatter value on main (parsed like
+          # scripts/generate-sitemap-excludes.js does). Other lines are dropped.
           rule=.agents/cursor/rules/available-internal-links.mdc
           marker_line=$(grep -n "// Start of LLMs.txt" "$rule" | cut -d: -f1)
           [ -n "$marker_line" ] || fail "marker missing in $rule"
-          { head -n "$marker_line" "$rule"; echo; sed 's|https://langfuse.com||g' "$src/llms-combined.txt"; } > "$RUNNER_TEMP/rule"
+          declare -A known=()
+          while IFS= read -r value; do
+            if [ -n "$value" ]; then known["$value"]=1; fi
+          done < <(find content -type f \( -name '*.md' -o -name '*.mdx' \) -exec awk '
+            FNR == 1 { fm = ($0 == "---" || $0 == "---\r"); next }
+            !fm || /^---/ { nextfile }
+            /^(title|description):/ { sub(/\r$/, ""); sub(/^[a-z]+:[ \t]*/, ""); sub(/[ \t]+$/, ""); sub(/^["\047]/, ""); sub(/["\047]$/, ""); print }
+          ' {} +)
+          page_re='^- \[(.+)\]\(https://langfuse\.com(/[A-Za-z0-9/_.-]+)\.md\)(: (.+))?$'
+          pages=0
+          dropped=0
+          { head -n "$marker_line" "$rule"; echo; } > "$RUNNER_TEMP/rule"
+          while IFS= read -r line; do
+            if [[ -z "$line" || "$line" =~ ^#\ Langfuse\ (Docs|Integrations|Self-Hosting)$ ]]; then
+              printf '%s\n' "$line"
+            elif [[ "$line" =~ $page_re ]] && [ -n "${known["${BASH_REMATCH[1]}"]:-}" ] \
+                && { [ -z "${BASH_REMATCH[3]}" ] || [ -n "${known["${BASH_REMATCH[4]}"]:-}" ]; }; then
+              printf -- '- [%s](%s.md)%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
+              pages=$((pages + 1))
+            else
+              dropped=$((dropped + 1))
+            fi
+          done < "$src/llms-pages.txt" >> "$RUNNER_TEMP/rule"
+          [ "$dropped" = 0 ] || echo "::warning::Dropped $dropped unverified lines from $rule"
+          [ "$pages" -ge 200 ] || fail "only $pages verified pages for $rule"
           mv "$RUNNER_TEMP/rule" "$rule"
 
           git add -- data/generated/contributors.json src/github-stars.ts src/langfuse_github_discussions.json public/github-discussions-sitemap.xml "$rule"
