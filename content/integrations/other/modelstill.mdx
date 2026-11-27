@@ -1,0 +1,46 @@
+---
+title: ModelStill Integration
+sidebarTitle: ModelStill
+logo: /images/integrations/modelstill_icon.svg
+description: Read Langfuse generations into a ModelStill dataset to check a model or provider change against recorded production calls.
+---
+
+# ModelStill Integration
+
+[ModelStill](https://github.com/modelstill/modelstill) is an open-source (Apache-2.0) CLI for checking model and prompt changes against recorded production calls before you ship them.
+
+`modelstill ingest langfuse` reads generations from a Langfuse project through the [public API](/docs/api-and-data-platform/features/public-api) and writes them to a ModelStill dataset, with answers keyed by model. The reader only sends `GET` requests.
+
+## Get started
+
+<Steps>
+
+### Install ModelStill
+
+```bash
+uv tool install "git+https://github.com/modelstill/modelstill#subdirectory=python/modelstill"
+```
+
+### Read generations into a dataset
+
+Set the project's API keys and host, then read a time range of generations:
+
+```bash
+export LANGFUSE_PUBLIC_KEY=pk-lf-...
+export LANGFUSE_SECRET_KEY=sk-lf-...
+export LANGFUSE_HOST=https://cloud.langfuse.com # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+
+modelstill ingest langfuse --from 2026-11-01T00:00:00Z --to 2026-11-24T00:00:00Z \
+  --name <observation-name> --out data/langfuse.jsonl
+```
+
+`--name` keeps only observations with that name. Running the command again merges new generations into the same file. Self-hosted Langfuse versions without the v2 observations API need `--api v1`.
+
+### Check a model change on the dataset
+
+Replay the recorded calls against a candidate model with [`modelstill swap`](https://docs.modelstill.com/guides/model-swap), which compares its answers with the current model's.
+
+</Steps>
+
+See the [ModelStill Langfuse docs](https://docs.modelstill.com/integrations/langfuse) for all flags.
