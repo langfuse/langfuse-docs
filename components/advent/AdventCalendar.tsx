@@ -56,6 +56,8 @@ import {
 } from "./HeroFigures";
 import {
   ADVENT_DOORS,
+  LAST_ADVENT_DAY,
+  getAdventDoor,
   ADVENT_URL,
   ADVENT_YEAR,
   LINK_LABELS,
@@ -115,7 +117,8 @@ function getDoorState(
   unlocked: number | null,
   opened: Set<number>,
 ): DoorState {
-  if (unlocked === null || day > unlocked) return "locked";
+  if (unlocked === null || day > unlocked || !getAdventDoor(day))
+    return "locked";
   if (day < unlocked || opened.has(day)) return "open";
   return "today";
 }
@@ -292,6 +295,7 @@ function MusicVolume({
 }
 
 const DoorTile = memo(function DoorTile({
+  day,
   door,
   index,
   state,
@@ -299,7 +303,8 @@ const DoorTile = memo(function DoorTile({
   onSelect,
   onHover,
 }: {
-  door: AdventDoor;
+  day: number;
+  door: AdventDoor | undefined;
   index: number;
   state: DoorState;
   wiggle: boolean;
@@ -311,18 +316,18 @@ const DoorTile = memo(function DoorTile({
   ) => void;
 }) {
   const Ornament = ORNAMENTS[index % ORNAMENTS.length];
-  const Icon = door.icon;
+  const Icon = door?.icon;
   const label =
-    state === "locked"
-      ? `Door ${door.day}, opens on December ${door.day}`
+    state === "locked" || !door
+      ? `Door ${day}, locked`
       : state === "today"
-        ? `Door ${door.day}, open today's door`
-        : `Door ${door.day}: ${door.title}`;
+        ? `Door ${day}, open today's door`
+        : `Door ${day}: ${door.title}`;
   return (
     <button
       type="button"
       data-advent-door
-      data-day={door.day}
+      data-day={day}
       style={
         {
           "--adv-enter-delay": `${((index * 7) % 24) * 32}ms`,
@@ -332,10 +337,10 @@ const DoorTile = memo(function DoorTile({
         } as CSSProperties
       }
       aria-label={label}
-      onPointerEnter={(event) => onHover(door.day, event.clientX)}
+      onPointerEnter={(event) => onHover(day, event.clientX)}
       onClick={(e) =>
         onSelect(
-          door.day,
+          day,
           e.currentTarget,
           // detail is 0 for keyboard activation, which has no click point.
           e.detail > 0 ? { x: e.clientX, y: e.clientY } : null,
@@ -349,7 +354,7 @@ const DoorTile = memo(function DoorTile({
       )}
     >
       <span className="adv-door-recess" aria-hidden={state !== "open"}>
-        {state === "open" ? (
+        {state === "open" && door && Icon ? (
           <>
             <span className="adv-door-recess-icon">
               <Icon className="size-4" />
@@ -374,7 +379,7 @@ const DoorTile = memo(function DoorTile({
           {state === "locked" ? (
             <Lock className="adv-door-lock size-3" aria-hidden />
           ) : null}
-          <span className="adv-door-number">{door.day}</span>
+          <span className="adv-door-number">{day}</span>
           <Ornament className="adv-door-ornament size-4" aria-hidden />
         </span>
         <span className="adv-door-back" />
@@ -466,32 +471,30 @@ function DoorDialog({
             <DialogDescription className="text-[14px] leading-relaxed text-text-secondary">
               {door.description}
             </DialogDescription>
-            {door.link ? (
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
-                  variant="primary"
-                  size="default"
-                  href={door.link.href}
-                  wrapperClassName="sm:w-auto"
-                  className="sm:px-4"
-                >
-                  {LINK_LABELS[door.link.type]}
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="default"
-                  href={door.socialUrl ?? shareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  wrapperClassName="sm:w-auto"
-                  className="sm:px-4"
-                  icon={<ArrowUpRight className="size-3.5" />}
-                  iconPosition="end"
-                >
-                  {door.socialUrl ? "View the social post" : "Share on X"}
-                </Button>
-              </div>
-            ) : null}
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button
+                variant="primary"
+                size="default"
+                href={door.link.href}
+                wrapperClassName="sm:w-auto"
+                className="sm:px-4"
+              >
+                {LINK_LABELS[door.link.type]}
+              </Button>
+              <Button
+                variant="secondary"
+                size="default"
+                href={door.socialUrl ?? shareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                wrapperClassName="sm:w-auto"
+                className="sm:px-4"
+                icon={<ArrowUpRight className="size-3.5" />}
+                iconPosition="end"
+              >
+                {door.socialUrl ? "View the social post" : "Share on X"}
+              </Button>
+            </div>
             {prev !== null || next !== null ? (
               <div className="flex items-center justify-between border-t border-line-structure pt-3 text-[12px]">
                 <button
@@ -661,7 +664,12 @@ export function AdventCalendar() {
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      setUnlocked(getPreviewDay(now) ?? getUnlockedDay(now));
+      const day = getPreviewDay(now) ?? getUnlockedDay(now);
+      // Today is the latest door that exists, so the status line never
+      // points at a day whose feature isn't ready yet.
+      setUnlocked(
+        day > LAST_ADVENT_DAY && LAST_ADVENT_DAY < 24 ? LAST_ADVENT_DAY : day,
+      );
     };
     update();
     const id = setInterval(update, 60_000);
@@ -681,7 +689,7 @@ export function AdventCalendar() {
     deepLinkHandled.current = true;
     const match = /^#day-(\d+)$/.exec(window.location.hash);
     const day = match ? Number(match[1]) : null;
-    if (!day || day > ADVENT_DOORS.length) return;
+    if (!day || !getAdventDoor(day)) return;
     const state = getDoorState(day, unlocked, opened);
     if (state === "today") {
       const next = new Set(opened).add(day);
@@ -825,7 +833,9 @@ export function AdventCalendar() {
           setToast(
             unlocked === null
               ? "Loading the calendar…"
-              : `Not yet! Door ${day} opens on December ${day}.`,
+              : day <= unlocked
+                ? `Not yet! Door ${day} opens soon.`
+                : `Not yet! Door ${day} opens on December ${day}.`,
           );
         }, landsIn);
         return;
@@ -1088,11 +1098,11 @@ export function AdventCalendar() {
           </div>
           <div className="adv-door-grid">
             {DOOR_ORDER.map((day, index) => {
-              const door = ADVENT_DOORS[day - 1];
               return (
                 <DoorTile
                   key={day}
-                  door={door}
+                  day={day}
+                  door={getAdventDoor(day)}
                   index={index}
                   state={getDoorState(day, unlocked, opened)}
                   wiggle={wiggleDay === day}

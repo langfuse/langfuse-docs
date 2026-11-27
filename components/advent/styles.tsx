@@ -576,21 +576,6 @@ export function AdventStyles() {
       .adv-guard-result { min-height: 1.5em; color: var(--text-tertiary); font-size: 11px; opacity: 0; transition: opacity .3s; }
       .adv-guard-result[data-visible="true"] { opacity: 1; }
 
-      /* Upcoming doors (features not ready yet) */
-      .adv-gift { overflow: visible; animation: adv-gift-rattle .9s ease-in-out .3s both; transform-origin: 50% 90%; }
-      .adv-gift-lid { transform-box: fill-box; transform-origin: 50% 100%; animation: adv-gift-lid .9s ease-in-out .3s both; }
-      @keyframes adv-gift-rattle {
-        0%, 100% { transform: none; }
-        20% { transform: rotate(-6deg); }
-        40% { transform: rotate(5deg); }
-        60% { transform: rotate(-3deg); }
-        80% { transform: rotate(2deg); }
-      }
-      @keyframes adv-gift-lid {
-        0%, 100% { transform: none; }
-        30%, 50% { transform: translateY(-6px) rotate(-4deg); }
-      }
-
       /* Provider tour (day 8) */
       .adv-tour-chip {
         display: flex;

@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Boxes,
   Cpu,
-  Gift,
   KeyRound,
   Regex,
   Rocket,
@@ -31,7 +30,6 @@ export type DoorAnimation =
   | { kind: "patterns"; pattern: string }
   | { kind: "chat"; question: string; answer: string }
   | { kind: "gateway" }
-  | { kind: "upcoming" }
   | { kind: "providerTour" }
   | { kind: "budget"; limit: number; owner: string }
   | {
@@ -60,8 +58,7 @@ export type AdventDoor = {
   title: string;
   description: string;
   icon: LucideIcon;
-  /** Missing on doors whose feature isn't ready yet. */
-  link?: { type: "blog" | "changelog" | "docs"; href: string };
+  link: { type: "blog" | "changelog" | "docs"; href: string };
   /** URL of the social post announcing this door. Add it once the post is live. */
   socialUrl?: string;
   animation: DoorAnimation;
@@ -78,18 +75,6 @@ export const ALL_PROVIDERS = [
   "Google AI Studio",
   "Google Vertex AI",
 ];
-
-/** Placeholder for a door whose feature ships later in December. */
-function upcomingDoor(day: number): AdventDoor {
-  return {
-    day,
-    title: "Still being wrapped",
-    description:
-      "We're putting the finishing touches on this feature. Check back soon.",
-    icon: Gift,
-    animation: { kind: "upcoming" },
-  };
-}
 
 export const ADVENT_DOORS: AdventDoor[] = [
   {
@@ -224,8 +209,18 @@ export const ADVENT_DOORS: AdventDoor[] = [
     },
     animation: { kind: "providerTour" },
   },
-  ...Array.from({ length: 16 }, (_, i) => upcomingDoor(i + 9)),
 ];
+
+/**
+ * Doors only exist for days whose feature is ready. Days without one stay
+ * locked, whatever the date, until a door is added for them.
+ */
+export function getAdventDoor(day: number): AdventDoor | undefined {
+  return ADVENT_DOORS.find((door) => door.day === day);
+}
+
+/** The last day that has a door. */
+export const LAST_ADVENT_DAY = Math.max(...ADVENT_DOORS.map((d) => d.day));
 
 export const LINK_LABELS: Record<AdventDoor["link"]["type"], string> = {
   blog: "Read the blog post",
