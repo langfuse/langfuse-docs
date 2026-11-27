@@ -80,16 +80,6 @@ Choose what each guardrail inspects under **Runs on**:
   to **Log** so you can review matches before blocking.
 </Callout>
 
-<Details>
-<Summary>Built-in presets and regex constraints</Summary>
-
-- **PII presets:** US SSN, US ITIN, UK NINO, EU VAT ID, German Steuer-ID, Phone number, Credit card (Visa, Mastercard, Discover, American Express), Email, IBAN, IP address (IPv4 and IPv6).
-- **Secrets presets:** AWS access key ID, Langfuse API key, OpenAI API key, Anthropic API key, OpenRouter API key, Hugging Face token, GitHub token, GitLab token, npm token, PyPI token, Stripe API key, Stripe test key, Slack token, Slack app token, Slack webhook URL, SendGrid API key, Google API key, Google OAuth client secret, Databricks token, Atlassian API token, Linear API key, Shopify token, DigitalOcean token, Database connection string (Postgres, MySQL, MongoDB, Redis, and AMQP URLs with credentials), Private key (PEM blocks), JWT. Custom prefixes must be 3 to 32 printable ASCII characters without whitespace and match the prefix followed by at least 16 token characters (`[A-Za-z0-9_-]`).
-- **Prompt injection presets:** Instruction override, System prompt extraction, Jailbreak and safety bypass, Hidden Unicode characters (zero-width/invisible format characters, bidi controls, and Unicode Tag characters).
-- **Custom regex constraints:** Uses Rust regex syntax in ASCII mode. Look-ahead, look-behind, backreferences, and Unicode classes (`\p{..}`) are not supported. Compiled size is capped at 128 KiB per guardrail and 512 KiB combined per organization.
-
-</Details>
-
 ## Amazon Bedrock guardrails [#amazon-bedrock]
 
 You can connect an existing [Amazon Bedrock guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) from the **Integrations** tab. The gateway calls Bedrock's `ApplyGuardrail` API using your Bedrock API key (`bedrock:ApplyGuardrail` permission) and supports two actions: **Enforce** (block when Bedrock blocks, or anonymize matched text) and **Log**.
