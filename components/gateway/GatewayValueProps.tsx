@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useCallback,
   useEffect,
@@ -36,7 +37,7 @@ import {
   type ValueProp,
 } from "./content";
 
-const ROTATE_MS = 5000;
+const ROTATE_MS = 10000;
 
 const usd = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -546,31 +547,33 @@ export function GatewayValueProps() {
           const isActive = i === active;
           const isOpen = isActive && open;
           return (
-            <button
+            <div
               key={prop.title}
-              type="button"
-              role="tab"
-              id={`gateway-value-tab-${i}`}
-              aria-selected={isActive}
-              aria-expanded={isOpen}
-              aria-controls="gateway-value-panel"
-              onClick={() => select(i)}
-              className="relative flex cursor-pointer flex-col gap-2 border-b border-line-structure py-5 pr-4 text-left"
+              className="relative border-b border-line-structure"
             >
-              <span
+              <button
+                type="button"
+                role="tab"
+                id={`gateway-value-tab-${i}`}
+                aria-selected={isActive}
+                aria-expanded={isOpen}
+                aria-controls="gateway-value-panel"
+                onClick={() => select(i)}
                 className={cn(
-                  "font-analog text-[22px] leading-[1.2] transition-colors",
-                  isOpen ? "text-text-primary" : "text-text-tertiary",
+                  "block w-full cursor-pointer py-5 pr-4 text-left font-analog text-[22px] leading-[1.2] transition-colors",
+                  isOpen
+                    ? "pb-2 text-text-primary"
+                    : "text-text-tertiary hover:text-text-secondary",
                 )}
               >
                 {prop.title}
-              </span>
+              </button>
               {isOpen && (
                 // Every prop's details share one grid cell, so the open row is as
                 // tall as the longest one and the page doesn't jump on rotation.
-                <span className="grid max-w-[440px]">
+                <div className="grid max-w-[440px] pb-5 pr-4">
                   {valueProps.map((detail, j) => (
-                    <span
+                    <div
                       key={detail.title}
                       aria-hidden={j !== i || undefined}
                       className={cn(
@@ -578,25 +581,30 @@ export function GatewayValueProps() {
                         j !== i && "invisible",
                       )}
                     >
-                      <span className="text-[15px] leading-[1.5] text-text-secondary">
+                      <p className="text-[15px] leading-[1.5] text-text-secondary">
                         {detail.body}
-                      </span>
-                      <span className="mt-1.5 flex flex-col">
+                      </p>
+                      <ul className="mt-1.5 flex flex-col">
                         {detail.features.map((feature) => (
-                          <span
+                          <li
                             key={feature.label}
-                            className="border-t border-dashed border-line-divider-dash py-3 text-[14px] leading-[1.5] text-text-secondary"
+                            className="border-t border-dashed border-line-divider-dash"
                           >
-                            <strong className="font-semibold text-text-primary">
-                              {feature.label}
-                            </strong>{" "}
-                            {feature.text}
-                          </span>
+                            <Link
+                              href={feature.href}
+                              className="group block py-3 text-[14px] leading-[1.5] text-text-secondary"
+                            >
+                              <strong className="font-semibold text-text-primary underline decoration-line-structure underline-offset-4 group-hover:decoration-text-primary">
+                                {feature.label}
+                              </strong>{" "}
+                              {feature.text}
+                            </Link>
+                          </li>
                         ))}
-                      </span>
-                    </span>
+                      </ul>
+                    </div>
                   ))}
-                </span>
+                </div>
               )}
               {isOpen && (
                 <span
@@ -609,7 +617,7 @@ export function GatewayValueProps() {
                   style={{ animationDuration: `${ROTATE_MS}ms` }}
                 />
               )}
-            </button>
+            </div>
           );
         })}
       </div>

@@ -55,7 +55,7 @@ export type ValueProp = {
   title: string;
   body: string;
   panel: "spend" | "budgets" | "models" | "halo";
-  features: { label: string; text: string }[];
+  features: { label: string; text: string; href: string }[];
 };
 
 export const valueProps: ValueProp[] = [
@@ -66,10 +66,12 @@ export const valueProps: ValueProp[] = [
     features: [
       {
         label: "Spend dashboard:",
+        href: "/docs/gateway/features/analytics",
         text: "cost by model, provider, user and gateway key.",
       },
       {
         label: "Attribution by person, service or team:",
+        href: "/docs/gateway/features/api-keys#key-metadata",
         text: "keys for people or services, labels for teams or cost centers.",
       },
     ],
@@ -81,10 +83,12 @@ export const valueProps: ValueProp[] = [
     features: [
       {
         label: "Budgets:",
+        href: "/docs/gateway/features/budgets",
         text: "reset daily, weekly or monthly. Requests stop once a budget runs out.",
       },
       {
         label: "Warnings and resets:",
+        href: "/docs/gateway/features/budgets#email-alerts",
         text: "email warnings at 85% and 95%, and a one-click reset that sets spend back to zero.",
       },
     ],
@@ -96,14 +100,17 @@ export const valueProps: ValueProp[] = [
     features: [
       {
         label: "Model controls:",
+        href: "/docs/gateway/features/models#manage-models",
         text: "approve models centrally and limit each gateway key to the models it needs.",
       },
       {
         label: "Revocable keys:",
+        href: "/docs/gateway/features/api-keys#key-types",
         text: "revoke any gateway key immediately. User keys stop working when the person loses access.",
       },
       {
         label: "Guardrails:",
+        href: "/docs/gateway/features/guardrails",
         text: "block, redact or log PII, secrets and prompt injection in requests and responses.",
       },
     ],
@@ -115,11 +122,18 @@ export const valueProps: ValueProp[] = [
     features: [
       {
         label: "Automatic tracing:",
+        href: "/docs/gateway/features/tracing#ingestion-modes",
         text: "every call becomes a Langfuse trace, with full content or usage only.",
       },
       {
         label: "Evals and analysis:",
-        text: "run evals, topics and alerts, or tell Halo what’s on your mind.",
+        href: "/docs/evaluation/overview",
+        text: "run evals, topics and alerts on every gateway call.",
+      },
+      {
+        label: "Ask Halo about your usage:",
+        href: "/docs/api-and-data-platform/features/halo",
+        text: "find recurring workflows, cost drivers and failures in plain language.",
       },
     ],
   },

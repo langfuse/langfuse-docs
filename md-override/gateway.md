@@ -25,18 +25,19 @@ Figure: AI Gateway overview.
 ## Control your company's AI usage
 
 - **See all spend.** Know what AI costs and who’s spending it.
-  - **Spend dashboard:** cost by model, provider, user and gateway key.
-  - **Attribution by person, service or team:** keys for people or services, labels for teams or cost centers.
+  - **[Spend dashboard](/docs/gateway/features/analytics):** cost by model, provider, user and gateway key.
+  - **[Attribution by person, service or team](/docs/gateway/features/api-keys#key-metadata):** keys for people or services, labels for teams or cost centers.
 - **Cap model costs.** Set budgets and enforce limits across the organization.
-  - **Budgets:** reset daily, weekly or monthly. Requests stop once a budget runs out.
-  - **Warnings and resets:** email warnings at 85% and 95%, and a one-click reset that sets spend back to zero.
+  - **[Budgets](/docs/gateway/features/budgets):** reset daily, weekly or monthly. Requests stop once a budget runs out.
+  - **[Warnings and resets](/docs/gateway/features/budgets#email-alerts):** email warnings at 85% and 95%, and a one-click reset that sets spend back to zero.
 - **Govern access and data.** Decide who can use which models, and what data reaches them.
-  - **Model controls:** approve models centrally and limit each gateway key to the models it needs.
-  - **Revocable keys:** revoke any gateway key immediately. User keys stop working when the person loses access.
-  - **Guardrails:** block, redact or log PII, secrets and prompt injection in requests and responses.
+  - **[Model controls](/docs/gateway/features/models#manage-models):** approve models centrally and limit each gateway key to the models it needs.
+  - **[Revocable keys](/docs/gateway/features/api-keys#key-types):** revoke any gateway key immediately. User keys stop working when the person loses access.
+  - **[Guardrails](/docs/gateway/features/guardrails):** block, redact or log PII, secrets and prompt injection in requests and responses.
 - **Improve AI usage.** See what AI is used for and improve it.
-  - **Automatic tracing:** every call becomes a Langfuse trace, with full content or usage only.
-  - **Evals and analysis:** run evals, topics and alerts, or tell Halo what’s on your mind.
+  - **[Automatic tracing](/docs/gateway/features/tracing#ingestion-modes):** every call becomes a Langfuse trace, with full content or usage only.
+  - **[Evals and analysis](/docs/evaluation/overview):** run evals, topics and alerts on every gateway call.
+  - **[Ask Halo about your usage](/docs/api-and-data-platform/features/halo):** find recurring workflows, cost drivers and failures in plain language.
 
 ## Get everything you need in a gateway, included in Langfuse
 
