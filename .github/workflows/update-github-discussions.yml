@@ -61,7 +61,7 @@ jobs:
           out="$RUNNER_TEMP/generated"
           mkdir -p "$out"
           cp data/generated/contributors.json src/github-stars.ts src/langfuse_github_discussions.json public/github-discussions-sitemap.xml "$out/"
-          cat public/llms-docs.txt public/llms-integrations.txt public/llms-self-hosting.txt > "$out/llms-pages.txt"
+          cat public/llms.txt public/llms-docs.txt public/llms-integrations.txt public/llms-self-hosting.txt > "$out/llms-combined.txt"
 
       - name: Upload generated files
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -100,7 +100,7 @@ jobs:
           fail() { echo "::error::$1"; exit 1; }
 
           [ -z "$(find "$src" -mindepth 1 ! -type f)" ] || fail "artifact contains non-regular files"
-          expected=$'contributors.json\ngithub-discussions-sitemap.xml\ngithub-stars.ts\nlangfuse_github_discussions.json\nllms-pages.txt'
+          expected=$'contributors.json\ngithub-discussions-sitemap.xml\ngithub-stars.ts\nlangfuse_github_discussions.json\nllms-combined.txt'
           [ "$(cd "$src" && find . -type f -printf '%P\n' | LC_ALL=C sort)" = "$expected" ] || fail "unexpected artifact file set"
 
           # Roughly 3x current sizes
@@ -109,7 +109,7 @@ jobs:
           check_size contributors.json 300000
           check_size langfuse_github_discussions.json 7000000
           check_size github-discussions-sitemap.xml 1500000
-          check_size llms-pages.txt 210000
+          check_size llms-combined.txt 300000
 
           # github-stars.ts is compiled into the site, so it is rewritten from the validated number only.
           stars_file=$(cat "$src/github-stars.ts")
@@ -138,35 +138,74 @@ jobs:
           cp "$src/langfuse_github_discussions.json" src/langfuse_github_discussions.json
           cp "$src/github-discussions-sitemap.xml" public/github-discussions-sitemap.xml
 
-          # The rule is loaded into every agent session, so its header comes from main and it only lists
-          # pages whose title and description equal a frontmatter value on main (parsed like
+          # The rule is loaded into every agent session, so its header comes from main and every generated
+          # line must be reproducible from main: a line the llms.txt generator writes verbatim, or text
+          # made of its string literals and of frontmatter values (parsed like
           # scripts/generate-sitemap-excludes.js does). Other lines are dropped.
           rule=.agents/cursor/rules/available-internal-links.mdc
           marker_line=$(grep -n "// Start of LLMs.txt" "$rule" | cut -d: -f1)
           [ -n "$marker_line" ] || fail "marker missing in $rule"
-          declare -A known=()
+          gen=scripts/generate_llms_txt.js
+          declare -A reviewed=()
           while IFS= read -r value; do
-            if [ -n "$value" ]; then known["$value"]=1; fi
-          done < <(find content -type f \( -name '*.md' -o -name '*.mdx' \) -exec awk '
-            FNR == 1 { fm = ($0 == "---" || $0 == "---\r"); next }
-            !fm || /^---/ { nextfile }
-            /^(title|description):/ { sub(/\r$/, ""); sub(/^[a-z]+:[ \t]*/, ""); sub(/[ \t]+$/, ""); sub(/^["\047]/, ""); sub(/["\047]$/, ""); print }
-          ' {} +)
-          page_re='^- \[(.+)\]\(https://langfuse\.com(/[A-Za-z0-9/_.-]+)\.md\)(: (.+))?$'
+            if [ -n "$value" ]; then reviewed["$value"]=1; fi
+          done < <(
+            find content -type f \( -name '*.md' -o -name '*.mdx' \) -exec awk '
+              FNR == 1 { fm = ($0 == "---" || $0 == "---\r"); next }
+              !fm || /^---/ { nextfile }
+              /^(title|description|shortTitle|sidebarTitle):/ { sub(/\r$/, ""); sub(/^[A-Za-z]+:[ \t]*/, ""); sub(/[ \t]+$/, ""); sub(/^["\047]/, ""); sub(/["\047]$/, ""); print }
+            ' {} +
+            awk '/^[ \t]*markdownContent \+= `.*`;[ \t]*$/ && !/\$\{/ {
+              sub(/^[ \t]*markdownContent \+= `/, ""); sub(/`;[ \t]*$/, ""); gsub(/\\`/, "`")
+              n = split($0, parts, /\\n/); for (i = 1; i <= n; i++) print parts[i]
+            }' "$gen"
+            grep -o '"[^"]*"' "$gen" | sed 's/^"//; s/"$//'
+          )
+          client_setup=$(jq -r '"- Client setup: " + ([.pages[] | capture("^(?:external:)?\\[(?<n>.+?)(?:\\s*↗)?\\]\\((?<p>/[^)#]+)\\)$") | "[\(.n)](https://langfuse.com\(.p).md)"] | join(", ")) + "."' \
+            content/docs/gateway/integrations/meta.json 2> /dev/null || true)
+          # Rebuilds the line like lib/compare-labels.js; each label is a frontmatter value or the title-cased slug.
+          comparisons_ok() {
+            local rest=$1 links=() label slug words title w
+            local link_re='^\[([^]]+)\]\(https://langfuse\.com/compare/([a-z0-9-]+)\.md\)(.*)$'
+            while [[ "$rest" =~ $link_re ]]; do
+              label=${BASH_REMATCH[1]} slug=${BASH_REMATCH[2]} rest=${BASH_REMATCH[3]}
+              IFS=- read -ra words <<< "$slug"
+              title=""
+              for w in "${words[@]}"; do title+="${title:+ }${w^}"; done
+              [ -n "${reviewed["$label"]:-}" ] || [ "$label" = "$title" ] || return 1
+              links+=("[$label](https://langfuse.com/compare/$slug.md)")
+              rest=${rest#, }; rest=${rest#and }; rest=${rest# and }
+            done
+            [ -z "$rest" ] && [ "${#links[@]}" -gt 0 ] || return 1
+            local n=${#links[@]} joined
+            if [ "$n" -eq 1 ]; then joined=${links[0]}
+            elif [ "$n" -eq 2 ]; then joined="${links[0]} and ${links[1]}"
+            else joined=$(printf '%s, ' "${links[@]:0:n-1}"); joined+="and ${links[n-1]}"
+            fi
+            [ "$joined" = "$1" ]
+          }
+          text_re='^(#|##|>) (.+)$'
+          link_line_re='^- \[(.+)\]\(https://langfuse\.com(/[A-Za-z0-9/_.-]+)\)(: (.+))?$'
+          comparisons_re='^- Comparisons: (.+), with dated competitor sources\.$'
           pages=0
           dropped=0
           { head -n "$marker_line" "$rule"; echo; } > "$RUNNER_TEMP/rule"
           while IFS= read -r line; do
-            if [[ -z "$line" || "$line" =~ ^#\ Langfuse\ (Docs|Integrations|Self-Hosting)$ ]]; then
-              printf '%s\n' "$line"
-            elif [[ "$line" =~ $page_re ]] && [ -n "${known["${BASH_REMATCH[1]}"]:-}" ] \
-                && { [ -z "${BASH_REMATCH[3]}" ] || [ -n "${known["${BASH_REMATCH[4]}"]:-}" ]; }; then
-              printf -- '- [%s](%s.md)%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
-              pages=$((pages + 1))
+            if [ -z "$line" ] || [ -n "${reviewed["$line"]:-}" ] || [ "$line" = "$client_setup" ]; then
+              :
+            elif [[ "$line" =~ $text_re ]] && [ -n "${reviewed["${BASH_REMATCH[2]}"]:-}" ]; then
+              :
+            elif [[ "$line" =~ $link_line_re ]] && [ -n "${reviewed["${BASH_REMATCH[1]}"]:-}" ] \
+                && { [ -z "${BASH_REMATCH[3]}" ] || [ -n "${reviewed["${BASH_REMATCH[4]}"]:-}" ]; }; then
+              [[ "${BASH_REMATCH[2]}" != *.md ]] || pages=$((pages + 1))
+            elif [[ "$line" =~ $comparisons_re ]] && comparisons_ok "${BASH_REMATCH[1]}"; then
+              :
             else
               dropped=$((dropped + 1))
+              continue
             fi
-          done < "$src/llms-pages.txt" >> "$RUNNER_TEMP/rule"
+            printf '%s\n' "${line//https:\/\/langfuse.com/}"
+          done < "$src/llms-combined.txt" >> "$RUNNER_TEMP/rule"
           [ "$dropped" = 0 ] || echo "::warning::Dropped $dropped unverified lines from $rule"
           [ "$pages" -ge 200 ] || fail "only $pages verified pages for $rule"
           mv "$RUNNER_TEMP/rule" "$rule"
