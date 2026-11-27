@@ -10,7 +10,11 @@ export type ProviderIcon = {
 };
 
 export const heroProviders: ProviderIcon[] = [
-  { name: "Anthropic", icon: "/images/integrations/anthropic_icon.png" },
+  {
+    name: "Anthropic",
+    icon: "/images/integrations/anthropic_icon.png",
+    monochrome: true,
+  },
   {
     name: "OpenAI",
     icon: "/images/integrations/openai_icon.svg",
