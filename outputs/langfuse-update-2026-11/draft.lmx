@@ -1,0 +1,145 @@
+<Style backgroundColor="" backgroundXPadding="0" backgroundYPadding="0" bodyColor="" bodyXPadding="0" bodyYPadding="0" bodyFontFamily="Default" bodyFontCategory="sans-serif" borderColor="" borderWidth="0" borderRadius="4" buttonBodyColor="" buttonBodyXPadding="16" buttonBodyYPadding="12" buttonBorderColor="" buttonBorderWidth="0" buttonBorderRadius="4" buttonTextColor="" buttonTextFormat="0" buttonTextFontSize="16" dividerColor="" dividerBorderWidth="1" textBaseColor="" textBaseFontSize="14" textBaseLineHeight="150" textBaseLetterSpacing="0" textLinkColor="" heading1Color="" heading1FontSize="28" heading1LineHeight="125" heading1LetterSpacing="0" heading2Color="" heading2FontSize="24" heading2LineHeight="125" heading2LetterSpacing="0" heading3Color="" heading3FontSize="20" heading3LineHeight="125" heading3LetterSpacing="0" />
+<Paragraph>Hi {contact.firstName},</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>November was launch month. The AI Gateway and Topics both went into public beta, the trace view got a redesign, and audit logs now cover reads. Here's what's new:</Paragraph>
+<Paragraph></Paragraph>
+<UnorderedList>
+  <ListItem><Strong>AI Gateway public beta:</Strong> one entry point for your apps and coding agents, now with nine providers, budgets, and per-key model restrictions.</ListItem>
+  <ListItem><Strong>Topics public beta:</Strong> your production traces clustered by intent, sentiment, outcome, and issues.</ListItem>
+  <ListItem><Strong>Redesigned trace view:</Strong> large agent traces are easier to read, in the full page, the side peek, and on small screens.</ListItem>
+  <ListItem><Strong>Read-access audit logs:</Strong> record who read traces, scores, sessions, and experiments, not only who changed them.</ListItem>
+  <ListItem><Strong>Langfuse skills via MCP:</Strong> one MCP connection gives your agent live project tools and the official Langfuse playbooks.</ListItem>
+  <ListItem><Strong>Organization-level model definitions:</Strong> define model prices once for every project.</ListItem>
+</UnorderedList>
+<Paragraph></Paragraph>
+<H2>Langfuse AI Gateway public beta</H2>
+<Paragraph><Em>[Hero image: drop in images/1-ai-gateway.png here]</Em></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Point your app or coding agent at Langfuse instead of the provider: change the base URL and the API key, nothing else. Every teammate gets their own gateway key, the provider key stays in Langfuse, and every call is recorded as a trace with cost per user, key, and model.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Since the launch we added [1] Amazon Bedrock, OpenRouter, Vercel AI Gateway, xAI, Microsoft Azure, Google AI Studio, and Google Vertex AI as providers, [2] budgets per key, per user, and for the whole organization, with email warnings at 85% and 95%, [3] model restrictions per gateway key, and [4] the OpenAI Embeddings and Decisions APIs.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/docs/gateway/overview?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=ai_gateway"><Underline>Read more</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/changelog/2026-11-04-ai-gateway-public-beta?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=ai_gateway#coding-agents"><Underline>Connect Claude Code, Codex, GitHub Copilot, OpenCode, or pi</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>Topics public beta</H2>
+<Paragraph><Em>[Hero image: drop in images/2-topics.png here]</Em></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Topics clusters your production traces into named topics, so you see what users ask, how they felt, how it went, and what went wrong without reading every trace. Each trace is summarized from four angles (Intent, Sentiment, Outcome, Issues) and clustered per angle, so a failure spread across many user requests still lands in one Issues topic. On Halo, our in-app assistant, it surfaced users writing homework, a group pen-testing it, and a silent bug where the answer ended up inside the reasoning tokens.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Topics runs on your own LLM connections, and the first topics appear about five minutes after setup. Live maps keep adding new traces as they arrive; snapshots analyze one time window or slice, such as last week's gold-tier customers.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/blog/introducing-topics?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=topics"><Underline>Read the launch post</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://cloud.langfuse.com/project/~/topics"><Underline>Set up Topics in your project</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>Redesigned trace view</H2>
+<Paragraph>We rebuilt the trace view in many small steps over the past months, so you may not have noticed each one. Side by side, the difference is large: the Timeline and graph view show the shape of a big agent trace at a glance, the observation you are debugging gets the space, and the layout is the same in the full page, the side peek, and on small screens.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/changelog/2026-11-20-redesigned-trace-view?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=trace_view"><Underline>Watch the before and after</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/blog/2026-11-19-comfortable-with-being-uncomfortable?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=trace_view"><Underline>Read how we approached the redesign</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>Read-access audit logs</H2>
+<Paragraph><Em>[Hero image: drop in images/4-audit-logs.png here]</Em></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Audit logs can now record who read your data, not only who changed it. With read-access logging on, every open, list, search, export, or download of traces, observations, scores, sessions, and experiments is recorded with the actor, the route, the returned row IDs, the outcome, and the client IP. It covers the UI, the public API, and MCP tools, and access events appear next to change events in the audit log viewer and export.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Also new: organization admins can turn off public share links for traces and sessions, and self-hosted instances can turn them off for every organization.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/changelog/2026-11-17-read-access-audit-logs?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=audit_logs"><Underline>Read more</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/changelog/2026-11-19-disable-public-sharing?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=audit_logs"><Underline>Disable public sharing</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>Langfuse skills via MCP</H2>
+<Paragraph><Em>[Hero image: drop in images/5-mcp-skills.png here]</Em></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>The Langfuse MCP server now bundles the official Langfuse agent skills through the MCP Skills extension. Connect the server once and your agent gets live tools for your project plus the playbooks to use them well, with no <Code>npx skills add</Code> and no cloned repositories. Langfuse Cloud serves the latest skills, self-hosted deployments serve the skills matching their version, and skills load progressively so your context window stays clean until you work on a Langfuse task.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>The MCP server also gained tools to set a project's default evaluation model and run batch evaluations over existing observations, so an agent can switch judge models and re-score last week's traffic in one go.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/changelog/2026-11-26-mcp-bundled-skills?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=mcp_skills"><Underline>Read more</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/changelog/2026-11-11-default-evaluation-model-and-batch-evaluation-via-mcp?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=mcp_skills"><Underline>Batch evaluation via MCP</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>New Integrations</H2>
+<UnorderedList>
+  <ListItem>PagerDuty: page your on-call team from Langfuse alerts, project notifications, and prompt changes (<Link href="https://langfuse.com/integrations/other/pagerduty?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=new_integrations"><Underline>docs</Underline></Link>)</ListItem>
+  <ListItem>Sarvam AI: trace chat, speech-to-text, and text-to-speech calls from Vercel AI SDK apps and LiveKit voice agents (<Link href="https://langfuse.com/integrations/model-providers/sarvam?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=new_integrations"><Underline>docs</Underline></Link>)</ListItem>
+  <ListItem>Claude Code, Codex, GitHub Copilot, OpenCode, and pi through the AI Gateway: change the base URL and key, no plugin or hook needed (<Link href="https://langfuse.com/changelog/2026-11-04-ai-gateway-public-beta?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=new_integrations#coding-agents"><Underline>changelog</Underline></Link>)</ListItem>
+</UnorderedList>
+<Paragraph></Paragraph>
+<H2>Fixes &amp; Improvements</H2>
+<UnorderedList>
+  <ListItem>Cost: Define model prices once at the organization level; matching goes project, then organization, then Langfuse defaults (<Link href="https://langfuse.com/changelog/2026-11-27-organization-model-definitions?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>Cost: Automatic tokenization is retired; generations with missing usage now say so in the header and link to the fix (<Link href="https://langfuse.com/changelog/2026-11-06-retiring-tokenization?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>Evals: Decision-model evaluators run on Google's gemini-decision-1 (<Link href="https://langfuse.com/changelog/2026-11-13-gemini-decision-model-evaluators?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>) and can be managed through the stable evaluators API (<Link href="https://langfuse.com/changelog/2026-11-25-decision-model-evaluators-api?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>Evals: Self-hosted deployments can run code evaluators on an HTTP executor you operate, without AWS Lambda (<Link href="https://langfuse.com/changelog/2026-11-10-code-evaluators-on-your-own-executor?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>Filters: Compare metadata values as numbers with &gt;, &lt;, &gt;=, and &lt;= in the observations table, dashboards, alerts, the API, and MCP (<Link href="https://langfuse.com/changelog/2026-11-26-numeric-metadata-filters?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>Filters: The filter search bar suggests field values while you type (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.84.0"><Underline>v4.84.0</Underline></Link>)</ListItem>
+  <ListItem>API: Observations API pages can return a continuation cursor so expensive queries make progress across requests; keep paging until meta.cursor is absent (<Link href="https://langfuse.com/changelog/2026-11-03-observations-api-continuation?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>API keys: New Developer preset, and the Ingestion preset is now called Application (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.82.0"><Underline>v4.82.0</Underline></Link>)</ListItem>
+  <ListItem>Sessions: Chronological session list view and a session tab in the trace peek (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.76.0"><Underline>v4.76.0</Underline></Link>)</ListItem>
+  <ListItem>Datasets: Filter dataset items by status (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.81.0"><Underline>v4.81.0</Underline></Link>)</ListItem>
+  <ListItem>Annotation queues: Navigate between items from the single-item view and see all scores on an item (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.83.0"><Underline>v4.83.0</Underline></Link>)</ListItem>
+  <ListItem>MCP: Batch tools for scores and annotation queue items, and charts render inline as an interactive MCP App (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.86.0"><Underline>v4.86.0</Underline></Link>)</ListItem>
+  <ListItem>Skills: Skill management is out of beta, with version automations and Halo entry points to create and improve skills (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.85.0"><Underline>v4.85.0</Underline></Link>)</ListItem>
+  <ListItem>Self-hosting: Blob storage exports, External Media Storage, and Bedrock LLM connections can assume an IAM role instead of storing AWS keys (<Link href="https://langfuse.com/changelog/2026-11-18-bedrock-iam-role-auth?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=fixes_improvements"><Underline>changelog</Underline></Link>)</ListItem>
+  <ListItem>Self-hosting: JWT authentication for ClickHouse Cloud (<Link href="https://github.com/langfuse/langfuse/releases/tag/v4.88.0"><Underline>v4.88.0</Underline></Link>)</ListItem>
+  <ListItem>and many more!</ListItem>
+</UnorderedList>
+<Paragraph></Paragraph>
+<H2>Customer Story: Criteo</H2>
+<Paragraph>Criteo, the commerce intelligence platform, built a shared evaluation framework on Langfuse so that AI agents written in both Python and C# keep performing as expected, across 20 teams.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>"At Criteo, we make decisions based on data. Evaluation through Langfuse is key to that."</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>–– Clément Charnay, Senior Software Development Engineer at Criteo</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://langfuse.com/users/criteo?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=customer_story"><Underline>Read the whole story</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>Blog</H2>
+<UnorderedList>
+  <ListItem>Designing the Langfuse AI Gateway: why the runtime matters for this workload, why we picked Rust, and why we pass provider APIs through without translating them (<Link href="https://langfuse.com/blog/2026-11-11-building-the-langfuse-ai-gateway?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=blog"><Underline>blog</Underline></Link>)</ListItem>
+  <ListItem>Evaluating proactive agents: trace the decision to act, measure it like a classifier, and build a dataset of moments to evaluate it (<Link href="https://langfuse.com/blog/2026-11-19-evaluating-proactive-agents?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=blog"><Underline>blog</Underline></Link>)</ListItem>
+  <ListItem>How teams in regulated industries get AI agents into production: evidence, compliance checks, and human oversight at every step (<Link href="https://langfuse.com/blog/2026-11-04-regulated-industries-ai-agents-production?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=blog"><Underline>blog</Underline></Link>)</ListItem>
+</UnorderedList>
+<Paragraph></Paragraph>
+<H2>Town Hall Q4 recording</H2>
+<Paragraph>Missed the Community Town Hall on November 12? The recording covers the AI Gateway launch, a demo of everything shipped since the last Town Hall, and the updated roadmap.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://www.youtube.com/watch?v=1PxJrd6NFck"><Underline>Watch the recording</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<H2>Contribute Full-Time</H2>
+<Paragraph>Our team is growing (we now hire remote in US-East!). If you're passionate about building open source AI dev tools, we'd love to hear from you.</Paragraph>
+<Paragraph></Paragraph>
+<UnorderedList>
+  <ListItem><Link href="https://clickhouse.com/company/careers?search=langfuse"><Underline>Senior Product Engineer (US-East)</Underline></Link></ListItem>
+  <ListItem><Link href="https://clickhouse.com/company/careers?search=langfuse"><Underline>Senior Backend Engineer (US-East)</Underline></Link></ListItem>
+  <ListItem><Link href="https://clickhouse.com/company/careers?search=langfuse"><Underline>Product Manager</Underline></Link></ListItem>
+  <ListItem><Link href="https://clickhouse.com/company/careers?search=langfuse"><Underline>Senior Product Engineer, Integrations</Underline></Link></ListItem>
+  <ListItem><Link href="https://jobs.ashbyhq.com/clickhouse/0087feaa-a275-427d-bf4a-14a508708687"><Underline>Senior Product Engineer</Underline></Link></ListItem>
+  <ListItem><Link href="https://jobs.ashbyhq.com/clickhouse/31500bec-b690-4795-b4d6-0dce06a4c180"><Underline>Senior Backend Engineer</Underline></Link></ListItem>
+  <ListItem><Link href="https://jobs.ashbyhq.com/clickhouse/cf36e6db-3939-4ff0-8bcf-a3bb200d9e46"><Underline>Senior Cloud Infrastructure Engineer</Underline></Link></ListItem>
+  <ListItem><Link href="https://jobs.ashbyhq.com/clickhouse/2344ae13-045c-4513-ad01-94189029c46e"><Underline>Senior Software Engineer, SDK</Underline></Link></ListItem>
+  <ListItem><Link href="https://jobs.ashbyhq.com/clickhouse/49953f5a-271a-492f-a8be-50b8f028fbd7"><Underline>Developer Relations Engineer, Events &amp; Community, EMEA</Underline></Link></ListItem>
+  <ListItem><Link href="https://jobs.ashbyhq.com/clickhouse/7b0174fe-f124-4db2-923f-7028f39d6be9"><Underline>Developer Relations Engineer, Events &amp; Community, AMER</Underline></Link></ListItem>
+  <ListItem><Link href="https://clickhouse.com/company/careers?search=langfuse"><Underline>Head of Marketing</Underline></Link></ListItem>
+</UnorderedList>
+<Paragraph></Paragraph>
+<Paragraph>→ <Link href="https://clickhouse.com/company/careers?search=langfuse"><Underline>See all open roles</Underline></Link> ($5,000 for successful referrals!)</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Any feedback, questions, or ideas? Just hit reply; we read and respond to every message.</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Best,</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Marc</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>—</Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>Co-founder &amp; CEO, <Link href="https://langfuse.com?utm_source=langfuse&amp;utm_medium=email&amp;utm_campaign=product_update_2026_11&amp;utm_content=signature"><Underline>langfuse.com</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>🐧 <Link href="https://x.com/marcklingen"><Underline>@marcklingen</Underline></Link></Paragraph>
+<Paragraph></Paragraph>
+<Paragraph>⭐️ <Link href="https://github.com/langfuse/langfuse/"><Underline>github.com/langfuse/langfuse</Underline></Link></Paragraph>
