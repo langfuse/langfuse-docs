@@ -1,0 +1,98 @@
+---
+# Publishes the server.json files in mcp-registry/ to the official MCP Registry
+# under the com.langfuse namespace. Ownership of langfuse.com is proven with the
+# public key in public/.well-known/mcp-registry-auth; the matching private key
+# is the MCP_PRIVATE_KEY secret of the mcp-registry-publish environment.
+# A server is published only when its version is not yet in the registry, so
+# bump "version" in its server.json to publish a change.
+name: Publish to MCP Registry
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "mcp-registry/**"
+      - "public/.well-known/mcp-registry-auth"
+      - ".github/workflows/publish-mcp-registry.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: publish-mcp-registry
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: mcp-registry-publish
+    permissions:
+      contents: read
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.9
+      REGISTRY_URL: https://registry.modelcontextprotocol.io
+      AUTH_URL: https://langfuse.com/.well-known/mcp-registry-auth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
+        run: |
+          set -euo pipefail
+          archive="mcp-publisher_linux_amd64.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
+
+      # The registry reads the proof file from the live site, so wait until the
+      # Vercel deployment of this commit serves it.
+      - name: Wait for the proof file on langfuse.com
+        run: |
+          set -euo pipefail
+          expected="$(cat public/.well-known/mcp-registry-auth)"
+          for _ in $(seq 1 40); do
+            live="$(curl --fail --silent --show-error "$AUTH_URL" || true)"
+            if [ "$live" = "$expected" ]; then
+              echo "Proof file is live."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::$AUTH_URL does not match public/.well-known/mcp-registry-auth after 10 minutes."
+          exit 1
+
+      - name: Authenticate to MCP Registry
+        env:
+          MCP_PRIVATE_KEY: ${{ secrets.MCP_PRIVATE_KEY }}
+        run: ./mcp-publisher login http --domain langfuse.com --private-key "$MCP_PRIVATE_KEY"
+
+      - name: Publish new server versions
+        run: |
+          set -euo pipefail
+          for file in mcp-registry/*/server.json; do
+            name="$(jq -r .name "$file")"
+            version="$(jq -r .version "$file")"
+            encoded_name="$(jq -rn --arg n "$name" '$n|@uri')"
+            status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
+              "$REGISTRY_URL/v0.1/servers/$encoded_name/versions/$version")"
+            if [ "$status" = "200" ]; then
+              echo "$name $version is already published, skipping."
+              continue
+            fi
+            echo "Publishing $name $version from $file."
+            ./mcp-publisher publish "$file"
+          done
