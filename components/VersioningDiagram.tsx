@@ -299,6 +299,23 @@ export function VersioningDiagram() {
           border-radius: 9999px;
           background: var(--line-cta);
         }
+
+        @container (max-width: 560px) {
+          .versioning-diagram__comparison {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 8px;
+          }
+
+          .versioning-diagram__change {
+            align-self: stretch;
+          }
+
+          .versioning-diagram__arrow {
+            width: 40px;
+            margin: 15px auto;
+            transform: rotate(90deg);
+          }
+        }
       `}</style>
     </figure>
   );

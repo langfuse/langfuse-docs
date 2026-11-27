@@ -101,7 +101,8 @@ function Hero() {
           <h1 className="japan-h1">
             Langfuse Cloud、
             <br />
-            <span className="japan-highlight">日本</span>で動きます。
+            <span className="japan-highlight">日本</span>
+            <span className="whitespace-nowrap">で動きます。</span>
           </h1>
           <p className="japan-body" style={{ fontSize: 17, maxWidth: "44ch" }}>
             LLMのトレース、プロンプト管理、評価、メトリクス。

@@ -100,7 +100,7 @@ function VendorCard({ vendor }: { vendor: (typeof content.vendors)[number] }) {
             {vendor.migrate2 && <span>Migration:</span>}
             <Link
               href={vendor.migrate}
-              className="relative z-20 underline decoration-line-cta underline-offset-4 hover:text-text-primary"
+              className="relative z-20 inline-flex min-h-11 items-center underline decoration-line-cta underline-offset-4 hover:text-text-primary"
               aria-label={`${vendor.name}: ${vendor.migrate2 ? `${vendor.migrateLabel} migration guide` : vendor.migrateLabel}`}
             >
               {vendor.migrateLabel}
@@ -108,7 +108,7 @@ function VendorCard({ vendor }: { vendor: (typeof content.vendors)[number] }) {
             {vendor.migrate2 && (
               <Link
                 href={vendor.migrate2}
-                className="relative z-20 underline decoration-line-cta underline-offset-4 hover:text-text-primary"
+                className="relative z-20 inline-flex min-h-11 items-center underline decoration-line-cta underline-offset-4 hover:text-text-primary"
                 aria-label={`${vendor.migrate2Label} migration guide`}
               >
                 {vendor.migrate2Label}

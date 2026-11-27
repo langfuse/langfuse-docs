@@ -63,6 +63,7 @@ export function PricingPage({
   return (
     <HomeSection
       id="pricing"
+      reveal={!isPricingPage}
       className={cn(
         "not-prose",
         isPricingPage &&

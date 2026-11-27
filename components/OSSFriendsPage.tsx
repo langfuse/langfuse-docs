@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import fallbackFriends from "@/lib/oss-friends-fallback.json";
 
 interface OSSFriend {
   name: string;
@@ -8,27 +9,29 @@ interface OSSFriend {
 }
 
 async function getOSSFriends(): Promise<OSSFriend[]> {
-  const res = await fetch("https://formbricks.com/api/oss-friends", {
-    next: { revalidate: 3600 },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return data.data as OSSFriend[];
+  try {
+    const res = await fetch("https://formbricks.com/api/oss-friends", {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!Array.isArray(data?.data) || data.data.length === 0) {
+      throw new Error("empty OSS friends payload");
+    }
+    return data.data as OSSFriend[];
+  } catch {
+    return fallbackFriends as OSSFriend[];
+  }
 }
 
 export async function OSSFriendsPage() {
-  let friends: OSSFriend[];
-  try {
-    friends = await getOSSFriends();
-  } catch {
-    return <p>Error loading OSS Friends.</p>;
-  }
+  const friends = await getOSSFriends();
 
   return (
     <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-      {friends.map((friend, index) => (
+      {friends.map((friend) => (
         <div
-          key={index}
+          key={friend.href}
           className="flex flex-col gap-2 overflow-hidden rounded p-4 border bg-card"
         >
           <Link href={friend.href} className="text-xl font-bold">

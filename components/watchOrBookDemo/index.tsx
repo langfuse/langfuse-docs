@@ -202,7 +202,10 @@ export function Demo({ page }: { page: "talk-to-us" | "watch-demo" }) {
   const isDiscoverOpen = page === "watch-demo";
 
   return (
-    <HomeSection className="md:max-w-5xl xl:max-w-6xl px-4 sm:px-6 md:px-8">
+    <HomeSection
+      reveal={false}
+      className="md:max-w-5xl xl:max-w-6xl px-4 sm:px-6 md:px-8"
+    >
       <div className="not-prose flex flex-col gap-2 mb-8 items-center text-center text-balance">
         <Heading as="h1" size="large" className="m-0">
           <TextHighlight>
