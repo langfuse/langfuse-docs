@@ -88,11 +88,19 @@ jobs:
             version="$(jq -r .version "$file")"
             encoded_name="$(jq -rn --arg n "$name" '$n|@uri')"
             status="$(curl --silent --output /dev/null --write-out '%{http_code}' \
-              "$REGISTRY_URL/v0.1/servers/$encoded_name/versions/$version")"
-            if [ "$status" = "200" ]; then
-              echo "$name $version is already published, skipping."
-              continue
-            fi
-            echo "Publishing $name $version from $file."
-            ./mcp-publisher publish "$file"
+              --retry 3 --retry-all-errors --max-time 30 \
+              "$REGISTRY_URL/v0.1/servers/$encoded_name/versions/$version" || true)"
+            case "$status" in
+              200)
+                echo "$name $version is already published, skipping."
+                ;;
+              404)
+                echo "Publishing $name $version from $file."
+                ./mcp-publisher publish "$file"
+                ;;
+              *)
+                echo "::error::Could not check whether $name $version is published (HTTP $status)."
+                exit 1
+                ;;
+            esac
           done
