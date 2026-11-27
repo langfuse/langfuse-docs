@@ -14,6 +14,7 @@ import {
   Regex,
   Rocket,
   Route,
+  Server,
   ShieldCheck,
   Sparkles,
   SquareTerminal,
@@ -46,6 +47,7 @@ export type DoorAnimation =
   | { kind: "patterns"; pattern: string }
   | { kind: "chat"; question: string; answer: string }
   | { kind: "gateway" }
+  | { kind: "providerTour" }
   | { kind: "budget"; limit: number; owner: string }
   | {
       kind: "guardrail";
@@ -191,30 +193,38 @@ export const ADVENT_DOORS: AdventDoor[] = [
   },
   {
     day: 7,
-    title: "Amazon Bedrock",
+    title: "Self-host the AI Gateway",
     description:
-      "Connect Amazon Bedrock and call its models through the gateway, next to OpenAI and Anthropic.",
-    icon: Cloud,
+      "The gateway is open source and runs as one small, stateless container next to your self-hosted Langfuse. Deploy it with the same Helm chart or Docker Compose setup, and keep provider keys and traces in your own infrastructure.",
+    icon: Server,
     link: {
-      type: "changelog",
-      href: "/changelog/2026-11-10-ai-gateway-bedrock",
+      type: "docs",
+      href: `/self-hosting/configuration/ai-gateway?${ADVENT_UTM}`,
     },
-    animation: { kind: "providers", highlight: ["Amazon Bedrock"] },
+    animation: {
+      kind: "terminal",
+      lines: [
+        "# values.yaml",
+        "langfuse:",
+        "  gateway:",
+        "    enabled: true",
+        "$ helm upgrade langfuse langfuse/langfuse -f values.yaml",
+        "$ curl https://gateway.langfuse.example.com/health",
+        '✓ {"status":"ok"}',
+      ],
+    },
   },
   {
     day: 8,
-    title: "OpenRouter, Vercel AI Gateway, and xAI",
+    title: "Nine providers, your own contracts",
     description:
-      "Add OpenRouter, Vercel AI Gateway, and xAI connections to reach even more models with a single gateway key.",
+      "Connect nine model providers with your own keys, from OpenAI and Anthropic to Amazon Bedrock, Vertex AI, and Azure. You keep your rates and agreements, such as zero data retention. We don't resell tokens or add a markup.",
     icon: Boxes,
     link: {
-      type: "changelog",
-      href: "/changelog/2026-11-10-ai-gateway-openrouter-vercel-xai",
+      type: "docs",
+      href: `/docs/gateway/features/models?${ADVENT_UTM}#supported-providers`,
     },
-    animation: {
-      kind: "providers",
-      highlight: ["OpenRouter", "Vercel AI Gateway", "xAI"],
-    },
+    animation: { kind: "providerTour" },
   },
   {
     day: 9,

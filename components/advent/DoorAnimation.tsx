@@ -922,6 +922,83 @@ function BudgetAnimation({ limit, owner }: { limit: number; owner: string }) {
   );
 }
 
+const PROVIDER_TOUR: {
+  name: string;
+  mark?: ProviderMarkName;
+  formats: string;
+}[] = [
+  {
+    name: "OpenAI",
+    mark: "openai",
+    formats: "Responses, Chat Completions, Decisions, Embeddings",
+  },
+  { name: "Anthropic", mark: "anthropic", formats: "Anthropic Messages" },
+  {
+    name: "Amazon Bedrock",
+    mark: "aws",
+    formats: "Anthropic Messages for Claude, OpenAI formats for other models",
+  },
+  {
+    name: "Google Vertex AI",
+    mark: "gemini",
+    formats: "Chat Completions for Gemini and open models",
+  },
+  {
+    name: "Google AI Studio",
+    mark: "gemini",
+    formats: "Chat Completions, Embeddings",
+  },
+  {
+    name: "Microsoft Azure",
+    mark: "azure",
+    formats: "Anthropic Messages for Claude, OpenAI formats for other models",
+  },
+  {
+    name: "OpenRouter",
+    mark: "openrouter",
+    formats: "Responses, Chat Completions, Anthropic Messages, Embeddings",
+  },
+  {
+    name: "Vercel AI Gateway",
+    formats: "Responses, Chat Completions, Anthropic Messages, and more",
+  },
+  { name: "xAI", formats: "Responses, Chat Completions" },
+];
+
+/** A spotlight moves across the providers and names their native formats. */
+function ProviderTourAnimation() {
+  const tick = useTick(1600);
+  const active = tick % PROVIDER_TOUR.length;
+  const provider = PROVIDER_TOUR[active];
+
+  return (
+    <Stage>
+      <div className="flex w-full max-w-[520px] flex-col gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {PROVIDER_TOUR.map((p, i) => (
+            <span
+              key={p.name}
+              className="adv-tour-chip"
+              data-active={i === active}
+            >
+              {p.mark ? (
+                <svg viewBox="0 0 14 14" className="size-3.5 shrink-0">
+                  <ProviderMark name={p.mark} x={0} y={0} size={14} />
+                </svg>
+              ) : null}
+              <span className="truncate">{p.name}</span>
+            </span>
+          ))}
+        </div>
+        <div key={`formats-${tick}`} className="adv-tour-formats adv-slide-in">
+          <span className="font-medium text-text-primary">{provider.name}</span>
+          <span className="font-mono">{provider.formats}</span>
+        </div>
+      </div>
+    </Stage>
+  );
+}
+
 export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
   switch (spec.kind) {
     case "route":
@@ -960,6 +1037,8 @@ export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
           label={spec.label}
         />
       );
+    case "providerTour":
+      return <ProviderTourAnimation />;
     case "budget":
       return <BudgetAnimation limit={spec.limit} owner={spec.owner} />;
     case "benchmark":

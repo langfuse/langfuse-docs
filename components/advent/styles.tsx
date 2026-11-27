@@ -576,6 +576,22 @@ export function AdventStyles() {
       .adv-guard-result { min-height: 1.5em; color: var(--text-tertiary); font-size: 11px; opacity: 0; transition: opacity .3s; }
       .adv-guard-result[data-visible="true"] { opacity: 1; }
 
+      /* Provider tour (day 8) */
+      .adv-tour-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        padding: 7px 9px;
+        border-radius: 6px;
+        background: var(--surface-bg);
+        border: 1px solid var(--line-structure);
+        font-size: 12px;
+        transition: border-color .3s, box-shadow .3s, transform .3s;
+      }
+      .adv-tour-chip[data-active="true"] { border-color: var(--adv-gold); box-shadow: 0 0 0 3px var(--adv-gold-soft); transform: translateY(-1px); }
+      .adv-tour-formats { display: flex; flex-direction: column; gap: 2px; min-height: 3.4em; font-size: 11px; color: var(--text-secondary); }
+
       /* Budget meter (day 6) */
       .adv-budget-track { position: relative; height: 14px; border-radius: 999px; background: var(--surface-bg); border: 1px solid var(--line-structure); overflow: hidden; }
       .adv-budget-bar { height: 100%; border-radius: 999px; background: var(--adv-gold); transition: width .6s cubic-bezier(.2, .9, .3, 1), background-color .3s; }
