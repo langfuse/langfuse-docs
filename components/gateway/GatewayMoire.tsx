@@ -56,6 +56,7 @@ export function GatewayMoire({
     };
 
     const draw = () => {
+      if (!width || !height) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
       ctx.lineWidth = LINE_WIDTH;
@@ -119,7 +120,6 @@ export function GatewayMoire({
     const resize = () => {
       width = canvas.clientWidth;
       height = canvas.clientHeight;
-      if (!width || !height) return;
       dpr = window.devicePixelRatio || 1;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
@@ -177,6 +177,15 @@ export function GatewayMoire({
     intersectionObserver.observe(canvas);
     document.addEventListener("visibilitychange", syncLoop);
     reducedMotion.addEventListener("change", onMotionChange);
+    // A theme switch repaints at once, so a still frame never keeps old colours.
+    const themeObserver = new MutationObserver(() => {
+      readColors();
+      draw();
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     // Touch devices get the field without the pointer bump.
     const scope = pointerScopeRef?.current ?? canvas.parentElement;
@@ -205,6 +214,7 @@ export function GatewayMoire({
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      themeObserver.disconnect();
       document.removeEventListener("visibilitychange", syncLoop);
       reducedMotion.removeEventListener("change", onMotionChange);
       scope?.removeEventListener("pointermove", onPointerMove);
