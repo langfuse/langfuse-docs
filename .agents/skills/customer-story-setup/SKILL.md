@@ -63,7 +63,7 @@ description if useful):
 4. **Size each image by aspect ratio** (run `sips -g pixelWidth -g pixelHeight <file>` to get dimensions):
    - **Portrait / square** (ratio <= 1:1) -> `<div className="flex justify-center"><Frame fullWidth className="w-1/2">...</Frame></div>`
    - **Landscape** (~1.5:1) -> `<div className="flex justify-center"><Frame fullWidth className="w-2/3">...</Frame></div>`
-   - **Panoramic** (> 2:1) -> `<Frame fullWidth className="w-full">...</Frame>` (no centering wrapper needed)
+   - **Panoramic** (> 2:1) -> `<Frame fullWidth>...</Frame>` (no centering wrapper needed)
 
 If the draft says "screenshot here" without files, **list placeholders** in
 MDX with consistent paths so the user can drop files in later.
@@ -104,7 +104,7 @@ available-internal-links** rule so links resolve.
 6. **Images**: size by aspect ratio (see checklist item 4 under Images above)
    - portrait/square -> `w-1/2` centered
    - landscape -> `w-2/3` centered
-   - panoramic -> `w-full`
+   - panoramic -> `<Frame fullWidth>` (default full width)
 7. **Closing**: `<ImpactChart items={[{ area, impact }, ...]} />` (optional)
    then `<CustomerStoryCTA />`.
 
