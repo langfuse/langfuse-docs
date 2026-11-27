@@ -153,10 +153,10 @@ export function GatewayMoire({
       draw();
     };
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // Runs whatever the reduced-motion setting is, like the rotating value props.
     let onScreen = false;
     const syncLoop = () => {
-      const run = onScreen && !document.hidden && !reducedMotion.matches;
+      const run = onScreen && !document.hidden;
       if (run && !raf) {
         raf = requestAnimationFrame(frame);
       } else if (!run && raf) {
@@ -164,16 +164,6 @@ export function GatewayMoire({
         raf = 0;
         lastFrame = 0;
       }
-    };
-    const onMotionChange = () => {
-      if (reducedMotion.matches) {
-        // Reduced motion holds one still frame at t = 0 without a bump.
-        t = 0;
-        bump.on = 0;
-        target.on = 0;
-        draw();
-      }
-      syncLoop();
     };
 
     const resizeObserver = new ResizeObserver(resize);
@@ -185,7 +175,6 @@ export function GatewayMoire({
     });
     intersectionObserver.observe(canvas);
     document.addEventListener("visibilitychange", syncLoop);
-    reducedMotion.addEventListener("change", onMotionChange);
     // A theme switch repaints at once, so a still frame never keeps old colours.
     const themeObserver = new MutationObserver(() => {
       readColors();
@@ -200,7 +189,7 @@ export function GatewayMoire({
     const scope = pointerScopeRef?.current ?? canvas.parentElement;
     const canHover = window.matchMedia("(hover: hover)").matches;
     const onPointerMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch" || reducedMotion.matches) return;
+      if (event.pointerType === "touch") return;
       const rect = canvas.getBoundingClientRect();
       target.x = event.clientX - rect.left;
       target.y = event.clientY - rect.top;
@@ -225,7 +214,6 @@ export function GatewayMoire({
       intersectionObserver.disconnect();
       themeObserver.disconnect();
       document.removeEventListener("visibilitychange", syncLoop);
-      reducedMotion.removeEventListener("change", onMotionChange);
       scope?.removeEventListener("pointermove", onPointerMove);
       scope?.removeEventListener("pointerleave", onPointerLeave);
     };

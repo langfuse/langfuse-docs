@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
 import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import styles from "./Gateway.module.css";
@@ -16,7 +15,6 @@ const TICK_MS = 1000;
  * shows its filled state) and 0..TICKS-1 while hovered.
  */
 function useDemoTick() {
-  const reduceMotion = useReducedMotion();
   const [tick, setTick] = useState<number | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -27,14 +25,13 @@ function useDemoTick() {
   }, []);
 
   const start = useCallback(() => {
-    if (reduceMotion) return;
     if (timer.current) clearInterval(timer.current);
     setTick(0);
     timer.current = setInterval(
       () => setTick((t) => ((t ?? 0) + 1) % TICKS),
       TICK_MS,
     );
-  }, [reduceMotion]);
+  }, []);
 
   useEffect(() => stop, [stop]);
 
