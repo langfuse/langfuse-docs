@@ -689,3 +689,75 @@ Run `npx vitest run test/application-experiment.test.ts` with Vitest installed.
 </LangTabs>
 
 These assertions implement the **every required case must pass** policy. For a suite with explicitly accepted failures, use the [approved-baseline gate](#approved-baseline) instead. A test that expects the gate's assertion to throw would turn a real regression into a passing CI job.
+
+### Pipeline configuration
+
+The test files above run in any CI system that can install Python or Node.js. Each pipeline needs to:
+
+- Provide `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the CI system's secret store. Never commit them to the repository.
+- Set `APP_VERSION` to the commit under test, so every experiment in Langfuse links back to a specific change.
+- Fail the job when the test fails. Pytest and Vitest exit with a non-zero code on a failed assertion, which fails the pipeline.
+
+The examples use the Python SDK and Pytest. For the JS/TS SDK, make three changes in either pipeline:
+
+- Use a Node.js image, for example `node:24`, instead of `python:3.14`.
+- Replace the two `pip install` commands with `npm ci`.
+- Replace the `pytest` command with a Vitest command that writes the same JUnit file:
+
+```bash
+npx vitest run test/application-experiment.test.ts --reporter=default --reporter=junit --outputFile.junit=langfuse-experiment.xml
+```
+
+#### GitLab CI
+
+Add `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` as masked variables under **Settings** > **CI/CD** > **Variables**. GitLab passes them to the job as environment variables.
+
+```yaml title=".gitlab-ci.yml"
+langfuse-experiment:
+  image: python:3.14
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    APP_VERSION: $CI_COMMIT_SHA
+  script:
+    - pip install langfuse pytest
+    - pip install -r requirements.txt # Your application's dependencies.
+    - pytest -s test_application_experiment.py --junitxml=langfuse-experiment.xml
+  artifacts:
+    when: always
+    reports:
+      junit: langfuse-experiment.xml
+```
+
+The JUnit report shows the experiment as one test in the merge request. If several cases fail, it reports only the first assertion failure. Follow the experiment link printed by `result.format()` in the job log to inspect all case results in Langfuse.
+
+#### Jenkins
+
+Store each Langfuse value as a **Secret text** credential, then load it with `credentials()`. Jenkins masks these values in the build log.
+
+```groovy title="Jenkinsfile"
+pipeline {
+  agent { docker { image 'python:3.14' } }
+  environment {
+    LANGFUSE_PUBLIC_KEY = credentials('langfuse-public-key')
+    LANGFUSE_SECRET_KEY = credentials('langfuse-secret-key')
+    LANGFUSE_BASE_URL   = 'https://cloud.langfuse.com'
+  }
+  stages {
+    stage('Langfuse experiment') {
+      steps {
+        sh 'pip install langfuse pytest'
+        sh 'pip install -r requirements.txt' // Your application's dependencies.
+        sh 'APP_VERSION="$GIT_COMMIT" pytest -s test_application_experiment.py --junitxml=langfuse-experiment.xml'
+      }
+    }
+  }
+  post {
+    always {
+      junit 'langfuse-experiment.xml'
+    }
+  }
+}
+```
+
+The `docker` agent requires the Docker Pipeline plugin, and the `junit` step requires the JUnit plugin. If you use another Langfuse region or a self-hosted instance, change `LANGFUSE_BASE_URL` to match.
