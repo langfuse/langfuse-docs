@@ -410,17 +410,17 @@ export const openSource = {
 export const steps = {
   connect: {
     title: "Connect your providers",
-    body: "Add your own OpenAI, Anthropic, Bedrock, Vertex, Azure or other provider accounts. Your keys stay in the gateway, and you keep your own contracts and pricing with no markup.",
+    body: "Add your own provider accounts. You keep your contracts and pricing, with no markup.",
     href: "/docs/gateway/features/models",
   },
   keys: {
     title: "Hand out gateway keys",
-    body: "Give each person or service its own gateway key instead of a provider key. Each key carries who it belongs to, which models it can use and its budget, and you can revoke it anytime.",
+    body: "Give each person or service its own key, with its own models and budget. Revoke it anytime.",
     href: "/docs/gateway/features/api-keys",
   },
   url: {
     title: "Change one URL",
-    body: "Point your apps and coding agents at the gateway. Requests keep each provider’s native format, so nothing else changes. From then on, every call is costed, checked against your budgets, and recorded in Langfuse.",
+    body: "Point your apps and coding agents at the gateway. Nothing else changes, and every call is traced in Langfuse.",
     href: "/docs/gateway/get-started/first-request",
   },
 };

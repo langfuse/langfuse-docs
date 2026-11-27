@@ -50,9 +50,9 @@ Figure: AI Gateway overview.
 
 ## How it works: change the base URL, keep the rest
 
-1. **Connect your providers.** Add your own OpenAI, Anthropic, Bedrock, Vertex, Azure or other provider accounts. Your keys stay in the gateway, and you keep your own contracts and pricing with no markup. [Read the docs](/docs/gateway/features/models)
-2. **Hand out gateway keys.** Give each person or service its own gateway key instead of a provider key. Each key carries who it belongs to, which models it can use and its budget, and you can revoke it anytime. [Read the docs](/docs/gateway/features/api-keys)
-3. **Change one URL.** Point your apps and coding agents at the gateway. Requests keep each provider’s native format, so nothing else changes. From then on, every call is costed, checked against your budgets, and recorded in Langfuse. [Read the docs](/docs/gateway/get-started/first-request)
+1. **Connect your providers.** Add your own provider accounts. You keep your contracts and pricing, with no markup. [Read the docs](/docs/gateway/features/models)
+2. **Hand out gateway keys.** Give each person or service its own key, with its own models and budget. Revoke it anytime. [Read the docs](/docs/gateway/features/api-keys)
+3. **Change one URL.** Point your apps and coding agents at the gateway. Nothing else changes, and every call is traced in Langfuse. [Read the docs](/docs/gateway/get-started/first-request)
 
 ```diff
  client = OpenAI(
