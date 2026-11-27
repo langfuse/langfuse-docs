@@ -541,7 +541,7 @@ Missing evaluations, duplicate identifiers, and changed case sets raise script e
 
 Keep your existing application and grader in Pytest or Vitest. These examples load local JSON cases, call your application, publish its outputs and check results to Langfuse, and require every case to pass. They do not require a hosted dataset or a separate LLM judge.
 
-Configure [Langfuse credentials and SDK dependencies](/resources/engineering/evaluate-existing-application#setup) with Python SDK v5 or JS/TS SDK v6 or newer. Replace the application and grader imports with your own modules. Here, `run_application(input)` / `runApplication(input)` returns a non-null output and `grade(output, expected_output)` returns a boolean. If your suite uses `run_checks()`, adapt its named checks into evaluator results and require every required check to be present and passing.
+Configure [Langfuse credentials and SDK dependencies](/resources/engineering/evaluate-existing-application#setup) with [Python SDK v5 or JS/TS SDK v6](/changelog/2026-10-14-python-sdk-v5-js-sdk-v6) or newer. Replace the application and grader imports with your own modules. Here, `run_application(input)` / `runApplication(input)` returns a non-null output and `grade(output, expected_output)` returns a boolean. If your suite uses `run_checks()`, adapt its named checks into evaluator results and require every required check to be present and passing.
 
 Save your cases in this format, keeping IDs stable between releases:
 
@@ -587,7 +587,8 @@ def test_application_checks():
         return Evaluation(name="existing_checks", value=int(passed))
 
     langfuse = get_client()
-    langfuse.auth_check()  # Raises UnauthorizedError when Langfuse rejects the keys.
+    # Raises UnauthorizedError on rejected keys; returns False when keys are missing.
+    assert langfuse.auth_check(), "Langfuse client is disabled"
     try:
         result = langfuse.run_experiment(
             name="Application checks",
