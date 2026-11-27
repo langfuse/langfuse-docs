@@ -27,16 +27,16 @@ import { Book, Server } from "lucide-react";
 - **Give your agents the enrichment layer.** Agents start from the topics via API, MCP, and CLI and load full traces only where they need them.
 - **Go from a topic to a fix.** Filter the tracing table by the topic, read a few of its traces, then fix the prompt or add a new evaluator.
 
-## Four questions you can ask about a trace [#facets]
+## Four summaries from different view points per trace [#facets]
 
-A **facet** is a question Topics answers about each selected trace. Choose from four built-in facets.
+Topics summarizes each trace from different angles, called **facets**, then clusters every facet summary and names the clusters. There are four built-in facets:
 
 - **Intent:** what the agent was asked to do
 - **Sentiment:** how the user felt about the interaction
 - **Outcome:** how the trace ended
 - **Issues:** the main problem in how the trace was handled
 
-For a travel agent, “Move a flight from Friday to Sunday” might be the Intent **facet summary** for one trace. Topics groups similar summaries into a **topic** such as **Flight changes**. Issues groups traces separately, so you can find a booking failure across several kinds of requests.
+Traces are clustered per facet, so a problem that occurs in multiple Intent topics still shows up as one topic under Issues.
 
 ## Live maps and snapshots [#maps-and-snapshots]
 
@@ -44,7 +44,7 @@ A [live map](/docs/observability/features/topics#maps-and-snapshots) groups the 
 
 ## How Topics works [#how-it-works]
 
-After a matching trace goes idle, Topics analyzes its selected facets. It turns each summary into an **embedding**, a numeric representation of its meaning, and uses those embeddings to find clusters within each facet. Live maps refresh daily. A snapshot groups traces once for the selected time window.
+After a matching trace goes idle, Topics analyzes its selected facets. It turns each summary into an embedding, a numeric representation of its meaning, and uses those embeddings to find clusters within each facet. Live maps refresh daily. A snapshot groups traces once for the selected time window.
 
 <TopicsArchitectureDiagram />
 
