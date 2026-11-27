@@ -1,0 +1,125 @@
+---
+title: "Know Your Agent (KYA): what it is and why it matters"
+description: "Know Your Agent (KYA) extends KYC to AI agents: who an agent is, who is accountable for it, what it may do, and what it actually did. How to answer those questions for your own agents."
+tags: [guide, agents]
+---
+
+import { SignupCTA } from "@/components/SignupCTA";
+
+# Know Your Agent (KYA): what it is and why it matters
+
+Know Your Agent (KYA) applies the idea behind Know Your Customer (KYC) to AI agents. Before an agent is allowed to buy something, move data, or act for a person, someone needs to know which agent it is, who stands behind it, and what it is allowed to do. As agents take on more work inside companies and between them, that question moves from a niche concern in payments to a basic requirement for running agents in production.
+
+<SignupCTA className="my-6" />
+
+**TL;DR:** KYA means being able to answer four questions about an AI agent: **who it is** (identity), **who is accountable** for it (ownership and delegation), **what it may do** (models, tools, data, spending), and **what it actually did** (a record of its actions). Payment networks and identity vendors use KYA mainly for verifying agents that arrive from outside. Teams that build agents need the same answers for their own agents. Identity and permissions come from your agent platform and access controls. The record of behavior comes from tracing: with [Langfuse](/docs/observability/overview), every agent run is a trace of model calls, tool calls, and decisions, attributed to the agent, its version, and the user it acted for.
+
+<Video
+  src="https://static.langfuse.com/changelog-videos/2026-07-13-graph-view-modes.mp4"
+  aspectRatio={16 / 9}
+  gifStyle
+  title="Agent graph of a traced agent run in Langfuse"
+  description="Trace detail of an agent trace, Graph tab next to Tree and Timeline. In Aggregated mode, repeated steps collapse into one node; Expanded mode shows the run as it happened, including each tool call."
+/>
+
+## What KYA means [#definition]
+
+KYA is a framework, not a single standard. Vendors, payment networks, and researchers define it slightly differently, as of November 2026, but the definitions share four parts:
+
+| Question                   | What it covers                                                             |
+| -------------------------- | -------------------------------------------------------------------------- |
+| Who is this agent?         | A stable identity for the agent and its version, which can be verified     |
+| Who is accountable for it? | The person or organization that operates it, and the user it is acting for |
+| What is it allowed to do?  | The models, tools, data, and spending limits it may use                    |
+| What did it actually do?   | A record of its actions and decisions that can be reviewed later           |
+
+The first three are checked before an agent acts. The fourth is what makes the first three trustworthy over time: an agent that is verified but never observed can still drift, loop, or misuse a tool, and nobody would know.
+
+## Why KYA matters now [#why-now]
+
+- **Agents act, not just answer.** An agent that calls tools can send emails, change records, run code, or make purchases. Mistakes have consequences beyond a wrong answer.
+- **Accountability gets blurry.** When an agent acts for a user, through a platform, on a model from a third party, it isn't obvious who is responsible for a given action unless that chain is recorded.
+- **Agents talk to other agents.** Services increasingly receive requests from agents instead of people. Payment networks have started to work on shared approaches to identifying agents: in September 2026, Visa, Mastercard, and Ant International announced common KYA principles for agent onboarding and identification, according to trade press coverage.
+- **Regulators expect records.** Rules such as the EU AI Act require logging for high-risk AI systems. See [EU AI Act record-keeping](/resources/engineering/eu-ai-act-record-keeping).
+
+## Two sides of KYA [#two-sides]
+
+KYA shows up in two different situations, and they need different tools:
+
+- **Agents that come to you.** A merchant, bank, or API provider receives a request from an agent it didn't build. It needs to verify the agent's identity and the authority it claims, usually with credentials or tokens from the agent's platform or a payment network. This is the focus of identity verification vendors and payment networks.
+- **Agents you run.** A company deploys its own agents, or lets employees use coding agents and assistants. It needs an inventory of those agents, clear owners, limits on what they can call, and a record of what they did. This is an engineering and governance problem, and observability is a large part of the answer.
+
+The rest of this page covers the second side.
+
+## Answer the KYA questions for your own agents [#own-agents]
+
+### Identity: name and version every agent [#identity]
+
+Give every agent a stable name and record it on each run. In Langfuse, use the trace name or a tag for the agent, [environments](/docs/observability/features/environments) to separate production from staging, and a [release or version](/docs/observability/features/releases-and-versioning) to tell agent versions apart. Link each run to the [prompt version](/docs/prompt-management/features/link-to-traces) it used. A filter on the agent name then works as a live inventory: which agents exist, how often they run, and which versions are in production.
+
+### Accountability: record who the agent acted for [#accountability]
+
+Record the [user ID](/docs/observability/features/users) the agent acted for and group multi-step work into [sessions](/docs/observability/features/sessions). Keep the owning team in [metadata](/docs/observability/features/metadata) or tags. For model access, give each agent its own [service account key](/resources/engineering/ai-gateway-api-keys#service-accounts) in the [Langfuse AI Gateway](/docs/gateway/overview), named after the agent, so every model call it makes is attributed to it even when it isn't instrumented.
+
+### Authority: limit what the agent can call [#authority]
+
+Permissions for tools and data live in your agent framework and your own systems. For models, the gateway can limit each agent's key to approved models with [model patterns](/resources/engineering/ai-model-allowlist#per-key), and you can revoke one agent's key without affecting others. [Alerts](/docs/observability/features/alerts) on cost or error metrics catch an agent that starts to spend or fail more than expected.
+
+<Callout type="info">
+  Tracing records what an agent did; it doesn't stop it. Enforce permissions
+  where the agent acts: in tool implementations, API scopes, and the
+  credentials you give the agent.
+</Callout>
+
+### Behavior: keep a reviewable record [#behavior]
+
+A trace records each step of an agent run: model calls with inputs and outputs, tool calls with arguments and results, retrievals, and errors. The [agent graph](/docs/observability/features/agent-graphs) shows the path the agent took, and you can filter observations by the tools an agent called. To turn the record into oversight:
+
+- **Evaluate runs** with [LLM-as-a-Judge](/docs/evaluation/evaluation-methods/llm-as-a-judge) evaluators for policy compliance or task success, and route samples to people in [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues). See [AI agent evaluation](/resources/engineering/ai-agent-evaluation).
+- **Keep records as long as policy requires** with [data retention](/docs/administration/data-retention) and [blob storage export](/docs/api-and-data-platform/features/export-to-blob-storage).
+- **Track changes to the agent** in Langfuse [audit logs](/docs/administration/audit-logs), such as prompt releases and key changes.
+- **Mask sensitive data** before it is stored. See [PII masking for LLM applications](/resources/engineering/pii-masking-llm-applications).
+
+## A KYA checklist for agents you run [#checklist]
+
+- [ ] Every agent has a name, an owner, and a version recorded on each run.
+- [ ] Every run records the user or system the agent acted for.
+- [ ] Every agent has its own credentials, which can be revoked on their own.
+- [ ] Models, tools, and data access are limited to what the agent needs.
+- [ ] Every run is traced, including tool calls and their results.
+- [ ] Runs are evaluated or reviewed, and alerts cover cost and error spikes.
+- [ ] Records are kept for the required period, and sensitive data is masked.
+
+## FAQ
+
+<FaqDetails>
+
+<Details id="kya-vs-kyc">
+<Summary>What is the difference between KYA and KYC?</Summary>
+
+KYC verifies a person or business before it can use a financial service. KYA verifies an AI agent, the person or business accountable for it, and what it is authorized to do. Because an agent's behavior can change with its model, prompt, or tools, KYA also needs ongoing monitoring of what the agent does, not only a check at onboarding.
+
+</Details>
+
+<Details id="is-kya-a-standard">
+<Summary>Is KYA a formal standard or regulation?</Summary>
+
+Not as of November 2026. KYA is an emerging practice. Payment networks, identity vendors, and researchers have proposed frameworks, and regulations such as the EU AI Act set related requirements for logging and oversight, but there is no single KYA specification.
+
+</Details>
+
+<Details id="langfuse-verifies-agents">
+<Summary>Does Langfuse verify the identity of third-party agents?</Summary>
+
+No. Langfuse records and evaluates what your own agents and AI applications do. Verifying agents that call your services from outside is done with identity and payment providers.
+
+</Details>
+
+<Details id="coding-agents-kya">
+<Summary>Does KYA apply to coding agents?</Summary>
+
+Yes. Coding agents run code and change repositories on behalf of developers. Routing them through the [Langfuse AI Gateway](/docs/gateway/overview) gives each developer their own key and records every model call they make. See [coding agent cost tracking](/resources/engineering/coding-agent-cost-tracking) and [tracing coding agents](/resources/engineering/coding-agent-tracing).
+
+</Details>
+
+</FaqDetails>
