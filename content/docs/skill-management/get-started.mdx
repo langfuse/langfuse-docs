@@ -9,6 +9,16 @@ import { SignupCTA } from "@/components/SignupCTA";
 
 # Get Started with Skill Management
 
+<AvailabilityBanner
+  availability={{
+    hobby: "full",
+    core: "full",
+    pro: "full",
+    enterprise: "full",
+    selfHosted: "v4.73",
+  }}
+/>
+
 This guide walks you through creating and using a skill with Langfuse. If you're looking to understand what skill management is and why it matters, check out the [Skill Management Overview](/docs/skill-management/overview) first. For details on how skills are structured in Langfuse and how it works in the background, see [Core Concepts](/docs/prompt-and-skill-management/concepts).
 
 **_Looking to manage prompts instead?_** _Follow the [Get Started with Prompt Management guide](/docs/prompt-management/get-started)._
@@ -16,6 +26,7 @@ This guide walks you through creating and using a skill with Langfuse. If you're
 <SignupCTA className="my-6" />
 
 import { Details, Summary } from "@/components/Details";
+import McpSkillInstall from "@/components-mdx/get-started/mcp-skill-install.mdx";
 import { FaqPreview } from "@/components/faq/FaqPreview";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
@@ -26,7 +37,7 @@ import { Link } from "@/components/ui/link";
 
 Install the [Langfuse Agent Skill](https://github.com/langfuse/skills) to let your coding agent access all Langfuse features.
 
-<Tabs items={["Ask your coding agent", "Cursor plugin", "Manual installation"]}>
+<Tabs items={["Ask your coding agent", "Langfuse MCP", "Cursor plugin", "Manual installation"]}>
 
 <Tab>
 
@@ -36,6 +47,18 @@ Ask your coding agent to install the skill by pointing to the [GitHub repository
 Install the Langfuse Agent Skill from github.com/langfuse/skills
 and use it to create and publish a skill for this application
 with Langfuse.
+```
+
+</Tab>
+
+<Tab>
+
+<McpSkillInstall />
+
+Then prompt your agent:
+
+```txt filename="Agent instruction"
+Create and publish a skill for this application with Langfuse.
 ```
 
 </Tab>

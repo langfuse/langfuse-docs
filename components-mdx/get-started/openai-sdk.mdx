@@ -1,12 +1,14 @@
 import Env from "@/components-mdx/env-python.mdx";
 
 ```bash
-pip install langfuse
+pip install langfuse openai
 ```
 
 Set your Langfuse credentials as environment variables so the SDK knows which project to write to.
 
 <Env />
+
+The SDK reads environment variables, not the file itself, so load the file into your shell first with `set -a; . ./.env; set +a`.
 
 Swap the regular OpenAI import to Langfuse’s OpenAI drop-in. It behaves like the regular OpenAI client while also recording each call for you.
 

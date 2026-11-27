@@ -106,6 +106,13 @@ type Tier = {
 const TEAMS_ADDON = "Teams add-on";
 const YEARLY_COMMITMENT = "Yearly Commitment";
 
+const yearlyCommitmentBenefits = [
+  "Custom volume pricing",
+  "Billing via AWS Marketplace",
+  "Billing via invoice",
+  "Vendor onboarding",
+] as const;
+
 const tiers: Record<DeploymentOption, Tier[]> = {
   cloud: [
     {
@@ -220,16 +227,6 @@ const tiers: Record<DeploymentOption, Tier[]> = {
         "Support SLA",
         "Named lead support engineer",
       ],
-      addOn: {
-        name: "Yearly Commitment",
-        mainFeatures: [
-          "Custom Volume Pricing",
-          "Architecture reviews",
-          "Billing via AWS Marketplace",
-          "Billing via Invoice",
-          "Vendor Onboarding",
-        ],
-      },
       cta: "Talk to sales",
     },
   ],
@@ -485,14 +482,14 @@ const sections: Section[] = [
         },
       },
       {
-        name: "Custom Usage Pricing",
-        description: "Custom volume based pricing for large-scale projects.",
+        name: "Custom volume pricing",
+        description: "Custom volume-based pricing for committed contracts.",
         tiers: {
           cloud: {
             Hobby: false,
-            Core: false,
-            Pro: false,
-            Enterprise: "Available with " + YEARLY_COMMITMENT,
+            Core: YEARLY_COMMITMENT,
+            Pro: YEARLY_COMMITMENT,
+            Enterprise: YEARLY_COMMITMENT,
           },
         },
       },
@@ -1310,16 +1307,38 @@ const sections: Section[] = [
         description:
           "Deployment, hosting, and rollout guidance for production self-hosted environments.",
         tiers: {
+          selfHosted: {
+            "Open Source": false,
+            Enterprise: true,
+            Government: true,
+          },
+        },
+      },
+      {
+        name: "Onboarding support",
+        href: "/support#onboarding",
+        description:
+          "Onboarding workshops and best-practice setup for your team.",
+        tiers: {
           cloud: {
             Hobby: false,
             Core: false,
             Pro: false,
             Enterprise: true,
           },
-          selfHosted: {
-            "Open Source": false,
-            Enterprise: true,
-            Government: true,
+        },
+      },
+      {
+        name: "Architecture reviews",
+        href: "/support#onboarding",
+        description:
+          "Architecture reviews when integrating Langfuse into your platform.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: false,
+            Pro: false,
+            Enterprise: YEARLY_COMMITMENT,
           },
         },
       },
@@ -1670,9 +1689,9 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "Self-serve",
-            Pro: "Self-serve",
-            Enterprise: "Self-serve, Contact sales for " + YEARLY_COMMITMENT,
+            Core: "Self-serve, or contact sales for " + YEARLY_COMMITMENT,
+            Pro: "Self-serve, or contact sales for " + YEARLY_COMMITMENT,
+            Enterprise: "Self-serve, or contact sales for " + YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1686,9 +1705,9 @@ const sections: Section[] = [
         tiers: {
           cloud: {
             Hobby: false,
-            Core: "Credit card",
-            Pro: "Credit card",
-            Enterprise: "Credit card, Invoice",
+            Core: "Credit card, Invoice (" + YEARLY_COMMITMENT + ")",
+            Pro: "Credit card, Invoice (" + YEARLY_COMMITMENT + ")",
+            Enterprise: "Credit card, Invoice (" + YEARLY_COMMITMENT + ")",
           },
           selfHosted: {
             "Open Source": false,
@@ -1704,7 +1723,7 @@ const sections: Section[] = [
             Hobby: false,
             Core: "Monthly or " + YEARLY_COMMITMENT,
             Pro: "Monthly or " + YEARLY_COMMITMENT,
-            Enterprise: YEARLY_COMMITMENT,
+            Enterprise: "Monthly or " + YEARLY_COMMITMENT,
           },
           selfHosted: {
             "Open Source": false,
@@ -1726,6 +1745,19 @@ const sections: Section[] = [
             "Open Source": false,
             Enterprise: true,
             Government: true,
+          },
+        },
+      },
+      {
+        name: "Vendor onboarding",
+        description:
+          "Support for vendor portals, procurement forms, and onboarding workflows.",
+        tiers: {
+          cloud: {
+            Hobby: false,
+            Core: YEARLY_COMMITMENT,
+            Pro: YEARLY_COMMITMENT,
+            Enterprise: YEARLY_COMMITMENT,
           },
         },
       },
@@ -1883,7 +1915,8 @@ const FeatureCell = ({
               <InfoIcon className="inline-block ml-1 size-3" />
             </HoverCardTrigger>
             <HoverCardContent className="w-60">
-              Available when committing to a yearly contract.
+              Available when committing to a yearly contract (subject to a
+              minimum contract value).
             </HoverCardContent>
           </HoverCard>
         )}
@@ -2121,6 +2154,49 @@ export function PricingPlans({ variant }: { variant: DeploymentOption }) {
           );
         })}
       </div>
+      {variant === "cloud" && (
+        <Card
+          id="yearly-commitment"
+          hoverStripes
+          className="relative mt-6 scroll-mt-28"
+        >
+          <div className="flex flex-col gap-4 p-4 lg:p-6 @2xl:flex-row @2xl:items-center @2xl:justify-between">
+            <div className="space-y-1 text-left">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-lg font-semibold text-foreground">
+                  Yearly commitment
+                </CardTitle>
+                <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-surface-1 border border-line-structure text-muted-foreground">
+                  Optional
+                </span>
+              </div>
+              <CardDescription className="text-left">
+                Available on any paid plan (Core, Pro, or Enterprise) starting
+                from a minimum contract value.
+              </CardDescription>
+            </div>
+            <Button
+              variant="secondary"
+              size="default"
+              href="/talk-to-us?deployment=cloud"
+              wrapperClassName="w-full shrink-0 @2xl:w-auto"
+              className="justify-center! group-hover:border-line-structure hover:border-line-cta"
+            >
+              Talk to sales
+            </Button>
+          </div>
+          <div className="border-t border-line-structure p-4 lg:px-6 lg:py-4">
+            <ul className="flex flex-col gap-y-2.5 text-sm @xl:flex-row @xl:flex-wrap @xl:gap-x-6 @4xl:gap-x-8">
+              {yearlyCommitmentBenefits.map((benefit) => (
+                <li key={benefit} className="flex items-start space-x-2">
+                  <Check className="shrink-0 mt-0.5 h-4 w-4 text-primary" />
+                  <span className="text-muted-foreground">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

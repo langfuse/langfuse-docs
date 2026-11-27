@@ -1,6 +1,6 @@
 ---
 title: Topics
-description: Continously surface topics in your traces to understand which traces matter most.
+description: Continuously surface topics in your traces to understand which traces matter most.
 ---
 
 import { Steps, Step } from "@/components/docs";
@@ -11,14 +11,14 @@ import { TopicsArchitectureDiagram } from "@/components/TopicsArchitectureDiagra
 Topics groups similar traces into clusters to easily discover patterns in your trace data. See what users ask for, how interactions go, and where your application struggles without having to look at all of your traces by hand.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/topics-views.mp4"
+  src="https://static.langfuse.com/docs-videos/topics-views.mp4?v=2"
   title="Treemap and scatter plot views of the Issues facet"
   description="The Issues facet of a live map is shown as a treemap, then switched to the scatter plot. Hovering a point shows the summary of its trace, and clicking it opens the trace."
   aspectRatio={16 / 9}
   controls={false}
 />
 
-## How Topics works and what it is [#how-it-works]
+## How Topics works [#how-it-works]
 
 A **facet** is a question you want to answer about each trace. Topics summarizes each trace for the selected facets, embeds those summaries, and groups similar summaries into named topics.
 
@@ -183,8 +183,6 @@ A **live map** follows a filtered set of traces over time. A **snapshot** analyz
 
 ## Get started [#get-started]
 
-The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
-
 <Callout type="warning">
   The summary model receives full inputs/outputs and some metadata of selected traces. The embedding and grouping models receive generated summaries, which can still contain sensitive data. Apply [masking](/docs/observability/features/masking) before ingestion to keep sensitive content out of model requests.
 </Callout>
@@ -212,7 +210,7 @@ Add an [LLM connection](/docs/administration/llm-connection) under **Settings > 
 
 ### Select your traces
 
-Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate, as to not loose topics. Consider costs.
+Choose filters and a sampling rate. It makes sense to filter for single agents, for example by `traceName`. You can always create multiple topic maps. We recommend a 100% sampling rate so you do not lose topics. Consider costs.
 
 <Callout type="info">
   Topics needs recorded model conversations on `GENERATION` observations. Therefore,
@@ -240,7 +238,7 @@ Open the map picker to create a **New live map** or **New snapshot**.
 | Live map | Analyzes new matching traces continuously and updates topics daily.         |
 | Snapshot | Groups traces from a selected time window once, without changing live maps. |
 
-Live maps wait for a trace to finish before analyzing it. The default is five minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
+Live maps wait for a trace to finish before analyzing it. The default is 10 minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
 
 Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand instead of waiting for the daily refresh.
 
@@ -248,7 +246,7 @@ Snapshots also reuse existing summaries and summarize more traces if required. C
 
 <Callout type="info">
   A snapshot needs at least 10 applicable summarized traces per selected facet.
-  Small samples can produce broad topics. We recommend at least more than 150 traces
+  Small samples can produce broad topics. We recommend at least 150 traces
   to see meaningful clusters.
 </Callout>
 
@@ -274,14 +272,30 @@ Your model provider charges separately for summarization, embeddings, and topic 
 
 Open the map picker or a run in **Settings -> History** to see **Estimated costs**, which includes topic naming when pricing is available. Check your provider's invoice for actual charges.
 
-## Access results via API [#api]
+## Access results via API, MCP, and CLI [#api]
 
-Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments for your own analyses.
+Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstabletopics) to retrieve current live-map topics, summaries, and assignments. The [Langfuse CLI](/docs/api-and-data-platform/features/cli) wraps those endpoints, and the [MCP server](/docs/api-and-data-platform/features/mcp-server) exposes them as tools, including to [Halo](/docs/api-and-data-platform/features/halo). Start from the topics, then load full traces only where you need them.
 
 <Callout type="info">
-  These endpoints use the `/api/public/unstable` namespace and may change between releases.
+  These endpoints and MCP tools use the `/api/public/unstable` namespace and may
+  change between releases.
 </Callout>
 
 ## Paused processing
 
 If Topics pauses because of a provider or billing error, resolve the error, then select **Turn back on** in the Topics banner and save. Updating model settings alone does not resume processing.
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="self-hosted-version">
+<Summary>Which version of self-hosted Langfuse do I need to use Topics?</Summary>
+
+Topics works on self-hosted Langfuse **v4.86.0 or later** with no extra configuration.
+
+Configure [blob storage lifecycle expiry for Topics transcripts](/self-hosting/deployment/infrastructure/blobstorage#topics-transcript-expiry) (or enable the worker cleaner), and confirm both web and worker can reach your [LLM provider endpoints](/self-hosting/security/networking). For troubleshooting or tuning worker concurrency, see [Troubleshoot self-hosted Topics](/faq/all/troubleshoot-self-hosted-topics).
+
+</Details>
+
+</FaqDetails>

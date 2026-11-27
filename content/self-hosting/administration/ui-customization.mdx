@@ -58,7 +58,7 @@ Replace the Langfuse mark in the sidebar with your organization's logo.
 
 Organizations that operate multiple Langfuse deployments (e.g. for development, staging, and production, or per business unit) can configure a list of instances. It is rendered as an instance switcher in the sidebar user menu so users can quickly move between deployments, similar to the region switcher on Langfuse Cloud.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth>
   ![UI Customization Instance
   Switcher](/images/docs/ui-customization-instance-switcher.png)
 </Frame>
@@ -78,6 +78,14 @@ Notes:
 - The list is per-deployment configuration. Set the same value on all deployments so the switcher is consistent everywhere.
 - Names must be unique, and URLs must use `http` or `https`. Names are what users pick from in the menu, and other URL schemes would not open a Langfuse deployment.
 - If the value is not valid JSON in the expected shape, the switcher is hidden and a warning naming the problem is logged; the deployment still starts.
+
+## Public sharing [#public-sharing]
+
+Turn off [public sharing of traces and sessions](/docs/observability/features/url#disable-public-sharing) for every organization on the instance. The organization setting is then shown as off and cannot be changed.
+
+| Variable                          | Description                                                    |
+| --------------------------------- | -------------------------------------------------------------- |
+| `LANGFUSE_DISABLE_PUBLIC_SHARING` | Set to `true` to turn off public sharing. Defaults to `false`. |
 
 ## LLM API/Gateway Connection defaults
 

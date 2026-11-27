@@ -44,6 +44,33 @@ export const productLinks: NavPanelLink[] = [
   { name: "AI Gateway", href: "/docs/gateway/overview", icon: Network },
 ];
 
+export type NavCta = {
+  id: "tracing" | "gateway";
+  title: string;
+  description: string;
+  cta: string;
+  href: string;
+  badge?: string;
+};
+
+export const productCtas: NavCta[] = [
+  {
+    id: "tracing",
+    title: "AI Observability",
+    description: "Trace every prompt, tool call, latency, and cost.",
+    cta: "Learn more",
+    href: "/docs/observability/overview",
+  },
+  {
+    id: "gateway",
+    title: "AI Gateway",
+    description: "Route model calls, control access, and track spend.",
+    cta: "Learn more",
+    href: "/docs/gateway/overview",
+    badge: "New",
+  },
+];
+
 export const resourcesLinks: NavPanelLink[] = [
   { name: "Academy", href: "/academy", icon: BookOpen },
   { name: "Workshop", href: "/workshop", icon: Presentation },
