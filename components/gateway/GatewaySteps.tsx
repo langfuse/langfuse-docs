@@ -38,9 +38,9 @@ function useDemoTick() {
   return { tick, handlers: { onMouseEnter: start, onMouseLeave: stop } };
 }
 
-const fieldLabel = "text-[13px] font-semibold leading-[1.3] text-text-primary";
+const fieldLabel = "text-[12px] font-semibold leading-[1.3] text-text-primary";
 const field =
-  "flex h-[34px] items-center justify-between gap-2 rounded-[6px] border bg-card px-2.5 text-[13px] transition-colors duration-200";
+  "flex h-7 items-center justify-between gap-2 rounded-[6px] border bg-card px-2.5 text-[12px] transition-colors duration-200";
 
 function DialogFrame({
   title,
@@ -64,20 +64,20 @@ function DialogFrame({
     <div
       {...handlers}
       aria-hidden
-      className="relative mt-2 @2xl:mt-0 @3xl:mt-2 overflow-hidden rounded-[10px] border border-line-structure bg-card shadow-[0_8px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.05)]"
+      className="relative mt-2 flex flex-col overflow-hidden rounded-[2px] border border-line-structure bg-card shadow-[0_8px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.05)] @2xl:mt-0 @3xl:mt-2 @3xl:flex-1"
     >
-      <div className="flex items-center justify-between border-b border-line-structure px-4 py-3 text-[16px] font-semibold tracking-[-0.01em] text-text-primary">
+      <div className="flex items-center justify-between border-b border-line-structure px-4 py-1.5 text-[14px] font-semibold tracking-[-0.01em] text-text-primary">
         <span>{title}</span>
         <span className="font-normal text-text-tertiary">×</span>
       </div>
-      <div className="flex flex-col gap-1.5 px-4 py-3.5">{children}</div>
-      <div className="flex items-center justify-end gap-2 border-t border-line-structure px-4 py-3">
+      <div className="flex flex-1 flex-col gap-1 px-4 py-2.5">{children}</div>
+      <div className="flex items-center justify-end gap-2 border-t border-line-structure px-4 py-1.5">
         <span className="mr-auto min-w-0 truncate font-mono text-[11px] text-muted-green">
           {status}
         </span>
         <span
           className={cn(
-            "inline-flex h-[30px] items-center whitespace-nowrap rounded-[6px] px-3 text-[12px] font-[450] text-surface-bg transition-colors duration-150",
+            "inline-flex h-[26px] items-center whitespace-nowrap rounded-[6px] px-2.5 text-[11.5px] font-[450] text-surface-bg transition-colors duration-150",
             pressed ? "bg-text-tertiary" : "bg-text-primary",
           )}
         >
@@ -172,7 +172,7 @@ function AddConnectionDialog() {
           className={cn(
             "overflow-hidden whitespace-nowrap",
             t >= 2
-              ? "font-mono text-[12px] text-text-primary"
+              ? "font-mono text-[11px] text-text-primary"
               : "text-text-disabled",
           )}
         >
@@ -198,7 +198,7 @@ function CreateKeyDialog() {
 
   const segment = (selected: boolean) =>
     cn(
-      "flex h-7 flex-1 items-center justify-center whitespace-nowrap rounded-[6px] text-[12px] font-[450] transition-colors duration-200",
+      "flex h-[22px] flex-1 items-center justify-center whitespace-nowrap rounded-[5px] text-[11.5px] font-[450] transition-colors duration-200",
       selected
         ? "bg-card text-text-primary shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
         : "text-text-tertiary",
@@ -250,11 +250,11 @@ const diff: DiffLine[] = [
 
 function CodeDiff() {
   return (
-    <div className="mt-2 @2xl:mt-0 @3xl:mt-2 overflow-hidden rounded-[2px] border border-line-structure bg-card font-mono text-[12.5px] leading-[1.7]">
-      <div className="border-b border-line-structure bg-surface-1 px-3 py-1.5 text-[11px] text-text-tertiary">
+    <div className="mt-2 overflow-hidden rounded-[2px] border border-line-structure bg-card font-mono text-[12.5px] leading-[1.7] @2xl:mt-0 @3xl:mt-2 @3xl:flex @3xl:flex-1 @3xl:flex-col">
+      <div className="border-b border-line-structure bg-surface-1 px-3 py-2 text-[11px] text-text-tertiary">
         client.py
       </div>
-      <pre className="m-0 overflow-x-auto bg-transparent py-2 font-mono">
+      <pre className="m-0 overflow-x-auto bg-transparent py-3 font-mono @3xl:flex @3xl:flex-1 @3xl:flex-col @3xl:justify-center">
         {diff.map((line, i) => (
           <div
             key={i}
@@ -297,8 +297,9 @@ function Step({
     <div
       className={cn(
         // Stacked on phones, text beside the visual at medium widths, and
-        // stacked again inside each of the three columns from medium-wide cards.
-        "grid min-w-0 items-start gap-x-8 gap-y-2.5 bg-surface-bg px-5 pb-7 pt-6 @2xl:grid-cols-2 @3xl:grid-cols-1",
+        // stacked again inside each of the three columns from medium-wide cards,
+        // where the columns share rows so the three visuals get one height.
+        "grid min-w-0 items-start gap-x-8 gap-y-2.5 bg-surface-bg px-5 pb-7 pt-6 @2xl:grid-cols-2 @3xl:row-span-2 @3xl:grid-cols-1 @3xl:grid-rows-subgrid",
         className,
       )}
     >
@@ -317,7 +318,9 @@ function Step({
           Read the docs →
         </Link>
       </div>
-      <div className="min-w-0">{children}</div>
+      <div className="min-w-0 @3xl:flex @3xl:flex-col @3xl:self-stretch">
+        {children}
+      </div>
     </div>
   );
 }

@@ -1268,6 +1268,14 @@ svg .edgeLabel {
   }
 }
 
+/* The gateway page uses the homepage's 840px column at xl, so its footer does too. */
+@media (min-width: 1280px) {
+  #home-main-area > div:has(> [data-use-case="gateway"]) > footer {
+    max-width: 52.5rem; /* 840px */
+    padding-inline: 0;
+  }
+}
+
 /*
  * Flush pages (no page padding, sections pad themselves with px-5 sm:px-10):
  * inset the feedback row and footer to the same section gutter.

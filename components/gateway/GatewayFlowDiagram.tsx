@@ -1,10 +1,10 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { MonoLabel } from "@/components/home/academy-loop/shared";
-import { HArrow, VArrow } from "@/components/home/diagram-arrows";
 import { CornerBox } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { heroMoreProviders, heroProviders, type ProviderIcon } from "./content";
+import styles from "./Gateway.module.css";
 
 // Request flow on /gateway, built from the homepage diagram pieces.
 // Keep the labels in sync with the figure text in md-override/gateway.md.
@@ -61,7 +61,7 @@ function IconTile({
 
 function ClientsPanel() {
   return (
-    <CornerBox className="flex flex-col gap-2 p-4">
+    <CornerBox className="flex flex-col gap-2 bg-[var(--flow-panel)] p-4">
       <MonoLabel className="lowercase">{CLIENTS_CAPTION}</MonoLabel>
       <ul className="flex flex-wrap gap-1.5">
         {clients.map((client) => (
@@ -79,7 +79,7 @@ function ClientsPanel() {
 
 function ProvidersPanel() {
   return (
-    <CornerBox className="flex flex-col gap-2 p-4">
+    <CornerBox className="flex flex-col gap-2 bg-[var(--flow-panel)] p-4">
       <MonoLabel className="lowercase">{PROVIDERS_CAPTION}</MonoLabel>
       {/* One provider per row in the wide layout, two columns when stacked. */}
       <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 @3xl/flow:grid-cols-1">
@@ -127,7 +127,12 @@ function LangfuseLabel({ className }: { className?: string }) {
 
 function GatewayCard({ className }: { className?: string }) {
   return (
-    <CornerBox className={cn("flex flex-col gap-2 p-3 sm:p-4", className)}>
+    <CornerBox
+      className={cn(
+        "flex flex-col gap-2 bg-[var(--flow-panel)] p-3 sm:p-4",
+        className,
+      )}
+    >
       <Title>AI Gateway</Title>
       <ul className="flex flex-col gap-1">
         {gatewaySteps.map((step) => (
@@ -145,10 +150,36 @@ function GatewayCard({ className }: { className?: string }) {
 
 function TracingCard({ className }: { className?: string }) {
   return (
-    <CornerBox className={cn("flex flex-col gap-2 p-3 sm:p-4", className)}>
+    <CornerBox
+      className={cn(
+        "flex flex-col gap-2 bg-[var(--flow-panel)] p-3 sm:p-4",
+        className,
+      )}
+    >
       <Title>Langfuse tracing</Title>
       <p className={DETAIL}>Captures every request (usage only or full)</p>
     </CornerBox>
+  );
+}
+
+/** Dotted connector; its dots travel the way the request flows. */
+function FlowLine({ vertical }: { vertical?: boolean }) {
+  return (
+    <svg
+      aria-hidden
+      className={cn(
+        "block overflow-visible",
+        vertical ? "h-full w-[2px]" : "h-[2px] w-full",
+      )}
+    >
+      <line
+        x1={vertical ? 1 : 0}
+        y1={vertical ? 0 : 1}
+        x2={vertical ? 1 : "100%"}
+        y2={vertical ? "100%" : 1}
+        className={styles.flowLine}
+      />
+    </svg>
   );
 }
 
@@ -156,7 +187,7 @@ function TracingCard({ className }: { className?: string }) {
 function CardArrow() {
   return (
     <div className="flex h-6 justify-center" aria-hidden="true">
-      <VArrow />
+      <FlowLine vertical />
     </div>
   );
 }
@@ -164,14 +195,14 @@ function CardArrow() {
 function PanelArrow() {
   return (
     <div className="flex items-center" aria-hidden="true">
-      <HArrow />
+      <FlowLine />
     </div>
   );
 }
 
 function LangfusePanel() {
   return (
-    <CornerBox className="flex flex-col p-4">
+    <CornerBox className="flex flex-col bg-[var(--flow-panel)] p-4">
       <LangfuseLabel className="pb-3" />
       <GatewayCard />
       <CardArrow />
@@ -199,7 +230,7 @@ function WideFlow() {
 function DownArrow() {
   return (
     <div className="flex h-8 justify-center" aria-hidden="true">
-      <VArrow />
+      <FlowLine vertical />
     </div>
   );
 }
@@ -221,16 +252,18 @@ function CompactFlow() {
 
 export function GatewayFlowDiagram() {
   return (
-    <figure className="not-prose @container/flow m-0 text-left">
-      <WideFlow />
-      <CompactFlow />
-      <figcaption className="sr-only">
-        Coding agents such as Claude Code, Codex and OpenCode, and your own
-        apps, send requests to the AI Gateway inside Langfuse. The gateway
-        authorizes the gateway key, maps the model to a provider and calls the
-        model provider, such as Anthropic, OpenAI, Google AI or Bedrock.
-        Langfuse tracing captures every request, usage only or in full.
-      </figcaption>
-    </figure>
+    <CornerBox className={cn(styles.flowFrame, "p-5")}>
+      <figure className="not-prose @container/flow m-0 text-left">
+        <WideFlow />
+        <CompactFlow />
+        <figcaption className="sr-only">
+          Coding agents such as Claude Code, Codex and OpenCode, and your own
+          apps, send requests to the AI Gateway inside Langfuse. The gateway
+          authorizes the gateway key, maps the model to a provider and calls the
+          model provider, such as Anthropic, OpenAI, Google AI or Bedrock.
+          Langfuse tracing captures every request, usage only or in full.
+        </figcaption>
+      </figure>
+    </CornerBox>
   );
 }

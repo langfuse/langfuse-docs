@@ -51,90 +51,79 @@ export const customerLogoNames = [
   "SumUp",
 ] as const;
 
+/** A value prop's paragraph: plain text and linked phrases, in reading order. */
+export type ValuePropText = string | { text: string; href: string };
+
 export type ValueProp = {
   title: string;
-  body: string;
+  body: ValuePropText[];
   panel: "spend" | "budgets" | "models" | "halo";
-  features: { label: string; text: string; href: string }[];
 };
 
 export const valueProps: ValueProp[] = [
   {
     title: "See all spend",
-    body: "Know what AI costs and who’s spending it.",
     panel: "spend",
-    features: [
+    body: [
+      "The ",
+      { text: "spend dashboard", href: "/docs/gateway/features/analytics" },
+      " shows what AI costs by model, user and key, ",
       {
-        label: "Spend dashboard:",
-        href: "/docs/gateway/features/analytics",
-        text: "cost by model, provider, user and gateway key.",
-      },
-      {
-        label: "Attribution by person, service or team:",
+        text: "attributed",
         href: "/docs/gateway/features/api-keys#key-metadata",
-        text: "keys for people or services, labels for teams or cost centers.",
       },
+      " to a person, service or team.",
     ],
   },
   {
     title: "Cap model costs",
-    body: "Set budgets and enforce limits across the organization.",
     panel: "budgets",
-    features: [
+    body: [
+      "Set daily, weekly or monthly ",
+      { text: "budgets", href: "/docs/gateway/features/budgets" },
+      ". Requests stop at the limit, with ",
       {
-        label: "Budgets:",
-        href: "/docs/gateway/features/budgets",
-        text: "reset daily, weekly or monthly. Requests stop once a budget runs out.",
-      },
-      {
-        label: "Warnings and resets:",
+        text: "email warnings",
         href: "/docs/gateway/features/budgets#email-alerts",
-        text: "email warnings at 85% and 95%, and a one-click reset that sets spend back to zero.",
       },
+      " at 85% and 95%.",
     ],
   },
   {
     title: "Govern access and data",
-    body: "Decide who can use which models, and what data reaches them.",
     panel: "models",
-    features: [
+    body: [
       {
-        label: "Model controls:",
+        text: "Approve models",
         href: "/docs/gateway/features/models#manage-models",
-        text: "approve models centrally and limit each gateway key to the models it needs.",
       },
+      " centrally and limit each key to the models it needs. ",
       {
-        label: "Revocable keys:",
+        text: "Revoke keys",
         href: "/docs/gateway/features/api-keys#key-types",
-        text: "revoke any gateway key immediately. User keys stop working when the person loses access.",
       },
-      {
-        label: "Guardrails:",
-        href: "/docs/gateway/features/guardrails",
-        text: "block, redact or log PII, secrets and prompt injection in requests and responses.",
-      },
+      " instantly, and add ",
+      { text: "guardrails", href: "/docs/gateway/features/guardrails" },
+      " for PII and secrets.",
     ],
   },
   {
     title: "Improve AI usage",
-    body: "See what AI is used for and improve it.",
     panel: "halo",
-    features: [
+    body: [
+      "Every call becomes a ",
       {
-        label: "Automatic tracing:",
+        text: "Langfuse trace",
         href: "/docs/gateway/features/tracing#ingestion-modes",
-        text: "every call becomes a Langfuse trace, with full content or usage only.",
       },
+      ". Run ",
+      { text: "evals", href: "/docs/evaluation/overview" },
+      " on it, or ",
       {
-        label: "Evals and analysis:",
-        href: "/docs/evaluation/overview",
-        text: "run evals, topics and alerts on every gateway call.",
-      },
-      {
-        label: "Ask Halo about your usage:",
+        text: "ask Halo",
         href: "/docs/api-and-data-platform/features/halo",
-        text: "find recurring workflows, cost drivers and failures in plain language.",
       },
+      " what drives cost and failures.",
     ],
   },
 ];
@@ -386,6 +375,17 @@ export const featureCardsBottom: FeatureCard[] = [
   },
 ];
 
+// Drawing in the signup box: what an update email is about.
+export const updatesSketch = {
+  kind: "keys",
+  group: "ai gateway",
+  heading: "Updates",
+  rows: [
+    { label: "features", value: "new", tone: "ok" },
+    { label: "providers", value: "new", tone: "ok" },
+  ],
+} satisfies FeatureSketch;
+
 // Open source section: self-hosting in three steps, each linking to its docs.
 export const openSource = {
   sketch: {
@@ -398,7 +398,7 @@ export const openSource = {
   steps: [
     {
       title: "Deploy the gateway",
-      body: "It ships with the Langfuse Docker Compose setup and Helm chart. Add the gateway keys, or enable it in your Helm values.",
+      body: "Ships with the Docker Compose setup and Helm chart.",
       links: [
         {
           label: "Docker Compose",
@@ -412,7 +412,7 @@ export const openSource = {
     },
     {
       title: "Give it a public URL",
-      body: "Serve the gateway on its own host name over HTTPS, and set that address as its public URL.",
+      body: "Serve it on its own host name over HTTPS.",
       links: [
         {
           label: "Public URL and TLS",
@@ -422,7 +422,7 @@ export const openSource = {
     },
     {
       title: "Connect providers and hand out keys",
-      body: "As an organization admin, add your provider accounts and create gateway keys in Langfuse.",
+      body: "Add provider accounts and create gateway keys.",
       links: [
         {
           label: "Admin setup",

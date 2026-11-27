@@ -24,20 +24,10 @@ Figure: AI Gateway overview.
 
 ## Control your company's AI usage
 
-- **See all spend.** Know what AI costs and who’s spending it.
-  - **[Spend dashboard](/docs/gateway/features/analytics):** cost by model, provider, user and gateway key.
-  - **[Attribution by person, service or team](/docs/gateway/features/api-keys#key-metadata):** keys for people or services, labels for teams or cost centers.
-- **Cap model costs.** Set budgets and enforce limits across the organization.
-  - **[Budgets](/docs/gateway/features/budgets):** reset daily, weekly or monthly. Requests stop once a budget runs out.
-  - **[Warnings and resets](/docs/gateway/features/budgets#email-alerts):** email warnings at 85% and 95%, and a one-click reset that sets spend back to zero.
-- **Govern access and data.** Decide who can use which models, and what data reaches them.
-  - **[Model controls](/docs/gateway/features/models#manage-models):** approve models centrally and limit each gateway key to the models it needs.
-  - **[Revocable keys](/docs/gateway/features/api-keys#key-types):** revoke any gateway key immediately. User keys stop working when the person loses access.
-  - **[Guardrails](/docs/gateway/features/guardrails):** block, redact or log PII, secrets and prompt injection in requests and responses.
-- **Improve AI usage.** See what AI is used for and improve it.
-  - **[Automatic tracing](/docs/gateway/features/tracing#ingestion-modes):** every call becomes a Langfuse trace, with full content or usage only.
-  - **[Evals and analysis](/docs/evaluation/overview):** run evals, topics and alerts on every gateway call.
-  - **[Ask Halo about your usage](/docs/api-and-data-platform/features/halo):** find recurring workflows, cost drivers and failures in plain language.
+- **See all spend.** The [spend dashboard](/docs/gateway/features/analytics) shows what AI costs by model, user and key, [attributed](/docs/gateway/features/api-keys#key-metadata) to a person, service or team.
+- **Cap model costs.** Set daily, weekly or monthly [budgets](/docs/gateway/features/budgets). Requests stop at the limit, with [email warnings](/docs/gateway/features/budgets#email-alerts) at 85% and 95%.
+- **Govern access and data.** [Approve models](/docs/gateway/features/models#manage-models) centrally and limit each key to the models it needs. [Revoke keys](/docs/gateway/features/api-keys#key-types) instantly, and add [guardrails](/docs/gateway/features/guardrails) for PII and secrets.
+- **Improve AI usage.** Every call becomes a [Langfuse trace](/docs/gateway/features/tracing#ingestion-modes). Run [evals](/docs/evaluation/overview) on it, or [ask Halo](/docs/api-and-data-platform/features/halo) what drives cost and failures.
 
 ## Get everything you need in a gateway, included in Langfuse
 
@@ -66,11 +56,11 @@ Figure: AI Gateway overview.
 
 ## Open source: self-host it in your own infrastructure
 
-Like the rest of Langfuse, the AI Gateway is MIT-licensed. Run it next to your self-hosted Langfuse as a single 22 MB Docker image with no extra dependencies, or use it fully managed on Langfuse Cloud.
+MIT-licensed, like the rest of Langfuse. Run it as a single 22 MB Docker image, or use it managed on Langfuse Cloud.
 
-1. **Deploy the gateway.** It ships with the Langfuse Docker Compose setup and Helm chart. Add the gateway keys, or enable it in your Helm values. See [Docker Compose](/self-hosting/deployment/docker-compose#ai-gateway) and [Helm](/self-hosting/deployment/kubernetes-helm#ai-gateway).
-2. **Give it a public URL.** Serve the gateway on its own host name over HTTPS, and set that address as its public URL. See [Public URL and TLS](/self-hosting/configuration/ai-gateway#public-url).
-3. **Connect providers and hand out keys.** As an organization admin, add your provider accounts and create gateway keys in Langfuse. See [Admin setup](/docs/gateway/get-started/admin-setup).
+1. **Deploy the gateway.** Ships with the Docker Compose setup and Helm chart. See [Docker Compose](/self-hosting/deployment/docker-compose#ai-gateway) and [Helm](/self-hosting/deployment/kubernetes-helm#ai-gateway).
+2. **Give it a public URL.** Serve it on its own host name over HTTPS. See [Public URL and TLS](/self-hosting/configuration/ai-gateway#public-url).
+3. **Connect providers and hand out keys.** Add provider accounts and create gateway keys. See [Admin setup](/docs/gateway/get-started/admin-setup).
 
 ## Customers
 
@@ -80,6 +70,6 @@ Like the rest of Langfuse, the AI Gateway is MIT-licensed. Run it next to your s
 
 [Read the SumUp story](/users/sumup), [All customer stories](/users)
 
-## Langfuse AI Gateway updates
+## Get Updates
 
-Get an email when we ship new gateway features and providers. Gateway updates only, no spam. Subscribe on [the AI Gateway launch post](/blog/introducing-gateway).
+Get an email when we ship new features and providers. Gateway updates only, no spam. Subscribe on [the AI Gateway launch post](/blog/introducing-gateway).

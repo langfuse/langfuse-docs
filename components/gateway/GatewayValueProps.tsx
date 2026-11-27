@@ -537,9 +537,9 @@ export function GatewayValueProps() {
   );
 
   return (
-    <div className="grid items-start gap-10 @3xl:grid-cols-2">
+    <div className="grid items-start gap-10 @3xl:grid-cols-5">
       <div
-        className="flex flex-col border-t border-line-structure"
+        className="flex flex-col border-t border-line-structure @3xl:col-span-2"
         role="tablist"
         aria-orientation="vertical"
       >
@@ -571,7 +571,7 @@ export function GatewayValueProps() {
               {isOpen && (
                 // Every prop's details share one grid cell, so the open row is as
                 // tall as the longest one and the page doesn't jump on rotation.
-                <div className="grid max-w-[440px] pb-5 pr-4">
+                <div className="grid max-w-[440px] pb-5">
                   {valueProps.map((detail, j) => (
                     <div
                       key={detail.title}
@@ -582,26 +582,20 @@ export function GatewayValueProps() {
                       )}
                     >
                       <p className="text-[15px] leading-[1.5] text-text-secondary">
-                        {detail.body}
-                      </p>
-                      <ul className="mt-1.5 flex flex-col">
-                        {detail.features.map((feature) => (
-                          <li
-                            key={feature.label}
-                            className="border-t border-dashed border-line-divider-dash"
-                          >
+                        {detail.body.map((part) =>
+                          typeof part === "string" ? (
+                            part
+                          ) : (
                             <Link
-                              href={feature.href}
-                              className="group block py-3 text-[14px] leading-[1.5] text-text-secondary"
+                              key={part.href}
+                              href={part.href}
+                              className="text-text-primary underline decoration-line-structure underline-offset-4 hover:decoration-text-primary"
                             >
-                              <strong className="font-semibold text-text-primary underline decoration-line-structure underline-offset-4 group-hover:decoration-text-primary">
-                                {feature.label}
-                              </strong>{" "}
-                              {feature.text}
+                              {part.text}
                             </Link>
-                          </li>
-                        ))}
-                      </ul>
+                          ),
+                        )}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -626,7 +620,7 @@ export function GatewayValueProps() {
         id="gateway-value-panel"
         role="tabpanel"
         aria-labelledby={`gateway-value-tab-${active}`}
-        className="@container/panel min-w-0 rounded-[2px] shadow-[-8px_18px_12px_rgba(0,0,0,0.02),-4px_8px_9px_rgba(0,0,0,0.03),-1px_2px_5px_rgba(0,0,0,0.04)]"
+        className="@container/panel min-w-0 rounded-[2px] @3xl:col-span-3 shadow-[-8px_18px_12px_rgba(0,0,0,0.02),-4px_8px_9px_rgba(0,0,0,0.03),-1px_2px_5px_rgba(0,0,0,0.04)]"
       >
         <div className={styles.screen}>
           {/* Panels share one grid cell, so the window keeps its size. */}

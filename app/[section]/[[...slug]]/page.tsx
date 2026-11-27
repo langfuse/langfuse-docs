@@ -113,7 +113,11 @@ export default async function SectionDocPage(props: PageProps) {
       data-use-case={isUseCase ? section.replaceAll("-", "_") : undefined}
       data-use-case-page={isUseCase ? `/${section}` : undefined}
     >
-      <DocBodyChrome withProse showCopyButton={!isUseCase}>
+      <DocBodyChrome
+        withProse
+        showCopyButton={!isUseCase}
+        showFeedback={section !== "gateway"}
+      >
         {bodyClient}
       </DocBodyChrome>
     </div>

@@ -49,6 +49,33 @@
   }
 }
 
+/* Flow diagram frame: the hatch and raised surface of the value prop panels (.screen). */
+.flowFrame {
+  --flow-panel: #f9f9f7;
+  background: repeating-linear-gradient(135deg, #eeeee9 0 1px, #f4f4f0 1px 7px);
+}
+
+/* Flow diagram connectors: dots that move from the source to the target. */
+.flowLine {
+  stroke: var(--line-cta);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-dasharray: 0.01 7;
+  animation: flow 0.7s linear infinite;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flowLine {
+    animation: none;
+  }
+}
+
 /* App-screen mockups in the value prop panels. */
 .screen {
   --app-hatch: #f4f4f0;

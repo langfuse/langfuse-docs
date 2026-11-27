@@ -7,16 +7,16 @@ import { openSource } from "./content";
 
 export function GatewayOpenSource() {
   return (
-    <div className="grid items-start gap-10 @3xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
-      <div className="flex min-w-0 flex-col gap-4">
-        <p className="max-w-[46ch] text-[16px] leading-[1.5] text-text-secondary">
-          Like the rest of Langfuse, the AI Gateway is MIT-licensed. Run it next
-          to your self-hosted Langfuse as a single 22 MB Docker image with no
-          extra dependencies, or use it fully managed on Langfuse Cloud.
+    // Two joined boxes, like the homepage's scale and security section.
+    <div className="grid items-stretch @3xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
+      <CornerBox className="flex min-w-0 flex-col">
+        <p className="px-5 py-5 text-[16px] leading-[1.5] text-text-secondary">
+          MIT-licensed, like the rest of Langfuse. Run it as a single 22 MB
+          Docker image, or use it managed on Langfuse Cloud.
         </p>
-        <FeatureSketch sketch={openSource.sketch} className="max-w-[420px]" />
-      </div>
-      <CornerBox className="grid gap-px bg-line-structure">
+        <FeatureSketch sketch={openSource.sketch} className="mt-auto" />
+      </CornerBox>
+      <CornerBox className="-mt-px grid gap-px bg-line-structure @3xl:-ml-px @3xl:mt-0">
         {openSource.steps.map((step, i) => (
           <div
             key={step.title}

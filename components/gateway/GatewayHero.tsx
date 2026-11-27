@@ -81,15 +81,20 @@ export function GatewayHero() {
   );
 }
 
-/** Logo strip that opens the page panel under the new hero. */
+/** Logo band under the hero; its lines run to the page edges. */
 export function GatewayHeroLogos() {
   return (
-    <section data-use-case-section="logos" className="px-2 py-2">
-      <EnterpriseLogoGrid
-        names={customerLogoNames}
-        className="sm:grid-cols-4 xl:grid-flow-col xl:auto-cols-max xl:grid-cols-none xl:justify-between xl:px-8"
-        hideStoryTags
-      />
+    <section
+      data-use-case-section="logos"
+      className="not-prose -mx-4 border-y border-line-structure px-6 py-2 sm:-mx-6 sm:px-8 md:-mx-8 md:px-10"
+    >
+      <div className="mx-auto xl:max-w-[840px]">
+        <EnterpriseLogoGrid
+          names={customerLogoNames}
+          className="sm:grid-cols-4 xl:grid-flow-col xl:auto-cols-max xl:grid-cols-none xl:justify-between xl:px-0"
+          hideStoryTags
+        />
+      </div>
     </section>
   );
 }
