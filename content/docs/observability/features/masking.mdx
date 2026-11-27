@@ -226,6 +226,33 @@ def mask_otel_spans(
 langfuse = Langfuse(mask_otel_spans=mask_otel_spans)
 ```
 
+#### Mask names and addresses with newmean-pii
+
+[newmean-pii](https://github.com/newmean-ai/pii) provides a `mask` function that runs a small multilingual model (54 languages) in your process. It masks names, email addresses, phone numbers, addresses, ID numbers, and other personal information in the input, output, and metadata of each observation.
+
+```bash
+pip install newmean-pii
+```
+
+```python
+from langfuse import Langfuse, observe
+from newmean_pii.langfuse import pii_mask
+
+langfuse = Langfuse(mask=pii_mask(size="medium"))
+
+
+@observe()
+def answer(question: str) -> str:
+    return "I will call Kim Minsu on 010-1234-5678."
+
+
+answer("Please call Kim Minsu on 010-1234-5678")
+
+langfuse.flush()
+```
+
+Langfuse receives `Please call [PERSON] on [PHONE]` as the input and `I will call [PERSON] on [PHONE].` as the output. `pii_mask` uses the legacy `mask` hook, so it does not cover spans from third-party OpenTelemetry instrumentations. The model files are downloaded from Hugging Face on first use. No model finds every piece of personal information. Miss rates per model, dataset, and language are in the [newmean-pii README](https://github.com/newmean-ai/pii#results).
+
 </Tab>
 <Tab title="JS/TS SDK">
 
