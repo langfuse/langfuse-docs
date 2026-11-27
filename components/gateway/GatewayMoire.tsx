@@ -170,8 +170,9 @@ export function GatewayMoire({
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas);
-    const intersectionObserver = new IntersectionObserver(([entry]) => {
-      onScreen = entry.isIntersecting;
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      // Entries arrive oldest first; the last one is the current state.
+      onScreen = entries[entries.length - 1].isIntersecting;
       syncLoop();
     });
     intersectionObserver.observe(canvas);
