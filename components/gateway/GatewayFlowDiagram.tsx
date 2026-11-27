@@ -102,20 +102,25 @@ function ProvidersPanel() {
   );
 }
 
-/** Name of the panel that holds everything running inside Langfuse. */
+/** Langfuse wordmark naming the panel that holds everything running inside Langfuse. */
 function LangfuseLabel({ className }: { className?: string }) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 text-[14px] font-medium text-text-primary",
-        className,
-      )}
-    >
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center border border-line-structure bg-surface-1">
-        {/* The mark fills 78% of its file, so 18px draws it 14px wide. */}
-        <Image src="/langfuse-icon.svg" alt="" width={18} height={18} />
-      </span>
-      Langfuse
+    <div className={cn("flex items-center", className)}>
+      {/* The wordmark file is 2255 x 527. */}
+      <Image
+        src="/langfuse_logo.svg"
+        alt="Langfuse"
+        width={90}
+        height={21}
+        className="h-[21px] w-auto dark:hidden"
+      />
+      <Image
+        src="/langfuse_logo_white.svg"
+        alt="Langfuse"
+        width={90}
+        height={21}
+        className="hidden h-[21px] w-auto dark:block"
+      />
     </div>
   );
 }
@@ -142,7 +147,7 @@ function TracingCard({ className }: { className?: string }) {
   return (
     <CornerBox className={cn("flex flex-col gap-2 p-3 sm:p-4", className)}>
       <Title>Langfuse tracing</Title>
-      <p className={DETAIL}>Captures every request</p>
+      <p className={DETAIL}>Captures every request (usage only or full)</p>
     </CornerBox>
   );
 }
@@ -224,7 +229,7 @@ export function GatewayFlowDiagram() {
         apps, send requests to the AI Gateway inside Langfuse. The gateway
         authorizes the gateway key, maps the model to a provider and calls the
         model provider, such as Anthropic, OpenAI, Google AI or Bedrock.
-        Langfuse tracing captures every request.
+        Langfuse tracing captures every request, usage only or in full.
       </figcaption>
     </figure>
   );
