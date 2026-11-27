@@ -24,8 +24,8 @@ const traceSteps = [
     highlight: false,
   },
   {
-    title: "Analyze facets",
-    description: ["One result per", "active facet and trace"],
+    title: "Summarize",
+    description: ["One summary per", "active facet and trace"],
     x: 392,
     width: 180,
     highlight: true,
@@ -42,7 +42,7 @@ const traceSteps = [
 const groupingSteps = [
   {
     title: "Cluster embeddings",
-    description: ["Group similar summaries", "within each facet"],
+    description: ["Group similar traces", "within each facet"],
     x: 160,
     width: 224,
     highlight: false,
@@ -57,7 +57,7 @@ const groupingSteps = [
 ];
 
 const ariaLabel =
-  "Topics analyzes matching traces after a configurable delay since the last observation. The model returns one result per active facet. Topics embeds each text summary, clusters similar summaries within each facet, and names the clusters. Live maps refresh daily. Snapshots run once for a selected time window and can reuse existing summaries.";
+  "Topics architecture. Incoming traces are filtered, then treated as finished after a configurable delay since the last observation arrived. One summary is generated per active facet and trace. Each facet summary is embedded. Embeddings are clustered per facet, then the clusters are named. Live maps repeat clustering and naming daily. Snapshots run once for a selected time window and can reuse existing summaries.";
 
 const titleStyle = {
   fontFamily: "var(--font-sans)",
