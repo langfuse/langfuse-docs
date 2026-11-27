@@ -20,9 +20,9 @@ import { FileTree } from "@/components/docs";
   authors={["lotteverheyden"]}
 />
 
-Once you have a harness that can run agents against a dataset, the harder question is content: **what should you actually measure?**
+Agent skills are great: they enable you to give nuanced instructions to your agent, in a structured way. But when it comes to skills, how do you start evaluating them?
 
-It is tempting to evaluate a skill the same way you evaluate a system prompt. But skills are not prompts, and skill evals are not prompt evals. Let's walk through what that means and how you should think about your skill eval setup.
+It is tempting to evaluate a skill the same way you evaluate a system prompt. But skills are not prompts, and skill evals are not prompt evals. Let's walk through what that means for your skill eval setup.
 
 ## Why skill evals are not prompt evals [#why-skill-evals-are-not-prompt-evals]
 
@@ -30,51 +30,53 @@ Evaluating an agent skill differs from evaluating a prompt in two fundamental wa
 
 ### 1. Progressive disclosure
 
-Prompts are always immediately in an agent's context. A skill, on the other hand, uses a progressive disclosure mechanism: the agent starts with only the frontmatter in context, and loads `SKILL.md` (and any reference files) only if it decides it needs them.
+Prompts are always immediately in an agent's context. A skill, on the other hand, uses progressive disclosure: the agent starts with only the frontmatter in context, and loads `SKILL.md` (and any other files) only if it deems them useful.
 
-This means that, unlike for prompts, you **can't just blindly evaluate every agent execution assuming the agent was aware of the skill content**.
+This means that, unlike for prompts, you **can't just blindly evaluate assuming the agent was aware of the skill content**.
 
 <SkillContextDisclosureDiagram />
 
 ### 2. Agent behavior is (often) more complex
 
-The decision to put something into a skill implies a decision to not add it to the system prompt. This often happens when the agent's behavior is too complex to fit everything into one long string that's always completely in the agent's context.
+The decision to put something into a skill implies that it was too complex to fit everything into one long string that's always completely in the agent's context.
 
-Evaluating a skill therefore often means **evaluating more complex behavior**. This shifts the focus to a specific kind of evals.
+Evaluating a skill therefore means **evaluating more complex behavior**. This shifts the focus to a specific kind of evals.
 
 ## Separate skill routing from skill quality [#separate-routing-from-quality]
 
-Before writing granular evaluators, you need to separate two questions that often get tangled together in a skill setup:
+Before writing evaluators, you need to separate two questions that often get tangled together:
 
 1. **Does the agent pick the right skill when left on its own?**
 2. **Does the skill itself actually help when the agent uses it?**
 
-This brings you to two things to test every time you edit your skill:
+This means you will test two things every time you edit your skill:
 
 | Eval | Setup |
 | --- | --- |
 | **Skill routing** | All skills available (check the right skill is picked, with no interference) |
 | **Skill quality (lift)** | `Forced skill` vs. baseline (`No skill` or previous version) |
 
+So how do you evaluate these?
+
 ## Evaluating skill routing [#evaluating-skill-routing]
 
-Routing evals test whether the agent loads the right skill, and the right files inside it, when left on its own.
+Routing evals test whether the agent loads the right skill (files) when left on its own.
 
-To test this, create a dataset where each item pairs a prompt and environment setup with the skill file that should be used (`expected_output`). When you [link skills to traces](/docs/skill-management/tracing), every skill load is recorded on the trace, so a [code-based evaluator](/docs/evaluation/evaluation-methods/code-evaluators) can deterministically check the trace against `expected_output`.
+To test this, create a dataset where each item pairs a prompt + environment with the skill file that should be loaded into context (as `expected_output`). When you [link skills to traces](/docs/skill-management/tracing), loading a skill file into context will be recorded on a trace, so you can use a [code-based evaluator](/docs/evaluation/evaluation-methods/code-evaluators) to check this.
 
 <SkillRoutingEvalFlowDiagram />
 
 ### 1. Skill-level triggering and coexistence
 
-Skill-level trigger eval sets test whether the frontmatter of the skill is clear enough for the agent to load your skill when it should, and leave it alone when it shouldn't.
+First, test whether the frontmatter of the skill is clear enough for the agent to load your skill when it should, and leave it alone when it shouldn't.
 
-**This gets harder (and more important) as your skill library grows:** every new skill competes in the same routing decision, so adding one can pull attention away from existing skills. Treating skill-level triggering as a regression suite gives you a fast signal to iterate your frontmatter against.
+**This gets harder (and more important) as your skill library grows:** every new skill competes for attention, so adding a new skill can change routing behavior for existing skills.
 
 <SkillCoexistenceRoutingDiagram />
 
-### 2. Intra-skill routing (`SKILL.md` to reference files)
+### 2. Intra-skill routing (other skill files)
 
-Larger skills use multiple files and progressive disclosure to keep context size down. For example, our [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) keeps core rules and a routing index in `SKILL.md` and delegates workflows to `references/`:
+Larger skills use multiple files and progressive disclosure to keep context size low. For example, our [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) keeps core rules and a routing index in `SKILL.md` and delegates workflows to `references/`:
 
 <div>
   <FileTree>
@@ -90,7 +92,7 @@ Larger skills use multiple files and progressive disclosure to keep context size
   </FileTree>
 </div>
 
-Loading of these sub-files needs to be tested individually. Here's an example of 2 items of the reference file routing dataset we use to test our Langfuse skill:
+Loading of these sub-files into context needs to be tested individually. Here's an example of 2 items in the dataset we use to test our Langfuse skill:
 
 <Frame fullWidth>
   ![Langfuse dataset items for intra-skill routing showing prompt inputs, expected output with invoked_reference_file, and metadata with env_folder](/images/blog/2026-11-20-what-to-evaluate-in-an-agent-skill/routing-dataset-items.png)
@@ -98,13 +100,20 @@ Loading of these sub-files needs to be tested individually. Here's an example of
 
 ## Evaluating skill quality [#evaluating-skill-quality]
 
-Skill quality evals test whether the skill actually improves agent performance when it is used.
+Next to skill routing, also test whether using the skill actually improves your agent.
 
-To isolate skill quality from routing, **force the agent to use the skill** during the run, and **compare the results against a baseline** (either no skill, or the previous version of the skill). You can then compare the quality of your agent with vs. without the new skill version.
+To isolate skill quality from routing, **force the agent to use the skill** during the run, and **compare the results against a baseline** (either no skill, or the previous version of the skill). This is similar to any form of agent testing in general.
 
-### 1. Task outcomes
+Once you run these experiments, how do you decide what to evaluate? There isn't one true-for-all answer. But there are two categories of eval metrics that we often see when people are evaluating skills:
 
-Because skills target multi-step work, focus on concrete outcome and trajectory checks. The exact metrics you'll measure come from reading your traces ([error analysis](/academy/monitoring/error-analysis)) and depend on your use case. Some examples:
+- outcome & trajectory (quality) metrics
+- trajectory efficiency metrics
+
+Generally, a good starting point for coming to a metric set for your specific agent is the [Evaluate section in our academy](/academy/evaluate).
+
+### 1. Task outcome & trajectory
+
+Because skills target multi-step work, concrete outcome and trajectory checks often make sense. The exact metrics you'll measure come from reading your traces ([error analysis](/academy/monitoring/error-analysis)) and depend on your use case. Some examples:
 
 <Tabs items={["Coding", "CLI/API operations", "Encoded team workflows"]}>
 <Tab>
@@ -124,18 +133,20 @@ Because skills target multi-step work, focus on concrete outcome and trajectory 
 <Tab>
 
 - **Step order (trajectory):** Did the agent run required steps in order (such as a dry run before a destructive action)?
-- **Structure (outcome):** Does the final artifact follow the team's expected format?
+- **Output format (outcome):** Does the final artifact follow the team's expected format?
 
 </Tab>
 </Tabs>
 
-**Score per constraint, avoid one monolithic score.** Grade concrete sub-checks (`builds_cleanly`, `uses_production_label`, `no_collateral_writes`) and roll them up, so you can immediately see *which* requirement broke.
+Some tips:
 
-**Pick `pass@k` vs. `pass^k` based on user risk.** Use `pass@k` (succeeding at least once in `k` attempts) for interactive workflows where the agent can iterate. Use `pass^k` (succeeding across every trial) for operational actions like production migrations or compliance reviews.
+**Score per constraint (avoid one monolithic score).** Grade concrete sub-checks (`builds_cleanly`, `uses_production_label`, `no_collateral_writes`) so you can immediately see *which* requirement breaks.
+
+**Pick `pass@k` vs. `pass^k` based on user risk.** Use `pass@k` (succeeding at least once in `k` attempts) for workflows where the agent can iterate. Use `pass^k` (succeeding across every trial) for actions like production migrations or compliance reviews.
 
 ### 2. Trajectory efficiency & cost
 
-Passing runs can still hide severe friction, because strong frontier models often recover from broken instructions. Track three signals alongside pass rate:
+Quality evals can still hide severe friction, because strong frontier models often recover from broken instructions. Try to track whether your agent gets the job done efficiently as well:
 
 **Tool error rate:** non-zero exit codes, `4xx` responses, failed tool spans, etc. per run.
 
@@ -145,19 +156,19 @@ Passing runs can still hide severe friction, because strong frontier models ofte
 
 **Workaround rate:** Track when the agent abandons the skill's recommended path (for example, dropping from your CLI to raw `curl`, or falling back to web search).
 
-**Token cost, turns, and wall-clock time (passing runs only):** for these metrics it's important to make a distinction between successful vs. failed runs (failed runs often look cheap because the agent gave up early). If tokens increase on passing runs without improving quality metrics, the skill is adding noise.
+**Token cost, turns, and wall-clock time (passing runs only):** for these metrics, make a distinction between successful vs. failed runs (failed runs often look cheap because the agent gave up early).
 
 <Callout type="info">
-  **In production, also track the cost of misrouted skills.** When an agent loads the wrong skill or misses a needed one, the extra tokens, latency, and degraded outcomes add up quickly and show which routing failures are worth fixing first.
+  **In production, you can also track the cost of misrouted skills.** When an agent loads the wrong skill or misses a needed one, the extra tokens, latency, and degraded outcomes add up quickly and show which routing failures are worth fixing first.
 </Callout>
 
 ## How to sequence this without Goodharting yourself [#how-to-sequence-this]
 
-Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite on day one—or worse, optimize against a flawed metric.
+Looking at routing, trajectory efficiency, and multi-constraint outcome graders together, it is easy to over-engineer your evaluation suite, or worse, optimize against a flawed metric.
 
 As covered in [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate) and [AI is eating the AI engineering loop](/blog/2026-06-09-ai-is-eating-ai-engineering), your metric set should emerge from observing your agent's traces:
 
-1. **Start by reading traces.** You will learn a lot from just observing how your agent is behaving and form an opinion on how you'd prefer things to go in specific scenarios.
+1. **Start by reading traces.** You will learn a lot from just observing how your agent is behaving and form an opinion on how you'd prefer things to go.
 2. **Add routing evals first.** Everything else is noise if the skill never gets loaded.
 3. **Layer in outcome and trajectory evals.** These should be heavily inspired by the outcome of your error analysis.
 4. **Re-run your `no-skill` baseline when models upgrade.** Newer models absorb older skills, so you know what to drop.
