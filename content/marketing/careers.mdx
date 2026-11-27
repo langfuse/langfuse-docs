@@ -62,9 +62,9 @@ If you want to build great developer tools, or get developers to love them, we'd
 
 ### We're winning the category through open source
 
-Langfuse is the [most used open-source AI engineering platform](/adoption), with the largest distribution in our space. See the [public metrics](#public-metrics).
-
 <CredibilitySentence bold={false} />
+
+It has the largest distribution in our space. See the [public metrics](#public-metrics).
 
 ### AI-native companies and large enterprises
 
@@ -84,9 +84,9 @@ You own it from the customer call to the launch. Here is how that looked for one
 4. **Ship.** You launch it with the GTM team: [changelog](/changelog/2026-08-22-reusable-evaluators-and-rules), docs and marketing. ([Releases](/handbook/product-engineering/playbooks/releases))
 5. **Offsite.** Then you meet everyone in person at an offsite in Tokyo or Berlin. ([Remote at Langfuse](/handbook/how-we-work/remote))
 
-### ClickHouse backs us and stays out of the way
+### ClickHouse backs us
 
-We set our own roadmap. ClickHouse gives us a global sales team that sells Langfuse and a much larger audience for our launches. The engineers who build the database are one message away.
+ClickHouse gives us a global sales team that sells Langfuse and a much larger audience for our launches. The engineers who build the database are one message away. We set our own roadmap.
 
 Our bet is that ClickHouse will be one of the great infrastructure companies of the AI era, and that joining Langfuse now means being part of that. The database already runs real-time analytics, observability, and AI workloads. Langfuse is how that platform sees what agents do in production. For more background, [see below](#further-reading).
 
@@ -196,6 +196,10 @@ You own ingestion, ClickHouse query performance, and the infrastructure behind L
   </Cards.Card>
 </Cards>
 
+### Design
+
+You think through how flows connect across the product, cut what users don't need, and ship the changes yourself as small PRs that are each safe to merge. Engineers bring prototypes they built with AI, and you critique the UX gaps and iterate on them together. Trang, our first designer, wrote about [what that looks like day to day](/blog/2026-11-19-comfortable-with-being-uncomfortable).
+
 ### Marketing and growth
 
 Our audience is AI engineers, so most of our marketing is material they'd bookmark:
@@ -239,102 +243,124 @@ We are remote-first and hire engineers across Europe and in US-East time zones. 
 
 ## Further reading [#further-reading]
 
-### ClickHouse
+### Videos and podcasts [#videos-and-podcasts]
 
 <Cards num={2}>
   <Cards.Card
-    href="https://clickhouse.com/blog/ai-redrawing-database-market"
-    title="AI is redrawing the database market"
-    description="Tanya Bragin on how AI is changing analytics, warehousing, and observability."
-    source="ClickHouse blog"
-    cover
+    href="/blog/2026-11-19-comfortable-with-being-uncomfortable"
+    title="Design at Langfuse: comfortable with being uncomfortable"
+    arrow
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/blog/2026-11-19-comfortable-with-being-uncomfortable/team-amsterdam.jpg"
+        alt="Langfuse team members on a street in Amsterdam"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+  <Cards.Card
+    href="https://www.youtube.com/watch?v=aKHsG1B5ysI"
+    title="Real Time: Peter Fenton on founders, open source, and the AI boom"
     arrow
     target="_blank"
     rel="noopener noreferrer"
   >
-    <Image
-      src="/images/careers/tanya-ai-redrawing-database-market.jpg"
-      alt=""
-      fill
-      className="object-cover"
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/real-time-peter-fenton.jpg"
+        alt="Real Time: Peter Fenton on founders, open source, and the AI boom"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
+  </Cards.Card>
+  <Cards.Card
+    href="https://clickhouse.com/blog/ai-redrawing-database-market"
+    title="AI is redrawing the database market"
+    arrow
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/tanya-ai-redrawing-database-market.jpg"
+        alt="AI is redrawing the database market"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
   </Cards.Card>
   <Cards.Card
     href="https://semistructured.substack.com/p/why-i-joined-clickhouse-at-a-15b"
     title="Why I joined ClickHouse at a $15B valuation"
-    description="Jon Natkins on making that career bet."
-    source="Substack"
-    cover
     arrow
     target="_blank"
     rel="noopener noreferrer"
   >
-    <Image
-      src="/images/careers/natty-why-i-joined-clickhouse.jpg"
-      alt=""
-      fill
-      className="object-contain"
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/natty-why-i-joined-clickhouse.jpg"
+        alt="Why I joined ClickHouse at a $15B valuation"
+        fill
+        className="object-contain"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
   </Cards.Card>
   <Cards.Card
     href="https://clickhouse.com/blog/clickhouse-raises-400-million-series-d-acquires-langfuse-launches-postgres"
     title="ClickHouse raises a $400M Series D"
-    description="Led by Dragoneer. The same round acquired Langfuse."
-    source="ClickHouse blog"
-    cover
     arrow
     target="_blank"
     rel="noopener noreferrer"
   >
-    <Image
-      src="/images/careers/clickhouse-series-d.png"
-      alt=""
-      fill
-      className="object-cover"
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/clickhouse-series-d.png"
+        alt="ClickHouse raises a $400M Series D"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
   </Cards.Card>
   <Cards.Card
     href="/blog/joining-clickhouse"
     title="Langfuse joins ClickHouse"
-    description="What stays the same, and why the teams are building together."
-    source="Langfuse blog"
-    cover
     arrow
   >
-    <Image
-      src="/images/blog/acquisition/banner.jpg"
-      alt=""
-      fill
-      className="object-cover"
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
+    <div className="relative aspect-video">
+      <Image
+        src="/images/blog/acquisition/banner.jpg"
+        alt="Langfuse joins ClickHouse"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
   </Cards.Card>
   <Cards.Card
     href="https://www.youtube.com/watch?v=Wna2Ds4dt50"
     title="Aaron Katz on 20VC"
-    description="ClickHouse's CEO on AI, product, and building the company."
-    source="20VC"
-    cover
     arrow
     target="_blank"
     rel="noopener noreferrer"
   >
-    <Image
-      src="/images/careers/aaron-katz-20vc.jpg"
-      alt=""
-      fill
-      className="object-cover"
-      sizes="(max-width: 768px) 100vw, 50vw"
-    />
+    <div className="relative aspect-video">
+      <Image
+        src="/images/careers/aaron-katz-20vc.jpg"
+        alt="Aaron Katz on 20VC"
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+      />
+    </div>
   </Cards.Card>
-</Cards>
-
-### Videos and podcasts
-
-<Cards num={2}>
   <Cards.Card
     href="https://www.youtube.com/watch?v=1UjJh9a9O1k"
     title="A Day in the Life of a Technical Support Engineer at Langfuse"

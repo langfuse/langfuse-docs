@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextFetchEvent, NextRequest } from "next/server";
+import {
+  classifyAgentTraffic,
+  createIpRangesCache,
+  isAgentOrAiCrawler,
+} from "./lib/agent-traffic";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
 const posthogHost =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.posthog.com";
-
-// Verified AI crawlers, search-index bots, and user-triggered fetchers. These
-// fetch regular HTML pages without executing JavaScript, so client-side
-// analytics never see them. Deliberately conservative: documented AI agents
-// only — classic search/SEO crawlers (Googlebot, Bingbot, Ahrefs) are
-// excluded. Sources: openai.com/gptbot, docs.perplexity.ai/guides/bots,
-// support.claude.com, developers.google.com/crawling, github.com/ai-robots-txt.
-const AI_AGENT_UA =
-  /GPTBot|OAI-SearchBot|ChatGPT-User|OAI-AdsBot|ClaudeBot|Claude-User|Claude-SearchBot|claude-code|PerplexityBot|Perplexity-User|Google-Extended|Google-CloudVertexBot|GoogleAgent|DuckAssistBot|Amazonbot|Applebot-Extended|Bytespider|CCBot|meta-externalagent|meta-externalfetcher|cohere-training-data-crawler|MistralAI-User|Kagibot|YouBot|AI2Bot|Diffbot|NotebookLM|Devin/i;
 
 // Matched routes: the generated llms*.txt indexes plus all page routes
 // (static assets and API routes excluded to limit middleware invocations).
@@ -32,9 +28,58 @@ export const config = {
   ],
 };
 
-function contentKind(pathname: string, accept: string | null): string {
+// Crawler IP ranges, loaded in the background (never on the response path).
+const getIpRanges = createIpRangesCache();
+
+// Links copied from prose, chat answers, or broken Markdown often drag the
+// next characters into the URL: `/pricing,`, `/docs/v4.`, `/docs)`,
+// `/docs/halo](https:/langfuse.com/docs/halo`, `.../annotation%3E(1)`. No page
+// path contains these characters, so cut the path at the first one (and drop
+// trailing dots and colons) and redirect to what is left. Redirects in
+// next.config.mjs then apply to the cleaned path as usual.
+//
+// /cloud is skipped: app/cloud/[[...path]] forwards any subpath to the
+// Langfuse app, where resource names (prompts, datasets) may contain these
+// characters.
+const STRAY_PATH_SUFFIX =
+  /(?:https?:\/|[)\]>"'`*,;!]|%21|%22|%27|%29|%2C|%3B|%3E|%5B|%5D|%60|%E2%80%8B|%EF%BC%89).*$/i;
+const TRAILING_PUNCTUATION = /[.:]+$/;
+const UNCLEANED_PATH = /^\/cloud(?:\/|$)/;
+
+function strippedPathname(pathname: string): string | null {
+  if (UNCLEANED_PATH.test(pathname)) return null;
+  const cleaned =
+    pathname.replace(STRAY_PATH_SUFFIX, "").replace(TRAILING_PUNCTUATION, "") ||
+    "/";
+  return cleaned === pathname ? null : cleaned;
+}
+
+// Pages whose Markdown mirror lives in public/md-src (see
+// scripts/copy_md_sources.js and md-override/). Every page under these
+// prefixes has a mirror, except the virtual /faq/tag/<tag> listings.
+// ChatGPT-User (ChatGPT and Codex fetching a page for a person) gets the
+// mirror even though it does not ask for Markdown. Every other client keeps
+// the HTML page: browsers, search crawlers (including OAI-SearchBot), ChatGPT
+// agent (drives a real browser), and agents that already send
+// `Accept: text/markdown`, such as Claude Code.
+const MARKDOWN_FOR_AGENT_PATHS =
+  /^\/(?:(?:docs|integrations|self-hosting|faq|guides|security|compare)(?:\/.*)?|pricing|pricing-self-host)\/?$/;
+const NO_MARKDOWN_MIRROR = /^\/faq\/tag(?:\/|$)|\.(?:md|txt|json|xml)$/;
+
+function markdownMirrorPath(pathname: string): string {
+  return `/md-src${pathname.replace(/\/$/, "")}.md`;
+}
+
+function contentKind(
+  pathname: string,
+  accept: string | null,
+  servedMarkdownToAgent: boolean,
+): string {
   if (pathname.startsWith("/llms") && pathname.endsWith(".txt")) {
     return "llms_txt";
+  }
+  if (servedMarkdownToAgent) {
+    return "markdown_user_agent";
   }
   if (pathname.endsWith(".md")) {
     return "markdown_file";
@@ -49,51 +94,102 @@ export function proxy(
   request: NextRequest,
   event: NextFetchEvent,
 ): NextResponse {
+  const stripped = strippedPathname(request.nextUrl.pathname);
+  if (stripped) {
+    const url = request.nextUrl.clone();
+    url.pathname = stripped;
+    return NextResponse.redirect(url, 307);
+  }
+
+  const headers = request.headers;
+  const pathname = request.nextUrl.pathname;
+  const accept = headers.get("accept");
+  const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+
+  // Requests that ask for Markdown are served by the rewrites in
+  // next.config.mjs. This covers ChatGPT-User, which fetches pages like a
+  // browser does. The rewrite targets a separate file, so the CDN caches the Markdown under
+  // /md-src/... and the HTML under the page URL: the two never mix, and no
+  // `Vary: User-Agent` is needed.
+  let markdownRewrite: URL | null = null;
+  if (
+    (request.method === "GET" || request.method === "HEAD") &&
+    MARKDOWN_FOR_AGENT_PATHS.test(pathname) &&
+    !NO_MARKDOWN_MIRROR.test(pathname) &&
+    !accept?.includes("text/markdown") &&
+    /chatgpt-user/i.test(headers.get("user-agent") ?? "")
+  ) {
+    if (classifyAgentTraffic(headers, ip).id === "chatgpt-user") {
+      markdownRewrite = request.nextUrl.clone();
+      markdownRewrite.pathname = markdownMirrorPath(pathname);
+    }
+  }
+
   if (posthogKey && process.env.DISABLE_AGENT_FETCH_TRACKING !== "true") {
-    const userAgent = request.headers.get("user-agent") ?? "";
-    const pathname = request.nextUrl.pathname;
-    const accept = request.headers.get("accept");
-    const kind = contentKind(pathname, accept);
+    const userAgent = headers.get("user-agent") ?? "";
+    const kind = contentKind(pathname, accept, markdownRewrite !== null);
 
     // Agent-facing content endpoints (markdown mirrors, llms*.txt) are
-    // tracked for every caller; regular page routes only when the user agent
-    // is a known AI agent — never for human traffic (posthog-js covers that).
-    const shouldTrack = kind !== "page" || AI_AGENT_UA.test(userAgent);
+    // tracked for every caller; regular page routes only when the request
+    // comes from an AI agent or AI crawler — never for human traffic
+    // (posthog-js covers that). This first pass is user-agent and header
+    // based only, so it adds no latency.
+    const shouldTrack =
+      kind !== "page" || isAgentOrAiCrawler(classifyAgentTraffic(headers, ip));
 
     if (shouldTrack) {
-      const payload = {
-        api_key: posthogKey,
-        event: "agent_content_fetch",
-        distinct_id: userAgent || "unknown-agent",
-        timestamp: new Date().toISOString(),
-        properties: {
-          $process_person_profile: false,
-          $lib: "docs-proxy",
-          // PostHog computes its $virt_* traffic classification (traffic
-          // type, bot name, bot operator) from $raw_user_agent and $ip at
-          // query time.
-          $raw_user_agent: userAgent,
-          $ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
-          $current_url: request.nextUrl.href,
-          $host: request.nextUrl.host,
-          $pathname: pathname,
-          $referrer: request.headers.get("referer") ?? undefined,
-          content_kind: kind,
-          method: request.method,
-          accept: accept ?? undefined,
-        },
-      };
+      const send = async () => {
+        // Re-classify with IP ranges to verify crawlers and catch
+        // impersonators (category "bot", kind "impersonator").
+        const traffic = classifyAgentTraffic(headers, ip, await getIpRanges());
+        const payload = {
+          api_key: posthogKey,
+          event: "agent_content_fetch",
+          distinct_id: userAgent || "unknown-agent",
+          timestamp: new Date().toISOString(),
+          properties: {
+            $process_person_profile: false,
+            $lib: "docs-proxy",
+            // PostHog computes its $virt_* traffic classification (traffic
+            // type, bot name, bot operator) from $raw_user_agent and $ip at
+            // query time.
+            $raw_user_agent: userAgent,
+            $ip: ip,
+            $current_url: request.nextUrl.href,
+            $host: request.nextUrl.host,
+            $pathname: pathname,
+            $referrer: headers.get("referer") ?? undefined,
+            content_kind: kind,
+            method: request.method,
+            accept: accept ?? undefined,
+            // @mintlify/agent-traffic classification.
+            agent_category: traffic.category,
+            agent_kind: traffic.kind,
+            agent_name: traffic.name,
+            agent_operator: traffic.operator,
+            agent_version: traffic.version,
+            agent_verified: traffic.verified,
+            agent_confidence: traffic.confidence,
+          },
+        };
 
-      event.waitUntil(
-        fetch(`${posthogHost}/i/v0/e/`, {
+        await fetch(`${posthogHost}/i/v0/e/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }).catch(() => {
+        });
+      };
+
+      event.waitUntil(
+        send().catch(() => {
           // Analytics must never affect content delivery.
         }),
       );
     }
+  }
+
+  if (markdownRewrite) {
+    return NextResponse.rewrite(markdownRewrite);
   }
 
   return NextResponse.next();

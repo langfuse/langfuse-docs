@@ -28,10 +28,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         id: pnpm-install
         with:
-          runtime: node@22
+          runtime: node@24
           cache: true
           require-lockfile: true
 
@@ -51,7 +51,7 @@ jobs:
           path: .next/analyze/__bundle_analysis.json
 
       - name: Download base branch bundle stats
-        uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
+        uses: dawidd6/action-download-artifact@a92c7ae74cf1df8810783758581e485ac3aaa309 # v28
         if: success() && github.event.number
         with:
           workflow: nextjs_bundle_analysis.yml

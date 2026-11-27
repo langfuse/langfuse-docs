@@ -68,7 +68,7 @@ export function ValueInsightsAccordion({
   items = chatAgentsInsights,
   imageSrc = "/images/docs/observability/first-trace.png",
   imageAlt = "Langfuse trace screenshot",
-  caption = "trace · frustrated turn 3 of 7",
+  caption = "trace: frustrated turn 3 of 7",
   locked = false,
 }: ValueInsightsAccordionProps = {}) {
   const [activeItemId, setActiveItemId] = useState(items[0]?.id);

@@ -1,6 +1,6 @@
 ---
-title: Capturing signals
-sidebarTitle: Capturing signals
+title: Capturing user signals
+sidebarTitle: Capturing user signals
 description: "Instrument your application so production usage produces quality judgments: explicit ratings, behavioral events, conversation signals, and task outcomes captured as scores on traces."
 ---
 
@@ -52,11 +52,11 @@ export const references = [
   },
 ];
 
-# Capturing signals
+# Capturing user signals
 
 Once you have [traces](/academy/tracing), you will want to know whether what your agent did was good. You can either set up [online evaluators](/academy/evaluate) that measure specific aspects of a trace, or you can capture [signals of judgment from your users](/docs/observability/features/user-feedback).
 
-Unlike traditional online evaluation, capturing signals does not directly evaluate the quality of the agent's work. Instead, it captures things a user did or said that indicate whether the user perceives the agent's work as good or bad: a thumbs down, a retry, a request for a human, etc.
+Unlike traditional online evaluation, capturing user signals does not directly evaluate the quality of the agent's work. Instead, it captures things a user did or said that indicate whether the user perceives the agent's work as good or bad: a thumbs down, a retry, a request for a human, etc.
 
 <Callout type="info">
 **Signals measure perceived quality at the moment of use.**
@@ -128,6 +128,8 @@ Separate steering from correction. In this [music DJ example](/academy/examples/
 
 _Amazon used rephrase and follow-up patterns to curate training data for Alexa's language understanding from live traffic.<Ref refs={references} id="park-alexa" /> Microsoft's SPUR goes a step further: an LLM learns satisfaction and dissatisfaction patterns from the small slice of thumbs-labeled conversations, condenses them into a rubric, and scores the unlabeled majority with it.<Ref refs={references} id="spur" />_
 
+Conversation signals live in free text, so detecting them takes a model. A [decision model](/docs/evaluation/evaluation-methods/decision-models) can check a message for several of them in a single call, cheaply enough to cover all production traffic rather than a sample. [Catching conversation signals in Langfuse](/blog/2026-09-23-catching-conversation-signals-in-langfuse) walks through a ready-made template.
+
 ### Outcome signals [#outcome-signals]
 
 Outcome signals tell you what the environment did with the output: a draft was sent unedited, a ticket was closed, etc. **They are the strongest kind because they are grounded in the environment rather than in someone's opinion.**
@@ -182,6 +184,12 @@ Two examples of this:
 - When OpenAI added a reward signal built from ChatGPT thumbs data, the model turned sycophantic: user feedback favored agreeable answers and weakened the signal that had been holding sycophancy in check, while offline evaluations and A/B tests looked fine and only expert testers noticed the model felt off.<Ref refs={references} id="openai-sycophancy" />
 
 ## Apply this to your application
+
+<ManualGuideCallout
+  href="/guides/user-feedback-loop"
+  topic="User feedback loop"
+  lede="Choose the feedback signals that fit your application, capture them as scores on your traces, and act on what they surface."
+/>
 
 The [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) can inspect your application and existing scores, propose the signals worth capturing, and help implement the ones you choose.
 

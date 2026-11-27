@@ -49,9 +49,7 @@ export function SpendByTaskMock() {
     >
       <div className="flex items-center justify-between gap-3 border-b border-line-structure px-3 py-2 font-sans text-[12px] font-[450] leading-[150%] tracking-[-0.06px]">
         <span className="text-text-secondary">Spend by task category</span>
-        <span className="text-right text-text-tertiary">
-          Last 30 days · Eng
-        </span>
+        <span className="text-right text-text-tertiary">Last 30 days, Eng</span>
       </div>
 
       <div className="space-y-2.5 px-3 py-3">

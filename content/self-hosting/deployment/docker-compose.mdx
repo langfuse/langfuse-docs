@@ -9,14 +9,12 @@ sidebarTitle: "Local/VM (Docker Compose)"
 
 This guide will walk you through deploying Langfuse locally or on a VM using Docker Compose.
 We will use the [`docker-compose.yml`](https://github.com/langfuse/langfuse/blob/main/docker-compose.yml) file.
-This is the simplest way to run Langfuse to give it a try.
+
+Docker Compose is for local use and for a single test VM. It runs all seven services on one machine and has no high availability, scaling or backup. For production, use [Kubernetes (Helm)](/self-hosting/deployment/kubernetes-helm) or the [AWS](/self-hosting/deployment/aws), [Azure](/self-hosting/deployment/azure) or [GCP](/self-hosting/deployment/gcp) guides. Self-hosted Enterprise can be bundled with ClickHouse Cloud or ClickHouse BYOC, see [self-hosted pricing](/pricing-self-host).
 
 If you would rather not run any infrastructure, use [Langfuse Cloud](/cloud): hosted by Langfuse, with a free tier and no infrastructure to run. The SDKs and integrations work identically against Langfuse Cloud and a self-hosted instance.
 
 If you use a cloud provider like AWS, GCP, or Azure, you will need permissions to deploy virtual machines.
-
-For high-availability and high-throughput, we recommend using Kubernetes ([deployment guide](/self-hosting/deployment/kubernetes-helm)).
-The docker compose setup lacks high-availability, scaling capabilities, and backup functionality.
 
 <Callout type="info">
   Coming from docker-compose v2? See our upgrade guide for [docker
@@ -38,6 +36,17 @@ Watch this 2:15 minute walkthrough for a step-by-step guide on running Langfuse 
   allowFullScreen
 ></iframe>
 
+## Sizes [#sizes]
+
+| Item               | Size                                                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Services           | 7: web, worker, AI Gateway, ClickHouse, MinIO, Redis, Postgres                                                                      |
+| Images to download | about 980 MB compressed (web 235 MB, worker 173 MB, AI Gateway 28 MB, ClickHouse 267 MB, MinIO 64 MB, Redis 44 MB, Postgres 167 MB) |
+| VM                 | at least 4 cores, 16 GiB memory, 100 GiB disk, for example a t3.xlarge on AWS                                                       |
+| Ports on the host  | 3000 (web), 9090 (MinIO), 3031 (AI Gateway)                                                                                         |
+
+Production deployments size each service separately. The [scaling page](/self-hosting/configuration/scaling#minimum-infrastructure-requirements) lists the minimums per service.
+
 ## Get Started
 
 <Tabs items={["Local", "VM"]}>
@@ -49,7 +58,13 @@ Watch this 2:15 minute walkthrough for a step-by-step guide on running Langfuse 
 ### Requirements
 
 - git
+- a POSIX shell with openssl (on Windows, use WSL or Git Bash)
 - docker & docker compose -> use [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows
+
+<Callout type="info">
+  On Apple silicon, you can also [run Langfuse locally with Apple’s `container`
+  runtime](/self-hosting/deployment/macos).
+</Callout>
 
 ### Clone Langfuse Repository
 
@@ -60,17 +75,49 @@ git clone https://github.com/langfuse/langfuse.git
 cd langfuse
 ```
 
-### Start the application
+### Create the secrets
 
-Update the secrets in the docker-compose.yml and then run the langfuse docker compose using:
+Run this in the `langfuse` folder. It writes a `.env` with a random value for every secret the compose file marks `# CHANGEME`, and it leaves an existing `.env` untouched.
 
 ```bash
-docker compose up
+if [ -f .env ]; then echo ".env exists, not overwriting"
+elif ! command -v openssl >/dev/null; then echo "openssl not found, install it first"
+else
+PG=$(openssl rand -hex 16)
+MINIO=$(openssl rand -hex 16)
+cat > .env <<ENV
+DATABASE_URL=postgresql://postgres:${PG}@postgres:5432/postgres
+POSTGRES_PASSWORD=${PG}
+SALT=$(openssl rand -hex 16)
+ENCRYPTION_KEY=$(openssl rand -hex 32)
+NEXTAUTH_SECRET=$(openssl rand -hex 32)
+CLICKHOUSE_PASSWORD=$(openssl rand -hex 16)
+REDIS_AUTH=$(openssl rand -hex 16)
+MINIO_ROOT_PASSWORD=${MINIO}
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
+LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
+LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY=${MINIO}
+ENV
+fi
 ```
 
-Watch the containers being started and the logs flowing in.
-After about 2-3 minutes, the langfuse-web-1 container should log "Ready".
-At this point you can proceed to the next step.
+`DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`. If you started Langfuse on this machine before with the default secrets, the existing volumes keep the old passwords: remove them with `docker compose down -v`, which deletes all data.
+
+### Start Langfuse
+
+```bash
+docker compose up -d
+```
+
+### Wait until it is ready
+
+```bash
+ok=; for i in $(seq 1 60); do curl -sf http://localhost:3000/api/public/health && { ok=1; break; }; sleep 5; done
+[ -n "$ok" ] || echo "Not ready after 5 minutes, check: docker compose logs langfuse-web"
+docker compose ps
+```
+
+The health check prints `{"status":"OK","version":"..."}` once the web container is up, usually after 2 to 3 minutes.
 
 ### Done
 
@@ -92,9 +139,8 @@ Enter your cloud provider interface and navigate to the VM instance section.
 This is EC2 on AWS, Compute Engine on GCP, and Virtual Machines on Azure.
 Create a new instance.
 
-We recommend that you use at least 4 cores and 16 GiB of memory, e.g. a t3.xlarge on AWS.
+Choose an instance that matches the [VM size](#sizes).
 Assign a public IP address in case you want to send traces from external sources.
-As observability data tends to be large in volume, choose a sufficient amount of storage, e.g. 100GiB.
 
 The rest of this guide will assume that you have an Ubuntu OS running on your VM and are connected via SSH.
 
@@ -140,11 +186,34 @@ git clone https://github.com/langfuse/langfuse.git
 cd langfuse
 ```
 
-### Update Secrets
+### Create the secrets
 
-We strongly recommend that you update the secrets in the docker-compose file.
-All sensitive lines are marked with `# CHANGEME`.
-Make sure to select long, random passwords for all secrets.
+Run this in the `langfuse` folder. It writes a `.env` with a random value for every secret the compose file marks `# CHANGEME`, and it leaves an existing `.env` untouched. Before you run it, replace `<instance-ip>` with the instance address, because `NEXTAUTH_URL` must match the address users open.
+
+```bash
+if [ -f .env ]; then echo ".env exists, not overwriting"
+elif ! command -v openssl >/dev/null; then echo "openssl not found, install it first"
+else
+PG=$(openssl rand -hex 16)
+MINIO=$(openssl rand -hex 16)
+cat > .env <<ENV
+NEXTAUTH_URL=http://<instance-ip>:3000
+DATABASE_URL=postgresql://postgres:${PG}@postgres:5432/postgres
+POSTGRES_PASSWORD=${PG}
+SALT=$(openssl rand -hex 16)
+ENCRYPTION_KEY=$(openssl rand -hex 32)
+NEXTAUTH_SECRET=$(openssl rand -hex 32)
+CLICKHOUSE_PASSWORD=$(openssl rand -hex 16)
+REDIS_AUTH=$(openssl rand -hex 16)
+MINIO_ROOT_PASSWORD=${MINIO}
+LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
+LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY=${MINIO}
+LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY=${MINIO}
+ENV
+fi
+```
+
+`DATABASE_URL` contains the Postgres password, and the three S3 secret keys must equal the MinIO root password, so the script sets each pair from one value. Do not put spaces around `=` in `.env`. If you started Langfuse on this machine before with the default secrets, the existing volumes keep the old passwords: remove them with `docker compose down -v`, which deletes all data.
 
 ### Update network parameters (optional)
 
@@ -152,15 +221,21 @@ Only the langfuse-web container and minio must be accessible from outside the in
 Therefore, we recommend to add a security group or firewall to your instance that restricts incoming traffic to port :3000 and :9090.
 If you use the [AI Gateway](#ai-gateway), allow traffic to the TLS-terminating reverse proxy in front of it rather than to port :3031, because the gateway serves plain HTTP. Host firewalls such as ufw don't filter ports that Docker publishes, so block :3031 in the security group or bind it to `127.0.0.1` in `docker-compose.yml`.
 
-### Start the application
+### Start Langfuse
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
-Watch the containers being started and the logs flowing in.
-After about 2-3 minutes, the langfuse-web-1 container should log "Ready".
-At this point you can proceed to the next step.
+### Wait until it is ready
+
+```bash
+ok=; for i in $(seq 1 60); do curl -sf http://localhost:3000/api/public/health && { ok=1; break; }; sleep 5; done
+[ -n "$ok" ] || echo "Not ready after 5 minutes, check: docker compose logs langfuse-web"
+docker compose ps
+```
+
+The health check prints `{"status":"OK","version":"..."}` once the web container is up, usually after 2 to 3 minutes.
 
 ### Done
 
@@ -219,8 +294,7 @@ To add more throughput on a docker compose setup, you can usually use a larger v
 
 ## Shutdown
 
-You can stop the containers by hitting `Ctrl+C` in the terminal.
-If you started docker-compose in the background (`-d` flag), you can stop all instance using:
+Stop all containers with:
 
 ```bash
 docker compose down
@@ -249,6 +323,6 @@ Ports that are bound to `127.0.0.1` (the worker on `3030`, MinIO console on `909
 
 ## How to Upgrade
 
-To upgrade Langfuse, you can stop the containers and run `docker compose up --pull always`.
+To upgrade Langfuse, you can stop the containers and run `docker compose up -d --pull always`.
 
 For more details on upgrading, please refer to the [upgrade guide](/self-hosting/upgrade).

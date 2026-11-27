@@ -6,6 +6,7 @@ type SignupCTAProps = {
   actionLabel?: string;
   href?: string;
   className?: string;
+  onClick?: () => void;
 };
 
 export function SignupCTA({
@@ -13,6 +14,7 @@ export function SignupCTA({
   actionLabel = "Sign up",
   href = "/cloud",
   className,
+  onClick,
 }: SignupCTAProps) {
   return (
     <aside
@@ -21,6 +23,7 @@ export function SignupCTA({
     >
       <a
         href={href}
+        onClick={onClick}
         className="group button-wrapper relative -m-1 flex p-1 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         <HoverCorners />

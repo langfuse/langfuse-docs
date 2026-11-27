@@ -22,7 +22,7 @@ import { Frame } from "@/components/Frame";
   ![Introducing Langfuse AI Gateway](/images/blog/introducing-gateway/hero.png)
 </Frame>
 
-Today, we are launching [Langfuse AI Gateway](/docs/gateway/overview) in public beta. We're excited to introduce our next product. Thank you to everyone who shared feedback that this is what you want us to build next to establish a unified way use models, track costs, and govern access to AI.
+Today, we are launching [Langfuse AI Gateway](/docs/gateway/overview) in public beta. We're excited to introduce our next product. Thank you to everyone who shared feedback that this is what you want us to build next to establish a unified way to use models, track costs, and govern access to AI.
 
 ## Why we built Langfuse AI Gateway
 
@@ -39,7 +39,7 @@ Managing AI usage within a company is becoming its own discipline:
 
 ## Langfuse is uniquely positioned for this
 
-Langfuse is the [leading open source project](/adoption) for AI observability and evals (35k+ GitHub stars, 90B+ observations/month, 90M+ package downloads/month). 21 of the Fortune 50 and leading AI-native businesses like Ramp, Hugging Face, and Canva rely on Langfuse to understand and improve their AI agents. Open source is important here as an AI gateway needs to be scalable, reliable, and self-hosting it air-gapped can solve many security concerns in regulated industries.
+Langfuse is the [leading open source project](/adoption) for AI observability and evals (35k+ GitHub stars, 110B+ observations/month, 90M+ package downloads/month). 21 of the Fortune 50 and leading AI-native businesses like Ramp, Hugging Face, and Canva rely on Langfuse to understand and improve their AI agents. Open source is important here as an AI gateway needs to be scalable, reliable, and self-hosting it air-gapped can solve many security concerns in regulated industries.
 
 Adding a gateway was widely requested by our users. To get a complete picture of your company's AI usage, you need to see every model call. Our [100+ integrations](/integrations) already cover many of the AI agents you build, but much of a company's AI usage happens in tools nobody instruments, like coding agents, internal assistants, and scripts. A gateway sits centrally, where every call passes, so nothing is missed. And unlike a standalone gateway, which can only count tokens and cost, Langfuse turns each call into a full trace you can search, evaluate, and improve. This is why adding a native gateway is a natural next step for Langfuse.
 
@@ -47,12 +47,12 @@ Adding a gateway was widely requested by our users. To get a complete picture of
 
 Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because every call through it becomes a full Langfuse trace (opt-in).
 
-**See your spend.** Cost and usage for every call land in one AI spend [dashboard](/docs/metrics/overview), by model and provider. Set spend limits per key and get [alerted](/docs/observability/features/alerts) before anyone runs into a surprise bill.
+**See your spend.** Cost and usage for every call land in one AI spend [dashboard](/docs/gateway/features/analytics), by model and provider. Get [alerted](/docs/gateway/features/analytics#alerts) before anyone runs into a surprise bill.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/261106_gateway_analytics.mp4"
+  src="https://static.langfuse.com/docs-videos/20261109_analytics.mp4"
   title="AI Gateway spend analytics in Langfuse"
-  aspectRatio={2726 / 2082}
+  aspectRatio={3714 / 2296}
   controls={false}
 />
 
@@ -71,9 +71,9 @@ Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because 
 **Control which models are used and keep them secure.** Approve models centrally, so expensive or unvetted ones don't creep in unnoticed. You decide what gets recorded: usage and cost only, full prompts and responses, or nothing at all.
 
 <Video
-  src="https://static.langfuse.com/docs-videos/261106_gateway_modelcontrol.mp4"
+  src="https://static.langfuse.com/docs-videos/20261109_modelcontrol.mp4"
   title="Approving models for the AI Gateway"
-  aspectRatio={3706 / 2074}
+  aspectRatio={3714 / 2174}
   controls={false}
 />
 
@@ -90,14 +90,14 @@ Most gateways tell you what AI costs. Langfuse AI Gateway goes further, because 
 ## Fully open source
 
 - **Open source.** Like the rest of Langfuse, the core gateway is MIT-licensed. [Run it in your own infrastructure](/self-hosting/configuration/ai-gateway), or use it fully managed in Langfuse Cloud.
-- **Easy to self-host.** Deploy it as a single 22MB Docker image alongside your existing Langfuse instance, with no extra dependencies. [Read the docs](/self-hosting/configuration/ai-gateway).
+- **Easy to self-host.** Deploy it as a single 22 MB Docker image alongside your existing Langfuse instance, with no extra dependencies. [Read the docs](/self-hosting/configuration/ai-gateway#scaling).
 - **Your keys, no markup.** You keep your contracts, rates, and compliance agreements, such as zero data retention, with model/cloud providers. We don't resell tokens.
 
 ## Built for maximum performance and predictable scaling
 
 - **Built in Rust.** We built the gateway in Rust for high performance, availability, and reliability, even during usage peaks.
 - **High speed.** \<3ms median latency with tracing on.
-- **High reliability.** 1,000+ concurrent streams on a single 2 vCPU node.
+- **High reliability.** 1,000+ concurrent streams on a single 2 vCPU node. See [scaling](/self-hosting/configuration/ai-gateway#scaling).
 - **Predictable scaling.** Memory footprint scales in line with load.
 
 ## What's next
@@ -115,7 +115,7 @@ If you are interested in being a design partner on one of these, [reach out to u
 
 ## How to get started
 
-The gateway is in public beta, and you can try it out today. If you're an admin, [set up the gateway for your organization](/docs/gateway/get-started/admin-setup), then create a gateway key under **Organization settings → AI Gateway**.
+The gateway is in public beta, and you can try it out today. If you're an admin, [set up the gateway for your organization](/docs/gateway/get-started/admin-setup), then create a gateway key under **AI Gateway → Gateway keys**.
 
 Point your app or coding agent at your region's gateway host (for example, `https://gateway.cloud.langfuse.com`) and use the gateway key instead of your provider key. Open the ingestion project in Tracing to see incoming traffic.
 
@@ -133,7 +133,11 @@ client = OpenAI(
 
 For a full walkthrough of setting up Claude Code, Codex, and more, see [Send your first request](/docs/gateway/get-started/first-request).
 
-Langfuse is part of ClickHouse since January and the Langfuse AI Gateway is one of many big launches at today. We're announcing the **largest expansion of the ClickHouse platform** since the launch of ClickHouse Cloud, introducing new capabilities across postgres, observability, security, and AI engineering. [Read more](https://clickhouse.com/blog/announcing-clickhouse-platform-largest-expansion?utm_medium=referral&utm_source=langfuse&utm_campaign=unified-platform-launch).
+Langfuse has been part of ClickHouse since January, and the Langfuse AI Gateway is one of many big launches today. We're announcing the **largest expansion of the ClickHouse platform** since the launch of ClickHouse Cloud, introducing new capabilities across postgres, observability, security, and AI engineering. [Read more](https://clickhouse.com/blog/announcing-clickhouse-platform-largest-expansion?utm_medium=referral&utm_source=langfuse&utm_campaign=unified-platform-launch).
+
+import GatewayUpdateSignup from "@/components-mdx/gateway-update-signup.mdx";
+
+<GatewayUpdateSignup />
 
 ## FAQ
 
@@ -156,7 +160,7 @@ No. Change the base URL and use a gateway key. Requests and responses stay in th
 <Details>
 <Summary>Does Langfuse record my prompts?</Summary>
 
-Only if you opt in. By default, the gateway records metadata, usage, and cost, not content. Pass-through mode records nothing, and self-hosting keeps all data on your infrastructure. Turn on full logging, and every request becomes a complete Langfuse trace you can debug, evaluate, and turn into datasets, all without touching your code.
+Only if you opt in. By default, the gateway records metadata, usage, and cost, not content. On self-hosted Langfuse, the `NONE` ingestion mode records nothing. Self-hosting keeps all data on your infrastructure. Turn on full logging, and every request becomes a complete Langfuse trace you can debug, evaluate, and turn into datasets, all without touching your code.
 
 </Details>
 

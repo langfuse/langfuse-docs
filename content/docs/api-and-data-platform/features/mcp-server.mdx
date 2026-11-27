@@ -1,24 +1,24 @@
 ---
-title: MCP Server
+title: Langfuse MCP server
 sidebarTitle: MCP Server
-description: Native Model Context Protocol (MCP) server for Langfuse, enabling AI assistants to interact with your Langfuse data programmatically.
+description: The Langfuse MCP server gives AI agents read and write access to evaluators, scores, datasets, experiments, prompts, traces and metrics in a Langfuse project.
 ---
 
-# Langfuse MCP Server
+# Langfuse MCP server
 
-Langfuse includes a native [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that enables AI assistants and agents to interact with your Langfuse data programmatically.
+The Langfuse [MCP](https://modelcontextprotocol.io) server lets AI agents set up and run evals, manage prompts and read traces in a Langfuse project. It covers evaluators and evaluation rules, scores, datasets and experiments, annotation queues, prompts, observations and metrics, and nearly half of its tools are for evaluation.
 
 If you have feedback or ideas for new tools, please [share them on GitHub](https://github.com/orgs/langfuse/discussions/10605).
 
 <Callout type="info">
 
-If you are running AI agents in an environment where you can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) instead of the MCP server.
+If your agent can install CLI tools and run bash commands, we recommend using the [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) with the [Langfuse CLI](/docs/api-and-data-platform/features/cli). This MCP server also [bundles the Langfuse skills](#bundled-skills) for clients that support MCP skills.
 
 </Callout>
 
 <Callout type="info">
 
-This is the authenticated MCP server for the Langfuse data platform. There is also a public MCP server for the Langfuse documentation ([docs](/docs/docs-mcp)).
+This is the Langfuse MCP server, which needs the project's API keys. The [Langfuse docs MCP server](/docs/docs-mcp) is a separate public server for searching the documentation.
 
 </Callout>
 
@@ -406,6 +406,10 @@ http_headers = { "Authorization" = "Basic {your-base64-token}" }
 
 </Steps>
 
+## Bundled skills [#bundled-skills]
+
+The MCP server bundles the official [Langfuse Agent Skill](/docs/api-and-data-platform/features/agent-skill) (`langfuse`) and migration skill (`migrate-to-langfuse`) via the [MCP Skills extension](https://modelcontextprotocol.io/extensions/skills/overview) (`io.modelcontextprotocol/skills`). Clients that support MCP skills, such as Claude Code 2.1.331 or later, discover and load them automatically once connected, and self-hosted deployments serve the skills matching their Langfuse version. If your client does not support MCP skills, [install the skill from GitHub](/docs/api-and-data-platform/features/agent-skill#install) instead.
+
 ## Filter logical root observations [#logical-root-observations]
 
 The observation tools distinguish logical roots from physical parentage:
@@ -417,9 +421,15 @@ The observation tools distinguish logical roots from physical parentage:
 
 For the complete tool schemas and request examples, see the [MCP Reference](https://mcp.reference.langfuse.com).
 
-## Feedback
+## Feedback [#feedback]
 
 We'd love to hear about your experience with the Langfuse MCP server. Share your feedback, ideas, and use cases in our [GitHub Discussion](https://github.com/orgs/langfuse/discussions/10605).
+
+<Callout type="info">
+
+The `submitFeedback` tool is also available as [`POST /api/public/feedback`](https://api.reference.langfuse.com/#tag/feedback/POST/api/public/feedback).
+
+</Callout>
 
 ## Related Documentation
 

@@ -1,0 +1,35 @@
+---
+date: 2026-11-19
+title: Cap AI Gateway spend with budgets
+description: Set budgets that cap Langfuse AI Gateway spend per API key, per user, and for the whole organization.
+author: Tobias Wochinger
+ogImage: /images/changelog/2026-11-19-ai-gateway-budgets.png
+---
+
+import { ChangelogHeader } from "@/components/changelog/ChangelogHeader";
+import { Book, KeyRound } from "lucide-react";
+
+<ChangelogHeader />
+
+You can now set [budgets](/docs/gateway/features/budgets) on the [Langfuse AI Gateway](/docs/gateway/overview): per API key, per user, a default for every key or user without one, and one for the whole organization. Once a budget is reached, the gateway rejects requests until it resets.
+
+<Cards num={2}>
+  <Card
+    title="AI Gateway overview"
+    href="/docs/gateway/overview"
+    icon={<Book />}
+    arrow
+  />
+  <Card
+    title="Send your first request"
+    href="/docs/gateway/get-started/first-request"
+    icon={<KeyRound />}
+    arrow
+  />
+  <Card
+    title="Budgets"
+    href="/docs/gateway/features/budgets"
+    icon={<Book />}
+    arrow
+  />
+</Cards>

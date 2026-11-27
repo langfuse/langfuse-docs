@@ -36,9 +36,9 @@ const TOOL_ITEMS: ToolItem[] = [
     eyebrow: "Terminal",
   },
   {
-    title: "Platform MCP Server",
+    title: "Langfuse MCP server",
     description:
-      "Structured access for IDE agents to manage prompts, query traces, and use Langfuse data.",
+      "Structured access for IDE agents to run evals, manage prompts, and query traces, scores, and metrics.",
     href: "/docs/api-and-data-platform/features/mcp-server",
     action: "Configure MCP",
     eyebrow: "IDE agents",

@@ -1,0 +1,24 @@
+---
+title: How are multiple filters combined in the Langfuse API?
+seoTitle: "AND and OR Filter Logic in the Observations and Metrics APIs"
+description: Filter conditions in the Observations API v2, Metrics API v2, and other public APIs are combined with AND. Use any of / none of to match several values of one column.
+tags: [public-api]
+---
+
+# How are multiple filters combined in the Langfuse API?
+
+All conditions in a `filter` array are combined with **AND**. Nested groups and OR across different columns are not supported. This applies to the [Observations API v2](/docs/api-and-data-platform/features/public-api#observations-filters), the [Metrics API v2](/docs/metrics/features/metrics-api), and the other endpoints that take a `filter` parameter.
+
+To match one of several values in the **same** column, use a single condition with `any of` (or `none of` to exclude values):
+
+```json
+[
+  { "type": "stringOptions", "column": "environment", "operator": "any of", "value": ["production", "staging"] },
+  { "type": "arrayOptions", "column": "tags", "operator": "all of", "value": ["checkout", "v2"] },
+  { "type": "number", "column": "totalCost", "operator": ">", "value": 0.01 }
+]
+```
+
+This returns observations in production **or** staging, **and** tagged with both `checkout` and `v2`, **and** costing more than 0.01. `arrayOptions` (for example `tags`) supports `any of`, `all of`, and `none of`.
+
+For an OR across different columns, send one request per condition and merge the results. In the Observations API v2, a `filter` parameter takes precedence over the fixed query parameters such as `userId` or `name`.
