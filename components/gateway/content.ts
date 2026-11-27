@@ -189,21 +189,34 @@ export const spanDetails = [
   { k: "key", v: "anna-laptop" },
 ];
 
-export type SketchRow = {
-  label: string;
-  value?: string;
-  tone?: "ok" | "warn" | "error";
-  toggle?: boolean;
-};
+export type SketchTone = "ok" | "warn" | "error";
+
+// What each feature-card drawing shows; the layout lives in GatewayFeatureSketch.
+export type FeatureSketch =
+  | {
+      kind: "keys";
+      group: string;
+      heading: string;
+      rows: { label: string; value: string; tone?: SketchTone }[];
+    }
+  | {
+      kind: "budget";
+      label: string;
+      usedPercent: number;
+      warnAtPercent: [number, number];
+      warning: string;
+    }
+  | { kind: "spend"; points: number[]; highlight: number; tag: string[] }
+  | { kind: "models"; rows: { label: string; on: boolean }[] }
+  | { kind: "agents"; agents: string[]; result: string }
+  | { kind: "tracing"; spans: { label: string; cost: string }[] }
+  | { kind: "hosting"; options: { label: string; detail: string }[] };
 
 export type FeatureCard = {
   title: string;
   description: string;
   href: string;
-  sketch:
-    | { kind: "rows"; rows: SketchRow[] }
-    | { kind: "budget" }
-    | { kind: "bars" };
+  sketch: FeatureSketch;
 };
 
 export const providerCard = {
@@ -211,6 +224,7 @@ export const providerCard = {
   description:
     "Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Change one URL to switch over.",
   href: "/docs/gateway/features/models#supported-providers",
+  hub: "AI Gateway",
   chips: [
     "OpenAI",
     "Anthropic",
@@ -231,7 +245,9 @@ export const featureCardsTop: FeatureCard[] = [
       "Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.",
     href: "/docs/gateway/features/api-keys",
     sketch: {
-      kind: "rows",
+      kind: "keys",
+      group: "platform",
+      heading: "Gateway keys",
       rows: [
         { label: "maria", value: "active", tone: "ok" },
         { label: "ci-release", value: "service" },
@@ -244,14 +260,25 @@ export const featureCardsTop: FeatureCard[] = [
     description:
       "Per key, per user, a default for everyone, or for the whole organization. Email warnings at 85%, 95% and 100%.",
     href: "/docs/gateway/features/budgets",
-    sketch: { kind: "budget" },
+    sketch: {
+      kind: "budget",
+      label: "platform",
+      usedPercent: 86,
+      warnAtPercent: [85, 95],
+      warning: "warning",
+    },
   },
   {
     title: "Spend dashboard",
     description:
       "Spend by model, provider, user and key, with alerts on cost or request count and export to your data lake.",
     href: "/docs/gateway/features/analytics",
-    sketch: { kind: "bars" },
+    sketch: {
+      kind: "spend",
+      points: [30, 42, 36, 55, 48, 66, 60, 78, 72, 90, 84, 100],
+      highlight: 9,
+      tag: ["30d cost", "$18,204"],
+    },
   },
 ];
 
@@ -262,11 +289,11 @@ export const featureCardsBottom: FeatureCard[] = [
       "Turn models on or off per provider connection and limit each gateway key to certain models.",
     href: "/docs/gateway/features/models",
     sketch: {
-      kind: "rows",
+      kind: "models",
       rows: [
-        { label: "openai:*", toggle: true },
-        { label: "anthropic:*", toggle: true },
-        { label: "openrouter:*", toggle: false },
+        { label: "openai:*", on: true },
+        { label: "anthropic:*", on: true },
+        { label: "openrouter:*", on: false },
       ],
     },
   },
@@ -276,12 +303,9 @@ export const featureCardsBottom: FeatureCard[] = [
       "Point Claude Code, Codex and other coding agents at the gateway. Their sessions are grouped automatically.",
     href: "/docs/gateway/get-started/first-request",
     sketch: {
-      kind: "rows",
-      rows: [
-        { label: "claude-code", value: "traced", tone: "ok" },
-        { label: "codex", value: "traced" },
-        { label: "opencode", value: "traced" },
-      ],
+      kind: "agents",
+      agents: ["claude-code", "codex", "opencode"],
+      result: "traced",
     },
   },
   {
@@ -290,11 +314,11 @@ export const featureCardsBottom: FeatureCard[] = [
       "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
     href: "/docs/gateway/features/tracing",
     sketch: {
-      kind: "rows",
-      rows: [
-        { label: "opus", value: "$0.42" },
-        { label: "sonnet", value: "$0.11" },
-        { label: "gpt-5", value: "$0.08" },
+      kind: "tracing",
+      spans: [
+        { label: "opus", cost: "$4.2k" },
+        { label: "sonnet", cost: "$1.1k" },
+        { label: "gpt-5", cost: "$0.8k" },
       ],
     },
   },
@@ -304,10 +328,10 @@ export const featureCardsBottom: FeatureCard[] = [
       "Self-host the gateway as a single small Docker image, or use it on Langfuse Cloud.",
     href: "/self-hosting/configuration/ai-gateway",
     sketch: {
-      kind: "rows",
-      rows: [
-        { label: "Cloud", value: "managed" },
-        { label: "Self-hosted", value: "Docker" },
+      kind: "hosting",
+      options: [
+        { label: "Cloud", detail: "managed" },
+        { label: "Self-hosted", detail: "Docker" },
       ],
     },
   },

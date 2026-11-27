@@ -1,107 +1,35 @@
-/* Isometric sketches on the /gateway feature cards. Same projection as the
-   "All the tools" illustrations on the homepage: rows of labels on a tilted
-   plane, the first row raised as a block. */
+/* Line drawings on the /gateway feature cards: one SVG each, fading out at
+   the card edges. */
 
-.sketch {
-  position: relative;
-  height: 232px;
-  overflow: hidden;
-  pointer-events: none;
-  mask-image: radial-gradient(130% 120% at 40% 40%, #000 58%, transparent 100%);
-}
-
+.sketch,
 .wideSketch {
-  position: relative;
-  height: 280px;
-  overflow: hidden;
   pointer-events: none;
   mask-image: linear-gradient(
     90deg,
     transparent 0,
-    #000 8%,
-    #000 92%,
+    #000 5%,
+    #000 95%,
     transparent 100%
   );
 }
 
-.plane {
-  position: absolute;
-  left: 22px;
-  top: 98px;
-  width: min(236px, 82%);
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  transform: rotateX(48deg) rotateZ(-26deg);
-  transform-origin: left top;
+.sketch {
+  mask-image:
+    linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%),
+    linear-gradient(180deg, transparent 0, #000 8%);
+  mask-composite: intersect;
 }
 
-.widePlane {
-  composes: plane;
-  left: 30px;
-  top: 102px;
-  width: min(360px, 78%);
-  flex-direction: row;
-  flex-wrap: wrap;
+.sketch svg,
+.wideSketch svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.grid {
-  position: absolute;
-  inset: -300px -400px;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--line-structure) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line-structure) 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity: 0.4;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 12px;
-  border: 1px solid var(--line-structure);
-  background: var(--surface-bg);
-  font-family: var(--font-mono);
-  font-size: 16px;
-  line-height: 1.4;
-  color: var(--text-disabled);
-  white-space: nowrap;
-}
-
-.chip {
-  composes: row;
-  padding: 6px 10px;
-  font-size: 13px;
-}
-
-.raised {
-  border-color: var(--text-primary);
-  background: hsl(var(--card));
-  color: var(--text-primary);
-  box-shadow:
-    -1.1px 2.3px 0 var(--surface-2),
-    -2.2px 4.6px 0 var(--surface-2),
-    -3.3px 6.9px 0 var(--surface-2),
-    -4.5px 9.1px 0 var(--surface-2),
-    -5.6px 11.4px 0 var(--text-primary),
-    -16px 30px 20px rgba(34, 34, 32, 0.1);
-}
-
-.meter {
-  position: relative;
-  height: 12px;
-  border: 1px solid var(--text-primary);
-  background: var(--surface-bg);
-}
-
-.bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  height: 84px;
-  width: 84%;
+.sketch text,
+.wideSketch text {
+  font-weight: 400;
 }
 
 @media (prefers-reduced-motion: reduce) {
