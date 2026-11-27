@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { GatewayMoire } from "./GatewayMoire";
 import styles from "./GatewayHero.module.css";
 
-/** "70": full-bleed field with the copy on the left. "72": centred copy above a band. */
+/** "70": field behind the copy on the left. "72": centred copy above a band. */
 export type GatewayHeroLayout = "70" | "72";
 
 function HeroCopy({ centered = false }: { centered?: boolean }) {
@@ -56,54 +56,67 @@ function HeroCopy({ centered = false }: { centered?: boolean }) {
   );
 }
 
+// Cancels the page column padding so the hero runs edge to edge under the nav.
+const BLEED = "not-prose -mx-4 -mt-4 sm:-mx-6 md:-mx-8 md:-mt-8";
+// Column padding plus the panel's section padding: the copy lines up with the panel text.
+const COPY_INSET = "px-9 sm:px-16 md:px-18";
+
+/** Full-bleed hero that sits above the page panel, on the page background. */
 export function GatewayHero({ layout }: { layout: GatewayHeroLayout }) {
   const heroRef = useRef<HTMLElement>(null);
 
-  return (
-    <>
-      {layout === "70" ? (
-        <section
-          ref={heroRef}
-          data-use-case-section="hero"
-          className="relative h-[560px] overflow-hidden"
-        >
-          <GatewayMoire
-            pointerScopeRef={heroRef}
-            className={styles.fadeVertical}
-          />
-          <div className={styles.clearing} aria-hidden />
-          <div className="relative flex h-full flex-col items-start justify-center px-5 sm:px-10">
-            <HeroCopy />
-          </div>
-        </section>
-      ) : (
-        <section
-          ref={heroRef}
-          data-use-case-section="hero"
-          className="relative overflow-hidden"
-        >
-          <div className="mx-auto flex max-w-[760px] flex-col items-center px-5 pt-[70px] text-center sm:px-10">
-            <HeroCopy centered />
-          </div>
-          <div className="relative mt-[26px] h-[320px]">
-            <GatewayMoire
-              pointerScopeRef={heroRef}
-              className={styles.fadeAllEdges}
-            />
-          </div>
-        </section>
-      )}
-
-      <section
-        data-use-case-section="logos"
-        className="border-t border-line-structure px-2 py-2"
+  return layout === "70" ? (
+    <section
+      ref={heroRef}
+      data-use-case-section="hero"
+      className={cn("relative h-[560px] overflow-hidden", BLEED)}
+    >
+      <GatewayMoire pointerScopeRef={heroRef} className={styles.fadeVertical} />
+      <div
+        className={cn(
+          "relative flex h-full flex-col items-start justify-center",
+          COPY_INSET,
+        )}
       >
-        <EnterpriseLogoGrid
-          names={customerLogoNames}
-          className="sm:grid-cols-4 lg:grid-cols-8"
-          hideStoryTags
+        <div className="relative isolate flex flex-col items-start">
+          <div className={styles.clearing} aria-hidden />
+          <HeroCopy />
+        </div>
+      </div>
+    </section>
+  ) : (
+    <section
+      ref={heroRef}
+      data-use-case-section="hero"
+      className={cn("relative overflow-hidden", BLEED)}
+    >
+      <div
+        className={cn(
+          "mx-auto flex max-w-[760px] flex-col items-center pt-[70px] text-center",
+          COPY_INSET,
+        )}
+      >
+        <HeroCopy centered />
+      </div>
+      <div className="relative mt-[26px] h-[320px]">
+        <GatewayMoire
+          pointerScopeRef={heroRef}
+          className={styles.fadeAllEdges}
         />
-      </section>
-    </>
+      </div>
+    </section>
+  );
+}
+
+/** Logo strip that opens the page panel under the new hero. */
+export function GatewayHeroLogos() {
+  return (
+    <section data-use-case-section="logos" className="px-2 py-2">
+      <EnterpriseLogoGrid
+        names={customerLogoNames}
+        className="sm:grid-cols-4 lg:grid-cols-8"
+        hideStoryTags
+      />
+    </section>
   );
 }

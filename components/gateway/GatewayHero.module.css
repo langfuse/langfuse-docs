@@ -37,9 +37,15 @@
   mask-composite: intersect;
 }
 
+/* Soft patch behind the copy; its left edge sits 40px left of the copy. */
 .clearing {
   position: absolute;
-  inset: 0;
+  z-index: -1;
+  top: 50%;
+  left: -40px;
+  width: 860px;
+  height: 680px;
+  transform: translateY(-50%);
   pointer-events: none;
   background: radial-gradient(
     ellipse 560px 340px at 300px 50%,
