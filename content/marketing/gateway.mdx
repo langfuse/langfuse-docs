@@ -12,6 +12,7 @@ import { GatewayCustomerQuote } from "@/components/gateway/GatewayCustomerQuote"
 import { GatewayFeatureGrid } from "@/components/gateway/GatewayFeatureGrid";
 import { GatewayFlowDiagram } from "@/components/gateway/GatewayFlowDiagram";
 import { GatewayHeroArt } from "@/components/gateway/GatewayHeroArt";
+import { GatewayHeroAbove, GatewayHeroSwitch } from "@/components/gateway/GatewayHeroSwitch";
 import { GatewaySteps } from "@/components/gateway/GatewaySteps";
 import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
 import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
@@ -20,7 +21,11 @@ import GatewayUpdateSignup from "@/components-mdx/gateway-update-signup.mdx";
 
 <h1 className="sr-only">See and control all AI usage with the Langfuse AI Gateway</h1>
 
+<GatewayHeroAbove />
+
 <div className="@container not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
+  {/* Temporary layout comparison: the sections inside are the "current" hero. */}
+  <GatewayHeroSwitch>
   <section data-use-case-section="hero" className="grid items-center @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
     <div className="flex min-w-0 flex-col items-start gap-6 px-6 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12 @2xl:py-12 @2xl:pr-4">
       <p className="-mb-2 text-[15px] text-text-secondary">
@@ -45,6 +50,7 @@ import GatewayUpdateSignup from "@/components-mdx/gateway-update-signup.mdx";
   <section data-use-case-section="logos" className="border-t border-line-structure px-2 py-2">
     <EnterpriseLogoGrid names={customerLogoNames} className="sm:grid-cols-4 lg:grid-cols-8" />
   </section>
+  </GatewayHeroSwitch>
 
   <section data-use-case-section="architecture" className="pattern-bg border-t border-line-structure px-5 py-10 sm:px-10 sm:py-14">
     <div className="relative z-10 mx-auto max-w-[960px]">

@@ -3,11 +3,11 @@ title: Langfuse AI Gateway
 description: One open source entry point for all AI usage in your company. See every model call, who made it and what it cost, natively traced in Langfuse.
 ---
 
-# See and control all AI usage
+# Introducing AI Gateway
 
-Langfuse AI Gateway (public beta)
+Public beta
 
-AI governance across your organization: route all model calls through the gateway instead of losing track of keys and budgets.
+One endpoint for Claude Code, Codex and your apps.
 
 [Start free](/cloud), [Documentation](/docs/gateway/overview)
 
