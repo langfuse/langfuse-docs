@@ -84,7 +84,7 @@ Because the CLI is generated from the spec, it stays in sync with the API automa
 
 ## MCP server [#mcp]
 
-For agents that can't run shell commands, Langfuse exposes a [Model Context Protocol server](/docs/api-and-data-platform/features/mcp-server). It authenticates with your Langfuse API keys and covers most of the platform: observations, metrics, scores, score configs, datasets, dataset items, dataset runs, dataset run items, prompts, comments, annotation queues, models, media, and health. It also [bundles the Langfuse skills](/docs/api-and-data-platform/features/mcp-server#bundled-skills) for MCP clients that support skills.
+For agents that can't run shell commands, Langfuse exposes a [Model Context Protocol server](/docs/api-and-data-platform/features/mcp-server). It authenticates with your Langfuse API keys and covers most of the platform: evaluators and evaluation rules, scores and score configs, datasets, dataset items, dataset runs, experiments, annotation queues, observations, metrics, prompts, skills, comments, dashboards, models, media, and health. It also [bundles the Langfuse skills](/docs/api-and-data-platform/features/mcp-server#bundled-skills) for MCP clients that support skills.
 
 Agents such as Claude Cowork, Linear agents, or custom internal tools can investigate a production issue, pull the relevant observation, query metrics, leave a comment for the team, create a score, or stage a dataset item for regression testing, without leaving the chat.
 
@@ -163,7 +163,7 @@ When an agent integrates Langfuse, it needs to find the right documentation fast
   curl -s "https://langfuse.com/api/search-docs?query=How+do+I+trace+LangGraph+agents"
   ```
 
-- **[Docs MCP server](/docs/docs-mcp).** The same docs search and page retrieval over MCP, for clients that prefer it.
+- **[Langfuse docs MCP server](/docs/docs-mcp).** The same docs search and page retrieval over MCP, for clients that prefer it.
 
 ## Wire up evaluation gates [#evaluation]
 

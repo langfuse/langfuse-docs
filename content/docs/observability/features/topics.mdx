@@ -183,8 +183,6 @@ A **live map** follows a filtered set of traces over time. A **snapshot** analyz
 
 ## Get started [#get-started]
 
-The project setup is the same on Langfuse Cloud and self-hosted deployments. Self-hosted administrators should first check the [Topics infrastructure configuration](/self-hosting/configuration/topics).
-
 <Callout type="warning">
   The summary model receives full inputs/outputs and some metadata of selected traces. The embedding and grouping models receive generated summaries, which can still contain sensitive data. Apply [masking](/docs/observability/features/masking) before ingestion to keep sensitive content out of model requests.
 </Callout>
@@ -240,7 +238,7 @@ Open the map picker to create a **New live map** or **New snapshot**.
 | Live map | Analyzes new matching traces continuously and updates topics daily.         |
 | Snapshot | Groups traces from a selected time window once, without changing live maps. |
 
-Live maps wait for a trace to finish before analyzing it. The default is five minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
+Live maps wait for a trace to finish before analyzing it. The default is 10 minutes after the last received observation. Adjust **Trace readiness** in **Topics > ⋮ > Settings** for long- or short-running traces.
 
 Use **Edit map** to change filters, facets, or sampling. Turn off **Live updates** to pause a map while retaining its results. **Refresh map** in the map picker rebuilds its topics on demand instead of waiting for the daily refresh.
 
@@ -286,3 +284,18 @@ Use the read-only [Topics API](https://api.reference.langfuse.com/#tag/unstablet
 ## Paused processing
 
 If Topics pauses because of a provider or billing error, resolve the error, then select **Turn back on** in the Topics banner and save. Updating model settings alone does not resume processing.
+
+## FAQ [#faq]
+
+<FaqDetails>
+
+<Details id="self-hosted-version">
+<Summary>Which version of self-hosted Langfuse do I need to use Topics?</Summary>
+
+Topics works on self-hosted Langfuse **v4.86.0 or later** with no extra configuration.
+
+Configure [blob storage lifecycle expiry for Topics transcripts](/self-hosting/deployment/infrastructure/blobstorage#topics-transcript-expiry) (or enable the worker cleaner), and confirm both web and worker can reach your [LLM provider endpoints](/self-hosting/security/networking). For troubleshooting or tuning worker concurrency, see [Troubleshoot self-hosted Topics](/faq/all/troubleshoot-self-hosted-topics).
+
+</Details>
+
+</FaqDetails>

@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // URL prefixes whose pages are mirrored as markdown by copy_md_sources.js,
 // derived from the same map the copy script uses so a new content section is
 // picked up automatically. The empty prefix (marketing pages, served from the
-// site root) is dropped: those sit alongside app-only routes such as /cloud
-// and /events that have no mirror, and a root-level matcher cannot tell them
+// site root) is dropped: those sit alongside app-only routes such as /events
+// that have no mirror, and a root-level matcher cannot tell them
 // apart. Marketing pages still advertise their mirror through the <link> tag
 // in buildSectionMetadata(), which is only emitted when the page exists.
 const MIRRORED_URL_PREFIXES = Array.from(
@@ -316,9 +316,9 @@ const nextConfig = {
       // Scoped to a mirrored section prefix plus at least one path segment.
       // Section roots are excluded because some of them (/blog, /changelog,
       // /resources) are listing routes with no markdown mirror, and anything
-      // outside these prefixes is excluded because app routes such as /cloud
-      // and /events have no mirror either. Advertising a Link that 404s is
-      // worse than advertising nothing.
+      // outside these prefixes is excluded because app routes such as /events
+      // have no mirror either. Advertising a Link that 404s is worse than
+      // advertising nothing.
       {
         source: `/:section(${MIRRORED_URL_PREFIXES.join("|")})/:path((?!.*\\.md$).+)`,
         headers: [

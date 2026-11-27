@@ -5,12 +5,14 @@ description: How to tell whether a Langfuse Cloud organization or a self-hosted 
 tags: [platform, self-hosting, v4]
 ---
 
+import { V4CutoverDate } from "@/components/V4CutoverDate";
+
 # How do I check whether I am on Langfuse v4?
 
 ## Langfuse Cloud
 
 - Organizations created on or after April 14, 2026 run [Langfuse v4](/docs/v4) and do not show a toggle.
-- Organizations created before that date show a **Langfuse v4 preview** toggle in the bottom-left corner of the UI until the v4 cutover. When the toggle is on, you see the v4 experience.
+- Organizations created before that date showed a **Langfuse v4 preview** toggle in the bottom-left corner of the UI until the v4 cutover on <V4CutoverDate />. Since then, every organization runs v4.
 - The **Migration Assistant** sidebar panel and the [Migration status page](https://cloud.langfuse.com/v4-migration) list the remaining actions for your projects.
 
 ## Self-hosted Langfuse

@@ -1,5 +1,6 @@
 import { Home } from "@/components/home";
 import { JsonLd } from "@/components/JsonLd";
+import { buildPageUrl } from "@/lib/og-url";
 import { HOME_JSON_LD } from "@/lib/structured-data";
 import type { Metadata } from "next";
 
@@ -10,8 +11,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://langfuse.com/",
-    // Markdown mirror from md-override/index.md.
-    types: { "text/markdown": "https://langfuse.com/index.md" },
+    types: { "text/markdown": buildPageUrl("/index.md") },
   },
 };
 

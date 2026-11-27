@@ -2,7 +2,7 @@
 title: LangSmith Alternative? Langfuse vs. LangSmith for AI Engineering
 shortTitle: LangSmith
 seoTitle: "LangSmith Alternative: Langfuse vs. LangSmith"
-description: Langfuse is the open-source LangSmith alternative. October 2026 comparison of MIT self-hosting, ClickHouse vs SmithDB, evals, and unit pricing with no seats.
+description: Langfuse is the open-source LangSmith alternative. November 2026 comparison of MIT self-hosting, ClickHouse vs SmithDB, evals, and unit pricing with no seats.
 tags: [comparison, integration]
 ---
 
@@ -13,7 +13,7 @@ import CompareClickhouseDatastore from "@/components-mdx/compare-clickhouse-data
 
 # Langfuse vs. LangSmith
 
-**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide outlines how it differs from **[LangSmith](https://www.langchain.com/langsmith)** to help engineering teams choose the right AI engineering platform. All LangSmith facts were checked against public LangChain sources in October 2026.
+**[Langfuse](/)** is the [most widely adopted open-source LLM engineering platform](/adoption). This guide outlines how it differs from **[LangSmith](https://www.langchain.com/langsmith)** to help engineering teams choose the right AI engineering platform. All LangSmith facts were checked against public LangChain sources in November 2026.
 
 ## TL;DR
 
@@ -191,12 +191,13 @@ The differences are depth and availability. The Langfuse skill follows the open 
 
 Both products publish SOC 2 Type II, ISO 27001, GDPR, and HIPAA. Langfuse signs a Business Associate Agreement (BAA) from the Pro plan in the dedicated [HIPAA Cloud region](/security/hipaa). Langfuse is used by [21 of the Fortune 50 and 129 of the Fortune 500](/enterprise). Air-gapped operation and self-hosted SSO/RBAC are in [Open source and distribution](#open-source-and-distribution).
 
-| Feature        | Langfuse                                                                                           | LangSmith                                                                                   |
-| -------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Certifications | [SOC 2 Type II, ISO 27001, GDPR, HIPAA](/security)                                                 | SOC 2 Type II, ISO 27001, GDPR, HIPAA                                                       |
-| Data regions   | Cloud EU, US, Japan; [HIPAA region with BAA on Pro+](/security/hipaa); any region via self-hosting | US, EU, APAC cloud & BYOC                                                                   |
-| BAA            | **From Pro plan** in the [HIPAA region](/security/hipaa)                                           | Not published; HIPAA compliant per [docs](https://docs.langchain.com/langsmith/regions-faq) |
-| Adoption       | **21 of Fortune 50** / 129 of Fortune 500                                                          | See LangChain stories                                                                       |
+| Feature                         | Langfuse                                                                                                                                   | LangSmith                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Certifications                  | [SOC 2 Type II, ISO 27001, GDPR, HIPAA](/security)                                                                                         | SOC 2 Type II, ISO 27001, GDPR, HIPAA                                                                                                                                                                                                                                                                                                     |
+| Data regions                    | Cloud EU, US, Japan; [HIPAA region with BAA on Pro+](/security/hipaa); any region via self-hosting                                         | US, EU, APAC cloud & BYOC                                                                                                                                                                                                                                                                                                                 |
+| Training on customer trace data | [Does not train or fine-tune ML/LLM models on customer data](/security/privacy-faq); [self-host on your own infrastructure](/self-hosting) | Self-serve plans from December 1, 2026: LangChain may use trace inputs, outputs, and steps for training unless you opt out in settings; opting out later stops future use only. Enterprise agreements exclude training ([FAQ](https://kb.langchain.com/articles/1355426865-faqs-tos-privacy-policy-dpa-update-effective-december-1-2026)) |
+| BAA                             | **From Pro plan** in the [HIPAA region](/security/hipaa)                                                                                   | Not published; HIPAA compliant per [docs](https://docs.langchain.com/langsmith/regions-faq)                                                                                                                                                                                                                                               |
+| Adoption                        | **21 of Fortune 50** / 129 of Fortune 500                                                                                                  | See LangChain stories                                                                                                                                                                                                                                                                                                                     |
 
 ---
 
