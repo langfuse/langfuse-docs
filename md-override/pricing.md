@@ -252,7 +252,7 @@ Additional usage beyond the included units is billed at graduated rates. Higher 
 
 ### Billable Units
 
-For the pricing calculator, enter your monthly total of traces, observations, scores, and facet results.
+Enter your monthly billable units (the total number of traces, observations, scores, and facet results).
 
 ## Discounts
 
