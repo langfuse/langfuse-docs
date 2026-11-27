@@ -192,7 +192,6 @@ export const gatewayKeys = [
 export const session = {
   name: "refactor-billing-export",
   user: "anna",
-  total: "$1.92",
   // Cost of each model call in dollars, in order.
   calls: [0.42, 0.06, 0.38, 0.04, 0.61, 0.4, 0.01, 0.22, 0.05, 0.31],
   rows: [

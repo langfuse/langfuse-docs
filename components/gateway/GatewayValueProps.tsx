@@ -412,6 +412,7 @@ function ModelsPanel() {
 
 const CALL_MAX = 0.8;
 const callPoints = toPoints(session.calls, CALL_MAX);
+const callTotal = session.calls.reduce((sum, cost) => sum + cost, 0);
 
 function TracePanel() {
   return (
@@ -420,7 +421,7 @@ function TracePanel() {
         <Chip>{session.user}</Chip>
       </ScreenHeader>
       <div className={styles.appBody}>
-        <Section title="Cost per call" note={`Total ${session.total}`}>
+        <Section title="Cost per call" note={`Total ${usd.format(callTotal)}`}>
           <Chart
             height={150}
             yTicks={["$0.80", "$0.60", "$0.40", "$0.20", "$0.00"]}
