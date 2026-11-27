@@ -1,0 +1,85 @@
+---
+title: "Harbor integration with Langfuse"
+sidebarTitle: Harbor
+logo: /images/integrations/harbor_icon.png
+description: "Send Harbor agent evaluations to Langfuse as experiment runs: each trial's trajectory as a trace, verifier rewards as scores, and runs compared task by task."
+category: Integrations
+---
+
+# Harbor integration with Langfuse
+
+Use the [Langfuse plugin for Harbor](https://github.com/langfuse/harbor-observability-plugin) to inspect what agents did in [Harbor](https://github.com/harbor-framework/harbor) jobs: each job becomes an experiment run, each trial a trace of the agent's model and tool calls, and each verifier reward a score.
+
+> **What is Harbor?** [Harbor](https://github.com/harbor-framework/harbor) is an open-source framework for evaluating agents in sandboxed environments. A task bundles an instruction, a container environment, and a verifier that grades the result. Harbor runs agents such as Claude Code, Codex, or OpenHands on tasks locally with Docker or in cloud sandboxes, and shares datasets of tasks on the [Harbor Hub](https://hub.harborframework.com).
+
+> **What is Langfuse?** [Langfuse](https://langfuse.com/) is an open-source AI engineering platform. It helps teams trace agentic applications, debug issues, evaluate quality, and monitor costs in production. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+## Get started [#get-started]
+
+<Steps>
+
+### Install the plugin [#install-the-plugin]
+
+Install the plugin into the same environment as Harbor:
+
+```bash
+uv tool install harbor --with "harbor-langfuse @ git+https://github.com/langfuse/harbor-observability-plugin"
+```
+
+### Set your Langfuse API keys [#set-your-langfuse-api-keys]
+
+Create API keys in your Langfuse project settings:
+
+```bash
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+```
+
+### Run a job with the plugin [#run-a-job]
+
+Set up the agent's model API key and sandbox as described in the [Harbor README](https://github.com/harbor-framework/harbor), then add `--plugin langfuse` to `harbor run`:
+
+```bash
+harbor run -d terminal-bench/terminal-bench-2-1 \
+  -a claude-code -m anthropic/claude-sonnet-5-5 \
+  --plugin langfuse
+```
+
+The plugin sends each trial when it ends. To send a job that already ran, use `harbor-langfuse export jobs/<job-name>`.
+
+### Compare runs [#compare-runs]
+
+Each job appears as one experiment run per agent and model on a dataset named after the Harbor dataset, for example `terminal-bench/terminal-bench-2-1`. Each trial is the run's result for its task: a trace with a generation per model call and a tool observation per tool call, scored with the verifier's rewards, such as `reward`. Because the dataset item for a task is the same in every job, you can [compare runs](/docs/evaluation/experiments/compare-experiments) task by task.
+
+</Steps>
+
+### Agent support [#agent-support]
+
+What a trace shows depends on what the agent records in its trajectory:
+
+| Agent                                    | Tool calls  | Tokens and cost |
+| ---------------------------------------- | ----------- | --------------- |
+| Claude Code, Codex, OpenCode, Terminus-2 | yes         | yes             |
+| mini-SWE-agent                           | inputs only | yes             |
+| OpenHands SDK                            | yes         | no              |
+| Goose                                    | no          | no              |
+
+Agents that write no trajectory, such as Aider, appear as one observation per trial with the trial's scores. Trajectories don't record how long a tool call took, so tool observations have no duration.
+
+## Test Langfuse-managed skills [#skills]
+
+Install a skill version from [Langfuse Skill Management](/docs/skill-management/overview) with the [Langfuse CLI](/docs/skill-management/get-started#cli-install) and pass its folder to Harbor:
+
+```bash
+npm install -g @langfuse/cli
+langfuse skills install my-skill --label staging
+
+harbor run -d terminal-bench/terminal-bench-2-1 \
+  -a claude-code -m anthropic/claude-sonnet-5-5 \
+  --skill .agents/skills/my-skill --job-name my-skill-staging \
+  --plugin langfuse
+```
+
+Run one job per label or version and [compare the runs](#compare-runs).
