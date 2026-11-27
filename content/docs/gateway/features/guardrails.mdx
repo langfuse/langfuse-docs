@@ -1,7 +1,7 @@
 ---
 title: Guardrails
 seoTitle: "Langfuse AI Gateway guardrails: block, redact, or log PII and secrets (beta)"
-description: Configure guardrails on the Langfuse AI Gateway to block, redact, or log PII, secrets, keywords, and custom regex patterns across requests and responses.
+description: Block, redact, or log PII, secrets, prompt injection patterns, keywords, and custom regexes across AI Gateway requests and responses.
 ---
 
 import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
@@ -18,24 +18,32 @@ Guardrails inspect model requests and responses against pattern rules to block, 
 
 ## Create a guardrail [#create-a-guardrail]
 
-Select **Add guardrail** under **AI Gateway → Guardrails**, pick a template, and configure its [action](#actions), [evaluation scope](#scopes), and [targets](#targets). Built-in templates include a live test panel to verify matches before saving.
+Select **Add guardrail** under **AI Gateway → Guardrails** (or pick an option under **Guardrails** when none are configured yet), then choose its [action](#actions), [evaluation scope](#scopes), and [targets](#targets). Built-in guardrails include a live test panel to verify matches before saving.
 
 An organization can have up to 20 guardrails. Creating, editing, reassigning, and deleting guardrails are recorded in the [audit log](/docs/administration/audit-logs).
 
 ## Built-in rules [#built-in-rules]
 
-| Template                 | Matches                                                                                              |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| **PII**                  | Emails, US SSNs, credit cards, IBANs, and IPv4/IPv6 addresses                                        |
-| **Secrets and API keys** | Common provider keys, tokens, JWTs, PEM private keys, and up to 20 custom secret prefixes            |
-| **Keyword list**         | Up to 500 ASCII words or phrases (one per line, max 100 chars each), whole-word and case-insensitive |
-| **Custom regex**         | Custom Rust regular expressions in ASCII mode (up to 500 chars)                                      |
+| Guardrail                        | Matches                                                                                                     |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **PII**                          | Emails, US SSNs and ITINs, UK NINOs, EU VAT and German tax IDs, phone numbers, cards, IBANs, and IPs        |
+| **Secrets and API keys**         | Provider API keys, tokens, database connection URLs, JWTs, PEM private keys, and up to 20 prefixes          |
+| **Prompt injection (heuristic)** | Instruction override, system prompt extraction, jailbreak phrases, and hidden Unicode (defaults to **Log**) |
+| **Keyword list**                 | Up to 500 ASCII words or phrases (one per line, max 100 chars each), whole-word and case-insensitive        |
+| **Custom regex**                 | Custom Rust regular expressions in ASCII mode (up to 500 chars)                                             |
+
+<Callout type="info">
+  **Prompt injection (heuristic)** matches common prompt injection phrases
+  rather than novel attacks and can flag legitimate security text. It defaults
+  to **Log** so you can review matches before blocking.
+</Callout>
 
 <Details>
 <Summary>Built-in presets and regex constraints</Summary>
 
-- **PII presets:** US SSN, Credit card (Visa, Mastercard, Discover, American Express), Email, IBAN, IP address (IPv4 and IPv6).
-- **Secrets presets:** AWS access key ID, Langfuse API key, OpenAI API key, Anthropic API key, GitHub token, Stripe API key, Slack token, Google API key, Private key (PEM blocks), JWT. Custom prefixes must be 3 to 32 printable ASCII characters without whitespace and match the prefix followed by at least 16 token characters (`[A-Za-z0-9_-]`).
+- **PII presets:** US SSN, US ITIN, UK NINO, EU VAT ID, German Steuer-ID, Phone number, Credit card (Visa, Mastercard, Discover, American Express), Email, IBAN, IP address (IPv4 and IPv6).
+- **Secrets presets:** AWS access key ID, Langfuse API key, OpenAI API key, Anthropic API key, OpenRouter API key, Hugging Face token, GitHub token, GitLab token, npm token, PyPI token, Stripe API key, Stripe test key, Slack token, Slack app token, Slack webhook URL, SendGrid API key, Google API key, Google OAuth client secret, Databricks token, Atlassian API token, Linear API key, Shopify token, DigitalOcean token, Database connection string (Postgres, MySQL, MongoDB, Redis, and AMQP URLs with credentials), Private key (PEM blocks), JWT. Custom prefixes must be 3 to 32 printable ASCII characters without whitespace and match the prefix followed by at least 16 token characters (`[A-Za-z0-9_-]`).
+- **Prompt injection presets:** Instruction override, System prompt extraction, Jailbreak and safety bypass, Hidden Unicode characters (zero-width/invisible format characters, bidi controls, and Unicode Tag characters).
 - **Custom regex constraints:** Uses Rust regex syntax in ASCII mode. Look-ahead, look-behind, backreferences, and Unicode classes (`\p{..}`) are not supported. Compiled size is capped at 128 KiB per guardrail and 512 KiB combined per organization.
 
 </Details>
