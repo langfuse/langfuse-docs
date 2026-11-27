@@ -1,0 +1,93 @@
+---
+title: Local Development
+seoTitle: "langfuse-lite: Local LLM Tracing and Evals Without an Account"
+description: langfuse-lite is a local emulator of Langfuse for development and coding agents. One command, no account, no API keys to create, no Docker. Works with the official Langfuse SDKs and OpenTelemetry for tracing, scores, datasets, and experiments.
+---
+
+# Local development with langfuse-lite
+
+[langfuse-lite](https://github.com/langfuse/langfuse-lite) is a local emulator of Langfuse for development and coding agent sandboxes. It runs as one process with one SQLite file, without an account, Docker, or databases. The official Langfuse SDKs and any OpenTelemetry exporter work against it unchanged.
+
+<Callout type="info">
+  langfuse-lite is in beta and an experiment. Use it to start a project, then
+  [move to Langfuse Cloud or a self-hosted Langfuse](#move-to-langfuse), which
+  are more performant, secure, and have more features.
+</Callout>
+
+## Start the server [#start]
+
+```bash
+npx -y langfuse-lite serve   # needs Node.js 22.13 or later
+uvx langfuse-lite serve      # from PyPI, no Node.js needed
+```
+
+Point the Langfuse SDKs at it. The API keys are placeholders: they are not checked, but the SDKs need a value.
+
+```bash
+export LANGFUSE_BASE_URL=http://localhost:3000
+export LANGFUSE_PUBLIC_KEY=pk-lf-local
+export LANGFUSE_SECRET_KEY=sk-lf-local
+```
+
+Then instrument your application as in [Get started with tracing](/docs/observability/get-started), or run [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). Skip the account and API key steps in those guides and keep the three variables above: the guides' credentials point the SDKs at Langfuse Cloud. OpenTelemetry exporters send to `http://localhost:3000/api/public/otel/v1/traces`. Data is stored in `./.langfuse/lite.db`, and a small viewer runs at `http://localhost:3000`.
+
+## Read results back [#cli]
+
+The CLI reads the SQLite file, so an agent can verify its own traces and experiment runs from the terminal. Run the commands the same way you started the server, for example `npx -y langfuse-lite runs` or `uvx langfuse-lite runs`. To get the bare `langfuse-lite` command shown below, install it with `npm install -g langfuse-lite` or `pip install langfuse-lite`.
+
+| Command                               | Output                                    |
+| ------------------------------------- | ----------------------------------------- |
+| `langfuse-lite observations`          | Root observations, newest first           |
+| `langfuse-lite tree <trace id>`       | Every observation of one trace, as a tree |
+| `langfuse-lite runs`                  | Experiment runs with average scores       |
+| `langfuse-lite compare <run> <run>`   | Two runs side by side, item by item       |
+| `langfuse-lite sql "SELECT ..."`      | Read-only SQL on the local data           |
+| `langfuse-lite export --out run.html` | The viewer and its data in one file       |
+| `langfuse-lite push --to <url>`       | Copies the local data to a full Langfuse  |
+
+In Python, `pip install langfuse-lite` registers the pytest fixtures `langfuse_lite` and `langfuse_lite_env` and a `serve()` context manager. See the [README](https://github.com/langfuse/langfuse-lite#readme) for examples.
+
+## Scope [#scope]
+
+langfuse-lite implements the part of the Langfuse public API that the SDKs (Python 5.x, JS/TS 6.x) use for tracing and experiments.
+
+Included:
+
+- Tracing (observations)
+- Scores
+- Datasets
+- Experiment runs
+- OpenTelemetry ingestion
+
+Not included:
+
+- Prompt management
+- Evaluators running in Langfuse
+- Dashboards and the metrics API
+- Access control
+- Media and annotation queues
+
+## Limitations [#limitations]
+
+langfuse-lite is a local emulator for development, not a way to run Langfuse.
+
+<Callout type="warning">
+  There is no authentication and a single tenant: anyone who can reach the port
+  can read and write all data, including prompts and outputs.
+</Callout>
+
+- It is not security hardened like Langfuse Cloud or a self-hosted Langfuse.
+- There is no API compatibility guarantee. It may differ from Langfuse Cloud or lag behind it.
+- It is not built for load.
+
+## Move to Langfuse Cloud or self-hosting [#move-to-langfuse]
+
+The instrumentation code stays the same. Create a project and API keys in [Langfuse Cloud](/cloud) or a [self-hosted Langfuse](/self-hosting), copy the local data over, and change `LANGFUSE_BASE_URL`, `LANGFUSE_PUBLIC_KEY`, and `LANGFUSE_SECRET_KEY` to the new project.
+
+```bash
+langfuse-lite push --to <url> --public-key <pk> --secret-key <sk>
+```
+
+## Telemetry [#telemetry]
+
+langfuse-lite sends anonymous usage telemetry: counts only, never traces, prompts, or outputs. Turn it off with `TELEMETRY_ENABLED=false` or `DO_NOT_TRACK=1`.
