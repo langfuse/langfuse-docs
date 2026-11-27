@@ -6,6 +6,7 @@ import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { GatewayMoire } from "./GatewayMoire";
+import { GatewayLockup } from "./GatewayLockup";
 import styles from "./GatewayHero.module.css";
 
 /** "70": field behind the copy on the left. "72": centred copy above a band. */
@@ -14,10 +15,7 @@ export type GatewayHeroLayout = "70" | "72";
 function HeroCopy({ centered = false }: { centered?: boolean }) {
   return (
     <>
-      <p className="text-[15px] leading-none text-text-secondary">
-        Langfuse AI Gateway{" "}
-        <span className="text-text-tertiary">(public beta)</span>
-      </p>
+      <GatewayLockup className={centered ? "justify-center" : undefined} />
       <h2
         id="see-and-control"
         data-toc-title="Langfuse AI Gateway"
