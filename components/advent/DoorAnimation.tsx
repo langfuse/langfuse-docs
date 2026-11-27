@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Bell, Check, KeyRound, Lock, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
+  ProviderMark,
+  type ProviderMarkName,
+} from "@/components/home/AiGatewayProviderMarks";
+import {
   ALL_PROVIDERS,
   type DoorAnimation as DoorAnimationSpec,
+  type GuardrailTemplate,
 } from "./doors";
 
 function useTick(intervalMs: number) {
@@ -454,6 +459,407 @@ function ChatAnimation({
   );
 }
 
+const FLOW_CLIENTS = ["Claude Code", "Codex", "OpenCode", "Your apps"];
+const FLOW_PROVIDERS: { label: string; mark: ProviderMarkName }[] = [
+  { label: "Anthropic", mark: "anthropic" },
+  { label: "OpenAI", mark: "openai" },
+  { label: "Google AI", mark: "gemini" },
+  { label: "Bedrock", mark: "aws" },
+  { label: "Azure", mark: "azure" },
+];
+const FLOW_HUB = { x: 216, y: 122 };
+const FLOW_CLIENT_ROWS = [47, 97, 147, 197];
+const FLOW_PROVIDER_ROWS = [22, 62, 102, 142, 182, 222];
+const flowIn = (y: number) =>
+  `M114 ${y}C160 ${y} 158 ${FLOW_HUB.y} 194 ${FLOW_HUB.y}`;
+const flowOut = (y: number) =>
+  `M238 ${FLOW_HUB.y}C282 ${FLOW_HUB.y} 280 ${y} 318 ${y}`;
+
+function FlowChip({
+  x,
+  y,
+  w,
+  label,
+  mark,
+  hit,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  label: string;
+  mark?: ProviderMarkName;
+  hit?: boolean;
+}) {
+  const h = 28;
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y - h / 2}
+        width={w}
+        height={h}
+        rx={6}
+        fill="var(--surface-bg)"
+        stroke="var(--line-structure)"
+        className={hit ? "adv-flow-hit" : undefined}
+      />
+      {mark ? <ProviderMark name={mark} x={x + 9} y={y - 7} size={14} /> : null}
+      <text
+        x={x + (mark ? 30 : 11)}
+        y={y}
+        dominantBaseline="central"
+        fontSize={13}
+        className="font-mono"
+        fill="var(--text-secondary)"
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+/** Coding agents and apps call the gateway, which fans out to providers. */
+function GatewayAnimation() {
+  const tick = useTick(2400);
+  const gridId = `adv-flow-grid-${useId().replace(/[^\w-]/g, "")}`;
+  const client = tick % FLOW_CLIENT_ROWS.length;
+  const provider = tick % FLOW_PROVIDERS.length;
+  const moreY = FLOW_PROVIDER_ROWS[FLOW_PROVIDERS.length];
+
+  return (
+    <Stage className="p-2 sm:p-4">
+      <svg
+        viewBox="0 0 440 244"
+        className="h-auto w-full max-w-[520px]"
+        role="img"
+        aria-label="Claude Code, Codex, OpenCode, and your apps send requests through the Langfuse AI Gateway to Anthropic, OpenAI, Google AI, Amazon Bedrock, Microsoft Azure, and more providers. Every call becomes a trace."
+      >
+        <defs>
+          <pattern
+            id={gridId}
+            width={16}
+            height={16}
+            patternUnits="userSpaceOnUse"
+          >
+            <circle cx={1} cy={1} r={0.8} fill="var(--line-structure)" />
+          </pattern>
+        </defs>
+        <rect width={440} height={244} fill={`url(#${gridId})`} />
+
+        {FLOW_CLIENT_ROWS.map((y, i) => (
+          <g key={y}>
+            <path
+              d={flowIn(y)}
+              fill="none"
+              stroke="var(--text-disabled)"
+              strokeWidth={1.25}
+            />
+            <path
+              d={flowIn(y)}
+              pathLength={100}
+              className="adv-flow-pulse adv-flow-ambient"
+              style={{ animationDelay: `${-0.3 - i * 0.7}s` }}
+            />
+          </g>
+        ))}
+        {FLOW_PROVIDER_ROWS.map((y, i) => (
+          <g key={y}>
+            <path
+              d={flowOut(y)}
+              fill="none"
+              stroke="var(--text-disabled)"
+              strokeWidth={1.25}
+              strokeDasharray="3 4"
+              opacity={y === moreY ? 0.6 : 1}
+            />
+            <path
+              d={flowOut(y)}
+              pathLength={100}
+              className="adv-flow-pulse adv-flow-ambient"
+              style={{ animationDelay: `${-1.1 - i * 0.47}s` }}
+            />
+          </g>
+        ))}
+
+        <g key={`focus-${tick}`}>
+          <path
+            d={flowIn(FLOW_CLIENT_ROWS[client])}
+            pathLength={100}
+            className="adv-flow-pulse adv-flow-focus"
+          />
+          <path
+            d={flowOut(FLOW_PROVIDER_ROWS[provider])}
+            pathLength={100}
+            className="adv-flow-pulse adv-flow-focus adv-flow-focus-late"
+          />
+        </g>
+
+        {FLOW_CLIENTS.map((label, i) => (
+          <FlowChip
+            key={label}
+            x={2}
+            y={FLOW_CLIENT_ROWS[i]}
+            w={112}
+            label={label}
+          />
+        ))}
+        {FLOW_PROVIDERS.map((p, i) => (
+          <FlowChip
+            key={`${p.label}-${i === provider ? tick : "idle"}`}
+            x={318}
+            y={FLOW_PROVIDER_ROWS[i]}
+            w={120}
+            label={p.label}
+            mark={p.mark}
+            hit={i === provider}
+          />
+        ))}
+        <g>
+          <circle
+            cx={330}
+            cy={moreY}
+            r={12}
+            fill="var(--surface-bg)"
+            stroke="var(--line-structure)"
+          />
+          <ProviderMark name="openrouter" x={323} y={moreY - 7} size={14} />
+          <circle
+            cx={351}
+            cy={moreY}
+            r={12}
+            fill="var(--surface-bg)"
+            stroke="var(--line-structure)"
+          />
+          <path
+            d={`M351 ${moreY - 5.5}L357 ${moreY + 4.5}H345Z`}
+            fill="var(--text-tertiary)"
+          />
+          <text
+            x={371}
+            y={moreY}
+            dominantBaseline="central"
+            fontSize={12}
+            className="font-mono"
+            fill="var(--text-tertiary)"
+          >
+            and more
+          </text>
+        </g>
+
+        <rect
+          x={FLOW_HUB.x - 26}
+          y={FLOW_HUB.y - 26}
+          width={52}
+          height={52}
+          rx={13}
+          fill="none"
+          stroke="var(--line-cta)"
+          className="adv-flow-ring"
+        />
+        <rect
+          x={FLOW_HUB.x - 22}
+          y={FLOW_HUB.y - 22}
+          width={44}
+          height={44}
+          rx={10}
+          fill="var(--surface-bg)"
+          stroke="var(--line-structure)"
+        />
+        <image
+          href="/langfuse-icon.svg"
+          x={FLOW_HUB.x - 14}
+          y={FLOW_HUB.y - 14}
+          width={28}
+          height={28}
+        />
+        <g key={`trace-${tick}`} className="adv-flow-trace">
+          <rect
+            x={FLOW_HUB.x - 28}
+            y={FLOW_HUB.y + 30}
+            width={56}
+            height={18}
+            rx={9}
+            fill="var(--adv-mint)"
+          />
+          <text
+            x={FLOW_HUB.x}
+            y={FLOW_HUB.y + 39}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={10}
+            fontWeight={600}
+            fill="#0b1626"
+          >
+            +1 trace
+          </text>
+        </g>
+      </svg>
+    </Stage>
+  );
+}
+
+const GUARDRAIL_TEMPLATES: {
+  id: GuardrailTemplate;
+  name: string;
+  pill: [string, string];
+}[] = [
+  { id: "pii", name: "PII", pill: ["email", "dana@example.com"] },
+  {
+    id: "secrets",
+    name: "Secrets and API keys",
+    pill: ["openai_key", "sk-proj-4f9a…"],
+  },
+  {
+    id: "injection",
+    name: "Prompt injection",
+    pill: ["heuristic", "Ignore previous instructions"],
+  },
+  { id: "keyword", name: "Keyword list", pill: ["keyword", "Falcon"] },
+  { id: "regex", name: "Custom regex", pill: ["regex", "CUST-\\d{6}"] },
+];
+
+function GuardrailPill({
+  pill,
+  compact,
+}: {
+  pill: [string, string];
+  compact?: boolean;
+}) {
+  return (
+    <span className="adv-guard-pill font-mono">
+      {compact ? null : <span className="adv-guard-pill-key">{pill[0]}:</span>}
+      <span className="adv-guard-pill-value">{pill[1]}</span>
+    </span>
+  );
+}
+
+/** One guardrail template catches a match while the others wait their turn. */
+function GuardrailAnimation({
+  active,
+  action,
+  prompt,
+  match,
+  label = "[REDACTED]",
+}: {
+  active: GuardrailTemplate;
+  action: "redact" | "block";
+  prompt: string;
+  match: string;
+  label?: string;
+}) {
+  const phase = useTick(1100) % 4;
+  const template = GUARDRAIL_TEMPLATES.find((t) => t.id === active)!;
+  const others = GUARDRAIL_TEMPLATES.filter((t) => t.id !== active);
+  const [before, after] = prompt.split(match);
+  const caught = phase >= 2;
+  const matchState = caught
+    ? action === "redact"
+      ? "redacted"
+      : "blocked"
+    : phase === 1
+      ? "flagged"
+      : "idle";
+
+  return (
+    <Stage className="p-3 sm:p-4">
+      <div className="flex w-full max-w-[520px] flex-col gap-2.5">
+        <div className="adv-guard-card adv-guard-active">
+          <div className="adv-guard-preview">
+            <GuardrailPill pill={template.pill} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-semibold">{template.name}</span>
+            <span className="adv-guard-live">Live</span>
+          </div>
+          <div
+            className="adv-guard-prompt font-mono"
+            data-blocked={caught && action === "block"}
+          >
+            {before}
+            <span className="adv-guard-match" data-state={matchState}>
+              {caught && action === "redact" ? label : match}
+            </span>
+            {after}
+          </div>
+          <div className="adv-guard-result" data-visible={caught}>
+            {action === "redact" ? (
+              "Redacted before the provider sees it"
+            ) : (
+              <>
+                <span className="font-mono">400 guardrail_blocked</span>: never
+                reaches the provider
+              </>
+            )}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {others.map((t) => (
+            <div key={t.id} className="adv-guard-card adv-guard-teased">
+              <div className="adv-guard-preview">
+                <GuardrailPill pill={t.pill} compact />
+              </div>
+              <span className="truncate text-[11px] font-medium">{t.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Stage>
+  );
+}
+
+const BENCHMARK_RUNTIMES = ["Rust", "Node.js", "Python"];
+
+/** Rust vs. Node.js vs. Python, alternating between throughput and latency. */
+function BenchmarkAnimation({
+  metrics,
+}: {
+  metrics: { label: string; unit: string; values: number[] }[];
+}) {
+  const tick = useTick(3200);
+  const metric = metrics[tick % metrics.length];
+  const max = Math.max(...metric.values);
+
+  return (
+    <Stage>
+      <div className="flex w-full max-w-[440px] flex-col gap-3">
+        <span
+          key={`label-${tick}`}
+          className="adv-slide-in text-[12px] font-medium text-text-secondary"
+        >
+          {metric.label}
+        </span>
+        {BENCHMARK_RUNTIMES.map((runtime, i) => {
+          const value = metric.values[i];
+          return (
+            <div
+              key={runtime}
+              className="grid grid-cols-[64px_1fr_72px] items-center gap-3 text-[12px]"
+            >
+              <span className={cn("font-mono", i === 0 && "font-semibold")}>
+                {runtime}
+              </span>
+              <div className="adv-bench-track">
+                <div
+                  key={`bar-${tick}`}
+                  className={cn("adv-bench-bar", i === 0 && "is-ours")}
+                  style={{ width: `${Math.max((value / max) * 100, 1.5)}%` }}
+                />
+              </div>
+              <span className="text-right font-mono tabular-nums">
+                {value.toLocaleString("en-US")}
+                {metric.unit}
+              </span>
+            </div>
+          );
+        })}
+        <span className="text-[11px] text-text-tertiary">
+          Same workload, 2 vCPUs and 4 GiB each
+        </span>
+      </div>
+    </Stage>
+  );
+}
+
 export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
   switch (spec.kind) {
     case "route":
@@ -480,5 +886,19 @@ export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
       return <PatternsAnimation pattern={spec.pattern} />;
     case "chat":
       return <ChatAnimation question={spec.question} answer={spec.answer} />;
+    case "gateway":
+      return <GatewayAnimation />;
+    case "guardrail":
+      return (
+        <GuardrailAnimation
+          active={spec.active}
+          action={spec.action}
+          prompt={spec.prompt}
+          match={spec.match}
+          label={spec.label}
+        />
+      );
+    case "benchmark":
+      return <BenchmarkAnimation metrics={spec.metrics} />;
   }
 }

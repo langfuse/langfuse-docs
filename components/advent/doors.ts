@@ -4,7 +4,7 @@ import {
   Boxes,
   ChartColumn,
   Cloud,
-  Code,
+  Cpu,
   Filter,
   GitBranch,
   Globe,
@@ -12,8 +12,10 @@ import {
   Layers,
   ListTree,
   MessageCircle,
+  Regex,
   Rocket,
   Route,
+  ShieldCheck,
   Sparkles,
   SquareTerminal,
   Tag,
@@ -26,6 +28,9 @@ import {
 
 export const ADVENT_YEAR = 2026;
 export const ADVENT_URL = "https://langfuse.com/advent";
+const ADVENT_UTM =
+  "utm_source=langfuse&utm_medium=event&utm_campaign=202612-advent";
+const GUARDRAILS_CHANGELOG = `/changelog/2026-11-27-ai-gateway-guardrails?${ADVENT_UTM}`;
 
 export type DoorAnimation =
   | { kind: "route"; from: string[]; to: string[] }
@@ -39,14 +44,35 @@ export type DoorAnimation =
   | { kind: "alert" }
   | { kind: "toggles" }
   | { kind: "patterns"; pattern: string }
-  | { kind: "chat"; question: string; answer: string };
+  | { kind: "chat"; question: string; answer: string }
+  | { kind: "gateway" }
+  | {
+      kind: "guardrail";
+      active: GuardrailTemplate;
+      action: "redact" | "block";
+      prompt: string;
+      match: string;
+      label?: string;
+    }
+  | {
+      kind: "benchmark";
+      /** Values are for Rust, Node.js, and Python, in that order. */
+      metrics: { label: string; unit: string; values: number[] }[];
+    };
+
+export type GuardrailTemplate =
+  | "pii"
+  | "secrets"
+  | "injection"
+  | "keyword"
+  | "regex";
 
 export type AdventDoor = {
   day: number;
   title: string;
   description: string;
   icon: LucideIcon;
-  link: { type: "changelog" | "docs"; href: string };
+  link: { type: "blog" | "changelog" | "docs"; href: string };
   /** URL of the social post announcing this door. Add it once the post is live. */
   socialUrl?: string;
   animation: DoorAnimation;
@@ -67,82 +93,86 @@ export const ALL_PROVIDERS = [
 export const ADVENT_DOORS: AdventDoor[] = [
   {
     day: 1,
-    title: "The Langfuse AI Gateway",
+    title: "Introducing the Langfuse AI Gateway",
     description:
-      "Send your OpenAI and Anthropic requests to Langfuse instead of the provider. The gateway forwards them with a credential your organization stores in Langfuse and records every call. You only change the base URL and the API key.",
+      "This December, we're launching 24 features to introduce the Langfuse AI Gateway, the biggest product expansion in Langfuse history. It's one open source entry point for all AI usage in your company. Every model call becomes a full Langfuse trace, with who made it and what it cost.",
     icon: Rocket,
     link: {
-      type: "changelog",
-      href: "/changelog/2026-11-04-ai-gateway-public-beta",
+      type: "blog",
+      href: `/blog/introducing-gateway?${ADVENT_UTM}`,
     },
-    animation: {
-      kind: "route",
-      from: ["Your app"],
-      to: ["OpenAI", "Anthropic"],
-    },
+    animation: { kind: "gateway" },
   },
   {
     day: 2,
-    title: "One base URL, no code changes",
+    title: "Redact PII with guardrails",
     description:
-      "Point any client at the gateway by swapping its base URL and key. No SDK to install and no code to change: requests look exactly like requests to the provider.",
-    icon: Code,
-    link: { type: "docs", href: "/docs/gateway/get-started/first-request" },
+      "Guardrails are now live on the AI Gateway, and PII is the first of them. When someone pastes a customer's email into a coding agent, the gateway redacts it before the request reaches the provider or your traces. More guardrails are behind the next doors.",
+    icon: ShieldCheck,
+    link: { type: "changelog", href: GUARDRAILS_CHANGELOG },
     animation: {
-      kind: "terminal",
-      lines: [
-        "$ export OPENAI_BASE_URL=https://gateway.cloud.langfuse.com/openai/v1",
-        "$ export OPENAI_API_KEY=<your gateway key>",
-        "$ python app.py",
-        "✓ traced in Langfuse",
-      ],
+      kind: "guardrail",
+      active: "pii",
+      action: "redact",
+      prompt: "Draft a reply to dana@example.com about her refund.",
+      match: "dana@example.com",
+      label: "[REDACTED]",
     },
   },
   {
     day: 3,
-    title: "Gateway keys, not provider keys",
+    title: "Block leaked secrets and API keys",
     description:
-      "Everyone gets their own gateway key, and the provider key never leaves Langfuse. User keys belong to a person, service account keys to CI and shared services.",
+      "Coding agents read .env files and paste stack traces, so keys end up in prompts. The secrets guardrail detects common provider keys, tokens, JWTs, private keys, and your own key prefixes, and blocks the request before it reaches the provider.",
     icon: KeyRound,
-    link: { type: "docs", href: "/docs/gateway/features/api-keys#key-types" },
-    animation: { kind: "keys" },
+    link: { type: "changelog", href: GUARDRAILS_CHANGELOG },
+    animation: {
+      kind: "guardrail",
+      active: "secrets",
+      action: "block",
+      prompt: 'Why does this fail? OpenAI(api_key="sk-proj-4f9a8c2e…")',
+      match: "sk-proj-4f9a8c2e…",
+    },
   },
   {
     day: 4,
-    title: "Claude Code through the gateway",
+    title: "Custom regex guardrails",
     description:
-      "Give your team Claude Code without sharing an Anthropic key. Every session lands in Langfuse with cost, tokens, and the full conversation.",
-    icon: SquareTerminal,
-    link: {
-      type: "docs",
-      href: "/integrations/developer-tools/claude-code-gateway",
-    },
+      "Built-in rules can't know your internal identifiers. Write a regular expression for customer numbers, contract IDs, or patient record numbers, test it against sample text, and block, redact, or log every match.",
+    icon: Regex,
+    link: { type: "changelog", href: GUARDRAILS_CHANGELOG },
     animation: {
-      kind: "terminal",
-      lines: [
-        "$ export ANTHROPIC_BASE_URL=https://gateway.cloud.langfuse.com/anthropic",
-        "$ export ANTHROPIC_AUTH_TOKEN=<your gateway key>",
-        "$ claude",
-        "✓ session traced in Langfuse",
-      ],
+      kind: "guardrail",
+      active: "regex",
+      action: "redact",
+      prompt: "Summarize every ticket from customer CUST-482913.",
+      match: "CUST-482913",
+      label: "[CUSTOMER_ID]",
     },
   },
   {
     day: 5,
-    title: "Codex through the gateway",
+    title: "How we designed the AI Gateway",
     description:
-      "Run Codex with a gateway key and see what every session costs, which tools it called, and what it changed.",
-    icon: SquareTerminal,
-    link: { type: "docs", href: "/integrations/developer-tools/codex-gateway" },
+      "Hassieb and Tobias explain why we built the gateway in Rust and why it passes provider APIs through without translating them. In their benchmark on two vCPUs, it sustained 964 streaming requests per second and added 3.2 ms to the median time to first token.",
+    icon: Cpu,
+    link: {
+      type: "blog",
+      href: `/blog/2026-11-11-building-the-langfuse-ai-gateway?${ADVENT_UTM}`,
+    },
     animation: {
-      kind: "terminal",
-      lines: [
-        "# ~/.codex/config.toml",
-        'model_provider = "langfuse"',
-        "[model_providers.langfuse]",
-        'base_url = "https://gateway.cloud.langfuse.com/openai/v1"',
-        "$ codex",
-        "✓ session traced in Langfuse",
+      kind: "benchmark",
+      metrics: [
+        {
+          label: "Streaming requests per second",
+          unit: "",
+          values: [964, 127, 100],
+        },
+        {
+          label: "Added time to first token (median)",
+          unit: " ms",
+          values: [3.2, 734, 729],
+        },
       ],
     },
   },
@@ -432,6 +462,7 @@ export const ADVENT_DOORS: AdventDoor[] = [
 ];
 
 export const LINK_LABELS: Record<AdventDoor["link"]["type"], string> = {
+  blog: "Read the blog post",
   changelog: "Read the changelog",
   docs: "Read the docs",
 };
