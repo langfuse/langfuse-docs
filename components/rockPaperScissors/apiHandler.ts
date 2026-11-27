@@ -64,8 +64,8 @@ const OPPONENTS: Record<OpponentId, Opponent> = {
     model: () => openai("gpt-6-astra"),
     providerOptions: {
       openai: {
-        reasoningEffort: "low",
-        reasoningSummary: "detailed",
+        reasoningEffort: "minimal",
+        reasoningSummary: "auto",
       } satisfies OpenAIResponsesProviderOptions,
     },
   },
