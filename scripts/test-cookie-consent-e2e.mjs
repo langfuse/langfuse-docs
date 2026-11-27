@@ -170,6 +170,7 @@ function decodePostHogEvents(request) {
   let text;
   const headers = request.headers();
   const isGzip =
+    (raw.length >= 2 && raw[0] === 0x1f && raw[1] === 0x8b) ||
     url.includes("compression=gzip-js") ||
     headers["content-encoding"] === "gzip";
   if (isGzip) {
@@ -221,6 +222,32 @@ function isPostHogStorageKey(key) {
 }
 
 const allGtmRequests = [];
+
+function parseUrl(raw) {
+  try {
+    return new URL(raw);
+  } catch {
+    return null;
+  }
+}
+
+function isHostOrSubdomain(raw, domain) {
+  const parsed = parseUrl(raw);
+  if (!parsed) return false;
+  return parsed.hostname === domain || parsed.hostname.endsWith(`.${domain}`);
+}
+
+function isGtmUrl(raw) {
+  const parsed = parseUrl(raw);
+  if (!parsed) return false;
+  if (
+    isHostOrSubdomain(raw, "googletagmanager.com") &&
+    parsed.pathname.startsWith("/gtm.js")
+  ) {
+    return true;
+  }
+  return parsed.searchParams.get("id")?.startsWith("GTM-") ?? false;
+}
 
 async function createIsolatedContext(browser, baseUrl, options = {}) {
   const {
@@ -299,7 +326,7 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
     }
 
     requestedUrls.push(url);
-    if (url.includes("googletagmanager.com/gtm.js") || url.includes("GTM-")) {
+    if (isGtmUrl(url)) {
       allGtmRequests.push(url);
     }
     const parsed = new URL(url);
@@ -378,7 +405,8 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
 
     // Cloud region sign-in probes from ConversionTracker: respond signed-out.
     if (
-      parsed.hostname.endsWith("cloud.langfuse.com") &&
+      (parsed.hostname === "cloud.langfuse.com" ||
+        parsed.hostname.endsWith(".cloud.langfuse.com")) &&
       parsed.pathname === "/api/auth/session"
     ) {
       await route.fulfill({
@@ -406,9 +434,7 @@ async function createIsolatedContext(browser, baseUrl, options = {}) {
 }
 
 function assertNoGtm(requestedUrls, label) {
-  const gtmRequests = requestedUrls.filter(
-    (u) => u.includes("googletagmanager.com/gtm.js") || u.includes("GTM-"),
-  );
+  const gtmRequests = requestedUrls.filter(isGtmUrl);
   assert.deepEqual(
     gtmRequests,
     [],
@@ -691,11 +717,7 @@ async function run() {
           COOKIEYES_SCRIPT_URL,
         );
         assert.equal(
-          headOrder.allScripts.some(
-            (s) =>
-              s.src?.includes("googletagmanager.com/gtm.js") ||
-              s.src?.includes("GTM-"),
-          ),
+          headOrder.allScripts.some((s) => Boolean(s.src && isGtmUrl(s.src))),
           false,
           `Expected no GTM script tags in DOM, got: ${JSON.stringify(headOrder.allScripts)}`,
         );
@@ -727,7 +749,9 @@ async function run() {
 
         assertNoGtm(requestedUrls, "undecided consent defaults");
         assert.deepEqual(
-          requestedUrls.filter((u) => u.includes("googletagmanager.com")),
+          requestedUrls.filter((u) =>
+            isHostOrSubdomain(u, "googletagmanager.com"),
+          ),
           [],
           `Expected zero Google requests before consent, got: ${JSON.stringify(requestedUrls)}`,
         );
@@ -755,7 +779,9 @@ async function run() {
 
         assertNoGtm(requestedUrls, "reject Google Ads check");
         assert.deepEqual(
-          requestedUrls.filter((u) => u.includes("googletagmanager.com")),
+          requestedUrls.filter((u) =>
+            isHostOrSubdomain(u, "googletagmanager.com"),
+          ),
           [],
           `Expected zero Google requests after Reject, got: ${JSON.stringify(requestedUrls)}`,
         );
@@ -785,8 +811,8 @@ async function run() {
           () =>
             requestedUrls.some(
               (u) =>
-                u.includes("cloud.langfuse.com") &&
-                u.includes("/api/auth/session"),
+                isHostOrSubdomain(u, "cloud.langfuse.com") &&
+                parseUrl(u)?.pathname === "/api/auth/session",
             ),
           4_000,
         );
@@ -1098,7 +1124,7 @@ async function run() {
 
         const storage = await assertNoPostHogStorage(page, exitKind);
         assert.ok(
-          storage.beaconUrls.some((u) => u.includes("posthog.com")),
+          storage.beaconUrls.some((u) => isHostOrSubdomain(u, "posthog.com")),
           `Expected navigator.sendBeacon call to PostHog on ${exitKind}, got: ${JSON.stringify(storage.beaconUrls)}`,
         );
         console.log(`PASS: page exit before 10s (${exitKind})`);
