@@ -1,0 +1,183 @@
+---
+title: Generating ground truth
+sidebarTitle: Generating ground truth
+description: How to build trustworthy expected outputs for agent evaluation datasets in regulated settings, using historical cases, shadow runs, synthetic inputs, and human-in-the-loop decisions.
+---
+
+export const references = [
+  {
+    id: "anthropic-agent-evals",
+    title: "Demystifying evals for AI agents (Anthropic)",
+    url: "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+  },
+  {
+    id: "northcutt-label-errors",
+    title:
+      "Pervasive label errors in test sets destabilize machine learning benchmarks (Northcutt et al.)",
+    url: "https://arxiv.org/abs/2103.14749",
+  },
+  {
+    id: "swe-bench-plus",
+    title: "SWE-Bench+ (Aleithan et al.)",
+    url: "https://arxiv.org/abs/2410.06992",
+  },
+  {
+    id: "yang-contamination",
+    title:
+      "Rethinking benchmark and contamination for language models with rephrased samples (Yang et al.)",
+    url: "https://arxiv.org/abs/2311.04850",
+  },
+  {
+    id: "oscilar-shadow",
+    title: "How to evaluate an AI risk agent before production (Oscilar)",
+    url: "https://oscilar.com/blog/evaluate-ai-risk-agent",
+  },
+  {
+    id: "tikhomirov-silent-trials",
+    title:
+      "A scoping review of silent trials for medical artificial intelligence (Tikhomirov et al.)",
+    url: "https://www.nature.com/articles/s44360-025-00048-z",
+  },
+  {
+    id: "yan-product-evals",
+    title: "Product evals in three simple steps (Eugene Yan)",
+    url: "https://eugeneyan.com/writing/product-evals/",
+  },
+  {
+    id: "grant-thornton-validation",
+    title:
+      "AI validation in practice: testing AI agents in financial services (Grant Thornton Ireland)",
+    url: "https://www.grantthornton.ie/insights/factsheets/ai-validation-in-practice-testing-ai-agents-financial-services/",
+  },
+  {
+    id: "galileo-adjudication",
+    title: "Calibrate LLM judges with human annotations (Galileo)",
+    url: "https://galileo.ai/blog/calibrate-llm-judge-human-annotations",
+  },
+  {
+    id: "bansal-explanations",
+    title:
+      "Does the whole exceed its parts? The effect of AI explanations on complementary team performance (Bansal et al.)",
+    url: "https://arxiv.org/abs/2006.14779",
+  },
+  {
+    id: "shankar-validators",
+    title: "Who validates the validators? (Shankar et al.)",
+    url: "https://arxiv.org/abs/2404.12272",
+  },
+  {
+    id: "green-human-oversight",
+    title:
+      "The flaws of policies requiring human oversight of government algorithms (Green)",
+    url: "https://arxiv.org/abs/2109.05067",
+  },
+];
+
+# Generating ground truth for agent datasets
+
+A dataset item is only as useful as its expected output. If the expected output is wrong, every experiment against it rewards the wrong behavior.
+
+In finance, insurance, or healthcare, you often cannot build your first dataset from production traces: an agent that decides on a refund cannot go live just to see what happens. And even live traces come without a correct answer. Someone has to provide it.
+
+<Callout type="info">
+New to datasets? Start with [Datasets](/academy/datasets) and [Designing datasets](/academy/datasets/designing-great-datasets).
+</Callout>
+
+This page uses one example: **an agent that reads customer emails to a bank and decides on fee refund requests** (approve, deny, or escalate).
+
+## What ground truth means here
+
+Good ground truth follows the current policy, is recorded with who decided it and why, and holds up to a second expert. As Anthropic's guide to agent evals puts it: "A good task is one where two domain experts would independently reach the same pass/fail verdict."<Ref refs={references} id="anthropic-agent-evals" />
+
+One rule runs through this page: **inputs can come from many places, and a domain expert always writes or confirms the expected output.**
+
+## Four approaches
+
+### 1. Existing data
+
+**Historical cases** are the cheapest start: run the agent offline on past refund emails and have an expert compare its output with the recorded decision. Treat each past decision as a draft until an expert confirms it. Even heavily reviewed public test sets contain label errors, at least 3.3% on average across ten well-known benchmarks.<Ref refs={references} id="northcutt-label-errors" /> Tag each case with its policy version, mask PII, and strip leaked answers such as a note saying "refund approved". In one popular coding benchmark, about a third of successful runs had the solution handed to them in the issue text or comments.<Ref refs={references} id="swe-bench-plus" />
+
+**Public benchmarks** such as FinanceBench help you compare models early. Use them as a baseline only: they know nothing about your policy and may already be in a model's training data.<Ref refs={references} id="yang-contamination" />
+
+### 2. Shadow runs
+
+The human team keeps deciding, the agent proposes a decision in parallel, and nobody acts on the proposal. Then you compare. The hard part is the disagreements, because sometimes the human was wrong. A risk software vendor writes: "Some of the most useful findings in these exercises are cases where the agent was right and the original disposition was not."<Ref refs={references} id="oscilar-shadow" /> A review of silent trials in clinical AI found that "Far fewer studies reported verification of outputs against an in situ clinical ground truth".<Ref refs={references} id="tikhomirov-silent-trials" />
+
+Send every disagreement to an expert, sample agreements too, and keep the human blind to the proposal. Only adjudicated cases become dataset items.
+
+### 3. Synthetic inputs
+
+For rare cases, such as an email from a relative of a deceased customer, write or generate the input and have an expert correct the agent's output. **Only the input is synthetic.** Our [financial services post](/blog/2026-07-15-llm-certification-financial-services) states the rule: "The reviewer supplies the correct answer; the pipeline never copies the suspect output as ground truth." Generated cases can also be "out-of-distribution, either too exaggerated or too subtle",<Ref refs={references} id="yan-product-evals" /> so measure real accuracy on real inputs.
+
+### 4. Human in the loop [#human-in-the-loop]
+
+After go-live, the agent proposes and a named person decides. Each decision is a label, so this is a valid but weak ground truth approach: the reviewer always sees the proposal first. A survey of human oversight policies warns they can give "a false sense of security".<Ref refs={references} id="green-human-oversight" /> Track override rates (near zero is a warning sign), insert known-wrong cases, and keep a blind sample.
+
+In every approach, experts record corrections in Langfuse [annotation queues](/docs/evaluation/evaluation-methods/annotation-queues) as a [corrected output](/docs/observability/features/corrections), which becomes the expected output. The edits are data too: "Repeated corrections to the same type of output may point to a recurring weakness in the system."<Ref refs={references} id="grant-thornton-validation" />
+
+## A recommended order
+
+No published source ranks these approaches. This is our recommendation:
+
+1. **Historical cases or shadow runs**, corrected by experts under a calibrated labeling approach
+2. **The same real inputs**, labeled by one expert without calibration, for low-risk items
+3. **Synthetic inputs** with expert-corrected outputs, for gaps
+4. **Human-in-the-loop decisions**, the steady state after go-live
+
+Public benchmarks sit outside this order as a baseline.
+
+## Making labels trustworthy [#making-labels-trustworthy]
+
+**Setup.** Two experts label the first examples independently and agree on the criteria and edge cases. A senior expert settles disagreements. One evaluation vendor advises: "When they disagree, use adjudication rather than majority vote."<Ref refs={references} id="galileo-adjudication" /> [Score Analytics](/docs/evaluation/scores/score-analytics) reports Cohen's kappa between two scores.
+
+**Running.** After that, the process runs more automatically: one expert labels each new item, and a second reviewer checks a small random sample now and then.
+
+Watch for two risks:
+
+- **Anchoring and automation bias.** One study found AI explanations "increased the chance that humans will accept the AI's recommendation, regardless of its correctness."<Ref refs={references} id="bansal-explanations" /> Label a share of cases blind.
+- **Criteria drift.** Experts refine what "correct" means while they label: "users need criteria to grade outputs, but grading outputs helps users define criteria."<Ref refs={references} id="shankar-validators" /> Re-check early labels once the criteria settle.
+
+For housekeeping, name an owner for the labels, tag every item with its source and policy version, [version the dataset](/docs/evaluation/experiments/datasets#versioning), and keep a holdout set that never tunes prompts or judges.
+
+## Structuring the item in Langfuse
+
+Put the decision your evaluators check in `expectedOutput` and everything else in `metadata`:
+
+```json
+{
+  "input": {
+    "subject": "Refund of overdraft fee on my late father's account",
+    "body": "[synthetic email text]"
+  },
+  "expectedOutput": {
+    "decision": "escalate",
+    "must_not": ["approve_refund", "share_account_details_with_sender"]
+  },
+  "metadata": {
+    "source": "synthetic_input",
+    "labeled_blind": true,
+    "second_review": "monthly_sample_2026-10",
+    "policy_version": "fee-policy-2026-09"
+  }
+}
+```
+
+## A note on regulation
+
+<Callout type="info">
+No regulator prescribes a method for agent ground truth yet. US banking guidance ([OCC Bulletin 2026-13](https://www.occ.gov/news-issuances/bulletins/2026/bulletin-2026-13.html), [SR 26-2](https://www.federalreserve.gov/supervisionreg/srletters/SR2602.pdf)) places agentic AI outside its scope. [FINRA](https://www.finra.org/rules-guidance/guidance/reports/2026-finra-annual-regulatory-oversight-report/gen-ai) and [Article 14 of the EU AI Act](https://artificialintelligenceact.eu/article/14/) point to human oversight. Your labeling record is the evidence.
+</Callout>
+
+## What comes next
+
+Use your expert labels to run [experiments](/academy/experiments) and check whether an LLM-as-a-judge agrees with your experts.
+
+<ManualGuideCallout
+  href="/guides/llm-as-a-judge-calibration-skill"
+  topic="Judge calibration"
+  lede="Use your expert labels as ground truth, run your judge against them, and get an agreement report with the exact disagreements."
+/>
+
+## References
+
+<FurtherReading numbered resources={references} />
