@@ -20,6 +20,6 @@ export LANGFUSE_PUBLIC_KEY=pk-lf-local
 export LANGFUSE_SECRET_KEY=sk-lf-local
 ```
 
-The keys are placeholders and are not checked. Traces, scores, datasets, and experiment runs are stored in `./.langfuse/lite.db`. Read them back in the viewer at `http://localhost:3000` or with the CLI, for example `langfuse-lite observations` and `langfuse-lite runs`.
+The keys are placeholders and are not checked. Traces, scores, datasets, and experiment runs are stored in `./.langfuse/lite.db`. Read them back in the viewer at `http://localhost:3000` or with the CLI, for example `npx -y langfuse-lite observations` and `npx -y langfuse-lite runs` (or the same with `uvx`).
 
-langfuse-lite is for local development only: it has no authentication and covers [part of Langfuse](/docs/langfuse-lite#scope). When the project grows, change the base URL and API keys to [Langfuse Cloud](/cloud) or a [self-hosted Langfuse](/self-hosting). `langfuse-lite push --to <url>` copies the local data.
+langfuse-lite is for local development only: it has no authentication and covers [part of Langfuse](/docs/langfuse-lite#scope). When the project grows, change the base URL and API keys to [Langfuse Cloud](/cloud) or a [self-hosted Langfuse](/self-hosting). `npx -y langfuse-lite push --to <url>` copies the local data.

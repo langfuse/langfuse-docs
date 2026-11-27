@@ -29,11 +29,11 @@ export LANGFUSE_PUBLIC_KEY=pk-lf-local
 export LANGFUSE_SECRET_KEY=sk-lf-local
 ```
 
-Then instrument your application as in [Get started with tracing](/docs/observability/get-started), or run [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). OpenTelemetry exporters send to `http://localhost:3000/api/public/otel/v1/traces`. Data is stored in `./.langfuse/lite.db`, and a small viewer runs at `http://localhost:3000`.
+Then instrument your application as in [Get started with tracing](/docs/observability/get-started), or run [experiments via SDK](/docs/evaluation/experiments/experiments-via-sdk). Skip the account and API key steps in those guides and keep the three variables above: the guides' credentials point the SDKs at Langfuse Cloud. OpenTelemetry exporters send to `http://localhost:3000/api/public/otel/v1/traces`. Data is stored in `./.langfuse/lite.db`, and a small viewer runs at `http://localhost:3000`.
 
 ## Read results back [#cli]
 
-The CLI reads the SQLite file, so an agent can verify its own traces and experiment runs from the terminal.
+The CLI reads the SQLite file, so an agent can verify its own traces and experiment runs from the terminal. Run the commands the same way you started the server, for example `npx -y langfuse-lite runs` or `uvx langfuse-lite runs`. To get the bare `langfuse-lite` command shown below, install it with `npm install -g langfuse-lite` or `pip install langfuse-lite`.
 
 | Command                               | Output                                    |
 | ------------------------------------- | ----------------------------------------- |
