@@ -909,7 +909,7 @@ export function AdventStyles() {
 
       html:has(.adv-page), html:has(.adv-page) body { height: 100%; overflow: hidden; overscroll-behavior: none; }
       .adv-page { height: 100dvh; max-height: 100dvh; min-height: 0; display: grid; grid-template-rows: 64px minmax(0,1fr) 88px; overflow: hidden; --adv-pointer-x: 0; --adv-pointer-y: 0; }
-      .adv-page:not([data-experience="intro"]) { grid-template-rows: 64px 112px minmax(0,1fr) 88px; }
+      .adv-page:not([data-experience="intro"]) { grid-template-rows: 64px 124px minmax(0,1fr) 88px; }
       .adv-nav { position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; border-bottom: 1px solid var(--line-structure); background: color-mix(in srgb,var(--surface-bg) 85%,transparent); }
       .adv-brand { position: relative; display: block; width: 150px; }
       .adv-brand img { width: 100%; height: auto; display: block; }
@@ -927,7 +927,7 @@ export function AdventStyles() {
       .adv-start-action button > span { font-size: 16px; gap: 10px; }
       .adv-header-controls { display: none; }
       .adv-page:not([data-experience="intro"]) .adv-experience-header { padding: 8px 20px; gap: 7px; }
-      .adv-page:not([data-experience="intro"]) .adv-heading h1 { font-size: 22px; letter-spacing: -.035em; }
+      .adv-page:not([data-experience="intro"]) .adv-heading h1 { font-size: 32px; letter-spacing: -.04em; }
       .adv-page:not([data-experience="intro"]) :is(.adv-intro-copy,.adv-start-action,.adv-knot-stage) { display: none; }
       .adv-page:not([data-experience="intro"]) .adv-header-controls { display: block; }
       .adv-scene-control { text-align: center; min-width: 0; width: min(420px,80vw); }
@@ -1002,7 +1002,7 @@ export function AdventStyles() {
       }
       @media (max-width: 700px) {
         .adv-page { grid-template-rows: 54px minmax(0,1fr) 88px; }
-        .adv-page:not([data-experience="intro"]) { grid-template-rows: 54px 108px minmax(0,1fr) 88px; }
+        .adv-page:not([data-experience="intro"]) { grid-template-rows: 54px 114px minmax(0,1fr) 88px; }
         .adv-nav { padding: 0 14px; }
         .adv-brand { width: 120px; }
         .adv-nav-links { gap: 16px; font-size: 11px; }
@@ -1010,7 +1010,7 @@ export function AdventStyles() {
         .adv-experience-header { padding: 20px; gap: 22px; }
         .adv-heading h1 { max-width: 12ch; font-size: clamp(42px,10vw,65px); }
         .adv-intro-copy { font-size: 14px; margin-top: 24px; }
-        .adv-page:not([data-experience="intro"]) .adv-heading h1 { max-width: none; font-size: 19px; }
+        .adv-page:not([data-experience="intro"]) .adv-heading h1 { max-width: none; font-size: 24px; }
         .adv-scene-control { width: min(280px,74vw); }
         .adv-scene-switch { min-height: 44px; }
         .adv-scene-switch button { font-size: 12px; padding: 6px 8px; gap: 6px; }
