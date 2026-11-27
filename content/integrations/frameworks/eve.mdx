@@ -3,18 +3,18 @@ title: Observability for eve with Langfuse
 sidebarTitle: Eve
 logo: /images/integrations/eve_icon.svg
 logoAppearance: dark
-description: Trace eve agents with Langfuse via OpenTelemetry. Capture model calls, tool calls, and full agent runs with token usage and cost.
+description: Trace eve agents with Langfuse via OpenTelemetry. Capture agent turns, model calls, and tool calls with token usage and cost, grouped into sessions.
 ---
 
 # Observability for eve with Langfuse
 
-This guide shows you how to integrate **Langfuse** with **eve** to trace and debug your agents. eve emits OpenTelemetry spans for every run, so connecting Langfuse is a matter of pointing those spans at your Langfuse project.
+This guide shows you how to integrate **Langfuse** with **eve** to trace and debug your agents.
 
 > **What is eve?** [eve](https://eve.dev) is an open-source TypeScript framework from Vercel for building durable agents as ordinary files in a project. It ships with durable execution, a sandbox, tools, subagents, schedules, and built-in OpenTelemetry tracing.
 
 > **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source observability platform for AI agents and LLM applications. It helps you visualize and monitor model calls, tool usage, cost, latency, and more. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
 
-[Every eve run produces a trace](https://eve.dev/docs/guides/instrumentation), and the spans are standard OpenTelemetry, built on the [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) telemetry conventions. eve registers its tracer in `agent/instrumentation.ts` via `registerOTel`. By adding the `LangfuseSpanProcessor`, every model call and tool call flows into Langfuse — where Langfuse maps them to traces, generations, and tool observations.
+eve emits OpenTelemetry spans that follow the [OpenTelemetry GenAI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/). Registering the `LangfuseSpanProcessor` as an eve OpenTelemetry destination sends every agent turn, model call, and tool call to Langfuse.
 
 ## Get Started
 
@@ -31,12 +31,10 @@ cd my-agent
 
 See the full [eve quickstart](https://eve.dev/docs/getting-started) for details.
 
-### Install the Langfuse OpenTelemetry packages
-
-Add the Langfuse span processor and the Vercel OpenTelemetry helper that eve's instrumentation uses:
+### Install the Langfuse span processor
 
 ```bash
-npm install @langfuse/otel @vercel/otel
+npm install @langfuse/otel
 ```
 
 ### Add your Langfuse credentials
@@ -50,71 +48,37 @@ LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # LANGFUSE_BASE_URL="https://us.cloud.langfuse.com" # 🇺🇸 US region
 ```
 
-### Register the Langfuse span processor
+### Add Langfuse as an OpenTelemetry destination
 
-eve configures telemetry in `agent/instrumentation.ts`. Register the `LangfuseSpanProcessor` on the `registerOTel` call so eve's spans are exported to Langfuse:
+eve loads one file per tracing destination from `agent/instrumentation/`. Create `agent/instrumentation/langfuse.ts`:
 
-```typescript filename="agent/instrumentation.ts"
-import { defineInstrumentation } from "eve/instrumentation";
-import { registerOTel } from "@vercel/otel";
-import { LangfuseSpanProcessor, isDefaultExportSpan } from "@langfuse/otel";
+```typescript filename="agent/instrumentation/langfuse.ts"
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+import { otelIntegration } from "eve/instrumentation/otel";
 
-export default defineInstrumentation({
-  setup: ({ agentName }) =>
-    registerOTel({
-      serviceName: agentName,
-      spanProcessors: [
-        new LangfuseSpanProcessor({
-          // Keep Langfuse's default export filter (Langfuse SDK spans, GenAI
-          // spans, and known LLM instrumentors), and additionally keep eve's
-          // `gen_ai` spans and its own run span (scope `eve`). Everything else —
-          // eve's durable-workflow orchestration and the @vercel/otel HTTP
-          // spans — is dropped.
-          shouldExportSpan: ({ otelSpan }) =>
-            isDefaultExportSpan(otelSpan) ||
-            ["gen_ai", "eve"].includes(otelSpan.instrumentationScope.name),
-        }),
-      ],
+export default otelIntegration({
+  spanProcessors: [
+    new LangfuseSpanProcessor({
+      environment: process.env.VERCEL_ENV ?? "development",
     }),
+  ],
 });
 ```
 
-The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the environment.
+The `LangfuseSpanProcessor` reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, and `LANGFUSE_BASE_URL` from the environment. Its default export filter keeps eve's agent, model, and tool spans and drops eve's durable-workflow orchestration spans.
 
 <Callout type="info">
-  Registering the `LangfuseSpanProcessor` via `registerOTel` requires
-  `@vercel/otel` v2 or later, which is built on the same OpenTelemetry JS SDK v2
-  as `@langfuse/otel` ([vercel/otel#154](https://github.com/vercel/otel/issues/154)).
-  The install command above already pulls in a compatible version. If you wire
-  Langfuse into a custom OpenTelemetry setup instead, you can register the
-  processor on a [`NodeSDK`](/docs/observability/sdk/overview) as well.
-</Callout>
-
-<Callout type="info">
-  eve runs every turn as a durable workflow, so it emits many low-level
-  orchestration spans (instrumentation scope `workflow`) alongside the model and
-  tool calls (scope `gen_ai`) and the run span (scope `eve`). `shouldExportSpan`
-  replaces Langfuse's default filter, so the snippet above composes with
-  `isDefaultExportSpan` to keep that default behavior — Langfuse SDK spans
-  (`langfuse-sdk`), GenAI spans, and known LLM instrumentors — and then also
-  keeps eve's `gen_ai` and `eve` scopes. The result is one clean trace: agent
-  invocations, generations, and tool calls nested under eve's run span, plus any
-  observations you add with the Langfuse SDK (see the "Interoperability with the
-  JS/TS SDK" section below), without the workflow plumbing. Keeping the `eve`
-  scope matters — it is the
-  parent that holds the GenAI spans together, so dropping it would leave them as
-  [orphaned spans](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope).
-  To keep eve's full run tree including the workflow spans, drop only the HTTP
-  noise with
-  `({ otelSpan }) => otelSpan.instrumentationScope.name !== "@vercel/otel/fetch"`,
-  or use `() => true` to export everything. See
-  [filtering by instrumentation scope](/docs/observability/sdk/advanced-features#filtering-by-instrumentation-scope)
-  for more.
+  Outside development, eve includes prompts and completions only for
+  conversations with a `public` audience. Other turns still arrive in Langfuse
+  with timing, token usage, and cost, but without inputs and outputs. To capture
+  content in preview or production, set a `tracePolicy` in
+  `agent/instrumentation/otel.ts`, as described in eve's [OpenTelemetry
+  docs](https://eve.dev/docs/observability/otel).
 </Callout>
 
 ### Define a simple agent
 
-A minimal eve agent is a tool plus a system prompt. The weather agent below — a single `getWeather` tool and a short instruction — produces the kind of run shown in the example trace below:
+A minimal eve agent is a tool plus a system prompt. The weather agent below, with a single `getWeather` tool and a short instruction, is enough to produce a trace with model calls and a tool call:
 
 ```ts filename="agent/tools/getWeather.ts"
 import { defineTool } from "eve/tools";
@@ -133,7 +97,7 @@ export default defineTool({
 import { defineAgent } from "eve";
 
 export default defineAgent({
-  model: "openai/gpt-4o-mini",
+  model: "openai/gpt-5.4-mini",
 });
 ```
 
@@ -146,26 +110,22 @@ eve discovers these files automatically. Model provider authentication (the Verc
 
 ### Run your agent
 
-Start your agent and send it a message, for example _"What's the weather in Berlin? Use the getWeather tool, then answer in one sentence."_:
+Start your agent and send it a message, for example _"What's the weather in Berlin?"_:
 
 ```bash
 npm run dev
 ```
 
-Each run is now exported to Langfuse.
+Each agent turn is now exported to Langfuse.
 
 ### View traces in Langfuse
 
-Open your [Langfuse dashboard](https://cloud.langfuse.com) to see the trace for each run. With the scope filter above, eve's spans map to the Langfuse data model as follows:
+Open your [Langfuse dashboard](https://cloud.langfuse.com) to see a trace for each agent turn. eve's spans map to the Langfuse data model as follows:
 
-- The **eve run** becomes the **root span** that the rest nest under.
-- **Agent invocations** become **agent observations**.
-- **Model calls** become **generations** with the model name, token usage, and cost.
-- **Tool calls** become **tool observations** with their inputs and outputs.
-
-![eve agent run trace in Langfuse, showing the eve run span with nested agent invocations, model generations, and a getWeather tool call](/images/cookbook/integration-eve/eve-example-trace.png)
-
-_[View this example trace in Langfuse →](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/2db3fca28fc9a5c4fcf0acbd3a5c0a92?observation=8719bc06eb4f1661)_
+- The **agent turn** (`invoke_agent`) becomes the root **agent observation**, with the user message as input and the final answer as output.
+- **Model calls** (`chat`) become **generations** with the model name, token usage, and cost.
+- **Tool calls** (`execute_tool`) become **tool observations** with their arguments and results.
+- The **eve session** becomes a Langfuse [session](/docs/observability/features/sessions), so all turns of a conversation are grouped together.
 
 </Steps>
 
@@ -175,7 +135,6 @@ import LearnMore from "@/components-mdx/integration-learn-more-js.mdx";
 
 ## References
 
-- [eve instrumentation docs](https://eve.dev/docs/guides/instrumentation)
+- [eve OpenTelemetry docs](https://eve.dev/docs/observability/otel)
 - [Langfuse OpenTelemetry endpoint](/integrations/native/opentelemetry)
-- [Langfuse + Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk) (eve's telemetry is built on the same conventions)
 - [`@langfuse/otel` on npm](https://www.npmjs.com/package/@langfuse/otel)
