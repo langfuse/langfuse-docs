@@ -204,8 +204,9 @@ try {
     `document.head.insertAdjacentHTML("beforeend", "<style>nextjs-portal{display:none!important}</style>")`,
   );
   if (flags.dark) {
+    // A forced-light page drops the dark class and sets color-scheme inline; the light class comes later.
     const forcedLight = await evaluate(
-      `(() => { const c = document.documentElement.classList; return c.contains("light") && !c.contains("dark"); })()`,
+      `(() => { const html = document.documentElement; return !html.classList.contains("dark") && (html.classList.contains("light") || html.style.colorScheme === "light"); })()`,
     );
     if (forcedLight)
       throw new Error(
