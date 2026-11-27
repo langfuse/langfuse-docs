@@ -14,17 +14,22 @@ export type GatewayHeroLayout = "70" | "72";
 function HeroCopy({ centered = false }: { centered?: boolean }) {
   return (
     <>
-      <p className="font-mono text-[12px] leading-none tracking-[0.06em] text-text-secondary">
-        PUBLIC BETA
+      <p className="text-[15px] leading-none text-text-secondary">
+        Langfuse AI Gateway{" "}
+        <span className="text-text-tertiary">(public beta)</span>
       </p>
       <h2
-        id="introducing-ai-gateway"
-        className="mt-4 text-[40px] leading-[1.02] tracking-[-0.02em] text-text-primary sm:text-[60px]"
+        id="see-and-control"
+        className="mt-4 text-balance text-[40px] leading-[1.02] tracking-[-0.02em] text-text-primary sm:text-[60px]"
       >
-        Introducing AI Gateway
+        <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">
+          See and control
+        </span>{" "}
+        all AI usage
       </h2>
-      <p className="mt-4 text-[18px] leading-[1.4] text-text-tertiary">
-        One endpoint for Claude Code, Codex and your apps.
+      <p className="mt-4 max-w-[52ch] text-[18px] leading-[1.4] text-text-tertiary">
+        AI governance across your organization: route all model calls through
+        the gateway instead of losing track of keys and budgets.
       </p>
       <div
         className={cn(
