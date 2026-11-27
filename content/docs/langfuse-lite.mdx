@@ -51,13 +51,21 @@ In Python, `pip install langfuse-lite` registers the pytest fixtures `langfuse_l
 
 langfuse-lite implements the part of the Langfuse public API that the SDKs (Python 5.x, JS/TS 6.x) use for tracing and experiments.
 
-| Included                | Not included                   |
-| ----------------------- | ------------------------------ |
-| Tracing (observations)  | Prompt management              |
-| Scores                  | Evaluators running in Langfuse |
-| Datasets                | Dashboards and the metrics API |
-| Experiment runs         | Access control                 |
-| OpenTelemetry ingestion | Media, annotation queues       |
+Included:
+
+- Tracing (observations)
+- Scores
+- Datasets
+- Experiment runs
+- OpenTelemetry ingestion
+
+Not included:
+
+- Prompt management
+- Evaluators running in Langfuse
+- Dashboards and the metrics API
+- Access control
+- Media and annotation queues
 
 ## Limitations [#limitations]
 
@@ -71,7 +79,6 @@ langfuse-lite is a local emulator for development, not a way to run Langfuse.
 - It is not security hardened like Langfuse Cloud or a self-hosted Langfuse.
 - There is no API compatibility guarantee. It may differ from Langfuse Cloud or lag behind it.
 - It is not built for load.
-- It sends anonymous usage telemetry (counts only, never traces, prompts, or outputs). Turn it off with `TELEMETRY_ENABLED=false` or `DO_NOT_TRACK=1`.
 
 ## Move to Langfuse Cloud or self-hosting [#move-to-langfuse]
 
@@ -80,3 +87,7 @@ The instrumentation code stays the same. Create a project and API keys in [Langf
 ```bash
 langfuse-lite push --to <url> --public-key <pk> --secret-key <sk>
 ```
+
+## Telemetry [#telemetry]
+
+langfuse-lite sends anonymous usage telemetry: counts only, never traces, prompts, or outputs. Turn it off with `TELEMETRY_ENABLED=false` or `DO_NOT_TRACK=1`.
