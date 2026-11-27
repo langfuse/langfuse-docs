@@ -41,7 +41,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-op") as curr
 
 </Tab>
 <Tab title="JS/TS SDK">
-Use [`createTraceId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.createTraceId.html) to generate a deterministic trace ID from a seed.
+Use [`createTraceId`](https://js.reference.langfuse.com/functions/_langfuse_tracing.createTraceId.html) to generate a deterministic trace ID from a seed.
 
 ```ts /createTraceId/ /getActiveTraceId/
 import { createTraceId, startObservation } from "@langfuse/tracing";
@@ -50,7 +50,7 @@ const externalId = "support-ticket-54321";
 const langfuseTraceId = await createTraceId(externalId);
 ```
 
-Use [`getActiveTraceId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.getActiveTraceId.html) to get the active trace ID and [`getActiveSpanId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.getActiveSpanId.html) to get the current observation ID.
+Use [`getActiveTraceId`](https://js.reference.langfuse.com/functions/_langfuse_tracing.getActiveTraceId.html) to get the active trace ID and [`getActiveSpanId`](https://js.reference.langfuse.com/functions/_langfuse_tracing.getActiveSpanId.html) to get the current observation ID.
 
 ```ts /getActiveTraceId/
 import { startObservation, getActiveTraceId } from "@langfuse/tracing";

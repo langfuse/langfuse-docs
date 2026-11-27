@@ -56,7 +56,7 @@ with langfuse.start_as_current_observation(
 
 </Tab>
 <Tab title="JS/TS SDK">
-[`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html) accepts a callback, makes the new span active for the callback scope, and ends it automatically, even across async boundaries.
+[`startActiveObservation`](https://js.reference.langfuse.com/functions/_langfuse_tracing.startActiveObservation.html) accepts a callback, makes the new span active for the callback scope, and ends it automatically, even across async boundaries.
 
 Observations can have different [types](/docs/observability/features/observation-types) by setting the `asType` parameter.
 
@@ -109,7 +109,7 @@ Capturing large inputs/outputs may add overhead. Disable IO capture per decorato
 </Tab>
 <Tab title="JS/TS SDK">
 
-Use [`observe()`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.observe.html) to wrap a function and automatically capture inputs, outputs, timings, and errors.
+Use [`observe()`](https://js.reference.langfuse.com/functions/_langfuse_tracing.observe.html) to wrap a function and automatically capture inputs, outputs, timings, and errors.
 
 Observations can have different [types](/docs/observability/features/observation-types) by setting the `asType` parameter.
 
@@ -226,7 +226,7 @@ with langfuse.start_as_current_observation(as_type="span", name="main-operation"
 </Tab>
 <Tab title="JS/TS SDK">
 
-[`startObservation`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#startobservation) gives you full control over creating observations.
+[`startObservation`](https://js.reference.langfuse.com/classes/_langfuse_tracing.LangfuseSpan.html#startobservation) gives you full control over creating observations.
 
 You can pass the `asType` parameter to specify the [type of observation](/docs/observability/features/observation-types) to create.
 
@@ -287,7 +287,7 @@ span.update({ output: "Successfully answered user request." }).end();
 ```
 
 <Callout type="warning" title="Manual Ending Required">
-  If you use [`startObservation()`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startObservation.html), you are responsible for calling [`.end()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#end) on
+  If you use [`startObservation()`](https://js.reference.langfuse.com/functions/_langfuse_tracing.startObservation.html), you are responsible for calling [`.end()`](https://js.reference.langfuse.com/classes/_langfuse_tracing.LangfuseSpan.html#end) on
   the returned observation object. Failure to do so will result in incomplete or
   missing observations in Langfuse.
 </Callout>
@@ -373,7 +373,7 @@ parent.end()
 
 </Tab>
 <Tab title="JS/TS SDK">
-Nesting happens automatically via OpenTelemetry context propagation. When you create a new observation with [`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html), it becomes a child of whatever was active at the time.
+Nesting happens automatically via OpenTelemetry context propagation. When you create a new observation with [`startActiveObservation`](https://js.reference.langfuse.com/functions/_langfuse_tracing.startActiveObservation.html), it becomes a child of whatever was active at the time.
 
 ```ts
 import { startActiveObservation } from "@langfuse/tracing";
@@ -433,7 +433,7 @@ with langfuse.start_as_current_observation(as_type="span", name="data-processing
 
 </Tab>
 <Tab title="JS/TS SDK">
-Update the active observation with [`observation.update()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_tracing.LangfuseSpan.html#update).
+Update the active observation with [`observation.update()`](https://js.reference.langfuse.com/classes/_langfuse_tracing.LangfuseSpan.html#update).
 
 ```ts /update/
 import { startActiveObservation } from "@langfuse/tracing";
@@ -513,7 +513,7 @@ def call_llm():
 </Tab>
 <Tab title="JS/TS SDK">
 
-Use [`propagateAttributes()`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.propagateAttributes.html) to add attributes to observations.
+Use [`propagateAttributes()`](https://js.reference.langfuse.com/functions/_langfuse_tracing.propagateAttributes.html) to add attributes to observations.
 
 ```ts /propagateAttributes/
 import { startActiveObservation, propagateAttributes, startObservation } from "@langfuse/tracing";
@@ -643,7 +643,7 @@ def process_user_query(user_question: str):
 
 </Tab>
 <Tab title="JS/TS SDK">
-Use [`propagateAttributes`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.propagateAttributes.html) to set correlating trace attributes, and update the root observation to set the trace input/output.
+Use [`propagateAttributes`](https://js.reference.langfuse.com/functions/_langfuse_tracing.propagateAttributes.html) to set correlating trace attributes, and update the root observation to set the trace input/output.
 
 ```ts /propagateAttributes/ /rootSpan.update/
 import { propagateAttributes, startObservation } from "@langfuse/tracing";
@@ -720,7 +720,7 @@ with langfuse.start_as_current_observation(as_type="span", name="my-op") as curr
 
 </Tab>
 <Tab title="JS/TS SDK">
-Use [`createTraceId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.createTraceId.html) to generate a deterministic trace ID from a seed.
+Use [`createTraceId`](https://js.reference.langfuse.com/functions/_langfuse_tracing.createTraceId.html) to generate a deterministic trace ID from a seed.
 
 ```ts /createTraceId/ /getActiveTraceId/
 import { createTraceId, startObservation } from "@langfuse/tracing";
@@ -742,7 +742,7 @@ const rootSpan = startObservation(
 );
 ```
 
-Use [`getActiveTraceId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.getActiveTraceId.html) to get the active trace ID and [`getActiveSpanId`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.getActiveSpanId.html) to get the current observation ID.
+Use [`getActiveTraceId`](https://js.reference.langfuse.com/functions/_langfuse_tracing.getActiveTraceId.html) to get the active trace ID and [`getActiveSpanId`](https://js.reference.langfuse.com/functions/_langfuse_tracing.getActiveSpanId.html) to get the current observation ID.
 
 ```ts /getActiveTraceId/
 import { startObservation, getActiveTraceId } from "@langfuse/tracing";
@@ -859,7 +859,7 @@ langfuse.shutdown()
 <Tabs items={["Generic Serverless function", "Vercel Cloud Functions"]}>
 <Tab>
 {/* Generic serverless */}
-Export the processor from your OTEL SDK setup file in order to call [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) later.
+Export the processor from your OTEL SDK setup file in order to call [`forceFlush()`](https://js.reference.langfuse.com/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) later.
 
 ```ts filename="instrumentation.ts" /langfuseSpanProcessor/ /forceFlush/ /exportMode: "immediate"/
 import { NodeSDK } from "@opentelemetry/sdk-node";
@@ -877,7 +877,7 @@ const sdk = new NodeSDK({
 sdk.start();
 ```
 
-In your serverless function handler, call [`forceFlush()`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) on the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) before the function exits.
+In your serverless function handler, call [`forceFlush()`](https://js.reference.langfuse.com/classes/_langfuse_otel.LangfuseSpanProcessor.html#forceflush) on the [`LangfuseSpanProcessor`](https://js.reference.langfuse.com/classes/_langfuse_otel.LangfuseSpanProcessor.html) before the function exits.
 
 ```ts filename="handler.ts" /forceFlush/
 import { langfuseSpanProcessor } from "./instrumentation";

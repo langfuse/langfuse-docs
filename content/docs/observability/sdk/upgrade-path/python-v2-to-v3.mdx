@@ -421,11 +421,11 @@ The Langfuse base URL environment variable is now `LANGFUSE_BASE_URL` and no lon
 
 The v4 SDK tracing is a major rewrite based on OpenTelemetry and introduces several breaking changes.
 
-1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the [`LangfuseSpanProcessor`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_otel.LangfuseSpanProcessor.html) with an OpenTelemetry `NodeSDK`.
-2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by [`startObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startObservation.html), [`startActiveObservation`](https://langfuse-js-git-main-langfuse.vercel.app/functions/_langfuse_tracing.startActiveObservation.html), etc., from the `@langfuse/tracing` package.
+1.  **OTEL-based Architecture**: The SDK is now built on top of OpenTelemetry. An OpenTelemetry Setup is required now and done by registering the [`LangfuseSpanProcessor`](https://js.reference.langfuse.com/classes/_langfuse_otel.LangfuseSpanProcessor.html) with an OpenTelemetry `NodeSDK`.
+2.  **New Tracing Functions**: The `langfuse.trace()`, `langfuse.span()`, and `langfuse.generation()` methods have been replaced by [`startObservation`](https://js.reference.langfuse.com/functions/_langfuse_tracing.startObservation.html), [`startActiveObservation`](https://js.reference.langfuse.com/functions/_langfuse_tracing.startActiveObservation.html), etc., from the `@langfuse/tracing` package.
 3.  **Separation of Concerns**:
     - The **`@langfuse/tracing`** and **`@langfuse/otel`** packages are for tracing.
-    - The **`@langfuse/client`** package and the [`LangfuseClient`](https://langfuse-js-git-main-langfuse.vercel.app/classes/_langfuse_client.LangfuseClient.html) class are now only for non-tracing features like scoring, prompt management, and datasets.
+    - The **`@langfuse/client`** package and the [`LangfuseClient`](https://js.reference.langfuse.com/classes/_langfuse_client.LangfuseClient.html) class are now only for non-tracing features like scoring, prompt management, and datasets.
 
 See the [SDK v4 docs](/docs/observability/sdk/overview) for details on each.
 
