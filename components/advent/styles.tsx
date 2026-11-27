@@ -445,6 +445,30 @@ export function AdventStyles() {
       .adv-packet-late { animation-delay: 1.1s; }
       @keyframes adv-packet { from { left: 0; opacity: 1; } 90% { opacity: 1; } to { left: calc(100% - 10px); opacity: 0; } }
 
+      /* Reindeer team crossing the page */
+      .adv-reindeer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 4;
+        width: 210px;
+        aspect-ratio: 210 / 66;
+        transform-origin: center;
+        will-change: transform;
+        filter: drop-shadow(0 6px 8px rgb(24 34 26 / .18));
+      }
+      .adv-reindeer[data-state="idle"] { display: none; }
+      .adv-reindeer-team { display: block; width: 100%; height: 100%; }
+      .adv-reindeer[data-dir="-1"] .adv-reindeer-team { transform: scaleX(-1); }
+      .adv-reindeer-legs-front, .adv-reindeer-legs-back { transform-box: fill-box; }
+      .adv-reindeer-legs-front { transform-origin: 0 0; }
+      .adv-reindeer-legs-back { transform-origin: 100% 0; }
+      .adv-reindeer[data-state="flying"] .adv-reindeer-legs-front { animation: adv-gallop .45s ease-in-out infinite alternate; }
+      .adv-reindeer[data-state="flying"] .adv-reindeer-legs-back { animation: adv-gallop .45s ease-in-out infinite alternate-reverse; }
+      .adv-reindeer[data-state="falling"] .adv-reindeer-legs-front { transform: rotate(-35deg); }
+      .adv-reindeer[data-state="falling"] .adv-reindeer-legs-back { transform: rotate(35deg); }
+      @keyframes adv-gallop { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } }
+
       /* Gateway flow (day 1) */
       .adv-flow-pulse {
         fill: none;

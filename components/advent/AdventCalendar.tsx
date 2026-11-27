@@ -45,6 +45,7 @@ import {
   WinterCanvas,
   type WinterCanvasHandle,
 } from "./WinterCanvas";
+import { ReindeerFlight, type ReindeerHandle } from "./Reindeer";
 import {
   SNOWMAN_HAND,
   SNOWMAN_MAX_BALLS,
@@ -210,6 +211,10 @@ function useJingles() {
     (day: number, pan: number) => playerRef.current?.hover(day, pan),
     [],
   );
+  const tumble = useCallback(
+    (pan: number) => playerRef.current?.tumble(pan),
+    [],
+  );
 
   const getFrame = useCallback(
     (): MusicFrame =>
@@ -240,6 +245,7 @@ function useJingles() {
     shatter,
     setSlop,
     hover,
+    tumble,
     volume,
     changeVolume,
     fold,
@@ -559,6 +565,7 @@ export function AdventCalendar() {
   const [wiggleDay, setWiggleDay] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const canvasRef = useRef<WinterCanvasHandle>(null);
+  const reindeerRef = useRef<ReindeerHandle>(null);
   const foldRef = useRef<PageFoldHandle>(null);
   const openingRef = useRef(false);
   const openingTaskRef = useRef<Promise<boolean> | null>(null);
@@ -609,12 +616,18 @@ export function AdventCalendar() {
     (x: number, y: number) => {
       if (experience !== "ready" || dialogOpenRef.current || openingRef.current)
         return;
+      if (reindeerRef.current?.hit(x, y)) {
+        canvasRef.current?.burst(x, y);
+        music.tumble((x / innerWidth) * 2 - 1);
+        setToast("Reindeer down! Santa will hear about this.");
+        return;
+      }
       const power = slopRef.current;
       impulse(x, y, power, music.getFrame().mix);
       if (power > 0.5) shatterRef.current?.hit(x, y, (power - 0.5) * 2);
       music.shatter((x / innerWidth) * 2 - 1, power);
     },
-    [experience, impulse, music.shatter, music.getFrame],
+    [experience, impulse, music.shatter, music.getFrame, music.tumble],
   );
   const hoverDoor = useCallback(
     (day: number, x: number) => {
@@ -1055,6 +1068,11 @@ export function AdventCalendar() {
           className="adv-snowman-figure"
         />
       </div>
+
+      <ReindeerFlight
+        ref={reindeerRef}
+        active={experience === "ready" && !reducedMotion}
+      />
 
       <section className="adv-calendar" aria-label="Advent calendar">
         <p className="adv-calendar-status" aria-live="polite">

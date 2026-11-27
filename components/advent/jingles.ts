@@ -1144,6 +1144,36 @@ export class JinglePlayer {
       );
   }
 
+  /** A reindeer team hit by a snowball: bells, a thud, then a falling whistle. */
+  tumble(pan: number) {
+    const ctx = this.ctx,
+      graph = this.graph;
+    if (!ctx || !graph || ctx.state !== "running") return;
+    const time = ctx.currentTime;
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = Math.max(-1, Math.min(1, pan));
+    panner.connect(graph.effects);
+    this.lowTone(ctx, panner, 110, time, 0.28, 0.4);
+    for (let i = 0; i < 4; i++) this.sleigh(ctx, panner, time + i * 0.06);
+    const start = time + 0.12;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(1400, start);
+    osc.frequency.exponentialRampToValueAtTime(220, start + 1.1);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.08, start + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 1.15);
+    osc.connect(gain).connect(panner);
+    osc.start(start);
+    osc.stop(start + 1.2);
+    osc.onended = () => {
+      osc.disconnect();
+      gain.disconnect();
+    };
+    setTimeout(() => panner.disconnect(), 1700);
+  }
+
   hover(day: number, pan: number) {
     const ctx = this.ctx,
       graph = this.graph;
