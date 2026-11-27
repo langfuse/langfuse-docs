@@ -822,24 +822,27 @@ function draw(s: Scene, sketch: FeatureSketchData): View {
   }
 }
 
-// Providers per row under the gateway button.
-const PROVIDER_ROWS = [3, 2, 2, 2];
+/** Three providers on the first row under the gateway button, two on each row after. */
+function providerRows(providers: string[]) {
+  const rows = [providers.slice(0, 3)];
+  for (let i = 3; i < providers.length; i += 2) {
+    rows.push(providers.slice(i, i + 2));
+  }
+  return rows;
+}
 
 /** Gateway button with the providers hanging off its trunk, wrapped into rows. */
 function drawProviders(s: Scene, hub: string, providers: string[]): View {
-  s.line(
-    `M${TX} ${BLOCK_H}V${FIRST_ROW + (PROVIDER_ROWS.length - 1) * PITCH + 18}`,
-  );
-  let next = 0;
-  PROVIDER_ROWS.forEach((count, i) => {
+  const rows = providerRows(providers);
+  s.line(`M${TX} ${BLOCK_H}V${FIRST_ROW + (rows.length - 1) * PITCH + 18}`);
+  rows.forEach((names, i) => {
     const y = FIRST_ROW + i * PITCH;
     let x = IND;
     s.branch(TX, y + 18, x);
-    providers.slice(next, next + count).forEach((name, j) => {
+    names.forEach((name, j) => {
       if (j) s.line(`M${x - 18} ${y + 18}H${x}`);
       x += s.row(x, y, [{ t: name, fill: C.mid }]) + 18;
     });
-    next += count;
   });
   s.block(0, 0, [{ t: hub, fill: C.ink }], { w: 180, center: true });
   return { px: 280, rx: 440, ry: 300 };
@@ -847,11 +850,11 @@ function drawProviders(s: Scene, hub: string, providers: string[]): View {
 
 const DEFAULT_PX = 232;
 
-/** The view is centred on the content at SCALE, and shrinks only when the card is narrower than the drawing. */
+/** The view is centred on the content at SCALE, and shrinks only when the drawing would not fit its card. */
 function Drawing({ scene: s, view }: { scene: Scene; view: View }) {
   const id = s.id;
-  const H = (view.px || DEFAULT_PX) / SCALE;
   const { x0, y0, x1, y1 } = s.box;
+  const H = Math.max((view.px || DEFAULT_PX) / SCALE, y1 - y0);
   const cx = (x0 + x1) / 2;
   const cy = (y0 + y1) / 2;
   const W = x1 - x0 + 40;
