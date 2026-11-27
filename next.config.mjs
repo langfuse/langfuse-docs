@@ -62,6 +62,10 @@ const nextConfig = {
   }),
   experimental: {
     scrollRestoration: true,
+    // Measured on an 8-core build: a warm cache compiles no faster than a cold
+    // build without it, but adds ~1 GB to the Vercel build cache that must be
+    // restored, compacted, and re-uploaded on every deployment.
+    turbopackFileSystemCacheForBuild: false,
     // Reduce peak memory during production build (helps avoid OOM on Vercel)
     webpackMemoryOptimizations: true,
     serverSourceMaps: false,
