@@ -12,7 +12,8 @@ flex flex-direction flex-wrap flex-grow flex-shrink flex-basis align-items align
 order gap row-gap column-gap grid-template-columns grid-template-rows grid-column grid-row grid-auto-flow
 background-color background-image background-size background-position background-repeat background-clip
 border-top border-right border-bottom border-left border-radius box-shadow outline opacity visibility
-color font-family font-size font-weight font-style font-variant font-feature-settings line-height letter-spacing
+color font-family font-size font-weight font-style font-stretch font-variant font-feature-settings
+font-variation-settings font-kerning font-optical-sizing font-synthesis line-height letter-spacing word-spacing
 text-align text-decoration text-transform text-shadow white-space word-break overflow-wrap text-overflow
 -webkit-line-clamp -webkit-box-orient vertical-align list-style object-fit object-position
 transform transform-origin transform-style perspective backface-visibility rotate scale translate filter

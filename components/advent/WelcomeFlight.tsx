@@ -27,8 +27,12 @@ export function WelcomeFlight({
   const shaderRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const skipRef = useRef<() => void>(() => {});
+  const reducedRef = useRef(reducedMotion);
+  reducedRef.current = reducedMotion;
   useEffect(() => {
     if (!active) return;
+    // Choose a treatment once per flight; changing the preference must not restart it.
+    const reducedMotion = reducedRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) {
@@ -248,7 +252,7 @@ export function WelcomeFlight({
       document.removeEventListener("keydown", keydown);
       if (!finished && typeof stopSound === "function") stopSound();
     };
-  }, [active, onComplete, onReveal, onSound, reducedMotion]);
+  }, [active, onComplete, onReveal, onSound]);
   return active
     ? createPortal(
         <div className="adv-welcome-flight" data-fold-exclude>

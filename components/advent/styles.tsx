@@ -975,8 +975,10 @@ export function AdventStyles() {
       .adv-start-action button { min-width: 160px; min-height: 48px; }
       .adv-start-action button > span { font-size: 16px; gap: 10px; }
       .adv-header-controls { display: none; }
-      .adv-page:not([data-experience="intro"]) .adv-experience-header { padding: 8px 20px; gap: 7px; }
-      .adv-page:not([data-experience="intro"]) .adv-heading h1 { font-size: 32px; letter-spacing: -.04em; }
+      .adv-page:not([data-experience="intro"]) .adv-experience-header { padding: 8px 20px; gap: 5px; }
+      .adv-page:not([data-experience="intro"]) :is(.adv-heading,.adv-header-controls) { flex-shrink: 0; }
+      /* Captures retain pixel widths: font rounding must not wrap the compact title into the switcher. */
+      .adv-page:not([data-experience="intro"]) .adv-heading h1 { font-size: 32px; letter-spacing: -.04em; white-space: nowrap; }
       .adv-page:not([data-experience="intro"]) :is(.adv-intro-copy,.adv-start-action,.adv-knot-stage) { display: none; }
       .adv-page:not([data-experience="intro"]) .adv-header-controls { display: block; }
       .adv-scene-control { text-align: center; min-width: 0; width: min(420px,80vw); }
