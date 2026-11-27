@@ -59,9 +59,9 @@ function IconTile({
   );
 }
 
-function ClientsPanel({ className }: { className?: string }) {
+function ClientsPanel() {
   return (
-    <CornerBox className={cn("flex flex-col gap-2 p-4", className)}>
+    <CornerBox className="flex flex-col gap-2 p-4">
       <MonoLabel className="lowercase">{CLIENTS_CAPTION}</MonoLabel>
       <ul className="flex flex-wrap gap-1.5">
         {clients.map((client) => (
@@ -77,12 +77,12 @@ function ClientsPanel({ className }: { className?: string }) {
   );
 }
 
-function ProvidersPanel({ className }: { className?: string }) {
+function ProvidersPanel() {
   return (
-    <CornerBox className={cn("flex flex-col gap-2 p-4", className)}>
+    <CornerBox className="flex flex-col gap-2 p-4">
       <MonoLabel className="lowercase">{PROVIDERS_CAPTION}</MonoLabel>
-      {/* One provider per row from md, two columns below it. */}
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 md:grid-cols-1">
+      {/* One provider per row in the wide layout, two columns when stacked. */}
+      <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 @3xl/flow:grid-cols-1">
         {providers.map((provider) => (
           <li key={provider.name} className="flex items-center gap-2">
             <IconTile provider={provider} decorative />
@@ -91,11 +91,11 @@ function ProvidersPanel({ className }: { className?: string }) {
             </span>
           </li>
         ))}
-        <li className="col-span-2 flex items-center gap-1.5 md:col-span-1">
+        <li className="col-span-2 flex items-center gap-1.5 @3xl/flow:col-span-1">
           {moreProviders.map((provider) => (
             <IconTile key={provider.name} provider={provider} />
           ))}
-          <MonoLabel className="ml-0.5">and more</MonoLabel>
+          <MonoLabel className="ml-0.5 whitespace-nowrap">and more</MonoLabel>
         </li>
       </ul>
     </CornerBox>
@@ -156,34 +156,34 @@ function CardArrow() {
   );
 }
 
-function PanelArrow({ className }: { className?: string }) {
+function PanelArrow() {
   return (
-    <div className={cn("flex items-center", className)} aria-hidden="true">
+    <div className="flex items-center" aria-hidden="true">
       <HArrow />
     </div>
   );
 }
 
-// Centers a side panel on the arrow line; -mb-13 is the label row's height.
-const SIDE_PANEL = "row-span-2 row-start-1 -mb-13 self-center";
+function LangfusePanel() {
+  return (
+    <CornerBox className="flex flex-col p-4">
+      <LangfuseLabel className="pb-3" />
+      <GatewayCard />
+      <CardArrow />
+      <TracingCard />
+    </CornerBox>
+  );
+}
 
-// The Langfuse panel is a subgrid over all three rows, so the arrows sit on
-// the gateway card's center line.
+// The three panels and both arrows center on one line.
 function WideFlow() {
   return (
-    <div className="hidden grid-cols-[minmax(172px,0.7fr)_44px_minmax(0,1fr)_44px_minmax(172px,0.7fr)] md:grid">
-      <ClientsPanel className={cn("col-start-1", SIDE_PANEL)} />
-      <PanelArrow className="col-start-2 row-start-2" />
-      <CornerBox className="col-start-3 row-span-3 row-start-1 grid grid-rows-subgrid p-4">
-        <LangfuseLabel className="pb-3" />
-        <GatewayCard />
-        <div className="flex flex-col">
-          <CardArrow />
-          <TracingCard />
-        </div>
-      </CornerBox>
-      <PanelArrow className="col-start-4 row-start-2" />
-      <ProvidersPanel className={cn("col-start-5", SIDE_PANEL)} />
+    <div className="hidden grid-cols-[minmax(172px,0.7fr)_44px_minmax(0,1fr)_44px_minmax(172px,0.7fr)] items-center @3xl/flow:grid">
+      <ClientsPanel />
+      <PanelArrow />
+      <LangfusePanel />
+      <PanelArrow />
+      <ProvidersPanel />
     </div>
   );
 }
@@ -198,15 +198,10 @@ function DownArrow() {
 
 function CompactFlow() {
   return (
-    <div className="flex flex-col md:hidden">
+    <div className="mx-auto flex max-w-[420px] flex-col @3xl/flow:hidden">
       <ClientsPanel />
       <DownArrow />
-      <CornerBox className="flex flex-col p-4">
-        <LangfuseLabel className="pb-3" />
-        <GatewayCard />
-        <CardArrow />
-        <TracingCard />
-      </CornerBox>
+      <LangfusePanel />
       <DownArrow />
       <ProvidersPanel />
     </div>
@@ -215,7 +210,7 @@ function CompactFlow() {
 
 export function GatewayFlowDiagram() {
   return (
-    <figure className="not-prose m-0 text-left">
+    <figure className="not-prose @container/flow m-0 text-left">
       <WideFlow />
       <CompactFlow />
       <figcaption className="sr-only">
