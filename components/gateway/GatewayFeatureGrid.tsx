@@ -59,7 +59,7 @@ export function GatewayFeatureGrid() {
           <Card key={card.title} card={card} />
         ))}
       </div>
-      <div className="grid gap-2 @xl:grid-cols-2 @6xl:grid-cols-4">
+      <div className="grid gap-2 @3xl:grid-cols-3">
         {featureCardsBottom.map((card) => (
           <Card key={card.title} card={card} />
         ))}

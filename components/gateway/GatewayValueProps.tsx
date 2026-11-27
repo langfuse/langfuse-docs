@@ -513,21 +513,16 @@ export function GatewayValueProps() {
               onClick={() => select(i)}
               className="relative flex cursor-pointer flex-col gap-2 border-b border-line-structure py-5 pr-4 text-left"
             >
-              <span className="flex items-baseline gap-3.5">
-                <span className="font-mono text-[11px] text-text-tertiary">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span
-                  className={cn(
-                    "font-analog text-[22px] leading-[1.2] transition-colors",
-                    isActive ? "text-text-primary" : "text-text-tertiary",
-                  )}
-                >
-                  {prop.title}
-                </span>
+              <span
+                className={cn(
+                  "font-analog text-[22px] leading-[1.2] transition-colors",
+                  isActive ? "text-text-primary" : "text-text-tertiary",
+                )}
+              >
+                {prop.title}
               </span>
               {isActive && (
-                <span className="ml-[30px] flex max-w-[440px] flex-col">
+                <span className="flex max-w-[440px] flex-col">
                   <span className="text-[15px] leading-[1.5] text-text-secondary">
                     {prop.body}
                   </span>

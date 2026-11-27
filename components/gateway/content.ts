@@ -258,6 +258,20 @@ export const providerCard = {
 
 export const featureCardsTop: FeatureCard[] = [
   {
+    title: "Native Langfuse integration",
+    description:
+      "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
+    href: "/docs/gateway/features/tracing",
+    sketch: {
+      kind: "tracing",
+      spans: [
+        { label: "opus", cost: "$4.2k" },
+        { label: "sonnet", cost: "$1.1k" },
+        { label: "gpt-5", cost: "$0.8k" },
+      ],
+    },
+  },
+  {
     title: "Gateway keys",
     description:
       "Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.",
@@ -286,6 +300,9 @@ export const featureCardsTop: FeatureCard[] = [
       warning: "warning",
     },
   },
+];
+
+export const featureCardsBottom: FeatureCard[] = [
   {
     title: "Spend dashboard",
     description:
@@ -298,9 +315,6 @@ export const featureCardsTop: FeatureCard[] = [
       tag: ["30d cost", "$18,204"],
     },
   },
-];
-
-export const featureCardsBottom: FeatureCard[] = [
   {
     title: "Model controls",
     description:
@@ -316,44 +330,69 @@ export const featureCardsBottom: FeatureCard[] = [
     },
   },
   {
-    title: "Coding agents",
+    title: "Guardrails",
     description:
-      "Point Claude Code, Codex and other coding agents at the gateway. Their sessions are grouped automatically.",
-    href: "/docs/gateway/get-started/first-request",
+      "Block, redact or log PII, secrets, prompt injection and custom patterns in requests and responses.",
+    href: "/docs/gateway/features/guardrails",
     sketch: {
-      kind: "agents",
-      agents: ["claude-code", "codex", "opencode"],
-      result: "traced",
-    },
-  },
-  {
-    title: "Tracing and insights",
-    description:
-      "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
-    href: "/docs/gateway/features/tracing",
-    sketch: {
-      kind: "tracing",
-      spans: [
-        { label: "opus", cost: "$4.2k" },
-        { label: "sonnet", cost: "$1.1k" },
-        { label: "gpt-5", cost: "$0.8k" },
-      ],
-    },
-  },
-  {
-    title: "Open source",
-    description:
-      "Self-host the gateway as a single small Docker image, or use it on Langfuse Cloud.",
-    href: "/self-hosting/configuration/ai-gateway",
-    sketch: {
-      kind: "hosting",
-      options: [
-        { label: "Cloud", detail: "managed" },
-        { label: "Self-hosted", detail: "Docker" },
+      kind: "keys",
+      group: "organization",
+      heading: "Guardrails",
+      rows: [
+        { label: "pii", value: "redact", tone: "ok" },
+        { label: "secrets", value: "block", tone: "error" },
+        { label: "prompt-injection", value: "log" },
       ],
     },
   },
 ];
+
+// Open source section: self-hosting in three steps, each linking to its docs.
+export const openSource = {
+  sketch: {
+    kind: "hosting",
+    options: [
+      { label: "Cloud", detail: "managed" },
+      { label: "Self-hosted", detail: "Docker" },
+    ],
+  } satisfies FeatureSketch,
+  steps: [
+    {
+      title: "Deploy the gateway",
+      body: "It ships with the Langfuse Docker Compose setup and Helm chart. Add the gateway keys, or enable it in your Helm values.",
+      links: [
+        {
+          label: "Docker Compose",
+          href: "/self-hosting/deployment/docker-compose#ai-gateway",
+        },
+        {
+          label: "Helm",
+          href: "/self-hosting/deployment/kubernetes-helm#ai-gateway",
+        },
+      ],
+    },
+    {
+      title: "Give it a public URL",
+      body: "Serve the gateway on its own host name over HTTPS, and set that address as its public URL.",
+      links: [
+        {
+          label: "Public URL and TLS",
+          href: "/self-hosting/configuration/ai-gateway#public-url",
+        },
+      ],
+    },
+    {
+      title: "Connect providers and hand out keys",
+      body: "As an organization admin, add your provider accounts and create gateway keys in Langfuse.",
+      links: [
+        {
+          label: "Admin setup",
+          href: "/docs/gateway/get-started/admin-setup",
+        },
+      ],
+    },
+  ],
+};
 
 export const steps = {
   connect: {
