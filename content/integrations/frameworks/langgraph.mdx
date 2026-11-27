@@ -21,14 +21,14 @@ Langfuse traces a LangGraph agent without LangSmith: one callback handler in the
 
 </Callout>
 
-Add your [Langfuse API keys](/docs/observability/sdk/overview#client-setup) and your OpenAI key to the environment. Any LangChain chat model works; OpenAI is the example.
+Add your [Langfuse API keys](/docs/observability/sdk/overview#client-setup) and your OpenAI key to your shell environment. Any LangChain chat model works; OpenAI is the example.
 
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+```bash
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-OPENAI_API_KEY="sk-proj-..."
+export OPENAI_API_KEY="sk-proj-..."
 ```
 
 ## Trace LangGraph in Python [#python]
@@ -82,7 +82,7 @@ The code ran with `@langfuse/langchain` 6.1.1, `langchain` 1.6.8, `@langchain/la
 npm install langchain @langchain/openai @langchain/langgraph @langfuse/langchain @langfuse/otel @langfuse/tracing zod "@opentelemetry/sdk-node@>=0.202.0 <0.300.0"
 ```
 
-Start OpenTelemetry with the Langfuse span processor once, and shut it down before a short script exits:
+Start OpenTelemetry with the Langfuse span processor once, and shut it down before a short script exits. Run the file with `npx tsx agent.ts`.
 
 ```ts filename="agent.ts"
 import { createAgent, tool } from "langchain";
@@ -145,7 +145,7 @@ In Python, `propagate_attributes` sets the trace name, the [user ID](/docs/obser
 The LangGraph Server invokes the graph itself, so add the handler to the compiled graph instead of the call:
 
 ```python
-server_graph = graph_builder.compile().with_config({"callbacks": [langfuse_handler]})
+server_graph = agent.with_config({"callbacks": [langfuse_handler]})
 ```
 
 ## More examples [#examples]

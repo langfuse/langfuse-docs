@@ -75,7 +75,7 @@ export const mastra = new Mastra({
 });
 ```
 
-Run the agent. In a short script, `mastra.shutdown()` flushes the exporter before the process exits. With `mastra dev`, chat with the agent in the playground instead.
+Run the agent with `npx tsx --env-file=.env src/run.ts`. In a short script, `mastra.shutdown()` flushes the exporter before the process exits. With `mastra dev`, which loads `.env` itself, chat with the agent in the playground instead.
 
 ```ts filename="src/run.ts"
 import { mastra } from "./mastra";

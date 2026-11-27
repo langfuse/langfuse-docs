@@ -30,14 +30,14 @@ Install the Agents SDK, the Langfuse SDK and the OpenInference instrumentor, a t
 pip install langfuse openai-agents openinference-instrumentation-openai-agents
 ```
 
-Add your [Langfuse API keys](/docs/observability/sdk/overview#client-setup) and your OpenAI key to the environment:
+Add your [Langfuse API keys](/docs/observability/sdk/overview#client-setup) and your OpenAI key to your shell environment:
 
-```bash filename=".env"
-LANGFUSE_SECRET_KEY="sk-lf-..."
-LANGFUSE_PUBLIC_KEY="pk-lf-..."
-LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+```bash
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-OPENAI_API_KEY="sk-proj-..."
+export OPENAI_API_KEY="sk-proj-..."
 ```
 
 Call the instrumentor before the first run. `auth_check()` stops the script with `UnauthorizedError` if Langfuse rejects the keys or the host.
