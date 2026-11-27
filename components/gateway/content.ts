@@ -281,6 +281,18 @@ export const providerCard = {
     "Vercel AI Gateway",
     "xAI",
   ],
+  // Logo shown before each chip's name.
+  icons: {
+    OpenAI: "/images/integrations/openai_icon.svg",
+    Anthropic: "/images/integrations/anthropic_icon.png",
+    "Amazon Bedrock": "/images/integrations/bedrock_icon.svg",
+    "Google AI Studio": "/images/integrations/google_gemini_icon.svg",
+    "Google Vertex AI": "/images/integrations/vertexai_icon.png",
+    "Microsoft Azure (Foundry)": "/images/integrations/microsoft_icon.svg",
+    OpenRouter: "/images/integrations/openrouter_icon.svg",
+    "Vercel AI Gateway": "/images/integrations/vercel_ai_gateway_icon.svg",
+    xAI: "/images/integrations/xai_icon.svg",
+  } as Record<string, string>,
 };
 
 export const featureCardsTop: FeatureCard[] = [

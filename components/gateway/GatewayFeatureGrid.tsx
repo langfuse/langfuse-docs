@@ -51,6 +51,7 @@ export function GatewayFeatureGrid() {
           <ProviderSketch
             hub={providerCard.hub}
             providers={providerCard.chips}
+            icons={providerCard.icons}
           />
         </div>
       </ChipCard>

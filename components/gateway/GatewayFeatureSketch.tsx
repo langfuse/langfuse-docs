@@ -58,6 +58,7 @@ const TONE: Record<Tone, string> = {
 
 type Seg =
   | { t: string; fill?: string }
+  | { icon: string }
   | { dot: Tone; end?: boolean }
   | { toggle: boolean; hero?: boolean }
   | { sp: number };
@@ -93,6 +94,20 @@ function inner(x: number, yc: number, segs: Seg[], fs = FS) {
         </text>,
       );
       cx += seg.t.length * adv;
+    } else if ("icon" in seg) {
+      // a 22-unit logo on the plane, then a 9-unit gap before the label
+      nodes.push(
+        <image
+          key={i}
+          href={seg.icon}
+          x={cx}
+          y={yc - 11}
+          width={22}
+          height={22}
+          preserveAspectRatio="xMidYMid meet"
+        />,
+      );
+      cx += 31;
     } else if ("dot" in seg) {
       nodes.push(
         <Fragment key={i}>
@@ -832,7 +847,12 @@ function providerRows(providers: string[]) {
 }
 
 /** Gateway button with the providers hanging off its trunk, wrapped into rows. */
-function drawProviders(s: Scene, hub: string, providers: string[]): View {
+function drawProviders(
+  s: Scene,
+  hub: string,
+  providers: string[],
+  icons?: Record<string, string>,
+): View {
   const rows = providerRows(providers);
   s.line(`M${TX} ${BLOCK_H}V${FIRST_ROW + (rows.length - 1) * PITCH + 18}`);
   rows.forEach((names, i) => {
@@ -841,7 +861,12 @@ function drawProviders(s: Scene, hub: string, providers: string[]): View {
     s.branch(TX, y + 18, x);
     names.forEach((name, j) => {
       if (j) s.line(`M${x - 18} ${y + 18}H${x}`);
-      x += s.row(x, y, [{ t: name, fill: C.mid }]) + 18;
+      const logo = icons?.[name];
+      x +=
+        s.row(x, y, [
+          ...(logo ? [{ icon: logo }] : []),
+          { t: name, fill: C.mid },
+        ]) + 18;
     });
   });
   s.block(0, 0, [{ t: hub, fill: C.ink }], { w: 180, center: true });
@@ -967,14 +992,17 @@ export function FeatureSketch({
 export function ProviderSketch({
   hub,
   providers,
+  icons,
   className,
 }: {
   hub: string;
   providers: string[];
+  /** Logo file per provider name; a provider without one shows its name only. */
+  icons?: Record<string, string>;
   className?: string;
 }) {
   const scene = new Scene(useSceneId());
-  const view = drawProviders(scene, hub, providers);
+  const view = drawProviders(scene, hub, providers, icons);
   return (
     <div
       className={cn(styles.wideSketch, regularMono.className, className)}
