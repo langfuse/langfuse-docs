@@ -252,7 +252,7 @@ function CompactFlow() {
 
 export function GatewayFlowDiagram() {
   return (
-    <CornerBox className={cn(styles.flowFrame, "p-5")}>
+    <CornerBox className={cn(styles.flowFrame, "px-5 py-10")}>
       <figure className="not-prose @container/flow m-0 text-left">
         <WideFlow />
         <CompactFlow />
