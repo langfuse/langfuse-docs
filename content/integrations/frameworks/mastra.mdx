@@ -1,191 +1,139 @@
 ---
-title: Observability for Mastra with Langfuse
+title: Mastra agent observability with Langfuse
 sidebarTitle: Mastra
 logo: /images/integrations/mastra_icon.svg
-description: Learn how to integrate Langfuse with Mastra, a TypeScript agent framework, to monitor, debug, and analyze your AI applications.
+description: "Open source observability for Mastra agents: set three variables, add the Langfuse exporter and see each run, model call and tool call. Code tested."
+category: Integrations
 ---
 
-# Observability for Mastra With Langfuse
+# Mastra agent observability with Langfuse
 
-This guide shows you how to integrate **Langfuse** with **Mastra** for observability and tracing. By following these steps, you'll be able to monitor and debug your Mastra agents in the Langfuse dashboard.
+The Langfuse exporter in `@mastra/langfuse` sends each Mastra agent run, model call and tool call to Langfuse, and reads its keys from three environment variables. Mastra registers the exporter through `new Observability({ configs })`, passed to `new Mastra({ observability })`.
 
-> **What is Mastra?** [Mastra](https://mastra.ai) is the TypeScript agent framework designed to provide the essential primitives for building AI applications. It enables developers to create AI agents with memory and tool-calling capabilities, implement deterministic LLM workflows, and leverage RAG for knowledge integration.
+> **What is Mastra?** [Mastra](https://mastra.ai) is an open source TypeScript framework for building agents and workflows, with memory, tools and RAG.
 
-> **What is Langfuse?** [Langfuse](https://langfuse.com) is an open-source AI engineering platform. It offers tracing and monitoring capabilities for LLM applications. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+> **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform for tracing, evaluating and debugging AI agents. Use [Langfuse Cloud](/cloud) or [self-host](/self-hosting) it.
 
-## Integration
+> **How do they work together?** Mastra's observability system records a span for each agent run, model call, tool call and workflow step. The Langfuse exporter, a package maintained by Mastra, sends those spans to Langfuse.
 
-<Steps>
+<Callout type="info">
+  Requires Node.js 22.13 or later. The code on this page ran with `@mastra/core` 1.85.0, `@mastra/observability` 1.24.2 and `@mastra/langfuse` 1.7.1, as of November 2026. `@mastra/langfuse` 1.7 needs `@mastra/core` 1.16 or later.
 
-### Create a Mastra project
+</Callout>
 
-If you don't have a Mastra project yet, you can create one using the Mastra CLI:
+## Send traces to Langfuse [#setup]
 
-```bash
-npx create-mastra
-```
-
-Move into the project directory:
+Install Mastra, its observability package and the Langfuse exporter:
 
 ```bash
-cd your-mastra-project
+npm install @mastra/core @mastra/observability @mastra/langfuse @ai-sdk/openai zod
 ```
 
-See the [full Mastra installation instructions](https://mastra.ai/docs/getting-started/installation)
+Add your [Langfuse API keys](/docs/observability/sdk/overview#client-setup) and your OpenAI key to `.env`:
 
-### Set up Langfuse project
-
-Create a project in [Langfuse](https://cloud.langfuse.com) and get your API keys from the project settings page.
-
-### Add environment variables
-
-Create or update your `.env.development` (or `.env`) file with the following variables:
-
-```bash
-# Your LLM API key
-OPENAI_API_KEY=your-api-key
-
-# Langfuse credentials
-LANGFUSE_SECRET_KEY=sk-lf-...
-LANGFUSE_PUBLIC_KEY=pk-lf-...
-LANGFUSE_BASE_URL=https://cloud.langfuse.com # Optional. Defaults to https://cloud.langfuse.com
+```bash filename=".env"
+LANGFUSE_SECRET_KEY="sk-lf-..."
+LANGFUSE_PUBLIC_KEY="pk-lf-..."
+LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
+# Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
+OPENAI_API_KEY="sk-proj-..."
 ```
 
-### Install the `@mastra/langfuse` package
+Define an agent:
 
-Add the `@mastra/langfuse` package to your project:
-
-```bash
-npm install @mastra/langfuse
-```
-
-### Set up an agent
-
-Create an agent in your project. For example, create a file `agents/chefAgent.ts`:
-
-```typescript
+```ts filename="src/mastra/agents/chef-agent.ts"
 import { Agent } from "@mastra/core/agent";
 import { openai } from "@ai-sdk/openai";
 
 export const chefAgent = new Agent({
   name: "chef-agent",
   instructions:
-    "You are Michel, a practical and experienced home chef " +
-    "You help people cook with whatever ingredients they have available.",
-  model: openai("gpt-4o-mini"),
+    "You are Michel, a practical home chef. Help people cook with the ingredients they have.",
+  model: openai("gpt-4.1-mini"),
 });
 ```
 
-{" "}
+Register the Langfuse exporter in an `Observability` instance. With the three variables set, the exporter takes no arguments.
 
-<Callout type="info">You can use any model provider from `ai-sdk`.</Callout>
-
-### Register agent and configure Langfuse
-
-Create or update your Mastra instance configuration to register the agent and configure Langfuse integration. For example, create a file `mastra.ts`:
-
-```typescript
+```ts filename="src/mastra/index.ts"
 import { Mastra } from "@mastra/core";
+import { Observability } from "@mastra/observability";
 import { LangfuseExporter } from "@mastra/langfuse";
-import { chefAgent } from "./agents/chefAgent";
+import { chefAgent } from "./agents/chef-agent";
 
 export const mastra = new Mastra({
   agents: { chefAgent },
-  observability: {
+  observability: new Observability({
     configs: {
       langfuse: {
         serviceName: "my-service",
-        exporters: [
-          new LangfuseExporter({
-            publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
-            secretKey: process.env.LANGFUSE_SECRET_KEY!,
-            baseUrl: process.env.LANGFUSE_BASE_URL,
-            options: {
-              environment: process.env.NODE_ENV,
-            },
-          }),
-        ],
+        // Reads LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY and LANGFUSE_BASE_URL.
+        exporters: [new LangfuseExporter()],
       },
     },
-  },
+  }),
 });
 ```
 
-### Run mastra dev server
+Run the agent. In a short script, `mastra.shutdown()` flushes the exporter before the process exits. With `mastra dev`, chat with the agent in the playground instead.
 
-Start the Mastra development server:
+```ts filename="src/run.ts"
+import { mastra } from "./mastra";
 
-```bash
-npm run dev
+const agent = mastra.getAgent("chefAgent");
+const result = await agent.generate("What can I cook with chicken and lemon?");
+console.log(result.text);
+
+await mastra.shutdown(); // flushes the exporter before a short script exits
 ```
 
-Head over to the developer playground with the provided URL and start chatting with your agent.
+## Agent runs, model calls and tool calls in one trace [#trace]
 
-### View traces in Langfuse
+Each agent or workflow run becomes one trace, named after the agent or workflow, with a span for each model call and tool call. Langfuse evaluators can filter on the trace name or on metadata such as `agentId`.
 
-Head over to your [Langfuse dashboard](https://cloud.langfuse.com) and you'll see the traces from your agent interactions. You can analyze the prompts, completions, and other details of your AI interactions.
+![Mastra trace in Langfuse](/images/docs/langfuse-mastra-trace.png)
 
-Here's an example of a trace:
+## Sessions and metadata [#sessions]
 
-![Mastra trace in Langfuse UI](/images/docs/langfuse-mastra-trace.png)
+Mastra maps `sessionId` in the span metadata to a Langfuse [session](/docs/observability/features/sessions), with the memory `threadId` as the fallback. Keys under `langfuse` in span metadata become trace metadata.
 
-</Steps>
+## Exporter options [#options]
 
-## Configuration Options
+Explicit options override the environment variables. `publicKey`, `secretKey` and `baseUrl` replace the three variables. See [Mastra's exporter reference](https://mastra.ai/reference/observability/tracing/exporters/langfuse) for all options.
 
-### Realtime vs Batch Mode
-
-The Langfuse exporter supports two modes for sending traces:
-
-- **Realtime (development)**: Flushes after each event for immediate visibility.
+| Option        | Effect                                                     |
+| ------------- | ---------------------------------------------------------- |
+| `realtime`    | `true` flushes after each event; the default sends batches |
+| `environment` | Sets the Langfuse environment, for filtering               |
+| `release`     | Sets the release, such as a git commit                     |
 
 ```ts
 new LangfuseExporter({
-  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
-  secretKey: process.env.LANGFUSE_SECRET_KEY!,
-  realtime: true, // Flush after each event
-})
-```
-
-- **Batch (production, default)**: Buffers and sends in batches for better throughput.
-
-```ts
-new LangfuseExporter({
-  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
-  secretKey: process.env.LANGFUSE_SECRET_KEY!,
-  realtime: false, // Default behavior
-})
-```
-
-### Complete Configuration
-
-```ts
-new LangfuseExporter({
-  // Required credentials
-  publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
-  secretKey: process.env.LANGFUSE_SECRET_KEY!,
-
-  // Optional settings
-  baseUrl: process.env.LANGFUSE_BASE_URL, // Defaults to https://cloud.langfuse.com
   realtime: process.env.NODE_ENV === "development",
-  logLevel: "info", // debug | info | warn | error
-
-  // Langfuse-specific options
-  options: {
-    environment: process.env.NODE_ENV,
-    version: process.env.APP_VERSION,
-    release: process.env.GIT_COMMIT,
-  },
-})
+  environment: process.env.NODE_ENV,
+  release: process.env.GIT_COMMIT,
+});
 ```
 
-## Troubleshooting
+## Link a Langfuse prompt [#prompts]
 
-- **NextJS Integration Issues**: If you encounter issues when using Mastra with Langfuse in NextJS applications, refer to the [Mastra NextJS tracing documentation](https://mastra.ai/en/docs/observability/nextjs-tracing) for NextJS-specific configuration and setup instructions.
-- **No Traces in Langfuse**: Ensure that your credentials are correct and follow this [troubleshooting guide](/faq/all/missing-traces)
+Mastra's `withLangfusePrompt` helper links a prompt from [Langfuse Prompt Management](/docs/prompt-management/overview) to the model calls of an agent, by prompt name and version. See the prompt linking section of [Mastra's Langfuse docs](https://mastra.ai/reference/observability/tracing/exporters/langfuse).
 
-## References
+## Troubleshooting [#troubleshooting]
 
-- **Mastra Langfuse Exporter**: [Docs](https://mastra.ai/en/docs/observability/ai-tracing/exporters/langfuse), [npm](https://www.npmjs.com/package/@mastra/langfuse)
-- [**Mastra Documentation**](https://mastra.ai/docs)
-- [**Langfuse Documentation**](https://langfuse.com/docs)
+- **"Observability configuration error: Expected an Observability instance"**: `observability` was a plain `{ configs: ... }` object. Mastra then disables observability, the agent still answers, and no trace is sent. Wrap the config in `new Observability(...)` as above.
+- **Storage warning**: Mastra falls back to in-memory storage, which is not durable. Configure a storage adapter in production; see the [Mastra docs](https://mastra.ai/docs).
+- **No traces**: check that the keys belong to the region in `LANGFUSE_BASE_URL`, and that a short script calls `mastra.shutdown()`. See [Missing traces](/faq/all/missing-traces).
+
+## FAQ [#faq]
+
+**How do I add observability to a Mastra agent with Langfuse?** Install `@mastra/langfuse`, set the three variables and register `new LangfuseExporter()` in an `Observability` instance.
+
+**Does Mastra send sessions to Langfuse?** Yes. `sessionId` maps to a Langfuse session, with `threadId` as the fallback.
+
+**Does Langfuse show cost for Mastra runs?** The exporter sends the cost the provider reports. For other models, [model prices in Langfuse](/docs/observability/features/token-and-cost-tracking) cover the rest.
+
+## Next steps [#next-steps]
+
+- [Evaluate the agent's runs](/docs/evaluation/overview) with scores, LLM-as-a-judge and datasets.
+- Trace other frameworks: [Vercel AI SDK](/integrations/frameworks/vercel-ai-sdk), [LangGraph](/integrations/frameworks/langgraph).

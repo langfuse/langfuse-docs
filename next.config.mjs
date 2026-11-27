@@ -296,6 +296,17 @@ const nextConfig = {
           { key: "Content-Type", value: "text/markdown; charset=utf-8" },
         ],
       },
+      // Point search indexes that keep a markdown mirror anyway at its page,
+      // so the mirror does not compete with the page in results.
+      {
+        source: "/:path((?!md-src/).+)\\.md",
+        headers: [
+          {
+            key: "Link",
+            value: '<https://langfuse.com/:path>; rel="canonical"',
+          },
+        ],
+      },
     ];
 
     // WebMCP (components/WebMcpDocsTools.tsx) is behind an origin trial in
