@@ -178,7 +178,10 @@ function LangfusePanel() {
 // The three panels and both arrows center on one line.
 function WideFlow() {
   return (
-    <div className="hidden grid-cols-[minmax(172px,0.7fr)_44px_minmax(0,1fr)_44px_minmax(172px,0.7fr)] items-center @3xl/flow:grid">
+    <div
+      aria-hidden="true"
+      className="hidden grid-cols-[minmax(172px,0.7fr)_44px_minmax(0,1fr)_44px_minmax(172px,0.7fr)] items-center @3xl/flow:grid"
+    >
       <ClientsPanel />
       <PanelArrow />
       <LangfusePanel />
@@ -198,7 +201,10 @@ function DownArrow() {
 
 function CompactFlow() {
   return (
-    <div className="mx-auto flex max-w-[420px] flex-col @3xl/flow:hidden">
+    <div
+      aria-hidden="true"
+      className="mx-auto flex max-w-[420px] flex-col @3xl/flow:hidden"
+    >
       <ClientsPanel />
       <DownArrow />
       <LangfusePanel />
