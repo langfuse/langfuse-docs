@@ -982,7 +982,10 @@ function ProviderTourAnimation() {
               data-active={i === active}
             >
               {p.mark ? (
-                <svg viewBox="0 0 14 14" className="size-3.5 shrink-0">
+                <svg
+                  viewBox="0 0 14 14"
+                  className="size-3.5 shrink-0 overflow-visible"
+                >
                   <ProviderMark name={p.mark} x={0} y={0} size={14} />
                 </svg>
               ) : null}

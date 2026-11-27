@@ -292,7 +292,6 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
                     revealed = true;
                     onReveal();
                     logAdvent("transition.reveal", context);
-                    if (!closing) renderer!.canvas.style.pointerEvents = "none";
                   }
                   const dialog =
                     document.querySelector<HTMLElement>(".adv-dialog");
@@ -307,6 +306,7 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
                   );
                   if (dialog) {
                     dialog.dataset.arriving = "";
+                    dialog.inert = !closing && t < 0.84;
                     dialog.dataset.journey = closing
                       ? "closing"
                       : berlin
@@ -336,6 +336,8 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
                     });
                     renderer.draw(t, cardWidth / height, cardHeight / height);
                   }
+                  renderer!.canvas.style.pointerEvents =
+                    !closing && t >= 0.84 ? "none" : "auto";
                   renderer!.canvas.dataset.progress = t.toFixed(2);
                   // Fade procedural material in instead of flashing a replacement page.
                   renderer!.canvas.style.opacity = String(
@@ -375,6 +377,7 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
             renderer?.dispose();
             const dialog = document.querySelector<HTMLElement>(".adv-dialog");
             if (dialog) {
+              dialog.inert = false;
               delete dialog.dataset.arriving;
               delete dialog.dataset.journey;
               dialog.style.removeProperty("--adv-arrival");

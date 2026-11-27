@@ -586,13 +586,21 @@ function StatusLine({
     );
   }
   if (unlocked === ALL_OPEN) {
-    return <span>All 24 doors are open. Merry Christmas!</span>;
+    return (
+      <span>
+        {LAST_ADVENT_DAY === 24
+          ? "All 24 doors are open. Merry Christmas!"
+          : "Merry Christmas! Explore the open doors."}
+      </span>
+    );
   }
   if (!todayOpened) {
     return (
       <span>Door {unlocked} is ready. Find the glowing door and open it!</span>
     );
   }
+  if (unlocked === LAST_ADVENT_DAY && LAST_ADVENT_DAY < 24)
+    return <span>Explore the open doors. More are on their way.</span>;
   return unlocked === 24 ? (
     <span>That was the last door. Merry Christmas!</span>
   ) : (
@@ -621,6 +629,7 @@ export function AdventCalendar() {
   >("intro");
   const experienceRef = useRef(false);
   const [unlocked, setUnlocked] = useState<number | null>(null);
+  const [calendarDay, setCalendarDay] = useState<number | null>(null);
   const [opened, setOpened] = useState<Set<number>>(new Set());
   const [activeDay, setActiveDay] = useState<number | null>(null);
   useEffect(() => {
@@ -785,10 +794,13 @@ export function AdventCalendar() {
     const update = () => {
       const now = new Date();
       const day = getPreviewDay(now) ?? getUnlockedDay(now);
+      setCalendarDay(day);
       // Today is the latest door that exists, so the status line never
       // points at a day whose feature isn't ready yet.
       setUnlocked(
-        day > LAST_ADVENT_DAY && LAST_ADVENT_DAY < 24 ? LAST_ADVENT_DAY : day,
+        day !== ALL_OPEN && day > LAST_ADVENT_DAY && LAST_ADVENT_DAY < 24
+          ? LAST_ADVENT_DAY
+          : day,
       );
     };
     update();
@@ -964,7 +976,7 @@ export function AdventCalendar() {
           setToast(
             unlocked === null
               ? "Loading the calendar…"
-              : day <= unlocked
+              : day <= (calendarDay ?? unlocked)
                 ? `Not yet! Door ${day} opens soon.`
                 : `Not yet! Door ${day} opens on December ${day}.`,
           );
@@ -1013,6 +1025,7 @@ export function AdventCalendar() {
       experience,
       begin,
       unlocked,
+      calendarDay,
       opened,
       throwAt,
       showDoor,
