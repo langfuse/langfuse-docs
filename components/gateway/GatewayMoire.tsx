@@ -6,7 +6,9 @@ import styles from "./GatewayHero.module.css";
 
 const LINE_WIDTH = 0.55;
 const LINE_ALPHA = 0.42;
-const FRAME_MS = 1000 / 30;
+// Time constants of the pointer swell: it covers 90% of the way in about 0.4s.
+const FOLLOW_SECONDS = 0.18;
+const FADE_SECONDS = 0.3;
 const ROW_OVERSCAN = 40;
 const SAMPLE_OVERSCAN = 24;
 
@@ -42,9 +44,8 @@ export function GatewayMoire({
     let ink = "";
     let accent = "";
     let t = 0;
-    let frames = 0;
 
-    // The bump eases towards the pointer target each drawn frame.
+    // The bump eases towards the pointer target.
     const bump = { x: 0, y: 0, on: 0 };
     const target = { x: 0, y: 0, on: 0, seen: false };
 
@@ -132,17 +133,23 @@ export function GatewayMoire({
 
     const startedAt = performance.now();
     let raf = 0;
-    let lastDraw = 0;
+    let lastFrame = 0;
+    let colorsReadAt = 0;
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
-      if (now - lastDraw < FRAME_MS - 2) return;
-      lastDraw = now;
+      // Easing uses elapsed time, so the swell moves the same at any refresh rate.
+      const dt = lastFrame ? Math.min(0.1, (now - lastFrame) / 1000) : 0;
+      lastFrame = now;
       t = (now - startedAt) / 1000;
-      bump.x += (target.x - bump.x) * 0.018;
-      bump.y += (target.y - bump.y) * 0.018;
-      bump.on += (target.on - bump.on) * 0.02;
+      const follow = 1 - Math.exp(-dt / FOLLOW_SECONDS);
+      bump.x += (target.x - bump.x) * follow;
+      bump.y += (target.y - bump.y) * follow;
+      bump.on += (target.on - bump.on) * (1 - Math.exp(-dt / FADE_SECONDS));
       // Picks up a theme change about once a second.
-      if (frames++ % 30 === 0) readColors();
+      if (now - colorsReadAt > 1000) {
+        colorsReadAt = now;
+        readColors();
+      }
       draw();
     };
 
@@ -155,6 +162,7 @@ export function GatewayMoire({
       } else if (!run && raf) {
         cancelAnimationFrame(raf);
         raf = 0;
+        lastFrame = 0;
       }
     };
     const onMotionChange = () => {
