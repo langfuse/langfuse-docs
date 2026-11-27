@@ -10,7 +10,7 @@ import AiGatewayBetaCallout from "@/components-mdx/ai-gateway-beta-callout.mdx";
 
 <AiGatewayBetaCallout />
 
-Guardrails inspect model requests and responses against pattern rules to block, redact, or log sensitive content such as PII and secrets. Organization owners and admins manage guardrails under **AI Gateway → Guardrails**; other members with gateway access have a read-only view.
+Guardrails inspect model requests and responses against pattern rules or external providers to block, redact, or log sensitive content such as PII and secrets. Organization owners and admins manage guardrails under **AI Gateway → Guardrails**; other members with gateway access have a read-only view.
 
 <Frame fullWidth>
   ![Guardrails page with the flagged requests chart over time and a table of PII, secrets, keyword, and custom regex guardrails showing their scope, action, targets, and 7-day flagged counts](/images/docs/ai-gateway/guardrails.png)
@@ -18,9 +18,51 @@ Guardrails inspect model requests and responses against pattern rules to block, 
 
 ## Create a guardrail [#create-a-guardrail]
 
-Select **Add guardrail** under **AI Gateway → Guardrails** (or pick an option under **Guardrails** when none are configured yet), then choose its [action](#actions), [evaluation scope](#scopes), and [targets](#targets). Built-in guardrails include a live test panel to verify matches before saving.
+Select **Add guardrail** under **AI Gateway → Guardrails**, pick a [built-in rule](#built-in-rules) or [Amazon Bedrock](#amazon-bedrock), and choose its [action](#actions), [evaluation scope](#scopes), and [targets](#targets).
 
 An organization can have up to 20 guardrails. Creating, editing, reassigning, and deleting guardrails are recorded in the [audit log](/docs/administration/audit-logs).
+
+## Actions [#actions]
+
+Choose what happens **On match**:
+
+| Action     | Behavior                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Block**  | Rejects the request or response with `400` (`guardrail_blocked`). Blocked requests never reach the provider.                    |
+| **Redact** | Replaces matched text with your **Replacement label** (default `[REDACTED]`) before forwarding the request or returning output. |
+| **Log**    | Passes the request or response through unchanged and records the match on the generation.                                       |
+
+When multiple guardrails apply, all of them evaluate; **Block** takes precedence over **Redact** and **Log**. Rejected calls return `400` (`guardrail_blocked`) with the guardrail name (for example, `Request blocked by guardrail "PII"`). Enforcing guardrails (**Block**, **Redact**, and Bedrock **Enforce**) also fail closed if a payload is unreadable or exceeds scan or buffer limits; see [AI Gateway errors](/faq/all/ai-gateway-error-codes) for all guardrail error codes.
+
+<Callout type="info">
+  In `FULL` [ingestion mode](/docs/gateway/features/tracing#ingestion-modes),
+  redacted text is replaced before the trace is captured, so scrubbed PII or
+  secrets aren't stored in Langfuse. Blocked responses omit their output from
+  `FULL` ingestion while still recording upstream token usage against
+  [budgets](/docs/gateway/features/budgets).
+</Callout>
+
+## Evaluation scopes [#scopes]
+
+Choose what each guardrail inspects under **Runs on**:
+
+| Scope                     | Evaluated text                                                                                  | Allowed with **Block** |
+| ------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------- |
+| **Last turn** (default)   | Latest user turn and tool outputs since the last model reply (system prompts on the first turn) | Yes                    |
+| **Entire input**          | All messages and system prompts in the request, including conversation history                  | No                     |
+| **Output**                | Provider responses before returning them to the client                                          | Yes                    |
+| **Last turn & output**    | Latest user turn and tool outputs, plus provider responses                                      | Yes                    |
+| **Entire input & output** | All messages and system prompts in the request, plus provider responses                         | No                     |
+
+**Block** only needs **Last turn** on input because every turn is checked before reaching the provider — nothing blocked is sent, so earlier turns have already passed and checking full history would permanently lock existing conversations. Use **Entire input** (or **Entire input & output**) for **Redact** rules so earlier turns aren't resent to the provider unredacted.
+
+<Callout type="info">
+  When any guardrail checks **Output**, the gateway buffers the full provider
+  response (including streamed SSE deltas) before returning it to the client, so
+  matches spanning chunk boundaries are caught and blocked responses never leak
+  partial tokens. Requests with no active output guardrail stream through
+  unchanged.
+</Callout>
 
 ## Built-in rules [#built-in-rules]
 
@@ -48,47 +90,11 @@ An organization can have up to 20 guardrails. Creating, editing, reassigning, an
 
 </Details>
 
-## Actions [#actions]
+## Amazon Bedrock guardrails [#amazon-bedrock]
 
-Choose what happens **On match**:
+You can connect an existing [Amazon Bedrock guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) from the **Integrations** tab. The gateway calls Bedrock's `ApplyGuardrail` API using your Bedrock API key (`bedrock:ApplyGuardrail` permission) and supports two actions: **Enforce** (block when Bedrock blocks, or anonymize matched text) and **Log**.
 
-| Action     | Behavior                                                                                                                        |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Block**  | Rejects the request or response with `400` (`guardrail_blocked`). Blocked requests never reach the provider.                    |
-| **Redact** | Replaces matched text with your **Replacement label** (default `[REDACTED]`) before forwarding the request or returning output. |
-| **Log**    | Passes the request or response through unchanged and records the match on the generation.                                       |
-
-When multiple guardrails apply, all of them evaluate; **Block** takes precedence over **Redact** and **Log**. Overlapping **Redact** matches merge into a single replacement.
-
-<Callout type="info">
-  In `FULL` [ingestion mode](/docs/gateway/features/tracing#ingestion-modes),
-  redacted text is replaced before the trace is captured, so scrubbed PII or
-  secrets aren't stored in Langfuse. Blocked responses omit their output from
-  `FULL` ingestion while still recording upstream token usage against
-  [budgets](/docs/gateway/features/budgets).
-</Callout>
-
-## Evaluation scopes [#scopes]
-
-Choose what each guardrail inspects under **Runs on**:
-
-| Scope                     | Evaluated text                                                                                  | Allowed with **Block** |
-| ------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------- |
-| **Last turn** (default)   | Latest user turn and tool outputs since the last model reply (system prompts on the first turn) | Yes                    |
-| **Entire input**          | All messages and system prompts in the request, including conversation history                  | No                     |
-| **Output**                | Provider responses before returning them to the client                                          | Yes                    |
-| **Last turn & output**    | Latest user turn and tool outputs, plus provider responses                                      | Yes                    |
-| **Entire input & output** | All messages and system prompts in the request, plus provider responses                         | No                     |
-
-Use **Entire input** (or **Entire input & output**) for **Redact** rules so earlier turns aren't resent to the provider unredacted. **Block** is limited to **Last turn** on input so a single matched turn doesn't permanently block the rest of a conversation.
-
-<Callout type="info">
-  When any guardrail checks **Output**, the gateway buffers the full provider
-  response (including streamed SSE deltas) before returning it to the client, so
-  matches spanning chunk boundaries are caught and blocked responses never leak
-  partial tokens. Requests with no active output guardrail stream through
-  unchanged.
-</Callout>
+We recommend using **Last turn** (or **Last turn & output**) scope rather than **Entire input** with Amazon Bedrock. Bedrock enforces per-request size and text-unit limits on `ApplyGuardrail` (and bills per text unit), so sending long conversation histories can hit Bedrock limits or trigger rate limits. Enforcing Bedrock guardrails fail closed on provider errors, rate limits, or timeouts (3 seconds by default), returning `429` or `503` so unscreened traffic does not pass through.
 
 ## Targets [#targets]
 
@@ -104,16 +110,6 @@ Generations that pass through with a **Redact** or **Log** match get level `WARN
 | ------------------------------------- | ------------------------------------------------------------------------ |
 | `langfuse.gateway.guardrails.outcome` | Highest-severity action across the exchange: `block`, `redact`, or `log` |
 | `langfuse.gateway.guardrails.<id>`    | Highest-severity action for that guardrail: `block`, `redact`, or `log`  |
-
-## Amazon Bedrock guardrails [#amazon-bedrock]
-
-You can also connect an [Amazon Bedrock guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) from the **Integrations** tab with **Enforce** (block when Bedrock blocks, or anonymize matched text) or **Log**. Enforcing Bedrock guardrails fail closed on provider errors or timeouts (3 seconds by default).
-
-## When a guardrail blocks [#guardrail-blocked]
-
-When a guardrail rejects a request or response, the gateway returns `400` with error code `guardrail_blocked` and names the guardrail in the message, for example: `Request blocked by guardrail "PII"` or `Response blocked by guardrail "Secrets and API keys"`.
-
-Enforcing guardrails (**Block**, **Redact**, and **Enforce**) fail closed if a payload is unreadable or exceeds scan or buffer limits. See [AI Gateway errors](/faq/all/ai-gateway-error-codes) for all guardrail error codes.
 
 ## FAQ [#faq]
 
