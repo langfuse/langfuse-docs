@@ -50,8 +50,6 @@ export const customerLogoNames = [
 export type ValueProp = {
   title: string;
   body: string;
-  /** UI path shown in the product panel title bar. */
-  crumb: string;
   panel: "spend" | "budgets" | "models" | "trace";
   features: { label: string; text: string }[];
 };
@@ -60,7 +58,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "See all spend",
     body: "Know what AI costs and who’s spending it.",
-    crumb: "AI Gateway → Overview → Analytics",
     panel: "spend",
     features: [
       {
@@ -76,7 +73,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "Cap model costs",
     body: "Set budgets and enforce limits across the organization.",
-    crumb: "AI Gateway → Budgets",
     panel: "budgets",
     features: [
       {
@@ -92,7 +88,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "Control access",
     body: "Allow or block models centrally or individually.",
-    crumb: "AI Gateway → Connections & Models",
     panel: "models",
     features: [
       {
@@ -108,7 +103,6 @@ export const valueProps: ValueProp[] = [
   {
     title: "Improve AI usage",
     body: "See what AI is used for and improve it.",
-    crumb: "Tracing → Sessions",
     panel: "trace",
     features: [
       {
@@ -125,69 +119,89 @@ export const valueProps: ValueProp[] = [
 
 // Mock data for the product panels. Names, models and amounts are invented.
 export const spendStats = [
-  { label: "Total cost", value: "$18,204" },
-  { label: "Requests", value: "1.24M" },
-  { label: "Tokens", value: "9.8B" },
+  { label: "Total cost", value: "$1,366.92" },
+  { label: "Requests", value: "19.23K" },
 ];
 
-export const spendBars = Array.from({ length: 30 }, (_, i) => {
-  const v = 28 + 22 * Math.abs(Math.sin(i * 0.9)) + i * 1.1;
-  return { a: Math.round(v * 0.35), b: Math.round(v * 0.65) };
-});
+// Daily cost in dollars, Oct 5 to Nov 2.
+export const spendBars = [
+  59, 38, 50, 68, 58, 8, 0, 73, 81, 60, 80, 64, 1, 1, 53, 63, 40, 54, 78, 16, 0,
+  80, 56, 68, 70, 72, 14, 14, 24,
+];
+
+export const spendBarLabels = [
+  { text: "Oct 5", index: 0 },
+  { text: "Oct 15", index: 10 },
+  { text: "Oct 25", index: 20 },
+  { text: "Nov 2", index: 28 },
+];
 
 export const topModels = [
-  { name: "claude-opus", pct: 92, cost: "$8,410" },
-  { name: "gpt-codex", pct: 58, cost: "$5,302" },
-  { name: "claude-sonnet", pct: 34, cost: "$3,118" },
+  { name: "claude-sonnet", cost: 452.02 },
+  { name: "claude-opus", cost: 434.49 },
+  { name: "gpt-5.6", cost: 300.76 },
+  { name: "gpt-5.3-codex", cost: 85.5 },
+  { name: "gpt-5.6-terra", cost: 72.14 },
 ];
+
+// One team's daily spend from Nov 1 to Nov 27, in relative units.
+export const budgetChart = {
+  team: "support",
+  spent: 2340,
+  budget: 2500,
+  warnAt: 0.85,
+  daily: [
+    62, 48, 95, 110, 104, 30, 22, 96, 118, 101, 92, 88, 26, 18, 99, 112, 124,
+    97, 90, 24, 20, 104, 131, 120, 95, 30, 61,
+  ],
+};
 
 export const budgetRows = [
-  { team: "platform", cc: "4711", pct: 78, label: "$3,900 / $5,000" },
-  { team: "support", cc: "5102", pct: 94, label: "$2,340 / $2,500" },
-  { team: "growth", cc: "4720", pct: 49, label: "$986 / $2,000" },
-  { team: "data", cc: "4802", pct: 20, label: "$305 / $1,500" },
+  { team: "support", spent: 2340, budget: 2500, highlight: true },
+  { team: "platform", spent: 3900, budget: 5000 },
+  { team: "growth", spent: 986, budget: 2000 },
+  { team: "data", spent: 305, budget: 1500 },
 ];
 
-export const connections = [
+export const keyStats = [
+  { label: "Active keys", value: "46" },
+  { label: "Shared provider keys", value: "0" },
+];
+
+export const gatewayKeys = [
+  { name: "Priya – Claude Code", models: "anthropic-prod:*", revoked: false },
   {
-    name: "anthropic-prod",
-    provider: "Anthropic",
-    models: [
-      { name: "claude-opus", on: true },
-      { name: "claude-sonnet", on: true },
-      { name: "claude-haiku", on: false },
-    ],
+    name: "support-bot",
+    models: "anthropic-prod:claude-haiku*",
+    revoked: false,
   },
   {
-    name: "openai-prod",
-    provider: "OpenAI",
-    models: [
-      { name: "gpt-5", on: true },
-      { name: "gpt-codex", on: true },
-      { name: "gpt-pro", on: false },
-    ],
+    name: "Amara – agents",
+    models: "anthropic-prod:claude-sonnet*",
+    revoked: false,
+  },
+  { name: "ci-release", models: "openai-prod:gpt-5*", revoked: false },
+  { name: "Lukas – Claude Code", models: "anthropic-prod:*", revoked: true },
+  {
+    name: "contractor-q4",
+    models: "anthropic-prod:claude-sonnet*",
+    revoked: true,
   },
 ];
 
-export const sessionSpans = [
-  { name: "refactor billing export", cost: "$1.92", child: false },
-  { name: "claude-opus", cost: "$0.42", child: true, selected: true },
-  { name: "claude-opus", cost: "$0.38", child: true },
-  { name: "claude-sonnet", cost: "$0.11", child: true },
-  { name: "claude-opus", cost: "$0.61", child: true },
-  { name: "claude-opus", cost: "$0.40", child: true },
-];
-
-export const spanDetails = [
-  { k: "in", v: "18.4k" },
-  { k: "out", v: "1.2k" },
-  { k: "cached", v: "14.9k" },
-  { k: "cost", v: "$0.42" },
-  { k: "latency", v: "6.8s" },
-  { k: "ttft", v: "0.9s" },
-  { k: "user", v: "anna" },
-  { k: "key", v: "anna-laptop" },
-];
+export const session = {
+  name: "refactor-billing-export",
+  user: "anna",
+  // Cost of each model call in dollars, in order.
+  calls: [0.42, 0.06, 0.38, 0.04, 0.61, 0.4, 0.01, 0.22, 0.05, 0.31],
+  rows: [
+    { name: "fix-failing-test", model: "claude-opus", cost: "$0.61" },
+    { name: "plan-changes", model: "claude-opus", cost: "$0.42" },
+    { name: "summarize-diff", model: "claude-opus", cost: "$0.40" },
+    { name: "edit-export.ts", model: "claude-opus", cost: "$0.38" },
+    { name: "read-files", model: "claude-sonnet", cost: "$0.06" },
+  ],
+};
 
 export type SketchTone = "ok" | "warn" | "error";
 
