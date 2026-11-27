@@ -522,23 +522,36 @@ export function GatewayValueProps() {
                 {prop.title}
               </span>
               {isActive && (
-                <span className="flex max-w-[440px] flex-col">
-                  <span className="text-[15px] leading-[1.5] text-text-secondary">
-                    {prop.body}
-                  </span>
-                  <span className="mt-1.5 flex flex-col @3xl:min-h-[200px]">
-                    {prop.features.map((feature) => (
-                      <span
-                        key={feature.label}
-                        className="border-t border-dashed border-line-divider-dash py-3 text-[14px] leading-[1.5] text-text-secondary"
-                      >
-                        <strong className="font-semibold text-text-primary">
-                          {feature.label}
-                        </strong>{" "}
-                        {feature.text}
+                // Every prop's details share one grid cell, so the open row is as
+                // tall as the longest one and the page doesn't jump on rotation.
+                <span className="grid max-w-[440px]">
+                  {valueProps.map((detail, j) => (
+                    <span
+                      key={detail.title}
+                      aria-hidden={j !== i || undefined}
+                      className={cn(
+                        "col-start-1 row-start-1 flex flex-col",
+                        j !== i && "invisible",
+                      )}
+                    >
+                      <span className="text-[15px] leading-[1.5] text-text-secondary">
+                        {detail.body}
                       </span>
-                    ))}
-                  </span>
+                      <span className="mt-1.5 flex flex-col">
+                        {detail.features.map((feature) => (
+                          <span
+                            key={feature.label}
+                            className="border-t border-dashed border-line-divider-dash py-3 text-[14px] leading-[1.5] text-text-secondary"
+                          >
+                            <strong className="font-semibold text-text-primary">
+                              {feature.label}
+                            </strong>{" "}
+                            {feature.text}
+                          </span>
+                        ))}
+                      </span>
+                    </span>
+                  ))}
                 </span>
               )}
               {isActive && (

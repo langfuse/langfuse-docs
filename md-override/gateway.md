@@ -30,9 +30,10 @@ Figure: AI Gateway overview.
 - **Cap model costs.** Set budgets and enforce limits across the organization.
   - **Budgets:** reset daily, weekly or monthly. Requests stop once a budget runs out.
   - **Warnings and resets:** email warnings at 85% and 95%, and a one-click reset that sets spend back to zero.
-- **Control access.** Allow or block models centrally or individually.
+- **Govern access and data.** Decide who can use which models, and what data reaches them.
   - **Model controls:** approve models centrally and limit each gateway key to the models it needs.
   - **Revocable keys:** revoke any gateway key immediately. User keys stop working when the person loses access.
+  - **Guardrails:** block, redact or log PII, secrets and prompt injection in requests and responses.
 - **Improve AI usage.** See what AI is used for and improve it.
   - **Automatic tracing:** every call becomes a Langfuse trace, with full content or usage only.
   - **Evals and analysis:** run evals, topics and alerts, or tell Halo what’s on your mind.

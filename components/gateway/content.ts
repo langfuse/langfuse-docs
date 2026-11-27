@@ -90,8 +90,8 @@ export const valueProps: ValueProp[] = [
     ],
   },
   {
-    title: "Control access",
-    body: "Allow or block models centrally or individually.",
+    title: "Govern access and data",
+    body: "Decide who can use which models, and what data reaches them.",
     panel: "models",
     features: [
       {
@@ -101,6 +101,10 @@ export const valueProps: ValueProp[] = [
       {
         label: "Revocable keys:",
         text: "revoke any gateway key immediately. User keys stop working when the person loses access.",
+      },
+      {
+        label: "Guardrails:",
+        text: "block, redact or log PII, secrets and prompt injection in requests and responses.",
       },
     ],
   },
