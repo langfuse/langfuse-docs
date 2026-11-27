@@ -299,10 +299,10 @@ If you run an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector)
 receivers:
   otlp:
     protocols:
-    grpc:
-      endpoint: 0.0.0.0:4317
-    http:
-      endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 
 processors:
   batch:
@@ -329,23 +329,24 @@ service:
       exporters: [otlphttp/langfuse]
 ```
 
-#### Filtering Spans sent to Langfuse
+#### Filtering spans sent to Langfuse [#filtering-spans-sent-to-langfuse]
 
-In case you want to selectively send OTel Spans to Langfuse, you can use the OTel Collector [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md).
-It enables you to filter spans based on attributes, span names, and more.
-As this applies on a Span level, you may risk incomplete traces and should be careful when applying complex filter rules.
-Langfuse also requires that a root span is sent to our backend to ensure that a trace is created correctly.
+Use the OTel Collector [filterprocessor](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/processor/filterprocessor/README.md) to selectively send spans to Langfuse. It drops individual spans that match its conditions. The Langfuse SDK's default export filter does not apply to spans sent directly by a Collector.
 
-With the configuration below, you would only forward Spans which have a `gen_ai.system` attribute set to `openai`:
+The example below forwards only spans whose `gen_ai.system` attribute is `openai`.
+
+<Callout type="warning">
+This attribute filter does not preserve complete trace hierarchies: a non-AI root or intermediate parent without `gen_ai.system="openai"` is dropped, while matching children are still exported. Langfuse can ingest these children, but it cannot recover the omitted parent spans or attributes recorded only on them. To preserve the hierarchy, retain the root and all intermediate parents of the spans you keep. Adapt the filter to your application's span structure; keeping only the root is not sufficient. See [orphaned traces](/faq/all/existing-otel-setup#orphaned-traces).
+</Callout>
 
 ```yml
 receivers:
   otlp:
     protocols:
-    grpc:
-      endpoint: 0.0.0.0:4317
-    http:
-      endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 
 processors:
   filter/openaisystem:
