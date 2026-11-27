@@ -203,6 +203,7 @@ type MusicGraph = {
   space: ReturnType<typeof createDubSpace>;
   spaceSend: GainNode;
   effects: GainNode;
+  effectsSpace: GainNode;
   winter: GainNode;
   duck: GainNode;
   winterDuck: GainNode;
@@ -243,7 +244,8 @@ export class JinglePlayer {
   private volume = 1;
   private slop = 0;
   private transitionSound: GainNode | null = null;
-  private journey: { at: number; duration: number } | null = null;
+  private journey: { at: number; duration: number; space: number } | null =
+    null;
   setSlop(value: number) {
     this.slop = clamp(value);
   }
@@ -461,7 +463,8 @@ export class JinglePlayer {
     const effects = ctx.createGain();
     effects.gain.value = 0.55;
     effects.connect(duck);
-    effects.connect(space.input);
+    const effectsSpace = ctx.createGain();
+    effects.connect(effectsSpace).connect(space.input);
     const lead = ctx.createGain();
     const leadFilter = ctx.createBiquadFilter();
     leadFilter.type = "lowpass";
@@ -518,6 +521,7 @@ export class JinglePlayer {
       ...space.nodes,
       spaceSend,
       effects,
+      effectsSpace,
       winter,
       duck,
       winterDuck,
@@ -548,6 +552,7 @@ export class JinglePlayer {
       space,
       spaceSend,
       effects,
+      effectsSpace,
       winter,
       duck,
       winterDuck,
@@ -573,7 +578,20 @@ export class JinglePlayer {
     const progress = journey
       ? clamp((time - journey.at) / journey.duration)
       : 0;
-    const spaceMotion = Math.max(build, Math.sin(progress * Math.PI));
+    const spaceMotion = Math.max(
+      build,
+      Math.sin(progress * Math.PI) * (journey?.space ?? 1),
+    );
+    g.effectsSpace.gain.setTargetAtTime(
+      journey && progress < 1 ? journey.space : 1,
+      time,
+      0.08,
+    );
+    g.space.wet.gain.setTargetAtTime(
+      0.22 + mix * 0.12 + spaceMotion * 0.06,
+      time,
+      0.1,
+    );
     g.winterSpace.gain.setTargetAtTime(
       spaceMotion * 0.5 + this.slop * 0.22,
       time,
@@ -903,7 +921,7 @@ export class JinglePlayer {
     this.noiseHit(ctx, graph.effects, time, 0.15, 0.18, 700, "lowpass");
   }
 
-  /** The page folding into itself: descending sub, detuned fifth, filtered air. */
+  /** Crystal growth, passage and thaw share the visual journey clock. */
   welcome() {
     return this.fold(0, false, false, WELCOME_SECONDS);
   }
@@ -915,7 +933,12 @@ export class JinglePlayer {
     const time = ctx.currentTime;
     const root = [82.4, 65.4, 98][day % 3];
     const duration = seconds ?? getFoldSeconds(berlin, closing);
-    const journey = { at: time, duration };
+    const entrance = seconds === WELCOME_SECONDS;
+    const journey = {
+      at: time,
+      duration,
+      space: entrance ? 0.22 : berlin ? 1 : 0.48,
+    };
     this.journey = journey;
     const bus = this.spatialBus(
       ctx,
@@ -933,10 +956,41 @@ export class JinglePlayer {
       setTimeout(() => bus.disconnect(), 300);
     };
     if (closing) {
-      // A single falling sub follows the camera's continuous pullback.
+      // Descending crystal notes trace the six faces back to the selected door.
       this.lowTone(ctx, bus, root * 2, time, duration * 0.92, 0.45);
       this.lowTone(ctx, bus, root * 1.498, time + 0.04, duration * 0.85, 0.18);
-      this.noiseHit(ctx, bus, time, duration * 0.6, 0.12, 240, "lowpass");
+      this.noiseHit(ctx, bus, time, duration * 0.6, 0.07, 400, "lowpass");
+      for (let i = 0; i < 6; i++) {
+        this.crystalTone(
+          ctx,
+          bus,
+          root * [4, 3, 2.5, 2, 1.5, 1][i],
+          time + duration * (0.12 + i * 0.115),
+          0.32,
+          0.09,
+        );
+      }
+      return cancel;
+    }
+    if (!berlin) {
+      // Keep the carol in front: a brief ice click, six voiced branches, then resolve.
+      this.lowTone(ctx, bus, root, time, 0.9, entrance ? 0.14 : 0.24);
+      this.noiseHit(ctx, bus, time, 0.22, 0.035, 1500, "bandpass");
+      const notes = [2, 3, 4, 5, 6, 8];
+      for (let i = 0; i < 6; i++) {
+        this.crystalTone(
+          ctx,
+          bus,
+          root * notes[i],
+          time + duration * (0.13 + i * 0.082),
+          0.55,
+          entrance ? 0.07 : 0.1,
+        );
+      }
+      const reveal = time + duration * FOLD_REVEAL;
+      this.lowTone(ctx, bus, root * 0.75, reveal, 1.1, 0.2);
+      this.crystalTone(ctx, bus, root * 3, reveal, 0.9, 0.12);
+      this.crystalTone(ctx, bus, root * 4, reveal + 0.09, 0.75, 0.08);
       return cancel;
     }
     const rate = duration / FOLD_SECONDS;
@@ -991,6 +1045,39 @@ export class JinglePlayer {
       0.16,
     );
     return cancel;
+  }
+
+  private crystalTone(
+    ctx: AudioContext,
+    out: AudioNode,
+    hz: number,
+    time: number,
+    duration: number,
+    level: number,
+  ) {
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(level, time + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    gain.connect(out);
+    let remaining = 2;
+    for (const [ratio, volume] of [
+      [1, 1],
+      [2.01, 0.16],
+    ]) {
+      const voice = ctx.createOscillator(),
+        partial = ctx.createGain();
+      voice.frequency.value = hz * ratio;
+      partial.gain.value = volume;
+      voice.connect(partial).connect(gain);
+      voice.start(time);
+      voice.stop(time + duration + 0.03);
+      voice.onended = () => {
+        voice.disconnect();
+        partial.disconnect();
+        if (--remaining === 0) gain.disconnect();
+      };
+    }
   }
 
   private spatialBus(

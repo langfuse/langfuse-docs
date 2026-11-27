@@ -44,7 +44,11 @@ export async function captureAdvent(node: HTMLElement, options: Options) {
   return toCanvas(node, {
     ...options,
     includeStyleProperties: CAPTURE_STYLES,
-    fontEmbedCSS: (await fonts) + svgStyles,
+    // Computed grid auto-margins report 0px even while centering the live board.
+    fontEmbedCSS:
+      (await fonts) +
+      svgStyles +
+      ".adv-calendar{margin-left:auto!important;margin-right:auto!important}",
     // Foreign-object rasterization flattens 3D backfaces; the visible front must win.
     filter: (element) =>
       !element.classList?.contains("adv-door-back") &&

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { canvasScale } from "./render-budget";
+import { createWinterVault } from "./winter-optics";
 import { WELCOME_SECONDS } from "./fold-timing";
 
 type Props = {
@@ -19,6 +20,7 @@ export function WelcomeFlight({
   onComplete,
   onSound,
 }: Props) {
+  const shaderRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const skipRef = useRef<() => void>(() => {});
   useEffect(() => {
@@ -35,6 +37,8 @@ export function WelcomeFlight({
       onComplete();
       return;
     }
+    const shaderCanvas = shaderRef.current;
+    const vault = shaderCanvas ? createWinterVault(shaderCanvas) : null;
     let frame = 0;
     let revealed = false;
     let finished = false;
@@ -56,6 +60,11 @@ export function WelcomeFlight({
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (shaderCanvas) {
+        const resolution = canvasScale(innerWidth, innerHeight, 650_000);
+        shaderCanvas.width = Math.round(innerWidth * resolution);
+        shaderCanvas.height = Math.round(innerHeight * resolution);
+      }
     };
     resize();
     window.addEventListener("resize", resize);
@@ -86,30 +95,33 @@ export function WelcomeFlight({
       const cx = w / 2 + Math.sin(t * 6) * w * 0.06 * (1 - reveal);
       const cy = h / 2 + Math.cos(t * 5) * h * 0.04 * (1 - reveal);
       ctx.clearRect(0, 0, w, h);
-      const bg = ctx.createRadialGradient(
-        cx,
-        cy,
-        0,
-        cx,
-        cy,
-        Math.max(w, h) * 0.8,
-      );
-      bg.addColorStop(0, "#fff9df");
-      bg.addColorStop(0.28, "#d5e6da");
-      bg.addColorStop(0.7, "#24594c");
-      bg.addColorStop(1, "#102e2c");
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, w, h);
-      // Nested garlands mark the depth; each one rolls past the camera.
-      for (let i = 18; i >= 0; i--) {
-        const depth = (i / 19 + speed * 0.18) % 1;
-        const radius = Math.pow(depth, 2.3) * Math.max(w, h) * 0.95 + 4;
-        ctx.strokeStyle = i % 2 ? "#eac369" : "#fff5d4";
-        ctx.globalAlpha = Math.sin(depth * Math.PI) * 0.22;
-        ctx.lineWidth = 1 + depth * 4;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, radius, radius * 0.72, t * 0.7, 0, Math.PI * 2);
-        ctx.stroke();
+      const shaderDrawn = vault?.draw(t) ?? false;
+      if (!shaderDrawn) {
+        const bg = ctx.createRadialGradient(
+          cx,
+          cy,
+          0,
+          cx,
+          cy,
+          Math.max(w, h) * 0.8,
+        );
+        bg.addColorStop(0, "#fff9df");
+        bg.addColorStop(0.28, "#d5e6da");
+        bg.addColorStop(0.7, "#24594c");
+        bg.addColorStop(1, "#102e2c");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+        // Nested garlands mark the depth; each one rolls past the camera.
+        for (let i = 18; i >= 0; i--) {
+          const depth = (i / 19 + speed * 0.18) % 1;
+          const radius = Math.pow(depth, 2.3) * Math.max(w, h) * 0.95 + 4;
+          ctx.strokeStyle = i % 2 ? "#eac369" : "#fff5d4";
+          ctx.globalAlpha = Math.sin(depth * Math.PI) * 0.22;
+          ctx.lineWidth = 1 + depth * 4;
+          ctx.beginPath();
+          ctx.ellipse(cx, cy, radius, radius * 0.72, t * 0.7, 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
       // Snow catches the light in long streaks as the camera accelerates.
       for (let i = 0; i < 100; i++) {
@@ -129,14 +141,14 @@ export function WelcomeFlight({
         ctx.stroke();
       }
       // Sprites follow corkscrew lanes, leaving the center clear to fly through.
-      for (let i = 0; i < 105; i++) {
+      for (let i = 0; i < 42; i++) {
         const depth = (i * 0.6180339 + speed * 0.15) % 1;
         const spread = Math.pow(depth, 2.5);
         const angle = i * 2.39996 + ((i % 3) * Math.PI * 2) / 3 + t * 0.8;
         const radius = 22 + spread * Math.max(w, h) * 0.85;
         const x = cx + Math.cos(angle) * radius;
         const y = cy + Math.sin(angle) * radius * 0.75;
-        const size = 2 + spread * (i % 5 === 0 ? 190 : 95);
+        const size = 2 + spread * (i % 5 === 0 ? 125 : 68);
         ctx.globalAlpha = Math.min(1, depth * 5) * (1 - reveal * 0.5);
         ctx.save();
         ctx.translate(x, y);
@@ -178,6 +190,7 @@ export function WelcomeFlight({
     frame = requestAnimationFrame(draw);
     return () => {
       cancelAnimationFrame(frame);
+      vault?.dispose();
       window.removeEventListener("resize", resize);
       document.removeEventListener("keydown", keydown);
       if (!finished && typeof stopSound === "function") stopSound();
@@ -186,6 +199,7 @@ export function WelcomeFlight({
   return active
     ? createPortal(
         <div className="adv-welcome-flight" data-fold-exclude>
+          <canvas ref={shaderRef} data-welcome-vault aria-hidden />
           <canvas ref={canvasRef} data-welcome-flight aria-hidden />
           <button
             type="button"

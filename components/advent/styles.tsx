@@ -120,6 +120,8 @@ export function AdventStyles() {
         opacity: clamp(0, var(--adv-arrival, 0) * 3, 1);
         transform-origin: center;
       }
+      .adv-dialog[data-journey="winter"] { z-index: 99; scale: 1; filter: blur(calc((1 - var(--adv-arrival, 0)) * 5px)); }
+      .adv-dialog[data-journey="closing"] { z-index: 99; scale: 1; filter: none; opacity: 1; }
       .adv-fold-skip { pointer-events: auto; position: fixed; z-index: 101; right: 20px; bottom: 20px; background: #101219; color: #edf0fa; border: 1px solid #596279; border-radius: 6px; padding: 10px 14px; font-size: 12px; }
       .adv-fold-skip kbd { margin-left: 8px; opacity: .6; }
       .adv-scene-control { position: relative; min-width: 244px; text-align: right; }
@@ -984,7 +986,7 @@ export function AdventStyles() {
       .adv-page[data-slop-level="2"] .adv-title-accent, .adv-page[data-slop-level="3"] .adv-title-accent, .adv-page[data-slop-level="4"] .adv-title-accent { font-family: Georgia,serif; color: #b45dff; text-shadow: 3px 3px #ff92c866; }
       .adv-page[data-slop-level="4"] .adv-board { background: linear-gradient(135deg,#874af0,#ff7cc1,#3a77fa); box-shadow: 0 0 70px #a96dffaa; }
       .adv-welcome-flight { position: fixed; inset: 0; z-index: 110; }
-      .adv-welcome-flight canvas { width: 100vw; height: 100dvh; }
+      .adv-welcome-flight canvas { position: absolute; inset: 0; width: 100vw; height: 100dvh; }
       .adv-welcome-flight .adv-fold-skip { z-index: 111; }
       .adv-shatter-canvas { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 59; pointer-events: none; }
       @media (min-width: 701px) and (max-height: 850px) {

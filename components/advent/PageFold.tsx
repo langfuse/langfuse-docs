@@ -1,6 +1,7 @@
 "use client";
 
 import { captureAdvent } from "./capture";
+import { WINTER_OPTICS } from "./winter-optics";
 
 import {
   forwardRef,
@@ -31,6 +32,8 @@ const FRAGMENT = `
 precision highp float;
 varying vec2 uv;
 uniform sampler2D page;
+uniform sampler2D panel;
+uniform float hasPanel;
 uniform vec2 origin;
 uniform float progress;
 uniform float aspect;
@@ -39,22 +42,82 @@ uniform float variant;
 uniform float closing;
 uniform vec2 cardSize;
 vec2 mirror(vec2 p){return 1.-abs(mod(p,2.)-1.);}
+${WINTER_OPTICS}
 void main(){
   float t=progress;
   if(closing>.5){
-    // One continuous camera pullback, from deep inside the selected door.
-    float outT=1.-t;
-    float travel=1.-pow(1.-outT,3.);
-    float zoom=exp(log(9.)*(1.-travel));
-    vec2 focus=mix(origin,vec2(.5),travel);
-    vec2 scene=(uv-.5)/zoom+focus;
-    vec2 fringe=(uv-.5)*.006*berlin*(1.-travel);
-    vec3 color;
-    color.r=texture2D(page,clamp(scene+fringe,0.,1.)).r;
-    color.g=texture2D(page,clamp(scene,0.,1.)).g;
-    color.b=texture2D(page,clamp(scene-fringe,0.,1.)).b;
-    float opacity=smoothstep(0.,.1,outT)*(1.-smoothstep(.92,1.,outT));
+    // The actual window separates along six crystal faces and returns to its door.
+    // The calendar stays at its real size throughout the return.
+    float c=1.-t;
+    float flight=smoothstep(.07,.94,c);
+    vec2 landing=(origin-.5)*vec2(aspect,1.);
+    vec2 p=(uv-.5)*vec2(aspect,1.);
+    vec3 color=texture2D(page,uv).rgb;
+    vec3 backdrop=mix(mix(color,vec3(.985,.975,.95),.82),color*.22,berlin);
+    color=mix(backdrop,color,smoothstep(.12,.85,c));
+    for(int i=0;i<6;i++){
+      float a=float(i)*TAU/6.;
+      vec2 wind=vec2(cos(a),sin(a))*sin(flight*3.141593)*.13;
+      vec2 center=landing*flight+wind;
+      float shrink=max(.025,1.-flight);
+      vec2 local=spin(-flight*(.55+berlin*.65))*(p-center)/shrink;
+      vec2 tex=local/cardSize+.5;
+      float angle=mod(atan(local.y,local.x)+TAU,TAU);
+      float sector=step(a,angle)*(1.-step(a+TAU/6.,angle));
+      float inside=step(0.,tex.x)*step(tex.x,1.)*step(0.,tex.y)*step(tex.y,1.);
+      vec4 fragment=texture2D(panel,clamp(tex,0.,1.));
+      vec2 cell=floor(tex*vec2(42.,48.));
+      float melt=smoothstep(.22,.82,c);
+      vec2 dust=fract(tex*vec2(42.,48.))-vec2(.32+.36*grain(cell),.32+.36*grain(cell+7.));
+      float needles=min(abs(dust.x),min(abs(dust.y*.866+dust.x*.5),abs(dust.y*.866-dust.x*.5)));
+      float powder=(1.-smoothstep(.02,.065,needles))*(1.-smoothstep(.23,.46,length(dust)));
+      float frost=smoothstep(melt-.16,melt+.06,grain(cell))*mix(1.,powder,smoothstep(.22,.5,c));
+      float facet=sector*inside*fragment.a*hasPanel;
+      vec3 ice=mix(vec3(.63,.9,.87),vec3(.29,.48,.83),berlin);
+      vec3 face=mix(fragment.rgb,ice,smoothstep(.05,.42,c)*.75);
+      color=mix(color,face,facet*frost);
+      color+=ice*facet*(1.-frost)*exp(-length(fract(tex*vec2(42.,48.))-.5)*14.)*(1.-flight)*.8;
+    }
+    vec2 snow=(p-landing*flight)/max(.025,(1.-flight)*.45);
+    float etch=exp(-crystal(spin(flight*.6)*snow)*180.);
+    color+=mix(vec3(.44,.67,.59),vec3(.22,.32,.65),berlin)*etch*sin(c*3.141593)*.5;
+    float opacity=smoothstep(0.,.065,c)*(1.-smoothstep(.90,1.,c));
     gl_FragColor=vec4(color,opacity);
+    return;
+  }
+  if(berlin<.5){
+    // A crystal grows from the door, refracts the page through six mirrors,
+    // and carries us through its branches before the real window thaws out.
+    float grow=smoothstep(0.,.23,t);
+    float travel=smoothstep(.14,.86,t)*2.8;
+    vec2 center=mix(origin,vec2(.5),smoothstep(.08,.40,t));
+    vec2 p=(uv-center)*vec2(aspect,1.);
+    float r=length(p);
+    vec2 k=sixfold(spin(t*.42)*p);
+    float depth=-log(max(r,.002))*.8+travel;
+    vec2 refract=sixfold(k*(1.3+fract(depth)*1.9));
+    refract=mirror(refract/vec2(aspect,1.)+origin+floor(depth)*.13);
+    vec2 prism=vec2(.004,-.003)*sin(t*3.141593);
+    vec3 reflection=vec3(texture2D(page,refract+prism).r,
+      texture2D(page,refract).g,texture2D(page,refract-prism).b);
+    vec3 vault=winterVault(p,travel,1.);
+    vault+=reflection*.25*(.5+.5*cos(depth*TAU));
+    float seed=exp(-crystal(p/max(.02,grow*.9))*170.);
+    vault+=vec3(.5,.72,.64)*seed*(1.-smoothstep(.25,.5,t));
+    float radius=grow*2.2;
+    float iris=1.-smoothstep(radius-.1,radius,r*(.86+.14*cos(atan(p.y,p.x)*6.)));
+    vec3 color=mix(texture2D(page,uv).rgb,vault,iris*grow);
+    float arrival=smoothstep(.68,1.,t);
+    // Ice clears from the center; the content keeps its size and becomes legible.
+    vec2 window=(uv-.5)*vec2(aspect,1.);
+    vec2 box=abs(window)-cardSize*.5;
+    float edge=length(max(box,0.))+min(max(box.x,box.y),0.);
+    float frost=crystal(window/max(.06,arrival))*.18;
+    float thaw=1.-smoothstep(arrival-.08,arrival+.08,
+      max(abs(window.x)/max(.01,cardSize.x*.5),abs(window.y)/max(.01,cardSize.y*.5))*.8+frost);
+    float aperture=(1.-smoothstep(-.008,.008,edge))*thaw*smoothstep(.68,.76,t);
+    color+=vec3(.3,.45,.29)*exp(-abs(edge)*180.)*sin(arrival*3.141593);
+    gl_FragColor=vec4(color,(1.-aperture)*(1.-smoothstep(.88,1.,t)));
     return;
   }
   float fold=smoothstep(0.,.3,t);
@@ -110,20 +173,6 @@ void main(){
   color+=mix(vec3(.35,.16,.04),vec3(.08,.16,.32),berlin)*edge*fold*.35;
   vec3 spectral=.5+.5*cos(vec3(0.,2.1,4.2)+length(inner)*1.4+t*5.);
   color=mix(color,color*.5+spectral*.38,peak*.7);
-  if(berlin<.5){
-    // Christmas: fold the page into the chosen box, then carry it to the window.
-    vec2 winterCenter=mix(vec2(.5),origin,smoothstep(0.,.38,t));
-    winterCenter=mix(winterCenter,vec2(.5),smoothstep(.38,.68,t));
-    vec2 pageScale=mix(vec2(1.),vec2(.14,.18),smoothstep(0.,.38,t));
-    pageScale=mix(pageScale,vec2(cardSize.x/aspect,cardSize.y),smoothstep(.38,.68,t));
-    vec2 mapped=(uv-winterCenter)/pageScale+.5;
-    mapped+=sin(mapped.yx*10.+t*4.)*.012*sin(t*3.141593);
-    float inside=step(0.,mapped.x)*step(mapped.x,1.)*step(0.,mapped.y)*step(mapped.y,1.);
-    vec3 paper=vec3(.985,.963,.914);
-    vec3 image=texture2D(page,clamp(mapped,0.,1.)).rgb;
-    vec3 echo=texture2D(page,mirror(mapped*1.04)).rgb;
-    color=mix(paper,mix(image,echo,.09*sin(t*3.141593)),inside);
-  }
   float arrival=smoothstep(.68,1.,t);
   float size=mix(.12,1.,arrival);
   // Reveal the real dialog through a portal with its exact shape and scale.
@@ -183,6 +232,30 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
           const width = innerWidth,
             height = innerHeight;
           // Lazy loaded: the calendar's initial render has no capture-library cost.
+          const dialogElement = closing
+            ? document.querySelector<HTMLElement>(".adv-dialog")
+            : null;
+          const dialogRect = dialogElement?.getBoundingClientRect();
+          const panelCapture =
+            dialogElement && dialogRect
+              ? captureAdvent(dialogElement, {
+                  width: dialogRect.width,
+                  height: dialogRect.height,
+                  pixelRatio: Math.min(1, 800 / dialogRect.height),
+                  style: {
+                    position: "relative",
+                    top: "0",
+                    left: "0",
+                    margin: "0",
+                    transform: "none",
+                    translate: "none",
+                    scale: "1",
+                    opacity: "1",
+                    filter: "none",
+                    animation: "none",
+                  },
+                }).catch(() => null)
+              : Promise.resolve(null);
           const capture =
             closing && lastSnapshot.current
               ? Promise.resolve(lastSnapshot.current)
@@ -204,15 +277,16 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
                       ) && !node.hasAttribute?.("data-fold-exclude"),
                   },
                 );
-          const snapshot = await Promise.race([
-            capture,
+          const captured = await Promise.race([
+            Promise.all([capture, panelCapture]),
             new Promise<null>((resolve) => {
               timer = setTimeout(() => resolve(null), 1800);
             }),
           ]);
           clearTimeout(timer);
-          if (!snapshot || !mounted.current || cancelled)
+          if (!captured || !mounted.current || cancelled)
             return mounted.current;
+          const [snapshot, panelSnapshot] = captured;
           if (!closing) lastSnapshot.current = snapshot;
           canvas = document.createElement("canvas");
           canvas.dataset.foldExclude = "";
@@ -261,6 +335,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
           gl.enableVertexAttribArray(position);
           gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
           const texture = gl.createTexture();
+          gl.activeTexture(gl.TEXTURE0);
           gl.bindTexture(gl.TEXTURE_2D, texture);
           gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
           gl.texImage2D(
@@ -275,6 +350,27 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.uniform1i(gl.getUniformLocation(program, "page"), 0);
+          const panelTexture = gl.createTexture();
+          gl.activeTexture(gl.TEXTURE1);
+          gl.bindTexture(gl.TEXTURE_2D, panelTexture);
+          gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            panelSnapshot ?? snapshot,
+          );
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.uniform1i(gl.getUniformLocation(program, "panel"), 1);
+          gl.uniform1f(
+            gl.getUniformLocation(program, "hasPanel"),
+            panelSnapshot ? 1 : 0,
+          );
           gl.uniform2f(
             gl.getUniformLocation(program, "origin"),
             point.x / width,
@@ -304,11 +400,11 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
             const start = performance.now();
             let last = 0;
             let measured: HTMLElement | null = null;
-            let cardWidth = 560,
-              cardHeight = 600;
+            let cardWidth = dialogRect?.width ?? 560,
+              cardHeight = dialogRect?.height ?? 600;
             dialogResize = new ResizeObserver(([entry]) => {
               const box = entry.borderBoxSize[0];
-              if (box) {
+              if (box?.inlineSize && box.blockSize) {
                 cardWidth = box.inlineSize;
                 cardHeight = box.blockSize;
               }
@@ -331,10 +427,11 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
                 ) {
                   revealed = true;
                   onReveal();
+                  if (!closing) canvas!.style.pointerEvents = "none";
                 }
                 const dialog =
                   document.querySelector<HTMLElement>(".adv-dialog");
-                if (dialog && dialog !== measured) {
+                if (!closing && dialog && dialog !== measured) {
                   dialogResize!.disconnect();
                   dialogResize!.observe(dialog);
                   measured = dialog;
@@ -348,6 +445,11 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
                   : linear * linear * (3 - 2 * linear);
                 if (dialog) {
                   dialog.dataset.arriving = "";
+                  dialog.dataset.journey = closing
+                    ? "closing"
+                    : berlin
+                      ? "berlin"
+                      : "winter";
                   dialog.dataset.folded = "";
                   dialog.style.setProperty("--adv-arrival", arrival.toFixed(4));
                 }
@@ -369,6 +471,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
             frame = requestAnimationFrame(draw);
           });
           gl.deleteTexture(texture);
+          gl.deleteTexture(panelTexture);
           gl.deleteBuffer(buffer);
           gl.deleteProgram(program);
           return result;
@@ -383,6 +486,7 @@ export const PageFold = forwardRef<PageFoldHandle>(function PageFold(_, ref) {
           const dialog = document.querySelector<HTMLElement>(".adv-dialog");
           if (dialog) {
             delete dialog.dataset.arriving;
+            delete dialog.dataset.journey;
             dialog.style.removeProperty("--adv-arrival");
             if (!closing) dialog.focus({ preventScroll: true });
           }
