@@ -159,14 +159,13 @@ function useMotionPreference() {
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-  const reduced = preference
-    ? preference === "reduced"
-    : Boolean(systemReduced);
+  // Start is an explicit request for the experience. OS preferences are diagnostic,
+  // not an indication of device performance or a reason to skip the story.
+  const reduced = preference === "reduced";
   return {
     reduced,
-    mode: systemReduced === null ? "system" : reduced ? "reduced" : "full",
-    showControl: Boolean(systemReduced) || preference !== null,
-    followsDevice: preference === null,
+    mode: reduced ? "reduced" : "full",
+    source: preference === null ? "default" : "visitor",
     toggle: () => {
       const next = reduced ? "full" : "reduced";
       trackAdvent("motion_changed", {
@@ -688,9 +687,9 @@ export function AdventCalendar() {
   useEffect(() => {
     logAdvent("motion.preference", {
       mode: motion.mode,
-      followsDevice: motion.followsDevice,
+      source: motion.source,
     });
-  }, [motion.mode, motion.followsDevice]);
+  }, [motion.mode, motion.source]);
   const music = useJingles();
   const begin = useCallback(() => {
     void music.start();
@@ -1002,12 +1001,13 @@ export function AdventCalendar() {
           }
           showDoor(day);
         };
+        const berlin = music.getFrame().mix > 0.5;
         const task = foldRef.current?.play(
           center,
-          music.getFrame().mix > 0.5,
+          berlin,
           () => {
             setEntering(true);
-            return music.fold(day, music.getFrame().mix > 0.5);
+            return music.fold(day, berlin);
           },
           reveal,
           day,
@@ -1294,27 +1294,16 @@ export function AdventCalendar() {
               });
             }}
           />
-          {motion.showControl ? (
-            <div className="adv-motion-control" data-motion-control>
-              {reducedMotion ? (
-                <span>
-                  {motion.followsDevice
-                    ? "Device: reduced motion"
-                    : "Reduced motion"}
-                </span>
-              ) : null}
-              <Button
-                aria-label={
-                  reducedMotion ? "Enable animations" : "Reduce motion"
-                }
-                variant="text"
-                size="small"
-                onClick={motion.toggle}
-              >
-                {reducedMotion ? "Enable animations" : "Reduce motion"}
-              </Button>
-            </div>
-          ) : null}
+          <div className="adv-motion-control" data-motion-control>
+            <Button
+              aria-label={reducedMotion ? "Full effects" : "Calmer effects"}
+              variant="text"
+              size="small"
+              onClick={motion.toggle}
+            >
+              {reducedMotion ? "Full effects" : "Calmer effects"}
+            </Button>
+          </div>
         </div>
         {experience === "ready" ? (
           <SlopSlider power={slop} onChange={changeSlop} />
@@ -1350,7 +1339,7 @@ export function AdventCalendar() {
       ) : null}
 
       <DoorDialog
-        sceneMix={reducedMotion ? Number(techno) : music.getFrame().mix}
+        sceneMix={music.getFrame().mix}
         techno={techno}
         door={activeDoor}
         openDays={openDays}

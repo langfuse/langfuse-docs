@@ -1,7 +1,7 @@
 "use client";
 
 import { logAdvent } from "./advent-debug";
-import { canvasScale } from "./render-budget";
+import { canvasScale, frameMonitor, renderPixels } from "./render-budget";
 
 import { useEffect, useRef } from "react";
 import type { MusicFrame } from "./jingles";
@@ -218,6 +218,8 @@ export function ShaderAtmosphere({
     let lost = false;
     let disposed = false;
     let dirty = true;
+    let pixels = renderPixels(700_000);
+    const monitor = frameMonitor();
     let width = 1;
     let height = 1;
 
@@ -318,7 +320,7 @@ export function ShaderAtmosphere({
       if (!input.reducedMotion) elapsed += dt;
       const music = input.getFrame();
       const target = input.techno ? 1 : 0;
-      mode = input.reducedMotion ? target : music.mix;
+      mode = music.mix;
       const build = input.reducedMotion ? 0 : music.build;
       setStyle(root, "--adv-scene", mode.toFixed(3));
       setStyle(root, "--adv-tension", build.toFixed(3));
@@ -340,6 +342,14 @@ export function ShaderAtmosphere({
         !lost &&
         !document.querySelector("[data-page-fold], [data-welcome-flight]")
       ) {
+        if (monitor.frame(now) && pixels > 200_000) {
+          pixels = Math.max(200_000, pixels * 0.7);
+          resize();
+          logAdvent("renderer.resolution_reduced", {
+            transition: "atmosphere",
+            pixels,
+          });
+        }
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.uniform2f(uniforms.u_resolution, canvas.width, canvas.height);
         gl.uniform2f(uniforms.u_size, width, height);
@@ -354,7 +364,7 @@ export function ShaderAtmosphere({
         );
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       }
-      if (!input.reducedMotion && (program || Math.abs(mode - target) > 0.001))
+      if ((!input.reducedMotion && program) || Math.abs(mode - target) > 0.001)
         schedule();
     }
 
@@ -362,7 +372,7 @@ export function ShaderAtmosphere({
       const bounds = canvas.getBoundingClientRect();
       width = Math.max(1, bounds.width);
       height = Math.max(1, bounds.height);
-      const scale = canvasScale(width, height, 700_000);
+      const scale = canvasScale(width, height, pixels);
       canvas.width = Math.max(1, Math.round(width * scale));
       canvas.height = Math.max(1, Math.round(height * scale));
       invalidate();

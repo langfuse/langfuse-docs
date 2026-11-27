@@ -1130,13 +1130,7 @@ export function AdventStyles() {
         animation-iteration-count: 1 !important;
         transition-duration: .01ms !important;
       }
-      @media (prefers-reduced-motion: reduce) {
-        .adv-page[data-motion="system"] *, .adv-page[data-motion="system"] *::before, .adv-page[data-motion="system"] *::after {
-          animation-duration: .01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: .01ms !important;
-        }
-      }
+
     `}</style>
   );
 }

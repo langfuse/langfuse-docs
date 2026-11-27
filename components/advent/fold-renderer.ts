@@ -14,11 +14,24 @@ uniform float aspect;
 uniform float berlin;
 uniform float variant;
 uniform float closing;
+uniform float gentle;
 uniform vec2 cardSize;
 vec2 mirror(vec2 p){return 1.-abs(mod(p,2.)-1.);}
 ${WINTER_OPTICS}
 void main(){
   float t=progress;
+  if(gentle>.5){
+    // A stationary frost pane: same reveal and sound clock, no camera flight.
+    float elapsed=closing>.5 ? 1.-t : t;
+    vec2 p=(uv-.5)*vec2(aspect,1.);
+    vec3 color=mix(vec3(.03,.15,.14),vec3(.025,.035,.10),berlin);
+    float ice=exp(-crystal(p/.72)*150.);
+    color+=mix(vec3(.55,.78,.68),vec3(.4,.43,.85),berlin)*ice*.6;
+    color+=texture2D(page,uv).rgb*.10;
+    float alpha=smoothstep(0.,.12,elapsed)*(1.-smoothstep(.68,1.,elapsed))*.9;
+    gl_FragColor=vec4(color,alpha);
+    return;
+  }
   if(closing>.5){
     // The actual window separates along six crystal faces and returns to its door.
     // The calendar stays at its real size throughout the return.
@@ -175,6 +188,7 @@ type Options = {
   berlin: boolean;
   variant: number;
   closing: boolean;
+  gentle: boolean;
 };
 
 /** A useful image from frame one, even with blocked fonts/images or no screenshot. */
@@ -265,6 +279,7 @@ export function createFoldRenderer(options: Options): FoldRenderer {
     gpu.uniform1f(uniform("berlin"), Number(options.berlin));
     gpu.uniform1f(uniform("variant"), options.variant % 3);
     gpu.uniform1f(uniform("closing"), Number(options.closing));
+    gpu.uniform1f(uniform("gentle"), Number(options.gentle));
     const progress = uniform("progress"),
       cardSize = uniform("cardSize"),
       hasPanel = uniform("hasPanel");
@@ -334,7 +349,11 @@ export function createCanvasFold(options: Options): FoldRenderer {
       const elapsed = options.closing ? 1 - t : t;
       const fade = Math.min(1, elapsed / 0.07, (1 - elapsed) / 0.1);
       ctx.globalAlpha = fade;
-      if (options.closing) {
+      if (options.gentle) {
+        ctx.globalAlpha =
+          fade * (elapsed < 0.68 ? 0.8 : (0.8 * (1 - elapsed)) / 0.32);
+        ctx.drawImage(page, 0, 0, w, h);
+      } else if (options.closing) {
         const flight = elapsed * elapsed * (3 - 2 * elapsed);
         const x = w / 2 + (options.x - 0.5) * w * flight,
           y = h / 2 + (options.y - 0.5) * h * flight;

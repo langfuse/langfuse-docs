@@ -52,7 +52,7 @@ vec3 winterVault(vec2 p,float travel,float bloom){
 `;
 
 /** One bounded WebGL layer; the existing canvas flight remains the fallback. */
-export function createWinterVault(canvas: HTMLCanvasElement) {
+export function createWinterVault(canvas: HTMLCanvasElement, gentle = false) {
   const gl = canvas.getContext("webgl", {
     alpha: true,
     premultipliedAlpha: false,
@@ -79,17 +79,18 @@ precision highp float;
 varying vec2 uv;
 uniform float progress;
 uniform float aspect;
+uniform float gentle;
 ${WINTER_OPTICS}
 void main(){
   float t=progress;
-  float travel=t*t*5.;
+  float travel=mix(t*t*5.,t*.12,gentle);
   vec2 p=(uv-.5)*vec2(aspect,1.);
-  p+=vec2(sin(t*6.),cos(t*5.))*.025*(1.-t);
+  p+=vec2(sin(t*6.),cos(t*5.))*.025*(1.-t)*(1.-gentle);
   vec3 col=winterVault(p,travel,smoothstep(.02,.3,t));
   // Interlaced red and blue threads become the ribs of the winter vault.
   float a=atan(p.y,p.x);
   float r=length(p);
-  float radius=.18+t*t*2.8;
+  float radius=mix(.18+t*t*2.8,.38,gentle);
   for(int i=0;i<2;i++){
     float side=float(i);
     float wave=radius+sin(a*3.+side*3.141593+t*3.)*.065;
@@ -143,6 +144,7 @@ void main(){
   const position = gl.getAttribLocation(program, "p");
   gl.enableVertexAttribArray(position);
   gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  gl.uniform1f(gl.getUniformLocation(program, "gentle"), Number(gentle));
   const progress = gl.getUniformLocation(program, "progress");
   const aspect = gl.getUniformLocation(program, "aspect");
   return {

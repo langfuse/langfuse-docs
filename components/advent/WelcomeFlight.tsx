@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { trackAdvent } from "./analytics";
 import { logAdvent } from "./advent-debug";
-import { canvasScale, frameMonitor } from "./render-budget";
+import { canvasScale, frameMonitor, renderPixels } from "./render-budget";
 import { createWinterVault } from "./winter-optics";
 import { WELCOME_SECONDS } from "./fold-timing";
 
@@ -29,15 +29,6 @@ export function WelcomeFlight({
   const skipRef = useRef<() => void>(() => {});
   useEffect(() => {
     if (!active) return;
-    if (reducedMotion) {
-      trackAdvent("transition_skipped", {
-        transition: "intro",
-        reason: "reduced_motion",
-      });
-      onReveal();
-      onComplete();
-      return;
-    }
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) {
@@ -50,12 +41,15 @@ export function WelcomeFlight({
       return;
     }
     const shaderCanvas = shaderRef.current;
-    const vault = shaderCanvas ? createWinterVault(shaderCanvas) : null;
+    const vault = shaderCanvas
+      ? createWinterVault(shaderCanvas, reducedMotion)
+      : null;
     const monitor = frameMonitor();
-    let shaderPixels = 650_000;
+    let shaderPixels = renderPixels(650_000);
     let fallbackLogged = !vault;
     trackAdvent("transition_started", {
       transition: "intro",
+      gentle: reducedMotion,
       renderer: vault ? "webgl" : "canvas",
     });
     let frame = 0;
@@ -81,7 +75,7 @@ export function WelcomeFlight({
     };
     document.addEventListener("keydown", keydown);
     const resize = () => {
-      const dpr = canvasScale(innerWidth, innerHeight);
+      const dpr = canvasScale(innerWidth, innerHeight, shaderPixels * 1.38);
       canvas.width = innerWidth * dpr;
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -124,9 +118,11 @@ export function WelcomeFlight({
       const w = innerWidth,
         h = innerHeight;
       const reveal = Math.max(0, (t - 0.69) / 0.31);
-      const speed = t * 5 + t * t * 4;
-      const cx = w / 2 + Math.sin(t * 6) * w * 0.06 * (1 - reveal);
-      const cy = h / 2 + Math.cos(t * 5) * h * 0.04 * (1 - reveal);
+      const speed = reducedMotion ? t * 0.12 : t * 5 + t * t * 4;
+      const cx =
+        w / 2 + Math.sin(t * 6) * w * (reducedMotion ? 0 : 0.06) * (1 - reveal);
+      const cy =
+        h / 2 + Math.cos(t * 5) * h * (reducedMotion ? 0 : 0.04) * (1 - reveal);
       ctx.clearRect(0, 0, w, h);
       const shaderDrawn = vault?.draw(t) ?? false;
       if (!shaderDrawn) {
@@ -160,12 +156,25 @@ export function WelcomeFlight({
           ctx.globalAlpha = Math.sin(depth * Math.PI) * 0.22;
           ctx.lineWidth = 1 + depth * 4;
           ctx.beginPath();
-          ctx.ellipse(cx, cy, radius, radius * 0.72, t * 0.7, 0, Math.PI * 2);
+          ctx.ellipse(
+            cx,
+            cy,
+            radius,
+            radius * 0.72,
+            reducedMotion ? 0 : t * 0.7,
+            0,
+            Math.PI * 2,
+          );
           ctx.stroke();
         }
       }
       // Snow catches the light in long streaks as the camera accelerates.
-      for (let i = 0; i < 100; i++) {
+      const density = Math.min(1, shaderPixels / 650_000);
+      for (
+        let i = 0;
+        i < (reducedMotion ? 0 : Math.max(32, Math.round(100 * density)));
+        i++
+      ) {
         const d = (i * 0.723 + speed * 0.28) % 1;
         const a = i * 2.718;
         const r = d * d * Math.max(w, h);
@@ -182,10 +191,13 @@ export function WelcomeFlight({
         ctx.stroke();
       }
       // Sprites follow corkscrew lanes, leaving the center clear to fly through.
-      for (let i = 0; i < 42; i++) {
+      for (let i = 0; i < Math.max(16, Math.round(42 * density)); i++) {
         const depth = (i * 0.6180339 + speed * 0.15) % 1;
         const spread = Math.pow(depth, 2.5);
-        const angle = i * 2.39996 + ((i % 3) * Math.PI * 2) / 3 + t * 0.8;
+        const angle =
+          i * 2.39996 +
+          ((i % 3) * Math.PI * 2) / 3 +
+          (reducedMotion ? 0 : t * 0.8);
         const radius = 22 + spread * Math.max(w, h) * 0.85;
         const x = cx + Math.cos(angle) * radius;
         const y = cy + Math.sin(angle) * radius * 0.75;
@@ -193,7 +205,7 @@ export function WelcomeFlight({
         ctx.globalAlpha = Math.min(1, depth * 5) * (1 - reveal * 0.5);
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(Math.sin(angle + t * 3) * 0.2);
+        ctx.rotate(reducedMotion ? 0 : Math.sin(angle + t * 3) * 0.2);
         ctx.scale(size / 100, size / 100);
         ctx.drawImage(sprites[i % 7], -80, -80, 160, 160);
         ctx.restore();

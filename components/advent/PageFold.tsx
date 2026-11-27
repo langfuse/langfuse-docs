@@ -6,7 +6,7 @@ import {
   createCanvasFold,
   type FoldRenderer,
 } from "./fold-renderer";
-import { canvasScale, frameMonitor } from "./render-budget";
+import { canvasScale, frameMonitor, renderPixels } from "./render-budget";
 import { logAdvent } from "./advent-debug";
 import { trackAdvent } from "./analytics";
 
@@ -70,14 +70,8 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
             transition: closing ? "door_close" : "door_open",
             day: variant,
             berlin,
+            gentle: reducedRef.current,
           };
-          if (reducedRef.current) {
-            trackAdvent("transition_skipped", {
-              ...context,
-              reason: "reduced_motion",
-            });
-            return true;
-          }
           busy.current = true;
           let renderer: FoldRenderer | undefined;
           let frame = 0;
@@ -96,7 +90,7 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
           const requested = performance.now();
           let start = requested;
           let outcome = "completed";
-          let pixels = 650_000;
+          let pixels = renderPixels(650_000);
           cancel.current = () => {
             cancelled = true;
             outcome = mounted.current ? "skipped" : "unmounted";
@@ -113,6 +107,7 @@ export const PageFold = forwardRef<PageFoldHandle, { reducedMotion: boolean }>(
               berlin,
               variant,
               closing,
+              gentle: reducedRef.current,
             };
             const dialogElement = closing
               ? document.querySelector<HTMLElement>(".adv-dialog")
