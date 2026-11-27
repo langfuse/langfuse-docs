@@ -1,0 +1,200 @@
+---
+title: "How we stopped vibe-editing our agent skill"
+date: 2026/11/19
+description: "External agent skills run on other people's machines, where you cannot trace them. Here is how we engineer the Langfuse skill across 22k biweekly clones using Modal sandboxes, Skill Management, and Halo."
+tag: engineering, agents, evaluation
+author: Lotte
+---
+
+import { Frame } from "@/components/Frame";
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import { SkillBoundaryDiagram } from "@/components/blog/SkillBoundaryDiagram";
+import { SkillDatasetItemDiagram } from "@/components/blog/SkillDatasetItemDiagram";
+import { SkillEngineeringLoopDiagram } from "@/components/blog/SkillEngineeringLoopDiagram";
+import { SkillOperationArchitectureDiagram } from "@/components/blog/SkillOperationArchitectureDiagram";
+import { SkillTestingHarnessDiagram } from "@/components/blog/SkillTestingHarnessDiagram";
+import { SkillTraceDiagram } from "@/components/blog/SkillTraceDiagram";
+import { SkillUniqueClonersChart } from "@/components/blog/SkillUniqueClonersChart";
+
+<BlogHeader
+  title="How we stopped vibe-editing our agent skill"
+  description="External agent skills run on other people's machines, where you cannot trace them. Here is how we engineer the Langfuse skill across 22k biweekly clones using Modal sandboxes, Skill Management, and Halo."
+  date="November 19, 2026"
+  authors={["lotteverheyden"]}
+/>
+
+<p className="bg-surface-cta-primary px-2 py-1 italic text-text-primary">Alternative title under consideration: "How to engineer an agent skill (instead of vibe-editing it)"</p>
+
+We started building the [Langfuse skill](https://github.com/langfuse/skills/tree/main/skills/langfuse) earlier this year as part of [making Langfuse accessible to external coding agents](/blog/2026-02-13-will-you-be-my-cli), alongside our [CLI](/docs/api-and-data-platform/features/cli), Markdown documentation endpoints, `llms.txt`, and [MCP servers](/docs/api-and-data-platform/features/mcp-server).
+
+I remember when this all started. [skills.sh](https://skills.sh) was big, and we were refreshing the page to see how many people had downloaded our skill, because that download counter was the full extent of the data we had on how users were interacting with it.
+
+By now, a lot has changed, and our setup has matured significantly. We now have much more observability into how agents use it, and have a good setup for testing and measuring the quality. And it's paying off: today, the `langfuse/skills` repository gets an average of 2,129 unique clones a day.
+
+<SkillUniqueClonersChart />
+
+How do we, as an AI observability and evals company, measure and improve our agent skill? While we always recommend getting to a good setup of the [AI engineering loop](/academy/ai-engineering-loop), this is not as straightforward when you work with skills. We combine different mechanisms to mimic this loop as closely as possible:
+
+<SkillEngineeringLoopDiagram mode="internal" />
+
+<Callout type="info">
+This post talks about our setup. If you're interested in what kinds of evals you should prioritize, see [How to evaluate an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
+</Callout>
+
+## Skills for your own agent vs. someone else's [#own-agent-vs-distributed]
+
+Before going into the complete setup, we should talk about the different ways skills are used, and how this influences how you evaluate them.
+
+### 1. Skills for an agent you build
+
+These skills act like a more complex, modular system prompt for an agent you own.
+
+<SkillBoundaryDiagram variant="own-agent" />
+
+Because you control the agent harness, tools, and environment, you can trace every run, so you have good observability into how the skill is used, and you can act on what you see. Your evals are informed by real usage, and you can reliably measure improvements with the exact harness the agent will use in production.
+
+### 2. Distributed skills
+
+Distributed skills are shipped for other people to install into their own coding agents.
+
+<SkillBoundaryDiagram variant="distributed" />
+
+Once someone clones the skill on their machine, you have no control over the harness and no direct observability into how the agent runs. Without this observability, you can only evaluate and improve the skill through the offline half of the loop: curating datasets of representative user tasks to the best of your abilities and running different coding agents against them.
+
+<SkillEngineeringLoopDiagram mode="offline" />
+
+**One way to gather feedback on distributed skills** is to expose an endpoint for agents to provide feedback, and explicitly add instructions to the skill to submit feedback that way.
+
+We added both a `submitFeedback` MCP tool and an API endpoint to submit these. The feedback ends up in a Slack channel we monitor.
+
+<Frame fullWidth>
+  ![Langfuse Feedback Intake Slack message showing skill feedback submitted via the public API](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-feedback-slack.png)
+</Frame>
+
+<Callout type="warning">
+Be careful about users accidentally leaking information to you. We added instructions to ask the user for explicit permission before submitting feedback to us.
+
+```markdown filename="langfuse/skills/langfuse/references/skill-feedback.md"
+...
+Show every submitted field exactly as it will be sent and ask for explicit
+permission. Do not submit without approval.
+...
+```
+</Callout>
+
+## Bringing everything together in one loop [#bringing-everything-together]
+
+The Langfuse skill is used both as a skill for our own in-app agent, [Halo](/blog/2026-10-23-halo), and as a distributed skill for external coding agents. Because of this setup, we can actually complete the loop quite well.
+
+Everything starts from a single source of truth in [`langfuse/skills`](https://github.com/langfuse/skills) on GitHub, which ships to both Halo (through [Langfuse Skill Management](/docs/skill-management/overview)) and external coding agents:
+
+<SkillOperationArchitectureDiagram />
+
+Both contribute value to the overall loop: Halo feeds live production traces (tracing & monitoring), while external coding agents are used more broadly and can give feedback through the feedback endpoints, although this is less frequent. These then feed into the evals used for measuring experiment results.
+
+## Online observability and choosing what to improve (tracing & monitoring) [#online-observability]
+
+The traces coming in from Langfuse Halo track skill interactions with tool observations like `skill` and `skill_read`.
+
+<SkillTraceDiagram />
+
+On each generation, you see which skill versions were **Available** to the model and whether it **Requested** a skill.
+
+<Tabs items={["Skill available", "Skill requested"]}>
+<Tab>
+
+<Frame fullWidth>
+  ![Langfuse generation preview showing the langfuse v1 skill as available](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-generation-available.png)
+</Frame>
+
+</Tab>
+<Tab>
+
+<Frame fullWidth>
+  ![Langfuse generation preview showing the langfuse v1 skill requested with SKILL.md](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-generation-requested.png)
+</Frame>
+
+</Tab>
+</Tabs>
+
+On the skill-loading tool call, you see the exact skill version and the specific files (`SKILL.md` and individual `references/*.md` files) that were **Loaded** into context.
+
+<Frame fullWidth>
+  ![Langfuse skill_read tool observation showing 1 loaded skill and references/setting-up-evals.md loaded into context](/images/blog/2026-11-19-engineering-the-langfuse-skill/skill-tool-read.png)
+</Frame>
+
+To decide what to improve next, we combine these live traces with explicit feedback submitted through our feedback endpoints and implicit [conversation signals](/academy/monitoring/capturing-signals#conversation-signals) such as users correcting or rephrasing their request.
+
+## Offline evaluation & experimentation setup (datasets, experiment, evaluate) [#offline-test-harness]
+
+At a high level, our offline evaluation setup consists of a Langfuse project, Modal to spin up coding agents, and a [GitHub repo](https://github.com/langfuse/coding-agent-testing) for the code and test environment files we use to simulate realistic scenarios.
+
+<SkillTestingHarnessDiagram />
+
+### 1. Datasets, skills, and coding environments
+
+We maintain our datasets alongside versioned skills in [Langfuse Skill Management](/docs/skill-management/version-control), in a dedicated project. There are **datasets for specific use cases** (e.g., each use case covered by a reference file), and two **routing datasets**:
+
+1. One to test whether the Langfuse skill gets invoked at all.
+2. One that tests invocation of specific reference files, mainly checking whether reference file descriptions are competing for the same use cases.
+
+Each dataset item follows a simple structure:
+
+- **Input:** the user prompt handed to the coding agent.
+- **Expected output:** varies depending on what we are evaluating (for example, a reference file the agent should load or criteria for a workflow).
+- **Metadata:** an optional `env_folder` field when we want the agent to spin up inside a specific starter environment from our [`langfuse/coding-agent-testing`](https://github.com/langfuse/coding-agent-testing) repository.
+
+<SkillDatasetItemDiagram />
+
+We bake these starter environments into our Modal sandbox image so every run starts from an identical, realistic codebase.
+
+### 2. Triggering an experiment from Langfuse
+
+To test a change, we trigger a [remote experiment](/docs/evaluation/experiments/experiments-via-sdk#configure-webhook) directly from a dataset in the Langfuse UI. Langfuse sends a webhook `POST` to Modal with the dataset name, the coding agents to test, and which skill version to use:
+
+```json
+{
+  "run_configs": ["claude-code", "codex", "cursor"],
+  "run_name": "skill-eval-v12",
+  "skill": {
+    "name": "langfuse",
+    "version": 12
+  },
+  "reset_sandbox": true
+}
+```
+
+Triggering runs from the Langfuse UI means **anyone on the team can launch an experiment** without local scripts or credentials. Because skill versions in Langfuse are immutable, we can benchmark a candidate version before promoting it to `production`.
+
+### 3. Running agents in isolated Modal sandboxes
+
+Modal's orchestrator fetches the dataset items and spins up an isolated sandbox for each `(dataset item × coding agent)` pair. Before an agent starts, the sandbox loads the item's starter codebase (if any) and installs the requested skill version from Langfuse.
+
+Because many test prompts ask the coding agent to create prompts, datasets, or traces in Langfuse, we separate our setup into two Langfuse projects:
+
+- **The harness project** holds our benchmark datasets, versioned skills, coding-agent execution traces, and evaluation scores.
+- **A scratch project** provides the Langfuse credentials injected into the sandbox and is wiped clean before each run, so agent side effects never pollute our evaluation data or leak into later runs.
+
+### 4. Collecting traces and comparing results in Langfuse
+
+Each sandbox sends traces to the harness project via our open-source observability plugins ([Claude Code](https://github.com/langfuse/claude-observability-plugin), [Codex](https://github.com/langfuse/codex-observability-plugin), and [Cursor](https://github.com/langfuse/cursor-observability-plugin)), where Modal links them to dataset items so we can score and compare runs side by side in Langfuse.
+
+## Putting the loop into practice [#putting-the-loop-into-practice]
+
+This turns skill engineering back into standard AI engineering:
+
+- **Online tracing and monitoring** in Halo show us which reference files get loaded in practice, where routing misses on real user phrasing, which tool sequences fail, and where users push back or rephrase ([conversation signals](/academy/monitoring/capturing-signals#conversation-signals)).
+- **Offline dataset building and experimentation** take those real failure modes from Halo traces, turn them into dataset items, and test candidate skill fixes across Claude Code, Codex, and Cursor in Modal sandboxes.
+- **Deployment** publishes the verified change to `langfuse/skills` on GitHub for external coding agents and syncs the new version to Langfuse Skill Management for Halo.
+
+## How to engineer your own agent skills [#how-to-engineer-your-own-skills]
+
+Whether you are building skills for your own engineering team or publishing them for users of your developer product, three practices carry over directly:
+
+**1. Manage skills as versioned artifacts and link them to traces.** A skill is a multi-file instruction set with its own routing logic, so unversioned edits make regressions impossible to attribute. Store and version skills in [Skill Management](/docs/skill-management/overview) and attach [skill tracing attributes](/docs/skill-management/tracing) so every trace shows which skill version was available and which reference files the agent read.
+
+**2. Test coding-agent workflows in isolated sandboxes.** Run full coding agents against starter repositories backed by a separate, auto-reset scratch environment so runs stay reproducible and never pollute your benchmark project.
+
+**3. Share external skills with an agent you host.** Asking external agents to submit explicit feedback helps at the margins, but user friction keeps coverage low. If you distribute a skill publicly, running that same skill inside an internal or in-app agent you control gives you the live traces needed to close the AI engineering loop.
+
+For a deeper look at what we actually evaluate and measure inside this harness, see [How to evaluate an agent skill](/blog/2026-11-20-what-to-evaluate-in-an-agent-skill).
