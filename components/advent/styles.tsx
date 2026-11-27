@@ -576,6 +576,15 @@ export function AdventStyles() {
       .adv-guard-result { min-height: 1.5em; color: var(--text-tertiary); font-size: 11px; opacity: 0; transition: opacity .3s; }
       .adv-guard-result[data-visible="true"] { opacity: 1; }
 
+      /* Budget meter (day 6) */
+      .adv-budget-track { position: relative; height: 14px; border-radius: 999px; background: var(--surface-bg); border: 1px solid var(--line-structure); overflow: hidden; }
+      .adv-budget-bar { height: 100%; border-radius: 999px; background: var(--adv-gold); transition: width .6s cubic-bezier(.2, .9, .3, 1), background-color .3s; }
+      .adv-budget-track[data-full="true"] .adv-budget-bar { background: var(--adv-red); }
+      .adv-budget-mark { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--text-tertiary); opacity: .6; }
+      .adv-budget-event { align-self: flex-start; padding: 6px 10px; border-radius: 6px; background: var(--surface-bg); border: 1px solid var(--line-structure); font-size: 12px; color: var(--text-secondary); }
+      .adv-budget-event[data-tone="warn"] { border-color: var(--adv-gold); color: var(--text-primary); }
+      .adv-budget-event[data-tone="block"] { border-color: var(--adv-red); color: var(--adv-accent-text); }
+
       /* Runtime benchmark (day 5) */
       .adv-bench-track { height: 10px; border-radius: 999px; background: var(--surface-bg); border: 1px solid var(--line-structure); overflow: hidden; }
       .adv-bench-bar { height: 100%; border-radius: 999px; background: var(--text-disabled); transform-origin: left; animation: adv-bench-grow .9s cubic-bezier(.2, .9, .3, 1) both; }

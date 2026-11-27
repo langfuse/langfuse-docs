@@ -6,7 +6,6 @@ import {
   Cloud,
   Cpu,
   Filter,
-  GitBranch,
   Globe,
   KeyRound,
   Layers,
@@ -21,6 +20,7 @@ import {
   Tag,
   Tags,
   ToggleRight,
+  Wallet,
   Waypoints,
   Workflow,
   Zap,
@@ -46,6 +46,7 @@ export type DoorAnimation =
   | { kind: "patterns"; pattern: string }
   | { kind: "chat"; question: string; answer: string }
   | { kind: "gateway" }
+  | { kind: "budget"; limit: number; owner: string }
   | {
       kind: "guardrail";
       active: GuardrailTemplate;
@@ -178,19 +179,15 @@ export const ADVENT_DOORS: AdventDoor[] = [
   },
   {
     day: 6,
-    title: "GitHub Copilot through the gateway",
+    title: "Cap spend with budgets",
     description:
-      "Bring your own model to GitHub Copilot via the gateway, so Copilot usage shows up next to all your other AI traffic.",
-    icon: GitBranch,
+      "A coding agent stuck in a loop can spend a month's budget in an afternoon. Set budgets per gateway key, per user, or for the whole organization, and get an email at 85% and 95%. Once a budget is reached, the gateway rejects requests until it resets.",
+    icon: Wallet,
     link: {
-      type: "docs",
-      href: "/integrations/developer-tools/github-copilot-gateway",
+      type: "changelog",
+      href: `/changelog/2026-11-19-ai-gateway-budgets?${ADVENT_UTM}`,
     },
-    animation: {
-      kind: "route",
-      from: ["GitHub Copilot"],
-      to: ["OpenAI", "Anthropic", "OpenRouter"],
-    },
+    animation: { kind: "budget", limit: 10, owner: "Jane's Claude Code" },
   },
   {
     day: 7,

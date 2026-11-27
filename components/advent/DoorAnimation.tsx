@@ -860,6 +860,68 @@ function BenchmarkAnimation({
   );
 }
 
+const BUDGET_STEPS: {
+  spend: number;
+  event: string;
+  tone?: "warn" | "block";
+}[] = [
+  { spend: 1.4, event: "200 OK, +$1.40" },
+  { spend: 3.6, event: "200 OK, +$2.20" },
+  { spend: 5.9, event: "200 OK, +$2.30" },
+  { spend: 8.6, event: "Email: 85% of budget used", tone: "warn" },
+  { spend: 9.6, event: "Email: 95% of budget used", tone: "warn" },
+  { spend: 10, event: "Email: budget reached", tone: "warn" },
+  { spend: 10, event: "429 spend_limit_exceeded", tone: "block" },
+  { spend: 10, event: "429 spend_limit_exceeded", tone: "block" },
+];
+
+/** A key's monthly spend fills up, warns, and then requests are rejected. */
+function BudgetAnimation({ limit, owner }: { limit: number; owner: string }) {
+  const tick = useTick(900);
+  const step = BUDGET_STEPS[tick % BUDGET_STEPS.length];
+  const spend = (step.spend / 10) * limit;
+  const ratio = spend / limit;
+
+  return (
+    <Stage>
+      <div className="flex w-full max-w-[440px] flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3 text-[12px]">
+          <span className="truncate font-medium">{owner}</span>
+          <span className="shrink-0 font-mono tabular-nums text-text-secondary">
+            ${spend.toFixed(2)} of ${limit} monthly
+          </span>
+        </div>
+        <div className="adv-budget-track" data-full={ratio >= 1}>
+          <div
+            className="adv-budget-bar"
+            style={{ width: `${Math.min(ratio, 1) * 100}%` }}
+          />
+          <span className="adv-budget-mark" style={{ left: "85%" }} />
+          <span className="adv-budget-mark" style={{ left: "95%" }} />
+        </div>
+        <div className="relative h-3 font-mono text-[10px] text-text-tertiary">
+          {[85, 95].map((mark) => (
+            <span
+              key={mark}
+              className="absolute -translate-x-1/2"
+              style={{ left: `${mark}%` }}
+            >
+              {mark}%
+            </span>
+          ))}
+        </div>
+        <div
+          key={`event-${tick}`}
+          className="adv-budget-event adv-slide-in font-mono"
+          data-tone={step.tone}
+        >
+          {step.event}
+        </div>
+      </div>
+    </Stage>
+  );
+}
+
 export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
   switch (spec.kind) {
     case "route":
@@ -898,6 +960,8 @@ export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
           label={spec.label}
         />
       );
+    case "budget":
+      return <BudgetAnimation limit={spec.limit} owner={spec.owner} />;
     case "benchmark":
       return <BenchmarkAnimation metrics={spec.metrics} />;
   }
