@@ -20,7 +20,7 @@ Send Loom’s server traces to Langfuse over OpenTelemetry to see where a memory
 
 ### Get project API keys
 
-Create a Langfuse project and get its public and secret keys from the project settings. If you need a Loom server, set one up with the [Loom quickstart](https://clickhouse.github.io/loom/getting-started/quickstart/).
+Create a Langfuse project and get its public and secret keys from the project settings. If you need a Loom server, set one up with the [Loom quickstart](https://loom.clickhouse.com/docs/getting-started/quickstart).
 
 ### Configure the Loom server
 
@@ -45,7 +45,7 @@ docker compose --project-directory "$HOME/.loom" up -d --force-recreate loom
 
 ### Verify a trace in Langfuse
 
-Run a memory search from your agent or with the [Loom HTTP quickstart](https://clickhouse.github.io/loom/getting-started/quickstart/#4-first-memory-over-http). Open **Tracing** in your Langfuse project and select the `memory.search` trace. Expand it to inspect retrieval spans and any embedding or generation calls made by Loom.
+Run a memory search from your agent or with the [Loom HTTP quickstart](https://loom.clickhouse.com/docs/getting-started/quickstart#4-first-memory-over-http). Open **Tracing** in your Langfuse project and select the `memory.search` trace. Expand it to inspect retrieval spans and any embedding or generation calls made by Loom.
 
 If the trace is missing, check the base URL, key pair, and `LOOM_OTEL_ENABLED`. Loom reports the local exporter state at `GET /v1/health?include=langfuse`.
 
@@ -53,6 +53,6 @@ If the trace is missing, check the base URL, key pair, and `LOOM_OTEL_ENABLED`. 
 
 ## What Loom sends [#what-loom-sends]
 
-Loom exports server operation spans and includes latency, token usage, and cost where available. [Model prompt and completion capture](https://clickhouse.github.io/loom/features/integrations/langfuse/#what-text-leaves-loom) defaults to off and can be configured per namespace.
+Loom exports server operation spans and includes latency, token usage, and cost where available. [Model prompt and completion capture](https://loom.clickhouse.com/docs/features/integrations/langfuse#what-text-leaves-loom) defaults to off and can be configured per namespace.
 
-Loom also posts [retrieval-quality scores](https://clickhouse.github.io/loom/features/integrations/langfuse/#scores) onto each search trace: `retrieval_confidence`, `top_similarity`, `abstained`, and `abstain_reason`. `code.ask` traces add `code_ask_cache_hit` and `code_ask_coverage`. To have an LLM judge write a `retrieval_relevance` score, set `LOOM_RETRIEVAL_JUDGE_SAMPLE_RATE` above `0` (default `0`). Each sampled search costs one extra model call.
+Loom also posts [retrieval-quality scores](https://loom.clickhouse.com/docs/features/integrations/langfuse#scores) onto each search trace: `retrieval_confidence`, `top_similarity`, `abstained`, and `abstain_reason`. `code.ask` traces add `code_ask_cache_hit` and `code_ask_coverage`. To have an LLM judge write a `retrieval_relevance` score, set `LOOM_RETRIEVAL_JUDGE_SAMPLE_RATE` above `0` (default `0`). Each sampled search costs one extra model call.
