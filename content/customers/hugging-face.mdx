@@ -54,7 +54,7 @@ import { CustomerStoryCTA } from "@/components/customers/CustomerStoryCTA";
 
 The [Hugging Face Hub](https://huggingface.co/)'s core value is simple: it's where you go to find open-source AI models and datasets, filterable by task, library, license, and more. Currently, the hub supports nearly 3 million public models and 1 million public datasets. Still, a meaningful share of the 100 to 350 AI papers published on arXiv each day describe open-source artifacts that never reach the Hub. Models and datasets remain buried in GitHub repositories or Google Drive links, limiting their visibility for both Hugging Face and their authors.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth>
   ![Hugging Face Hub model catalog showing filters and nearly three million public models](/images/customers/hugging-face/open-models.png)
 </Frame>
 
@@ -64,13 +64,13 @@ Closing that gap is Niels Rogge's job. As a Machine Learning Engineer at Hugging
 
 Niels started by reading papers, finding the corresponding GitHub repositories, and contacting authors himself. When the volume outgrew him, he built an agent that runs overnight on Hugging Face Jobs. For each new paper, it looks for released models or datasets and checks whether they are already on the Hub. If an artifact is missing, it opens a GitHub issue; if it is already there but lacks the metadata needed for discovery, it opens a pull request.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth>
   ![Workflow from new arXiv papers through classification and Hub checks to GitHub issues or pull requests](/images/customers/hugging-face/workflow.png)
 </Frame>
 
 To ensure the highest-quality contributions to the Hugging Face community, Niels wants every message to meet his standards and reflect what he would have written himself. It's important that he trusts the agent to act on his behalf. He writes its messages from the same templates he used doing this by hand, and keeps the tone as if it's him reaching out. It's working: authors send him thank-yous on LinkedIn and follow-up emails, and Niels is able to scale his personal follow-ups, effectively replacing himself.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth>
   ![GitHub issue opened by Niels Rogge inviting an author to publish VERA-V artifacts on Hugging Face](/images/customers/hugging-face/github-example.png)
 </Frame>
 
@@ -82,7 +82,7 @@ Wiring Langfuse in was little work. Setup took a few lines of the [Langfuse Pyth
 
 His approach: use each paper's arXiv ID as the [session identifier](/docs/observability/features/sessions) instead. Rather than a session grouping the back-and-forth of one conversation, it now groups everything that happens for one paper. One paper, one session. Each agent runs on that paper, one trace. The four [LLM-call steps](/docs/observability/data-model#observations-and-traces) inside that run (finding a GitHub URL, checking a project page as fallback, classifying, taking the majority vote) became observations underneath.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth>
   ![Langfuse tracing view showing the Hugging Face paper-processing pipeline and parse_artifacts input and output](/images/customers/hugging-face/detailed-trace.png)
 </Frame>
 
@@ -126,7 +126,7 @@ The clearest value Niels got from Langfuse was simply seeing what the agent's LL
 
 After those initial fixes were in, Niels wanted to approach improvements more systematically. Inspired by Hamel Husain's framework for [error analysis](/academy/monitoring/error-analysis), he performed a "manual stress test" on 50 recent pull requests, comparing what his agent did, to what he would have manually done. Evaluation was done in a simple spreadsheet.
 
-<Frame fullWidth className="w-full">
+<Frame fullWidth>
   ![Spreadsheet used to review Hugging Face pull requests and flag hallucinated code and GitHub URLs](/images/customers/hugging-face/error-analysis.png)
 </Frame>
 

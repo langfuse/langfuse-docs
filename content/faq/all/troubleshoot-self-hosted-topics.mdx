@@ -1,0 +1,32 @@
+---
+title: How do I troubleshoot self-hosted Topics?
+description: Resolve missing trace processing, provider rate limits, and worker tuning for Topics on self-hosted Langfuse.
+tags: [self-hosting]
+---
+
+# Troubleshoot self-hosted Topics
+
+Use these checks when [Topics](/docs/observability/features/topics) does not process traces or hits provider rate limits on a self-hosted Langfuse v4.86.0 or later deployment.
+
+## No traces are processed [#no-traces-processed]
+
+- Topics only processes traces ingested through OpenTelemetry into the v4 events table. Confirm `LANGFUSE_MIGRATION_V4_WRITE_MODE` is not set to `legacy`.
+- Confirm `LANGFUSE_EVENTS_DISPATCH_ENABLED` and `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED` are not set to `false` on your workers. Both default to `true` since v4.86.0; remove any `false` override and redeploy.
+- Check the live map's filters and sampling rate. Together they decide which traces Topics analyzes.
+- Wait for the trace readiness delay (about 10 minutes after a trace goes idle by default).
+
+## Provider rate limits or worker load [#provider-rate-limits]
+
+Each Topics job makes one summary call and one embedding call. By default, each worker runs up to 20 jobs concurrently per queue shard, and total concurrency grows with worker replicas. Lower the limit if your provider returns 429 errors:
+
+| Variable                                             | Default  | Purpose                                                                            |
+| ---------------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
+| `LANGFUSE_TOPICS_TRACE_QUEUE_PROCESSING_CONCURRENCY` | `20`     | Topics jobs run at once, per worker and queue shard                                |
+| `LANGFUSE_TOPICS_MAX_INPUT_CHARACTERS`               | `500000` | Maximum transcript characters sent per summary request (about 135k to 150k tokens) |
+| `LANGFUSE_TOPICS_NIGHTLY_REFIT_HOUR_UTC`             | `4`      | UTC hour when the nightly map refit starts                                         |
+
+## Dedicated dispatch worker, resources, and embeddings [#advanced-tuning]
+
+- **Dedicated dispatch worker (optional):** On large deployments you can run dispatch on a dedicated worker pool by setting `QUEUE_CONSUMER_EVENTS_DISPATCH_QUEUE_IS_ENABLED=false` on the other workers. This is not required for correctness because the dispatcher takes a Redis lock so only one worker dispatches at a time.
+- **Worker resources:** Clustering runs inside the worker (the official image includes the native module for amd64 and arm64) and uses worker CPU and memory. Leave headroom next to ingestion and evaluation jobs; see [sizing and scaling](/self-hosting/configuration/scaling).
+- **Embedding dimensions:** Langfuse accepts 64 to 2,048 embedding dimensions and defaults to 1,024. Pick a value your embedding model supports; the model must return exactly that many dimensions.
