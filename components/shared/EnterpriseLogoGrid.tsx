@@ -128,12 +128,15 @@ interface EnterpriseLogoGridProps {
   small?: boolean;
   /** When set, only these company names are shown, in this order. */
   names?: readonly string[];
+  /** Hides the "Read story" tag on logos that link to a customer story. */
+  hideStoryTags?: boolean;
 }
 
 export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
   names,
+  hideStoryTags = false,
 }: EnterpriseLogoGridProps) => {
   const shouldReduceMotion = useReducedMotion();
   const selectedCompanies = names
@@ -206,7 +209,7 @@ export const EnterpriseLogoGrid = ({
               }
               role="gridcell"
             >
-              {hasStory && (
+              {hasStory && !hideStoryTags && (
                 <div className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
                   <div
                     className={cn(
