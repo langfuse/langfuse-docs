@@ -25,6 +25,7 @@ import { AhrefsAnalytics } from "@/components/analytics/ahrefs";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "../style.css";
 import "../src/overrides.css";
+import "../src/clickhouse-skin.css";
 
 const interVariable = Inter({
   subsets: ["latin"],
@@ -80,7 +81,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={`${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
+      className={`ch-skin ${interVariable.variable} ${geistMono.variable} ${f37Analog.variable}`}
     >
       <body className="font-sans antialiased">
         {process.env.NODE_ENV === "development" && (
