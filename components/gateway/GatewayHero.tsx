@@ -58,8 +58,6 @@ function HeroCopy({ centered = false }: { centered?: boolean }) {
 
 // Cancels the page column padding so the hero runs edge to edge under the nav.
 const BLEED = "not-prose -mx-4 -mt-4 sm:-mx-6 md:-mx-8 md:-mt-8";
-// Column padding plus the panel's section padding: the copy lines up with the panel text.
-const COPY_INSET = "px-9 sm:px-16 md:px-18";
 
 /** Full-bleed hero that sits above the page panel, on the page background. */
 export function GatewayHero({ layout }: { layout: GatewayHeroLayout }) {
@@ -69,31 +67,31 @@ export function GatewayHero({ layout }: { layout: GatewayHeroLayout }) {
     <section
       ref={heroRef}
       data-use-case-section="hero"
-      className={cn("relative h-[560px] overflow-hidden", BLEED)}
+      className={cn("relative h-[560px] overflow-hidden", styles.hero, BLEED)}
     >
-      <GatewayMoire pointerScopeRef={heroRef} className={styles.fadeVertical} />
+      <GatewayMoire
+        pointerScopeRef={heroRef}
+        className={styles.fadeAroundCopy}
+      />
       <div
         className={cn(
           "relative flex h-full flex-col items-start justify-center",
-          COPY_INSET,
+          styles.copy,
         )}
       >
-        <div className="relative isolate flex flex-col items-start">
-          <div className={styles.clearing} aria-hidden />
-          <HeroCopy />
-        </div>
+        <HeroCopy />
       </div>
     </section>
   ) : (
     <section
       ref={heroRef}
       data-use-case-section="hero"
-      className={cn("relative overflow-hidden", BLEED)}
+      className={cn("relative overflow-hidden", styles.hero, BLEED)}
     >
       <div
         className={cn(
           "mx-auto flex max-w-[760px] flex-col items-center pt-[70px] text-center",
-          COPY_INSET,
+          styles.copy,
         )}
       >
         <HeroCopy centered />
