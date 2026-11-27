@@ -1093,7 +1093,9 @@ export function AdventCalendar() {
 
       <div className="adv-mixer" data-no-snowball>
         <MusicVolume volume={music.volume} onVolume={music.changeVolume} />
-        <SlopSlider power={slop} onChange={changeSlop} />
+        {experience === "ready" ? (
+          <SlopSlider power={slop} onChange={changeSlop} />
+        ) : null}
       </div>
       <SlopDecorations power={slop} />
 
