@@ -20,6 +20,7 @@ function HeroCopy({ centered = false }: { centered?: boolean }) {
       </p>
       <h2
         id="see-and-control"
+        data-toc-title="Langfuse AI Gateway"
         className="mt-4 text-balance text-[40px] leading-[1.02] tracking-[-0.02em] text-text-primary sm:text-[60px]"
       >
         <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">

@@ -53,6 +53,7 @@ export function GatewayUpdateSignup() {
         <p className="text-[13px] text-text-tertiary">Updates</p>
         <h2
           id="updates"
+          data-toc-title="Updates"
           className="mt-2 text-[40px] leading-[1.02] tracking-[-0.02em] text-text-primary sm:text-[60px]"
         >
           Langfuse AI Gateway updates
