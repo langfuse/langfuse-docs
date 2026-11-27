@@ -1,4 +1,5 @@
 import type { toCanvas } from "html-to-image";
+import { logAdvent } from "./advent-debug";
 type Options = NonNullable<Parameters<typeof toCanvas>[1]>;
 
 // html-to-image otherwise copies hundreds of computed properties per element.
@@ -18,19 +19,29 @@ transform transform-origin transform-style perspective backface-visibility rotat
 clip-path fill stroke stroke-width stroke-linecap stroke-linejoin stroke-dasharray stroke-dashoffset
 paint-order vector-effect stop-color stop-opacity`.split(/\s+/);
 
+let library: Promise<typeof import("html-to-image")> | undefined;
 let fonts: Promise<string> | undefined;
+export async function warmAdventCapture() {
+  const renderer = await (library ??= import("html-to-image"));
+  const page = document.querySelector<HTMLElement>(".adv-page");
+  if (page)
+    fonts ??= renderer
+      .getFontEmbedCSS(page, {
+        preferredFontFormat: "woff2",
+      })
+      .catch(() => {
+        fonts = undefined;
+        logAdvent("capture.fonts_failed");
+        return "";
+      });
+  return renderer;
+}
 export async function captureAdvent(node: HTMLElement, options: Options) {
-  const { toCanvas, getFontEmbedCSS } = await import("html-to-image");
-  // Cache fonts for both the board and page; a failed fetch may be retried later.
-  fonts ??= getFontEmbedCSS(
-    document.querySelector<HTMLElement>(".adv-page") ?? node,
-    {
-      preferredFontFormat: "woff2",
-    },
-  ).catch(() => {
-    fonts = undefined;
-    return "";
+  const start = performance.now();
+  logAdvent("capture.start", {
+    target: node.classList.contains("adv-dialog") ? "dialog" : "calendar",
   });
+  const { toCanvas } = await warmAdventCapture();
   // SVG descendants are deep-cloned by the library without computed styles.
   // Preserve the scene's class-based fills/visibility inside the captured image.
   const svgStyles = ["adv-santa-harness", "adv-santa-coat", "adv-shadow"]
@@ -41,12 +52,12 @@ export async function captureAdvent(node: HTMLElement, options: Options) {
       return `.${name}{fill:${style.fill};opacity:${style.opacity}}`;
     })
     .join("");
-  return toCanvas(node, {
+  const canvas = await toCanvas(node, {
     ...options,
     includeStyleProperties: CAPTURE_STYLES,
     // Computed grid auto-margins report 0px even while centering the live board.
     fontEmbedCSS:
-      (await fonts) +
+      ((await fonts) ?? "") +
       svgStyles +
       ".adv-calendar{margin-left:auto!important;margin-right:auto!important}",
     // Foreign-object rasterization flattens 3D backfaces; the visible front must win.
@@ -54,4 +65,10 @@ export async function captureAdvent(node: HTMLElement, options: Options) {
       !element.classList?.contains("adv-door-back") &&
       (options.filter?.(element) ?? true),
   });
+  logAdvent("capture.complete", {
+    duration_ms: Math.round(performance.now() - start),
+    width: canvas.width,
+    height: canvas.height,
+  });
+  return canvas;
 }

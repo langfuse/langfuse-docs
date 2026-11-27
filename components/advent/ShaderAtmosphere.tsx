@@ -1,5 +1,6 @@
 "use client";
 
+import { logAdvent } from "./advent-debug";
 import { canvasScale } from "./render-budget";
 
 import { useEffect, useRef } from "react";
@@ -284,6 +285,7 @@ export function ShaderAtmosphere({
       return true;
     }
     initialize();
+    logAdvent("atmosphere.renderer", { renderer: canvas.dataset.renderer });
 
     const root = canvas.parentElement;
     const setStyle = (el: HTMLElement | null, key: string, value: string) => {
@@ -306,7 +308,7 @@ export function ShaderAtmosphere({
         return;
       }
       const input = inputRef.current;
-      if (!dirty && lastTime && now - lastTime < 1000 / 30) {
+      if (!dirty && lastTime && now - lastTime < 1000 / 30 - 1) {
         schedule();
         return;
       }
@@ -374,6 +376,7 @@ export function ShaderAtmosphere({
     }
     function contextLost(event: Event) {
       event.preventDefault();
+      logAdvent("atmosphere.context_lost");
       lost = true;
       canvas.dataset.renderer = "fallback";
       cancelAnimationFrame(frame);
@@ -381,6 +384,7 @@ export function ShaderAtmosphere({
       invalidate();
     }
     function contextRestored() {
+      logAdvent("atmosphere.context_restored");
       lost = !initialize();
       lastTime = 0;
       resize();

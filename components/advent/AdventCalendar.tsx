@@ -30,6 +30,14 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { PageFold, type PageFoldHandle } from "./PageFold";
+import {
+  adventDebugEnabled,
+  copyAdventDiagnostics,
+  installAdventDebug,
+  logAdvent,
+} from "./advent-debug";
+import { trackAdvent, createAdventInteractionBatch } from "./analytics";
+import { warmAdventCapture } from "./capture";
 import { WelcomeFlight } from "./WelcomeFlight";
 import { LogoKnot, SantaHat } from "./LogoKnot";
 import { SlopSlider, SlopDecorations, slopPhrase } from "./Slop";
@@ -139,16 +147,36 @@ function writeStorage(key: string, value: string) {
   }
 }
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
+function useMotionPreference() {
+  const [systemReduced, setSystemReduced] = useState<boolean | null>(null);
+  const [preference, setPreference] = useState<"full" | "reduced" | null>(null);
   useEffect(() => {
+    const stored = readStorage("langfuse-advent-motion");
+    if (stored === "full" || stored === "reduced") setPreference(stored);
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(query.matches);
+    const update = () => setSystemReduced(query.matches);
     update();
     query.addEventListener("change", update);
     return () => query.removeEventListener("change", update);
   }, []);
-  return reduced;
+  const reduced = preference
+    ? preference === "reduced"
+    : Boolean(systemReduced);
+  return {
+    reduced,
+    mode: systemReduced === null ? "system" : reduced ? "reduced" : "full",
+    showControl: Boolean(systemReduced) || preference !== null,
+    followsDevice: preference === null,
+    toggle: () => {
+      const next = reduced ? "full" : "reduced";
+      trackAdvent("motion_changed", {
+        preference: next,
+        system_reduced: systemReduced,
+      });
+      setPreference(next);
+      writeStorage("langfuse-advent-motion", next);
+    },
+  };
 }
 
 function useJingles() {
@@ -179,7 +207,16 @@ function useJingles() {
       .start()
       .then((didStart) => {
         enabledRef.current = didStart;
+        trackAdvent("audio_started", {
+          success: didStart,
+          state: player.state,
+        });
         return didStart;
+      })
+      .catch((error) => {
+        logAdvent("audio.failed", { error: String(error).slice(0, 300) });
+        trackAdvent("audio_failed");
+        return false;
       })
       .finally(() => {
         starting.current = null;
@@ -475,6 +512,8 @@ function DoorDialog({
               <Button
                 variant="primary"
                 size="default"
+                aria-label={LINK_LABELS[door.link.type]}
+                data-advent-link="feature"
                 href={door.link.href}
                 wrapperClassName="sm:w-auto"
                 className="sm:px-4"
@@ -484,6 +523,10 @@ function DoorDialog({
               <Button
                 variant="secondary"
                 size="default"
+                aria-label={
+                  door.socialUrl ? "View the social post" : "Share on X"
+                }
+                data-advent-link={door.socialUrl ? "social_post" : "share"}
                 href={door.socialUrl ?? shareUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -559,6 +602,19 @@ function StatusLine({
 
 export function AdventCalendar() {
   const sceneRef = useRef<HTMLDivElement>(null);
+  const [interactions] = useState(createAdventInteractionBatch);
+  const seenHovers = useRef(new Set<number>());
+  const viewed = useRef(false);
+  useEffect(() => {
+    const flush = () => {
+      if (document.hidden) interactions.flush();
+    };
+    document.addEventListener("visibilitychange", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", flush);
+      interactions.flush();
+    };
+  }, [interactions]);
   const shatterRef = useRef<CalendarShatterHandle>(null);
   const [experience, setExperience] = useState<
     "intro" | "flying" | "arriving" | "ready"
@@ -567,6 +623,25 @@ export function AdventCalendar() {
   const [unlocked, setUnlocked] = useState<number | null>(null);
   const [opened, setOpened] = useState<Set<number>>(new Set());
   const [activeDay, setActiveDay] = useState<number | null>(null);
+  useEffect(() => {
+    if (unlocked !== null && !viewed.current) {
+      viewed.current = true;
+      trackAdvent("viewed", {
+        unlocked_day: unlocked,
+        system_reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
+      });
+    }
+  }, [unlocked]);
+  useEffect(() => {
+    if (activeDay === null) return;
+    const start = performance.now();
+    trackAdvent("door_viewed", { day: activeDay });
+    return () =>
+      trackAdvent("door_left", {
+        day: activeDay,
+        duration_ms: Math.round(performance.now() - start),
+      });
+  }, [activeDay]);
   const [wiggleDay, setWiggleDay] = useState<number | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const canvasRef = useRef<WinterCanvasHandle>(null);
@@ -593,22 +668,44 @@ export function AdventCalendar() {
   const annoyedRef = useRef(false);
   const [throwing, setThrowing] = useState(false);
   const throwEndTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const reducedMotion = usePrefersReducedMotion();
+  const motion = useMotionPreference();
+  const reducedMotion = motion.reduced;
+  const [debug, setDebug] = useState(false);
+  const [copiedDebug, setCopiedDebug] = useState(false);
+  useEffect(() => {
+    installAdventDebug();
+    setDebug(adventDebugEnabled());
+  }, []);
+  useEffect(() => {
+    logAdvent("motion.preference", {
+      mode: motion.mode,
+      followsDevice: motion.followsDevice,
+    });
+  }, [motion.mode, motion.followsDevice]);
   const music = useJingles();
   const begin = useCallback(() => {
     void music.start();
     if (experienceRef.current) return;
     experienceRef.current = true;
+    trackAdvent("started");
+    void warmAdventCapture().catch(() => logAdvent("capture.preload_failed"));
     void music.start().then(() => setExperience("flying"));
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [music.start]);
   const revealCalendar = useCallback(() => setExperience("arriving"), []);
-  const finishFlight = useCallback(() => setExperience("ready"), []);
+  const finishFlight = useCallback(() => {
+    setExperience("ready");
+    trackAdvent("calendar_ready", { stage: "ready" });
+  }, []);
   const [techno, setTechno] = useState(false);
   const [slop, setSlop] = useState(0);
   const slopRef = useRef(0);
   slopRef.current = slop / 100;
   const changeSlop = (value: number) => {
+    interactions.record("slop_changed", {
+      value,
+      level: Math.ceil(value / 25),
+    });
     setSlop(value);
     music.setSlop(value / 100);
   };
@@ -622,21 +719,40 @@ export function AdventCalendar() {
       if (experience !== "ready" || dialogOpenRef.current || openingRef.current)
         return;
       if (reindeerRef.current?.hit(x, y)) {
+        interactions.record("reindeer_hit", {}, true);
         canvasRef.current?.burst(x, y);
         music.tumble((x / innerWidth) * 2 - 1);
         setToast("Reindeer down! Santa will hear about this.");
         return;
       }
       const power = slopRef.current;
+      interactions.record(
+        "snowball_impact",
+        { power: Math.round(power * 100) },
+        true,
+      );
       impulse(x, y, power, music.getFrame().mix);
       if (power > 0.5) shatterRef.current?.hit(x, y, (power - 0.5) * 2);
       music.shatter((x / innerWidth) * 2 - 1, power);
     },
-    [experience, impulse, music.shatter, music.getFrame, music.tumble],
+    [
+      experience,
+      impulse,
+      music.shatter,
+      music.getFrame,
+      music.tumble,
+      interactions,
+    ],
   );
   const hoverDoor = useCallback(
     (day: number, x: number) => {
-      if (experience === "ready") music.hover(day, (x / innerWidth) * 2 - 1);
+      if (experience === "ready") {
+        music.hover(day, (x / innerWidth) * 2 - 1);
+        if (!seenHovers.current.has(day)) {
+          seenHovers.current.add(day);
+          trackAdvent("door_hovered", { day });
+        }
+      }
     },
     [experience, music.hover],
   );
@@ -649,10 +765,14 @@ export function AdventCalendar() {
   }, [experience, activeDay, slop, techno, opened]);
   const changeScene = useCallback(
     (value: boolean) => {
+      interactions.flush();
+      trackAdvent("mode_selected", {
+        target_mode: value ? "techno" : "winter",
+      });
       setTechno(value);
       music.setTechno(value);
     },
-    [music.setTechno],
+    [music.setTechno, interactions],
   );
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("afterhours") === "1") {
@@ -699,16 +819,16 @@ export function AdventCalendar() {
     if (state !== "locked") setActiveDay(day);
   }, [unlocked, opened, experience]);
 
-  /**
-   * Throws a snowball at a point and returns the ms until it lands. Throws run
-   * even with reduced motion: each one is the visitor's own click, not ambient
-   * motion.
-   */
-  const throwAt = useCallback((x: number, y: number) => {
-    if (slopRef.current > 0.5) shatterRef.current?.prepare();
-    canvasRef.current?.throwSnowball(x, y);
-    return SNOWBALL_DURATION;
-  }, []);
+  /** Throws a snowball at a point and returns the ms until it lands. */
+  const throwAt = useCallback(
+    (x: number, y: number) => {
+      interactions.record("snowball_thrown", {}, true);
+      if (slopRef.current > 0.5) shatterRef.current?.prepare();
+      canvasRef.current?.throwSnowball(x, y);
+      return SNOWBALL_DURATION;
+    },
+    [interactions],
+  );
 
   /** The snowman winds up and throws a snowball at the viewer. */
   const throwBack = useCallback(() => {
@@ -743,6 +863,11 @@ export function AdventCalendar() {
     wobbleTimer.current = setTimeout(() => setSnowmanHit(false), HIT_WOBBLE_MS);
     clearTimeout(hitResetTimer.current);
     snowmanHitsRef.current += 1;
+    interactions.record(
+      "snowman_hit",
+      { level: snowmanBallsRef.current },
+      true,
+    );
     setSnowmanHits(snowmanHitsRef.current);
     if (snowmanHitsRef.current < SNOWMAN_HITS_PER_LEVEL) {
       if (annoyedRef.current) setTimeout(throwBack, HIT_WOBBLE_MS);
@@ -766,13 +891,14 @@ export function AdventCalendar() {
     setAnnoyed(false);
     crumblingRef.current = true;
     setCrumbling(true);
+    trackAdvent("snowman_completed");
     setTimeout(() => {
       crumblingRef.current = false;
       snowmanBallsRef.current = 0;
       setCrumbling(false);
       setSnowmanBalls(0);
     }, CRUMBLE_MS);
-  }, [throwBack]);
+  }, [throwBack, interactions]);
 
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
@@ -825,6 +951,11 @@ export function AdventCalendar() {
         return;
       }
       const state = getDoorState(day, unlocked, opened);
+      trackAdvent("door_selected", {
+        day,
+        locked: state === "locked",
+        input: point ? "pointer" : "keyboard",
+      });
       if (state === "locked") {
         const landsIn = point ? throwAt(point.x, point.y) : 0;
         setTimeout(() => {
@@ -957,10 +1088,24 @@ export function AdventCalendar() {
           event.preventDefault();
       }}
       data-mode={techno ? "techno" : "winter"}
+      data-motion={motion.mode}
+      data-slop={slop}
       data-experience={experience}
       data-slop-level={Math.floor(slop / 25)}
       style={{ "--adv-slop": slop / 100 } as CSSProperties}
-      onClickCapture={begin}
+      onClickCapture={(event) => {
+        const link = (event.target as Element).closest<HTMLAnchorElement>("a");
+        if (link) {
+          const destination = new URL(link.href, location.href);
+          trackAdvent("link_clicked", {
+            kind: link.dataset.adventLink ?? "navigation",
+            destination: destination.origin + destination.pathname,
+            day: activeDay,
+          });
+        }
+        if (!(event.target as Element).closest("[data-motion-control]"))
+          begin();
+      }}
     >
       <ShaderAtmosphere
         techno={techno}
@@ -969,17 +1114,18 @@ export function AdventCalendar() {
         slop={slop / 100}
       />
       <AdventStyles />
-      <PageFold ref={foldRef} />
+      <PageFold ref={foldRef} reducedMotion={reducedMotion} />
       <WelcomeFlight
+        reducedMotion={reducedMotion}
         active={experience === "flying" || experience === "arriving"}
         onReveal={revealCalendar}
         onComplete={finishFlight}
         onSound={music.welcome}
       />
-      <CalendarShatter ref={shatterRef} />
+      <CalendarShatter ref={shatterRef} reducedMotion={reducedMotion} />
       <WinterCanvas
         ref={canvasRef}
-        active={activeDay === null}
+        active={activeDay === null && !reducedMotion}
         onImpact={impact}
         slop={slop / 100}
       />
@@ -1040,6 +1186,8 @@ export function AdventCalendar() {
           <Button
             variant="primary"
             size="default"
+            onPointerEnter={() => void warmAdventCapture().catch(() => {})}
+            onFocus={() => void warmAdventCapture().catch(() => {})}
             onClick={begin}
             aria-label="Start"
           >
@@ -1122,11 +1270,61 @@ export function AdventCalendar() {
       </section>
 
       <div className="adv-mixer" data-no-snowball>
-        <MusicVolume volume={music.volume} onVolume={music.changeVolume} />
+        <div className="adv-audio-preferences">
+          <MusicVolume
+            volume={music.volume}
+            onVolume={(value) => {
+              music.changeVolume(value);
+              interactions.record("volume_changed", {
+                value,
+                muted: value === 0,
+              });
+            }}
+          />
+          {motion.showControl ? (
+            <div className="adv-motion-control" data-motion-control>
+              {reducedMotion ? (
+                <span>
+                  {motion.followsDevice
+                    ? "Device: reduced motion"
+                    : "Reduced motion"}
+                </span>
+              ) : null}
+              <Button
+                aria-label={
+                  reducedMotion ? "Enable animations" : "Reduce motion"
+                }
+                variant="text"
+                size="small"
+                onClick={motion.toggle}
+              >
+                {reducedMotion ? "Enable animations" : "Reduce motion"}
+              </Button>
+            </div>
+          ) : null}
+        </div>
         {experience === "ready" ? (
           <SlopSlider power={slop} onChange={changeSlop} />
         ) : null}
       </div>
+      {debug ? (
+        <Button
+          wrapperClassName="adv-debug-control"
+          aria-label={copiedDebug ? "Diagnostics copied" : "Copy diagnostics"}
+          data-motion-control
+          variant="text"
+          size="small"
+          onClick={async () => {
+            trackAdvent("diagnostics_copied");
+            const copied = await copyAdventDiagnostics();
+            setCopiedDebug(copied);
+            if (!copied)
+              setToast("Copy from the console: window.__adventDebug.report()");
+          }}
+        >
+          {copiedDebug ? "Diagnostics copied" : "Copy diagnostics"}
+        </Button>
+      ) : null}
       <SlopDecorations power={slop} />
 
       {toast ? (
@@ -1143,7 +1341,10 @@ export function AdventCalendar() {
         techno={techno}
         door={activeDoor}
         openDays={openDays}
-        onNavigate={showDoor}
+        onNavigate={(day) => {
+          trackAdvent("door_navigated", { from_day: activeDay, day });
+          showDoor(day);
+        }}
         onClose={() => void closeDoor()}
         onSkipEffect={entering ? () => foldRef.current?.skip() : undefined}
       />

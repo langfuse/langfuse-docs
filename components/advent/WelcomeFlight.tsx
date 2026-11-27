@@ -2,11 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { canvasScale } from "./render-budget";
+import { trackAdvent } from "./analytics";
+import { logAdvent } from "./advent-debug";
+import { canvasScale, frameMonitor } from "./render-budget";
 import { createWinterVault } from "./winter-optics";
 import { WELCOME_SECONDS } from "./fold-timing";
 
 type Props = {
+  reducedMotion: boolean;
   active: boolean;
   onReveal: () => void;
   onComplete: () => void;
@@ -15,6 +18,7 @@ type Props = {
 
 /** A small projected winter world, drawn once per frame without DOM particles. */
 export function WelcomeFlight({
+  reducedMotion,
   active,
   onReveal,
   onComplete,
@@ -25,7 +29,11 @@ export function WelcomeFlight({
   const skipRef = useRef<() => void>(() => {});
   useEffect(() => {
     if (!active) return;
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (reducedMotion) {
+      trackAdvent("transition_skipped", {
+        transition: "intro",
+        reason: "reduced_motion",
+      });
       onReveal();
       onComplete();
       return;
@@ -33,12 +41,23 @@ export function WelcomeFlight({
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) {
+      trackAdvent("transition_skipped", {
+        transition: "intro",
+        reason: "canvas_unavailable",
+      });
       onReveal();
       onComplete();
       return;
     }
     const shaderCanvas = shaderRef.current;
     const vault = shaderCanvas ? createWinterVault(shaderCanvas) : null;
+    const monitor = frameMonitor();
+    let shaderPixels = 650_000;
+    let fallbackLogged = !vault;
+    trackAdvent("transition_started", {
+      transition: "intro",
+      renderer: vault ? "webgl" : "canvas",
+    });
     let frame = 0;
     let revealed = false;
     let finished = false;
@@ -46,6 +65,12 @@ export function WelcomeFlight({
     const finish = (skip = false) => {
       if (finished) return;
       finished = true;
+      trackAdvent("transition_finished", {
+        transition: "intro",
+        outcome: skip ? "skipped" : "completed",
+        renderer: fallbackLogged ? "canvas" : "webgl",
+        ...monitor.summary(),
+      });
       if (skip && typeof stopSound === "function") stopSound();
       if (!revealed) onReveal();
       onComplete();
@@ -61,7 +86,7 @@ export function WelcomeFlight({
       canvas.height = innerHeight * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (shaderCanvas) {
-        const resolution = canvasScale(innerWidth, innerHeight, 650_000);
+        const resolution = canvasScale(innerWidth, innerHeight, shaderPixels);
         shaderCanvas.width = Math.round(innerWidth * resolution);
         shaderCanvas.height = Math.round(innerHeight * resolution);
       }
@@ -82,11 +107,19 @@ export function WelcomeFlight({
     let last = 0;
     const draw = (now: number) => {
       if (finished) return;
-      if (last && now - last < 1000 / 30) {
+      if (last && now - last < 1000 / 30 - 1) {
         frame = requestAnimationFrame(draw);
         return;
       }
       last = now;
+      if (monitor.frame(now) && shaderPixels > 200_000) {
+        shaderPixels = Math.max(200_000, shaderPixels * 0.7);
+        resize();
+        logAdvent("renderer.resolution_reduced", {
+          transition: "intro",
+          pixels: shaderPixels,
+        });
+      }
       const t = Math.min(1, (now - start) / (WELCOME_SECONDS * 1000));
       const w = innerWidth,
         h = innerHeight;
@@ -97,6 +130,14 @@ export function WelcomeFlight({
       ctx.clearRect(0, 0, w, h);
       const shaderDrawn = vault?.draw(t) ?? false;
       if (!shaderDrawn) {
+        if (!fallbackLogged) {
+          fallbackLogged = true;
+          trackAdvent("renderer_fallback", {
+            transition: "intro",
+            reason: "context_lost",
+            renderer: "canvas",
+          });
+        }
         const bg = ctx.createRadialGradient(
           cx,
           cy,
@@ -195,7 +236,7 @@ export function WelcomeFlight({
       document.removeEventListener("keydown", keydown);
       if (!finished && typeof stopSound === "function") stopSound();
     };
-  }, [active, onComplete, onReveal, onSound]);
+  }, [active, onComplete, onReveal, onSound, reducedMotion]);
   return active
     ? createPortal(
         <div className="adv-welcome-flight" data-fold-exclude>

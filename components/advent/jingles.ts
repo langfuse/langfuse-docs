@@ -1,3 +1,5 @@
+import { logAdvent } from "./advent-debug";
+
 import {
   FOLD_SECONDS,
   FOLD_REVEAL,
@@ -656,6 +658,10 @@ export class JinglePlayer {
     const ctx = this.ctx;
     this.contextState = ctx.state;
     ctx.onstatechange = () => {
+      logAdvent("audio.context", {
+        state: ctx.state,
+        sample_rate: ctx.sampleRate,
+      });
       if (ctx.state === "running" && this.contextState !== "running")
         this.audioOffset = performance.now() / 1000 - ctx.currentTime;
       this.contextState = ctx.state;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Moon, Snowflake } from "lucide-react";
+import { trackAdvent } from "./analytics";
 import type { MusicFrame } from "./jingles";
 
 export function SceneSwitch({
@@ -15,8 +16,18 @@ export function SceneSwitch({
 }) {
   const [stage, setStage] = useState("The evening is young");
   useEffect(() => {
+    const start = performance.now();
+    let completed = false;
     const update = () => {
       const { mix } = getFrame();
+      if (!completed && Math.abs(mix - Number(techno)) < 0.001) {
+        completed = true;
+        if (performance.now() - start > 250)
+          trackAdvent("mode_arrived", {
+            target_mode: techno ? "techno" : "winter",
+            duration_ms: Math.round(performance.now() - start),
+          });
+      }
       setStage(
         techno
           ? mix < 0.2

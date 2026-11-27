@@ -1,3 +1,5 @@
+import { logAdvent } from "./advent-debug";
+
 // Original sixfold crystal geometry, shared by the entrance and door journeys.
 // A small fixed number of analytic planes keeps the effect independent of DPR.
 export const WINTER_OPTICS = `
@@ -57,7 +59,10 @@ export function createWinterVault(canvas: HTMLCanvasElement) {
     depth: false,
     antialias: false,
   });
-  if (!gl) return null;
+  if (!gl) {
+    logAdvent("intro.webgl_unavailable");
+    return null;
+  }
   const program = gl.createProgram();
   const buffer = gl.createBuffer();
   const dispose = () => {
@@ -114,6 +119,7 @@ void main(){
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      logAdvent("intro.shader_failed", { info: gl.getShaderInfoLog(shader) });
       gl.deleteShader(shader);
       dispose();
       return null;
@@ -123,6 +129,7 @@ void main(){
   }
   gl.linkProgram(program);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    logAdvent("intro.link_failed", { info: gl.getProgramInfoLog(program) });
     dispose();
     return null;
   }

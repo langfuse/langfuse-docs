@@ -1116,13 +1116,22 @@ export function AdventStyles() {
         .adv-heading h1 { font-size: 42px; }
       }
 
+      .adv-debug-control { width: auto; padding: 2px 6px; background: var(--surface-bg); position: fixed; right: 8px; bottom: 94px; z-index: 110; font-size: 10px; }
+      .adv-audio-preferences { display: grid; justify-items: center; gap: 0; flex-shrink: 0; }
+      .adv-audio-preferences:has(.adv-motion-control) { min-width: 110px; }
+      @media (max-width: 480px) { .adv-mixer:has(.adv-motion-control) .adv-slop-level { display: none; } }
+      .adv-motion-control { display: grid; justify-items: center; font-size: 9px; line-height: 1.2; color: var(--text-secondary); }
+      .adv-motion-control button { max-width: 112px; min-height: 24px; }
+      .adv-motion-control button span { font-size: 10px; }
+      html:has(.adv-page[data-motion="reduced"]) :is(.adv-page,.adv-dialog) *,
+      html:has(.adv-page[data-motion="reduced"]) :is(.adv-page,.adv-dialog) *::before,
+      html:has(.adv-page[data-motion="reduced"]) :is(.adv-page,.adv-dialog) *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
       @media (prefers-reduced-motion: reduce) {
-        .adv-experience-header, .adv-heading h1, .adv-calendar { transition: none !important; }
-        .adv-knot-strand, .adv-slop-decorations span { animation: none !important; }
-        .adv-page[data-experience="arriving"] .adv-door { animation: none !important; }
-
-        .adv-page *, .adv-page *::before, .adv-page *::after,
-        .adv-dialog *, .adv-dialog *::before, .adv-dialog *::after {
+        .adv-page[data-motion="system"] *, .adv-page[data-motion="system"] *::before, .adv-page[data-motion="system"] *::after {
           animation-duration: .01ms !important;
           animation-iteration-count: 1 !important;
           transition-duration: .01ms !important;
