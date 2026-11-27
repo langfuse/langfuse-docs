@@ -13,7 +13,7 @@ AI governance across your organization: route all model calls through the gatewa
 
 Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Khan Academy](/users/khan-academy), [Hugging Face](/users/hugging-face), Intuit and [SumUp](/users/sumup).
 
-## One control point for every model call, natively traced in Langfuse
+## One entry point for every model call, natively traced in Langfuse
 
 Figure: AI Gateway overview.
 
@@ -22,7 +22,7 @@ Figure: AI Gateway overview.
 3. The AI Gateway calls the model provider (Anthropic, OpenAI, Google AI, Bedrock and more) and returns the response.
 4. Langfuse tracing captures every request, usage only or in full.
 
-## Bring order to your company's AI usage
+## Control your company's AI usage
 
 - **See all spend.** Know what AI costs and who’s spending it.
   - **Spend dashboard:** cost by model, provider, user and gateway key.
