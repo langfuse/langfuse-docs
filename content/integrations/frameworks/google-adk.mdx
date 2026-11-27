@@ -1,245 +1,135 @@
 ---
-source: ⚠️ Jupyter Notebook
-title: Observability for Google Agent Development Kit with Langfuse
-seoTitle: Google Agent Development Kit Observability
+title: Trace Google ADK agents with Langfuse
 sidebarTitle: Google ADK
 logo: /images/integrations/google_adk_icon.png
-description: Learn how to instrument Google ADK agents with Langfuse via OpenTelemetry
+description: "Open source observability for Google ADK agents: trace each agent run, tool call and model call with Langfuse, with users and sessions. Code tested."
 category: Integrations
 ---
 
-# Integrate Langfuse with Google's Agent Development Kit
+# Trace Google ADK agents with Langfuse
 
-This notebook demonstrates how to capture detailed traces from a [Google Agent Development Kit](https://github.com/google/adk-python) (ADK) application with **[Langfuse](https://langfuse.com)** using the OpenTelemetry (OTel) protocol.
+Langfuse shows each Google ADK agent run, model call and tool call as spans in one trace, and maps the user ID and session ID of the runner to Langfuse users and sessions. Two lines in Python send the traces, `GoogleADKInstrumentor().instrument()` and `get_client()`, and your agent code stays the same.
 
-> **Why Agent Development Kit?**\
-> [Google’s Agent Development Kit](https://developers.googleblog.com/en/agent-development-kit-easy-to-build-multi-agent-applications/) streamlines building, orchestrating, and tracing generative-AI agents out of the box, letting you move from prototype to production far faster than wiring everything yourself.
+> **What is Google ADK?** The [Agent Development Kit](https://adk.dev/) (ADK) is Google's open source framework for building agents and multi-agent workflows. A `Runner` executes an agent with `run_async` inside a session.
 
-> **Why Langfuse?**\
-> [Langfuse](https://langfuse.com) gives you a detailed dashboard and rich analytics for every prompt, model response, and function call in your agent, making it easy to debug, evaluate, and iterate on LLM apps.
+> **What is Langfuse?** [Langfuse](/) is an open source LLM engineering platform for tracing, evaluating and debugging AI agents. Use [Langfuse Cloud](/cloud) or [self-host](/self-hosting) it.
 
-**What this cookbook covers.** We start with the simplest possible trace and add one concept at a time:
+> **How do they work together?** The OpenInference instrumentor for ADK wraps ADK calls and emits an OpenTelemetry span for each invocation, agent run, model call and tool call. The Langfuse client exports those spans to Langfuse.
 
-1. A hello-world agent with a tool call ([Example 1](#example-1-hello-world-agent-with-a-tool-call))
-2. Named, filterable traces with tags and metadata ([Example 2](#example-2-named-and-filterable-traces))
-3. A multi-agent pipeline whose trace shows every sub-agent ([Example 3](#example-3-multi-agent-pipeline-with-workflow))
-4. Attaching user-feedback scores to a trace ([Example 4](#example-4-score-traces-with-user-feedback))
+<Callout type="info">
+  Requires Python 3.11 or later (Langfuse Python SDK 5); ADK alone needs 3.10. The code on this page ran with `langfuse` 5.2.0, `google-adk` 2.15 and `openinference-instrumentation-google-adk` 1.1.9, as of November 2026.
 
-<Steps>
-## Step&nbsp;1: Install dependencies
+</Callout>
 
-_Note: `google-adk` 2.x requires Python ≥ 3.10. The `"google-adk>=2"` pin ensures pip installs the current ADK 2.x release instead of resolving to an older 1.x version to satisfy OpenTelemetry version constraints._
+## Send traces to Langfuse [#setup]
 
-```python
-%pip install langfuse "google-adk>=2" openinference-instrumentation-google-adk -q
+Install ADK, the Langfuse SDK and the OpenInference instrumentor, a third-party package maintained by Arize:
+
+```bash
+pip install langfuse "google-adk>=2" openinference-instrumentation-google-adk
 ```
 
-## Step 2: Set up environment variables
+Add your [Langfuse API keys](/docs/observability/sdk/overview#client-setup) and your [Gemini API key](https://aistudio.google.com/app/apikey) to your shell environment:
 
-Fill in the **Langfuse** and your **Gemini API key**.
-
-_Note: the Gemini free tier has low per-model rate limits (per minute and per day). If a cell prints a `429`/`503` agent error, wait a moment and re-run it, temporarily switch the examples to a lighter model such as `gemini-3.1-flash-lite`, or use an API key with billing enabled._
-
-```python
-import os
-
-# Get keys for your project from the project settings page: https://cloud.langfuse.com
-os.environ.setdefault("LANGFUSE_PUBLIC_KEY", "pk-lf-...");
-os.environ.setdefault("LANGFUSE_SECRET_KEY", "sk-lf-...");
-os.environ.setdefault("LANGFUSE_BASE_URL", "https://cloud.langfuse.com"); # 🇪🇺 EU region
+```bash
+export LANGFUSE_SECRET_KEY="sk-lf-..."
+export LANGFUSE_PUBLIC_KEY="pk-lf-..."
+export LANGFUSE_BASE_URL="https://cloud.langfuse.com" # 🇪🇺 EU region
 # Other Langfuse data regions include 🇺🇸 US: https://us.cloud.langfuse.com, 🇯🇵 Japan: https://jp.cloud.langfuse.com and ⚕️ HIPAA: https://hipaa.cloud.langfuse.com
-
-# Gemini API Key (Get from Google AI Studio: https://aistudio.google.com/app/apikey)
-os.environ.setdefault("GOOGLE_API_KEY", "...");
+export GOOGLE_API_KEY="..."
 ```
 
-With the environment variables set, we can now initialize the Langfuse client. `get_client()` initializes the Langfuse client using the credentials provided in the environment variables.
+Call the instrumentor before the first run. `auth_check()` stops the script with `UnauthorizedError` if Langfuse rejects the keys or the host.
 
-```python
-from langfuse import get_client
+```python filename="agent.py"
+import asyncio
 
-langfuse = get_client()
-
-# Verify connection
-if langfuse.auth_check():
-    print("Langfuse client is authenticated and ready!")
-else:
-    print("Authentication failed. Please check your credentials and host.")
-```
-
-    Langfuse client is authenticated and ready!
-
-## Step 3: OpenTelemetry Instrumentation
-
-Use the [`GoogleADKInstrumentor`](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-google-adk) library to wrap ADK calls and send OpenTelemetry spans to Langfuse.
-
-```python
-from openinference.instrumentation.google_adk import GoogleADKInstrumentor
-
-GoogleADKInstrumentor().instrument()
-```
-
-## Step 4: Run examples
-
-### Example 1: Hello world agent with a tool call [#example-1-hello-world-agent-with-a-tool-call]
-
-The smallest possible setup: one agent, one tool. Every tool call and model completion is captured as an OpenTelemetry span and forwarded to Langfuse.
-
-```python
 from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+from langfuse import get_client, propagate_attributes
+from openinference.instrumentation.google_adk import GoogleADKInstrumentor
 
-def say_hello():
-    return {"greeting": "Hello Langfuse 👋"}
+# Send every ADK agent, model and tool span to Langfuse. Call this before the first run.
+GoogleADKInstrumentor().instrument()
+
+langfuse = get_client()
+assert langfuse.auth_check(), "Langfuse rejected the keys or the host"
+
+def get_weather(city: str) -> dict:
+    """Return the weather for a city."""
+    return {"city": city, "forecast": "sunny"}
 
 agent = Agent(
-    name="hello_agent",
+    name="weather_agent",
     model="gemini-3.5-flash",
-    instruction="Always greet using the say_hello tool.",
-    tools=[say_hello],
+    instruction="Answer weather questions with the get_weather tool.",
+    tools=[get_weather],
 )
 
-APP_NAME = "hello_app"
-USER_ID = "demo-user"
-SESSION_ID = "demo-session"
+async def main():
+    session_service = InMemorySessionService()
+    await session_service.create_session(app_name="weather_app", user_id="user-123", session_id="session-abc")
+    runner = Runner(agent=agent, app_name="weather_app", session_service=session_service)
+    message = types.Content(role="user", parts=[types.Part(text="What is the weather in Tokyo?")])
 
-session_service = InMemorySessionService()
-# create_session is async → await it in notebooks
-await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID)
-
-runner = Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
-
-user_msg = types.Content(role="user", parts=[types.Part(text="hi")])
-for event in runner.run(user_id=USER_ID, session_id=SESSION_ID, new_message=user_msg):
-    if event.is_final_response():
-        if event.content and event.content.parts:
-            print(event.content.parts[0].text)
-        elif event.error_message:
-            print(f"Agent error: {event.error_message}")
-```
-
-    Hello! Hello Langfuse 👋
-
-Langfuse automatically maps the `user_id` and `session_id` you pass to `runner.run()` to the trace's **user** and **session** — you get [user](https://langfuse.com/docs/observability/features/users) and [session](https://langfuse.com/docs/observability/features/sessions) tracking without any extra code.
-
-### Example 2: Named and filterable traces [#example-2-named-and-filterable-traces]
-
-By default, traces are named after the ADK app (`invocation [hello_app]`). Use [`propagate_attributes`](https://langfuse.com/docs/observability/sdk/instrumentation) to set a descriptive trace name, tags, and metadata so you can filter traces in Langfuse.
-
-One thing to watch out for: the synchronous `runner.run()` executes the agent on a background worker thread, so OpenTelemetry context — and with it everything set via `propagate_attributes` — does not reach the ADK spans. Use the async `runner.run_async()` API instead, which runs in the current context:
-
-```python
-from langfuse import propagate_attributes
-
-SESSION_ID_2 = "demo-session-2"
-await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID_2)
-
-with propagate_attributes(
-    trace_name="hello-agent-request",
-    tags=["google-adk", "cookbook"],
-    metadata={"example": "named-trace"},
-):
-    async for event in runner.run_async(user_id=USER_ID, session_id=SESSION_ID_2, new_message=user_msg):
-        if event.is_final_response():
-            if event.content and event.content.parts:
+    with propagate_attributes(trace_name="weather-agent-request", tags=["google-adk"]):
+        async for event in runner.run_async(user_id="user-123", session_id="session-abc", new_message=message):
+            if event.is_final_response() and event.content and event.content.parts:
                 print(event.content.parts[0].text)
-            elif event.error_message:
-                print(f"Agent error: {event.error_message}")
+
+asyncio.run(main())
+langfuse.flush()  # a short script exits before the background export runs
 ```
 
-    Hello Langfuse 👋
+## Agent runs, tool calls and model calls in one trace [#trace]
 
-### Example 3: Multi-agent pipeline with Workflow [#example-3-multi-agent-pipeline-with-workflow]
+Each `run_async` call becomes one trace. With instrumentor 1.1.9 the script above produces these spans:
 
-Real ADK applications are rarely a single agent. ADK 2.x composes agents (and plain functions or tools) into an execution graph with [`Workflow`](https://adk.dev/workflows/) — and the trace shows every node as its own span, with its own model calls, token usage, and cost.
+- `invocation [weather_app]`: the run, with the user message and the final response
+- `agent_run [weather_agent]`: the agent
+- `call_llm`: each Gemini call, with the prompt, the response and the token use
+- `execute_tool get_weather`: the tool call, with its arguments and result
 
-Here a `researcher` agent stores its result in session state via `output_key`, and a `writer` agent reads it through the `{research_notes}` placeholder in its instruction. The edge chain `("START", researcher, writer)` runs them sequentially:
+The user ID and session ID passed to the runner become the Langfuse [user](/docs/observability/features/users) and [session](/docs/observability/features/sessions), so you can filter traces by user and follow a conversation across runs. Span names depend on the instrumentor version.
 
-```python
-from google.adk.workflow import Workflow
+![Google ADK trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
 
-researcher = Agent(
-    name="researcher",
-    model="gemini-3.5-flash",
-    instruction="Gather two short facts about the topic. Reply in two bullet points.",
-    output_key="research_notes",  # stores the reply in session state
-)
-writer = Agent(
-    name="writer",
-    model="gemini-3.5-flash",
-    instruction="Write a single friendly sentence summarizing: {research_notes}",
-)
-pipeline = Workflow(name="research_pipeline", edges=[("START", researcher, writer)])
+## Trace names and tags [#names-tags]
 
-PIPELINE_SESSION_ID = "pipeline-session"
-await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=PIPELINE_SESSION_ID)
-pipeline_runner = Runner(agent=pipeline, app_name=APP_NAME, session_service=session_service)
+`propagate_attributes` sets the trace name and tags on every span of the run inside its block. Use the trace name to tell agents apart in the trace list, and tags to filter by feature or environment.
 
-topic = types.Content(role="user", parts=[types.Part(text="The Langfuse platform")])
-with propagate_attributes(trace_name="research-pipeline", tags=["google-adk", "multi-agent"]):
-    async for event in pipeline_runner.run_async(user_id=USER_ID, session_id=PIPELINE_SESSION_ID, new_message=topic):
-        if event.is_final_response() and event.content and event.content.parts:
-            print(f"[{event.author}]", event.content.parts[0].text)
-```
+## Multi-agent workflows [#workflows]
 
-    [researcher] * Langfuse is an open-source LLM (Large Language Model) engineering platform designed for tracing, debugging, and monitoring AI applications.
-    * It provides features for prompt management, tracking API costs and latency, and evaluating the quality of LLM outputs using both automated and manual methods.
-    [writer] Langfuse is a wonderful open-source LLM engineering platform that helps you easily monitor, debug, and optimize your AI applications by tracking costs, managing prompts, and evaluating output quality all in one place!
+An ADK [`Workflow`](https://adk.dev/workflows/) runs several agents as a graph, and each node appears as its own span with its own model calls, token use and cost. The notebook has a [researcher and writer pipeline](/guides/cookbook/integration_google_adk#example-3-multi-agent-pipeline-with-workflow).
 
-The trace now contains one `agent_run` span per pipeline stage, each with its own generation.
+## User feedback as scores [#scores]
 
-For dynamic delegation, LLM agents can alternatively coordinate `sub_agents` themselves — the spans nest the same way.
+To attach a thumbs-up or an evaluation result to a run, create the trace ID upfront, run the agent inside a Langfuse span with that ID, and pass the same ID to `create_score`. See the [notebook example](/guides/cookbook/integration_google_adk#example-4-score-traces-with-user-feedback) and [Scores](/docs/evaluation/scores/overview).
 
-### Example 4: Score traces with user feedback [#example-4-score-traces-with-user-feedback]
+## Troubleshooting [#troubleshooting]
 
-[Scores](https://langfuse.com/docs/evaluation/evaluation-methods/scores-via-sdk) attach evaluations — user feedback, guardrail results, eval outcomes — to a trace. To score an ADK run, create the trace ID upfront, run the agent inside an enclosing Langfuse span that uses this trace ID, and pass the same ID to `create_score`:
+If no trace appears:
 
-```python
-from langfuse import Langfuse
+- Check that `langfuse.auth_check()` passes and that the keys belong to the region in `LANGFUSE_BASE_URL`.
+- Call `GoogleADKInstrumentor().instrument()` before the first run.
+- Call `langfuse.flush()` before a short script exits.
 
-predefined_trace_id = Langfuse.create_trace_id()
+The Gemini free tier has low rate limits. If a run fails with a rate-limit error, wait and rerun, or use a lighter model. See [Missing traces](/faq/all/missing-traces) for more causes.
 
-SCORED_SESSION_ID = "scored-session"
-await session_service.create_session(app_name=APP_NAME, user_id=USER_ID, session_id=SCORED_SESSION_ID)
+## FAQ [#faq]
 
-final_response = None
-with langfuse.start_as_current_observation(
-    as_type="span",
-    name="adk-request",
-    trace_context={"trace_id": predefined_trace_id},
-) as span:
-    span.update(input="hi")
-    async for event in runner.run_async(user_id=USER_ID, session_id=SCORED_SESSION_ID, new_message=user_msg):
-        if event.is_final_response() and event.content and event.content.parts:
-            final_response = event.content.parts[0].text
-            print(final_response)
-            span.update(output=final_response)
+**How do I trace a Google ADK agent?** Call `GoogleADKInstrumentor().instrument()` and `get_client()` before the first run.
 
-# e.g. triggered by a thumbs-up in your application
-if final_response is not None:
-    langfuse.create_score(
-        trace_id=predefined_trace_id,
-        name="user-feedback",
-        value=1,
-        data_type="NUMERIC",
-        comment="The answer was helpful.",
-    )
-```
+**Does Langfuse show ADK tool calls?** Yes. Each tool call appears as an `execute_tool` span inside the agent run.
 
-    Hello Langfuse 👋
+**How are users and sessions tracked?** The user ID and session ID passed to the runner become the Langfuse user and session.
 
-## Step 5: View the traces in Langfuse
+**Can I trace multi-agent workflows?** Yes. Each node of an ADK `Workflow` appears as its own span.
 
-Head over to your **Langfuse dashboard → Traces**. Example 1 produces a trace with the agent loop and the tool call; Examples 2–4 add trace names, tags, nested sub-agents, and a `user-feedback` score. Traces are filterable by the users, sessions, and tags set above.
+## Next steps [#next-steps]
 
-![Google ADK example trace in Langfuse](https://langfuse.com/images/cookbook/integration-google-adk/google-adk-trace.png)
-
-[Link to a public example trace in Langfuse](https://cloud.langfuse.com/project/cloramnkj0002jz088vzn1ja4/traces/fdd35393ced5a5be64ce8b8a947aef24?timestamp=2026-07-23T09%3A47%3A56.387Z&display=details)
-
-</Steps>
-
-import LearnMore from "@/components-mdx/integration-learn-more.mdx";
-
-<LearnMore />
+- [Evaluate the agent's runs](/docs/evaluation/overview) with scores, LLM-as-a-judge and datasets.
+- Trace other agent frameworks: [OpenAI Agents SDK](/integrations/frameworks/openai-agents), [LangGraph](/integrations/frameworks/langgraph).
+- Run as a notebook: the [Google ADK notebook](/guides/cookbook/integration_google_adk) covers workflows and scores.
