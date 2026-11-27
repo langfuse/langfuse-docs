@@ -1,0 +1,294 @@
+---
+title: "Straitly Integration"
+sidebarTitle: Straitly
+logo: /images/integrations/straitly_icon.svg
+description: "Learn how to integrate Langfuse with Straitly to trace and monitor requests across 150+ AI models using the OpenAI SDK."
+---
+
+import AiGatewayCallout from "@/components-mdx/ai-gateway-callout.mdx";
+
+# Straitly Integration
+
+In this guide, we'll show you how to integrate [Langfuse](/) with [Straitly](https://straitly.ai).
+
+> **What is Straitly?** [Straitly](https://straitly.ai) is an AI gateway providing access to 150+ AI models (including Claude, GPT, Gemini, Grok, and DeepSeek) through a single OpenAI-compatible API key and base URL. It routes requests across providers with automatic failover when a provider goes down.
+
+> **What is Langfuse?** [Langfuse](/) is an open source AI engineering platform that helps teams trace LLM calls, monitor performance, and debug issues in their AI applications. Use [Langfuse Cloud](/cloud) (hosted by Langfuse, free tier, no infrastructure to run) or [self-host](/self-hosting) it.
+
+<AiGatewayCallout />
+
+Since Straitly exposes an OpenAI-compatible API at `https://api.straitly.ai/v1`, you can use Langfuse's native OpenAI SDK wrapper in both [Python](/integrations/model-providers/openai-py) and [TypeScript](/integrations/model-providers/openai-js).
+
+## Get started
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+
+<Tab>
+
+```bash
+pip install langfuse openai
+```
+
+```python
+import os
+
+# Set your Langfuse API keys
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..."
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..."
+os.environ["LANGFUSE_BASE_URL"] = "https://cloud.langfuse.com"  # EU region
+# Other Langfuse data regions: US https://us.cloud.langfuse.com, Japan https://jp.cloud.langfuse.com, HIPAA https://hipaa.cloud.langfuse.com
+
+# Set your Straitly API key
+os.environ["STRAITLY_API_KEY"] = "<YOUR_STRAITLY_API_KEY>"
+```
+
+</Tab>
+
+<Tab>
+
+```bash
+npm install @langfuse/openai @langfuse/otel @langfuse/tracing "@opentelemetry/sdk-node@>=0.202.0 <0.300.0" openai
+```
+
+```typescript
+// Set your Langfuse API keys
+process.env.LANGFUSE_SECRET_KEY = "sk-lf-...";
+process.env.LANGFUSE_PUBLIC_KEY = "pk-lf-...";
+process.env.LANGFUSE_BASE_URL = "https://cloud.langfuse.com"; // EU region
+// Other Langfuse data regions: US https://us.cloud.langfuse.com, Japan https://jp.cloud.langfuse.com, HIPAA https://hipaa.cloud.langfuse.com
+
+// Set your Straitly API key
+process.env.STRAITLY_API_KEY = "<YOUR_STRAITLY_API_KEY>";
+```
+
+Set up OpenTelemetry with the `LangfuseSpanProcessor`:
+
+```typescript
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { LangfuseSpanProcessor } from "@langfuse/otel";
+
+const sdk = new NodeSDK({
+  spanProcessors: [new LangfuseSpanProcessor()],
+});
+
+sdk.start();
+```
+
+In short-lived scripts, call `await sdk.shutdown()` before the process exits so queued spans are flushed to Langfuse. Long-running apps should call it only on exit.
+
+</Tab>
+
+</LangTabs>
+
+## Example 1: Simple LLM Call
+
+Use the Langfuse OpenAI SDK wrapper to automatically log Straitly chat completion calls as generations in Langfuse.
+
+- Set `base_url` / `baseURL` to `https://api.straitly.ai/v1`.
+- Pass your `STRAITLY_API_KEY` as the API key.
+- Replace `"claude-sonnet-5-5"` with any model id from the [Straitly model catalog](https://straitly.ai/models).
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+
+<Tab>
+
+```python
+import os
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ["STRAITLY_API_KEY"],
+    base_url="https://api.straitly.ai/v1",
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-5-5",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Summarize how an AI gateway handles provider failover in two sentences."},
+    ],
+    name="straitly-simple-call",  # Optional: Name of the generation in Langfuse
+)
+
+print(response.choices[0].message.content)
+```
+
+</Tab>
+
+<Tab>
+
+```typescript
+import { observeOpenAI } from "@langfuse/openai";
+import OpenAI from "openai";
+
+const openaiClient = new OpenAI({
+  apiKey: process.env.STRAITLY_API_KEY,
+  baseURL: "https://api.straitly.ai/v1",
+});
+
+const client = observeOpenAI(openaiClient, {
+  generationName: "straitly-simple-call", // Optional: Name of the generation in Langfuse
+});
+
+try {
+  const response = await client.chat.completions.create({
+    model: "claude-sonnet-5-5",
+    messages: [
+      { role: "system", content: "You are a helpful assistant." },
+      {
+        role: "user",
+        content:
+          "Summarize how an AI gateway handles provider failover in two sentences.",
+      },
+    ],
+  });
+
+  console.log(response.choices[0].message.content);
+} finally {
+  await sdk.shutdown(); // Flush queued spans before a short script exits
+}
+```
+
+</Tab>
+
+</LangTabs>
+
+## Example 2: Nested LLM Calls
+
+Group multi-step calls routed through Straitly into a single Langfuse trace to inspect latency, token usage, and outputs across each step.
+
+<LangTabs items={["Python SDK", "JS/TS SDK"]}>
+
+<Tab>
+
+Use the `@observe()` decorator to trace nested Python functions calling different models through Straitly.
+
+```python
+import os
+from langfuse import observe
+from langfuse.openai import openai
+
+client = openai.OpenAI(
+    api_key=os.environ["STRAITLY_API_KEY"],
+    base_url="https://api.straitly.ai/v1",
+)
+
+@observe()
+def summarize_text(text: str) -> str:
+    response = client.chat.completions.create(
+        model="claude-sonnet-5-5",
+        messages=[
+            {"role": "system", "content": "You summarize texts in one concise sentence."},
+            {"role": "user", "content": f"Summarize the following text:\n{text}"},
+        ],
+        name="summarize-text",
+    )
+    return response.choices[0].message.content
+
+@observe()
+def classify_topic(summary: str) -> str:
+    response = client.chat.completions.create(
+        model="deepseek/deepseek-v4-1-flash-1017",
+        messages=[
+            {"role": "system", "content": "Return one short topic label for the summary."},
+            {"role": "user", "content": summary},
+        ],
+        name="classify-topic",
+    )
+    return response.choices[0].message.content
+
+@observe()
+def analyze_text(text: str):
+    summary = summarize_text(text)
+    topic = classify_topic(summary)
+    return {"summary": summary, "topic": topic}
+
+analyze_text(
+    "Straitly provides a single OpenAI-compatible endpoint for routing requests across more than 150 AI models."
+)
+```
+
+</Tab>
+
+<Tab>
+
+Use `startActiveObservation` from `@langfuse/tracing` to group nested TypeScript calls under a single trace.
+
+```typescript
+import { startActiveObservation } from "@langfuse/tracing";
+import { observeOpenAI } from "@langfuse/openai";
+import OpenAI from "openai";
+
+const openaiClient = new OpenAI({
+  apiKey: process.env.STRAITLY_API_KEY,
+  baseURL: "https://api.straitly.ai/v1",
+});
+
+async function summarizeText(text: string) {
+  const client = observeOpenAI(openaiClient, {
+    generationName: "summarize-text",
+  });
+  const response = await client.chat.completions.create({
+    model: "claude-sonnet-5-5",
+    messages: [
+      {
+        role: "system",
+        content: "You summarize texts in one concise sentence.",
+      },
+      { role: "user", content: `Summarize the following text:\n${text}` },
+    ],
+  });
+  return response.choices[0].message.content ?? "";
+}
+
+async function classifyTopic(summary: string) {
+  const client = observeOpenAI(openaiClient, {
+    generationName: "classify-topic",
+  });
+  const response = await client.chat.completions.create({
+    model: "deepseek/deepseek-v4-1-flash-1017",
+    messages: [
+      {
+        role: "system",
+        content: "Return one short topic label for the summary.",
+      },
+      { role: "user", content: summary },
+    ],
+  });
+  return response.choices[0].message.content ?? "";
+}
+
+async function analyzeText(text: string) {
+  return await startActiveObservation("analyze-text", async (span) => {
+    span.update({ input: { text } });
+    const summary = await summarizeText(text);
+    const topic = await classifyTopic(summary);
+    const result = { summary, topic };
+    span.update({ output: result });
+    return result;
+  });
+}
+
+try {
+  await analyzeText(
+    "Straitly provides a single OpenAI-compatible endpoint for routing requests across more than 150 AI models.",
+  );
+} finally {
+  await sdk.shutdown(); // Flush queued spans before a short script exits
+}
+```
+
+</Tab>
+
+</LangTabs>
+
+## Learn More
+
+- **Straitly Quickstart**: [https://straitly.ai/docs/quickstart](https://straitly.ai/docs/quickstart)
+- **Straitly Model Catalog**: [https://straitly.ai/models](https://straitly.ai/models)
+- **Langfuse OpenAI Integration**: [Python SDK](/integrations/model-providers/openai-py) and [TypeScript SDK](/integrations/model-providers/openai-js)
+- **Langfuse `@observe()` Decorator**: [SDK Instrumentation](/docs/observability/sdk/instrumentation)
+
+import LearnMore from "@/components-mdx/integration-learn-more.mdx";
+
+<LearnMore />
