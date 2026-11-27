@@ -19,7 +19,7 @@ Give each major concept a diagram or a table, and answer the questions a newcome
 
 - Open with one sentence on what the reader will accomplish, a link to the Concepts page, and, when admins and users have separate guides, a link to the other guide.
 - Put the steps under a `## Setup steps` heading inside `<Steps>`. Each step is one task; fold small actions, such as exporting the key the reader just created, into the step that produces the value.
-- Don't add a "Before you begin" or prerequisites section. Put each requirement (role, plan, deployment type, prior setup) in the step where the reader would hit it, as an info callout at the end of that step. Caveats that apply to the whole procedure go above `<Steps>`.
+- Don't add a "Before you begin" or prerequisites section. Put each requirement (role, prior setup) in the step where the reader would hit it, as an info callout at the end of that step. Plan, deployment type, and minimum self-hosted version go in the `<AvailabilityBanner />`. Caveats that apply to the whole procedure go above `<Steps>`.
 - When setup differs per tool, client, or language, give each its own tab with everything needed to finish there: an italic requirements line such as `_**Requires** <tool> <version> or later and <prerequisite>._`, the minimal configuration, a command that confirms it works, and a card that links to the full guide. A tab that only links to another page is not enough. Also use tabs for alternative ways to do one step, such as the Langfuse UI and the API.
 - A reader can finish setup from that page, and from the tab they selected.
 - End with a "Not seeing what you expected?" section that uses `<FaqPreview>` with the area's get-started tag and, if there is an obvious next guide, a "Next steps" list with just that link.
@@ -53,11 +53,11 @@ When the tool already has an integration page for another Langfuse product area,
 ## Changelog entries [#changelog-entries]
 
 - Title: describe what the user can now do, not an abstract concept. "Filter Observations by Tool Calls" > "Simplify for Scale". Never use the "Feature Name: Rephrasing of Feature Name" format (e.g., "Code-Based Evaluators: Deterministic Evaluation Without LLM Calls"). Keep titles short and punchy — e.g., "Code as a Judge" or "Code-Based Evaluators".
-- Lead with what's now possible, not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
+- Lead with what's now possible (for a redesign, what looks different), not what was missing before. Frame positively — don't highlight past limitations of Langfuse. Weave the value naturally into the intro, not in a "Why This Matters" section buried later.
 - A changelog entry can be updated to record that something was retired. Do not copy that history onto a docs or integration page unless readers of that page would otherwise follow a dead path.
 - For new features, follow the intro immediately with 2-3 concrete use cases, not in a separate section. For additions to existing features, such as a new provider or endpoint, use cases are optional. A one-sentence entry that restates the title and links to docs is incomplete.
 - Keep it concise — every sentence should add new information. Don't repeat what was already said.
-- Do not reproduce durable conceptual breakdowns, schema inventories, or general how-it-works explanations. Link to evergreen docs instead.
+- Do not reproduce durable conceptual breakdowns, schema inventories such as required and optional API fields, or general how-it-works explanations. Link to evergreen docs or the API reference instead.
 - Use visuals (screenshots, `.mp4` videos) for UI changes, interleaved with text. Flag UI-change entries that have no screenshot or video. Frontmatter `ogImage` or `ogVideo` counts only when `showOgInHeader` is not `false`. When that flag is `false`, the visual has to be in the body. Do not invent a visual.
 - Be specific — name actual filters, metrics, commands. Avoid vague adjectives.
 - Tone: helpful and conversational, not marketing copy. No filler headings like "Why This Matters", or "Key Benefits."
