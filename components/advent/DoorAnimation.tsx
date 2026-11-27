@@ -999,6 +999,54 @@ function ProviderTourAnimation() {
   );
 }
 
+/** A wrapped present that rattles now and then: the feature behind it is coming. */
+function UpcomingAnimation() {
+  const tick = useTick(2200);
+  return (
+    <Stage>
+      <div className="flex flex-col items-center gap-3">
+        <svg
+          key={`gift-${tick}`}
+          viewBox="0 0 96 96"
+          className="adv-gift size-24"
+          aria-hidden
+        >
+          <rect
+            x={14}
+            y={42}
+            width={68}
+            height={46}
+            rx={4}
+            fill="var(--adv-red)"
+          />
+          <rect x={42} y={42} width={12} height={46} fill="var(--adv-gold)" />
+          <g className="adv-gift-lid">
+            <rect
+              x={8}
+              y={30}
+              width={80}
+              height={16}
+              rx={3}
+              fill="var(--adv-red-dark)"
+            />
+            <rect x={42} y={30} width={12} height={16} fill="var(--adv-gold)" />
+            <path
+              d="M48 30C40 14 24 18 30 26C33 30 42 30 48 30ZM48 30C56 14 72 18 66 26C63 30 54 30 48 30Z"
+              fill="none"
+              stroke="var(--adv-gold)"
+              strokeWidth={4}
+              strokeLinejoin="round"
+            />
+          </g>
+        </svg>
+        <span className="font-mono text-[12px] text-text-secondary">
+          Opening soon
+        </span>
+      </div>
+    </Stage>
+  );
+}
+
 export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
   switch (spec.kind) {
     case "route":
@@ -1037,6 +1085,8 @@ export function DoorAnimation({ spec }: { spec: DoorAnimationSpec }) {
           label={spec.label}
         />
       );
+    case "upcoming":
+      return <UpcomingAnimation />;
     case "providerTour":
       return <ProviderTourAnimation />;
     case "budget":

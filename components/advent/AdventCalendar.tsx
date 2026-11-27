@@ -466,30 +466,32 @@ function DoorDialog({
             <DialogDescription className="text-[14px] leading-relaxed text-text-secondary">
               {door.description}
             </DialogDescription>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button
-                variant="primary"
-                size="default"
-                href={door.link.href}
-                wrapperClassName="sm:w-auto"
-                className="sm:px-4"
-              >
-                {LINK_LABELS[door.link.type]}
-              </Button>
-              <Button
-                variant="secondary"
-                size="default"
-                href={door.socialUrl ?? shareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                wrapperClassName="sm:w-auto"
-                className="sm:px-4"
-                icon={<ArrowUpRight className="size-3.5" />}
-                iconPosition="end"
-              >
-                {door.socialUrl ? "View the social post" : "Share on X"}
-              </Button>
-            </div>
+            {door.link ? (
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  variant="primary"
+                  size="default"
+                  href={door.link.href}
+                  wrapperClassName="sm:w-auto"
+                  className="sm:px-4"
+                >
+                  {LINK_LABELS[door.link.type]}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="default"
+                  href={door.socialUrl ?? shareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  wrapperClassName="sm:w-auto"
+                  className="sm:px-4"
+                  icon={<ArrowUpRight className="size-3.5" />}
+                  iconPosition="end"
+                >
+                  {door.socialUrl ? "View the social post" : "Share on X"}
+                </Button>
+              </div>
+            ) : null}
             {prev !== null || next !== null ? (
               <div className="flex items-center justify-between border-t border-line-structure pt-3 text-[12px]">
                 <button
