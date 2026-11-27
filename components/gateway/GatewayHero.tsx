@@ -9,13 +9,10 @@ import { GatewayMoire } from "./GatewayMoire";
 import { GatewayLockup } from "./GatewayLockup";
 import styles from "./GatewayHero.module.css";
 
-/** "70": field behind the copy on the left. "72": centred copy above a band. */
-export type GatewayHeroLayout = "70" | "72";
-
-function HeroCopy({ centered = false }: { centered?: boolean }) {
+function HeroCopy() {
   return (
     <>
-      <GatewayLockup className={centered ? "justify-center" : undefined} />
+      <GatewayLockup />
       <h2
         id="see-and-control"
         data-toc-title="Langfuse AI Gateway"
@@ -26,16 +23,11 @@ function HeroCopy({ centered = false }: { centered?: boolean }) {
         </span>{" "}
         all AI usage
       </h2>
-      <p className="mt-4 max-w-[52ch] text-[18px] leading-[1.4] text-text-tertiary">
-        AI governance across your organization: route all model calls through
-        the gateway instead of losing track of keys and budgets.
+      <p className="mt-4 max-w-[52ch] text-[18px] leading-[1.4] text-text-secondary">
+        Route every model call through one gateway. Track spend, set budgets and
+        manage access across your organization.
       </p>
-      <div
-        className={cn(
-          "-mx-1 -mb-1 mt-6 flex flex-wrap gap-3",
-          centered && "justify-center",
-        )}
-      >
+      <div className="-mx-1 -mb-1 mt-6 flex flex-wrap gap-3">
         <Button
           href="/cloud"
           size="default"
@@ -46,14 +38,14 @@ function HeroCopy({ centered = false }: { centered?: boolean }) {
           Start free
         </Button>
         <Button
-          href="/docs/gateway/overview"
+          href="/docs/gateway/get-started/first-request"
           variant="secondary"
           size="default"
           shortcutKey="d"
           className="w-auto"
           wrapperClassName="w-fit"
         >
-          Documentation
+          Send your first request
         </Button>
       </div>
     </>
@@ -63,11 +55,11 @@ function HeroCopy({ centered = false }: { centered?: boolean }) {
 // Cancels the page column padding so the hero runs edge to edge under the nav.
 const BLEED = "not-prose -mx-4 -mt-4 sm:-mx-6 md:-mx-8 md:-mt-8";
 
-/** Full-bleed hero that sits above the page panel, on the page background. */
-export function GatewayHero({ layout }: { layout: GatewayHeroLayout }) {
+/** Full-bleed hero above the page panel: the line field behind the copy. */
+export function GatewayHero() {
   const heroRef = useRef<HTMLElement>(null);
 
-  return layout === "70" ? (
+  return (
     <section
       ref={heroRef}
       data-use-case-section="hero"
@@ -84,27 +76,6 @@ export function GatewayHero({ layout }: { layout: GatewayHeroLayout }) {
         )}
       >
         <HeroCopy />
-      </div>
-    </section>
-  ) : (
-    <section
-      ref={heroRef}
-      data-use-case-section="hero"
-      className={cn("relative overflow-hidden", styles.hero, BLEED)}
-    >
-      <div
-        className={cn(
-          "mx-auto flex max-w-[760px] flex-col items-center pt-[70px] text-center",
-          styles.copy,
-        )}
-      >
-        <HeroCopy centered />
-      </div>
-      <div className="relative mt-[26px] h-[320px]">
-        <GatewayMoire
-          pointerScopeRef={heroRef}
-          className={styles.fadeAllEdges}
-        />
       </div>
     </section>
   );

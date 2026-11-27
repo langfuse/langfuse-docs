@@ -7,50 +7,21 @@ contentWidth: full
 
 {/* Markdown for agents and .md consumers lives in md-override/gateway.md. Keep both files in sync. */}
 
-import { customerLogoNames } from "@/components/gateway/content";
 import { GatewayCustomerQuote } from "@/components/gateway/GatewayCustomerQuote";
 import { GatewayFeatureGrid } from "@/components/gateway/GatewayFeatureGrid";
 import { GatewayOpenSource } from "@/components/gateway/GatewayOpenSource";
 import { GatewayFlowDiagram } from "@/components/gateway/GatewayFlowDiagram";
-import { GatewayLockup } from "@/components/gateway/GatewayLockup";
-import { GatewayHeroArt } from "@/components/gateway/GatewayHeroArt";
-import { GatewayHeroAbove, GatewayHeroSwitch } from "@/components/gateway/GatewayHeroSwitch";
+import { GatewayHero, GatewayHeroLogos } from "@/components/gateway/GatewayHero";
 import { GatewaySteps } from "@/components/gateway/GatewaySteps";
 import { GatewayValueProps } from "@/components/gateway/GatewayValueProps";
-import { EnterpriseLogoGrid } from "@/components/shared/EnterpriseLogoGrid";
-import { Button } from "@/components/ui/button";
 import { GatewayUpdateSignup } from "@/components/gateway/GatewayUpdateSignup";
 
 <h1 className="sr-only">See and control all AI usage with the Langfuse AI Gateway</h1>
 
-<GatewayHeroAbove />
+<GatewayHero />
 
 <div className="@container not-prose mt-6 overflow-hidden border border-line-structure bg-surface-bg">
-  {/* Temporary layout comparison: the sections inside are the "current" hero. */}
-  <GatewayHeroSwitch>
-  <section data-use-case-section="hero" className="grid items-center @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-    <div className="flex min-w-0 flex-col items-start gap-6 px-6 pb-8 pt-10 sm:px-10 sm:pb-10 sm:pt-12 @2xl:py-12 @2xl:pr-4">
-      <GatewayLockup className="-mb-2" />
-      <h2 id="see-and-control" data-toc-title="Langfuse AI Gateway" className="text-[40px] leading-[1.02] text-text-primary @lg:text-[52px] @2xl:text-[44px] @4xl:text-[52px] @6xl:text-[64px]">
-        <span className="-mx-1.5 bg-surface-cta-primary box-decoration-clone px-1.5">{"See and control"}</span>{" all AI usage"}
-      </h2>
-      <p className="max-w-[52ch] text-[15px] leading-[1.5] text-text-secondary">
-        {"AI governance across your organization: route all model calls through the gateway instead of losing track of keys and budgets."}
-      </p>
-      <div className="flex flex-wrap gap-3">
-        <Button href="/cloud" size="default" shortcutKey="s" className="w-auto" wrapperClassName="w-fit">Start free</Button>
-        <Button href="/docs/gateway/overview" variant="secondary" size="default" shortcutKey="d" className="w-auto" wrapperClassName="w-fit">Documentation</Button>
-      </div>
-    </div>
-    <div className="flex min-w-0 items-center px-4 pb-8 sm:px-8 @2xl:py-8 @2xl:pl-0">
-      <GatewayHeroArt className="m-0 w-full" />
-    </div>
-  </section>
-
-  <section data-use-case-section="logos" className="border-t border-line-structure px-2 py-2">
-    <EnterpriseLogoGrid names={customerLogoNames} className="sm:grid-cols-4 lg:grid-cols-8" />
-  </section>
-  </GatewayHeroSwitch>
+  <GatewayHeroLogos />
 
   <section data-use-case-section="architecture" className="pattern-bg border-y border-line-structure px-5 py-12 sm:px-10 sm:py-20">
     <div className="relative z-10 mx-auto max-w-[960px]">

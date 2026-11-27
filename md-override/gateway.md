@@ -7,9 +7,9 @@ description: One open source entry point for all AI usage in your company. See e
 
 Langfuse AI Gateway (public beta)
 
-AI governance across your organization: route all model calls through the gateway instead of losing track of keys and budgets.
+Route every model call through one gateway. Track spend, set budgets and manage access across your organization.
 
-[Start free](/cloud), [Documentation](/docs/gateway/overview)
+[Start free](/cloud), [Send your first request](/docs/gateway/get-started/first-request)
 
 Used by [Ramp](/users/ramp), [Canva](/users/canva), Expedia Group, Pigment, [Khan Academy](/users/khan-academy), [Hugging Face](/users/hugging-face), Intuit and [SumUp](/users/sumup).
 
