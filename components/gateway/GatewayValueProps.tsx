@@ -7,7 +7,18 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  ChevronsUpDown,
+  FileText,
+  History,
+  Info,
+  Maximize2,
+  Minus,
+  Plus,
+  Send,
+} from "lucide-react";
 import { CornerBox } from "@/components/ui/corner-box";
 import { cn } from "@/lib/utils";
 import styles from "./Gateway.module.css";
@@ -15,8 +26,8 @@ import {
   budgetChart,
   budgetRows,
   gatewayKeys,
+  halo,
   keyStats,
-  session,
   spendBarLabels,
   spendBars,
   spendStats,
@@ -410,58 +421,78 @@ function ModelsPanel() {
   );
 }
 
-const CALL_MAX = 0.8;
-const callPoints = toPoints(session.calls, CALL_MAX);
-const callTotal = session.calls.reduce((sum, cost) => sum + cost, 0);
+const haloMax = Math.max(...halo.workflows.map((w) => w.sessions));
+const count = new Intl.NumberFormat("en-US");
 
-function TracePanel() {
+function HaloPanel() {
   return (
     <>
-      <ScreenHeader prefix="Session" title={session.name}>
-        <Chip>{session.user}</Chip>
+      <ScreenHeader title="Halo">
+        <span className={styles.haloTools}>
+          <Plus aria-hidden />
+          <History aria-hidden />
+          <Maximize2 aria-hidden />
+          <Minus aria-hidden />
+        </span>
       </ScreenHeader>
-      <div className={styles.appBody}>
-        <Section title="Cost per call" note={`Total ${usd.format(callTotal)}`}>
-          <Chart
-            height={150}
-            yTicks={["$0.80", "$0.60", "$0.40", "$0.20", "$0.00"]}
-            xLabels={[0, 3, 6, 9].map((call) => ({
-              text: `#${call + 1}`,
-              at: call / (session.calls.length - 1),
-            }))}
-            marks={
-              <polyline
-                className={styles.appLine}
-                points={toPolyline(callPoints)}
-              />
-            }
-          >
-            {callPoints.map((point, i) => (
-              <span
-                key={i}
-                className={styles.appDot}
-                style={{ left: `${point.x}%`, top: `${point.y}%` }}
-              />
+      <div className={styles.haloBody}>
+        <div className={styles.haloThread}>
+          <p className={styles.haloQuestion}>{halo.question}</p>
+          <ul className={styles.haloSteps}>
+            {halo.steps.map((step) => (
+              <li key={step}>
+                <Check aria-hidden />
+                {step}
+              </li>
             ))}
-          </Chart>
-        </Section>
-        <div className={styles.appSection}>
-          <div className={cn(styles.appTable, styles.appFade)}>
-            <div className={cn(styles.appRow, styles.appRowHead)}>
-              <span>Name</span>
-              <span>Model</span>
-              <span className={styles.appCellEnd}>Cost</span>
-            </div>
-            {session.rows.map((row) => (
-              <div key={row.name} className={styles.appRow}>
-                <span>{row.name}</span>
-                <span>
-                  <Chip>{row.model}</Chip>
+          </ul>
+          <p>{halo.intro}</p>
+          <div className={styles.haloList}>
+            {halo.workflows.map((workflow) => (
+              <div key={workflow.name} className={styles.haloRow}>
+                <span className={styles.haloName}>{workflow.name}</span>
+                <span className={styles.haloTrack}>
+                  <span
+                    className={cn(
+                      styles.haloFill,
+                      workflow.highlight && styles.haloFillStrong,
+                    )}
+                    style={{ width: `${(workflow.sessions / haloMax) * 100}%` }}
+                  />
                 </span>
-                <span className={styles.appCellEnd}>{row.cost}</span>
+                <span className={styles.haloCount}>
+                  {count.format(workflow.sessions)}
+                </span>
               </div>
             ))}
           </div>
+          <p>{halo.answer}</p>
+          <div className={styles.haloAction}>
+            <span className={styles.haloActionIcon}>
+              <FileText aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className={styles.haloActionTitle}>
+                {halo.action.title}
+              </span>
+              <span className={styles.haloActionDetail}>
+                {halo.action.detail}
+              </span>
+            </span>
+            <ArrowRight aria-hidden className={styles.haloActionArrow} />
+          </div>
+        </div>
+        <div className={styles.haloComposer}>
+          <span className={styles.haloPlaceholder}>Ask a follow-up</span>
+          <span className={styles.haloComposerBar}>
+            <span className={styles.haloContext}>
+              <Info aria-hidden />
+              Current trace view in context
+            </span>
+            <span className={styles.haloSend}>
+              <Send aria-hidden />
+            </span>
+          </span>
         </div>
       </div>
     </>
@@ -472,26 +503,37 @@ const panels: Record<ValueProp["panel"], () => React.ReactElement> = {
   spend: SpendPanel,
   budgets: BudgetsPanel,
   models: ModelsPanel,
-  trace: TracePanel,
+  halo: HaloPanel,
 };
 
 export function GatewayValueProps() {
   const [active, setActive] = useState(0);
+  // Clicking the open prop folds it; rotation pauses until another is picked.
+  const [open, setOpen] = useState(true);
   // Bumped on every change so the progress bar animation restarts.
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
+    if (!open) return;
     const timer = setTimeout(() => {
       setActive((a) => (a + 1) % valueProps.length);
       setTick((t) => t + 1);
     }, ROTATE_MS);
     return () => clearTimeout(timer);
-  }, [tick]);
+  }, [tick, open]);
 
-  const select = useCallback((index: number) => {
-    setActive(index);
-    setTick((t) => t + 1);
-  }, []);
+  const select = useCallback(
+    (index: number) => {
+      if (index === active && open) {
+        setOpen(false);
+        return;
+      }
+      setActive(index);
+      setOpen(true);
+      setTick((t) => t + 1);
+    },
+    [active, open],
+  );
 
   return (
     <div className="grid items-start gap-10 @3xl:grid-cols-2">
@@ -502,6 +544,7 @@ export function GatewayValueProps() {
       >
         {valueProps.map((prop, i) => {
           const isActive = i === active;
+          const isOpen = isActive && open;
           return (
             <button
               key={prop.title}
@@ -509,6 +552,7 @@ export function GatewayValueProps() {
               role="tab"
               id={`gateway-value-tab-${i}`}
               aria-selected={isActive}
+              aria-expanded={isOpen}
               aria-controls="gateway-value-panel"
               onClick={() => select(i)}
               className="relative flex cursor-pointer flex-col gap-2 border-b border-line-structure py-5 pr-4 text-left"
@@ -516,12 +560,12 @@ export function GatewayValueProps() {
               <span
                 className={cn(
                   "font-analog text-[22px] leading-[1.2] transition-colors",
-                  isActive ? "text-text-primary" : "text-text-tertiary",
+                  isOpen ? "text-text-primary" : "text-text-tertiary",
                 )}
               >
                 {prop.title}
               </span>
-              {isActive && (
+              {isOpen && (
                 // Every prop's details share one grid cell, so the open row is as
                 // tall as the longest one and the page doesn't jump on rotation.
                 <span className="grid max-w-[440px]">
@@ -554,7 +598,7 @@ export function GatewayValueProps() {
                   ))}
                 </span>
               )}
-              {isActive && (
+              {isOpen && (
                 <span
                   key={tick}
                   aria-hidden

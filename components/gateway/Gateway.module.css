@@ -589,3 +589,246 @@
     padding: 8px 10px;
   }
 }
+
+/* Halo chat on the "Improve AI usage" panel, after the Halo assistant UI. */
+.haloTools {
+  display: inline-flex;
+  gap: 16px;
+  color: var(--app-text-soft);
+}
+
+.haloTools svg {
+  width: 16px;
+  height: 16px;
+}
+
+.haloBody {
+  display: flex;
+  flex-direction: column;
+  height: 560px;
+  overflow: hidden;
+}
+
+.haloThread {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 16px 20px;
+  color: var(--app-text-soft);
+  font-size: 13px;
+  line-height: 19px;
+  mask-image: linear-gradient(to bottom, #000 95%, transparent);
+}
+
+.haloThread > * {
+  flex: none;
+}
+
+.haloQuestion {
+  align-self: flex-end;
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--app-chip);
+  color: var(--app-text);
+}
+
+.haloSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--app-text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.haloSteps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.haloSteps svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.haloList {
+  border: 1px solid var(--app-line);
+  border-radius: 6px;
+  background: var(--app-raised);
+}
+
+.haloRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px 36px;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 12px;
+  color: var(--app-text);
+}
+
+.haloRow + .haloRow {
+  border-top: 1px solid var(--app-line);
+}
+
+.haloName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.haloTrack {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 1px;
+  background: var(--app-chip);
+}
+
+.haloFill {
+  display: block;
+  height: 100%;
+  background: var(--app-warn);
+}
+
+.haloFillStrong {
+  background: var(--app-text);
+}
+
+.haloCount {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+}
+
+.haloAction {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--app-control-line);
+  border-radius: 6px;
+  background: var(--app-raised);
+}
+
+.haloActionIcon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--surface-cta-primary);
+  color: #1f1f1d;
+}
+
+.haloActionIcon svg,
+.haloActionArrow {
+  width: 16px;
+  height: 16px;
+}
+
+.haloActionArrow {
+  flex: none;
+  color: var(--app-text-muted);
+}
+
+.haloActionTitle {
+  display: block;
+  overflow: hidden;
+  color: var(--app-text);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.haloActionDetail {
+  display: block;
+  overflow: hidden;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.haloComposer {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  margin: 0 14px 14px;
+  overflow: hidden;
+  border: 1px solid var(--app-control-line);
+  border-radius: 8px;
+  background: var(--app-raised);
+}
+
+.haloPlaceholder {
+  padding: 10px 12px 14px;
+  color: var(--app-text-muted);
+}
+
+.haloComposerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 6px 6px 12px;
+  background: var(--app-chip);
+}
+
+.haloContext {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--app-text-muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.haloContext svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.haloSend {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--app-text-muted);
+  color: var(--app-window);
+}
+
+.haloSend svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Phone-width panels keep the counts and the answer: the bars and steps go. */
+@container panel (width < 360px) {
+  .haloRow {
+    grid-template-columns: minmax(0, 1fr) 40px;
+  }
+
+  .haloTrack,
+  .haloSteps {
+    display: none;
+  }
+
+  .haloPlaceholder {
+    padding-bottom: 10px;
+  }
+}

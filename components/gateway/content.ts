@@ -54,7 +54,7 @@ export const customerLogoNames = [
 export type ValueProp = {
   title: string;
   body: string;
-  panel: "spend" | "budgets" | "models" | "trace";
+  panel: "spend" | "budgets" | "models" | "halo";
   features: { label: string; text: string }[];
 };
 
@@ -111,7 +111,7 @@ export const valueProps: ValueProp[] = [
   {
     title: "Improve AI usage",
     body: "See what AI is used for and improve it.",
-    panel: "trace",
+    panel: "halo",
     features: [
       {
         label: "Automatic tracing:",
@@ -197,18 +197,27 @@ export const gatewayKeys = [
   },
 ];
 
-export const session = {
-  name: "refactor-billing-export",
-  user: "anna",
-  // Cost of each model call in dollars, in order.
-  calls: [0.42, 0.06, 0.38, 0.04, 0.61, 0.4, 0.01, 0.22, 0.05, 0.31],
-  rows: [
-    { name: "fix-failing-test", model: "claude-opus", cost: "$0.61" },
-    { name: "plan-changes", model: "claude-opus", cost: "$0.42" },
-    { name: "summarize-diff", model: "claude-opus", cost: "$0.40" },
-    { name: "edit-export.ts", model: "claude-opus", cost: "$0.38" },
-    { name: "read-files", model: "claude-sonnet", cost: "$0.06" },
+// Halo answering a question about the team's coding agent sessions.
+export const halo = {
+  question:
+    "Which recurring coding agent workflows should we turn into a skill?",
+  steps: [
+    "Searched 19.23K coding agent traces",
+    "Grouped 2,314 sessions by intent",
   ],
+  intro: "Four workflows repeat across your team's coding agent sessions:",
+  workflows: [
+    { name: "Writing integration tests", sessions: 1240 },
+    { name: "Debugging CI failures", sessions: 860, highlight: true },
+    { name: "ClickHouse migrations", sessions: 610 },
+    { name: "Docs after API changes", sessions: 420 },
+  ],
+  answer:
+    "Debugging CI failures is the strongest candidate. Those sessions take 14 tool calls on average before a fix, and most of the steps are identical.",
+  action: {
+    title: "Create skill: debug-ci-failures",
+    detail: "Draft a SKILL.md from 860 sessions",
+  },
 };
 
 export type SketchTone = "ok" | "warn" | "error";
