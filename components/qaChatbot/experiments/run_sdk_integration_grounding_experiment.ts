@@ -17,6 +17,7 @@ import { LangfuseSpanProcessor } from "@langfuse/otel";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 import {
+  applyQaChatbotCodeFormattingToMessages,
   getChatHistory,
   getLastUserMessage,
   normalizeMessageContent,
@@ -260,7 +261,9 @@ function compileExperimentMessages(
     compiledMessages.push(...datasetMessages);
   }
 
-  return compiledMessages as Parameters<typeof generateText>[0]["messages"];
+  return applyQaChatbotCodeFormattingToMessages(compiledMessages) as Parameters<
+    typeof generateText
+  >[0]["messages"];
 }
 
 async function runOneExperiment(
@@ -284,11 +287,13 @@ async function runOneExperiment(
     | "medium"
     | "high"
     | undefined;
-  const textVerbosity = promptConfig.textVerbosity as
+  const configuredTextVerbosity = promptConfig.textVerbosity as
     | "low"
     | "medium"
     | "high"
     | undefined;
+  const textVerbosity =
+    configuredTextVerbosity === "low" ? "medium" : configuredTextVerbosity;
   const reasoningEffort = promptConfig.reasoningEffort as
     | "low"
     | "medium"
