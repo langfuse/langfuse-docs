@@ -454,7 +454,7 @@ const sections: Section[] = [
       {
         name: "Included usage",
         description:
-          "Each trace, observation, score, or new facet result counts as one unit.",
+          "Each trace, observation, score, and facet result counts as one unit.",
         href: "/docs/administration/billable-units",
         tiers: {
           cloud: {
@@ -473,7 +473,7 @@ const sections: Section[] = [
       {
         name: "Additional usage",
         description:
-          "Each trace, observation, score, or new facet result counts as one unit. Pricing follows graduated tiers with lower rates at higher volumes.",
+          "Each trace, observation, score, and facet result counts as one unit. Pricing follows graduated tiers with lower rates at higher volumes.",
         href: "/docs/administration/billable-units",
         tiers: {
           cloud: {

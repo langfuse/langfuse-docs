@@ -39,7 +39,7 @@ const faqs: FAQItem[] = [
   {
     question: "How does pricing work?",
     answer:
-      "Langfuse Cloud has a [free Hobby plan](/pricing) with no credit card required. Paid plans use [graduated pricing](/pricing). Each trace, observation, score, or new [facet result](/docs/observability/features/topics#models-and-costs) counts as one [billable unit](/docs/administration/billable-units). Volume discounts apply automatically as you scale. You can also [self-host](/self-hosting) Langfuse for free under the MIT license. See the [pricing page](/pricing) for the full calculator and plan comparison.",
+      "Langfuse Cloud has a [free Hobby plan](/pricing) with no credit card required. Paid plans use [graduated pricing](/pricing). Each trace, observation, score, and facet result counts as one [billable unit](/docs/administration/billable-units). Volume discounts apply automatically as you scale. You can also [self-host](/self-hosting) Langfuse for free under the MIT license. See the [pricing page](/pricing) for the full calculator and plan comparison.",
   },
 ];
 
