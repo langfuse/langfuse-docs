@@ -1,0 +1,128 @@
+---
+title: Operate Langfuse across teams
+sidebarTitle: Operate across teams
+description: Maintain shared configuration, manage SDK upgrades, monitor service health, and review access and costs across application teams.
+category: Administration
+---
+
+import { Frame } from "@/components/Frame";
+
+# Operate Langfuse across teams
+
+Once teams use Langfuse in production, keep their integrations working as applications, SDKs, and responsibilities change. This guide gives platform administrators a practical routine for maintaining the service while application teams own their quality and release decisions.
+
+<Frame>
+  ![Platform owners monitor service health, triage failures, improve shared tooling, and verify recovery. Application owners review outputs, investigate failures, change the application, and verify release results.](/images/blog/2026-10-22-operating-langfuse-as-an-internal-service/operating-loop.png)
+</Frame>
+
+## Prerequisites
+
+Teams have completed [project setup and onboarding](/guides/set-up-langfuse-for-teams), with named owners, working instrumentation, and a documented project baseline.
+
+## Operating workflow
+
+<Steps>
+
+### Assign ownership and keep an integration inventory
+
+Publish a short service page with the supported integration, permitted data, support channel, and escalation contacts. Make the division of work explicit:
+
+| Platform team                                                             | Application team                                                             |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Access, shared configuration, credential delivery, and service escalation | Instrumentation, domain datasets, evaluation criteria, and release decisions |
+| Reference integrations and upgrade guidance                               | Testing and deploying changes to their applications                          |
+| Service health and cost-allocation process                                | Investigating application behavior and explaining usage                      |
+
+Record each integration's owner, language/framework, SDK version, region, project, baseline version, and acceptance-test link. Include evaluation jobs and scripts as well as production applications. Store secret references, never credential values.
+
+With Cloud, the platform team still owns its SDK rollout, network path, credentials, and internal support. With [self-hosting](/self-hosting), also assign owners for the web and worker services, PostgreSQL, ClickHouse, Redis or Valkey, and object storage.
+
+### Maintain shared defaults [#maintain-defaults]
+
+Compare each project's configuration with its assigned baseline. Apply reviewed changes only to platform-managed settings, preserving team-owned resources and documented exceptions.
+
+| Change                   | Rollout check                                                                                             |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| LLM connection or model  | Test a representative evaluator and Playground request; identify projects with overrides.                 |
+| Evaluator definition     | Validate it against reviewed examples before updating destination evaluators. Retain the destination IDs. |
+| Live rule                | Review observation filters, variable mappings, sampling, and expected execution cost.                     |
+| Retention                | Confirm the new duration with the data owner and identify history that will expire.                       |
+| Notification destination | Test delivery and confirm who responds.                                                                   |
+
+<Callout type="warn">
+  Active rules use the latest version of their assigned evaluator, and changing the project default model affects evaluators that use it. Shorter retention can delete historical data. Treat these as reviewed rollouts, not routine synchronization. See [evaluator configuration](/docs/evaluation/evaluation-methods/llm-as-a-judge) and [retention](/docs/administration/data-retention).
+</Callout>
+
+Keep the provisioning workflow repeatable: store project, evaluator, and rule IDs; update managed resources by ID; and reconcile uncertain creates before retrying. Names alone are not unique identifiers. Use bounded retries for transient failures, and leave failed steps visible for an operator to repair.
+
+### Roll out SDK and server upgrades
+
+Publish a tested reference integration and link the relevant [SDK migration guide](/docs/observability/sdk/upgrade-path). Start with a representative application, then roll out to small groups with named owners and a recovery plan.
+
+Exercise a real request before and after the change:
+
+- Verify parent-child relationships, root input/output, model usage, errors, and export at shutdown.
+- Check environment, release, user, session, and other attributes on the observations that need them.
+- Confirm evaluations still score the intended observations, with the expected score count.
+- Test masking with synthetic sensitive values, including errors and third-party instrumentation.
+
+Run these checks in CI where practical. Review [sampling](/docs/observability/features/sampling) changes too, because they alter the evidence available for debugging. For self-hosted server upgrades, check [server migration guidance](/self-hosting/upgrade/upgrade-guides/upgrade-v3-to-v4) separately; API consumers, exports, and evaluators may also need changes.
+
+### Monitor the complete telemetry path
+
+Send a synthetic trace through a representative application and check that it becomes queryable with the expected fields. Monitor export errors and ingestion delay alongside process health. Give each alert an owner, a useful threshold, and a response runbook.
+
+When data is missing, compare affected projects, recent releases, credential changes, the last successful synthetic check, and service status. Ask teams to include the time range, project, SDK/integration version, sanitized error, and a safe example identifier in support requests.
+
+For self-hosting, monitor worker failures, queue backlog, database health, storage, and dependency availability. Follow the [backup guidance](/self-hosting/configuration/backups) and rehearse restoration in an isolated environment. Verify that restored data and configuration support the workflows your teams need.
+
+Test application behavior during a Langfuse outage, especially when fetching prompts at runtime. Check both a warm cache and a fresh instance with no cached prompt, then verify the intended fallback.
+
+### Help teams complete evaluation and release workflows
+
+Give each role a task it can repeat independently. For a support assistant, a domain reviewer can define acceptable refund answers, while an engineer tests a prompt change against those examples.
+
+| Task                      | Starting resource                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| Diagnose a request        | [Tracing quickstart](/docs/observability/get-started) and your reference integration |
+| Decide what quality means | [Choosing what to evaluate](/academy/evaluate/choosing-what-to-evaluate)             |
+| Test a proposed change    | [Evaluate with datasets](/docs/evaluation/get-started/offline)                       |
+| Monitor after release     | [Evaluate production traffic](/docs/evaluation/get-started/online)                   |
+
+The platform team keeps these workflows usable; application owners choose the examples, review failures, and decide whether a change should ship. Turn recurring support questions into tested examples and runbook updates.
+
+When projects are separated by environment, define how reviewed prompts and evaluation assets are promoted. Use [protected prompt labels](/docs/prompt-management/features/prompt-version-control) where available, and compose approvals and gradual rollout in your [release tooling](/resources/engineering/prompt-cicd). Record the reviewed version and how to restore the previous one.
+
+### Review access and rotate credentials
+
+Reconfirm project owners and effective permissions when people change teams. Keep the identity provider and project-mapping workflow aligned so a later sync does not restore access that was removed manually. Include elevated organization roles in reviews.
+
+For each API key, record its consuming service, purpose, secret reference, owner, and replacement date. Deploy a replacement, verify the integration, then revoke the old key. If a key expires, schedule replacement before requests begin failing. Review [key permissions](/docs/administration/rbac#api-key-permissions) as the integration's needs change.
+
+<Callout type="info">
+  Project API keys are independent of human accounts. Removing a user's membership does not revoke credentials they could access; review those separately.
+</Callout>
+
+When an application retires, stop its exporters and revoke its keys. Check for prompts, datasets, investigations, or retention requirements before deciding to delete the project. Low activity alone does not establish that its data is no longer needed.
+
+### Review usage and allocate costs
+
+Keep three cost sources separate:
+
+| Cost                       | Source and interpretation                                                                                                                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model spend                | [Usage and cost recorded in Langfuse](/docs/observability/features/token-and-cost-tracking), reconciled with provider billing. Sampling, missing usage, and negotiated prices can create gaps. |
+| Langfuse service           | Your bill and the [organization usage breakdown](/docs/administration/billable-units#monitor-organization-usage), which exports units by time bucket, project, and type.                       |
+| Self-hosted infrastructure | Actual compute, database, storage, backup, and network bills, plus applicable software/support costs.                                                                                          |
+
+Start with a report showing teams their attributed costs and the allocation method before charging those costs to budgets. For example, under an agreed unit-share rule, a project responsible for 60% of units would receive $360 of an illustrative $600 Langfuse bill. Add its reconciled model spend separately. Keep shared and unattributed costs visible.
+
+Include the period, ownership mapping, exceptions, and reconciliation method in each report. Let owners challenge anomalies. [Cloud spend alerts](/docs/administration/spend-alerts) concern the Langfuse bill; model-cost alerts concern model usage. An alert is a notification, not a hard spending limit.
+
+</Steps>
+
+## Run a regular service review
+
+Review failed integration checks, expiring credentials, access exceptions, configuration drift, and cost anomalies. Assign each issue an owner and a completion check. Use recurring problems to choose the next improvement: a better upgrade example, clearer evaluation guidance, or repaired cost attribution.
+
+When another team joins, use the same [setup and provisioning workflow](/guides/set-up-langfuse-for-teams), incorporating what you learned from operating existing projects.
