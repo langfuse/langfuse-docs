@@ -8,7 +8,8 @@
 //   --height    viewport height. Left out, the picture covers the whole page.
 //   --scale     device scale factor. The tilted drawings show at 0.6, so 1.6667 gives one plane unit
 //               per pixel: the scale of the original exports, which measure.py expects.
-//   --dark      prefers-color-scheme: dark.
+//   --dark      prefers-color-scheme: dark. Stops with an error on a page that forces light mode
+//               (the homepage and the marketing pages), instead of saving a light picture.
 //   --selector  cut the picture to the first element that matches. It is scrolled into view first.
 //   --wait      milliseconds to wait after the fonts have loaded.
 //
@@ -202,6 +203,15 @@ try {
   await evaluate(
     `document.head.insertAdjacentHTML("beforeend", "<style>nextjs-portal{display:none!important}</style>")`,
   );
+  if (flags.dark) {
+    const forcedLight = await evaluate(
+      `(() => { const c = document.documentElement.classList; return c.contains("light") && !c.contains("dark"); })()`,
+    );
+    if (forcedLight)
+      throw new Error(
+        `${url} forces light mode, so there is no dark picture to take. Nothing was saved.`,
+      );
+  }
 
   let clip;
   if (flags.selector) {

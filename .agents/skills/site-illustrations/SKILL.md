@@ -31,7 +31,7 @@ A wide flow does not suit the tilted floor: a layout 1000 units across climbs 34
 3. **Compare early.** After the first render, set one piece next to the same piece of the original, enlarged, before you refine anything. The tilted kit already draws the parts, so render the whole scene first; do not spend a round on a lone button.
 4. **Show it early**: the original and yours at the same scale on one page, plus today's version when you are replacing one. Get a yes from the person who owns the design before porting or polishing. With nobody to ask, stop there, hand over the page, and list every choice the originals did not settle.
 5. **Keep the copy.** Every word the product copy gives the drawing stays, in its own case. A new label, a dropped label or a changed case needs the design owner's yes.
-6. **Finish in the real page**: desktop width and 375 px, light and dark, no cropping, no sideways scroll. A mock cannot show this (its panel is a fixed 941 px), so it stays open until the port.
+6. **Finish in the real page**: desktop width and 375 px, no cropping, no sideways scroll, and in dark where the page has a dark theme. The homepage and the marketing pages, /gateway among them, force light mode. A mock cannot show this (its panel is a fixed 941 px), so it stays open until the port.
 
 ## Tools
 
@@ -47,7 +47,7 @@ Run every command from the repo root, with `K=.agents/skills/site-illustrations`
 | `python3 $K/scripts/svg-parity.py MOCK PAGE`               | proves a React port draws what the mock drew                                           |
 | `assets/compare.html`                                      | review page: pictures side by side at one scale; its options are in the file's comment |
 
-`shoot.mjs` options: `--width N` (below 500 lays out as a phone), `--scale N`, `--dark`, `--selector CSS` (cuts the picture to that element). Without `--height` it covers the whole page.
+`shoot.mjs` options: `--width N` (below 500 lays out as a phone), `--scale N`, `--dark`, `--selector CSS` (cuts the picture to that element). Without `--height` it covers the whole page. `--dark` stops with an error on a page that forces light mode, so a light picture is never saved as a dark one.
 
 Look at every picture you make (read the PNG). A check that printed numbers is not a check that the drawing looks right.
 
@@ -141,7 +141,7 @@ node $K/scripts/shoot.mjs http://127.0.0.1:3333/ /tmp/loop.png --selector 'figur
 5. Write the compact drawing for screens below `md` as its own layout.
 6. Wrap it in a `figure` and give it one text alternative, not two: either the visible boxes with an `aria-label` on the figure and `aria-hidden` connectors, or an `sr-only` `figcaption` with the visual layouts `aria-hidden`.
 
-Check against the ten rules in [references/flat-spec.md](references/flat-spec.md), then read its last section: what the originals do not settle. Shoot your diagram at `--width 1440` and `--width 375`, light and `--dark`, and crop one corner of a box and one arrow tip next to the same detail of an original.
+Check against the ten rules in [references/flat-spec.md](references/flat-spec.md), then read its last section: what the originals do not settle. Shoot your diagram at `--width 1440` and `--width 375`, and with `--dark` where the page allows it. On a page that forces light mode, check the dark tokens on a scratch route outside that layout, or say dark was not checked. Crop one corner of a box and one arrow tip next to the same detail of an original.
 
 ## Before you hand over
 

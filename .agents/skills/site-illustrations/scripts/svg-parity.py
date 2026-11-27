@@ -5,8 +5,9 @@
 
 MOCK and PAGE are URLs or local HTML files. Both are loaded in headless Chrome, every tilted drawing in
 each is reduced to its elements, attributes and text, and the two lists are compared in page order.
-Ignored on purpose: element ids, and how the button shadow gets its colour (a CSS variable in the mock,
-utility classes in the component). Exit code 0 only if every pair is identical.
+Ignored on purpose: element ids, and the two known spellings of the button shadow's paint (a CSS variable
+in the mock, utility classes in the component). Any other shadow paint counts as a difference.
+Exit code 0 only if every pair is identical.
 """
 import os
 import re
@@ -36,45 +37,65 @@ def dom(target):
     return subprocess.run(args, capture_output=True, text=True).stdout
 
 
-def drawings(html):
-    # every tilted drawing defines the 45 degree hatch pattern; script source is not markup
-    html = re.sub(r"<script\b.*?</script>", "", html, flags=re.S)
-    return [m for m in re.findall(r"<svg\b.*?</svg>", html, flags=re.S) if "rotate(45)" in m]
+class Drawings(HTMLParser):
+    """Collects the tokens of every top-level <svg> on a page. The parser never reports markup that sits
+    inside a <script>, so a drawing in a template string is not counted."""
 
-
-class Tokens(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.out = []
+        self.found, self.depth = [], 0
 
     def handle_starttag(self, tag, attrs):
-        self.out.append(["<", tag, dict(attrs)])
+        if tag == "svg":
+            if not self.depth:
+                self.found.append([])
+            self.depth += 1
+        if self.depth:
+            self.found[-1].append(["<", tag, dict(attrs)])
 
     def handle_endtag(self, tag):
-        self.out.append([">", tag])
+        if self.depth:
+            self.found[-1].append([">", tag])
+            if tag == "svg":
+                self.depth -= 1
 
     def handle_data(self, data):
-        if data.strip():
-            self.out.append(["#", data.strip()])
+        if self.depth and data.strip():
+            self.found[-1].append(["#", data.strip()])
 
 
-def canon(svg):
-    parser = Tokens()
-    parser.feed(svg)
+def drawings(html):
+    parser = Drawings()
+    parser.feed(html)
+    # every tilted drawing defines the 45 degree hatch pattern
+    return [d for d in parser.found if any(t[0] == "<" and "rotate(45)" in " ".join(v or "" for v in t[2].values()) for t in d)]
+
+
+# The button shadow is 8% black in light and 28% in dark, spelled two ways.
+SHADOW_PAINT = (
+    {"fill": "var(--shadow)", "opacity": "0.5"},  # the mock: --shadow is 16% or 56% black
+    {"class": "fill-black opacity-[0.08] dark:opacity-[0.28]"},  # the component
+)
+
+
+def canon(tokens):
     ids = {}
 
     def cid(name):
         return ids.setdefault(name, f"id{len(ids)}")
 
     result = []
-    for token in parser.out:
+    for token in tokens:
         if token[0] != "<":
             result.append(tuple(token))
             continue
         attrs = dict(token[2])
         if token[1] == "polygon" and "filter" in attrs:
-            for key in ("fill", "opacity", "class"):
-                attrs.pop(key, None)
+            paint = {key: attrs[key] for key in ("fill", "opacity", "class") if key in attrs}
+            if paint in SHADOW_PAINT:
+                for key in paint:
+                    del attrs[key]
+                attrs["paint"] = "button shadow"
         if "id" in attrs:
             attrs["id"] = cid(attrs["id"])
         for key, value in attrs.items():
