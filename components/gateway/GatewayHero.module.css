@@ -1,4 +1,4 @@
-/* Line field colour, edge fades and the text clearing for the /gateway hero. */
+/* Line field colour, copy inset and edge fades for the /gateway hero. */
 
 .moire {
   --gateway-moire-accent: #8f88e3;
@@ -8,14 +8,43 @@
   --gateway-moire-accent: var(--callout-info);
 }
 
-.fadeVertical {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 14%,
-    #000 86%,
-    transparent 100%
-  );
+/* Copy inset: the page column padding plus the panel's section padding. */
+.hero {
+  --gateway-hero-inset: 36px;
+}
+
+@media (width >= 40rem) {
+  .hero {
+    --gateway-hero-inset: 64px;
+  }
+}
+
+@media (width >= 48rem) {
+  .hero {
+    --gateway-hero-inset: 72px;
+  }
+}
+
+.copy {
+  padding-inline: var(--gateway-hero-inset);
+}
+
+/* Fades the lines out at the top, the bottom and around the copy; nothing is painted over the page. */
+.fadeAroundCopy {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 14%,
+      #000 86%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 560px 340px at calc(var(--gateway-hero-inset) + 260px) 50%,
+      transparent 45%,
+      #000 100%
+    );
+  mask-composite: intersect;
 }
 
 .fadeAllEdges {
@@ -35,21 +64,4 @@
       transparent 100%
     );
   mask-composite: intersect;
-}
-
-/* Soft patch behind the copy; its left edge sits 40px left of the copy. */
-.clearing {
-  position: absolute;
-  z-index: -1;
-  top: 50%;
-  left: -40px;
-  width: 860px;
-  height: 680px;
-  transform: translateY(-50%);
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 560px 340px at 300px 50%,
-    var(--surface-bg) 45%,
-    transparent 100%
-  );
 }
