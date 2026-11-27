@@ -55,32 +55,6 @@
   }
 }
 
-/* Request flow diagram: chip shadows and traffic dots, as in the Langfuse app. */
-.flowChip {
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.03))
-    drop-shadow(0 4px 12px rgb(0 0 0 / 0.05));
-}
-
-/* A traffic dot is a near-zero dash on a pathLength=100 copy of a line. */
-.flowPulse {
-  stroke-dasharray: 0.5 100;
-  stroke-dashoffset: 100.5;
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .flowPulse {
-    opacity: 0.6;
-    animation: flow-traffic 4.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  }
-}
-
-@keyframes flow-traffic {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 /* App-screen mockups in the value prop panels. */
 .screen {
   --app-hatch: #f4f4f0;
