@@ -38,6 +38,7 @@ const ASK_AI_BAR_HIDDEN_PATHS: ReadonlyArray<RegExp> = [
   // App proxy
   /^\/cloud(\/|$)/,
   // Custom-designed regional / annual landing pages
+  /^\/india(\/|$)/,
   /^\/japan(\/|$)/,
   /^\/cn(\/|$)/,
   /^\/kr(\/|$)/,

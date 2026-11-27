@@ -7,6 +7,8 @@ const emailSchema = z.string().email();
 
 const sourceSchema = z.string().max(100).optional();
 
+const eventNameSchema = z.enum(["india_cloud_waitlist"]).optional();
+
 const mailingListSchema = z.enum(["product", "oss", "gateway"]);
 
 const listsSchema = z.array(mailingListSchema).min(1).max(3);
@@ -46,7 +48,7 @@ export async function OPTIONS() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, source, list, lists } = body;
+    const { email, source, list, lists, eventName } = body;
 
     if (!emailSchema.safeParse(email).success) {
       return NextResponse.json(
@@ -58,6 +60,14 @@ export async function POST(request: NextRequest) {
     if (!sourceSchema.safeParse(source).success) {
       return NextResponse.json(
         { error: "Invalid source" },
+        { status: 400, headers: corsHeaders },
+      );
+    }
+
+    const parsedEventName = eventNameSchema.safeParse(eventName);
+    if (!parsedEventName.success) {
+      return NextResponse.json(
+        { error: "Invalid event name" },
         { status: 400, headers: corsHeaders },
       );
     }
@@ -91,18 +101,40 @@ export async function POST(request: NextRequest) {
         ? await loopsRequest("PUT", "contacts/update", { email, mailingLists })
         : createResponse;
 
-    if (loopsResponse.status === 200) {
-      return NextResponse.json({ status: "OK" }, { headers: corsHeaders });
+    if (loopsResponse.status !== 200) {
+      console.error("Loops", await loopsResponse.text());
+      return NextResponse.json(
+        {},
+        {
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: corsHeaders,
+        },
+      );
     }
-    console.error("Loops", await loopsResponse.text());
-    return NextResponse.json(
-      {},
-      {
-        status: 500,
-        statusText: "Internal Server Error",
-        headers: corsHeaders,
-      },
-    );
+
+    // Record allowlisted custom events (e.g. region waitlist signups) for both
+    // new and existing contacts without overwriting an existing contact's source.
+    if (parsedEventName.data) {
+      const eventResponse = await loopsRequest("POST", "events/send", {
+        email,
+        eventName: parsedEventName.data,
+      });
+
+      if (eventResponse.status !== 200) {
+        console.error("Loops event", await eventResponse.text());
+        return NextResponse.json(
+          {},
+          {
+            status: 500,
+            statusText: "Internal Server Error",
+            headers: corsHeaders,
+          },
+        );
+      }
+    }
+
+    return NextResponse.json({ status: "OK" }, { headers: corsHeaders });
   } catch (error) {
     console.error(error);
     // Fixed status line: error messages can echo the request body.
