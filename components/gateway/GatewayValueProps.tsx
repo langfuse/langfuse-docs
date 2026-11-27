@@ -513,15 +513,17 @@ export function GatewayValueProps() {
   const [open, setOpen] = useState(true);
   // Bumped on every change so the progress bar animation restarts.
   const [tick, setTick] = useState(0);
+  // Rotation waits while keyboard focus is inside the list, so a focused link stays.
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || paused) return;
     const timer = setTimeout(() => {
       setActive((a) => (a + 1) % valueProps.length);
       setTick((t) => t + 1);
     }, ROTATE_MS);
     return () => clearTimeout(timer);
-  }, [tick, open]);
+  }, [tick, open, paused]);
 
   const select = useCallback(
     (index: number) => {
@@ -542,6 +544,16 @@ export function GatewayValueProps() {
         className="flex flex-col border-t border-line-structure @3xl:col-span-2"
         role="tablist"
         aria-orientation="vertical"
+        onFocus={(event) => {
+          if (event.target.matches(":focus-visible")) setPaused(true);
+        }}
+        onBlur={(event) => {
+          if (!paused || event.currentTarget.contains(event.relatedTarget)) {
+            return;
+          }
+          setPaused(false);
+          setTick((t) => t + 1);
+        }}
       >
         {valueProps.map((prop, i) => {
           const isActive = i === active;
@@ -608,7 +620,10 @@ export function GatewayValueProps() {
                     "absolute bottom-[-1px] left-0 h-0.5 bg-text-primary",
                     styles.progress,
                   )}
-                  style={{ animationDuration: `${ROTATE_MS}ms` }}
+                  style={{
+                    animationDuration: `${ROTATE_MS}ms`,
+                    animationPlayState: paused ? "paused" : "running",
+                  }}
                 />
               )}
             </div>
