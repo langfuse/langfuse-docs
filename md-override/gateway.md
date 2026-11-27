@@ -39,21 +39,13 @@ Figure: AI Gateway overview.
 
 ## Get everything you need in a gateway, included in Langfuse
 
-- **[Your providers, one endpoint](/docs/gateway/features/models#supported-providers):** Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Change one URL to switch over. Supported providers: OpenAI, Anthropic, Amazon Bedrock, Google AI Studio, Google Vertex AI, Microsoft Azure (Foundry), OpenRouter, Vercel AI Gateway and xAI.
-- **[Native Langfuse integration](/docs/gateway/features/tracing):** Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.
-- **[Gateway keys](/docs/gateway/features/api-keys):** Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.
-- **[Budgets](/docs/gateway/features/budgets):** Per key, per user, a default for everyone, or for the whole organization. Email warnings at 85%, 95% and 100%.
+- **[Your providers, one endpoint](/docs/gateway/features/models#supported-providers):** Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Supported providers: OpenAI, Anthropic, Amazon Bedrock, Google AI Studio, Google Vertex AI, Microsoft Azure (Foundry), OpenRouter, Vercel AI Gateway and xAI.
+- **[Gateway keys](/docs/gateway/features/api-keys):** Hand out keys for people or services, labeled by team or cost center. Set expiration dates or revoke keys to stop traffic instantly.
 - **[Spend dashboard](/docs/gateway/features/analytics):** Spend by model, provider, user and key, with alerts on cost or request count and export to your data lake.
+- **[Budgets](/docs/gateway/features/budgets):** Avoid overspending by setting spend limits per key, per user, or for the whole organization. Get notified before hitting the limit.
 - **[Model controls](/docs/gateway/features/models):** Turn models on or off per provider connection and limit each gateway key to certain models.
 - **[Guardrails](/docs/gateway/features/guardrails):** Block, redact or log PII, secrets, prompt injection and custom patterns in requests and responses.
-
-## Open source: self-host it in your own infrastructure
-
-Like the rest of Langfuse, the core gateway is MIT-licensed. Run it next to your self-hosted Langfuse as a single small Docker image, or use it fully managed on Langfuse Cloud.
-
-1. **Deploy the gateway.** It ships with the Langfuse Docker Compose setup and Helm chart. Add the gateway keys, or enable it in your Helm values. See [Docker Compose](/self-hosting/deployment/docker-compose#ai-gateway) and [Helm](/self-hosting/deployment/kubernetes-helm#ai-gateway).
-2. **Give it a public URL.** Serve the gateway on its own host name over HTTPS, and set that address as its public URL. See [Public URL and TLS](/self-hosting/configuration/ai-gateway#public-url).
-3. **Connect providers and hand out keys.** As an organization admin, add your provider accounts and create gateway keys in Langfuse. See [Admin setup](/docs/gateway/get-started/admin-setup).
+- **[Native Langfuse integration](/docs/gateway/features/tracing):** Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.
 
 ## How it works: change the base URL, keep the rest
 
@@ -69,6 +61,14 @@ Like the rest of Langfuse, the core gateway is MIT-licensed. Run it next to your
 +  api_key="<your-gateway-key>",
  )
 ```
+
+## Open source: self-host it in your own infrastructure
+
+Like the rest of Langfuse, the AI Gateway is MIT-licensed. Run it next to your self-hosted Langfuse as a single 22 MB Docker image with no extra dependencies, or use it fully managed on Langfuse Cloud.
+
+1. **Deploy the gateway.** It ships with the Langfuse Docker Compose setup and Helm chart. Add the gateway keys, or enable it in your Helm values. See [Docker Compose](/self-hosting/deployment/docker-compose#ai-gateway) and [Helm](/self-hosting/deployment/kubernetes-helm#ai-gateway).
+2. **Give it a public URL.** Serve the gateway on its own host name over HTTPS, and set that address as its public URL. See [Public URL and TLS](/self-hosting/configuration/ai-gateway#public-url).
+3. **Connect providers and hand out keys.** As an organization admin, add your provider accounts and create gateway keys in Langfuse. See [Admin setup](/docs/gateway/get-started/admin-setup).
 
 ## Customers
 

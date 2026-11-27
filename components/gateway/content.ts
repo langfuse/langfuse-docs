@@ -240,7 +240,7 @@ export type FeatureCard = {
 export const providerCard = {
   title: "Your providers, one endpoint",
   description:
-    "Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Change one URL to switch over.",
+    "Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format.",
   href: "/docs/gateway/features/models#supported-providers",
   hub: "AI Gateway",
   chips: [
@@ -258,23 +258,9 @@ export const providerCard = {
 
 export const featureCardsTop: FeatureCard[] = [
   {
-    title: "Native Langfuse integration",
-    description:
-      "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
-    href: "/docs/gateway/features/tracing",
-    sketch: {
-      kind: "tracing",
-      spans: [
-        { label: "opus", cost: "$4.2k" },
-        { label: "sonnet", cost: "$1.1k" },
-        { label: "gpt-5", cost: "$0.8k" },
-      ],
-    },
-  },
-  {
     title: "Gateway keys",
     description:
-      "Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.",
+      "Hand out keys for people or services, labeled by team or cost center. Set expiration dates or revoke keys to stop traffic instantly.",
     href: "/docs/gateway/features/api-keys",
     sketch: {
       kind: "keys",
@@ -288,9 +274,21 @@ export const featureCardsTop: FeatureCard[] = [
     },
   },
   {
+    title: "Spend dashboard",
+    description:
+      "Spend by model, provider, user and key, with alerts on cost or request count and export to your data lake.",
+    href: "/docs/gateway/features/analytics",
+    sketch: {
+      kind: "spend",
+      points: [30, 42, 36, 55, 48, 66, 60, 78, 72, 90, 84, 100],
+      highlight: 9,
+      tag: ["30d cost", "$18,204"],
+    },
+  },
+  {
     title: "Budgets",
     description:
-      "Per key, per user, a default for everyone, or for the whole organization. Email warnings at 85%, 95% and 100%.",
+      "Avoid overspending by setting spend limits per key, per user, or for the whole organization. Get notified before hitting the limit.",
     href: "/docs/gateway/features/budgets",
     sketch: {
       kind: "budget",
@@ -303,18 +301,6 @@ export const featureCardsTop: FeatureCard[] = [
 ];
 
 export const featureCardsBottom: FeatureCard[] = [
-  {
-    title: "Spend dashboard",
-    description:
-      "Spend by model, provider, user and key, with alerts on cost or request count and export to your data lake.",
-    href: "/docs/gateway/features/analytics",
-    sketch: {
-      kind: "spend",
-      points: [30, 42, 36, 55, 48, 66, 60, 78, 72, 90, 84, 100],
-      highlight: 9,
-      tag: ["30d cost", "$18,204"],
-    },
-  },
   {
     title: "Model controls",
     description:
@@ -345,6 +331,20 @@ export const featureCardsBottom: FeatureCard[] = [
       ],
     },
   },
+  {
+    title: "Native Langfuse integration",
+    description:
+      "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
+    href: "/docs/gateway/features/tracing",
+    sketch: {
+      kind: "tracing",
+      spans: [
+        { label: "opus", cost: "$4.2k" },
+        { label: "sonnet", cost: "$1.1k" },
+        { label: "gpt-5", cost: "$0.8k" },
+      ],
+    },
+  },
 ];
 
 // Open source section: self-hosting in three steps, each linking to its docs.
@@ -353,7 +353,7 @@ export const openSource = {
     kind: "hosting",
     options: [
       { label: "Cloud", detail: "managed" },
-      { label: "Self-hosted", detail: "Docker" },
+      { label: "Self-hosted", detail: "22 MB image" },
     ],
   } satisfies FeatureSketch,
   steps: [

@@ -10,9 +10,9 @@ export function GatewayOpenSource() {
     <div className="grid items-start gap-10 @3xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)]">
       <div className="flex min-w-0 flex-col gap-4">
         <p className="max-w-[46ch] text-[16px] leading-[1.5] text-text-secondary">
-          Like the rest of Langfuse, the core gateway is MIT-licensed. Run it
-          next to your self-hosted Langfuse as a single small Docker image, or
-          use it fully managed on Langfuse Cloud.
+          Like the rest of Langfuse, the AI Gateway is MIT-licensed. Run it next
+          to your self-hosted Langfuse as a single 22 MB Docker image with no
+          extra dependencies, or use it fully managed on Langfuse Cloud.
         </p>
         <FeatureSketch sketch={openSource.sketch} className="max-w-[420px]" />
       </div>
