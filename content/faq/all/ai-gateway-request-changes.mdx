@@ -11,5 +11,6 @@ Only where it has to. The gateway forwards the native provider request body with
 - It removes the `<connection>:` prefix from `model`.
 - It replaces the authentication headers with the API key of your organization's provider connection, and doesn't forward `langfuse-*` headers or your `x-request-id`.
 - On streamed Chat Completions requests, it asks the provider for usage. See [streaming usage](/docs/gateway/features/rest-api#streaming-usage).
+- If an active [guardrail](/docs/gateway/features/guardrails) applies to the request, **Redact** (or Amazon Bedrock **Enforce**) replaces matched text before forwarding, and **Block** rejects matching requests before they reach the provider.
 
-The response is relayed unchanged. The gateway reads the request and response to record the generation.
+Responses are relayed unchanged unless an active output [guardrail](/docs/gateway/features/guardrails#scopes) applies: output guardrails buffer the full response (including streamed SSE) before returning it, **Redact** (or Bedrock **Enforce**) replaces matched text, and **Block** rejects the response with `400`. The gateway reads the request and response to record the generation.

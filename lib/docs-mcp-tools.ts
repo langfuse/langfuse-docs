@@ -4,7 +4,7 @@
 // server-only imports: it is bundled into the client.
 
 export const SEARCH_LANGFUSE_DOCS_DESCRIPTION =
-  "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns a concise answer synthesized from relevant docs. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.";
+  "Semantic search (RAG) over the Langfuse documentation. Use this whenever the user asks a broader question that cannot be answered by a specific single page. Returns the text of the most relevant docs pages, with their URLs. For prices, call getLangfuseDocsPage with /pricing or /pricing-self-host. Prefer this before guessing. If a specific page is needed call getLangfuseDocsPage first.";
 
 export const SEARCH_LANGFUSE_DOCS_QUERY_DESCRIPTION =
   "The user's question in natural language. Include helpful context like SDK/language (e.g., Python v3, JS v4), self-hosted vs cloud, and short error messages (trim long stack traces). Keep under ~600 characters.";

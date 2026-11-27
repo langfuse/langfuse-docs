@@ -541,7 +541,7 @@ Missing evaluations, duplicate identifiers, and changed case sets raise script e
 
 Keep your existing application and grader in Pytest or Vitest. These examples load local JSON cases, call your application, publish its outputs and check results to Langfuse, and require every case to pass. They do not require a hosted dataset or a separate LLM judge.
 
-Configure [Langfuse credentials and SDK dependencies](/resources/engineering/evaluate-existing-application#setup). Replace the application and grader imports with your own modules. Here, `run_application(input)` / `runApplication(input)` returns a non-null output and `grade(output, expected_output)` returns a boolean. If your suite uses `run_checks()`, adapt its named checks into evaluator results and require every required check to be present and passing.
+Configure [Langfuse credentials and SDK dependencies](/resources/engineering/evaluate-existing-application#setup) with [Python SDK v5 or JS/TS SDK v6](/changelog/2026-10-14-python-sdk-v5-js-sdk-v6) or newer. Replace the application and grader imports with your own modules. Here, `run_application(input)` / `runApplication(input)` returns a non-null output and `grade(output, expected_output)` returns a boolean. If your suite uses `run_checks()`, adapt its named checks into evaluator results and require every required check to be present and passing.
 
 Save your cases in this format, keeping IDs stable between releases:
 
@@ -587,6 +587,8 @@ def test_application_checks():
         return Evaluation(name="existing_checks", value=int(passed))
 
     langfuse = get_client()
+    # Raises UnauthorizedError on rejected keys; returns False when keys are missing.
+    assert langfuse.auth_check(), "Langfuse client is disabled"
     try:
         result = langfuse.run_experiment(
             name="Application checks",
@@ -612,6 +614,7 @@ def test_application_checks():
             assert len(scores) == 1 and scores[0].value == 1, (
                 f"Failed or missing check: {item.item['metadata']['case_id']}"
             )
+        assert result.experiment_url, "Langfuse did not accept the keys or the project"
     finally:
         langfuse.flush()
 ```
@@ -646,6 +649,7 @@ it("passes every required application check", async () => {
   otel.start();
   try {
     const langfuse = new LangfuseClient();
+    await langfuse.getProjectId(); // Throws when Langfuse rejects the keys.
     const result = await langfuse.experiment.run({
       name: "Application checks",
       data: cases.map((item) => ({
@@ -677,6 +681,7 @@ it("passes every required application check", async () => {
       expect(scores).toHaveLength(1);
       expect(scores[0].value).toBe(1);
     }
+    expect(result.experimentUrl, "Langfuse did not accept the keys or the project").toBeTruthy();
   } finally {
     await otel.shutdown();
   }
@@ -687,5 +692,7 @@ Run `npx vitest run test/application-experiment.test.ts` with Vitest installed.
 
 </Tab>
 </LangTabs>
+
+The SDK only logs a warning when Langfuse rejects the keys, so the examples check the keys before the run and require an experiment link after it. Without these checks, a wrong, revoked, or other-region key still produces a passing job.
 
 These assertions implement the **every required case must pass** policy. For a suite with explicitly accepted failures, use the [approved-baseline gate](#approved-baseline) instead. A test that expects the gate's assertion to throw would turn a real regression into a passing CI job.

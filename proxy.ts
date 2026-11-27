@@ -24,7 +24,7 @@ export const config = {
     "/llms-docs.txt",
     "/llms-integrations.txt",
     "/llms-self-hosting.txt",
-    "/((?!_next/|api/|md-src/|\\.well-known/|.*\\.(?:png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|txt|json|webmanifest|ipynb)$).*)",
+    "/((?!_next/|api/|md-src/|\\.well-known/|.*\\.(?:png|jpe?g|gif|svg|ico|webp|avif|css|js|mjs|map|woff2?|ttf|otf|eot|mp4|webm|mp3|zip|pdf|xml|txt|json|ya?ml|webmanifest|ipynb)$).*)",
   ],
 };
 
@@ -54,9 +54,32 @@ function strippedPathname(pathname: string): string | null {
   return cleaned === pathname ? null : cleaned;
 }
 
-function contentKind(pathname: string, accept: string | null): string {
+// Pages whose Markdown mirror lives in public/md-src (see
+// scripts/copy_md_sources.js and md-override/). Every page under these
+// prefixes has a mirror, except the virtual /faq/tag/<tag> listings.
+// ChatGPT-User (ChatGPT and Codex fetching a page for a person) gets the
+// mirror even though it does not ask for Markdown. Every other client keeps
+// the HTML page: browsers, search crawlers (including OAI-SearchBot), ChatGPT
+// agent (drives a real browser), and agents that already send
+// `Accept: text/markdown`, such as Claude Code.
+const MARKDOWN_FOR_AGENT_PATHS =
+  /^\/(?:(?:docs|integrations|self-hosting|faq|guides|security|compare)(?:\/.*)?|pricing|pricing-self-host)\/?$/;
+const NO_MARKDOWN_MIRROR = /^\/faq\/tag(?:\/|$)|\.(?:md|txt|json|xml)$/;
+
+function markdownMirrorPath(pathname: string): string {
+  return `/md-src${pathname.replace(/\/$/, "")}.md`;
+}
+
+function contentKind(
+  pathname: string,
+  accept: string | null,
+  servedMarkdownToAgent: boolean,
+): string {
   if (pathname.startsWith("/llms") && pathname.endsWith(".txt")) {
     return "llms_txt";
+  }
+  if (servedMarkdownToAgent) {
+    return "markdown_user_agent";
   }
   if (pathname.endsWith(".md")) {
     return "markdown_file";
@@ -78,13 +101,33 @@ export function proxy(
     return NextResponse.redirect(url, 307);
   }
 
+  const headers = request.headers;
+  const pathname = request.nextUrl.pathname;
+  const accept = headers.get("accept");
+  const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+
+  // Requests that ask for Markdown are served by the rewrites in
+  // next.config.mjs. This covers ChatGPT-User, which fetches pages like a
+  // browser does. The rewrite targets a separate file, so the CDN caches the Markdown under
+  // /md-src/... and the HTML under the page URL: the two never mix, and no
+  // `Vary: User-Agent` is needed.
+  let markdownRewrite: URL | null = null;
+  if (
+    (request.method === "GET" || request.method === "HEAD") &&
+    MARKDOWN_FOR_AGENT_PATHS.test(pathname) &&
+    !NO_MARKDOWN_MIRROR.test(pathname) &&
+    !accept?.includes("text/markdown") &&
+    /chatgpt-user/i.test(headers.get("user-agent") ?? "")
+  ) {
+    if (classifyAgentTraffic(headers, ip).id === "chatgpt-user") {
+      markdownRewrite = request.nextUrl.clone();
+      markdownRewrite.pathname = markdownMirrorPath(pathname);
+    }
+  }
+
   if (posthogKey && process.env.DISABLE_AGENT_FETCH_TRACKING !== "true") {
-    const headers = request.headers;
     const userAgent = headers.get("user-agent") ?? "";
-    const pathname = request.nextUrl.pathname;
-    const accept = headers.get("accept");
-    const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-    const kind = contentKind(pathname, accept);
+    const kind = contentKind(pathname, accept, markdownRewrite !== null);
 
     // Agent-facing content endpoints (markdown mirrors, llms*.txt) are
     // tracked for every caller; regular page routes only when the request
@@ -143,6 +186,10 @@ export function proxy(
         }),
       );
     }
+  }
+
+  if (markdownRewrite) {
+    return NextResponse.rewrite(markdownRewrite);
   }
 
   return NextResponse.next();
