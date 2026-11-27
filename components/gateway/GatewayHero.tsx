@@ -87,7 +87,7 @@ export function GatewayHeroLogos() {
     <section data-use-case-section="logos" className="px-2 py-2">
       <EnterpriseLogoGrid
         names={customerLogoNames}
-        className="sm:grid-cols-4 lg:grid-cols-8"
+        className="sm:grid-cols-4 xl:grid-flow-col xl:auto-cols-max xl:grid-cols-none xl:justify-between xl:px-8"
         hideStoryTags
       />
     </section>
