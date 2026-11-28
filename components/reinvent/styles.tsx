@@ -198,10 +198,9 @@ export function ReinventStyles() {
 
       .rei-pill {
         display: inline-flex; align-items: center;
-        height: 20px; padding: 0 7px; border-radius: 2px;
-        font-family: var(--font-mono); font-size: 10px;
+        min-height: 20px; padding: 2px 7px; border-radius: 2px;
+        font-family: var(--font-mono); font-size: 10px; line-height: 1.4;
         letter-spacing: .08em; text-transform: uppercase;
-        white-space: nowrap;
         color: var(--text-secondary);
         background: var(--surface-bg);
         border: 1px solid var(--line-structure);

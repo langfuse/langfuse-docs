@@ -386,7 +386,7 @@ function Events() {
             key={event.title}
             className="rei-chip-card flex flex-col gap-3 p-6"
           >
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <span className="rei-eyebrow">
                 {String(i + 1).padStart(2, "0")} {event.kind}
               </span>
