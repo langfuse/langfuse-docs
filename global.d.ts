@@ -6,6 +6,10 @@ interface Window {
     categories: Record<string, boolean>;
     isUserActionCompleted: boolean;
   };
+  revisitCkyConsent?: () => void;
+  Reo?: {
+    init: (config: { clientID: string }) => void;
+  };
   lintrk?: (...args: any[]) => void;
   _linkedin_data_partner_ids?: any[];
   rdt?: (...args: any[]) => void;

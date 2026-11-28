@@ -1,3 +1,5 @@
+import { readAdvertisementConsent } from "@/lib/cookie-consent";
+
 export const GOOGLE_ADS_ID = "AW-10855791654";
 
 export const GOOGLE_ADS_CONVERSIONS = {
@@ -38,7 +40,11 @@ export function reportGoogleAdsConversion(
   sendTo: string,
   options: ConversionOptions = {},
 ) {
-  if (typeof window === "undefined" || typeof window.gtag !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.gtag !== "function" ||
+    readAdvertisementConsent() !== "granted"
+  ) {
     return;
   }
 

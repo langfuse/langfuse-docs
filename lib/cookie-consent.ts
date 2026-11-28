@@ -40,21 +40,18 @@ export function readAdvertisementConsent(): ConsentState {
   return "unknown";
 }
 
-// CookieYes "analytics"-category consent as the visitor answered it, read by
-// the site's PostHog. Unlike the advertisement reader above, "denied" means the
-// visitor rejected: before any answer CookieYes already records every optional
-// category as off, and that reads "unknown" here, so the site's analytics keep
-// their pre-answer behaviour until the visitor actually decides.
-export function readAnalyticsConsent(): ConsentState {
+function readCategoryConsent(
+  category: "analytics" | "functional",
+): ConsentState {
   if (typeof window === "undefined") return "unknown";
 
   // The live API wins once it is conclusive, so an in-session revoke counts at
   // once; before the banner has loaded it reads as "not answered".
   try {
     const consent = window.getCkyConsent?.();
-    if (consent?.categories?.analytics === true) return "granted";
+    if (consent?.categories?.[category] === true) return "granted";
     if (
-      consent?.categories?.analytics === false &&
+      consent?.categories?.[category] === false &&
       consent.isUserActionCompleted
     )
       return "denied";
@@ -67,6 +64,21 @@ export function readAnalyticsConsent(): ConsentState {
     .split("; ")
     .find((cookie) => cookie.startsWith("cookieyes-consent="));
   if (!consentCookie) return "unknown";
-  if (consentCookie.includes("analytics:yes")) return "granted";
+  if (consentCookie.includes(`${category}:yes`)) return "granted";
   return consentCookie.includes("action:yes") ? "denied" : "unknown";
+}
+
+// CookieYes "analytics"-category consent as the visitor answered it, shared by
+// PostHogProvider, AnalyticsConsentGate, and Inkeep. Returns "granted" as soon
+// as either the live API or the persisted cookie records analytics consent,
+// "denied" once the visitor has answered negatively, and "unknown" before an
+// answer or when CookieYes fails to load. Callers fail closed and only enable
+// full tracking or analytics scripts on "granted".
+export function readAnalyticsConsent(): ConsentState {
+  return readCategoryConsent("analytics");
+}
+
+// CookieYes "functional"-category consent, mirroring readAnalyticsConsent.
+export function readFunctionalConsent(): ConsentState {
+  return readCategoryConsent("functional");
 }

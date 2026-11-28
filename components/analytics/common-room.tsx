@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { readAnalyticsConsent } from "@/lib/cookie-consent";
 
 // Common Room website visitor tracking ("Signals"). Loads the signals.js
 // snippet, which auto-tracks the initial page view and form submissions that
@@ -35,9 +36,14 @@ export function CommonRoom() {
 }
 
 // Report a page view to Common Room. The snippet auto-tracks the initial page
-// load, so this is only needed for SPA route changes.
+// load, so this is only needed for SPA route changes. Re-check consent so
+// mid-session revocation stops SPA page events immediately.
 export const crPageView = () => {
-  if (typeof window !== "undefined" && window.signals) {
+  if (
+    typeof window !== "undefined" &&
+    window.signals &&
+    readAnalyticsConsent() === "granted"
+  ) {
     window.signals.page();
   }
 };

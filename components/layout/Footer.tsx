@@ -1,6 +1,7 @@
 import { CornerBox } from "@/components/ui/corner-box";
 import { Link } from "@/components/ui/link";
 import { Text } from "@/components/ui/text";
+import { CookieSettingsButton } from "@/components/layout/CookieSettingsButton";
 import IconGithub from "@/components/icons/github";
 import IconDiscord from "@/components/icons/discord";
 import IconX from "@/components/icons/x";
@@ -204,6 +205,10 @@ export function Footer({ className }: { className?: string }) {
                 </Text>
               </Link>
             ))}
+            <CookieSettingsButton
+              className={linkClassName}
+              textClassName={footerMonoLinkTextClassName}
+            />
           </div>
         </div>
       </CornerBox>
