@@ -333,7 +333,14 @@ function HeroArt() {
         alt="Langfuse by ClickHouse"
         width={2255}
         height={600}
-        className="h-auto w-full max-w-[240px]"
+        className="h-auto w-full max-w-[240px] dark:hidden"
+      />
+      <img
+        src="/images/reinvent/langfuse-logo-dark.svg"
+        alt="Langfuse by ClickHouse"
+        width={2255}
+        height={600}
+        className="hidden h-auto w-full max-w-[240px] dark:block"
       />
       <div
         aria-hidden
@@ -346,7 +353,14 @@ function HeroArt() {
         alt="AWS"
         width={304}
         height={182}
-        className="h-auto w-[130px] md:w-[150px]"
+        className="h-auto w-[130px] dark:hidden md:w-[150px]"
+      />
+      <img
+        src="/images/reinvent/aws-logo-dark.svg"
+        alt="AWS"
+        width={304}
+        height={182}
+        className="hidden h-auto w-[130px] dark:block md:w-[150px]"
       />
     </div>
   );
