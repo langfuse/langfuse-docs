@@ -58,6 +58,18 @@ const companies: CompanyLogo[] = enterpriseLogoCompanies.map((company) => ({
   logo: logosByName[company.name],
 }));
 
+// Size correction per logo so a row reads as one size; heavy marks shrink, thin wordmarks grow.
+const opticalScale: Record<string, number> = {
+  Ramp: 1.1,
+  Canva: 1.15,
+  "Expedia Group": 0.95,
+  Pigment: 0.95,
+  "Khan Academy": 1.02,
+  "Hugging Face": 0.88,
+  Intuit: 1.15,
+  SumUp: 0.95,
+};
+
 const LogoImage = ({
   logo,
   name,
@@ -67,7 +79,10 @@ const LogoImage = ({
   name: string;
   hoverable?: boolean;
 }) => {
-  const { width, height } = wordmarkDisplaySize(logo, LOGO_DISPLAY_HEIGHT);
+  const { width, height } = wordmarkDisplaySize(
+    logo,
+    LOGO_DISPLAY_HEIGHT * (opticalScale[name] ?? 1),
+  );
 
   return (
     <Image
@@ -128,12 +143,15 @@ interface EnterpriseLogoGridProps {
   small?: boolean;
   /** When set, only these company names are shown, in this order. */
   names?: readonly string[];
+  /** Hides the "Read story" tag on logos that link to a customer story. */
+  hideStoryTags?: boolean;
 }
 
 export const EnterpriseLogoGrid = ({
   className = "",
   small = false,
   names,
+  hideStoryTags = false,
 }: EnterpriseLogoGridProps) => {
   const shouldReduceMotion = useReducedMotion();
   const selectedCompanies = names
@@ -206,7 +224,7 @@ export const EnterpriseLogoGrid = ({
               }
               role="gridcell"
             >
-              {hasStory && (
+              {hasStory && !hideStoryTags && (
                 <div className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none">
                   <div
                     className={cn(

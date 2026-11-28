@@ -26,6 +26,8 @@ type Props = {
    * Used by self-hosting pages.
    */
   versionLabel?: string | null;
+  /** Show the "Was this page helpful?" row under the content. */
+  showFeedback?: boolean;
 };
 
 /**
@@ -40,6 +42,7 @@ export function DocBodyChrome({
   withProse = true,
   showCopyButton = true,
   versionLabel,
+  showFeedback = true,
 }: Props) {
   const pathname = usePathname();
   const isInFlowCopyButton = pathname === "/enterprise";
@@ -75,7 +78,7 @@ export function DocBodyChrome({
           <NotebookBanner src={cookbook.ipynbPath} className="mb-4" />
         )}
         {children}
-        {!isCustomerStory && (
+        {showFeedback && !isCustomerStory && (
           <>
             <hr className="mt-12 mb-0 border-t border-line-structure" />
             <div className="flex flex-col gap-2 py-6" id="docs-feedback">

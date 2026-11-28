@@ -77,7 +77,12 @@ function useDOMHeadings(): TocItem[] {
         .map((el) => ({
           id: el.id,
           url: `#${el.id}`,
-          title: el.textContent?.trim() ?? "",
+          // `data-toc-title` sets a shorter sidebar label than the heading text.
+          title: (
+            el.getAttribute("data-toc-title") ??
+            el.textContent ??
+            ""
+          ).trim(),
           depth: parseInt(el.tagName[1]),
         }))
         .filter((h) => h.title);

@@ -1,0 +1,55 @@
+/* Line field colour, copy inset and edge fades for the /gateway hero. */
+
+.moire {
+  --gateway-moire-accent: #8f88e3;
+}
+
+:global(.dark) .moire {
+  --gateway-moire-accent: var(--callout-info);
+}
+
+/* Copy inset: the page column padding plus the panel's section padding. */
+.hero {
+  --gateway-hero-inset: 36px;
+}
+
+@media (width >= 40rem) {
+  .hero {
+    --gateway-hero-inset: 64px;
+  }
+}
+
+@media (width >= 48rem) {
+  .hero {
+    --gateway-hero-inset: 72px;
+  }
+}
+
+/* From xl the copy starts where the 840px column starts. */
+@media (width >= 80rem) {
+  .hero {
+    --gateway-hero-inset: max(60px, calc((100% - 840px) / 2));
+  }
+}
+
+.copy {
+  padding-inline: var(--gateway-hero-inset);
+}
+
+/* Fades the lines out at the top, the bottom and around the copy; nothing is painted over the page. */
+.fadeAroundCopy {
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 14%,
+      #000 86%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 560px 340px at calc(var(--gateway-hero-inset) + 260px) 50%,
+      transparent 45%,
+      #000 100%
+    );
+  mask-composite: intersect;
+}
