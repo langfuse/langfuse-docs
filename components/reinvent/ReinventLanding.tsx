@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ReinventStyles } from "./styles";
 
-const SIGN_UP_HREF = "https://cloud.langfuse.com/auth/sign-up";
+const SIGN_UP_HREF = "/cloud";
 
 const cornerBoxBase =
   "relative bg-surface-bg border border-line-structure rei-corners";
@@ -167,18 +167,28 @@ const deployItems: { label: string; href: string }[] = [
   },
 ];
 
-function Ctas() {
+function Ctas({ secondary }: { secondary?: boolean }) {
   return (
     <div className="flex flex-wrap gap-2">
       <Button
         href={SIGN_UP_HREF}
-        target="_blank"
-        rel="noopener noreferrer"
         size="default"
+        shortcutKey="s"
         wrapperClassName="w-fit"
       >
-        Get 90% off Langfuse Cloud ↗
+        Start for free
       </Button>
+      {secondary ? (
+        <Button
+          href="/docs"
+          variant="secondary"
+          size="default"
+          shortcutKey="d"
+          wrapperClassName="w-fit"
+        >
+          Documentation
+        </Button>
+      ) : null}
     </div>
   );
 }
@@ -247,17 +257,12 @@ function Hero() {
 
         <div className="relative flex flex-col gap-5">
           <h1 className="rei-h1">
-            Ship reliable AI agents on AWS.
-            <br />
-            <span className="rei-highlight">Get 90% off Langfuse Cloud.</span>
+            Ship <span className="rei-highlight">reliable AI agents</span> on
+            AWS.
           </h1>
           <p className="rei-body" style={{ fontSize: 17, maxWidth: "42ch" }}>
-            Trace, evaluate, and debug the agents you build on AWS. For
-            re:Invent, get{" "}
-            <b className="font-medium text-text-primary">
-              90% off the Core plan base fee for your first 12 months
-            </b>
-            .
+            Trace, evaluate, and debug the agents you build on AWS with open
+            source Langfuse.
           </p>
           <Ctas />
         </div>
@@ -286,6 +291,33 @@ function Hero() {
         >
           See the schedule
         </Link>
+      </div>
+    </section>
+  );
+}
+
+function StartFree() {
+  return (
+    <section className="rei-section pb-5 pt-5">
+      <div
+        className={`${cornerBoxBase} rei-stripes-bg flex flex-col gap-6 px-5 py-8 sm:px-7 md:flex-row md:items-center md:justify-between md:gap-10`}
+      >
+        <div className="flex min-w-0 flex-col gap-3">
+          <h2 className="rei-h2 max-w-[24ch]">
+            Start improving <span className="rei-highlight">your agents</span>{" "}
+            in under 5 minutes.
+          </h2>
+          <p className="rei-body">
+            Free tier:{" "}
+            <b className="font-medium text-text-primary">
+              50k observations/month
+            </b>
+            . No credit card required.
+          </p>
+        </div>
+        <div className="shrink-0">
+          <Ctas secondary />
+        </div>
       </div>
     </section>
   );
@@ -494,11 +526,10 @@ function CTABanner() {
       >
         <div className="rei-eyebrow">Langfuse at AWS re:Invent</div>
         <h2 className="rei-h2 max-w-[24ch]">
-          Ship reliable AI agents on AWS,{" "}
-          <span className="rei-highlight">get 90% off Langfuse Cloud.</span>
+          Ship <span className="rei-highlight">reliable AI agents</span> on AWS.
         </h2>
         <p className="rei-body text-center">
-          90% off the Core plan base fee for your first 12 months.
+          Free tier: 50k observations/month. No credit card required.
         </p>
         <Ctas />
       </div>
@@ -512,6 +543,7 @@ export function ReinventLanding() {
       <ReinventStyles />
       <div className="mx-auto max-w-[1000px]">
         <Hero />
+        <StartFree />
         <Events />
         <Integrations />
         <CTABanner />

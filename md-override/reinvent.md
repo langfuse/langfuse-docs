@@ -1,17 +1,21 @@
 ---
 title: Langfuse at AWS re:Invent 2026
-description: Ship reliable AI agents on AWS, get 90% off Langfuse Cloud. Find the Langfuse team in Las Vegas, Nov 30 to Dec 4, and every way to use Langfuse with AWS.
+description: Ship reliable AI agents on AWS with Langfuse. Find the Langfuse team in Las Vegas, Nov 30 to Dec 4, and every way to use Langfuse with AWS.
 ---
 
-# Ship reliable AI agents on AWS, get 90% off Langfuse Cloud
+# Ship reliable AI agents on AWS
 
 Langfuse at AWS re:Invent, Las Vegas, Nov 30 to Dec 4, 2026.
 
-Trace, evaluate, and debug the agents you build on AWS. For re:Invent, get 90% off the Core plan base fee for your first 12 months.
+Trace, evaluate, and debug the agents you build on AWS with open source Langfuse.
 
-[Get 90% off Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up)
+[Start for free](/cloud)
 
 Find us at ClickHouse booth #706 on the Venetian expo floor, with live demos of tracing and evaluations for agents on AWS, Nov 30 to Dec 3.
+
+## Start improving your agents in under 5 minutes
+
+Free tier: 50k observations/month. No credit card required. [Start for free](/cloud) or read the [documentation](/docs).
 
 ## Meet Langfuse in Las Vegas [#events]
 
@@ -76,6 +80,6 @@ Langfuse Cloud runs on AWS in the US, EU, Japan, and HIPAA [data regions](/secur
 - [Halo with Amazon Bedrock](/self-hosting/configuration/halo#configure-the-model)
 - [Sign in with AWS Cognito](/self-hosting/security/authentication-and-sso)
 
-## Ship reliable AI agents on AWS, get 90% off Langfuse Cloud
+## Ship reliable AI agents on AWS
 
-90% off the Core plan base fee for your first 12 months. [Get 90% off Langfuse Cloud](https://cloud.langfuse.com/auth/sign-up).
+Free tier: 50k observations/month. No credit card required. [Start for free](/cloud).

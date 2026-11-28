@@ -4,7 +4,7 @@ import { buildOgImageUrl } from "@/lib/og-url";
 
 const title = "Langfuse at AWS re:Invent 2026";
 const description =
-  "Ship reliable AI agents on AWS, get 90% off Langfuse Cloud. Find the Langfuse team in Las Vegas, Nov 30 to Dec 4, and every way to use Langfuse with AWS.";
+  "Ship reliable AI agents on AWS with Langfuse. Find the Langfuse team in Las Vegas, Nov 30 to Dec 4, and every way to use Langfuse with AWS.";
 
 const ogImageUrl = buildOgImageUrl({ title, description });
 
