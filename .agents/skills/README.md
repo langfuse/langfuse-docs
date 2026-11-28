@@ -46,3 +46,15 @@ Use for:
 
 Open:
 [`customer-story-setup/SKILL.md`](customer-story-setup/SKILL.md)
+
+### site-illustrations
+
+Use for:
+
+- drawing or changing a tilted card illustration (homepage and `/gateway` feature cards)
+- drawing or changing a flat boxed diagram with bracket corners (homepage platform overview and loop, `/gateway` request flow)
+- porting an approved mock to React and proving the port matches it
+- checking a drawing against the designers' originals with the measuring scripts
+
+Open:
+[`site-illustrations/SKILL.md`](site-illustrations/SKILL.md)

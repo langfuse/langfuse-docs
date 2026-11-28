@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tilted illustration mock</title>
+    <!-- Standalone mock of the tilted line drawings. Open it from disk; it needs the network for its fonts.
+     `?only=1` keeps the light panel, `?only=2` the dark one, `?card=N` one card alone (add `&only=2` for dark).
+     Shoot it with scripts/shoot.mjs; `--selector .card` cuts the picture to the one card.
+     The script below is the plain-JS twin of components/gateway/GatewayFeatureSketch.tsx: same parts, same numbers.
+     Draw here first, get it approved, then port; scripts/svg-parity.py proves the port matches. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&family=Inter:wght@400;500&display=swap"
+    />
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 40px 24px 96px; background: #0c0c0b; font-family: "Inter", system-ui, sans-serif; }
+      h2 { margin: 56px auto 12px; max-width: 941px; font: 500 12px/1 ui-monospace, monospace; color: #8a8a84; }
+      h2:first-child { margin-top: 0; }
+
+      /* tokens copied from style.css (:root and .dark); --shadow exists only here, the component uses fill-black with an opacity */
+      .t-light {
+        --card: 0 0% 100%; --line-structure: #cfcfc9; --line-cta: #404039;
+        --surface-bg: #f6f6f3; --surface-1: #edede8;
+        --text-primary: #222220; --text-secondary: #3d3d38; --text-tertiary: #6b6b66; --text-disabled: #a7a7a0;
+        --text-code-orange: #c17e2e; --text-code-pink: #d05376; --color-green-600: #00a63e; --shadow: rgba(0, 0, 0, 0.16);
+      }
+      .t-dark {
+        --card: 0 0% 0%; --line-structure: #2c2c29; --line-cta: #b8b6a0;
+        --surface-bg: #171714; --surface-1: #1e1e1b;
+        --text-primary: #e8e8e4; --text-secondary: #b4b4ae; --text-tertiary: #7a7a74; --text-disabled: #4a4a45;
+        --text-code-orange: #e8935a; --text-code-pink: #e86b9a; --color-green-600: #00a63e; --shadow: rgba(0, 0, 0, 0.56);
+      }
+
+      /* the card shell of components/gateway/GatewayFeatureGrid.tsx at its desktop size */
+      .panel { margin: 0 auto; width: 941px; padding: 24px; background: var(--surface-bg); }
+      .stack { display: flex; flex-direction: column; gap: 8px; }
+      .g3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .g2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .card { display: flex; flex-direction: column; overflow: hidden; min-width: 0; border: 1px solid var(--line-structure); border-radius: 2px; background: var(--surface-bg); }
+      .card-in { display: flex; flex-direction: column; gap: 4px; height: 100%; min-width: 0; padding: 16px 16px 0; }
+      .title { font-size: 17px; font-weight: 500; line-height: 1.3; color: var(--text-primary); }
+      .desc { margin: 0 0 12px; font-size: 14px; line-height: 1.5; letter-spacing: -0.07px; color: var(--text-tertiary); }
+      .wide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; }
+      .wide-text { display: flex; flex-direction: column; gap: 4px; padding: 40px 16px; }
+      .wide-text .desc { margin: 0; max-width: 52ch; }
+
+      /* the drawing: same rules as .sketch / .wideSketch in Gateway.module.css */
+      .sketch, .wideSketch { pointer-events: none;
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%); mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%); }
+      .sketch { margin: auto -16px 0;
+        -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%), linear-gradient(180deg, transparent 0, #000 8%); -webkit-mask-composite: source-in;
+        mask-image: linear-gradient(90deg, transparent 0, #000 5%, #000 95%, transparent 100%), linear-gradient(180deg, transparent 0, #000 8%); mask-composite: intersect; }
+      .sketch svg, .wideSketch svg { display: block; width: 100%; height: 100%; }
+      .sketch text, .wideSketch text { font-family: "Geist Mono", ui-monospace, monospace; font-weight: 400; }
+    </style>
+  </head>
+  <body>
+    <h2>1 Light</h2>
+    <div class="panel t-light"></div>
+
+    <h2>2 Dark</h2>
+    <div class="panel t-dark"></div>
+
+    <script>
+      // ---- copy: mirrors components/gateway/content.ts ----
+      const providerCard = {
+        title: "Your providers, one endpoint",
+        description: "Connect your own provider accounts, with no markup on tokens. Each provider keeps its own API format. Change one URL to switch over.",
+        hub: "AI Gateway",
+        chips: ["OpenAI", "Anthropic", "Amazon Bedrock", "Google AI Studio", "Google Vertex AI", "Microsoft Azure (Foundry)", "OpenRouter", "Vercel AI Gateway", "xAI"],
+      };
+      const cardsTop = [
+        { title: "Gateway keys", description: "Keys for people and for services, labelled by team or cost center. They expire, can be revoked, and stop working when their owner loses access.",
+          sketch: { kind: "keys", group: "platform", heading: "Gateway keys", rows: [{ label: "maria", value: "active", tone: "ok" }, { label: "ci-release", value: "service" }, { label: "alex", value: "revoked", tone: "error" }] } },
+        { title: "Budgets", description: "Per key, per user, a default for everyone, or for the whole organization. Email warnings at 85%, 95% and 100%.",
+          sketch: { kind: "budget", label: "platform", usedPercent: 86, warnAtPercent: [85, 95], warning: "warning" } },
+        { title: "Spend dashboard", description: "Spend by model, provider, user and key, with alerts on cost or request count and export to your data lake.",
+          sketch: { kind: "spend", points: [30, 42, 36, 55, 48, 66, 60, 78, 72, 90, 84, 100], highlight: 9, tag: ["30d cost", "$18,204"] } },
+      ];
+      const cardsBottom = [
+        { title: "Model controls", description: "Turn models on or off per provider connection and limit each gateway key to certain models.",
+          sketch: { kind: "models", rows: [{ label: "openai:*", on: true }, { label: "anthropic:*", on: true }, { label: "openrouter:*", on: false }] } },
+        { title: "Coding agents", description: "Point Claude Code, Codex and other coding agents at the gateway. Their sessions are grouped automatically.",
+          sketch: { kind: "agents", agents: ["claude-code", "codex", "opencode"], result: "traced" } },
+        { title: "Tracing and insights", description: "Every call becomes a Langfuse trace, with no code changes. Run evals, search, or ask Halo what teams use AI for.",
+          sketch: { kind: "tracing", spans: [{ label: "opus", cost: "$4.2k" }, { label: "sonnet", cost: "$1.1k" }, { label: "gpt-5", cost: "$0.8k" }] } },
+        { title: "Open source", description: "Self-host the gateway as a single small Docker image, or use it on Langfuse Cloud.",
+          sketch: { kind: "hosting", options: [{ label: "Cloud", detail: "managed" }, { label: "Self-hosted", detail: "Docker" }] } },
+      ];
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+      // ---- kit ----
+      // Projection of the homepage card drawings: plane x runs 20deg up-right, plane y 60deg down-right, neither squashed.
+      // Plane units are shown at SCALE. Text, tags and boxes all lie on the plane.
+      const EX = { x: 0.94, y: -0.342 }, EY = { x: 0.5, y: 0.866 };
+      const PLANE = `matrix(${EX.x} ${EX.y} ${EY.x} ${EY.y} 0 0)`;
+      const sx = (x, y) => EX.x * x + EY.x * y;
+      const sy = (x, y, z = 0) => EX.y * x + EY.y * y - z;
+      const P = (x, y, z = 0) => `${sx(x, y).toFixed(2)},${sy(x, y, z).toFixed(2)}`;
+      // positions sit on the 36-unit floor grid or its half
+      const SCALE = 0.6, RAISE = 16, FS = 19.5, PADL = 17, PADR = 14, BPAD = 20, BLOCK_H = 54, ROW_H = 36, PITCH = 54, IND = 54, TX = 18, FIRST_ROW = 72, DEFAULT_PX = 232;
+      const C = { line: "var(--line-structure)", cta: "var(--line-cta)", ink: "var(--text-secondary)", dark: "var(--text-primary)", mid: "var(--text-tertiary)",
+        dim: "var(--text-disabled)", floor: "var(--surface-bg)", side: "var(--surface-1)", top: "hsl(var(--card))", warn: "var(--text-code-orange)" };
+      const TONE = { ok: "var(--color-green-600)", warn: C.warn, error: "var(--text-code-pink)", none: C.dim };
+      let uid = 0;
+
+      // one line of content on the plane, packed from the left: text, a status dot, a switch, or a gap (in characters)
+      function inner(x, yc, segs, fs = FS) {
+        const adv = fs * 0.6, by = (yc + fs * 0.34).toFixed(1);
+        let cx = x, s = "";
+        for (const g of segs) {
+          if (g.t !== undefined) {
+            s += `<text x="${cx.toFixed(1)}" y="${by}" font-size="${fs}" fill="${g.fill || C.dim}">${esc(g.t)}</text>`;
+            cx += String(g.t).length * adv;
+          } else if (g.dot) {
+            s += `<circle cx="${cx + 16}" cy="${yc}" r="6.5" fill="${TONE[g.dot]}" opacity="0.16"/><circle cx="${cx + 16}" cy="${yc}" r="4" fill="${TONE[g.dot]}"/>`;
+            cx += g.end ? 20 : 31;
+          } else if (g.toggle !== undefined) {
+            s += g.toggle
+              ? `<rect x="${cx}" y="${yc - 9}" width="34" height="18" rx="9" fill="${g.hero ? C.dark : C.mid}"/><circle cx="${cx + 25}" cy="${yc}" r="5.5" fill="${C.floor}"/>`
+              : `<rect x="${cx}" y="${yc - 9}" width="34" height="18" rx="9" fill="none" stroke="${C.line}" stroke-width="1.5"/><circle cx="${cx + 9}" cy="${yc}" r="4.5" fill="${C.dim}"/>`;
+            cx += 34;
+          } else cx += g.sp * adv;
+        }
+        return { s, w: cx - x };
+      }
+      // closed path through screen points, corners rounded off by r
+      function rounded(pts, r) {
+        const n = pts.length, f = (v) => v.toFixed(2);
+        return pts.map(([px, py], i) => {
+          const [ax, ay] = pts[(i + n - 1) % n], [bx, by] = pts[(i + 1) % n], la = Math.hypot(ax - px, ay - py), lb = Math.hypot(bx - px, by - py);
+          return `${i ? "L" : "M"}${f(px + (ax - px) * r / la)} ${f(py + (ay - py) * r / la)}Q${f(px)} ${f(py)} ${f(px + (bx - px) * r / lb)} ${f(py + (by - py) * r / lb)}`;
+        }).join("") + "Z";
+      }
+      // one drawing, in layers: floor shadows, the plane, squares on top of it, raised parts
+      function scene() {
+        const id = "s" + uid++, defs = [], under = [], plane = [], nodes = [], over = [], box = [Infinity, Infinity, -Infinity, -Infinity];
+        const faded = (o, s) => (o.opacity !== undefined ? `<g opacity="${o.opacity}">${s}</g>` : s);
+        return {
+          id, defs, under, plane, nodes, over, box,
+          // grows the content box the view is centred on
+          mark(x, y, z = 0) { const X = sx(x, y), Y = sy(x, y, z); box[0] = Math.min(box[0], X); box[1] = Math.min(box[1], Y); box[2] = Math.max(box[2], X); box[3] = Math.max(box[3], Y); },
+          // loose content on the floor
+          put(x, yc, segs, o = {}) {
+            const r = inner(x, yc, segs, o.fs), half = (o.fs || FS) / 2;
+            plane.push(faded(o, r.s));
+            this.mark(x, yc - half); this.mark(x + r.w, yc - half); this.mark(x, yc + half); this.mark(x + r.w, yc + half);
+            return r.w;
+          },
+          // outlined row that hugs its content unless o.w is set
+          row(x, y, segs, o = {}) {
+            const h = o.h || ROW_H, cw = inner(0, 0, segs, o.fs).w, w = o.w || PADL + cw + PADR;
+            plane.push(faded(o, `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1" fill="${C.floor}" fill-opacity="${o.solid ? 1 : 0.6}" stroke="${C.line}"/>`));
+            this.put(o.center ? x + (w - cw) / 2 : x + PADL, y + h / 2, segs, o);
+            this.mark(x, y); this.mark(x + w, y); this.mark(x, y + h); this.mark(x + w, y + h);
+            return w;
+          },
+          // raised button: dark stroke on the silhouette only, faint inner edges, a soft shadow straight below
+          block(x, y, segs, o = {}) {
+            const h = o.h || BLOCK_H, cw = inner(0, 0, segs, o.fs).w, w = o.w || cw + 2 * BPAD, x1 = x + w, y1 = y + h, R = RAISE;
+            const r = inner(o.center ? x + (w - cw) / 2 : x + BPAD, y + h / 2, segs, o.fs);
+            const sil = [P(x, y, R), P(x1, y, R), P(x1, y1, R), P(x1, y1), P(x, y1), P(x, y)].join(" ");
+            const sides = [P(x, y, R), P(x, y1, R), P(x1, y1, R), P(x1, y1), P(x, y1), P(x, y)].join(" ");
+            under.push(`<polygon points="${sil}" transform="translate(0 8)" fill="var(--shadow)" opacity="0.5" filter="url(#${id}b)"/>`);
+            over.push(`<polygon points="${sil}" fill="${C.top}"/>`
+              + `<polygon points="${sides}" fill="${C.floor}" fill-opacity="0.5"/>`
+              + `<path d="M${P(x, y, R)}L${P(x, y1, R)}L${P(x1, y1, R)}M${P(x, y1, R)}L${P(x, y1)}" fill="none" stroke="${C.line}" stroke-opacity="0.75"/>`
+              + `<polygon points="${sil}" fill="none" stroke="${C.cta}" stroke-width="2" stroke-linejoin="round"/>`
+              + `<g transform="translate(0 ${-R}) ${PLANE}">${r.s}</g>`);
+            this.mark(x, y, R); this.mark(x1, y, R); this.mark(x1, y1); this.mark(x, y1); this.mark(x, y);
+            return w;
+          },
+          // one raised slab split into equal cells along x: a two-line label and two status dots per cell
+          slab(x, y, cells, cw, ch, R = 36) {
+            const x1 = x + cw * cells.length, y1 = y + ch, by = y + ch * 0.36, hair = `fill="none" stroke="${C.line}" stroke-width="1.5"`;
+            const sil = rounded([[x, y, R], [x1, y, R], [x1, y1, R], [x1, y1, 0], [x, y1, 0], [x, y, 0]].map(([a, b, z]) => [sx(a, b), sy(a, b, z)]), 4);
+            let top = "", seams = "";
+            cells.forEach((lines, i) => {
+              const cx = x + i * cw;
+              if (i) { top += `<path d="M${cx} ${y}V${y1}" ${hair}/>`; seams += `M${P(cx, y1, R)}L${P(cx, y1)}`; }
+              top += [27.8, 17.5].map((d) => `<circle cx="${cx + cw - d}" cy="${by + 2}" r="4.8" fill="none" stroke="${C.line}" stroke-width="0.9"/><circle cx="${cx + cw - d}" cy="${by + 2}" r="3.6" fill="${TONE.ok}"/>`).join("")
+                + lines.map((t, j) => `<text x="${cx + 28}" y="${by + j * 21}" font-size="18" fill="${C.ink}">${esc(t)}</text>`).join("");
+            });
+            defs.push(`<clipPath id="${id}c"><path d="${sil}"/></clipPath>`);
+            over.push(`<g clip-path="url(#${id}c)">`
+              + `<polygon points="${[P(x, y, R), P(x, y1, R), P(x, y1), P(x, y)].join(" ")}" fill="${C.floor}"/>`
+              + `<polygon points="${[P(x, y1, R), P(x1, y1, R), P(x1, y1), P(x, y1)].join(" ")}" fill="${C.side}"/>`
+              + `<g transform="translate(0 ${-R}) ${PLANE}"><rect x="${x}" y="${y}" width="${x1 - x}" height="${ch}" fill="${C.floor}"/>`
+              + `<rect x="${x}" y="${y}" width="${x1 - x}" height="${ch}" fill="${C.top}" fill-opacity="0.55"/>${top}<path d="M${x} ${y}V${y1}H${x1}" ${hair}/></g>`
+              + `<path d="M${P(x, y1, R)}L${P(x, y1)}${seams}" ${hair}/></g>`
+              + `<path d="${sil}" fill="none" stroke="${C.cta}" stroke-width="1.5"/>`);
+            this.mark(x, y, R); this.mark(x1, y, R); this.mark(x1, y1); this.mark(x, y1); this.mark(x, y);
+          },
+          // long floor line that fades out at both ends
+          rule(x0, y0, x1, y1) {
+            const g = `${id}l${defs.length}`;
+            defs.push(`<linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}"><stop offset="0" stop-color="${C.line}" stop-opacity="0"/><stop offset="0.35" stop-color="${C.line}"/><stop offset="0.65" stop-color="${C.line}"/><stop offset="1" stop-color="${C.line}" stop-opacity="0"/></linearGradient>`);
+            plane.push(`<path d="M${x0} ${y0}L${x1} ${y1}" fill="none" stroke="url(#${g})" stroke-width="1.5"/>`);
+          },
+          line(d, stroke = C.line, dash) { plane.push(`<path d="${d}" fill="none" stroke="${stroke}" stroke-width="1.5"${dash ? ` stroke-dasharray="${dash}"` : ""}/>`); },
+          // small square where a line meets a box, drawn over the box edge
+          node(x, y, fill = C.line) { nodes.push(`<rect x="${x - 3}" y="${y - 3}" width="6" height="6" fill="${fill}"/>`); },
+          // branch off a trunk: grey at the trunk, the tone at the square
+          branch(x0, y, x1, tone = "none") {
+            let stroke = C.line;
+            if (tone !== "none") {
+              const g = `${id}l${defs.length}`;
+              stroke = `url(#${g})`;
+              defs.push(`<linearGradient id="${g}" gradientUnits="userSpaceOnUse" x1="${x0}" y1="0" x2="${x1}" y2="0"><stop offset="0" stop-color="${C.line}"/><stop offset="0.8" stop-color="${TONE[tone]}"/></linearGradient>`);
+            }
+            plane.push(`<path d="M${x0} ${y}H${x1}" fill="none" stroke="${stroke}" stroke-width="1.5"/>`);
+            this.node(x1, y, tone === "none" ? C.line : TONE[tone]);
+          },
+          // callout box with bracket corners
+          bracket(x, y, w, h) {
+            const l = 9, a = x - 3, b = y - 3, c = x + w + 3, d = y + h + 3;
+            plane.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${C.floor}" fill-opacity="0.6" stroke="${C.line}"/>`
+              + `<path d="M${a} ${b + l}V${b}H${a + l}M${c - l} ${b}H${c}V${b + l}M${c} ${d - l}V${d}H${c - l}M${a + l} ${d}H${a}V${d - l}" fill="none" stroke="${C.cta}" stroke-width="2"/>`);
+            this.mark(a, b); this.mark(c, b); this.mark(a, d); this.mark(c, d);
+          },
+          // dark two-line tag on the plane, hanging off a cursor line through a point at (x, ny)
+          tag(x, y0, y1, ny, lines) {
+            const fs = 16.5, lh = 20, th = lines.length * lh + 8, tw = Math.ceil((Math.max(...lines.map((l) => l.length)) * fs * 0.6 + 20) / 18) * 18;
+            plane.push(`<path d="M${x} ${y0}V${y1}" fill="none" stroke="${C.cta}" stroke-width="1.5"/>`
+              + `<circle cx="${x}" cy="${ny}" r="4.5" fill="${C.floor}" stroke="${C.cta}" stroke-width="1.5"/>`
+              + `<rect x="${x}" y="${y0}" width="${tw}" height="${th}" fill="${C.dark}"/>`
+              + lines.map((l, i) => `<text x="${x + 10}" y="${y0 + lh * (i + 1) - 1}" font-size="${fs}" fill="${i ? C.floor : C.dim}">${esc(l)}</text>`).join(""));
+            this.mark(x, y0); this.mark(x + tw, y0); this.mark(x + tw, y0 + th);
+          },
+        };
+      }
+      // the view is centred on the content at SCALE, and shrinks only when the drawing would not fit its card
+      function render(s, view = {}) {
+        const id = s.id, [x0, y0, x1, y1] = s.box, H = Math.max((view.px || DEFAULT_PX) / SCALE, y1 - y0);
+        const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, W = x1 - x0 + 40, rx = view.rx || 300, ry = view.ry || 250;
+        return `<svg viewBox="${(cx - W / 2).toFixed(1)} ${(cy - H / 2).toFixed(1)} ${W.toFixed(1)} ${H.toFixed(1)}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <pattern id="${id}grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" stroke="${C.line}"/></pattern>
+            <pattern id="${id}h" width="3.6" height="3.6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0.5 0V3.6" stroke="${C.dim}" stroke-width="0.8" stroke-opacity="0.5"/></pattern>
+            <radialGradient id="${id}f" gradientUnits="userSpaceOnUse" cx="${cx}" cy="${cy}" r="${rx}" gradientTransform="translate(${cx} ${cy}) scale(1 ${(ry / rx).toFixed(3)}) translate(${-cx} ${-cy})"><stop offset="0.66" stop-color="#fff" stop-opacity="0.5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+            <mask id="${id}m" maskUnits="userSpaceOnUse" x="${cx - 900}" y="${cy - 700}" width="1800" height="1400"><rect x="${cx - 900}" y="${cy - 700}" width="1800" height="1400" fill="url(#${id}f)"/></mask>
+            <filter id="${id}b" x="-20%" y="-40%" width="140%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+            ${s.defs.join("")}
+          </defs>
+          <g mask="url(#${id}m)"><g transform="${PLANE}"><rect x="-1500" y="-1500" width="3200" height="3200" fill="url(#${id}grid)"/></g></g>
+          ${s.under.join("")}
+          <g transform="${PLANE}">${s.plane.join("")}${s.nodes.join("")}</g>
+          ${s.over.join("")}
+        </svg>`;
+      }
+
+      // ---- scenes: flat layouts in plane units; each returns its view ----
+      const draw = {
+        // button on top, the rows hanging off one trunk, a fainter parent behind
+        keys(s, d) {
+          const y = (i) => FIRST_ROW + i * PITCH;
+          s.row(0, -90, [{ t: d.group }], { w: 180, h: BLOCK_H, center: true, opacity: 0.7 });
+          s.line(`M${TX} -36V0`); s.node(TX, -36);
+          s.line(`M${TX} ${BLOCK_H}V${y(d.rows.length - 1) + 18}`);
+          d.rows.forEach((r, i) => {
+            const tone = r.tone || "none";
+            s.branch(TX, y(i) + 18, IND, tone);
+            s.row(IND, y(i), [{ t: r.label }, { dot: tone }, { t: r.value, fill: C.ink }]);
+          });
+          s.block(0, 0, [{ t: d.heading, fill: C.ink }], { w: 180, center: true });
+          return {};
+        },
+        // budget button, a hatched meter with the two warning marks, then the warning row
+        budget(s, d) {
+          const my = FIRST_ROW, mw = 234, at = (percent) => IND + mw * (percent / 100), wy = my + PITCH, [first, second] = d.warnAtPercent;
+          s.line(`M${TX} ${BLOCK_H}V${wy + 18}`);
+          s.branch(TX, my + 18, IND);
+          s.plane.push(`<rect x="${IND}" y="${my}" width="${mw}" height="${ROW_H}" rx="1" fill="${C.floor}" fill-opacity="0.6" stroke="${C.line}"/>`
+            + `<rect x="${IND}" y="${my}" width="${mw * (d.usedPercent / 100)}" height="${ROW_H}" fill="url(#${s.id}h)"/>`);
+          s.line(`M${at(first)} ${my - 6}V${my + ROW_H + 6}M${at(second)} ${my - 6}V${my + ROW_H + 6}`, C.warn);
+          s.mark(IND + mw, my); s.mark(IND + mw, my + ROW_H);
+          s.branch(TX, wy + 18, IND, "warn");
+          s.row(IND, wy, [{ t: d.warning }, { dot: "warn" }, { t: `at ${first}%`, fill: C.ink }]);
+          s.block(0, 0, [{ t: d.label, fill: C.ink }, { sp: 1.5 }, { t: `${d.usedPercent}%`, fill: C.warn }], { w: 180 });
+          return {};
+        },
+        // chart lying on the floor: hatch under the line, dashed guides, the total in a dark tag; it eases off away from the tagged point
+        spend(s, d) {
+          const W = 324, D = 144, px = (i) => +((i * W) / (d.points.length - 1)).toFixed(1), py = (v) => +(D - v * 1.25).toFixed(1);
+          const pts = d.points.map((v, i) => `${px(i)} ${py(v)}`).join("L"), hx = px(d.highlight), hy = py(d.points[d.highlight]);
+          s.defs.push(`<radialGradient id="${s.id}cf" gradientUnits="userSpaceOnUse" cx="${hx}" cy="${hy}" r="300"><stop offset="0.3" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0.15"/></radialGradient>`
+            + `<mask id="${s.id}cm" maskUnits="userSpaceOnUse" x="-60" y="-120" width="${W + 120}" height="${D + 240}"><rect x="-60" y="-120" width="${W + 120}" height="${D + 240}" fill="url(#${s.id}cf)"/></mask>`);
+          s.plane.push(`<g mask="url(#${s.id}cm)">`
+            + `<path d="M0 ${D}L${pts}L${W} ${D}Z" fill="url(#${s.id}h)"/>`
+            + `<path d="M0 36H${W}M0 108H${W}" fill="none" stroke="${C.line}" stroke-width="1" stroke-dasharray="7 6"/>`
+            + `<path d="M0 0H${W}M0 72H${W}" fill="none" stroke="${C.line}" stroke-width="1"/>`
+            + `<path d="M0 ${D}H${W}" fill="none" stroke="${C.dim}" stroke-width="1.2"/>`
+            + `<path d="M${pts}" fill="none" stroke="${C.cta}" stroke-width="1.3" stroke-linejoin="round"/></g>`);
+          s.tag(hx, -62, D, hy, d.tag);
+          s.mark(0, 0); s.mark(W, 0); s.mark(0, D); s.mark(W, D);
+          return {};
+        },
+        // list of model switches; the first one is the button
+        models(s, d) {
+          const segs = (r, hero = false) => [{ t: r.label, fill: hero ? C.ink : C.mid }, { sp: 1.4 }, { toggle: r.on, hero }];
+          d.rows.slice(1).forEach((r, i) => s.row(0, FIRST_ROW + i * PITCH, segs(r), i ? { opacity: 0.7 } : {}));
+          s.block(0, 0, segs(d.rows[0], true), { w: 180 });
+          return { rx: 420 };
+        },
+        // the agents wired into one bracketed result
+        agents(s, d) {
+          const W = 180, jx = 198, bx = 234, m = [27, 90, 144], res = [{ t: d.result, fill: C.ink }, { dot: "ok", end: true }];
+          s.line(`M${W} ${m[2]}H${jx}V${m[1]}M${W} ${m[1]}H${jx}`);
+          s.node(W, m[1]); s.node(W, m[2]);
+          s.line(`M${W} ${m[0]}H${jx}V${m[1]}H${bx}`, C.cta);
+          s.bracket(bx, FIRST_ROW, PADL + inner(0, 0, res).w + 10, ROW_H);
+          s.node(bx, m[1], C.cta);
+          s.put(bx + PADL, m[1], res);
+          s.row(0, FIRST_ROW, [{ t: d.agents[1], fill: C.mid }], { w: W, center: true });
+          s.row(0, FIRST_ROW + PITCH, [{ t: d.agents[2], fill: C.mid }], { w: W, center: true, opacity: 0.7 });
+          s.block(0, 0, [{ t: d.agents[0], fill: C.ink }], { w: W, center: true });
+          return { rx: 420 };
+        },
+        // spans stepping along a dashed time axis, fading with distance
+        tracing(s, d) {
+          const segs = (i, fill) => [{ t: d.spans[i].label, fill }, { sp: 1 }, { t: d.spans[i].cost, fill: C.warn }];
+          [0, 108, 216, 324].forEach((x, i) => {
+            s.line(`M${x} -36V198`, C.line, "5 5");
+            s.put(x + 6, -46, [{ t: `${i}s` }], { fs: 15 });
+          });
+          s.row(72, FIRST_ROW, segs(1, C.mid), { solid: true });
+          s.row(180, FIRST_ROW + PITCH, segs(2, C.mid), { solid: true, opacity: 0.6 });
+          s.block(0, 0, segs(0, C.ink), { w: 252 });
+          return { rx: 420 };
+        },
+        // one slab with an equal cell per option; its edges and seams run on across the floor
+        hosting(s, d) {
+          const cw = 216, ch = 108, W = cw * d.options.length;
+          d.options.forEach((_, i) => s.rule(i * cw, -190, i * cw, ch + 190));
+          s.rule(W, -190, W, ch + 190);
+          [0, ch].forEach((y) => s.rule(-200, y, W + 200, y));
+          s.slab(0, 0, d.options.map((o) => [o.label, o.detail]), cw, ch);
+          return { rx: 420 };
+        },
+      };
+      // gateway button with the providers hanging off its trunk: three on the first row, two on each row after
+      function drawProviders(s, hub, providers) {
+        const rows = [providers.slice(0, 3)];
+        for (let i = 3; i < providers.length; i += 2) rows.push(providers.slice(i, i + 2));
+        s.line(`M${TX} ${BLOCK_H}V${FIRST_ROW + (rows.length - 1) * PITCH + 18}`);
+        rows.forEach((names, i) => {
+          const y = FIRST_ROW + i * PITCH;
+          let x = IND;
+          s.branch(TX, y + 18, x);
+          names.forEach((name, j) => {
+            if (j) s.line(`M${x - 18} ${y + 18}H${x}`);
+            x += s.row(x, y, [{ t: name, fill: C.mid }]) + 18;
+          });
+        });
+        s.block(0, 0, [{ t: hub, fill: C.ink }], { w: 180, center: true });
+        return { px: 280, rx: 440, ry: 300 };
+      }
+
+      // ---- page ----
+      function sketch(d) {
+        const s = scene(), view = draw[d.kind](s, d);
+        return `<div class="sketch" style="height:${view.px || DEFAULT_PX}px">${render(s, view)}</div>`;
+      }
+      function wideSketch() {
+        const s = scene(), view = drawProviders(s, providerCard.hub, providerCard.chips);
+        return `<div class="wideSketch" style="height:${view.px}px">${render(s, view)}</div>`;
+      }
+      const card = (c) => `<div class="card"><div class="card-in"><div class="title">${esc(c.title)}</div><p class="desc">${esc(c.description)}</p>${sketch(c.sketch)}</div></div>`;
+      const grid = () => `<div class="stack">
+        <div class="card"><div class="wide"><div class="wide-text"><div class="title">${esc(providerCard.title)}</div><p class="desc">${esc(providerCard.description)}</p></div>${wideSketch()}</div></div>
+        <div class="g3">${cardsTop.map(card).join("")}</div>
+        <div class="g2">${cardsBottom.map(card).join("")}</div>
+      </div>`;
+      // ?only=1 keeps the light panel, ?only=2 the dark one. ?card=N keeps the Nth card in page order, alone at the
+      // top left on the floor colour (light unless only=2): the picture scripts/measure.py wants.
+      const query = new URLSearchParams(location.search);
+      const single = Number(query.get("card")), only = query.get("only") || (single ? "1" : null);
+      const heads = [...document.querySelectorAll("h2")];
+      [...document.querySelectorAll(".panel")].forEach((panel, i) => {
+        if (only && String(i + 1) !== only) { panel.remove(); heads[i].remove(); return; }
+        panel.innerHTML = grid();
+        if (only) { heads[i].remove(); document.body.style.padding = "0"; }
+      });
+      if (single) {
+        const panel = document.querySelector(".panel"), lone = [...panel.querySelectorAll(".card")][single - 1];
+        lone.style.width = `${lone.getBoundingClientRect().width}px`;
+        panel.replaceChildren(lone);
+        panel.style.cssText = "margin:0;padding:0;width:auto;min-height:100vh";
+        document.body.style.background = getComputedStyle(panel).backgroundColor;
+      }
+      // The drawings are set in Geist Mono regular, loaded from Google Fonts. Without it every width on this page is wrong.
+      document.fonts.load('400 20px "Geist Mono"').then((faces) => faces.length > 0, () => false).then((loaded) => {
+        if (!loaded) document.body.insertAdjacentHTML("afterbegin", '<p id="font-missing" style="margin:0;padding:12px;background:#b00020;color:#fff;font:14px sans-serif">Geist Mono 400 did not load (no network?). Do not judge or measure this page.</p>');
+      });
+    </script>
+  </body>
+</html>
